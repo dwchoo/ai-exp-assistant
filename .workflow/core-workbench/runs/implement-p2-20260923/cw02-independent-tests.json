@@ -1,0 +1,17 @@
+{
+  "ticket": "CW-02",
+  "test_delta": [
+    {
+      "path": "tests/gates/g1_vt/test_g1_candidate.py",
+      "sha256": "45586ddfec7ba0827fd64b6da3147e0db3bf2c366c6a6a12857c04bcf756b588"
+    }
+  ],
+  "check": {
+    "command": "/tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/gates/g1_vt -p test_*.py -v",
+    "exit_code": 1,
+    "result": "failed",
+    "detail": "10/11 pass; pasted F6/F10 misrouted as app hotkeys"
+  },
+  "classification": "implementation defect in InputRouter bracketed paste handling",
+  "recorded_at_utc": "2026-09-23T08:19:17.121872+00:00"
+}

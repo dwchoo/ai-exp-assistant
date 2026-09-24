@@ -1,0 +1,33 @@
+{
+  "gate_id": "G3",
+  "item_id": "native_wrapper_pause_after_A_before_B",
+  "requirements_digest": "922bd0dca00c52e3c6ab60f700a12e58aff6421034b623c76bd63ea87b3e6356",
+  "candidate_id": "647d9e220d6f8458225c7ce315c4fc5600fef3dc69126040f74bdeea94eb7104",
+  "command": "PYTHONDONTWRITEBYTECODE=1 python tests/gates/g3_omp/preexec_wrapper_probe.py",
+  "cwd": "/home/dwchoo/ai-exp-assistant",
+  "environment": {
+    "omp": "18.2.10",
+    "approval_mode": "always-ask",
+    "tool": "native write via same-name registerTool and ctx.invokeTool",
+    "cwd": "temp directory"
+  },
+  "exit_code": 0,
+  "result": "passed_item_only",
+  "observed_evidence_level": "runtime",
+  "observations": {
+    "a_approved": true,
+    "a_native_write_complete": true,
+    "pause_while_A_in_wrapper": true,
+    "b_prepared_after_A_complete": true,
+    "b_wrapper_blocked_before_native_write": true,
+    "read_executed_after_pause": true,
+    "a_file_exact": true,
+    "b_file_absent": true,
+    "pty_bytes_drained": 315262
+  },
+  "unknowns": [
+    "same-batch B prepared before pause has not occurred in actual OMP loop",
+    "full peer task/question/answer/report round-trip and busy/composer/ACK loss runtime remain pending"
+  ],
+  "recorded_at_utc": "2026-09-23T12:46:00.121180+00:00"
+}

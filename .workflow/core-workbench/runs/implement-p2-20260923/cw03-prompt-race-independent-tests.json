@@ -1,0 +1,12 @@
+{
+  "ticket": "CW-03",
+  "review_finding_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw03-handoff-review-1.json",
+  "changed_path": "tests/gates/g2_shell/test_g2_shell.py",
+  "test_sha256": "13864545eba1f44192f9dac89a9c24850954969b372b31f9dcc86ce78ffa9617",
+  "command": "PYTHONDONTWRITEBYTECODE=1 python -m unittest discover -s tests/gates/g2_shell -p 'test_g2_shell.py' -q",
+  "test_count": 21,
+  "new_failure_entries": 2,
+  "result": "failed_expected_red",
+  "exit_code": 1,
+  "recorded_at_utc": "2026-09-23T12:29:49.915014+00:00"
+}

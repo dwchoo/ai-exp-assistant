@@ -1,0 +1,13 @@
+{
+  "ticket": "CW-04",
+  "candidate_id": "6bd16f54bd4f343396f18c80a934552677a6edfd4e3abafc2625b114e7c56ea1",
+  "review_scope": "resume unknown-state clearing two-line delta and tests",
+  "result": "no_new_defect_in_delta",
+  "remaining": [
+    "confirmed-outcome closing contract",
+    "persistent actual OMP resume and two-process peer roundtrip",
+    "backend file/process/task/approval reconciliation"
+  ],
+  "gate_status": "pending",
+  "recorded_at_utc": "2026-09-23T15:27:09.083576+00:00"
+}

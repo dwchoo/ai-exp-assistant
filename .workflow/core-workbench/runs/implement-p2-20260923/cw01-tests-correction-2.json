@@ -1,0 +1,18 @@
+{
+  "ticket": "CW-01",
+  "correction_cycle": 2,
+  "test_delta": [
+    {
+      "path": "tests/contracts/test_v1.py",
+      "sha256": "dca9378bfda97adba7517a10595dcd558b34048ba713776817412456170bdade"
+    },
+    {
+      "path": "tests/gates/harness/contracts.test.ts",
+      "sha256": "4cff8b5becef73d00535ae141ea4e5a79b2b6e91946ec73eb0bea9e7dec62d7f"
+    }
+  ],
+  "expected": "all integer-valued shared wire numbers in JS safe range; finite fractional values preserved",
+  "observed": "Python 14 tests with 9 failing subcases; TS 10/11 with payload failure",
+  "result": "implementation_failure_reproduced",
+  "recorded_at_utc": "2026-09-23T07:30:16.172844+00:00"
+}

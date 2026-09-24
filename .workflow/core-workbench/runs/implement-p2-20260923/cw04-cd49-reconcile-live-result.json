@@ -1,0 +1,58 @@
+{
+  "gate_id": "G3",
+  "item_id": "cd49_rpc_reconciliation_harness_partial",
+  "candidate_id": "7bd4622dfff40dec6aa3a4b891a34f49ab0b429db9f03bb51d8aab0a2c8d17ca",
+  "requirements_digest": "e0b6abefef59c70f2a438c82005c671d23ec4776f4215ae9e8ba96211021f944",
+  "observed_evidence_level": "runtime",
+  "result": "passed_item_only",
+  "command": "PYTHONDONTWRITEBYTECODE=1 python tests/gates/g3_omp/live_rpc_pause_probe.py --pair",
+  "cwd": "/home/dwchoo/ai-exp-assistant",
+  "environment": {
+    "omp": "18.2.10",
+    "mode": "rpc",
+    "provider": "local scripted",
+    "paths": "temporary"
+  },
+  "exit_code": 0,
+  "observations": {
+    "pause_ack": "abort_requested",
+    "pause_ack_seconds": 0.004,
+    "turn_stop_observed": true,
+    "unknown_tool_id": "pause-probe-bash",
+    "post_resume_unknown_preserved": true,
+    "reconciliation_checks": {
+      "files": true,
+      "tool_result_unknown": true,
+      "terminal_process": true,
+      "test_owned_task_run": true,
+      "test_owned_approval_scope": true
+    },
+    "changed_task_withheld": true,
+    "changed_approval_withheld": true,
+    "explicit_resume_sent": true,
+    "resume_ack": "resumed",
+    "stale_retry": "unknown_no_replay",
+    "pair_kinds": [
+      "task",
+      "question",
+      "answer",
+      "report"
+    ],
+    "pair_api_accepted": 4,
+    "pair_agent_end_after_send": 4,
+    "omp_exits": [
+      0,
+      0
+    ],
+    "remaining_temp_cwd_processes": 0,
+    "cleanup_verified": true
+  },
+  "unknowns": [
+    "Actual Workbench backend reconciliation/user display absent",
+    "Live busy/approval/ACK loss/reconnect/session switch absent",
+    "Message provider input content and reply semantics unverified",
+    "Production 1-minute model review hold and host experiment/log continuity unverified"
+  ],
+  "gate_status": "pending",
+  "recorded_at_utc": "2026-09-23T15:46:53.419412+00:00"
+}

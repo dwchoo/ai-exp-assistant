@@ -1,0 +1,40 @@
+{
+  "ticket": "CW-04",
+  "status": "candidate_ready_gate_pending",
+  "approved_bundle_sha256": "922bd0dca00c52e3c6ab60f700a12e58aff6421034b623c76bd63ea87b3e6356",
+  "base_snapshot": ".workflow/core-workbench/runs/implement-p2-20260923/handoff-pause-20260923-2224.json",
+  "candidate_id": "dd94e5a9ba4ad6ef0fb0fdc53b2ffa87f854a34858a619eba30ed22930c35b34",
+  "validation_inputs_sha256": {
+    "omp_bridge/g3/bridge.ts": "31f8511a0735f0727783b313be77a5d935bb0b77dd4af628c32389b6e5c8bf1e",
+    "omp_bridge/contract/v1.ts": "7f31a6d0b54c1467eccfa7c54d19ce8ce61e3ec40b9ddf2f70b953ad420d2a3f",
+    "tests/gates/g3_omp/bridge.test.ts": "a13250c71332d191a8b5ca0213472dd43da8afe7b1cf7768086f803a651a1f9c",
+    "tests/gates/g3_omp/test_g3_protocol.py": "e082e0b596564a18f8e10bfaf8f87e8768350b4debcb3df2ba2a656d85653ca3",
+    "src/workbench/ipc/bridge_g3/protocol.py": "ac5467e5a3f54e3be11ad17427e3c3b879177407559576adaf07fe73f313bc24"
+  },
+  "changed_paths": [
+    "omp_bridge/g3/bridge.ts"
+  ],
+  "base_file_sha256": "20100450e8aace5185b1f084e5b01af340bcf4cc202dd86e64dcca85f4814474",
+  "candidate_file_sha256": "31f8511a0735f0727783b313be77a5d935bb0b77dd4af628c32389b6e5c8bf1e",
+  "delta_archive": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-resume-worker-delta.tar.gz",
+  "checks": [
+    {
+      "command": "node --experimental-strip-types --test tests/gates/g3_omp/bridge.test.ts",
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "exit_code": 0,
+      "result": "passed",
+      "count": "8/8",
+      "evidence": "Root rerun this turn"
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python -m unittest discover -s tests/gates/g3_omp -p 'test_g3_protocol.py' -v",
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "exit_code": 0,
+      "result": "passed",
+      "count": "6/6",
+      "evidence": "Root rerun this turn"
+    }
+  ],
+  "remaining": "write wrapper live OMP approval/same-batch, edit/bash mutable coverage, two OMP peer round trip and competition",
+  "recorded_at_utc": "2026-09-23T13:35:45.403143+00:00"
+}

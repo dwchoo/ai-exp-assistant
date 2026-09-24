@@ -1,0 +1,24 @@
+{
+  "ticket": "CW-03",
+  "unit": "C-D48 wb-handoff correction",
+  "candidate_id": "d256f79b4a0e2cf0f2df5df3c13600c8e3a3e9549fbc917575f72d194a7cc745",
+  "reviewer": "/root/cw03_handoff_delta_review",
+  "verdict": "failed",
+  "findings": [
+    {
+      "severity": "high",
+      "issue": "prompt code integrity checks compare PROMPT_COMMAND/PS1 string but not invoked functions; redefined __wb_emit or __wb_ready may start a background job after jobs snapshot and before READY",
+      "affected_paths": [
+        "src/workbench/terminal/shell_g2/prototype.py",
+        "tests/gates/g2_shell/test_g2_shell.py"
+      ],
+      "evidence_level": "static_review",
+      "runtime_confirmed": false
+    }
+  ],
+  "additional_root_probe": {
+    "bash_ps1_modified": "can_dispatch True after handoff; process lifetime not yet classified"
+  },
+  "inputs_unchanged": true,
+  "recorded_at_utc": "2026-09-23T12:37:12.982127+00:00"
+}

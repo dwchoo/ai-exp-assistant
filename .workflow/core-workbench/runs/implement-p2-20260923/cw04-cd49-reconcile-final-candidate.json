@@ -1,0 +1,22 @@
+{
+  "ticket": "CW-04",
+  "candidate_id": "056f55a99f734f6a54a1e44ae3613e2baa86aa46442ca4e63af6fad263327e28",
+  "approved_bundle_sha256": "e0b6abefef59c70f2a438c82005c671d23ec4776f4215ae9e8ba96211021f944",
+  "files_sha256": {
+    "omp_bridge/g3/bridge.ts": "808f2044d32885ef5df95da3b1f5bca2db601ca462acaa5eac078cf35fed86f6",
+    "src/workbench/ipc/bridge_g3/protocol.py": "2c8fc96efb86dc0be2c79f6f1f5f711fba27d3bfa0359e23d8d0d97cec9e0678",
+    "tests/gates/g3_omp/bridge.test.ts": "cc3888e0ed67a32e3a84cee9e1dea2546c8de76472f94e0ab1cdf24722174779",
+    "tests/gates/g3_omp/test_g3_protocol.py": "2926f5fdf67e4d3ae99bfd81480cf180ed530d0185f568a190328d0d89bedd10",
+    "tests/gates/g3_omp/live_pause_abort_probe.py": "eb6eb03f1a20371c069d7a4f44853d49d3c5afe18d15f23e31ccceb45abce217",
+    "tests/gates/g3_omp/live_rpc_pause_probe.py": "d51736977597da7d3b8e867411c4809bc478e06e6287931b6f0e2731744fcf59"
+  },
+  "prior_candidate_id": "7bd4622dfff40dec6aa3a4b891a34f49ab0b429db9f03bb51d8aab0a2c8d17ca",
+  "scope": "test-only G3 RPC reconciliation scope correction; product unchanged",
+  "checks": {
+    "syntax": "passed",
+    "actual_omp_rpc_pair": "exit 0 passed_pair_rpc Root rerun",
+    "negative_scope": "extra file, symlink, changed process, task, approval all withheld"
+  },
+  "gate_status": "partial_pending_live_contention_and_reply_semantics",
+  "recorded_at_utc": "2026-09-23T15:51:11.121137+00:00"
+}

@@ -1,0 +1,35 @@
+{
+  "gate_id": "G3",
+  "item_id": "same_batch_native_write_pause_control",
+  "requirements_digest": "922bd0dca00c52e3c6ab60f700a12e58aff6421034b623c76bd63ea87b3e6356",
+  "candidate_id": "b7f05ac77ed24cebc2927e4cd751a8bc61a37a25ddccf90546495059e8b409f0",
+  "command": "PYTHONDONTWRITEBYTECODE=1 python tests/gates/g3_omp/preexec_wrapper_probe.py",
+  "cwd": "/home/dwchoo/ai-exp-assistant",
+  "environment": {
+    "omp": "18.2.10",
+    "provider": "local scripted OpenAI-compatible",
+    "approval_mode": "auto_approve",
+    "tool": "native write via same-name registerTool and ctx.invokeTool",
+    "cwd": "temp directory"
+  },
+  "exit_code": 0,
+  "result": "passed_item_only",
+  "observed_evidence_level": "runtime",
+  "observations": {
+    "same_batch_A_B_prepared_before_pause": true,
+    "b_wrapper_queued_before_pause": true,
+    "a_native_write_complete_after_pause": true,
+    "b_wrapper_blocked_before_native_write": true,
+    "read_and_final_report_after_pause": true,
+    "a_file_exact": true,
+    "b_file_absent": true,
+    "provider_requests": 3,
+    "pty_bytes_drained": 12
+  },
+  "unknowns": [
+    "Native approval path was observed separately but not in this same-batch auto-approve run",
+    "Production bridge wrapper not yet implemented",
+    "G3 full peer round-trip and message competition tests pending"
+  ],
+  "recorded_at_utc": "2026-09-23T12:53:36.476995+00:00"
+}

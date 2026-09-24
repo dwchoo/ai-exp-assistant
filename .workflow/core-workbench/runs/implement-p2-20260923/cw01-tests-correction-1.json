@@ -1,0 +1,18 @@
+{
+  "ticket": "CW-01",
+  "correction_cycle": 1,
+  "test_delta": [
+    {
+      "path": "tests/contracts/test_v1.py",
+      "sha256": "99baa6b2b24cb0192cbeab20834277454b2a9cb01dc70e40308837a89477cce3"
+    },
+    {
+      "path": "tests/gates/harness/contracts.test.ts",
+      "sha256": "72bcdb275c3e4b2130937250730acadb95664ba7b6684f712ed83b2e858f05a5"
+    }
+  ],
+  "expected": "explicit optional null rejected; positive session generation <= 2^53-1",
+  "observed": "Python 11 tests with null/unsafe-generation failures; TS 8/8 pass",
+  "result": "implementation_failure_reproduced",
+  "recorded_at_utc": "2026-09-23T07:24:37.813345+00:00"
+}

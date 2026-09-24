@@ -1,0 +1,22 @@
+{
+  "ticket": "CW-04",
+  "candidate_id": "7bd4622dfff40dec6aa3a4b891a34f49ab0b429db9f03bb51d8aab0a2c8d17ca",
+  "reviewed_test_sha256": "8dc1257105fd296a172313af5acd971450e8b9ca29ef3e134928235b9fb5416b",
+  "result": "finding",
+  "findings": [
+    {
+      "severity": "high",
+      "issue": "Out-of-scope file present before post-stop snapshot can pass file equality despite static approval allowed_files; symlink allowed filename also follows outside cwd"
+    },
+    {
+      "severity": "test_gap",
+      "issue": "Persisted live negative scenarios omit extra file and changed process; only task/approval mutations covered"
+    },
+    {
+      "severity": "documentation",
+      "issue": "G3 current evidence section does not yet describe test-owned reconciliation"
+    }
+  ],
+  "gate_status": "pending",
+  "recorded_at_utc": "2026-09-23T15:48:47.530095+00:00"
+}

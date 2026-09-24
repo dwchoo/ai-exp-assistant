@@ -1,0 +1,16 @@
+{
+  "ticket": "CW-04",
+  "result": "red",
+  "node": "9/14 pass, 5 fail",
+  "product_unchanged": true,
+  "files_sha256": {
+    "omp_bridge/g3/bridge.ts": "489b8e7aeda5770fafac5b88dd779c6ee58a449cc9e9e9d90c7fc57ff3d3e26e",
+    "src/workbench/ipc/bridge_g3/protocol.py": "2c8fc96efb86dc0be2c79f6f1f5f711fba27d3bfa0359e23d8d0d97cec9e0678",
+    "tests/gates/g3_omp/bridge.test.ts": "06db26a3932dbc74288e43e6d644228319e0e285f00789808b63f6709a4d8ed9",
+    "tests/gates/g3_omp/test_g3_protocol.py": "2926f5fdf67e4d3ae99bfd81480cf180ed530d0185f568a190328d0d89bedd10",
+    "tests/gates/g3_omp/live_pause_abort_probe.py": "eb6eb03f1a20371c069d7a4f44853d49d3c5afe18d15f23e31ccceb45abce217"
+  },
+  "archive": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-correction-base.tar.gz",
+  "archive_sha256": "4df598b73c466729e767966502beed76376f72f01515286927a897b25ed1a8fb",
+  "recorded_at_utc": "2026-09-23T15:17:51.875459+00:00"
+}

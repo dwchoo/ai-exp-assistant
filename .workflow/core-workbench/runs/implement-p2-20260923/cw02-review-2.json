@@ -1,0 +1,9 @@
+{
+  "ticket": "CW-02",
+  "candidate_id": "6d3d7793237e2f826295ec49466e342267b3dcee0f1b00017e4f3c022b91fdea",
+  "result": "new_backpressure_defect",
+  "finding": "nonreading raw PTY child accepts repeated 1MiB enqueue, pending bytes grows about 1.0/2.1/3.1/4.2MiB without cap; app keeps reading outer input",
+  "required": "finite pending queue and source input flow control, no silent byte loss, UI remains responsive",
+  "minor_limitation": "partial ESC[200 prefix can be held indefinitely",
+  "recorded_at_utc": "2026-09-23T08:37:08.290734+00:00"
+}

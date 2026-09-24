@@ -1,0 +1,1871 @@
+{
+  "schema_version": 1,
+  "feature": "core-workbench",
+  "run": "implement-p2-20260923",
+  "started_at_utc": "2026-09-23T07:07:01.162457+00:00",
+  "approved_bundle_sha256": "e76c0bde27d2d040e373d0a0ed5d90458960f76fbbf3e2ca163cb590a11f1c06",
+  "workspace": "/home/dwchoo/ai-exp-assistant",
+  "isolation": "shared physical checkout; serial mutation leases",
+  "budget": {
+    "max_open_child_threads": 4,
+    "max_parallel_writers": 1,
+    "total_child_runs": 128,
+    "oracle_calls": 5,
+    "worker_attempts_per_incident": 2,
+    "corrective_review_cycles_per_unit": 3,
+    "reserved": {
+      "ticket_workers": 15,
+      "test_designers": 16,
+      "reviewers": 16,
+      "fix_and_rechecks": 16,
+      "oracle": 1
+    },
+    "amendment": "CW-01 third bounded correction granted from existing fix/review reserve: new writer defect introduced in cycle 2; total child-run budget remains 64. No acceptance/scope change.",
+    "oracle_calls_used": 5,
+    "total_child_runs_used": 92,
+    "total_child_runs_available": 36,
+    "reconciliation": {
+      "method": "2026-09-23 host Codex child session task_started events after run start; unique turn_id, excludes parent duplicate event",
+      "completed_calls": 40,
+      "completion_unobserved": 0,
+      "source": "/home/dwchoo/.codex/sessions/2026/09/23/*.jsonl",
+      "recorded_at_utc": "2026-09-23T12:11:00Z"
+    },
+    "current_reserved": {
+      "cw03_worker": 0,
+      "cw03_reviewer": 0,
+      "cw02_review": 0,
+      "cw04_worker_test_review": 0,
+      "cw03_test_worker_review": 0
+    },
+    "current_reserved_total": 0,
+    "minimum_future_calls_note": "CW-05..CW-15 each require worker/test_designer/reviewer (33 calls) and CW-16 independent test/review (2 calls), plus CW-02..04 remaining work; 128 total now authorized.",
+    "budget_changes": [
+      {
+        "scope": "CW-03 prompt-hook incident worker attempts",
+        "old_limit": 2,
+        "new_limit": 3,
+        "reason": "Reviewer-confirmed function redefinition path after two bounded corrections; one additional worker correction and necessary independent tests/delta review",
+        "authorization_ref": "user async reply 2026-09-23: 추가 수정 허용 (권장)",
+        "recorded_at_utc": "2026-09-23T13:01:31.329077+00:00"
+      },
+      {
+        "scope": "feature total child runs",
+        "old_limit": 64,
+        "new_limit": 128,
+        "reason": "Remaining approved tickets CW-05..16 require worker, independent tests and review; preserve prior usage and Oracle limit",
+        "authorization_ref": "user async reply 2026-09-23: 128회로 확대 (권장)",
+        "recorded_at_utc": "2026-09-23T13:01:31.329091+00:00"
+      },
+      {
+        "scope": "CW-03 prompt-hook incident worker attempts",
+        "old_limit": 3,
+        "new_limit": 4,
+        "reason": "User approved fourth bounded correction plus independent tests/review for three real Bash/dash safety failures",
+        "authorization_ref": "current user async reply: 네, CW-03도 진행",
+        "recorded_at_utc": "2026-09-23T13:44:06.734759+00:00"
+      },
+      {
+        "scope": "Oracle calls for CW-03 same-shell safety redesign review",
+        "old_limit": 4,
+        "new_limit": 5,
+        "reason": "New fourth-attempt deterministic post-READY race plus user-selected redesign review; one focused Oracle senior diagnosis with no code mutation",
+        "decision_owner": "Root",
+        "authority_ref": "workflow-contract section 8 internal reassessment; current user reply: 안전 경계 재설계 검토",
+        "recorded_at_utc": "2026-09-23T14:30:42.942099+00:00"
+      }
+    ],
+    "worker_attempts_per_incident_overrides": {
+      "CW-03 prompt-hook incident": 4
+    }
+  },
+  "tickets": {
+    "CW-01": {
+      "status": "integrated",
+      "workspace": "/home/dwchoo/ai-exp-assistant",
+      "base_checkpoint": ".workflow/core-workbench/runs/implement-p2-20260923/baseline.tar.gz",
+      "started_at_utc": "2026-09-23T07:07:07.126001+00:00",
+      "candidate_id": "51586db6d81f77699c93f54610146f2816d89b2deb1cb0515dcede35a5f581c8",
+      "worker_record": ".workflow/core-workbench/runs/implement-p2-20260923/cw01-worker-candidate.json",
+      "test_record": ".workflow/core-workbench/runs/implement-p2-20260923/cw01-independent-tests.json",
+      "frozen_record": ".workflow/core-workbench/runs/implement-p2-20260923/cw01-frozen-candidate-4.json",
+      "review_record": ".workflow/core-workbench/runs/implement-p2-20260923/cw01-review-1.json",
+      "correction_test_record": ".workflow/core-workbench/runs/implement-p2-20260923/cw01-tests-correction-1.json",
+      "delta_review_record": ".workflow/core-workbench/runs/implement-p2-20260923/cw01-review-2.json",
+      "correction_test_record_2": ".workflow/core-workbench/runs/implement-p2-20260923/cw01-tests-correction-2.json",
+      "third_review_record": ".workflow/core-workbench/runs/implement-p2-20260923/cw01-review-3.json",
+      "integration_record": ".workflow/core-workbench/runs/implement-p2-20260923/cw01-integration.json"
+    },
+    "CW-02": {
+      "status": "blocked_missing_live_input_evidence",
+      "base_checkpoint": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-base.tar.gz",
+      "started_at_utc": "2026-09-23T07:49:09.101058+00:00",
+      "candidate_id": "2c46e52e1fc6ad9e66e5cba2001f6037f86b45a60e101fc53944246a98b4c569",
+      "worker_record": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-worker-candidate.json",
+      "test_record": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-independent-tests.json",
+      "frozen_record": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-frozen-candidate-3.json",
+      "review_record": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-review-1.json",
+      "correction_test_record": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-tests-correction-1.json",
+      "delta_review_record": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-review-2.json",
+      "correction_test_record_2": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-tests-correction-2.json",
+      "second_delta_review_record": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-review-3.json",
+      "oracle_record": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-oracle-1.json",
+      "policy_test_record": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2-20260923/cw02-tests-after-policy.json",
+      "policy_worker_record": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2-20260923/cw02-policy-worker-candidate.json",
+      "latest_independent_test": {
+        "command": "PYTHONDONTWRITEBYTECODE=1 /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/gates/g1_vt -p 'test_*.py' -q",
+        "exit_code": 0,
+        "passed": 21,
+        "test_file_sha256": "018b663ba14bc4e2da1434a1d585240ad701902720ea731dc3f3f63229fc5bfe"
+      },
+      "live_probe_record": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-live-runtime-resume-result.json",
+      "blocker": "Actual OMP scripted-provider TUI probe showed provider request 0; composer input and /clear not acknowledged, so approval/tool output/resize not verified"
+    },
+    "CW-03": {
+      "status": "blocked_after_fourth_attempt",
+      "base_checkpoint": ".workflow/core-workbench/runs/implement-p2-20260923/cw03-base.tar.gz",
+      "started_at_utc": "2026-09-23T07:39:37.758461+00:00",
+      "incident_record": ".workflow/core-workbench/runs/implement-p2-20260923/cw03-needs-oracle.json",
+      "oracle_record": ".workflow/core-workbench/runs/implement-p2-20260923/cw03-oracle-1.json",
+      "resume_checkpoint": ".workflow/core-workbench/runs/implement-p2-20260923/cw03-resume-base.tar.gz",
+      "candidate_id": "4721952362dc0d423774ab9dbdede090a04a5ea651d25e5002fbb08ce4f73765",
+      "worker_record": ".workflow/core-workbench/runs/implement-p2-20260923/cw03-worker-candidate.json",
+      "test_record": ".workflow/core-workbench/runs/implement-p2-20260923/cw03-independent-tests.json",
+      "handoff_test_record": ".workflow/core-workbench/runs/implement-p2-20260923/cw03-handoff-independent-tests.json",
+      "frozen_record": ".workflow/core-workbench/runs/implement-p2-20260923/cw03-handoff-frozen-candidate.json",
+      "review_record": ".workflow/core-workbench/runs/implement-p2-20260923/cw03-handoff-review-1.json",
+      "prompt_race_test_record": ".workflow/core-workbench/runs/implement-p2-20260923/cw03-prompt-race-independent-tests.json",
+      "frozen_record_2": ".workflow/core-workbench/runs/implement-p2-20260923/cw03-handoff-frozen-candidate-2.json",
+      "second_review_record": ".workflow/core-workbench/runs/implement-p2-20260923/cw03-handoff-review-2.json",
+      "frozen_record_3": ".workflow/core-workbench/runs/implement-p2-20260923/cw03-function-redefine-frozen-candidate.json",
+      "third_review_record": ".workflow/core-workbench/runs/implement-p2-20260923/cw03-function-redefine-review.json",
+      "fourth_test_record": ".workflow/core-workbench/runs/implement-p2-20260923/cw03-fourth-independent-tests.json",
+      "fourth_blocked_record": ".workflow/core-workbench/runs/implement-p2-20260923/cw03-fourth-blocked-candidate.json",
+      "blocker": "Bash hook can emit READY and jobs markers before prompt hook completion; backend sees can_dispatch True before later job; no sound quiescence proof",
+      "post_ready_test_record": ".workflow/core-workbench/runs/implement-p2-20260923/cw03-post-ready-independent-test.json",
+      "recovered_product_sha256": "64267d025dd89ea78441b07fa1ca496251d9cb934d192513efc5dd0ef1d132d0",
+      "redesign_review_record": ".workflow/core-workbench/runs/implement-p2-20260923/cw03-safety-redesign-review.md",
+      "redesign_result": "protected same-interpreter execution boundary required; no fifth product edit authorized or ready"
+    },
+    "CW-04": {
+      "status": "cd49_partial_verified_g3_pending",
+      "base_checkpoint": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-base.tar.gz",
+      "started_at_utc": "2026-09-23T09:14:09.241261+00:00",
+      "candidate_id": "363d211b5c45b2d7ce66547ec84fabb89159af1a33df64f2a42eed08c0646e8e",
+      "worker_record": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-worker-candidate.json",
+      "correction_record": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-correction-1.json",
+      "test_record": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-independent-tests.json",
+      "frozen_record": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-frozen-candidate.json",
+      "review_record": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-review-1.json",
+      "oracle_record": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-oracle-1.json",
+      "probe_candidate_id": "647d9e220d6f8458225c7ce315c4fc5600fef3dc69126040f74bdeea94eb7104",
+      "probe_record": ".workflow/core-workbench/runs/implement-p2-20260923/g3-preexec-wrapper-resume-check.json",
+      "same_batch_probe_candidate_id": "b7f05ac77ed24cebc2927e4cd751a8bc61a37a25ddccf90546495059e8b409f0",
+      "same_batch_probe_record": ".workflow/core-workbench/runs/implement-p2-20260923/g3-same-batch-resume-check.json",
+      "resume_worker_record": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-resume-worker-candidate.json",
+      "resume_independent_test_record": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-resume-independent-tests.json",
+      "blocker": "Actual OMP abort/reconciliation harness/pair semantics/busy/native approval/ACK loss+immediate reconnect partial pass. Live non-empty composer, session switch/generation, long-term duplicate handling and production backend remain unverified.",
+      "api_feasibility_record": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-api-feasibility-audit.json",
+      "recovered_product_sha256": "d427f9977751580fb3edf27c0377e946769c8d0d20ed9e33a930c0be2a7ba489",
+      "cd49_red_tests": {
+        "node": "6/10 pass, 4 fail",
+        "python": "4/7 pass, 3 error",
+        "test_files_sha256": {
+          "tests/gates/g3_omp/bridge.test.ts": "1934a73ceb34f96b0c4d22631a08e8ab11b1b5c346e6e99c1d21b4a5c4dea7ff",
+          "tests/gates/g3_omp/test_g3_protocol.py": "2926f5fdf67e4d3ae99bfd81480cf180ed530d0185f568a190328d0d89bedd10"
+        },
+        "baseline": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-worker-base.json"
+      },
+      "cd49_worker_record": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-worker-candidate.json",
+      "cd49_live_test_record": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-live-test-candidate.json",
+      "cd49_early_review": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-early-review.json",
+      "cd49_delta_red": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-delta-red.json",
+      "cd49_correction_candidate": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-correction-candidate.json",
+      "cd49_resume_unknown_red": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-resume-unknown-red.json",
+      "cd49_final_partial_candidate": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-final-partial-candidate.json",
+      "cd49_final_delta_review": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-final-delta-review.json",
+      "cd49_rpc_candidate": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-rpc-frozen-candidate.json",
+      "cd49_rpc_live_result": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-rpc-live-result.json",
+      "cd49_rpc_probe_review": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-rpc-probe-review.json",
+      "cd49_rpc_final_candidate": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-rpc-final-candidate.json",
+      "cd49_rpc_final_result": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-rpc-final-result.json",
+      "cd49_rpc_probe_delta_review": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-rpc-probe-delta-review.json",
+      "cd49_reconcile_candidate": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-reconcile-candidate.json",
+      "cd49_reconcile_live_result": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-reconcile-live-result.json",
+      "cd49_reconcile_review": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-reconcile-review.json",
+      "cd49_reconcile_final_candidate": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-reconcile-final-candidate.json",
+      "cd49_reconcile_final_result": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-reconcile-final-result.json",
+      "cd49_reconcile_delta_review": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-reconcile-delta-review.json",
+      "cd49_pair_semantics_candidate": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-pair-semantics-candidate.json",
+      "cd49_pair_semantics_result": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-pair-semantics-result.json",
+      "cd49_pair_semantics_review": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-pair-semantics-review.json",
+      "cd49_contention_candidate": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-contention-candidate.json",
+      "cd49_contention_result": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-contention-result.json",
+      "cd49_contention_review": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-contention-review.json",
+      "cd49_contention_final_candidate": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-contention-final-candidate.json",
+      "cd49_contention_final_result": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-contention-final-result.json",
+      "cd49_contention_delta_review": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-contention-delta-review.json",
+      "cd49_reconnect_candidate": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-reconnect-candidate.json",
+      "cd49_reconnect_result": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-reconnect-result.json",
+      "cd49_reconnect_review": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-reconnect-review.json",
+      "cd49_reconnect_final_candidate": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-reconnect-final-candidate.json",
+      "cd49_reconnect_final_result": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-reconnect-final-result.json",
+      "cd49_reconnect_delta_review": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-reconnect-delta-review.json"
+    },
+    "CW-05": {
+      "status": "pending"
+    },
+    "CW-06": {
+      "status": "pending"
+    },
+    "CW-07": {
+      "status": "pending"
+    },
+    "CW-08": {
+      "status": "pending"
+    },
+    "CW-09": {
+      "status": "pending"
+    },
+    "CW-10": {
+      "status": "pending"
+    },
+    "CW-11": {
+      "status": "pending"
+    },
+    "CW-12": {
+      "status": "pending"
+    },
+    "CW-13": {
+      "status": "pending"
+    },
+    "CW-14": {
+      "status": "pending"
+    },
+    "CW-15": {
+      "status": "pending"
+    },
+    "CW-16": {
+      "status": "pending"
+    }
+  },
+  "active_assignments": [],
+  "checks": [
+    {
+      "gate_id": "G3",
+      "item_id": "single_task_no_tools_model_response",
+      "candidate_id": "41537aed7f9734cf26ba45bfb92766c2de26a91d863f27fa64e2aeb3a34d4477",
+      "requirements_digest": "922bd0dca00c52e3c6ab60f700a12e58aff6421034b623c76bd63ea87b3e6356",
+      "result_ref": ".workflow/core-workbench/runs/implement-p2-20260923/g3-single-task-resume-check.json",
+      "result": "passed_item_only",
+      "observed_evidence_level": "runtime"
+    },
+    {
+      "gate_id": "G1",
+      "item_id": "vt_pty_input_fixture",
+      "candidate_id": "d256f79b4a0e2cf0f2df5df3c13600c8e3a3e9549fbc917575f72d194a7cc745",
+      "requirements_digest": "922bd0dca00c52e3c6ab60f700a12e58aff6421034b623c76bd63ea87b3e6356",
+      "result_ref": ".workflow/core-workbench/runs/implement-p2-20260923/g1-resume-check.json",
+      "result": "passed_item_only",
+      "observed_evidence_level": "fixture"
+    },
+    {
+      "gate_id": "G1",
+      "item_id": "two_omp_composer_korean_paste_slash",
+      "candidate_id": "d256f79b4a0e2cf0f2df5df3c13600c8e3a3e9549fbc917575f72d194a7cc745",
+      "requirements_digest": "922bd0dca00c52e3c6ab60f700a12e58aff6421034b623c76bd63ea87b3e6356",
+      "result_ref": ".workflow/core-workbench/runs/implement-p2-20260923/g1-resume-check.json",
+      "result": "passed_item_only",
+      "observed_evidence_level": "runtime"
+    },
+    {
+      "gate_id": "G3",
+      "item_id": "native_wrapper_pause_after_A_before_B",
+      "candidate_id": "647d9e220d6f8458225c7ce315c4fc5600fef3dc69126040f74bdeea94eb7104",
+      "requirements_digest": "922bd0dca00c52e3c6ab60f700a12e58aff6421034b623c76bd63ea87b3e6356",
+      "result_ref": ".workflow/core-workbench/runs/implement-p2-20260923/g3-preexec-wrapper-resume-check.json",
+      "result": "passed_item_only",
+      "observed_evidence_level": "runtime"
+    },
+    {
+      "gate_id": "G3",
+      "item_id": "same_batch_native_write_pause_control",
+      "candidate_id": "b7f05ac77ed24cebc2927e4cd751a8bc61a37a25ddccf90546495059e8b409f0",
+      "requirements_digest": "922bd0dca00c52e3c6ab60f700a12e58aff6421034b623c76bd63ea87b3e6356",
+      "result_ref": ".workflow/core-workbench/runs/implement-p2-20260923/g3-same-batch-resume-check.json",
+      "result": "passed_item_only",
+      "observed_evidence_level": "runtime"
+    },
+    {
+      "gate_id": "G1",
+      "item_id": "live_approval_tool_output_resize_query",
+      "candidate_id": "5e598bd7f368887d1051cf14947118ecf52cfe527ab9f5d9cfccb4e81f42d576",
+      "requirements_digest": "922bd0dca00c52e3c6ab60f700a12e58aff6421034b623c76bd63ea87b3e6356",
+      "result_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-live-runtime-resume-result.json",
+      "result": "inconclusive",
+      "observed_evidence_level": "runtime"
+    },
+    {
+      "gate_id": "G2",
+      "item_id": "same_shell_auto_dispatch_safety",
+      "candidate_id": "5e598bd7f368887d1051cf14947118ecf52cfe527ab9f5d9cfccb4e81f42d576",
+      "requirements_digest": "922bd0dca00c52e3c6ab60f700a12e58aff6421034b623c76bd63ea87b3e6356",
+      "result_ref": "docs/features/core-workbench/gates/G2.md",
+      "result": "failed_4_of_26_real_shell_tests",
+      "observed_evidence_level": "runtime"
+    },
+    {
+      "gate_id": "G3",
+      "item_id": "mutable_preexec_pause_with_native_approval",
+      "candidate_id": "5e598bd7f368887d1051cf14947118ecf52cfe527ab9f5d9cfccb4e81f42d576",
+      "requirements_digest": "922bd0dca00c52e3c6ab60f700a12e58aff6421034b623c76bd63ea87b3e6356",
+      "result_ref": "docs/features/core-workbench/gates/G3.md",
+      "result": "blocked_public_api_approval_and_4_of_11_node_tests_failed",
+      "observed_evidence_level": "source_and_fixture"
+    },
+    {
+      "gate_id": "G3",
+      "item_id": "cd49_manager_turn_abort_partial",
+      "candidate_id": "4ebafc415841a7af808324522bbf0c1d060d161f45552fbaba22e1e2606fcb53",
+      "approved_requirements_identity": "7631d51ae0c6f10c8b3281ad962cfb2bfd5fe42f0bf06e672618b904a044a3d2",
+      "required_evidence_level": "runtime",
+      "observed_evidence_level": "runtime",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python tests/gates/g3_omp/live_pause_abort_probe.py",
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "environment": {
+        "omp": "18.2.10",
+        "provider": "local scripted",
+        "mode": "--print",
+        "temp_cwd": true
+      },
+      "exit_code": 0,
+      "result": "passed_item_only",
+      "evidence_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-live-test-candidate.json",
+      "observations": {
+        "pause_ack": "abort_requested",
+        "ack_before_tool_end": true,
+        "unknown_tool_ids": [
+          "pause-probe-bash"
+        ],
+        "paused_delivery": "deferred",
+        "agent_end": true,
+        "turn_stop_observed": true,
+        "provider_requests": 1,
+        "processes_after_cleanup": 0
+      },
+      "unknowns": [
+        "post-stop bridge state and explicit resume/replay not observed because --print exits after turn",
+        "interactive positional prompt did not start native bash within 10s",
+        "full peer round-trip and busy/approval/composer live behavior remain unverified"
+      ],
+      "recorded_at_utc": "2026-09-23T15:12:16.436675+00:00"
+    },
+    {
+      "gate_id": "G3",
+      "item_id": "cd49_manager_turn_abort_after_correction",
+      "candidate_id": "191ab2b858ea68909d520c1243250978625f4223c93b0528d006b9d766309ba4",
+      "approved_requirements_identity": "7631d51ae0c6f10c8b3281ad962cfb2bfd5fe42f0bf06e672618b904a044a3d2",
+      "required_evidence_level": "runtime",
+      "observed_evidence_level": "runtime",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python tests/gates/g3_omp/live_pause_abort_probe.py",
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "environment": {
+        "omp": "18.2.10",
+        "provider": "local scripted",
+        "mode": "--print",
+        "temp_cwd": true
+      },
+      "exit_code": 0,
+      "result": "passed_item_only",
+      "evidence_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-correction-candidate.json",
+      "observations": {
+        "pause_ack": "abort_requested",
+        "ack_before_tool_end": true,
+        "unknown_tool_ids": [
+          "pause-probe-bash"
+        ],
+        "paused_delivery": "deferred",
+        "agent_end": true,
+        "turn_stop_observed": true,
+        "provider_requests": 1,
+        "processes_after_cleanup": 0
+      },
+      "unknowns": [
+        "post-stop bridge state and explicit resume/replay not observed because --print exits after turn",
+        "interactive positional prompt did not start native bash within 10s",
+        "full peer round-trip and busy/approval/composer live behavior remain unverified"
+      ],
+      "recorded_at_utc": "2026-09-23T15:20:59.959492+00:00"
+    },
+    {
+      "gate_id": "G3",
+      "item_id": "cd49_rpc_manager_abort_and_pair_partial",
+      "candidate_id": "8f786053c65d848339d2a80ed45d7f66511746bfcd1c441428f8bddbc551247e",
+      "requirements_digest": "c79c6d64ca0782f1b4e817c68e148d07495f61e911a3af3dfcd7265b76b783d3",
+      "observed_evidence_level": "runtime",
+      "result": "passed_item_only",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python tests/gates/g3_omp/live_rpc_pause_probe.py --pair",
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "environment": {
+        "omp": "18.2.10",
+        "mode": "rpc",
+        "provider": "local scripted",
+        "paths": "temporary"
+      },
+      "exit_code": 0,
+      "result_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-rpc-live-result.json",
+      "unknowns": [
+        "Real Workbench backend state and approval reconciliation absent",
+        "Live busy/approval/ACK loss/reconnect/session switch absent",
+        "Message provider input content and reply semantics unverified",
+        "Production periodic model review hold and host experiment/log continuity unverified"
+      ]
+    },
+    {
+      "gate_id": "G3",
+      "item_id": "cd49_rpc_manager_abort_and_pair_partial",
+      "candidate_id": "95a31e3ec0ab31fe8a8446d098f00b0ea3f2a5f8781a0d8fb60df4c1f5c160b0",
+      "requirements_digest": "c79c6d64ca0782f1b4e817c68e148d07495f61e911a3af3dfcd7265b76b783d3",
+      "observed_evidence_level": "runtime",
+      "result": "passed_item_only",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python tests/gates/g3_omp/live_rpc_pause_probe.py --pair",
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "environment": {
+        "omp": "18.2.10",
+        "mode": "rpc",
+        "provider": "local scripted",
+        "paths": "temporary"
+      },
+      "exit_code": 0,
+      "result_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-rpc-final-result.json",
+      "unknowns": [
+        "Real Workbench backend state and approval reconciliation absent",
+        "Live busy/approval/ACK loss/reconnect/session switch absent",
+        "Message provider input content and reply semantics unverified",
+        "Production periodic model review hold and host experiment/log continuity unverified"
+      ]
+    },
+    {
+      "gate_id": "G3",
+      "item_id": "cd49_rpc_reconciliation_harness_partial",
+      "candidate_id": "7bd4622dfff40dec6aa3a4b891a34f49ab0b429db9f03bb51d8aab0a2c8d17ca",
+      "requirements_digest": "e0b6abefef59c70f2a438c82005c671d23ec4776f4215ae9e8ba96211021f944",
+      "observed_evidence_level": "runtime",
+      "result": "passed_item_only",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python tests/gates/g3_omp/live_rpc_pause_probe.py --pair",
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "environment": {
+        "omp": "18.2.10",
+        "mode": "rpc",
+        "provider": "local scripted",
+        "paths": "temporary"
+      },
+      "exit_code": 0,
+      "result_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-reconcile-live-result.json",
+      "unknowns": [
+        "Actual Workbench backend reconciliation/user display absent",
+        "Live busy/approval/ACK loss/reconnect/session switch absent",
+        "Message provider input content and reply semantics unverified",
+        "Production 1-minute model review hold and host experiment/log continuity unverified"
+      ]
+    },
+    {
+      "gate_id": "G3",
+      "item_id": "cd49_rpc_reconciliation_harness_partial",
+      "candidate_id": "056f55a99f734f6a54a1e44ae3613e2baa86aa46442ca4e63af6fad263327e28",
+      "requirements_digest": "e0b6abefef59c70f2a438c82005c671d23ec4776f4215ae9e8ba96211021f944",
+      "observed_evidence_level": "runtime",
+      "result": "passed_item_only",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python tests/gates/g3_omp/live_rpc_pause_probe.py --pair",
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "environment": {
+        "omp": "18.2.10",
+        "mode": "rpc",
+        "provider": "local scripted",
+        "paths": "temporary"
+      },
+      "exit_code": 0,
+      "result_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-reconcile-final-result.json",
+      "unknowns": [
+        "Actual Workbench backend reconciliation/user display absent",
+        "Live busy/approval/ACK loss/reconnect/session switch absent",
+        "Message provider input content and reply semantics unverified",
+        "Production 1-minute model review hold and host experiment/log continuity unverified"
+      ]
+    },
+    {
+      "gate_id": "G3",
+      "item_id": "cd49_rpc_pair_semantics_partial",
+      "candidate_id": "6e15ffd338658fbf0567b69e14490b970b925932c70ba8d707fa894f5a05cbad",
+      "requirements_digest": "e76c0bde27d2d040e373d0a0ed5d90458960f76fbbf3e2ca163cb590a11f1c06",
+      "observed_evidence_level": "runtime",
+      "result": "passed_item_only",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python tests/gates/g3_omp/live_rpc_pause_probe.py --pair",
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "environment": {
+        "omp": "18.2.10",
+        "mode": "rpc",
+        "provider": "local scripted",
+        "paths": "temporary"
+      },
+      "exit_code": 0,
+      "result_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-pair-semantics-result.json",
+      "unknowns": [
+        "Actual Workbench backend reconciliation/user display absent",
+        "Live busy/approval/ACK loss/reconnect/session switch absent",
+        "Production 1-minute worker model review hold and host terminal/log integration unverified"
+      ]
+    },
+    {
+      "gate_id": "G3",
+      "item_id": "cd49_live_busy_approval_partial",
+      "candidate_id": "5d99e0d8dbd73956b27fab776803f63429cb2e05cd38fbb6a702b606f9f64556",
+      "requirements_digest": "e76c0bde27d2d040e373d0a0ed5d90458960f76fbbf3e2ca163cb590a11f1c06",
+      "required_evidence_level": "runtime",
+      "observed_evidence_level": "runtime",
+      "result": "passed_item_only",
+      "command": [
+        "PYTHONDONTWRITEBYTECODE=1 python tests/gates/g3_omp/live_rpc_contention_probe.py --scenario busy",
+        "PYTHONDONTWRITEBYTECODE=1 python tests/gates/g3_omp/live_rpc_contention_probe.py --scenario approval"
+      ],
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "environment": {
+        "omp": "18.2.10",
+        "mode": "rpc",
+        "provider": "local scripted",
+        "paths": "temporary"
+      },
+      "exit_code": [
+        0,
+        0
+      ],
+      "result_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-contention-result.json",
+      "unknowns": [
+        "200ms no-new-turn window does not prove indefinite hold",
+        "Actual OMP ACK loss/reconnect/session switch unverified",
+        "Production backend state/approval reconciliation and periodic worker model review unverified"
+      ]
+    },
+    {
+      "gate_id": "G3",
+      "item_id": "cd49_live_busy_approval_partial",
+      "candidate_id": "0e0558dcc4edb229ceb2f3182acd2862a3b058d59dd7ac2ec30b8283a0d87ef3",
+      "requirements_digest": "e76c0bde27d2d040e373d0a0ed5d90458960f76fbbf3e2ca163cb590a11f1c06",
+      "required_evidence_level": "runtime",
+      "observed_evidence_level": "runtime",
+      "result": "passed_item_only",
+      "command": [
+        "PYTHONDONTWRITEBYTECODE=1 python tests/gates/g3_omp/live_rpc_contention_probe.py --scenario busy",
+        "PYTHONDONTWRITEBYTECODE=1 python tests/gates/g3_omp/live_rpc_contention_probe.py --scenario approval"
+      ],
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "environment": {
+        "omp": "18.2.10",
+        "mode": "rpc",
+        "provider": "local scripted",
+        "paths": "temporary"
+      },
+      "exit_code": [
+        0,
+        0
+      ],
+      "result_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-contention-final-result.json",
+      "unknowns": [
+        "No-new-turn observation bounded to 200ms",
+        "Actual OMP non-empty composer/ACK loss/reconnect/session switch unverified",
+        "Production backend reconciliation and periodic worker review unverified"
+      ]
+    },
+    {
+      "gate_id": "G3",
+      "item_id": "cd49_live_ack_loss_reconnect_partial",
+      "candidate_id": "22558e3ec42e9890cc12faad345bee0a4e46596efde5c7f2a980a38e50272024",
+      "requirements_digest": "e76c0bde27d2d040e373d0a0ed5d90458960f76fbbf3e2ca163cb590a11f1c06",
+      "required_evidence_level": "runtime",
+      "observed_evidence_level": "runtime",
+      "result": "passed_item_only",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python tests/gates/g3_omp/live_rpc_reconnect_probe.py",
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "environment": {
+        "omp": "18.2.10",
+        "mode": "rpc",
+        "provider": "local scripted",
+        "paths": "temporary"
+      },
+      "exit_code": 0,
+      "result_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-reconnect-result.json",
+      "unknowns": [
+        "Only immediate reconnect and bounded no-replay window; long-term duplicate behavior unverified",
+        "Actual OMP non-empty composer and session switch unverified",
+        "Production backend reconciliation/model review hold unverified"
+      ]
+    },
+    {
+      "gate_id": "G3",
+      "item_id": "cd49_live_ack_loss_reconnect_partial",
+      "candidate_id": "3e3764758e475fcdd503c8216ddb9d46cc348c1a116b8113249f60930e00fc4e",
+      "requirements_digest": "e76c0bde27d2d040e373d0a0ed5d90458960f76fbbf3e2ca163cb590a11f1c06",
+      "required_evidence_level": "runtime",
+      "observed_evidence_level": "runtime",
+      "result": "passed_item_only",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python tests/gates/g3_omp/live_rpc_reconnect_probe.py",
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "environment": {
+        "omp": "18.2.10",
+        "mode": "rpc",
+        "provider": "local scripted",
+        "paths": "temporary"
+      },
+      "exit_code": 0,
+      "result_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-reconnect-final-result.json",
+      "unknowns": [
+        "Only immediate reconnect/bounded no-replay window; long-term duplicate behavior unverified",
+        "Actual OMP non-empty composer and session switch unverified",
+        "Production backend reconciliation/model review hold unverified"
+      ]
+    }
+  ],
+  "previous_approved_bundle_sha256": "e0b6abefef59c70f2a438c82005c671d23ec4776f4215ae9e8ba96211021f944",
+  "policy_approval_record": ".workflow/core-workbench/runs/implement-p2-20260923/cd49-doc-final-approval.json",
+  "run_status": "blocked_g1_g2_g3",
+  "handoff_record": ".workflow/core-workbench/runs/implement-p2-20260923/HANDOFF-2026-09-23-2225.md",
+  "calls": [
+    {
+      "call_id": "01a0cd17-0c03-7813-b747-03ee9ddc3b06",
+      "role": "worker",
+      "assignment": "/root/cw01_worker",
+      "started_at_utc": "2026-09-23T07:07:14.821Z",
+      "status": "completed",
+      "completed_at_utc": "2026-09-23T07:16:19.750Z",
+      "host_observed_model": "gpt-6-luna",
+      "host_observed_effort": "xhigh",
+      "evidence_ref": "/home/dwchoo/.codex/sessions/2026/09/23/rollout-2026-09-23T16-07-14-01a0cd17-0bf4-7790-a073-3bc7e7947b51.jsonl"
+    },
+    {
+      "call_id": "01a0cd20-395d-7aa1-8298-c53afe58f108",
+      "role": "test_designer",
+      "assignment": "/root/cw01_tests",
+      "started_at_utc": "2026-09-23T07:17:16.255Z",
+      "status": "completed",
+      "completed_at_utc": "2026-09-23T07:18:52.491Z",
+      "host_observed_model": "gpt-6-sol",
+      "host_observed_effort": "high",
+      "evidence_ref": "/home/dwchoo/.codex/sessions/2026/09/23/rollout-2026-09-23T16-17-16-01a0cd20-394e-7c81-a544-eb25f8995132.jsonl"
+    },
+    {
+      "call_id": "01a0cd22-146f-7a30-9020-cd1f99cf4cc5",
+      "role": "worker",
+      "assignment": "/root/cw01_worker",
+      "started_at_utc": "2026-09-23T07:19:17.876Z",
+      "status": "completed",
+      "completed_at_utc": "2026-09-23T07:19:54.168Z",
+      "host_observed_model": "gpt-6-luna",
+      "host_observed_effort": "xhigh",
+      "evidence_ref": "/home/dwchoo/.codex/sessions/2026/09/23/rollout-2026-09-23T16-07-14-01a0cd17-0bf4-7790-a073-3bc7e7947b51.jsonl"
+    },
+    {
+      "call_id": "01a0cd23-01ec-7e72-b7ce-532e99d55974",
+      "role": "reviewer",
+      "assignment": "/root/cw01_review",
+      "started_at_utc": "2026-09-23T07:20:18.670Z",
+      "status": "completed",
+      "completed_at_utc": "2026-09-23T07:23:09.241Z",
+      "host_observed_model": "gpt-6-sol",
+      "host_observed_effort": "high",
+      "evidence_ref": "/home/dwchoo/.codex/sessions/2026/09/23/rollout-2026-09-23T16-20-18-01a0cd23-01db-7411-8046-4d1fa284ee5a.jsonl"
+    },
+    {
+      "call_id": "01a0cd25-e5c4-7cb3-b2f5-86ec9dbbbe47",
+      "role": "test_designer",
+      "assignment": "/root/cw01_tests",
+      "started_at_utc": "2026-09-23T07:23:28.083Z",
+      "status": "completed",
+      "completed_at_utc": "2026-09-23T07:24:29.014Z",
+      "host_observed_model": "gpt-6-sol",
+      "host_observed_effort": "high",
+      "evidence_ref": "/home/dwchoo/.codex/sessions/2026/09/23/rollout-2026-09-23T16-17-16-01a0cd20-394e-7c81-a544-eb25f8995132.jsonl"
+    },
+    {
+      "call_id": "01a0cd27-0aac-73c2-88e3-a037efd6193e",
+      "role": "worker",
+      "assignment": "/root/cw01_worker",
+      "started_at_utc": "2026-09-23T07:24:43.054Z",
+      "status": "completed",
+      "completed_at_utc": "2026-09-23T07:25:58.886Z",
+      "host_observed_model": "gpt-6-luna",
+      "host_observed_effort": "xhigh",
+      "evidence_ref": "/home/dwchoo/.codex/sessions/2026/09/23/rollout-2026-09-23T16-07-14-01a0cd17-0bf4-7790-a073-3bc7e7947b51.jsonl"
+    },
+    {
+      "call_id": "01a0cd28-8600-7582-9c26-3d9c51820ddb",
+      "role": "reviewer",
+      "assignment": "/root/cw01_review",
+      "started_at_utc": "2026-09-23T07:26:20.166Z",
+      "status": "completed",
+      "completed_at_utc": "2026-09-23T07:27:40.023Z",
+      "host_observed_model": "gpt-6-sol",
+      "host_observed_effort": "high",
+      "evidence_ref": "/home/dwchoo/.codex/sessions/2026/09/23/rollout-2026-09-23T16-20-18-01a0cd23-01db-7411-8046-4d1fa284ee5a.jsonl"
+    },
+    {
+      "call_id": "01a0cd2a-2245-7270-8b2e-b8792a12fd3e",
+      "role": "test_designer",
+      "assignment": "/root/cw01_tests",
+      "started_at_utc": "2026-09-23T07:28:05.704Z",
+      "status": "completed",
+      "completed_at_utc": "2026-09-23T07:30:08.216Z",
+      "host_observed_model": "gpt-6-sol",
+      "host_observed_effort": "high",
+      "evidence_ref": "/home/dwchoo/.codex/sessions/2026/09/23/rollout-2026-09-23T16-17-16-01a0cd20-394e-7c81-a544-eb25f8995132.jsonl"
+    },
+    {
+      "call_id": "01a0cd2c-3397-7520-9358-e22ac833db83",
+      "role": "worker",
+      "assignment": "/root/cw01_worker",
+      "started_at_utc": "2026-09-23T07:30:21.210Z",
+      "status": "completed",
+      "completed_at_utc": "2026-09-23T07:33:28.378Z",
+      "host_observed_model": "gpt-6-luna",
+      "host_observed_effort": "xhigh",
+      "evidence_ref": "/home/dwchoo/.codex/sessions/2026/09/23/rollout-2026-09-23T16-07-14-01a0cd17-0bf4-7790-a073-3bc7e7947b51.jsonl"
+    },
+    {
+      "call_id": "01a0cd2f-849f-7013-ba76-3bcd7689c19b",
+      "role": "reviewer",
+      "assignment": "/root/cw01_review",
+      "started_at_utc": "2026-09-23T07:33:58.564Z",
+      "status": "completed",
+      "completed_at_utc": "2026-09-23T07:35:15.392Z",
+      "host_observed_model": "gpt-6-sol",
+      "host_observed_effort": "high",
+      "evidence_ref": "/home/dwchoo/.codex/sessions/2026/09/23/rollout-2026-09-23T16-20-18-01a0cd23-01db-7411-8046-4d1fa284ee5a.jsonl"
+    },
+    {
+      "call_id": "01a0cd31-24f4-7a51-b330-e688121d787a",
+      "role": "test_designer",
+      "assignment": "/root/cw01_tests",
+      "started_at_utc": "2026-09-23T07:35:45.150Z",
+      "status": "completed",
+      "completed_at_utc": "2026-09-23T07:36:30.989Z",
+      "host_observed_model": "gpt-6-sol",
+      "host_observed_effort": "high",
+      "evidence_ref": "/home/dwchoo/.codex/sessions/2026/09/23/rollout-2026-09-23T16-17-16-01a0cd20-394e-7c81-a544-eb25f8995132.jsonl"
+    },
+    {
+      "call_id": "01a0cd31-ec5f-7643-b70b-9483ac480a87",
+      "role": "worker",
+      "assignment": "/root/cw01_worker",
+      "started_at_utc": "2026-09-23T07:36:36.196Z",
+      "status": "completed",
+      "completed_at_utc": "2026-09-23T07:37:41.567Z",
+      "host_observed_model": "gpt-6-luna",
+      "host_observed_effort": "xhigh",
+      "evidence_ref": "/home/dwchoo/.codex/sessions/2026/09/23/rollout-2026-09-23T16-07-14-01a0cd17-0bf4-7790-a073-3bc7e7947b51.jsonl"
+    },
+    {
+      "call_id": "01a0cd33-4de7-7ff2-bec0-a1c6ce850bfe",
+      "role": "reviewer",
+      "assignment": "/root/cw01_review",
+      "started_at_utc": "2026-09-23T07:38:06.710Z",
+      "status": "completed",
+      "completed_at_utc": "2026-09-23T07:38:59.529Z",
+      "host_observed_model": "gpt-6-sol",
+      "host_observed_effort": "high",
+      "evidence_ref": "/home/dwchoo/.codex/sessions/2026/09/23/rollout-2026-09-23T16-20-18-01a0cd23-01db-7411-8046-4d1fa284ee5a.jsonl"
+    },
+    {
+      "call_id": "01a0cd34-db67-70b1-9f39-908c0d8702e7",
+      "role": "worker_senior",
+      "assignment": "/root/cw03_worker",
+      "started_at_utc": "2026-09-23T07:39:48.457Z",
+      "status": "completed",
+      "completed_at_utc": "2026-09-23T07:48:04.860Z",
+      "host_observed_model": "gpt-6-luna",
+      "host_observed_effort": "max",
+      "evidence_ref": "/home/dwchoo/.codex/sessions/2026/09/23/rollout-2026-09-23T16-39-48-01a0cd34-db58-7303-982a-6c728a6d858e.jsonl"
+    },
+    {
+      "call_id": "01a0cd3c-bffe-7f23-9e87-d02309176213",
+      "role": "oracle",
+      "assignment": "/root/cw03_oracle",
+      "started_at_utc": "2026-09-23T07:48:25.728Z",
+      "status": "completed",
+      "completed_at_utc": "2026-09-23T07:51:55.894Z",
+      "host_observed_model": "gpt-6-astra",
+      "host_observed_effort": "high",
+      "evidence_ref": "/home/dwchoo/.codex/sessions/2026/09/23/rollout-2026-09-23T16-48-25-01a0cd3c-bfea-77e0-acf3-679aefcd8da9.jsonl"
+    },
+    {
+      "call_id": "01a0cd3d-92ad-7283-a20e-7ab76cc44d16",
+      "role": "worker_senior",
+      "assignment": "/root/cw02_worker",
+      "started_at_utc": "2026-09-23T07:49:19.663Z",
+      "status": "completed",
+      "completed_at_utc": "2026-09-23T08:16:30.759Z",
+      "host_observed_model": "gpt-6-luna",
+      "host_observed_effort": "max",
+      "evidence_ref": "/home/dwchoo/.codex/sessions/2026/09/23/rollout-2026-09-23T16-49-19-01a0cd3d-929f-7f90-8c6b-d8df64f4a29c.jsonl"
+    },
+    {
+      "call_id": "01a0cd57-449b-7e80-9c41-ca86248d8bd8",
+      "role": "test_designer",
+      "assignment": "/root/cw01_tests",
+      "started_at_utc": "2026-09-23T08:17:23.614Z",
+      "status": "completed",
+      "completed_at_utc": "2026-09-23T08:19:07.709Z",
+      "host_observed_model": "gpt-6-sol",
+      "host_observed_effort": "high",
+      "evidence_ref": "/home/dwchoo/.codex/sessions/2026/09/23/rollout-2026-09-23T16-17-16-01a0cd20-394e-7c81-a544-eb25f8995132.jsonl"
+    },
+    {
+      "call_id": "01a0cd59-16ab-71e2-afc3-77b2be85b252",
+      "role": "worker_senior",
+      "assignment": "/root/cw02_worker",
+      "started_at_utc": "2026-09-23T08:19:22.928Z",
+      "status": "completed",
+      "completed_at_utc": "2026-09-23T08:21:13.635Z",
+      "host_observed_model": "gpt-6-luna",
+      "host_observed_effort": "max",
+      "evidence_ref": "/home/dwchoo/.codex/sessions/2026/09/23/rollout-2026-09-23T16-49-19-01a0cd3d-929f-7f90-8c6b-d8df64f4a29c.jsonl"
+    },
+    {
+      "call_id": "01a0cd5b-6507-7031-8cd9-88b20d9bc700",
+      "role": "reviewer",
+      "assignment": "/root/cw02_review",
+      "started_at_utc": "2026-09-23T08:21:54.062Z",
+      "status": "completed",
+      "completed_at_utc": "2026-09-23T08:23:40.964Z",
+      "host_observed_model": "gpt-6-sol",
+      "host_observed_effort": "high",
+      "evidence_ref": "/home/dwchoo/.codex/sessions/2026/09/23/rollout-2026-09-23T17-21-54-01a0cd5b-64fa-7c31-b801-d2e38a1b78ac.jsonl"
+    },
+    {
+      "call_id": "01a0cd5d-577e-7522-8e8e-49a5683b8209",
+      "role": "test_designer",
+      "assignment": "/root/cw01_tests",
+      "started_at_utc": "2026-09-23T08:24:01.664Z",
+      "status": "completed",
+      "completed_at_utc": "2026-09-23T08:26:08.901Z",
+      "host_observed_model": "gpt-6-sol",
+      "host_observed_effort": "high",
+      "evidence_ref": "/home/dwchoo/.codex/sessions/2026/09/23/rollout-2026-09-23T16-17-16-01a0cd20-394e-7c81-a544-eb25f8995132.jsonl"
+    },
+    {
+      "call_id": "01a0cd5f-86a3-7ae1-beb8-04ed45125fba",
+      "role": "worker_senior",
+      "assignment": "/root/cw02_worker",
+      "started_at_utc": "2026-09-23T08:26:24.817Z",
+      "status": "completed",
+      "completed_at_utc": "2026-09-23T08:34:40.976Z",
+      "host_observed_model": "gpt-6-luna",
+      "host_observed_effort": "max",
+      "evidence_ref": "/home/dwchoo/.codex/sessions/2026/09/23/rollout-2026-09-23T16-49-19-01a0cd3d-929f-7f90-8c6b-d8df64f4a29c.jsonl"
+    },
+    {
+      "call_id": "01a0cd67-fb81-7701-a6e2-aaf16e92710c",
+      "role": "reviewer",
+      "assignment": "/root/cw02_review",
+      "started_at_utc": "2026-09-23T08:35:39.022Z",
+      "status": "completed",
+      "completed_at_utc": "2026-09-23T08:36:48.273Z",
+      "host_observed_model": "gpt-6-sol",
+      "host_observed_effort": "high",
+      "evidence_ref": "/home/dwchoo/.codex/sessions/2026/09/23/rollout-2026-09-23T17-21-54-01a0cd5b-64fa-7c31-b801-d2e38a1b78ac.jsonl"
+    },
+    {
+      "call_id": "01a0cd69-741c-72c2-8497-91319b777326",
+      "role": "test_designer",
+      "assignment": "/root/cw01_tests",
+      "started_at_utc": "2026-09-23T08:37:15.425Z",
+      "status": "completed",
+      "completed_at_utc": "2026-09-23T08:40:13.829Z",
+      "host_observed_model": "gpt-6-sol",
+      "host_observed_effort": "high",
+      "evidence_ref": "/home/dwchoo/.codex/sessions/2026/09/23/rollout-2026-09-23T16-17-16-01a0cd20-394e-7c81-a544-eb25f8995132.jsonl"
+    },
+    {
+      "call_id": "01a0cd6c-7afc-7482-8a8e-ea4e0f0f74ae",
+      "role": "worker_senior",
+      "assignment": "/root/cw02_worker",
+      "started_at_utc": "2026-09-23T08:40:33.791Z",
+      "status": "completed",
+      "completed_at_utc": "2026-09-23T08:46:51.130Z",
+      "host_observed_model": "gpt-6-luna",
+      "host_observed_effort": "max",
+      "evidence_ref": "/home/dwchoo/.codex/sessions/2026/09/23/rollout-2026-09-23T16-49-19-01a0cd3d-929f-7f90-8c6b-d8df64f4a29c.jsonl"
+    },
+    {
+      "call_id": "01a0cd73-2b83-7b60-99c1-5b0d60a4adb8",
+      "role": "reviewer",
+      "assignment": "/root/cw02_review",
+      "started_at_utc": "2026-09-23T08:47:52.209Z",
+      "status": "completed",
+      "completed_at_utc": "2026-09-23T08:49:02.683Z",
+      "host_observed_model": "gpt-6-sol",
+      "host_observed_effort": "high",
+      "evidence_ref": "/home/dwchoo/.codex/sessions/2026/09/23/rollout-2026-09-23T17-21-54-01a0cd5b-64fa-7c31-b801-d2e38a1b78ac.jsonl"
+    },
+    {
+      "call_id": "01a0cd74-cf14-7ee3-bc0e-eb984c431db8",
+      "role": "oracle",
+      "assignment": "/root/cw02_oracle",
+      "started_at_utc": "2026-09-23T08:49:39.613Z",
+      "status": "completed",
+      "completed_at_utc": "2026-09-23T08:51:53.400Z",
+      "host_observed_model": "gpt-6-astra",
+      "host_observed_effort": "high",
+      "evidence_ref": "/home/dwchoo/.codex/sessions/2026/09/23/rollout-2026-09-23T17-49-39-01a0cd74-cf07-7bc0-be3d-1b5c243d87e8.jsonl"
+    },
+    {
+      "call_id": "01a0cd75-44e5-7040-9b9b-f37a901dda5b",
+      "role": "worker_senior",
+      "assignment": "/root/cw03_worker",
+      "started_at_utc": "2026-09-23T08:50:09.783Z",
+      "status": "completed",
+      "completed_at_utc": "2026-09-23T09:09:00.208Z",
+      "host_observed_model": "gpt-6-luna",
+      "host_observed_effort": "max",
+      "evidence_ref": "/home/dwchoo/.codex/sessions/2026/09/23/rollout-2026-09-23T16-39-48-01a0cd34-db58-7303-982a-6c728a6d858e.jsonl"
+    },
+    {
+      "call_id": "01a0cd86-dcc6-7d71-872f-4ca645a4796a",
+      "role": "worker_senior",
+      "assignment": "/root/cw03_worker",
+      "started_at_utc": "2026-09-23T09:09:22.772Z",
+      "status": "completed",
+      "completed_at_utc": "2026-09-23T09:10:19.101Z",
+      "host_observed_model": "gpt-6-luna",
+      "host_observed_effort": "max",
+      "evidence_ref": "/home/dwchoo/.codex/sessions/2026/09/23/rollout-2026-09-23T16-39-48-01a0cd34-db58-7303-982a-6c728a6d858e.jsonl"
+    },
+    {
+      "call_id": "01a0cd88-8977-70c2-9030-649ce71d5f20",
+      "role": "test_designer",
+      "assignment": "/root/cw01_tests",
+      "started_at_utc": "2026-09-23T09:11:12.505Z",
+      "status": "completed",
+      "completed_at_utc": "2026-09-23T09:13:06.026Z",
+      "host_observed_model": "gpt-6-sol",
+      "host_observed_effort": "high",
+      "evidence_ref": "/home/dwchoo/.codex/sessions/2026/09/23/rollout-2026-09-23T16-17-16-01a0cd20-394e-7c81-a544-eb25f8995132.jsonl"
+    },
+    {
+      "call_id": "01a0cd8a-fd14-7e53-82ce-74a76c501086",
+      "role": "oracle",
+      "assignment": "/root/cw03_oracle_2",
+      "started_at_utc": "2026-09-23T09:13:53.180Z",
+      "status": "completed",
+      "completed_at_utc": "2026-09-23T09:16:19.601Z",
+      "host_observed_model": "gpt-6-astra",
+      "host_observed_effort": "high",
+      "evidence_ref": "/home/dwchoo/.codex/sessions/2026/09/23/rollout-2026-09-23T18-13-53-01a0cd8a-fd06-73a3-94db-7f68d24cf8fc.jsonl"
+    },
+    {
+      "call_id": "01a0cd8b-6c77-7632-b675-1d0319ce12e3",
+      "role": "worker_senior",
+      "assignment": "/root/cw04_worker",
+      "started_at_utc": "2026-09-23T09:14:21.689Z",
+      "status": "completed",
+      "completed_at_utc": "2026-09-23T09:39:49.555Z",
+      "host_observed_model": "gpt-6-luna",
+      "host_observed_effort": "max",
+      "evidence_ref": "/home/dwchoo/.codex/sessions/2026/09/23/rollout-2026-09-23T18-14-21-01a0cd8b-6c6a-70b2-ad08-91d5196dc62e.jsonl"
+    },
+    {
+      "call_id": "01a0cda4-406e-7a10-bd06-c2ef86ef6b67",
+      "role": "test_designer",
+      "assignment": "/root/cw01_tests",
+      "started_at_utc": "2026-09-23T09:41:28.817Z",
+      "status": "completed",
+      "completed_at_utc": "2026-09-23T09:46:16.969Z",
+      "host_observed_model": "gpt-6-sol",
+      "host_observed_effort": "high",
+      "evidence_ref": "/home/dwchoo/.codex/sessions/2026/09/23/rollout-2026-09-23T16-17-16-01a0cd20-394e-7c81-a544-eb25f8995132.jsonl"
+    },
+    {
+      "call_id": "01a0cda9-6f84-7e22-89dc-57ae82d2a8a8",
+      "role": "worker_senior",
+      "assignment": "/root/cw04_worker",
+      "started_at_utc": "2026-09-23T09:47:08.553Z",
+      "status": "completed",
+      "completed_at_utc": "2026-09-23T09:51:04.868Z",
+      "host_observed_model": "gpt-6-luna",
+      "host_observed_effort": "max",
+      "evidence_ref": "/home/dwchoo/.codex/sessions/2026/09/23/rollout-2026-09-23T18-14-21-01a0cd8b-6c6a-70b2-ad08-91d5196dc62e.jsonl"
+    },
+    {
+      "call_id": "01a0cdad-960f-79c3-b930-e0d1bf72f5e5",
+      "role": "test_designer",
+      "assignment": "/root/cw01_tests",
+      "started_at_utc": "2026-09-23T09:51:40.576Z",
+      "status": "completed",
+      "completed_at_utc": "2026-09-23T09:52:59.042Z",
+      "host_observed_model": "gpt-6-sol",
+      "host_observed_effort": "high",
+      "evidence_ref": "/home/dwchoo/.codex/sessions/2026/09/23/rollout-2026-09-23T16-17-16-01a0cd20-394e-7c81-a544-eb25f8995132.jsonl"
+    },
+    {
+      "call_id": "01a0cdaf-4703-7500-92f4-17ab77810879",
+      "role": "worker_senior",
+      "assignment": "/root/cw04_worker",
+      "started_at_utc": "2026-09-23T09:53:31.398Z",
+      "status": "completed",
+      "completed_at_utc": "2026-09-23T10:04:45.644Z",
+      "host_observed_model": "gpt-6-luna",
+      "host_observed_effort": "max",
+      "evidence_ref": "/home/dwchoo/.codex/sessions/2026/09/23/rollout-2026-09-23T18-14-21-01a0cd8b-6c6a-70b2-ad08-91d5196dc62e.jsonl"
+    },
+    {
+      "call_id": "01a0cdba-78bb-7f52-9bc7-e9f60be4e7bb",
+      "role": "reviewer",
+      "assignment": "/root/cw04_review",
+      "started_at_utc": "2026-09-23T10:05:45.021Z",
+      "status": "completed",
+      "completed_at_utc": "2026-09-23T10:07:57.776Z",
+      "host_observed_model": "gpt-6-sol",
+      "host_observed_effort": "high",
+      "evidence_ref": "/home/dwchoo/.codex/sessions/2026/09/23/rollout-2026-09-23T19-05-45-01a0cdba-78aa-77c3-87a4-96e6ce6a1104.jsonl"
+    },
+    {
+      "call_id": "01a0cdbc-ca52-7441-ba96-c58a3c1e226c",
+      "role": "oracle_senior",
+      "assignment": "/root/cw04_oracle",
+      "started_at_utc": "2026-09-23T10:08:16.980Z",
+      "status": "completed",
+      "completed_at_utc": "2026-09-23T10:16:19.617Z",
+      "host_observed_model": "gpt-6-astra",
+      "host_observed_effort": "max",
+      "evidence_ref": "/home/dwchoo/.codex/sessions/2026/09/23/rollout-2026-09-23T19-08-16-01a0cdbc-ca42-7281-9132-f52d5df5ec76.jsonl"
+    },
+    {
+      "call_id": "01a0cdca-a2b5-70e3-bdfd-b29af86a9ec2",
+      "role": "test_designer",
+      "assignment": "/root/cw01_tests",
+      "started_at_utc": "2026-09-23T10:23:24.357Z",
+      "status": "completed",
+      "completed_at_utc": "2026-09-23T10:28:09.702Z",
+      "host_observed_model": "gpt-6-sol",
+      "host_observed_effort": "high",
+      "evidence_ref": "/home/dwchoo/.codex/sessions/2026/09/23/rollout-2026-09-23T16-17-16-01a0cd20-394e-7c81-a544-eb25f8995132.jsonl"
+    },
+    {
+      "call_id": "01a0cdd0-8f5f-76d0-a861-6df21ed27857",
+      "role": "worker_senior",
+      "assignment": "/root/cw02_worker",
+      "started_at_utc": "2026-09-23T10:29:52.616Z",
+      "status": "completed",
+      "completed_at_utc": "2026-09-23T10:45:16.043Z",
+      "host_observed_model": "gpt-6-luna",
+      "host_observed_effort": "max",
+      "evidence_ref": "/home/dwchoo/.codex/sessions/2026/09/23/rollout-2026-09-23T16-49-19-01a0cd3d-929f-7f90-8c6b-d8df64f4a29c.jsonl"
+    },
+    {
+      "call_id": "01a0cddf-c98d-7c61-b1af-c7d0a8329d3f",
+      "role": "test_designer",
+      "assignment": "/root/cw01_tests",
+      "started_at_utc": "2026-09-23T10:46:30.544Z",
+      "status": "completed",
+      "completed_at_utc": "2026-09-23T10:48:06.856Z",
+      "host_observed_model": "gpt-6-sol",
+      "host_observed_effort": "high",
+      "evidence_ref": "/home/dwchoo/.codex/sessions/2026/09/23/rollout-2026-09-23T16-17-16-01a0cd20-394e-7c81-a544-eb25f8995132.jsonl"
+    },
+    {
+      "call_id": "current-cw03-handoff-tests-1",
+      "role": "test_designer",
+      "assignment": "/root/cw03_handoff_tests",
+      "purpose": "CW-03 C-D48 independent test correction",
+      "started_at_utc": "2026-09-23T12:13:13.377987+00:00",
+      "status": "completed",
+      "host_observed_model": "unverified",
+      "host_observed_effort": "unverified",
+      "evidence_ref": "tests/gates/g2_shell/test_g2_shell.py; Root rerun 20 tests 10 expected failures exit 1",
+      "completed_at_utc": "2026-09-23T12:17:40.718869+00:00"
+    },
+    {
+      "call_id": "current-cw03-handoff-worker-1",
+      "role": "worker_senior",
+      "assignment": "/root/cw03_handoff_worker",
+      "purpose": "CW-03 C-D48 production correction",
+      "started_at_utc": "2026-09-23T12:18:05.410040+00:00",
+      "status": "completed",
+      "host_observed_model": "unverified",
+      "host_observed_effort": "unverified",
+      "evidence_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw03-handoff-frozen-candidate.json",
+      "completed_at_utc": "2026-09-23T12:22:33.114151+00:00"
+    },
+    {
+      "call_id": "current-cw03-handoff-review-1",
+      "role": "reviewer",
+      "assignment": "/root/cw03_handoff_review",
+      "purpose": "CW-03 C-D48 frozen correction review",
+      "started_at_utc": "2026-09-23T12:23:00.405766+00:00",
+      "status": "completed",
+      "host_observed_model": "unverified",
+      "host_observed_effort": "unverified",
+      "evidence_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw03-handoff-review-1.json",
+      "completed_at_utc": "2026-09-23T12:27:34.892004+00:00"
+    },
+    {
+      "call_id": "current-cw03-prompt-race-tests-1",
+      "role": "test_designer",
+      "assignment": "/root/cw03_prompt_race_tests",
+      "purpose": "CW-03 reviewer-discovered prompt hook job race regression",
+      "started_at_utc": "2026-09-23T12:27:51.759857+00:00",
+      "status": "completed",
+      "host_observed_model": "unverified",
+      "host_observed_effort": "unverified",
+      "evidence_ref": "tests/gates/g2_shell/test_g2_shell.py:215; 21 tests, new Bash/dash subtests red",
+      "completed_at_utc": "2026-09-23T12:29:49.914938+00:00"
+    },
+    {
+      "call_id": "current-cw03-prompt-race-fix-1",
+      "role": "worker_senior",
+      "assignment": "/root/cw03_prompt_race_fix",
+      "purpose": "CW-03 prompt hook job race production correction",
+      "started_at_utc": "2026-09-23T12:30:07.015666+00:00",
+      "status": "completed",
+      "host_observed_model": "unverified",
+      "host_observed_effort": "unverified",
+      "evidence_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw03-handoff-frozen-candidate-2.json",
+      "completed_at_utc": "2026-09-23T12:33:43.871384+00:00"
+    },
+    {
+      "call_id": "current-cw03-handoff-delta-review-1",
+      "role": "reviewer",
+      "assignment": "/root/cw03_handoff_delta_review",
+      "purpose": "CW-03 C-D48 prompt hook correction delta review",
+      "started_at_utc": "2026-09-23T12:34:00.726870+00:00",
+      "status": "completed",
+      "host_observed_model": "unverified",
+      "host_observed_effort": "unverified",
+      "evidence_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw03-handoff-review-2.json",
+      "completed_at_utc": "2026-09-23T12:37:12.982512+00:00"
+    },
+    {
+      "call_id": "current-cw04-preexec-probe-1",
+      "role": "worker_senior",
+      "assignment": "/root/cw04_preexec_probe",
+      "purpose": "CW-04 real OMP same-batch mutable A/B pause feasibility",
+      "started_at_utc": "2026-09-23T12:37:48.877523+00:00",
+      "status": "completed",
+      "host_observed_model": "unverified",
+      "host_observed_effort": "unverified",
+      "evidence_ref": ".workflow/core-workbench/runs/implement-p2-20260923/g3-preexec-wrapper-resume-check.json",
+      "completed_at_utc": "2026-09-23T12:46:00.121402+00:00"
+    },
+    {
+      "call_id": "current-cw04-same-batch-probe-1",
+      "role": "worker_senior",
+      "assignment": "/root/cw04_same_batch_probe",
+      "purpose": "CW-04 deterministic actual OMP same-batch A/B pause feasibility",
+      "started_at_utc": "2026-09-23T12:46:21.605370+00:00",
+      "status": "completed",
+      "host_observed_model": "unverified",
+      "host_observed_effort": "unverified",
+      "evidence_ref": ".workflow/core-workbench/runs/implement-p2-20260923/g3-same-batch-resume-check.json",
+      "completed_at_utc": "2026-09-23T12:53:36.477214+00:00"
+    },
+    {
+      "call_id": "current-cw03-function-redefine-tests-1",
+      "role": "test_designer",
+      "assignment": "/root/cw03_function_redefine_tests",
+      "purpose": "CW-03 C-D48 real-shell function redefinition race regression",
+      "started_at_utc": "2026-09-23T13:01:41.610336+00:00",
+      "status": "completed",
+      "host_observed_model": "unverified",
+      "host_observed_effort": "unverified",
+      "completed_at_utc": "2026-09-23T13:03:34.053011+00:00",
+      "evidence_ref": "tests/gates/g2_shell/test_g2_shell.py:255; 22 tests, Bash/dash new subtests red; SHA a11b93825b81e365210429b7f3bacee4756d46a1ceeb0e2f7af163fc69d7fe83"
+    },
+    {
+      "call_id": "current-cw03-function-redefine-fix-1",
+      "role": "worker_senior",
+      "assignment": "/root/cw03_function_redefine_fix",
+      "purpose": "CW-03 third approved bounded production correction to prompt function redefinition race",
+      "started_at_utc": "2026-09-23T13:03:34.053026+00:00",
+      "status": "completed",
+      "host_observed_model": "unverified",
+      "host_observed_effort": "unverified",
+      "completed_at_utc": "2026-09-23T13:12:33.816436+00:00",
+      "evidence_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw03-function-redefine-frozen-candidate.json"
+    },
+    {
+      "call_id": "current-cw03-function-redefine-review-1",
+      "role": "reviewer",
+      "assignment": "/root/cw03_function_redefine_review",
+      "purpose": "CW-03 third correction frozen delta review",
+      "started_at_utc": "2026-09-23T13:12:33.816449+00:00",
+      "status": "completed",
+      "host_observed_model": "unverified",
+      "host_observed_effort": "unverified",
+      "completed_at_utc": "2026-09-23T13:17:02.025846+00:00",
+      "evidence_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw03-function-redefine-review.json"
+    },
+    {
+      "call_id": "current-cw04-product-tests-1",
+      "role": "test_designer",
+      "assignment": "/root/cw04_product_tests",
+      "purpose": "CW-04 independent test for same-batch pre-exec pause and reply correlation",
+      "started_at_utc": "2026-09-23T13:17:23.044429+00:00",
+      "status": "completed",
+      "host_observed_model": "unverified",
+      "host_observed_effort": "unverified",
+      "completed_at_utc": "2026-09-23T13:20:23.420561+00:00",
+      "evidence_ref": "tests/gates/g3_omp/bridge.test.ts; 8 tests, 6 pass/2 expected fail; SHA a13250c71332d191a8b5ca0213472dd43da8afe7b1cf7768086f803a651a1f9c"
+    },
+    {
+      "call_id": "current-cw04-product-fix-1",
+      "role": "worker_senior",
+      "assignment": "/root/cw04_product_fix",
+      "purpose": "CW-04 bridge same-name mutable wrapper and reply linkage correction",
+      "started_at_utc": "2026-09-23T13:20:23.420579+00:00",
+      "status": "interrupted_by_user",
+      "host_observed_model": "unverified",
+      "host_observed_effort": "unverified",
+      "completed_at_utc": "2026-09-23T13:24:14.727915+00:00",
+      "evidence_ref": "CW-04 worker returned without modifying omp_bridge/g3/bridge.ts or running tests; product SHA 20100450e8aace5185b1f084e5b01af340bcf4cc202dd86e64dcca85f4814474"
+    },
+    {
+      "call_id": "resume-cw04-product-fix-1",
+      "role": "worker_senior",
+      "assignment": "/root/cw04_product_fix_resume",
+      "purpose": "CW-04 same-batch pre-exec wrapper and reply linkage product correction",
+      "started_at_utc": "2026-09-23T13:30:25.884974+00:00",
+      "status": "completed",
+      "host_observed_model": "unverified",
+      "host_observed_effort": "unverified",
+      "evidence_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-resume-worker-candidate.json",
+      "completed_at_utc": "2026-09-23T13:35:45.403143+00:00"
+    },
+    {
+      "call_id": "resume-cw04-independent-tests-1",
+      "role": "test_designer",
+      "assignment": "/root/cw04_resume_tests",
+      "purpose": "CW-04 independent coverage evaluation after wrapper correction",
+      "started_at_utc": "2026-09-23T13:35:59.464122+00:00",
+      "status": "completed",
+      "host_observed_model": "unverified",
+      "host_observed_effort": "unverified",
+      "evidence_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-resume-independent-tests.json",
+      "completed_at_utc": "2026-09-23T13:44:06.734759+00:00"
+    },
+    {
+      "call_id": "resume-cw04-mutable-path-fix-1",
+      "role": "worker_senior",
+      "assignment": "/root/cw04_mutable_path_fix",
+      "purpose": "CW-04 edit/bash pre-exec pause and shared mutable queue correction",
+      "started_at_utc": "2026-09-23T13:44:27.767363+00:00",
+      "status": "completed_blocked",
+      "host_observed_model": "unverified",
+      "host_observed_effort": "unverified",
+      "evidence_ref": "worker report: OMP public API lacks native bash approval policy introspection; no product edit",
+      "completed_at_utc": "2026-09-23T13:48:47.713726+00:00"
+    },
+    {
+      "call_id": "resume-cw04-api-source-followup-1",
+      "role": "worker_senior",
+      "assignment": "/root/cw04_mutable_path_fix",
+      "purpose": "read-only exact OMP v18.2.10 source citation for feasibility audit",
+      "started_at_utc": "2026-09-23T13:48:47.713726+00:00",
+      "status": "completed",
+      "host_observed_model": "unverified",
+      "host_observed_effort": "unverified",
+      "evidence_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-api-feasibility-audit.json",
+      "completed_at_utc": "2026-09-23T13:49:55.148538+00:00"
+    },
+    {
+      "call_id": "resume-cw03-fourth-attempt-tests-1",
+      "role": "test_designer",
+      "assignment": "/root/cw03_fourth_tests",
+      "purpose": "CW-03 independent real Bash/dash regression for three review-confirmed safety failures",
+      "started_at_utc": "2026-09-23T13:49:55.148538+00:00",
+      "status": "completed",
+      "host_observed_model": "unverified",
+      "host_observed_effort": "unverified",
+      "evidence_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw03-fourth-independent-tests.json",
+      "completed_at_utc": "2026-09-23T13:54:13.923530+00:00"
+    },
+    {
+      "call_id": "resume-cw03-fourth-product-fix-1",
+      "role": "worker_senior",
+      "assignment": "/root/cw03_fourth_fix",
+      "purpose": "CW-03 fourth user-authorized bounded production correction for three real shell safety paths",
+      "started_at_utc": "2026-09-23T13:54:13.923530+00:00",
+      "status": "completed_blocked",
+      "host_observed_model": "unverified",
+      "host_observed_effort": "unverified",
+      "evidence_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw03-fourth-blocked-candidate.json",
+      "completed_at_utc": "2026-09-23T13:59:49.757978+00:00"
+    },
+    {
+      "call_id": "resume-cw03-post-ready-regression-1",
+      "role": "test_designer",
+      "assignment": "/root/cw03_post_ready_test",
+      "purpose": "independent regression for fourth-attempt live shell counterexample",
+      "started_at_utc": "2026-09-23T13:59:49.757978+00:00",
+      "status": "completed",
+      "host_observed_model": "unverified",
+      "host_observed_effort": "unverified",
+      "evidence_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw03-post-ready-independent-test.json",
+      "completed_at_utc": "2026-09-23T14:02:33.168127+00:00"
+    },
+    {
+      "call_id": "resume-cw02-live-evidence-1",
+      "role": "worker_senior",
+      "assignment": "/root/cw02_live_evidence",
+      "purpose": "CW-02 G1 actual OMP TUI approval/tool output and PTY resize/query evidence",
+      "started_at_utc": "2026-09-23T14:04:47.581921+00:00",
+      "status": "completed_inconclusive",
+      "host_observed_model": "unverified",
+      "host_observed_effort": "unverified",
+      "evidence_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-live-runtime-resume-result.json",
+      "completed_at_utc": "2026-09-23T14:19:55.660504+00:00"
+    },
+    {
+      "call_id": "cw03-safety-redesign-oracle-1",
+      "role": "oracle_senior",
+      "assignment": "/root/cw03_safety_redesign_oracle",
+      "ticket": "CW-03",
+      "purpose": "diagnose whether same-shell Bash/dash automatic dispatch can be proven safe after user handoff under arbitrary prompt hook/function changes; propose smallest discriminating design",
+      "started_at_utc": "2026-09-23T14:30:42.942099+00:00",
+      "status": "completed_advisory",
+      "configured_model": "gpt-6-astra",
+      "configured_effort": "max",
+      "host_observed_model": "unverified",
+      "host_observed_effort": "unverified",
+      "evidence_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw03-safety-redesign-oracle.json",
+      "completed_at_utc": "2026-09-23T14:40:53.570223+00:00"
+    },
+    {
+      "call_id": "pause-doc-impact",
+      "role": "code_explorer",
+      "assignment": "/root/pause_doc_impact",
+      "purpose": "Map exact BRIEF/SPEC/PLAN/ticket/DECISIONS/OPERATING-CONTRACT/gate changes from new user pause/worker decision; no edits",
+      "started_at_utc": "2026-09-23T14:43:14.892606+00:00",
+      "status": "completed_advisory",
+      "configured_model": "gpt-6-luna",
+      "configured_effort": "medium",
+      "host_observed_model": "unverified",
+      "host_observed_effort": "unverified",
+      "evidence_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cd49-policy-approval.json",
+      "completed_at_utc": "2026-09-23T14:55:06.067585+00:00"
+    },
+    {
+      "call_id": "omp-abort-api",
+      "role": "code_explorer",
+      "assignment": "/root/omp_abort_api",
+      "purpose": "Identify OMP 18.2.10 public API for aborting active manager turn, real live probe route and risks; no edits",
+      "started_at_utc": "2026-09-23T14:43:14.892606+00:00",
+      "status": "completed_advisory",
+      "configured_model": "gpt-6-luna",
+      "configured_effort": "medium",
+      "host_observed_model": "unverified",
+      "host_observed_effort": "unverified",
+      "evidence_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cd49-policy-approval.json",
+      "completed_at_utc": "2026-09-23T14:55:06.067585+00:00"
+    },
+    {
+      "call_id": "cw04-cd49-independent-tests",
+      "role": "test_designer",
+      "assignment": "/root/cw04_cd49_tests",
+      "purpose": "Replace obsolete CW04 A/B pause tests with C-D49 abort request/confirm/unknown/hold/resume tests; test-only; run red; no product code",
+      "started_at_utc": "2026-09-23T14:55:48.198929+00:00",
+      "status": "completed_red",
+      "configured_model": "gpt-6-sol",
+      "configured_effort": "high",
+      "host_observed_model": "unverified",
+      "host_observed_effort": "unverified",
+      "evidence_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-worker-base.json",
+      "completed_at_utc": "2026-09-23T15:00:02.590836+00:00"
+    },
+    {
+      "call_id": "cw04-cd49-worker-1",
+      "role": "worker_senior",
+      "assignment": "/root/cw04_cd49_worker",
+      "purpose": "Bounded C-D49 bridge + Python delivery pause implementation against independent red tests; no docs/tests edits",
+      "started_at_utc": "2026-09-23T15:00:02.590836+00:00",
+      "status": "candidate_ready",
+      "configured_model": "gpt-6-sol",
+      "configured_effort": "high",
+      "host_observed_model": "unverified",
+      "host_observed_effort": "unverified",
+      "evidence_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-worker-candidate.json",
+      "completed_at_utc": "2026-09-23T15:05:28.298721+00:00"
+    },
+    {
+      "call_id": "cw04-cd49-live-tests",
+      "role": "test_designer",
+      "assignment": "/root/cw04_cd49_tests",
+      "purpose": "Independent actual OMP 18.2.10 scripted-provider abort-turn runtime probe against product bridge; test-only",
+      "started_at_utc": "2026-09-23T15:05:28.298721+00:00",
+      "status": "completed_partial_runtime",
+      "configured_model": "gpt-6-sol",
+      "configured_effort": "high",
+      "host_observed_model": "unverified",
+      "host_observed_effort": "unverified",
+      "evidence_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-live-test-candidate.json",
+      "completed_at_utc": "2026-09-23T15:11:25.413010+00:00"
+    },
+    {
+      "call_id": "cw04-cd49-early-review",
+      "role": "reviewer",
+      "assignment": "/root/cw04_cd49_review",
+      "purpose": "Fresh read-only review of frozen C-D49 pause bridge partial candidate and independent tests; classify defects and G3 unknowns; not final gate approval",
+      "started_at_utc": "2026-09-23T15:12:16.436675+00:00",
+      "status": "completed_findings",
+      "configured_model": "gpt-6-sol",
+      "configured_effort": "high",
+      "host_observed_model": "unverified",
+      "host_observed_effort": "unverified",
+      "evidence_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-early-review.json",
+      "completed_at_utc": "2026-09-23T15:15:27.138150+00:00"
+    },
+    {
+      "call_id": "cw04-cd49-delta-tests",
+      "role": "test_designer",
+      "assignment": "/root/cw04_cd49_tests",
+      "purpose": "Independent red regression tests for reviewer findings: session switch unknown state, pre-agent-start abort, tool end unknown result, resume requested and delivery race",
+      "started_at_utc": "2026-09-23T15:15:27.138150+00:00",
+      "status": "completed_red",
+      "configured_model": "gpt-6-sol",
+      "configured_effort": "high",
+      "host_observed_model": "unverified",
+      "host_observed_effort": "unverified",
+      "evidence_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-delta-red.json",
+      "completed_at_utc": "2026-09-23T15:17:51.875459+00:00"
+    },
+    {
+      "call_id": "cw04-cd49-correction-1",
+      "role": "worker_senior",
+      "assignment": "/root/cw04_cd49_worker",
+      "purpose": "Bounded correction of five independent reviewer-derived C-D49 red races in bridge.ts only",
+      "started_at_utc": "2026-09-23T15:17:51.875459+00:00",
+      "status": "candidate_ready",
+      "configured_model": "gpt-6-sol",
+      "configured_effort": "high",
+      "host_observed_model": "unverified",
+      "host_observed_effort": "unverified",
+      "evidence_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-correction-candidate.json",
+      "completed_at_utc": "2026-09-23T15:20:14.044194+00:00"
+    },
+    {
+      "call_id": "cw04-cd49-delta-review",
+      "role": "reviewer",
+      "assignment": "/root/cw04_cd49_review",
+      "purpose": "Read-only delta review of corrected bridge.ts against five prior findings and independent tests; G3 remains partial",
+      "started_at_utc": "2026-09-23T15:20:59.959492+00:00",
+      "status": "completed_finding",
+      "configured_model": "gpt-6-sol",
+      "configured_effort": "high",
+      "host_observed_model": "unverified",
+      "host_observed_effort": "unverified",
+      "evidence_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-delta-review.json",
+      "completed_at_utc": "2026-09-23T15:22:35.535467+00:00"
+    },
+    {
+      "call_id": "cw04-cd49-resume-unknown-test",
+      "role": "test_designer",
+      "assignment": "/root/cw04_cd49_tests",
+      "purpose": "Independent red test for unknown tool/prior-session evidence preserved across explicit resume",
+      "started_at_utc": "2026-09-23T15:22:35.535467+00:00",
+      "status": "completed_red",
+      "configured_model": "gpt-6-sol",
+      "configured_effort": "high",
+      "host_observed_model": "unverified",
+      "host_observed_effort": "unverified",
+      "evidence_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-resume-unknown-red.json",
+      "completed_at_utc": "2026-09-23T15:24:31.644702+00:00"
+    },
+    {
+      "call_id": "cw04-cd49-resume-unknown-fix",
+      "role": "worker_senior",
+      "assignment": "/root/cw04_cd49_worker",
+      "purpose": "Minimal bridge.ts fix to preserve unknown tool/prior-session evidence across resume",
+      "started_at_utc": "2026-09-23T15:24:31.644702+00:00",
+      "status": "candidate_ready",
+      "configured_model": "gpt-6-sol",
+      "configured_effort": "high",
+      "host_observed_model": "unverified",
+      "host_observed_effort": "unverified",
+      "evidence_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-final-partial-candidate.json",
+      "completed_at_utc": "2026-09-23T15:25:28.404104+00:00"
+    },
+    {
+      "call_id": "cw04-cd49-final-delta-review",
+      "role": "reviewer",
+      "assignment": "/root/cw04_cd49_review",
+      "purpose": "Read-only focused delta review of resume uncertainty retention, frozen partial CW04 candidate",
+      "started_at_utc": "2026-09-23T15:25:45.468906+00:00",
+      "status": "completed_no_new_delta_finding",
+      "configured_model": "gpt-6-sol",
+      "configured_effort": "high",
+      "host_observed_model": "unverified",
+      "host_observed_effort": "unverified",
+      "evidence_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-final-delta-review.json",
+      "completed_at_utc": "2026-09-23T15:27:09.083576+00:00"
+    },
+    {
+      "call_id": "cw04-cd49-rpc-live-probe",
+      "role": "test_designer",
+      "assignment": "/root/cw04_cd49_tests",
+      "purpose": "Bounded actual OMP 18.2.10 persistent RPC-mode pause/resume and two-process bridge feasibility probe; test-only",
+      "started_at_utc": "2026-09-23T15:27:09.083576+00:00",
+      "status": "completed_partial_runtime",
+      "configured_model": "gpt-6-sol",
+      "configured_effort": "high",
+      "host_observed_model": "unverified",
+      "host_observed_effort": "unverified",
+      "evidence_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-rpc-live-result.json",
+      "completed_at_utc": "2026-09-23T15:34:13.021145+00:00"
+    },
+    {
+      "call_id": "cw04-cd49-rpc-probe-review",
+      "role": "reviewer",
+      "assignment": "/root/cw04_cd49_review",
+      "purpose": "Read-only focused review of frozen actual OMP RPC probe and evidence, check false positives and process cleanup; no product/doc edits",
+      "started_at_utc": "2026-09-23T15:34:13.021145+00:00",
+      "status": "completed_findings",
+      "configured_model": "gpt-6-sol",
+      "configured_effort": "high",
+      "host_observed_model": "unverified",
+      "host_observed_effort": "unverified",
+      "evidence_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-rpc-probe-review.json",
+      "completed_at_utc": "2026-09-23T15:35:41.843575+00:00"
+    },
+    {
+      "call_id": "cw04-cd49-rpc-probe-test-fix",
+      "role": "test_designer",
+      "assignment": "/root/cw04_cd49_tests",
+      "purpose": "Fix four independent review findings in RPC probe test only, rerun --pair once and syntax; no product/docs/ledger edits",
+      "started_at_utc": "2026-09-23T15:35:41.843575+00:00",
+      "status": "completed_green",
+      "configured_model": "gpt-6-sol",
+      "configured_effort": "high",
+      "host_observed_model": "unverified",
+      "host_observed_effort": "unverified",
+      "evidence_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-rpc-final-candidate.json",
+      "completed_at_utc": "2026-09-23T15:37:57.223769+00:00"
+    },
+    {
+      "call_id": "cw04-cd49-rpc-probe-delta-review",
+      "role": "reviewer",
+      "assignment": "/root/cw04_cd49_review",
+      "purpose": "Read-only delta review of four corrected RPC harness findings against frozen final candidate",
+      "started_at_utc": "2026-09-23T15:37:57.223769+00:00",
+      "status": "completed_no_new_delta_finding",
+      "configured_model": "gpt-6-sol",
+      "configured_effort": "high",
+      "host_observed_model": "unverified",
+      "host_observed_effort": "unverified",
+      "evidence_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-rpc-probe-delta-review.json",
+      "completed_at_utc": "2026-09-23T15:41:56.485449+00:00"
+    },
+    {
+      "call_id": "cw04-cd49-reconcile-harness",
+      "role": "test_designer",
+      "assignment": "/root/cw04_cd49_tests",
+      "purpose": "Bounded test-only actual OMP RPC gate harness state/approval reconciliation before explicit resume, with negative test",
+      "started_at_utc": "2026-09-23T15:42:51.612432+00:00",
+      "status": "completed_partial_runtime",
+      "configured_model": "gpt-6-sol",
+      "configured_effort": "high",
+      "host_observed_model": "unverified",
+      "host_observed_effort": "unverified",
+      "evidence_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-reconcile-live-result.json",
+      "completed_at_utc": "2026-09-23T15:46:53.419412+00:00"
+    },
+    {
+      "call_id": "cw04-cd49-reconcile-review",
+      "role": "reviewer",
+      "assignment": "/root/cw04_cd49_review",
+      "purpose": "Read-only focused review of frozen test-owned reconciliation harness and actual OMP evidence, no product/docs edits",
+      "started_at_utc": "2026-09-23T15:46:53.419412+00:00",
+      "status": "completed_finding",
+      "configured_model": "gpt-6-sol",
+      "configured_effort": "high",
+      "host_observed_model": "unverified",
+      "host_observed_effort": "unverified",
+      "evidence_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-reconcile-review.json",
+      "completed_at_utc": "2026-09-23T15:48:47.530095+00:00"
+    },
+    {
+      "call_id": "cw04-cd49-reconcile-scope-fix",
+      "role": "test_designer",
+      "assignment": "/root/cw04_cd49_tests",
+      "purpose": "Test-only correction for out-of-scope file/symlink approval false-positive and persisted negative file/process checks",
+      "started_at_utc": "2026-09-23T15:48:47.530095+00:00",
+      "status": "completed_green",
+      "configured_model": "gpt-6-sol",
+      "configured_effort": "high",
+      "host_observed_model": "unverified",
+      "host_observed_effort": "unverified",
+      "evidence_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-reconcile-final-result.json",
+      "completed_at_utc": "2026-09-23T15:51:11.121137+00:00"
+    },
+    {
+      "call_id": "cw04-cd49-reconcile-delta-review",
+      "role": "reviewer",
+      "assignment": "/root/cw04_cd49_review",
+      "purpose": "Read-only delta review of G3 test harness approval file scope false-positive correction",
+      "started_at_utc": "2026-09-23T15:51:11.121137+00:00",
+      "status": "completed_no_new_delta_finding",
+      "configured_model": "gpt-6-sol",
+      "configured_effort": "high",
+      "host_observed_model": "unverified",
+      "host_observed_effort": "unverified",
+      "evidence_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-reconcile-delta-review.json",
+      "completed_at_utc": "2026-09-23T15:53:06.221016+00:00"
+    },
+    {
+      "call_id": "cw04-cd49-pair-semantics-test",
+      "role": "test_designer",
+      "assignment": "/root/cw04_cd49_tests",
+      "purpose": "Bounded actual OMP RPC pair provider-input semantic linkage check; test-only and no response body retention",
+      "started_at_utc": "2026-09-23T15:53:56.087754+00:00",
+      "status": "completed_partial_runtime",
+      "configured_model": "gpt-6-sol",
+      "configured_effort": "high",
+      "host_observed_model": "unverified",
+      "host_observed_effort": "unverified",
+      "evidence_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-pair-semantics-result.json",
+      "completed_at_utc": "2026-09-23T15:56:47.541542+00:00"
+    },
+    {
+      "call_id": "cw04-cd49-pair-semantics-review",
+      "role": "reviewer",
+      "assignment": "/root/cw04_cd49_review",
+      "purpose": "Read-only focused review of new actual provider input semantic assertions and privacy bounds",
+      "started_at_utc": "2026-09-23T15:56:47.541542+00:00",
+      "status": "completed_no_finding_in_scope",
+      "configured_model": "gpt-6-sol",
+      "configured_effort": "high",
+      "host_observed_model": "unverified",
+      "host_observed_effort": "unverified",
+      "evidence_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-pair-semantics-review.json",
+      "completed_at_utc": "2026-09-23T15:58:50.243760+00:00"
+    },
+    {
+      "call_id": "cw04-cd49-live-contention-probe",
+      "role": "test_designer",
+      "assignment": "/root/cw04_cd49_tests",
+      "purpose": "Bounded actual OMP 18.2.10 RPC busy/approval contention and optionally reconnect probe; test-only",
+      "started_at_utc": "2026-09-23T15:58:50.243760+00:00",
+      "status": "completed_partial_runtime",
+      "configured_model": "gpt-6-sol",
+      "configured_effort": "high",
+      "host_observed_model": "unverified",
+      "host_observed_effort": "unverified",
+      "evidence_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-contention-result.json",
+      "completed_at_utc": "2026-09-23T16:01:49.287604+00:00"
+    },
+    {
+      "call_id": "cw04-cd49-contention-review",
+      "role": "reviewer",
+      "assignment": "/root/cw04_cd49_review",
+      "purpose": "Read-only focused review of frozen actual OMP busy/native approval contention probe",
+      "started_at_utc": "2026-09-23T16:01:49.287604+00:00",
+      "status": "completed_findings",
+      "configured_model": "gpt-6-sol",
+      "configured_effort": "high",
+      "host_observed_model": "unverified",
+      "host_observed_effort": "unverified",
+      "evidence_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-contention-review.json",
+      "completed_at_utc": "2026-09-23T16:03:25.498831+00:00"
+    },
+    {
+      "call_id": "cw04-cd49-contention-test-fix",
+      "role": "test_designer",
+      "assignment": "/root/cw04_cd49_tests",
+      "purpose": "Test-only busy live-state and OMP normal-exit pass criteria correction, native approval end-state check",
+      "started_at_utc": "2026-09-23T16:03:25.498831+00:00",
+      "status": "completed_green",
+      "configured_model": "gpt-6-sol",
+      "configured_effort": "high",
+      "host_observed_model": "unverified",
+      "host_observed_effort": "unverified",
+      "evidence_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-contention-final-result.json",
+      "completed_at_utc": "2026-09-23T16:05:14.303088+00:00"
+    },
+    {
+      "call_id": "cw04-cd49-contention-delta-review",
+      "role": "reviewer",
+      "assignment": "/root/cw04_cd49_review",
+      "purpose": "Read-only delta review of busy/approval live-state and cleanup pass criteria",
+      "started_at_utc": "2026-09-23T16:05:14.303088+00:00",
+      "status": "completed_no_new_delta_finding",
+      "configured_model": "gpt-6-sol",
+      "configured_effort": "high",
+      "host_observed_model": "unverified",
+      "host_observed_effort": "unverified",
+      "evidence_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-contention-delta-review.json",
+      "completed_at_utc": "2026-09-23T16:06:20.086682+00:00"
+    },
+    {
+      "call_id": "cw04-cd49-reconnect-ackloss-probe",
+      "role": "test_designer",
+      "assignment": "/root/cw04_cd49_tests",
+      "purpose": "Bounded actual OMP RPC ACK-loss then socket reconnect duplicate-ID no-replay feasibility probe; test-only",
+      "started_at_utc": "2026-09-23T16:06:20.086682+00:00",
+      "status": "completed_partial_runtime",
+      "configured_model": "gpt-6-sol",
+      "configured_effort": "high",
+      "host_observed_model": "unverified",
+      "host_observed_effort": "unverified",
+      "evidence_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-reconnect-result.json",
+      "completed_at_utc": "2026-09-23T16:08:55.993419+00:00"
+    },
+    {
+      "call_id": "cw04-cd49-reconnect-review",
+      "role": "reviewer",
+      "assignment": "/root/cw04_cd49_review",
+      "purpose": "Read-only focused review of actual OMP ACK loss/reconnect duplicate-ID no-replay probe",
+      "started_at_utc": "2026-09-23T16:08:55.993419+00:00",
+      "status": "completed_findings",
+      "configured_model": "gpt-6-sol",
+      "configured_effort": "high",
+      "host_observed_model": "unverified",
+      "host_observed_effort": "unverified",
+      "evidence_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-reconnect-review.json",
+      "completed_at_utc": "2026-09-23T16:10:12.885885+00:00"
+    },
+    {
+      "call_id": "cw04-cd49-reconnect-test-fix",
+      "role": "test_designer",
+      "assignment": "/root/cw04_cd49_tests",
+      "purpose": "Test-only host ACK receipt/drop metadata and exact accepted-duplicate retry predicate correction",
+      "started_at_utc": "2026-09-23T16:10:12.885885+00:00",
+      "status": "completed_green",
+      "configured_model": "gpt-6-sol",
+      "configured_effort": "high",
+      "host_observed_model": "unverified",
+      "host_observed_effort": "unverified",
+      "evidence_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-reconnect-final-result.json",
+      "completed_at_utc": "2026-09-23T16:12:07.019106+00:00"
+    },
+    {
+      "call_id": "cw04-cd49-reconnect-delta-review",
+      "role": "reviewer",
+      "assignment": "/root/cw04_cd49_review",
+      "purpose": "Read-only delta review of actual ACK receipt/drop metadata and strict duplicate predicate",
+      "started_at_utc": "2026-09-23T16:12:07.019106+00:00",
+      "status": "completed_no_new_delta_finding",
+      "configured_model": "gpt-6-sol",
+      "configured_effort": "high",
+      "host_observed_model": "unverified",
+      "host_observed_effort": "unverified",
+      "evidence_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-reconnect-delta-review.json",
+      "completed_at_utc": "2026-09-23T16:13:45.225137+00:00"
+    }
+  ],
+  "current_snapshot": ".workflow/core-workbench/runs/implement-p2-20260923/commit-checkpoint-20260924-090050.json",
+  "pending_user_decisions": [],
+  "handoff_validation": {
+    "command": "python /home/dwchoo/.codex/skills/session-handoff/scripts/validate_handoff.py .workflow/core-workbench/runs/implement-p2-20260923/HANDOFF-2026-09-23-2225.md",
+    "exit_code": 0,
+    "quality_score": 100,
+    "secret_scan": "passed",
+    "referenced_files_verified": 7
+  },
+  "resume_decisions": [
+    {
+      "at_utc": "2026-09-23T13:30:25.884974+00:00",
+      "authority_ref": "current user message: $implement ... 계속 진행해줘",
+      "decision": "resume approved CW-04 correction; retain CW-03 explicit three-attempt ceiling pending specific approval; serial writer on shared checkout",
+      "snapshot_ref": ".workflow/core-workbench/runs/implement-p2-20260923/handoff-pause-20260923-2224.json",
+      "snapshot_reconciliation": "137 entries; all product/test/approved feature docs match; eight instruction/workflow files changed externally; AGENTS.md differs from prior bundle and current user supplied current AGENTS instructions; requirements unchanged",
+      "budget_reconciliation": "53 prior calls retained, 128 user-authorized child-run cap retained, Oracle 4/4 retained"
+    },
+    {
+      "at_utc": "2026-09-23T14:55:06.067585+00:00",
+      "authority_ref": "current user async reply specifying six-point Core Workbench pause/worker policy, superseding C-D35/C-D44; follow-up requests related policy/docs edits",
+      "decision": "Adopt C-D49 and continue CW-04 under revised G3; old mutable A/B tests are historical, not acceptance; keep G1/G2 blockers",
+      "approved_bundle_sha256": "7631d51ae0c6f10c8b3281ad962cfb2bfd5fe42f0bf06e672618b904a044a3d2"
+    },
+    {
+      "at_utc": "2026-09-23T15:34:13.021145+00:00",
+      "authority_ref": "current user follow-up: 관련해서 정책과 docs의 문서도 수정이 필요하면 검토해서 수정해줘",
+      "decision": "Clarify glossary and detach policy docs under C-D49; retain G3 pending despite actual OMP RPC partial pass",
+      "approved_bundle_sha256": "c79c6d64ca0782f1b4e817c68e148d07495f61e911a3af3dfcd7265b76b783d3"
+    },
+    {
+      "at_utc": "2026-09-23T15:41:56.485449+00:00",
+      "authority_ref": "current user C-D49 six-point policy and follow-up to update related policy/docs",
+      "decision": "Clarify G3 feasibility/harness versus CW-11/12 production ownership without removing final C-D49 acceptance",
+      "approved_bundle_sha256": "e0b6abefef59c70f2a438c82005c671d23ec4776f4215ae9e8ba96211021f944"
+    },
+    {
+      "at_utc": "2026-09-23T15:53:06.221016+00:00",
+      "authority_ref": "current user C-D49 policy and follow-up requesting related policy/docs corrections",
+      "decision": "Clarify detach and result explanation under C-D49; product/test bytes unchanged so prior partial runtime evidence remains behaviorally applicable, G3 not passed",
+      "approved_bundle_sha256": "e76c0bde27d2d040e373d0a0ed5d90458960f76fbbf3e2ca163cb590a11f1c06"
+    },
+    {
+      "at_utc": "2026-09-23T16:17:32.809517+00:00",
+      "decision": "Classify the existing CW-02/CW-03/CW-04 entries as technical blockers, not pending user decisions; C-D49 and the current approved scope are unchanged. No suspended command or request was replayed.",
+      "authority_ref": "current user request to continue approved implementation and correct related policy/docs"
+    }
+  ],
+  "reassessments": [
+    {
+      "at_utc": "2026-09-23T13:44:27.767363+00:00",
+      "incident": "CW-04 mutable tool pre-execution pause",
+      "prior_attempts": "write-only wrapper fixed prior same-batch write fixture; independent tests now show edit/bash path uncovered",
+      "observable_progress": "real OMP product write auto-approved execution passed; queued abort/failure tests pass; edit/bash missing red",
+      "next_action": "one bounded shared mutable pre-exec gate correction for write/edit/bash, then independent affected tests and frozen review",
+      "finite_batch_calls_reserved": 3,
+      "success_stop_criteria": "Node mutable-path tests green; actual OMP path and approval classification; stop if public API cannot preserve safe approval or scope changes"
+    },
+    {
+      "at_utc": "2026-09-23T13:54:13.923530+00:00",
+      "incident": "CW-03 C-D48 prompt-job safety",
+      "prior_attempts": 3,
+      "observable_progress": "three actual Bash/dash job escape paths now independently reproduced red; prior 22 tests pass",
+      "next_action": "one user-authorized fourth bounded production correction followed by independent affected checks and delta review",
+      "finite_batch_calls_reserved": 2,
+      "success_stop_criteria": "all 25 real shell tests green and no uncovered job escape in frozen review; stop if no sound boundary, do not weaken C-D48"
+    },
+    {
+      "at_utc": "2026-09-23T14:04:47.581921+00:00",
+      "incident": "CW-02 G1 remaining runtime evidence",
+      "prior_attempts": "candidate 21 fixture pass; actual two OMP composer/paste/slash pass; live approval/tool output and resize/query/outer terminal incomplete",
+      "observable_progress": "G1 local VT and PTY checks pass, original two OMP panes observed in earlier live probe",
+      "next_action": "one bounded real OMP/PTY evidence probe with temp scripted provider, then independent tests and frozen review if decisive runtime passes",
+      "finite_batch_calls_reserved": 3,
+      "success_stop_criteria": "approval/tool output and resize/query observed in actual original OMP panes, no unsupported claims; stop on auth/TUI/host limitation and report exact gap"
+    },
+    {
+      "at_utc": "2026-09-23T14:40:53.570223+00:00",
+      "incident": "CW-03 C-D48 same-shell safety redesign",
+      "prior_attempts": 4,
+      "observable_progress": "Read-only Oracle and Root review identified missing protected execution boundary and a decisive PTY-read hook experiment; no safe fifth edit yet",
+      "next_action": "Keep G2 blocked; evaluate a trusted same-interpreter control wait primitive before any product fix, or obtain user decision for behavior change",
+      "finite_batch_calls_reserved": 0,
+      "success_stop_criteria": "Both Bash/dash pass hook-read no-write and normal cd/export/same-shell control, then independent trap/override/lifecycle verification"
+    },
+    {
+      "at_utc": "2026-09-23T15:22:35.535467+00:00",
+      "incident": "CW-04 C-D49 pause unknown outcome persistence",
+      "prior_attempts": "initial bridge candidate, five-finding correction",
+      "observable_progress": "five reviewer findings independently reproduced and fixed; Node 14/14 and actual OMP abort-only pass; new resume erasure defect isolated",
+      "next_action": "one independent red test for uncertainty persistence, one minimal worker correction, one affected delta review",
+      "finite_batch_calls_reserved": 3,
+      "success_stop_criteria": "unknown outcome preserved across resume; Node/Python affected checks green; delta review finds no new blocker; G3 remains partial until full runtime proof"
+    },
+    {
+      "at_utc": "2026-09-23T16:13:45.225137+00:00",
+      "incident": "CW-04 C-D49 G3 partial after bounded actual OMP probes",
+      "observable_progress": "Node 15/15, Python 7/7; actual OMP abort, unknown retention, test-owned reconciliation, four provider-linked message kinds, busy/native approval defer, ACK loss and immediate reconnect duplicate no replay all observed and delta-reviewed",
+      "next_action": "Do not mark G3 passed; resolve live non-empty composer/session switch and integrate backend reconciliation in CW-11/12 after G1/G2 gates. G1 original TUI input and G2 protected same-shell execution remain blocking prerequisites.",
+      "budget_note": "92/128 child calls used; 36 remain, of which 35 are minimum worker/test/review estimates for CW-05..16. Explicit user ceiling retained."
+    }
+  ],
+  "recoveries": [
+    ".workflow/core-workbench/runs/implement-p2-20260923/resume-unsafe-candidate-recovery.json"
+  ],
+  "technical_blockers": [
+    "CW-03: redesign review complete; no validated protected execution primitive in current stock Bash/dash adapter. Need architecture feasibility or explicit approved behavior change before another product candidate.",
+    "CW-02: actual scripted-provider TUI input route remains inconclusive; G1 missing live approval/tool output/resize evidence",
+    "CW-04: G3 partial; live composer/session switch and long-term reconnect remain unverified; CW-11/12 own production backend state/approval reconciliation and worker model review hold"
+  ]
+}

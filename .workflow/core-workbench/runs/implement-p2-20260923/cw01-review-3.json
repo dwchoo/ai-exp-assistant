@@ -1,0 +1,8 @@
+{
+  "ticket": "CW-01",
+  "candidate_id": "233762807b458be1323b3e29d41132973451bed3279ed0ca28c0481b4c6503de",
+  "result": "new_writer_defect",
+  "finding": "serializeControlEnvelope may invoke unvalidated non-enumerable payload.toJSON after parse returns payload by reference; emits unsafe wire",
+  "required": "serialize validated plain snapshot and add writer roundtrip test",
+  "recorded_at_utc": "2026-09-23T07:35:39.790487+00:00"
+}

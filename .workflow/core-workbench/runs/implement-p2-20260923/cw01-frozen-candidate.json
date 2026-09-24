@@ -1,0 +1,64 @@
+{
+  "ticket": "CW-01",
+  "candidate_id": "c3fb56f2ef45f2ae2e8f40173444560fb06b21e97e22637526c18cacde9acf39",
+  "files": [
+    {
+      "path": "omp_bridge/contract/v1.ts",
+      "sha256": "169ab54fc2a5922919488feecefd70aaf776985e66133fab6646ec73ef4678db",
+      "mode": 436
+    },
+    {
+      "path": "pyproject.toml",
+      "sha256": "aa85c1a99ad539c79f6cc94334703823720bd8d9a8676d8eb6c2e5290cb4e1a0",
+      "mode": 436
+    },
+    {
+      "path": "src/workbench/__init__.py",
+      "sha256": "80218cee4cdaf244d98d749c4baf8214df7ff96ce74b460d0df99ef4251d278c",
+      "mode": 436
+    },
+    {
+      "path": "src/workbench/contracts/__init__.py",
+      "sha256": "9c4103c852dd774550dee07b59248f57340592060c130df00a27b3f3a2d50a73",
+      "mode": 436
+    },
+    {
+      "path": "src/workbench/contracts/v1.py",
+      "sha256": "39a12083180051f095292778a84582be0e8b58f0d652748a03f3e7c7039d9782",
+      "mode": 436
+    },
+    {
+      "path": "tests/contracts/fixtures/control-envelope-v1.json",
+      "sha256": "e74d726e13af1a158d25812329d59704029074ab5ea84499d5e5723b4f3fe7a1",
+      "mode": 436
+    },
+    {
+      "path": "tests/contracts/fixtures/delivery-attempts-v1.json",
+      "sha256": "b23fb25dfbe07d051cf6ec4616e2427ddc90803349d1d6e332e6cbb87c702f10",
+      "mode": 436
+    },
+    {
+      "path": "tests/contracts/test_v1.py",
+      "sha256": "c2f8139bd54ba2212b5a6103ad5e55eb8a0f6346972502137739ae324022b325",
+      "mode": 436
+    },
+    {
+      "path": "tests/gates/harness/contracts.test.ts",
+      "sha256": "a97254a4256dfd62b347480f73cf53a364273b7568dd56dc6b8ee7a391022a36",
+      "mode": 436
+    },
+    {
+      "path": "tests/gates/harness/gate-evidence-v1.schema.json",
+      "sha256": "353e6fe2d12aa1ab79b15f34aea64b9dec314a45f0a9a7b5ab88a7f1d76ddeb9",
+      "mode": 436
+    },
+    {
+      "path": "tests/gates/harness/run-contracts.sh",
+      "sha256": "9bc331e46eba0638cf8bd2696c98175788bd17871b92d63e6510e16ddb1c905d",
+      "mode": 509
+    }
+  ],
+  "approval_digest": "d6df4fe834452e6bc0b34a13f4f99ce44381a419714b87b22e0cc6b1e27cba63",
+  "scope_audit": "11 ticket paths only; approved plan/source inputs unchanged; independent test delta only in tests/contracts and tests/gates/harness; production fix only omp_bridge/contract/v1.ts",
+  "recorded_at_utc": "2026-09-23T07:20:08.083195+00:00"
+}

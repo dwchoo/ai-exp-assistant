@@ -1,0 +1,11 @@
+{
+  "paths_sha256": {
+    "omp_bridge/g3/bridge.ts": "d427f9977751580fb3edf27c0377e946769c8d0d20ed9e33a930c0be2a7ba489",
+    "src/workbench/ipc/bridge_g3/protocol.py": "ac5467e5a3f54e3be11ad17427e3c3b879177407559576adaf07fe73f313bc24",
+    "tests/gates/g3_omp/bridge.test.ts": "1934a73ceb34f96b0c4d22631a08e8ab11b1b5c346e6e99c1d21b4a5c4dea7ff",
+    "tests/gates/g3_omp/test_g3_protocol.py": "2926f5fdf67e4d3ae99bfd81480cf180ed530d0185f568a190328d0d89bedd10"
+  },
+  "archive": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-worker-base.tar.gz",
+  "archive_sha256": "f3e8b3207a8e79eaad5c9570ee1caf841c1562a286da265893ca927d759831ed",
+  "approved_bundle_sha256": "7631d51ae0c6f10c8b3281ad962cfb2bfd5fe42f0bf06e672618b904a044a3d2"
+}

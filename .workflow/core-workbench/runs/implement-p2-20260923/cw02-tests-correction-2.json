@@ -1,0 +1,17 @@
+{
+  "ticket": "CW-02",
+  "correction_cycle": 2,
+  "test_delta": [
+    {
+      "path": "tests/gates/g1_vt/test_g1_candidate.py",
+      "sha256": "333f634248e0297cb0eb9bf1371c028033af4e2cd9254555e75fdb78a33a6f99"
+    }
+  ],
+  "check": {
+    "command": "/tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/gates/g1_vt -p test_*.py -v",
+    "exit_code": 1,
+    "result": "failed",
+    "detail": "18 tests 16 pass, two new failures: >2MiB pending queue and app reads source while full; >1MiB eventual drain passes"
+  },
+  "recorded_at_utc": "2026-09-23T08:40:27.229535+00:00"
+}

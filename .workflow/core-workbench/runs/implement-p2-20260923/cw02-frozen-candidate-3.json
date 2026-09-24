@@ -1,0 +1,59 @@
+{
+  "ticket": "CW-02",
+  "candidate_id": "52a7876d7b4688cd2f6a2f4f40262b0f02efc50aea527ea90a604210181aff6c",
+  "previous_candidate": "6d3d7793237e2f826295ec49466e342267b3dcee0f1b00017e4f3c022b91fdea",
+  "files": [
+    {
+      "path": "docs/features/core-workbench/gates/G1.md",
+      "sha256": "7769fab4840d7526dc5b00436105a26e0d425c88341b25e9f103f23fee1a5ee0",
+      "mode": 436
+    },
+    {
+      "path": "src/workbench/terminal/vt_g1/screen.py",
+      "sha256": "3f0c355b7126fc696f8b34fe1496791cd5e1d5e14585432fde85fe0b4f322ac2",
+      "mode": 436
+    },
+    {
+      "path": "src/workbench/terminal/vt_g1/session.py",
+      "sha256": "be4ecf3c54a00227cb7cfef12c3f64c0bfea501b2e6333216604fcd63cbaf6b4",
+      "mode": 436
+    },
+    {
+      "path": "src/workbench/ui/terminal_g1/app.py",
+      "sha256": "df5484917e87f475ce025ff5bc06d411ddc6879946ca929ed02b60c325b46df9",
+      "mode": 436
+    },
+    {
+      "path": "src/workbench/ui/terminal_g1/input_router.py",
+      "sha256": "f0aaba944b67a9bedc229f7d84f713d18fd149f313e5135ac0e561cc170c89d0",
+      "mode": 436
+    },
+    {
+      "path": "tests/gates/g1_vt/live_omp_probe.py",
+      "sha256": "623370075d6da44ffeceec864506d3d416de9c6fa9cf36a000487b93f1b0d748",
+      "mode": 436
+    },
+    {
+      "path": "tests/gates/g1_vt/test_g1_candidate.py",
+      "sha256": "333f634248e0297cb0eb9bf1371c028033af4e2cd9254555e75fdb78a33a6f99",
+      "mode": 436
+    }
+  ],
+  "gate_status": "pending",
+  "checks": [
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 /tmp/cw02-g1-venv-sys/bin/python -m unittest discover -s tests/gates/g1_vt -p test_*.py -v",
+      "exit_code": 0,
+      "result": "passed",
+      "detail": "Root check 18/18"
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 /tmp/cw02-g1-venv-sys/bin/python tests/gates/g1_vt/live_omp_probe.py",
+      "exit_code": 0,
+      "result": "partial",
+      "detail": "Root check two real OMP no-tools sessions pass composer/Korean/paste/slash/clear"
+    }
+  ],
+  "scope_audit": "7 ticket files added, attributable pycache removed, approved bundle unchanged",
+  "recorded_at_utc": "2026-09-23T08:47:42.425803+00:00"
+}

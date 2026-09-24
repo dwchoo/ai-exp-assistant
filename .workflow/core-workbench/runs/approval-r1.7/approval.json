@@ -1,0 +1,87 @@
+{
+  "revision": "r1.7",
+  "recorded_at_utc": "2026-09-23T05:48:29.267753+00:00",
+  "user_approval": {
+    "reference": "Current conversation: user reply immediately after the BRIEF r1.7 whole-bundle approval request. No platform message ID is available.",
+    "quote": "응 진행해. refine-spec은 끝났어?",
+    "in_response_to": "이 문서 묶음을 계획 수립의 기준으로 승인할까요?",
+    "scope": "BRIEF r1.7 bundle as the planning baseline, including technical validation gates G1–G4. No product implementation, commit or publication authorization."
+  },
+  "reviewed_candidate": {
+    "bundle_sha256": "6f729ab8259c9cefd9cdebaf76dc8af1f8ca9626e119b10265c59a89ee995653",
+    "files_sha256": {
+      "AGENTS.md": "f5732fad0e6f1e7ac6c82ac6e9baee81d4d1574e7bb204de2895fe0602d0cbeb",
+      "CONTEXT.md": "58f1d30a19cd10285f8f3e4a017eb0c2f568920203f1d960834ce89e2c1934e6",
+      "docs/features/core-workbench/BRIEF.md": "de90d22788aee210e4d81744b2093949b86f1d32d82daf007e92b48205d401d5",
+      "docs/features/core-workbench/OPERATING-CONTRACT.md": "7f4bdcb03d5dc7d88a6efbfd6bb63e72502b518bdfa8be7550ed7afae40129f0",
+      "docs/features/core-workbench/DECISIONS.md": "9299d1d06936a724b5dd3c0791e2e4940ebc5695f8e043455828bc33d7e32621",
+      "docs/features/core-workbench/EVIDENCE.md": "29555081147ced2554d012566d1765d3ff78c4b8d2e65029add4ae4f1274a778",
+      "docs/features/core-workbench/SOURCE-RECONCILIATION.md": "bb98edeb216be5dab972dcffb4a0b0e731c9e7faccfc5928e864c154b68af359",
+      "docs/adr/0001-no-external-multiplexer.md": "c09799d6ee17fb8273208b74413fc4703df970e643fa52609f61e7c800de1dbf"
+    },
+    "sources_sha256": {
+      "docs/OMP_Workbench_Phase2_Task_Inbox_PRD_v0.1.md": "7b612cad6913317eae33c09f5ec654dd691cb257fe9a617d1bf29a9e999be4e3",
+      "docs/OMP_Workbench_Development_Spec_v0.3.md": "d9db3315a48b25c831f71f46c438947c6e781dbd424db50e0e2ab2a2ba8193f0"
+    }
+  },
+  "approved_candidate": {
+    "bundle_sha256": "7f26c572f6272fde29ca15f815b3503ce3cb54de7c8ecbdf77bfa8bff593d62f",
+    "files_sha256": {
+      "AGENTS.md": "f5732fad0e6f1e7ac6c82ac6e9baee81d4d1574e7bb204de2895fe0602d0cbeb",
+      "CONTEXT.md": "58f1d30a19cd10285f8f3e4a017eb0c2f568920203f1d960834ce89e2c1934e6",
+      "docs/features/core-workbench/BRIEF.md": "b262e9ea626680b79e6eb7e85a4bb7bebc8f613ff69574e70364c140749f032f",
+      "docs/features/core-workbench/OPERATING-CONTRACT.md": "dcd6fb8c03bd1f47a11d3bbff96172c41aa765143db92cbfe1af24e1f5ca5d3c",
+      "docs/features/core-workbench/DECISIONS.md": "9299d1d06936a724b5dd3c0791e2e4940ebc5695f8e043455828bc33d7e32621",
+      "docs/features/core-workbench/EVIDENCE.md": "29555081147ced2554d012566d1765d3ff78c4b8d2e65029add4ae4f1274a778",
+      "docs/features/core-workbench/SOURCE-RECONCILIATION.md": "bb98edeb216be5dab972dcffb4a0b0e731c9e7faccfc5928e864c154b68af359",
+      "docs/adr/0001-no-external-multiplexer.md": "c09799d6ee17fb8273208b74413fc4703df970e643fa52609f61e7c800de1dbf"
+    },
+    "sources_sha256": {
+      "docs/OMP_Workbench_Phase2_Task_Inbox_PRD_v0.1.md": "7b612cad6913317eae33c09f5ec654dd691cb257fe9a617d1bf29a9e999be4e3",
+      "docs/OMP_Workbench_Development_Spec_v0.3.md": "d9db3315a48b25c831f71f46c438947c6e781dbd424db50e0e2ab2a2ba8193f0"
+    }
+  },
+  "post_approval_changes": {
+    "kind": "approval_status_metadata_only",
+    "files": [
+      "docs/features/core-workbench/BRIEF.md",
+      "docs/features/core-workbench/OPERATING-CONTRACT.md"
+    ],
+    "exact_replacements": {
+      "docs/features/core-workbench/BRIEF.md": [
+        [
+          "Revision: r1.7; state: agreement requested.",
+          "Revision: r1.7; state: approved with external reference."
+        ],
+        [
+          "작성일: 2026-09-23. 개별 인터뷰 결정은 반영했으며 전체 문서 묶음 승인은 아직 받지 않았다.",
+          "작성일: 2026-09-23. 사용자 답변 `응 진행해. refine-spec은 끝났어?`로 r1.7 문서 묶음을 승인받았다. 승인 근거·검토본 및 현재 문서의 digest는 [승인 기록](../../../.workflow/core-workbench/runs/approval-r1.7/approval.json)에 보관한다."
+        ],
+        [
+          "추가 운영 정책 인터뷰를 반영한 최종 검토안이다. **P1~P4의 설계 상세화**와 **G1~G4의 개발 초기 기술 검증**을 포함해 전체 묶음을 검토한다. 개별 정책 합의와 문서 전체 승인은 구분하며 승인 기록은 별도 workflow state에 보관한다.",
+          "추가 운영 정책 인터뷰를 반영한 승인본이다. **P1~P4의 설계 상세화**와 **G1~G4의 개발 초기 기술 검증**을 계획 단계로 인계한다. 기술 검증 통과나 제품 구현 승인을 뜻하지 않는다."
+        ],
+        [
+          "전체 사용자 승인 전에는 승인 완료로 기록하지 않는다. 승인 후 새 Sol XHigh/Max 세션에서:",
+          "r1.7 전체 승인과 검토본 동일성을 별도 기록했다. 다음은 새 Sol XHigh/Max 세션에서:"
+        ]
+      ],
+      "docs/features/core-workbench/OPERATING-CONTRACT.md": [
+        [
+          "Revision: r1.7; state: agreement requested.",
+          "Revision: r1.7; state: approved with external reference."
+        ],
+        [
+          "전체 문서 묶음은 최종 검토 중이며 개별 결정을 일괄 승인으로 취급하지 않는다.",
+          "r1.7 전체 문서 묶음 승인 근거는 [승인 기록](../../../.workflow/core-workbench/runs/approval-r1.7/approval.json)에 보관한다. 설계안의 실제 구현 가능성은 검증이 필요하다."
+        ]
+      ]
+    },
+    "requirements_changed": false
+  },
+  "next": {
+    "session": "fresh user-selected Sol XHigh/Max",
+    "command": "$to-tickets docs/features/core-workbench/BRIEF.md",
+    "executed": false
+  }
+}

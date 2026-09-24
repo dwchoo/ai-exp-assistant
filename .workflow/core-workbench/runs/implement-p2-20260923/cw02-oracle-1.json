@@ -1,0 +1,10 @@
+{
+  "ticket": "CW-02",
+  "incident": "g1-bounded-input-liveness",
+  "status": "advisory_only",
+  "source": "oracle final answer in current session",
+  "conclusion": "single stdin cannot guarantee arbitrary-length lossless paste + finite storage + immediate later F10 when child never reads; require explicit over-limit rejection/cancel policy",
+  "required_decision": "whether finite paste cap and all-or-nothing visible rejection are accepted; async user input pending",
+  "repairable_within_scope": "reserve whole VT query reply frame, preserve partial suffix, handle confirmed transport failure; independent UI actions after parsed input should not wait behind blocked byte event",
+  "recorded_at_utc": "2026-09-23T09:11:01.763075+00:00"
+}

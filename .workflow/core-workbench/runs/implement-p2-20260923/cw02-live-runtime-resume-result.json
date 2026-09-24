@@ -1,0 +1,43 @@
+{
+  "ticket": "CW-02",
+  "gate": "G1",
+  "result": "inconclusive_probe_input_not_accepted",
+  "candidate_id": "5e598bd7f368887d1051cf14947118ecf52cfe527ab9f5d9cfccb4e81f42d576",
+  "probe_path": "tests/gates/g1_vt/live_runtime_probe.py",
+  "observations": [
+    {
+      "kind": "worker_tui_prompt",
+      "provider_requests": 0,
+      "query_reply_callbacks": 8,
+      "pty_bytes_drained": 204629,
+      "result": "inconclusive"
+    },
+    {
+      "kind": "root_split_input",
+      "provider_requests": 0,
+      "input_visible_before_submit": false,
+      "clear_ack": false,
+      "query_reply_callbacks": 8,
+      "result": "inconclusive"
+    },
+    {
+      "kind": "root_ui_hint",
+      "provider_requests": 0,
+      "ui_hints": [
+        "select",
+        "provider"
+      ],
+      "composer_ready": false,
+      "result": "inconclusive"
+    }
+  ],
+  "fixture": {
+    "command": "PYTHONDONTWRITEBYTECODE=1 /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/gates/g1_vt -p 'test_*.py' -q",
+    "passed": 21,
+    "total": 21,
+    "exit_code": 0
+  },
+  "process_cleanup": "Probe child PTY processes and temporary directories removed; no related process observed after checks.",
+  "limits": "No actual approval, tool output, query consumption or resize restoration observed; provider requests remained zero.",
+  "recorded_at_utc": "2026-09-23T14:19:55.660504+00:00"
+}

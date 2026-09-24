@@ -1,0 +1,22 @@
+{
+  "ticket": "CW-02",
+  "candidate_id": "52a7876d7b4688cd2f6a2f4f40262b0f02efc50aea527ea90a604210181aff6c",
+  "result": "blocked_pending_design_diagnosis",
+  "findings": [
+    {
+      "severity": "high",
+      "summary": "stdin unregistered at saturated child queue; F10 cannot be consumed if child never drains/exits",
+      "file": "src/workbench/ui/terminal_g1/app.py"
+    },
+    {
+      "severity": "high",
+      "summary": "VT query reply callback ignores partial/zero acceptance and can lose reply at 2MiB cap",
+      "files": [
+        "src/workbench/terminal/vt_g1/screen.py",
+        "src/workbench/terminal/vt_g1/session.py"
+      ]
+    }
+  ],
+  "gate_status": "pending; actual approval/tool/query/resize/detach/terminal matrix missing",
+  "recorded_at_utc": "2026-09-23T08:49:21.695822+00:00"
+}

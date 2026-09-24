@@ -1,0 +1,13 @@
+{
+  "ticket": "CW-04",
+  "candidate_id": "bf1e1374db9e23c779e4d50c4712401c8101f664dd57989d8e5e7745a6a8ccab",
+  "oracle": "/root/cw04_oracle",
+  "verdict": "gate_pending",
+  "findings": [
+    "tool_call occurs for all prepared calls before concurrent scheduling; not re-called pre-exec",
+    "tool_execution_start is observational and pre-approval",
+    "same-name registerTool+invokeTool may supply pre-exec gate but native approval and concurrency metadata not automatically preserved",
+    "scripted real OMP loop experiment needed for A/B and approval policy"
+  ],
+  "recorded_at_utc": "2026-09-23T10:16:37.088804+00:00"
+}

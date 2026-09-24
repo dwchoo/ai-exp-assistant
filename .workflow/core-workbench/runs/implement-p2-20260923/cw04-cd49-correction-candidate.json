@@ -1,0 +1,19 @@
+{
+  "ticket": "CW-04",
+  "candidate_id": "191ab2b858ea68909d520c1243250978625f4223c93b0528d006b9d766309ba4",
+  "approved_bundle_sha256": "7631d51ae0c6f10c8b3281ad962cfb2bfd5fe42f0bf06e672618b904a044a3d2",
+  "files_sha256": {
+    "omp_bridge/g3/bridge.ts": "1e464de8fdd4ba0b57315db7ea437034c949829b262627e1757e2e8e1f42f554",
+    "src/workbench/ipc/bridge_g3/protocol.py": "2c8fc96efb86dc0be2c79f6f1f5f711fba27d3bfa0359e23d8d0d97cec9e0678",
+    "tests/gates/g3_omp/bridge.test.ts": "06db26a3932dbc74288e43e6d644228319e0e285f00789808b63f6709a4d8ed9",
+    "tests/gates/g3_omp/test_g3_protocol.py": "2926f5fdf67e4d3ae99bfd81480cf180ed530d0185f568a190328d0d89bedd10",
+    "tests/gates/g3_omp/live_pause_abort_probe.py": "eb6eb03f1a20371c069d7a4f44853d49d3c5afe18d15f23e31ccceb45abce217"
+  },
+  "worker_checks": {
+    "node": "14/14",
+    "python": "7/7",
+    "syntax": "passed"
+  },
+  "runtime_probe": "stale_pending_recheck",
+  "recorded_at_utc": "2026-09-23T15:20:14.044194+00:00"
+}

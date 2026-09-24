@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "feature": "core-workbench",
+  "approval_type": "C-D49 gate ownership clarification within user-directed implementation",
+  "authority_ref": "current user C-D49 six-point policy and follow-up to update related policy/docs",
+  "decision": "C-D49",
+  "revision": {
+    "brief": "r1.9",
+    "spec": "s2.2",
+    "plan": "p2.2"
+  },
+  "previous_record": ".workflow/core-workbench/runs/implement-p2-20260923/cd49-doc-clarity-approval.json",
+  "previous_bundle_sha256": "c79c6d64ca0782f1b4e817c68e148d07495f61e911a3af3dfcd7265b76b783d3",
+  "bundle_hash_method": "SHA-256 of UTF-8 JSON files_sha256 with sorted keys, compact separators and ensure_ascii=false",
+  "bundle_sha256": "e0b6abefef59c70f2a438c82005c671d23ec4776f4215ae9e8ba96211021f944",
+  "files_sha256": {
+    "docs/features/core-workbench/BRIEF.md": "f2ff96a06ad624ac36415d11cd699bc501b402e656a482768e89459b132df069",
+    "docs/features/core-workbench/DECISIONS.md": "7ef05777eae2b65f6b51baee44b4ec6b25eb9640390e0e65514c35d5ea49ef1c",
+    "docs/features/core-workbench/OPERATING-CONTRACT.md": "566c9d8eeb0feb38115ef338ee419a968c5ad412ccfbf0585df5f9519746005c",
+    "docs/features/core-workbench/SOURCE-RECONCILIATION.md": "9608b6ae75cd44f3365f0857fc86e1a4fff3ba9ed988ad7dea4f4985a79f156a",
+    "docs/features/core-workbench/SPEC.md": "ea16123aca25468c934ecad92d385dfd75e7530f78434abd1696dcd815e483c8",
+    "docs/features/core-workbench/PLAN.json": "85cd1d331f7d654433a15da79c782eba2d3bad4d6303a9d3f1db95ba0215d8b8",
+    "docs/features/core-workbench/tickets/CW-01.md": "7dae35e6d1a4d2a3475609849178bb9ea05a6f790eb4931dc0139925ba75bcb2",
+    "docs/features/core-workbench/tickets/CW-02.md": "c75525a0623a16c2ed5a39c11ac5350e3f394aaee574ec735b05a4fabb3eb07f",
+    "docs/features/core-workbench/tickets/CW-03.md": "8ba1f3e9824fb45932d957a996f6962929ad8e574298dd5af4cd1a037517deb6",
+    "docs/features/core-workbench/tickets/CW-04.md": "503d70bae16f6adf2c5cb8aaeb6bed3b8def16834913892ac716e3fc9e1bc913",
+    "docs/features/core-workbench/tickets/CW-05.md": "2af5779d3f3b5a5af65f09cdc72fa35c14aa3f8b918b24d19862cb919105e242",
+    "docs/features/core-workbench/tickets/CW-06.md": "7abd009af6ca5f86b67891897935c2531e08f5cb555baf86eb2dd9566ad122f3",
+    "docs/features/core-workbench/tickets/CW-07.md": "bafccbfd6e759768bbf0580d71ae36dce261c6cdee740a8a1fca0bd27a89b9da",
+    "docs/features/core-workbench/tickets/CW-08.md": "c76a2e991f21ac760a94ede2db505dc5355d30743790051a9808da468a4a6766",
+    "docs/features/core-workbench/tickets/CW-09.md": "5b540c83527603b073174e1914df2b56ba5d682fb1900013d8e38aae3eb49182",
+    "docs/features/core-workbench/tickets/CW-10.md": "4ac30e06964495650c212a2eed9a5e094d5bfaff5641ff148a131d1c22a1fa5b",
+    "docs/features/core-workbench/tickets/CW-11.md": "afce2bfb82a84a8f40dccca3351789fb074131ebdb57494440630b87cb5f2aed",
+    "docs/features/core-workbench/tickets/CW-12.md": "d8bad1493efbfd66e73638131929c45f4c4c94bb8ef2be1140f9142f35b289c7",
+    "docs/features/core-workbench/tickets/CW-13.md": "1e03c0dd4e21a36bf444f67603a182956b6003c64a74db8bb44bcfa6ee29b579",
+    "docs/features/core-workbench/tickets/CW-14.md": "20d89f909c99ef8b592f69c08fd54d9c28bad9d284fb131e56dd305c9a9011aa",
+    "docs/features/core-workbench/tickets/CW-15.md": "881353537952dc00b044cb1ece175db97ac9efc0af6bcbc073cae5ada5322cdb",
+    "docs/features/core-workbench/tickets/CW-16.md": "f8cce696eefcff9679b80d31eb0e9ac4f677b760d3d455418adbee4e0b877511",
+    "CONTEXT.md": "9b55e15b6bb1ba7469afa374ff43f27d4ee94fcfee3056d503b1402225f3625b"
+  },
+  "changed_paths": [
+    "docs/features/core-workbench/SPEC.md",
+    "docs/features/core-workbench/PLAN.json",
+    "docs/features/core-workbench/tickets/CW-04.md"
+  ],
+  "scope_note": "Separates G3 actual OMP bridge feasibility/harness reconciliation from CW-11/12 production model review, backend reconciliation and user display. All C-AC-33 behavior retained at final integration; ticket dependency graph unchanged.",
+  "validation": {
+    "local_links": "passed",
+    "acceptance_ids": 34,
+    "tickets": 16,
+    "source_brief_sha": "matched"
+  },
+  "recorded_at_utc": "2026-09-23T15:41:56.485449+00:00"
+}

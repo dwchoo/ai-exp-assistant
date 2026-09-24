@@ -1,0 +1,8 @@
+{
+  "ticket": "CW-01",
+  "candidate_id": "bbb7452a04ca9cf11edc254dbae130388e05e629826000401cd04e4daca10159",
+  "result": "remaining_parity_finding",
+  "finding": "Python accepts unsafe exitCode, DisplayChunk integer fields and payload integer; JS may round payload value. Apply shared safe integer boundary to all integer-valued wire numbers.",
+  "correction_cycle": 2,
+  "recorded_at_utc": "2026-09-23T07:27:58.161146+00:00"
+}

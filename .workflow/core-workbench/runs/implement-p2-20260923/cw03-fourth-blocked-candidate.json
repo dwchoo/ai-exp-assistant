@@ -1,0 +1,20 @@
+{
+  "ticket": "CW-03",
+  "status": "blocked_partial_candidate",
+  "approved_bundle_sha256": "922bd0dca00c52e3c6ab60f700a12e58aff6421034b623c76bd63ea87b3e6356",
+  "base_test_record": ".workflow/core-workbench/runs/implement-p2-20260923/cw03-fourth-independent-tests.json",
+  "changed_paths": [
+    "src/workbench/terminal/shell_g2/prototype.py"
+  ],
+  "candidate_file_sha256": "04ddc94965c32b5dec28ef4d7015cdeb61c144a90f3acab84a9bcf542048164c",
+  "delta_archive": ".workflow/core-workbench/runs/implement-p2-20260923/cw03-fourth-blocked-delta.tar.gz",
+  "check": {
+    "command": "PYTHONDWRITEBYTECODE=1 python -m unittest tests.gates.g2_shell.test_g2_shell -q",
+    "exit_code": 0,
+    "result": "25/25 passed; insufficient for safety due uncovered race"
+  },
+  "counterexample": "Bash __wb_emit override emits READY/JOBS_BEGIN:READY/JOBS_END:READY, then blocks in read -t 0.4, then starts sleep 30 &. Before job starts can_dispatch=True; after job starts guard blocks. No sound prompt-quiescence proof.",
+  "probe_process_cleanup": "reported all ShellProcess contexts closed and no lingering G2/sleep jobs",
+  "gate_result": "G2 blocked, not passed",
+  "recorded_at_utc": "2026-09-23T13:59:49.757978+00:00"
+}

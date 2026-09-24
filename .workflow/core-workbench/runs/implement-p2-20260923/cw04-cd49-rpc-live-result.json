@@ -1,0 +1,55 @@
+{
+  "gate_id": "G3",
+  "item_id": "cd49_rpc_manager_abort_and_pair_partial",
+  "candidate_id": "8f786053c65d848339d2a80ed45d7f66511746bfcd1c441428f8bddbc551247e",
+  "requirements_digest": "c79c6d64ca0782f1b4e817c68e148d07495f61e911a3af3dfcd7265b76b783d3",
+  "observed_evidence_level": "runtime",
+  "result": "passed_item_only",
+  "command": "PYTHONDONTWRITEBYTECODE=1 python tests/gates/g3_omp/live_rpc_pause_probe.py --pair",
+  "cwd": "/home/dwchoo/ai-exp-assistant",
+  "environment": {
+    "omp": "18.2.10",
+    "mode": "rpc",
+    "provider": "local scripted",
+    "paths": "temporary"
+  },
+  "exit_code": 0,
+  "observations": {
+    "manager_pause_ack": "abort_requested",
+    "pause_ack_seconds": 0.001,
+    "tool_end_seen_at_ack": false,
+    "turn_stop_observed": true,
+    "agent_end_observed": true,
+    "unknown_outcome_preserved_after_resume": [
+      "pause-probe-bash"
+    ],
+    "resume_without_reconciliation": "reconciliation_required",
+    "resume_with_reconciled_true": "resumed",
+    "stale_retry": "unknown_no_replay",
+    "result_file_created": false,
+    "pair_kinds": [
+      "task",
+      "question",
+      "answer",
+      "report"
+    ],
+    "pair_api_accepted": 4,
+    "pair_agent_end_after_send": 4,
+    "worker_provider_requests": 2,
+    "manager_provider_requests": 3,
+    "independent_omp_pids": true,
+    "omp_exits": [
+      0,
+      0
+    ],
+    "remaining_temp_cwd_processes": 0
+  },
+  "unknowns": [
+    "Real Workbench backend state and approval reconciliation absent",
+    "Live busy/approval/ACK loss/reconnect/session switch absent",
+    "Message provider input content and reply semantics unverified",
+    "Production periodic model review hold and host experiment/log continuity unverified"
+  ],
+  "gate_status": "pending",
+  "recorded_at_utc": "2026-09-23T15:34:13.021145+00:00"
+}

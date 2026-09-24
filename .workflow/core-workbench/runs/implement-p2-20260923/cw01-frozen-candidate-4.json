@@ -1,0 +1,71 @@
+{
+  "ticket": "CW-01",
+  "candidate_id": "51586db6d81f77699c93f54610146f2816d89b2deb1cb0515dcede35a5f581c8",
+  "previous_candidate": "233762807b458be1323b3e29d41132973451bed3279ed0ca28c0481b4c6503de",
+  "files": [
+    {
+      "path": "omp_bridge/contract/v1.ts",
+      "sha256": "7f31a6d0b54c1467eccfa7c54d19ce8ce61e3ec40b9ddf2f70b953ad420d2a3f",
+      "mode": 436
+    },
+    {
+      "path": "pyproject.toml",
+      "sha256": "aa85c1a99ad539c79f6cc94334703823720bd8d9a8676d8eb6c2e5290cb4e1a0",
+      "mode": 436
+    },
+    {
+      "path": "src/workbench/__init__.py",
+      "sha256": "80218cee4cdaf244d98d749c4baf8214df7ff96ce74b460d0df99ef4251d278c",
+      "mode": 436
+    },
+    {
+      "path": "src/workbench/contracts/__init__.py",
+      "sha256": "9c4103c852dd774550dee07b59248f57340592060c130df00a27b3f3a2d50a73",
+      "mode": 436
+    },
+    {
+      "path": "src/workbench/contracts/v1.py",
+      "sha256": "a8c5b9b12d408e9d22edc5b320634ec5b06b6ab70d15d7bc109cebf042796910",
+      "mode": 436
+    },
+    {
+      "path": "tests/contracts/fixtures/control-envelope-v1.json",
+      "sha256": "e74d726e13af1a158d25812329d59704029074ab5ea84499d5e5723b4f3fe7a1",
+      "mode": 436
+    },
+    {
+      "path": "tests/contracts/fixtures/delivery-attempts-v1.json",
+      "sha256": "b23fb25dfbe07d051cf6ec4616e2427ddc90803349d1d6e332e6cbb87c702f10",
+      "mode": 436
+    },
+    {
+      "path": "tests/contracts/test_v1.py",
+      "sha256": "dca9378bfda97adba7517a10595dcd558b34048ba713776817412456170bdade",
+      "mode": 436
+    },
+    {
+      "path": "tests/gates/harness/contracts.test.ts",
+      "sha256": "06f6a4ba1ddb4ad759ea886532ae23f343ffc33298d5aa17d61b7f483f8b0cc8",
+      "mode": 436
+    },
+    {
+      "path": "tests/gates/harness/gate-evidence-v1.schema.json",
+      "sha256": "353e6fe2d12aa1ab79b15f34aea64b9dec314a45f0a9a7b5ab88a7f1d76ddeb9",
+      "mode": 436
+    },
+    {
+      "path": "tests/gates/harness/run-contracts.sh",
+      "sha256": "9bc331e46eba0638cf8bd2696c98175788bd17871b92d63e6510e16ddb1c905d",
+      "mode": 509
+    }
+  ],
+  "approval_digest": "d6df4fe834452e6bc0b34a13f4f99ce44381a419714b87b22e0cc6b1e27cba63",
+  "check": {
+    "command": "sh tests/gates/harness/run-contracts.sh",
+    "cwd": "/home/dwchoo/ai-exp-assistant",
+    "exit_code": 0,
+    "result": "passed",
+    "detail": "Root recheck: Python 14/14; Node 12/12"
+  },
+  "recorded_at_utc": "2026-09-23T07:38:00.544482+00:00"
+}

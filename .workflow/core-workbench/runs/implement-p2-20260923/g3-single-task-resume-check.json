@@ -1,0 +1,38 @@
+{
+  "gate_id": "G3",
+  "item_id": "single_task_no_tools_model_response",
+  "requirements_digest": "922bd0dca00c52e3c6ab60f700a12e58aff6421034b623c76bd63ea87b3e6356",
+  "candidate_id": "41537aed7f9734cf26ba45bfb92766c2de26a91d863f27fa64e2aeb3a34d4477",
+  "observed_evidence_level": "runtime",
+  "required_evidence_level": "runtime",
+  "command": "PYTHONDONTWRITEBYTECODE=1 python tests/gates/g3_omp/live_omp_probe.py --model-task-probe",
+  "cwd": "/home/dwchoo/ai-exp-assistant",
+  "environment": {
+    "python": "3.12.3",
+    "omp": "18.2.10",
+    "tool_mode": "--no-tools",
+    "manager_worker": "separate OMP PTY processes"
+  },
+  "exit_code": 0,
+  "result": "passed_item_only",
+  "observations": {
+    "task_api_status": "api_accepted",
+    "provider_requests": 1,
+    "provider_responses_hook": 0,
+    "assistant_marker_matched": true,
+    "agent_end_observed": true,
+    "tool_calls_observed": 0,
+    "manager_pty_bytes_drained": 148509,
+    "worker_pty_bytes_drained": 187512,
+    "child_pids_reaped": [
+      3587740,
+      3587742
+    ]
+  },
+  "unknowns": [
+    "after_provider_response hook missing",
+    "G3 peer round-trip and mutable tool pause remain unverified"
+  ],
+  "probe_file_sha256": "402416ab309dceea1e43ac6f96d5e95a63c5bcf2a3f69485e1478da3b5aeb2ec",
+  "recorded_at_utc": "2026-09-23T12:23:45.155461+00:00"
+}

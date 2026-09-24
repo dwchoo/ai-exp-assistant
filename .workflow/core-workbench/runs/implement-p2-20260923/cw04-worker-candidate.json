@@ -1,0 +1,48 @@
+{
+  "ticket": "CW-04",
+  "status": "candidate_ready_gate_pending",
+  "candidate_id": "ad686abc409feffcb348caf1142b9eb4f43a04bf57ad4a18857d8a31df38402b",
+  "files": [
+    {
+      "path": "docs/features/core-workbench/gates/G3.md",
+      "sha256": "ca0601032e615fc3d76b86966bd51929c5fe4ab8f2da3b7cca4ea9893514c21b",
+      "mode": 436
+    },
+    {
+      "path": "omp_bridge/g3/bridge.ts",
+      "sha256": "ce24cda39acf16b8ccad41db360bcc79be916907a8943b218a396bbe0154964d",
+      "mode": 436
+    },
+    {
+      "path": "src/workbench/ipc/bridge_g3/protocol.py",
+      "sha256": "ac5467e5a3f54e3be11ad17427e3c3b879177407559576adaf07fe73f313bc24",
+      "mode": 436
+    },
+    {
+      "path": "tests/gates/g3_omp/live_omp_probe.py",
+      "sha256": "c0b14a84b737867a8415d3fd6a89fa38aa32059b4e7b9d7d78b00a696fd0d3cb",
+      "mode": 436
+    },
+    {
+      "path": "tests/gates/g3_omp/test_g3_protocol.py",
+      "sha256": "e082e0b596564a18f8e10bfaf8f87e8768350b4debcb3df2ba2a656d85653ca3",
+      "mode": 436
+    }
+  ],
+  "checks": [
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python -m unittest discover -s tests/gates/g3_omp -v",
+      "exit_code": 0,
+      "result": "passed",
+      "detail": "Root 6/6 fixture"
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 python tests/gates/g3_omp/live_omp_probe.py",
+      "exit_code": 0,
+      "result": "partial",
+      "detail": "Root real OMP v18.2.10 two sequential independent process pairs: task/answer/question/report API accepted; model not triggered"
+    }
+  ],
+  "scope_audit": "5 new CW-04 files only; Root updated G3.md with rerun result; approved inputs unchanged",
+  "recorded_at_utc": "2026-09-23T09:41:18.957156+00:00"
+}

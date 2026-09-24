@@ -1,0 +1,36 @@
+{
+  "status": "attributable_partial_candidate_recovery",
+  "at_utc": "2026-09-23T14:03:51.603815+00:00",
+  "before": {
+    "shell_sha256": "04ddc94965c32b5dec28ef4d7015cdeb61c144a90f3acab84a9bcf542048164c",
+    "bridge_sha256": "31f8511a0735f0727783b313be77a5d935bb0b77dd4af628c32389b6e5c8bf1e"
+  },
+  "after": {
+    "shell_sha256": "64267d025dd89ea78441b07fa1ca496251d9cb934d192513efc5dd0ef1d132d0",
+    "bridge_sha256": "d427f9977751580fb3edf27c0377e946769c8d0d20ed9e33a930c0be2a7ba489"
+  },
+  "preserved_candidate_archives": [
+    "cw03-fourth-blocked-delta.tar.gz",
+    "cw04-resume-worker-delta.tar.gz"
+  ],
+  "reason": "CW-03 /proc patch failed post-READY race; CW-04 static write wrapper may bypass native path-dependent approval. Keep independent red regressions and safe reply linkage.",
+  "checks": [
+    {
+      "command": "PYTHONDWRITEBYTECODE=1 python -m unittest tests.gates.g2_shell.test_g2_shell -q",
+      "exit_code": 1,
+      "result": "22/26 pass; four known safety tests fail (seven assertions)"
+    },
+    {
+      "command": "node --experimental-strip-types --test tests/gates/g3_omp/bridge.test.ts",
+      "exit_code": 1,
+      "result": "7/11 pass; four known mutable pre-exec tests fail"
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python -m unittest discover -s tests/gates/g3_omp -p 'test_g3_protocol.py' -q",
+      "exit_code": 0,
+      "result": "6/6 pass"
+    }
+  ],
+  "snapshot_ref": ".workflow/core-workbench/runs/implement-p2-20260923/resume-post-recovery-20260923.json",
+  "candidate_id": "1249c7496cea736c118a58508663f96a618b77148403daabe31cb132e41d2ada"
+}

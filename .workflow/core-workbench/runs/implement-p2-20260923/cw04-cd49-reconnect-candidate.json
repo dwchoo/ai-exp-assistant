@@ -1,0 +1,23 @@
+{
+  "ticket": "CW-04",
+  "candidate_id": "22558e3ec42e9890cc12faad345bee0a4e46596efde5c7f2a980a38e50272024",
+  "approved_bundle_sha256": "e76c0bde27d2d040e373d0a0ed5d90458960f76fbbf3e2ca163cb590a11f1c06",
+  "files_sha256": {
+    "omp_bridge/g3/bridge.ts": "808f2044d32885ef5df95da3b1f5bca2db601ca462acaa5eac078cf35fed86f6",
+    "src/workbench/ipc/bridge_g3/protocol.py": "2c8fc96efb86dc0be2c79f6f1f5f711fba27d3bfa0359e23d8d0d97cec9e0678",
+    "tests/gates/g3_omp/bridge.test.ts": "cc3888e0ed67a32e3a84cee9e1dea2546c8de76472f94e0ab1cdf24722174779",
+    "tests/gates/g3_omp/test_g3_protocol.py": "2926f5fdf67e4d3ae99bfd81480cf180ed530d0185f568a190328d0d89bedd10",
+    "tests/gates/g3_omp/live_rpc_pause_probe.py": "160876f30df9701d6e7e8e5dcfc1f83c16f753d6fecbcfd28fc4bb88c80b366a",
+    "tests/gates/g3_omp/live_rpc_contention_probe.py": "74b30187568eae9812f5b56bf95a210e9148ac5297b19c743d20d541d1d151c8",
+    "tests/gates/g3_omp/live_pause_abort_probe.py": "eb6eb03f1a20371c069d7a4f44853d49d3c5afe18d15f23e31ccceb45abce217",
+    "tests/gates/g3_omp/live_omp_probe.py": "5b310113906d0c558ac12ff7306dcc083985d74bacc2d671faa15a03f8523825",
+    "tests/gates/g3_omp/live_rpc_reconnect_probe.py": "09565f547f085fc1991faecd5375987104479d69f5e93c0eb75069439455d004"
+  },
+  "scope": "actual OMP RPC ACK loss/socket reconnect duplicate-ID test; product unchanged",
+  "checks": {
+    "syntax": "passed",
+    "actual_ack_loss_reconnect": "exit 0 passed_ack_loss_reconnect Root rerun"
+  },
+  "gate_status": "partial_pending_live_composer_session_switch_and_backend",
+  "recorded_at_utc": "2026-09-23T16:08:55.993419+00:00"
+}

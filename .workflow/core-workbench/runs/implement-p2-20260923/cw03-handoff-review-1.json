@@ -1,0 +1,18 @@
+{
+  "ticket": "CW-03",
+  "unit": "C-D48 wb-handoff correction",
+  "candidate_id": "1379f71d756d1128d547c8e363c163b6b87d80afdb328a40e620b2b78cc8061e",
+  "reviewer": "/root/cw03_handoff_review",
+  "verdict": "failed",
+  "findings": [
+    {
+      "severity": "high",
+      "file": "src/workbench/terminal/shell_g2/prototype.py",
+      "line": 504,
+      "issue": "job may start in changed PROMPT_COMMAND after handoff jobs -p snapshot and before READY; automatic dispatch allowed",
+      "runtime_reproducer": "PROMPT_COMMAND='if [[ -n $__wb_handoff_pid ]]; then sleep 30 & fi; __wb_emit READY' then wb-handoff -> can_dispatch True"
+    }
+  ],
+  "inputs_unchanged": true,
+  "recorded_at_utc": "2026-09-23T12:27:34.891631+00:00"
+}

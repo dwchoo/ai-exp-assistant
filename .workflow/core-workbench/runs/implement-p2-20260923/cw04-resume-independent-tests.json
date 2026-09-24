@@ -1,0 +1,54 @@
+{
+  "ticket": "CW-04",
+  "status": "independent_tests_red",
+  "approved_bundle_sha256": "922bd0dca00c52e3c6ab60f700a12e58aff6421034b623c76bd63ea87b3e6356",
+  "base_candidate_id": "dd94e5a9ba4ad6ef0fb0fdc53b2ffa87f854a34858a619eba30ed22930c35b34",
+  "candidate_id": "363d211b5c45b2d7ce66547ec84fabb89159af1a33df64f2a42eed08c0646e8e",
+  "validation_inputs_sha256": {
+    "omp_bridge/g3/bridge.ts": "31f8511a0735f0727783b313be77a5d935bb0b77dd4af628c32389b6e5c8bf1e",
+    "tests/gates/g3_omp/bridge.test.ts": "32b44a25d2c5fa87663757680b2f4522590b165a9565a026a8d5394685b9efb4",
+    "tests/gates/g3_omp/live_omp_probe.py": "5b310113906d0c558ac12ff7306dcc083985d74bacc2d671faa15a03f8523825",
+    "tests/gates/g3_omp/product_bridge_probe.py": "8c2f462c60690c64eec1c03b6e06f9de1dab9f939efb78b081e339a41e73a21b",
+    "tests/gates/g3_omp/test_g3_protocol.py": "e082e0b596564a18f8e10bfaf8f87e8768350b4debcb3df2ba2a656d85653ca3"
+  },
+  "changed_paths": [
+    "tests/gates/g3_omp/bridge.test.ts",
+    "tests/gates/g3_omp/live_omp_probe.py",
+    "tests/gates/g3_omp/product_bridge_probe.py"
+  ],
+  "checks": [
+    {
+      "command": "node --experimental-strip-types --test tests/gates/g3_omp/bridge.test.ts",
+      "exit_code": 1,
+      "result": "failed_expected_implementation",
+      "count": "10/11",
+      "finding": "edit/bash lack pre-execution pause gate",
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "evidence": "Root rerun this turn"
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python -m unittest discover -s tests/gates/g3_omp -p 'test_g3_protocol.py' -v",
+      "exit_code": 0,
+      "result": "passed",
+      "count": "6/6",
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "evidence": "test_designer run"
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 timeout 50s python tests/gates/g3_omp/product_bridge_probe.py",
+      "exit_code": 0,
+      "result": "passed_item_only",
+      "evidence_level": "runtime",
+      "finding": "actual OMP single write auto-approve only"
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 timeout 50s python tests/gates/g3_omp/product_bridge_probe.py --native-approval",
+      "exit_code": 1,
+      "result": "inconclusive",
+      "evidence_level": "runtime",
+      "finding": "approval requested, no file before approval, resolved false, no write"
+    }
+  ],
+  "remaining": "edit/bash pre-execution control; product same-batch pause; peer roundtrip; approval successful integration",
+  "recorded_at_utc": "2026-09-23T13:44:06.734759+00:00"
+}

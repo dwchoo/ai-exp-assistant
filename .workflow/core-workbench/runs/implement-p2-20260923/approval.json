@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "feature": "core-workbench",
+  "user_quote": "$implement  docs/features/core-workbench",
+  "approval_reference": "current user message in this session",
+  "approved_bundle_sha256": "d6df4fe834452e6bc0b34a13f4f99ce44381a419714b87b22e0cc6b1e27cba63",
+  "manifest_record": ".workflow/core-workbench/runs/planning-p2/manifest.json",
+  "plan_revision": "p2",
+  "spec_revision": "s2",
+  "recorded_at_utc": "2026-09-23T07:07:01.162457+00:00"
+}

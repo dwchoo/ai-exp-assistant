@@ -1,0 +1,30 @@
+{
+  "ticket": "CW-04",
+  "candidate_id": "8f786053c65d848339d2a80ed45d7f66511746bfcd1c441428f8bddbc551247e",
+  "review_type": "focused read-only RPC probe review",
+  "findings": [
+    {
+      "severity": "high",
+      "path": "tests/gates/g3_omp/live_rpc_pause_probe.py",
+      "issue": "--pair accepts passed_manager_rpc on pair early return/exception; exit may be 0 without pair proof"
+    },
+    {
+      "severity": "medium",
+      "path": "tests/gates/g3_omp/live_rpc_pause_probe.py",
+      "issue": "manager pass predicate does not assert exact unknown tool ID or post-stop/resume retained unknown outcome"
+    },
+    {
+      "severity": "medium",
+      "path": "tests/gates/g3_omp/live_rpc_pause_probe.py",
+      "issue": "RpcCapture retains full event bodies despite output/body-discard claim"
+    },
+    {
+      "severity": "medium",
+      "path": "tests/gates/g3_omp/live_rpc_pause_probe.py",
+      "issue": "pass verdict set before finally cleanup and omits OMP exit codes and residual temp cwd process check"
+    }
+  ],
+  "cleanup_review": "bounded process group and unique temporary cwd; no dangerous cleanup finding",
+  "runtime_result_note": "Recorded root run reported passed_pair_rpc and concrete unknown IDs, so these harness findings do not retroactively negate that observed event sequence.",
+  "recorded_at_utc": "2026-09-23T15:35:41.843575+00:00"
+}

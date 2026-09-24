@@ -1,0 +1,18 @@
+{
+  "ticket": "CW-04",
+  "status": "candidate_ready_fixture_pass",
+  "approved_bundle_sha256": "7631d51ae0c6f10c8b3281ad962cfb2bfd5fe42f0bf06e672618b904a044a3d2",
+  "paths_sha256": {
+    "omp_bridge/g3/bridge.ts": "489b8e7aeda5770fafac5b88dd779c6ee58a449cc9e9e9d90c7fc57ff3d3e26e",
+    "src/workbench/ipc/bridge_g3/protocol.py": "2c8fc96efb86dc0be2c79f6f1f5f711fba27d3bfa0359e23d8d0d97cec9e0678",
+    "tests/gates/g3_omp/bridge.test.ts": "1934a73ceb34f96b0c4d22631a08e8ab11b1b5c346e6e99c1d21b4a5c4dea7ff",
+    "tests/gates/g3_omp/test_g3_protocol.py": "2926f5fdf67e4d3ae99bfd81480cf180ed530d0185f568a190328d0d89bedd10"
+  },
+  "worker_checks": {
+    "node": "10/10",
+    "python": "7/7",
+    "node_syntax": "passed"
+  },
+  "runtime_probe": "pending",
+  "recorded_at_utc": "2026-09-23T15:05:28.298721+00:00"
+}

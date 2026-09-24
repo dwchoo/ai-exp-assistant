@@ -1,0 +1,17 @@
+{
+  "ticket": "CW-03",
+  "test_delta": [
+    {
+      "path": "tests/gates/g2_shell/test_g2_shell.py",
+      "sha256": "7d2ea32e97d540f76a5cad4ddfb35333e59ffb3fce45429c0596fcf8b12a5aa8"
+    }
+  ],
+  "check": {
+    "command": "python -m unittest discover -s tests/gates/g2_shell -v",
+    "exit_code": 1,
+    "result": "failed",
+    "detail": "13 tests, 4 failure cases: owner return immediately, stale READY after manual line, user background job Bash/dash"
+  },
+  "classification": "implementation/safety boundary defect; input clean checkpoint and manual job observation insufficient",
+  "recorded_at_utc": "2026-09-23T09:13:41.789749+00:00"
+}

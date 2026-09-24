@@ -1,0 +1,55 @@
+{
+  "gate_id": "G3",
+  "item_id": "cd49_rpc_pair_semantics_partial",
+  "candidate_id": "6e15ffd338658fbf0567b69e14490b970b925932c70ba8d707fa894f5a05cbad",
+  "requirements_digest": "e76c0bde27d2d040e373d0a0ed5d90458960f76fbbf3e2ca163cb590a11f1c06",
+  "observed_evidence_level": "runtime",
+  "result": "passed_item_only",
+  "command": "PYTHONDONTWRITEBYTECODE=1 python tests/gates/g3_omp/live_rpc_pause_probe.py --pair",
+  "cwd": "/home/dwchoo/ai-exp-assistant",
+  "environment": {
+    "omp": "18.2.10",
+    "mode": "rpc",
+    "provider": "local scripted",
+    "paths": "temporary"
+  },
+  "exit_code": 0,
+  "observations": {
+    "pair_kinds": [
+      "task",
+      "question",
+      "answer",
+      "report"
+    ],
+    "provider_semantics_match": [
+      true,
+      true,
+      true,
+      true
+    ],
+    "reply_id_match_for_answer_report": [
+      true,
+      true
+    ],
+    "api_accepted": 4,
+    "agent_end_after_send": 4,
+    "manager_abort_requested_before_tool_end": true,
+    "turn_stop_observed": true,
+    "unknown_tool_id_retained": true,
+    "test_owned_reconciliation_checks_passed": 5,
+    "negative_scope_task_approval_process_withheld": true,
+    "omp_exits": [
+      0,
+      0
+    ],
+    "remaining_temp_cwd_processes": 0,
+    "cleanup_verified": true
+  },
+  "unknowns": [
+    "Actual Workbench backend reconciliation/user display absent",
+    "Live busy/approval/ACK loss/reconnect/session switch absent",
+    "Production 1-minute worker model review hold and host terminal/log integration unverified"
+  ],
+  "gate_status": "pending",
+  "recorded_at_utc": "2026-09-23T15:56:47.541542+00:00"
+}

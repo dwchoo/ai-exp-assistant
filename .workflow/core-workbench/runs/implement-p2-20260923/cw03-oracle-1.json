@@ -1,0 +1,15 @@
+{
+  "ticket": "CW-03",
+  "incident": "g2-shell-input-lifecycle",
+  "status": "advisory_only",
+  "source": "oracle final answer in current session",
+  "conclusion": "dash full support not disproven; FIONREAD/Enter/PGID insufficient for clean boundary",
+  "experiments": [
+    "backend exclusive PTY master and serialized input/owner epoch dirty latch",
+    "dash jobs -p direct current-shell FD9 vs command substitution",
+    "manual cd/export then owner return and verified same PID/cwd/env clean boundary",
+    "Ctrl-C/exit, nested/REPL/background/suspend and hook loss fail-closed"
+  ],
+  "unresolved": "safe clean boundary recovery after arbitrary raw user input; same-shell sh full acceptance",
+  "recorded_at_utc": "2026-09-23T08:17:13.431837+00:00"
+}

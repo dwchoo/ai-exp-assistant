@@ -1,0 +1,11 @@
+{
+  "ticket": "CW-04",
+  "candidate_id": "0e0558dcc4edb229ceb2f3182acd2862a3b058d59dd7ac2ec30b8283a0d87ef3",
+  "reviewed_test_sha256": "74b30187568eae9812f5b56bf95a210e9148ac5297b19c743d20d541d1d151c8",
+  "result": "no_new_delta_finding",
+  "prior_findings_resolved": 2,
+  "verified": "busy live idle/inflight/no prior tool end; approval pending and file absent after 200ms; OMP exit0/residual0 required",
+  "scope": "read-only delta; live composer/reconnect/ACK loss remain unverified",
+  "gate_status": "pending",
+  "recorded_at_utc": "2026-09-23T16:06:20.086682+00:00"
+}

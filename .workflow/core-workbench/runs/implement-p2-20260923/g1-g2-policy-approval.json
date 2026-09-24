@@ -1,0 +1,82 @@
+{
+  "schema_version": 1,
+  "feature": "core-workbench",
+  "approval_type": "user-approved implementation policy addendum",
+  "original_implementation_approval_record": ".workflow/core-workbench/runs/implement-p2-20260923/approval.json",
+  "original_bundle_sha256": "d6df4fe834452e6bc0b34a13f4f99ce44381a419714b87b22e0cc6b1e27cba63",
+  "user_answers": [
+    {
+      "decision": "C-D47",
+      "question": "G1 child가 입력을 읽지 않을 때 paste 한도·전체 거절 정책",
+      "answer": "2 MiB 한도·전체 거절 (권장)",
+      "effect": "oversized or insufficient-queue-space paste rejected as whole with visible reason"
+    },
+    {
+      "decision": "C-D48",
+      "question": "G2 수동 shell 입력 뒤 명시적 wb-handoff 허용",
+      "answer": "명시적 handoff 허용 (권장)",
+      "effect": "direct same-shell wb-handoff required before auto resume is considered; actual safety still to verify"
+    }
+  ],
+  "approval_reference": "current user replies to two pending async questions in this session",
+  "revision": {
+    "brief": "r1.8",
+    "spec": "s2.1",
+    "plan": "p2.1"
+  },
+  "plan_scheduling_graph_unchanged": true,
+  "bundle_sha256": "922bd0dca00c52e3c6ab60f700a12e58aff6421034b623c76bd63ea87b3e6356",
+  "files_sha256": {
+    "AGENTS.md": "f5732fad0e6f1e7ac6c82ac6e9baee81d4d1574e7bb204de2895fe0602d0cbeb",
+    "CONTEXT.md": "58f1d30a19cd10285f8f3e4a017eb0c2f568920203f1d960834ce89e2c1934e6",
+    "docs/adr/0001-no-external-multiplexer.md": "c09799d6ee17fb8273208b74413fc4703df970e643fa52609f61e7c800de1dbf",
+    "docs/features/core-workbench/BRIEF.md": "ffee73daf864a11630dc34f7d903f7fb285078185aa21cace3a632e8e43812c8",
+    "docs/features/core-workbench/DECISIONS.md": "059ab330f2208ab4ef3ec7f8a8c1d6e187f55f277f3e4536024a57759c0a9c89",
+    "docs/features/core-workbench/EVIDENCE.md": "29555081147ced2554d012566d1765d3ff78c4b8d2e65029add4ae4f1274a778",
+    "docs/features/core-workbench/OPERATING-CONTRACT.md": "3740218ec48ef9339a4adc662c3ffe0baf6346070d5fbfa40a9d05ea0325a314",
+    "docs/features/core-workbench/PLAN.json": "0a2e5a034c570fa899822035a0287687aad54848230e84dc4a3ee441fd75f355",
+    "docs/features/core-workbench/SOURCE-RECONCILIATION.md": "bb98edeb216be5dab972dcffb4a0b0e731c9e7faccfc5928e864c154b68af359",
+    "docs/features/core-workbench/SPEC.md": "967e2fab4a0a8613fc24e0deb98609864ca32edb4bcc84459840d192d3b72b02",
+    "docs/features/core-workbench/tickets/CW-01.md": "f1a958e1c13e6dbaa51e3444d30ff83f231b84c0f9fe7b97125fe6dcc82866bc",
+    "docs/features/core-workbench/tickets/CW-02.md": "02c7c16aa3c0351f9f8938c6fd0df8ccb504ba0eb1ce242839cb1e58abde9d97",
+    "docs/features/core-workbench/tickets/CW-03.md": "4296444147f3c9a7a373bda60c0d4cb9879d9d23a0a6681c2d1af213fdc6c380",
+    "docs/features/core-workbench/tickets/CW-04.md": "b0379297e644cc5a3dee0755f86252fd75951b4aa43a917d04d2009676eee749",
+    "docs/features/core-workbench/tickets/CW-05.md": "e1dfe5b36e48243eb5217bd3c28404ae7711aba32144ee790e3d9458844485a7",
+    "docs/features/core-workbench/tickets/CW-06.md": "ebdb8a90126198ae3a24d0fe09163e275c082e4398b7ab1bfbfaadc4e076fd3e",
+    "docs/features/core-workbench/tickets/CW-07.md": "524b0a5683769be26ff1f8684462a33216f261f7dd552b91b3139e2bbc29dc07",
+    "docs/features/core-workbench/tickets/CW-08.md": "e3566b5cb52a8836f639e2ce3903fe8eeac5ac00260fde9b7966dc3305bca30c",
+    "docs/features/core-workbench/tickets/CW-09.md": "17ee0f4bb8f9b3f9efce7f8ef41c18c103f7858c56ce16fb297ef915e7210729",
+    "docs/features/core-workbench/tickets/CW-10.md": "05eb98eadf8e4a9c5d20c939ef26651f3e0a945b92a640f60ac6927ea81ef6d7",
+    "docs/features/core-workbench/tickets/CW-11.md": "564b23aa1054a867cc16e6af554e3dab2c56e5951c734d117df47840ee6b1037",
+    "docs/features/core-workbench/tickets/CW-12.md": "9ddf82d4a5b15a6123cee53eff0913065b641df55b0eaecc87b872d536ecf342",
+    "docs/features/core-workbench/tickets/CW-13.md": "4bb7502b2b01c92998ef45ab7d23c7403b2bbc134c195df582587caff3cfb2bd",
+    "docs/features/core-workbench/tickets/CW-14.md": "ebc8df91adc8fecd5be98c1eaf40f47518fc634913a72ba33b45b90fbebaac59",
+    "docs/features/core-workbench/tickets/CW-15.md": "7c0d7e7c4f1604ee127529ffb248161c81b7c606082450f1ce78e1369a4c1f0c",
+    "docs/features/core-workbench/tickets/CW-16.md": "ee61836309e5b39bf43cddfd966d05b4882eacf9e984a06899da7be04b74f168"
+  },
+  "changed_paths": [
+    "docs/features/core-workbench/BRIEF.md",
+    "docs/features/core-workbench/DECISIONS.md",
+    "docs/features/core-workbench/OPERATING-CONTRACT.md",
+    "docs/features/core-workbench/PLAN.json",
+    "docs/features/core-workbench/SPEC.md",
+    "docs/features/core-workbench/tickets/CW-01.md",
+    "docs/features/core-workbench/tickets/CW-02.md",
+    "docs/features/core-workbench/tickets/CW-03.md",
+    "docs/features/core-workbench/tickets/CW-04.md",
+    "docs/features/core-workbench/tickets/CW-05.md",
+    "docs/features/core-workbench/tickets/CW-06.md",
+    "docs/features/core-workbench/tickets/CW-07.md",
+    "docs/features/core-workbench/tickets/CW-08.md",
+    "docs/features/core-workbench/tickets/CW-09.md",
+    "docs/features/core-workbench/tickets/CW-10.md",
+    "docs/features/core-workbench/tickets/CW-11.md",
+    "docs/features/core-workbench/tickets/CW-12.md",
+    "docs/features/core-workbench/tickets/CW-13.md",
+    "docs/features/core-workbench/tickets/CW-14.md",
+    "docs/features/core-workbench/tickets/CW-15.md",
+    "docs/features/core-workbench/tickets/CW-16.md"
+  ],
+  "recorded_at_utc": "2026-09-23T10:22:19.292581+00:00",
+  "plan_base_requirements_refreshed": "CW-02..CW-16 now consume BRIEF r1.8; CW-01 retains historical r1.7 baseline"
+}

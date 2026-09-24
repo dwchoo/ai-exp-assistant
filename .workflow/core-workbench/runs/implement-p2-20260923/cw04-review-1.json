@@ -1,0 +1,14 @@
+{
+  "ticket": "CW-04",
+  "candidate_id": "bf1e1374db9e23c779e4d50c4712401c8101f664dd57989d8e5e7745a6a8ccab",
+  "reviewer": "/root/cw04_review",
+  "verdict": "blocked",
+  "findings": [
+    "prepared tool_call counted as in-flight",
+    "preauthorized B may start after pause",
+    "PTY output not drained in live probe",
+    "inReplyToMessageId absent from delivered body"
+  ],
+  "reviewed_paths_unchanged": true,
+  "recorded_at_utc": "2026-09-23T10:16:37.088648+00:00"
+}

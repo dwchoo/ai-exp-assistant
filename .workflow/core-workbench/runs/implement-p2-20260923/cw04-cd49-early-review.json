@@ -1,0 +1,31 @@
+{
+  "ticket": "CW-04",
+  "review_type": "narrow_early_technical",
+  "candidate_id": "4ebafc415841a7af808324522bbf0c1d060d161f45552fbaba22e1e2606fcb53",
+  "approved_bundle_sha256": "7631d51ae0c6f10c8b3281ad962cfb2bfd5fe42f0bf06e672618b904a044a3d2",
+  "status": "actionable_findings",
+  "findings": [
+    {
+      "severity": "high",
+      "issue": "session_switch clears unresolved tool/abort state"
+    },
+    {
+      "severity": "medium",
+      "issue": "pre-agent_start pause targets old turn sequence"
+    },
+    {
+      "severity": "medium",
+      "issue": "tool_execution_end erases unknown outcome without result evidence"
+    },
+    {
+      "severity": "proof_gap",
+      "issue": "resume trusted backend reconciliation and user decision not integrated"
+    },
+    {
+      "severity": "proof_gap",
+      "issue": "in-flight sendUserMessage pause race untested"
+    }
+  ],
+  "gate_status": "pending",
+  "recorded_at_utc": "2026-09-23T15:15:27.138150+00:00"
+}

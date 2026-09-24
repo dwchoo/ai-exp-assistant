@@ -1,0 +1,21 @@
+{
+  "ticket": "CW-03",
+  "status": "needs_oracle",
+  "candidate": "unchanged from cw03-base; no file delta",
+  "environment": "Linux Python 3.12.3 pty.fork, Bash 5.2.21, dash /usr/bin/dash, TERM=dumb, FD9 control",
+  "observations": [
+    "Bash and dash: incomplete echo USER_PENDING gives slave FIONREAD=0; subsequent newline manager text submits user command first",
+    "Bash bind -x READLINE_LINE can distinguish empty/pending through FD9",
+    "Bash wrapper jobs-present unknown for background/suspend; dash wrapper misclassified background completed0 and suspend completed148",
+    "Ctrl-C in sleep/read and exit23 lacked completion; should be unknown"
+  ],
+  "unknowns": [
+    "External input-owner protocol sufficiency for dash",
+    "dash job-control observation without false completion",
+    "same-shell sh support feasibility"
+  ],
+  "scope_audit": "cw03-base manifest comparison found no changed files",
+  "processes": "worker reports all experiment shells/children stopped and ps recheck found none",
+  "oracle_call": 1,
+  "recorded_at_utc": "2026-09-23T07:48:51.519645+00:00"
+}

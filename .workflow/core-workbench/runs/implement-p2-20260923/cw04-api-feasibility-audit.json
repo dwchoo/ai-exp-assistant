@@ -1,0 +1,29 @@
+{
+  "ticket": "CW-04",
+  "candidate_id": "363d211b5c45b2d7ce66547ec84fabb89159af1a33df64f2a42eed08c0646e8e",
+  "result": "blocked_public_api_approval_boundary",
+  "evidence_level": "OMP v18.2.10 tagged primary source + existing runtime probes",
+  "observations": [
+    {
+      "source": "https://github.com/can1357/oh-my-pi/blob/v18.2.10/packages/coding-agent/src/extensibility/extensions/runner.ts#L537-L574",
+      "fact": "same-name ctx.invokeTool calls native execute directly and inherits wrapper approval without rerunning native gate"
+    },
+    {
+      "source": "https://github.com/can1357/oh-my-pi/blob/v18.2.10/packages/coding-agent/src/tools/bash.ts#L387-L470",
+      "fact": "native bash approval evaluates bash.patterns deny/prompt and critical command overrides per input"
+    },
+    {
+      "source": "https://github.com/can1357/oh-my-pi/blob/v18.2.10/packages/coding-agent/src/extensibility/extensions/types.ts#L640-L647",
+      "fact": "public ToolInfo excludes approval callback/policy"
+    },
+    {
+      "source": "https://github.com/can1357/oh-my-pi/blob/v18.2.10/packages/coding-agent/src/tools/write.ts#L531-L579",
+      "fact": "native write approval is input/path dependent and may resolve a mounted device policyKey; static exec wrapper does not reproduce this policy"
+    }
+  ],
+  "inference": "Same-name write/bash wrappers using static exec plus ctx.invokeTool may bypass native argument-dependent deny/prompt or device policy. Their pre-exec queue cannot establish required G3 control while preserving native approval; unsafe write wrapper was removed from checkout.",
+  "code_changes_in_blocked_attempt": [],
+  "node_test": "10/11, edit/bash wrapper requirement red",
+  "recorded_at_utc": "2026-09-23T13:49:55.148538+00:00",
+  "audit_updated_at_utc": "2026-09-23T14:03:51.603815+00:00"
+}

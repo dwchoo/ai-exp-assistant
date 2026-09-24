@@ -1,0 +1,23 @@
+{
+  "ticket": "CW-04",
+  "candidate_id": "5d99e0d8dbd73956b27fab776803f63429cb2e05cd38fbb6a702b606f9f64556",
+  "reviewed_test_sha256": "bb7de9a1e87d87b36b48412ae6731754f1e47cad62073d5c3e2ab19a1eaaac60",
+  "result": "findings",
+  "findings": [
+    {
+      "severity": "medium",
+      "issue": "busy pass predicate omits live idle=false and in-flight tool count"
+    },
+    {
+      "severity": "medium",
+      "issue": "final pass omits OMP exit code 0"
+    },
+    {
+      "severity": "scope_note",
+      "issue": "approval pending asserted only at injection; 200ms persistence not proved; live composer/reconnect/ACK loss remain"
+    }
+  ],
+  "cleanup_review": "bounded temp cwd/process group; no body retention or dangerous cleanup finding",
+  "gate_status": "pending",
+  "recorded_at_utc": "2026-09-23T16:03:25.498831+00:00"
+}

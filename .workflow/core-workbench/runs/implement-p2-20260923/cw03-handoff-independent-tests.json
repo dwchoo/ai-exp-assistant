@@ -1,0 +1,17 @@
+{
+  "ticket": "CW-03",
+  "role": "test_designer",
+  "changed_paths": [
+    "tests/gates/g2_shell/test_g2_shell.py"
+  ],
+  "test_sha256": "0f03cab7805e8c370d2dc8309916ac83fd18c3a7f652cc2ed767aaaf8e3cd90c",
+  "baseline_sha256": "7d2ea32e97d540f76a5cad4ddfb35333e59ffb3fce45429c0596fcf8b12a5aa8",
+  "command": "python -m unittest discover -s tests/gates/g2_shell -p 'test_g2_shell.py' -q",
+  "cwd": "/home/dwchoo/ai-exp-assistant",
+  "result": "failed_expected_red",
+  "exit_code": 1,
+  "test_count": 20,
+  "failure_entries": 10,
+  "candidate_baseline": "handoff-resume-20260923-2106.json",
+  "approved_bundle_sha256": "922bd0dca00c52e3c6ab60f700a12e58aff6421034b623c76bd63ea87b3e6356"
+}

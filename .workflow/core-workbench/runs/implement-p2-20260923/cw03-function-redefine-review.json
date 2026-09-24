@@ -1,0 +1,28 @@
+{
+  "ticket": "CW-03",
+  "unit": "C-D48 wb-handoff prompt boundary",
+  "candidate_id": "ed42d2241ca6e255dbfa74404c89e1efde14e3892f5807aec9234c66f938998b",
+  "reviewer": "/root/cw03_function_redefine_review",
+  "verdict": "failed",
+  "findings": [
+    {
+      "severity": "high",
+      "issue": "Bash builtin()/dash jobs() function override hides background jobs from post-READY probe",
+      "evidence_level": "runtime_shell",
+      "runtime_confirmed": true
+    },
+    {
+      "severity": "high",
+      "issue": "Dash post-READY jobs runs in PS1 command substitution subshell and misses parent shell job started after HANDOFF snapshot",
+      "evidence_level": "runtime_shell",
+      "runtime_confirmed": true
+    }
+  ],
+  "root_runtime_probe": {
+    "command": "inline ShellProcess Bash/dash function override and dash parent-job reproducer",
+    "result": "can_dispatch True on Bash and dash despite live HIDDEN_JOB/PARENT_JOB after JOBS_END:HANDOFF before READY",
+    "process_cleanup": "ShellProcess context closed jobs"
+  },
+  "inputs_unchanged": true,
+  "recorded_at_utc": "2026-09-23T13:17:02.025441+00:00"
+}

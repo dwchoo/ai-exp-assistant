@@ -1,0 +1,20 @@
+{
+  "ticket": "CW-04",
+  "candidate_id": "8f786053c65d848339d2a80ed45d7f66511746bfcd1c441428f8bddbc551247e",
+  "approved_bundle_sha256": "c79c6d64ca0782f1b4e817c68e148d07495f61e911a3af3dfcd7265b76b783d3",
+  "files_sha256": {
+    "omp_bridge/g3/bridge.ts": "808f2044d32885ef5df95da3b1f5bca2db601ca462acaa5eac078cf35fed86f6",
+    "src/workbench/ipc/bridge_g3/protocol.py": "2c8fc96efb86dc0be2c79f6f1f5f711fba27d3bfa0359e23d8d0d97cec9e0678",
+    "tests/gates/g3_omp/bridge.test.ts": "cc3888e0ed67a32e3a84cee9e1dea2546c8de76472f94e0ab1cdf24722174779",
+    "tests/gates/g3_omp/test_g3_protocol.py": "2926f5fdf67e4d3ae99bfd81480cf180ed530d0185f568a190328d0d89bedd10",
+    "tests/gates/g3_omp/live_pause_abort_probe.py": "eb6eb03f1a20371c069d7a4f44853d49d3c5afe18d15f23e31ccceb45abce217",
+    "tests/gates/g3_omp/live_rpc_pause_probe.py": "5c3c63824c5d644d15b0417565990f33358a2506dcc65a4be541fb611a45dedf"
+  },
+  "checks": {
+    "node": "15/15 exit 0",
+    "python": "7/7 exit 0",
+    "actual_omp_rpc_pair": "exit 0 passed_pair_rpc"
+  },
+  "gate_status": "partial_pending_backend_reconciliation_and_races",
+  "recorded_at_utc": "2026-09-23T15:34:13.021145+00:00"
+}

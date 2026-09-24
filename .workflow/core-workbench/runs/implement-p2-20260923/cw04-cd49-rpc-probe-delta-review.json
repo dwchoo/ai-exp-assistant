@@ -1,0 +1,11 @@
+{
+  "ticket": "CW-04",
+  "candidate_id": "95a31e3ec0ab31fe8a8446d098f00b0ea3f2a5f8781a0d8fb60df4c1f5c160b0",
+  "review_type": "read-only delta review of RPC probe correction",
+  "reviewed_test_sha256": "d78aa58de016e6806b5855fa84910c9478622ded7c1c83b79fc897c5dcb349c8",
+  "result": "no_new_delta_finding",
+  "prior_findings_resolved": 4,
+  "scope": "test-only; product bytes unchanged; actual OMP not rerun by reviewer",
+  "gate_status": "pending",
+  "recorded_at_utc": "2026-09-23T15:41:56.485449+00:00"
+}

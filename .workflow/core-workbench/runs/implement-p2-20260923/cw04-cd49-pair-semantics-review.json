@@ -1,0 +1,10 @@
+{
+  "ticket": "CW-04",
+  "candidate_id": "6e15ffd338658fbf0567b69e14490b970b925932c70ba8d707fa894f5a05cbad",
+  "reviewed_test_sha256": "160876f30df9701d6e7e8e5dcfc1f83c16f753d6fecbcfd28fc4bb88c80b366a",
+  "result": "no_finding_in_claimed_scope",
+  "verified": "fresh message ID, target provider, exact structured IDs/reply IDs before agent_end; no raw body retention or pause/reconcile/cleanup regression",
+  "limitation": "exact provider request index per delivery and model answer quality not tested",
+  "gate_status": "pending",
+  "recorded_at_utc": "2026-09-23T15:58:50.243760+00:00"
+}

@@ -1,0 +1,65 @@
+{
+  "ticket": "CW-02",
+  "status": "candidate_ready_gate_unpassed",
+  "candidate_id": "f6302326d61c16bb5e0f4a5a33633507935ce340f2a60db4ff00c03bdf4c0aed",
+  "files": [
+    {
+      "path": "docs/features/core-workbench/gates/G1.md",
+      "sha256": "1e61ed9d6b3c11e0f7886c79cbaf9d0d3132d84f4ffac62bfc292e375b3d30d3",
+      "mode": 436
+    },
+    {
+      "path": "src/workbench/terminal/vt_g1/screen.py",
+      "sha256": "3f0c355b7126fc696f8b34fe1496791cd5e1d5e14585432fde85fe0b4f322ac2",
+      "mode": 436
+    },
+    {
+      "path": "src/workbench/terminal/vt_g1/session.py",
+      "sha256": "9366e968ae2aa17a83d06afd63be4ca4b7eab683f27e12ffc2fba41d5fb275c3",
+      "mode": 436
+    },
+    {
+      "path": "src/workbench/ui/terminal_g1/app.py",
+      "sha256": "cbd7daf2bf93e675737c044f331f15c4fa7ad3e442d69f7ef94f8df3647fc0ec",
+      "mode": 436
+    },
+    {
+      "path": "src/workbench/ui/terminal_g1/input_router.py",
+      "sha256": "39a602142a959202d124e44d0063cd822c66db9f357aac2e39aee03090f65845",
+      "mode": 436
+    },
+    {
+      "path": "tests/gates/g1_vt/live_omp_probe.py",
+      "sha256": "623370075d6da44ffeceec864506d3d416de9c6fa9cf36a000487b93f1b0d748",
+      "mode": 436
+    },
+    {
+      "path": "tests/gates/g1_vt/test_g1_candidate.py",
+      "sha256": "2991ce0015b91ba04bc523e79996554dd997af81f1d1eb4cf4f02a932e3d0453",
+      "mode": 436
+    }
+  ],
+  "worker_checks": [
+    {
+      "command": "Python unittest discover tests/gates/g1_vt",
+      "exit_code": 0,
+      "result": "passed",
+      "detail": "6 fixtures"
+    },
+    {
+      "command": "real OMP dual PTY probe",
+      "exit_code": 0,
+      "result": "partial",
+      "detail": "composer/Korean/paste/slash/clear, no model/tool"
+    },
+    {
+      "command": "real 240x45 3-pane app PTY",
+      "exit_code": 0,
+      "result": "partial",
+      "detail": "two OMP plus Bash; host output; F10 child teardown"
+    }
+  ],
+  "gate_status": "pending; approval/tool output, real query/resize, detach/reconnect and terminal matrix unverified",
+  "scope_audit": "7 new files, all within CW-02 scope; no baseline file modified",
+  "recorded_at_utc": "2026-09-23T08:17:13.431837+00:00"
+}

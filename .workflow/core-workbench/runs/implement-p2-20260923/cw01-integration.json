@@ -1,0 +1,24 @@
+{
+  "ticket": "CW-01",
+  "status": "integrated",
+  "candidate_id": "51586db6d81f77699c93f54610146f2816d89b2deb1cb0515dcede35a5f581c8",
+  "approved_bundle_sha256": "d6df4fe834452e6bc0b34a13f4f99ce44381a419714b87b22e0cc6b1e27cba63",
+  "checks": [
+    {
+      "command": "sh tests/gates/harness/run-contracts.sh",
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "exit_code": 0,
+      "result": "passed",
+      "detail": "Root recheck: Python 14/14; Node 12/12"
+    }
+  ],
+  "independent_test": "cw01-independent-tests.json and corrections 1-3",
+  "review": "cw01-review-1.json, cw01-review-2.json, cw01-review-3.json, final reviewer result in current session: no blocker",
+  "scope_audit": "11 attributable paths, all in CW-01 planned scope except Root-authorized src/workbench/__init__.py; approved inputs unchanged",
+  "limitations": [
+    "Actual G1-G4 runtime compatibility remains unverified; CW-01 is contract harness only",
+    "CW-04 must bind claimed role to authenticated connection",
+    "Low: Object.prototype.toJSON contamination could affect TS serializer"
+  ],
+  "recorded_at_utc": "2026-09-23T07:39:17.986450+00:00"
+}

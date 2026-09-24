@@ -1,0 +1,15 @@
+{
+  "ticket": "CW-01",
+  "candidate_id": "c3fb56f2ef45f2ae2e8f40173444560fb06b21e97e22637526c18cacde9acf39",
+  "result": "finding_requires_fix",
+  "finding": {
+    "severity": "medium",
+    "summary": "Python accepts optional null and sessionGeneration above JS safe integer while TypeScript rejects",
+    "python": "src/workbench/contracts/v1.py",
+    "typescript": "omp_bridge/contract/v1.ts",
+    "required": "align wire validation and add both-language boundary tests"
+  },
+  "deferred_followup": "CW-04 bridge must bind claimed senderRole to authenticated transport role, per SPEC; not CW-01 standalone parser blocker",
+  "reviewer_report": "fresh reviewer final answer in current session",
+  "recorded_at_utc": "2026-09-23T07:23:19.988992+00:00"
+}

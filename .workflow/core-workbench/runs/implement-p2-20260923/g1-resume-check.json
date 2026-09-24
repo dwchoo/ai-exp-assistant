@@ -1,0 +1,41 @@
+{
+  "gate_id": "G1",
+  "requirements_digest": "922bd0dca00c52e3c6ab60f700a12e58aff6421034b623c76bd63ea87b3e6356",
+  "candidate_id": "d256f79b4a0e2cf0f2df5df3c13600c8e3a3e9549fbc917575f72d194a7cc745",
+  "environment": {
+    "python": "3.12.3",
+    "omp": "18.2.10",
+    "pyte": "0.8.2",
+    "terminal": "Linux PTY no outer tmux/herdr"
+  },
+  "checks": [
+    {
+      "item_id": "vt_pty_input_fixture",
+      "observed_evidence_level": "fixture",
+      "command": "PYTHONDONTWRITEBYTECODE=1 /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/gates/g1_vt -p 'test_*.py' -q",
+      "exit_code": 0,
+      "result": "passed",
+      "test_count": 21
+    },
+    {
+      "item_id": "two_omp_composer_korean_paste_slash",
+      "observed_evidence_level": "runtime",
+      "command": "PYTHONDONTWRITEBYTECODE=1 /tmp/cw02-g1-venv/bin/python tests/gates/g1_vt/live_omp_probe.py",
+      "exit_code": 0,
+      "result": "passed",
+      "pids_reaped": [
+        3595414,
+        3595415
+      ]
+    }
+  ],
+  "gate_result": "pending",
+  "unknowns": [
+    "approval UI",
+    "actual mutable tool output",
+    "real OMP resize/query round-trip",
+    "detach/reconnect",
+    "outer terminal/tmux/herdr interaction"
+  ],
+  "recorded_at_utc": "2026-09-23T12:34:30.881722+00:00"
+}

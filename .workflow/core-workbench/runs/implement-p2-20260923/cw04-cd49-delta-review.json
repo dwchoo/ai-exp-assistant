@@ -1,0 +1,9 @@
+{
+  "ticket": "CW-04",
+  "candidate_id": "191ab2b858ea68909d520c1243250978625f4223c93b0528d006b9d766309ba4",
+  "status": "one_high_finding",
+  "prior_five_findings": "resolved",
+  "finding": "resume clears unknownOutcomeCalls and unresolvedPriorSessions while result may remain unknown",
+  "G3": "partial_pending",
+  "recorded_at_utc": "2026-09-23T15:22:35.535467+00:00"
+}

@@ -1,0 +1,19 @@
+{
+  "ticket": "CW-04",
+  "candidate_id": "22558e3ec42e9890cc12faad345bee0a4e46596efde5c7f2a980a38e50272024",
+  "reviewed_test_sha256": "09565f547f085fc1991faecd5375987104479d69f5e93c0eb75069439455d004",
+  "result": "findings",
+  "findings": [
+    {
+      "severity": "medium",
+      "issue": "dropped ACK configured but actual api_ack receipt/discard not observed"
+    },
+    {
+      "severity": "medium",
+      "issue": "retry pass accepts unknown_no_replay; accepted-then-duplicate path must require duplicate_api_accepted"
+    }
+  ],
+  "scope": "same PID/session/generation and cleanup/privacy sound; immediate reconnect window only",
+  "gate_status": "pending",
+  "recorded_at_utc": "2026-09-23T16:10:12.885885+00:00"
+}

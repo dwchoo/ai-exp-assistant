@@ -1,0 +1,30 @@
+{
+  "ticket": "CW-01",
+  "status": "test_failure",
+  "test_delta": [
+    {
+      "path": "tests/contracts/test_v1.py",
+      "sha256": "c2f8139bd54ba2212b5a6103ad5e55eb8a0f6346972502137739ae324022b325",
+      "mode": 436
+    },
+    {
+      "path": "tests/gates/harness/contracts.test.ts",
+      "sha256": "a97254a4256dfd62b347480f73cf53a364273b7568dd56dc6b8ee7a391022a36",
+      "mode": 436
+    },
+    {
+      "path": "tests/gates/harness/run-contracts.sh",
+      "sha256": "9bc331e46eba0638cf8bd2696c98175788bd17871b92d63e6510e16ddb1c905d",
+      "mode": 509
+    }
+  ],
+  "check": {
+    "command": "sh tests/gates/harness/run-contracts.sh",
+    "cwd": "/home/dwchoo/ai-exp-assistant",
+    "exit_code": 1,
+    "result": "failed",
+    "detail": "Python 9/9 pass; TS 5/6 pass; nested Date accepted by parseControlEnvelope instead of ContractError"
+  },
+  "classification": "implementation defect in TS nested JSON value validation",
+  "recorded_at_utc": "2026-09-23T07:19:12.944303+00:00"
+}

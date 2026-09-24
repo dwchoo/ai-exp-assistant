@@ -1,0 +1,19 @@
+{
+  "ticket": "CW-03",
+  "status": "independent_test_red",
+  "candidate_id": "4721952362dc0d423774ab9dbdede090a04a5ea651d25e5002fbb08ce4f73765",
+  "validation_inputs_sha256": {
+    "src/workbench/terminal/shell_g2/prototype.py": "04ddc94965c32b5dec28ef4d7015cdeb61c144a90f3acab84a9bcf542048164c",
+    "tests/gates/g2_shell/test_g2_shell.py": "2a8c42637f0927c633b90908bcefaa33d0b90bb850ca5664e457b87229ac28b5"
+  },
+  "changed_paths": [
+    "tests/gates/g2_shell/test_g2_shell.py"
+  ],
+  "command": "PYTHONDONTWRITEBYTECODE=1 python -m unittest tests.gates.g2_shell.test_g2_shell -q",
+  "cwd": "/home/dwchoo/ai-exp-assistant",
+  "exit_code": 1,
+  "result": "25 passed, one expected safety failure",
+  "failure": "can_dispatch True while overridden Bash prompt hook is paused after forged READY but before live job starts",
+  "evidence": "Root rerun this turn",
+  "recorded_at_utc": "2026-09-23T14:02:33.168127+00:00"
+}

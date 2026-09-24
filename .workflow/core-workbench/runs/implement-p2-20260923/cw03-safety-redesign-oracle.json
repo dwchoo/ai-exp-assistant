@@ -1,0 +1,13 @@
+{
+  "ticket": "CW-03",
+  "status": "advisory_only_read_only",
+  "question": "same-shell Bash/dash safe automatic dispatch after arbitrary user hook/function/trap changes",
+  "conclusion": "No general safe resume invariant with stock shell internal execution uncontrolled and only PTY, shell-authored FD9 events, and /proc snapshots. Protected same-interpreter execution boundary required; otherwise G2 remains blocked.",
+  "review_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw03-safety-redesign-review.md",
+  "review_sha256": "128f5d4d333ee5fecde4f3976f58968c53183cf947c0b9a00eac0a53776dba49",
+  "user_direction": "안전 경계 재설계 검토",
+  "source": "oracle_senior final response and Root local shell experiments",
+  "product_files_changed": [],
+  "requirements_changed": false,
+  "recorded_at_utc": "2026-09-23T14:40:53.570223+00:00"
+}

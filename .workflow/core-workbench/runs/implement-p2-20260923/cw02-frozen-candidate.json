@@ -1,0 +1,57 @@
+{
+  "ticket": "CW-02",
+  "candidate_id": "ced6d68b6e3744b26c0c52116efb92b4c4d372cc27116cc1fdcb38057fa45d1d",
+  "files": [
+    {
+      "path": "docs/features/core-workbench/gates/G1.md",
+      "sha256": "1e61ed9d6b3c11e0f7886c79cbaf9d0d3132d84f4ffac62bfc292e375b3d30d3",
+      "mode": 436
+    },
+    {
+      "path": "src/workbench/terminal/vt_g1/screen.py",
+      "sha256": "3f0c355b7126fc696f8b34fe1496791cd5e1d5e14585432fde85fe0b4f322ac2",
+      "mode": 436
+    },
+    {
+      "path": "src/workbench/terminal/vt_g1/session.py",
+      "sha256": "9366e968ae2aa17a83d06afd63be4ca4b7eab683f27e12ffc2fba41d5fb275c3",
+      "mode": 436
+    },
+    {
+      "path": "src/workbench/ui/terminal_g1/app.py",
+      "sha256": "cbd7daf2bf93e675737c044f331f15c4fa7ad3e442d69f7ef94f8df3647fc0ec",
+      "mode": 436
+    },
+    {
+      "path": "src/workbench/ui/terminal_g1/input_router.py",
+      "sha256": "ecdf8d34644da97b40607e4d156fc2d0be19f04f80b1b85d3f881c3b8bbc9167",
+      "mode": 436
+    },
+    {
+      "path": "tests/gates/g1_vt/live_omp_probe.py",
+      "sha256": "623370075d6da44ffeceec864506d3d416de9c6fa9cf36a000487b93f1b0d748",
+      "mode": 436
+    },
+    {
+      "path": "tests/gates/g1_vt/test_g1_candidate.py",
+      "sha256": "45586ddfec7ba0827fd64b6da3147e0db3bf2c366c6a6a12857c04bcf756b588",
+      "mode": 436
+    }
+  ],
+  "gate_status": "pending",
+  "checks": [
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/gates/g1_vt -p test_*.py -v",
+      "exit_code": 0,
+      "result": "passed",
+      "detail": "11/11 fixtures"
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 /tmp/cw02-g1-venv/bin/python tests/gates/g1_vt/live_omp_probe.py",
+      "exit_code": 0,
+      "result": "partial",
+      "detail": "real OMP 18.2.10 two PIDs 3437234/3437235; composer/Korean/paste/slash/clear; no model/tool"
+    }
+  ],
+  "recorded_at_utc": "2026-09-23T08:21:44.955017+00:00"
+}

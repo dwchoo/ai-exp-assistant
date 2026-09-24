@@ -1,0 +1,31 @@
+{
+  "ticket": "CW-03",
+  "status": "candidate_ready_gate_pending",
+  "candidate_id": "129066a7c4f8983312c48bae9986626e4d5851e272c52968fa680ec5e6ad597a",
+  "files": [
+    {
+      "path": "docs/features/core-workbench/gates/G2.md",
+      "sha256": "7ae654ffff15b8798a3ea47c2f816264bbf4e8e35d634451694e218c480b471a",
+      "mode": 436
+    },
+    {
+      "path": "src/workbench/terminal/shell_g2/prototype.py",
+      "sha256": "10e4170306dbf1ea6f3c9b1084e70622d5553a5460456e377082772dbefa30b8",
+      "mode": 436
+    },
+    {
+      "path": "tests/gates/g2_shell/test_g2_shell.py",
+      "sha256": "8473e0b6c7b176e3c8072cbf35773974d534c75a69215716ba789468354f4c20",
+      "mode": 436
+    }
+  ],
+  "check": {
+    "command": "PYTHONDONTWRITEBYTECODE=1 python -m unittest discover -s tests/gates/g2_shell -v",
+    "cwd": "/home/dwchoo/ai-exp-assistant",
+    "exit_code": 0,
+    "result": "partial",
+    "detail": "Root real Bash/dash harness 7/7; incomplete full G2 input matrix"
+  },
+  "scope_audit": "3 new CW-03 files only, approved bundle unchanged",
+  "recorded_at_utc": "2026-09-23T09:11:01.763075+00:00"
+}

@@ -1,0 +1,25 @@
+{
+  "ticket": "CW-03",
+  "status": "independent_tests_red",
+  "approved_bundle_sha256": "922bd0dca00c52e3c6ab60f700a12e58aff6421034b623c76bd63ea87b3e6356",
+  "base_snapshot": ".workflow/core-workbench/runs/implement-p2-20260923/handoff-pause-20260923-2224.json",
+  "candidate_id": "a12dc9a63b9496ea5e5b0e7439383fd799f751f546f67387dca27a9b99426c42",
+  "validation_inputs_sha256": {
+    "src/workbench/terminal/shell_g2/prototype.py": "64267d025dd89ea78441b07fa1ca496251d9cb934d192513efc5dd0ef1d132d0",
+    "tests/gates/g2_shell/test_g2_shell.py": "70b8a153d3a765a6858e22142b032794bde5bfa2ced317b4c404c204a4150a92"
+  },
+  "changed_paths": [
+    "tests/gates/g2_shell/test_g2_shell.py"
+  ],
+  "command": "PYTHONDONTWRITEBYTECODE=1 python -m unittest tests.gates.g2_shell.test_g2_shell -q",
+  "cwd": "/home/dwchoo/ai-exp-assistant",
+  "exit_code": 1,
+  "result": "failed_expected_implementation",
+  "ran_tests": 25,
+  "passed_tests": 22,
+  "failed_tests": 3,
+  "failure_assertions": 6,
+  "evidence": "Root rerun this turn; all new real-shell paths observed can_dispatch=True and no UnsafeShellState",
+  "process_cleanup": "ShellProcess contexts closed; post-run process inspection required",
+  "recorded_at_utc": "2026-09-23T13:54:13.923530+00:00"
+}

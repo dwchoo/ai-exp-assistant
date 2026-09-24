@@ -1,0 +1,114 @@
+{
+  "schema_version": 1,
+  "feature": "core-workbench",
+  "phase": "blocked",
+  "revision": "r1.9",
+  "approval_status": "approved",
+  "approval": {
+    "record": ".workflow/core-workbench/runs/implement-p2-20260923/cd49-doc-final-approval.json",
+    "revision": "r1.9",
+    "user_quote": "C-D49: six-point pause and worker role policy supersedes C-D35/C-D44; continue implementation",
+    "reviewed_bundle_sha256": "6f729ab8259c9cefd9cdebaf76dc8af1f8ca9626e119b10265c59a89ee995653",
+    "approved_bundle_sha256": "e76c0bde27d2d040e373d0a0ed5d90458960f76fbbf3e2ca163cb590a11f1c06",
+    "recorded_at_utc": "2026-09-23T15:53:06.221016+00:00",
+    "previous_record": ".workflow/core-workbench/runs/approval-r1.7/approval.json"
+  },
+  "candidate": {
+    "bundle_sha256": "e76c0bde27d2d040e373d0a0ed5d90458960f76fbbf3e2ca163cb590a11f1c06",
+    "files_sha256": {
+      "docs/features/core-workbench/BRIEF.md": "f2ff96a06ad624ac36415d11cd699bc501b402e656a482768e89459b132df069",
+      "docs/features/core-workbench/DECISIONS.md": "7ef05777eae2b65f6b51baee44b4ec6b25eb9640390e0e65514c35d5ea49ef1c",
+      "docs/features/core-workbench/OPERATING-CONTRACT.md": "02e84c2b811555db7700a8cb04580539af658d0394aad52d58b921321bcdd8de",
+      "docs/features/core-workbench/SOURCE-RECONCILIATION.md": "9608b6ae75cd44f3365f0857fc86e1a4fff3ba9ed988ad7dea4f4985a79f156a",
+      "docs/features/core-workbench/SPEC.md": "ea16123aca25468c934ecad92d385dfd75e7530f78434abd1696dcd815e483c8",
+      "docs/features/core-workbench/PLAN.json": "85cd1d331f7d654433a15da79c782eba2d3bad4d6303a9d3f1db95ba0215d8b8",
+      "docs/features/core-workbench/tickets/CW-01.md": "7dae35e6d1a4d2a3475609849178bb9ea05a6f790eb4931dc0139925ba75bcb2",
+      "docs/features/core-workbench/tickets/CW-02.md": "c75525a0623a16c2ed5a39c11ac5350e3f394aaee574ec735b05a4fabb3eb07f",
+      "docs/features/core-workbench/tickets/CW-03.md": "8ba1f3e9824fb45932d957a996f6962929ad8e574298dd5af4cd1a037517deb6",
+      "docs/features/core-workbench/tickets/CW-04.md": "503d70bae16f6adf2c5cb8aaeb6bed3b8def16834913892ac716e3fc9e1bc913",
+      "docs/features/core-workbench/tickets/CW-05.md": "2af5779d3f3b5a5af65f09cdc72fa35c14aa3f8b918b24d19862cb919105e242",
+      "docs/features/core-workbench/tickets/CW-06.md": "7abd009af6ca5f86b67891897935c2531e08f5cb555baf86eb2dd9566ad122f3",
+      "docs/features/core-workbench/tickets/CW-07.md": "bafccbfd6e759768bbf0580d71ae36dce261c6cdee740a8a1fca0bd27a89b9da",
+      "docs/features/core-workbench/tickets/CW-08.md": "c76a2e991f21ac760a94ede2db505dc5355d30743790051a9808da468a4a6766",
+      "docs/features/core-workbench/tickets/CW-09.md": "5b540c83527603b073174e1914df2b56ba5d682fb1900013d8e38aae3eb49182",
+      "docs/features/core-workbench/tickets/CW-10.md": "4ac30e06964495650c212a2eed9a5e094d5bfaff5641ff148a131d1c22a1fa5b",
+      "docs/features/core-workbench/tickets/CW-11.md": "afce2bfb82a84a8f40dccca3351789fb074131ebdb57494440630b87cb5f2aed",
+      "docs/features/core-workbench/tickets/CW-12.md": "d8bad1493efbfd66e73638131929c45f4c4c94bb8ef2be1140f9142f35b289c7",
+      "docs/features/core-workbench/tickets/CW-13.md": "1e03c0dd4e21a36bf444f67603a182956b6003c64a74db8bb44bcfa6ee29b579",
+      "docs/features/core-workbench/tickets/CW-14.md": "20d89f909c99ef8b592f69c08fd54d9c28bad9d284fb131e56dd305c9a9011aa",
+      "docs/features/core-workbench/tickets/CW-15.md": "ffa4244d0e6586d4e6444227d53025e756128d91ce71a764455f7a0477de96f5",
+      "docs/features/core-workbench/tickets/CW-16.md": "f8cce696eefcff9679b80d31eb0e9ac4f677b760d3d455418adbee4e0b877511",
+      "CONTEXT.md": "6f385e22c2b0c84333957d4a28f060092edac81e7bbc4c9a6c8e57ab464febed"
+    },
+    "record": ".workflow/core-workbench/runs/implement-p2-20260923/cd49-doc-final-approval.json"
+  },
+  "verification": {
+    "date": "2026-09-24",
+    "cwd": "/home/dwchoo/ai-exp-assistant",
+    "checks": {
+      "local_links": {
+        "result": "passed"
+      },
+      "source_brief_sha": {
+        "result": "passed"
+      },
+      "acceptance_ids": {
+        "result": "passed",
+        "count": 34
+      },
+      "ticket_count": {
+        "result": "passed",
+        "count": 16
+      },
+      "bundle_hash": {
+        "result": "passed",
+        "sha256": "e76c0bde27d2d040e373d0a0ed5d90458960f76fbbf3e2ca163cb590a11f1c06"
+      }
+    },
+    "scope": "C-D49 policy/document consistency; product/runtime evidence in G3 and run ledger"
+  },
+  "next_after_approval": "$to-tickets docs/features/core-workbench/BRIEF.md",
+  "discovery_status": "complete",
+  "user_direction": "BRIEF r1.7 approved; refine-spec complete; handoff to fresh planning session.",
+  "latest_interview": {
+    "answer": "추천대로 해줘.",
+    "decisions": [
+      "C-D43",
+      "C-D44",
+      "C-D45",
+      "C-D46"
+    ],
+    "next": [
+      "fresh_sol_planning_session"
+    ]
+  },
+  "planning": {
+    "record": ".workflow/core-workbench/runs/implement-p2-20260923/cd49-doc-final-approval.json",
+    "spec_revision": "s2.2",
+    "plan_revision": "p2.2",
+    "bundle_sha256": "e76c0bde27d2d040e373d0a0ed5d90458960f76fbbf3e2ca163cb590a11f1c06",
+    "approval_status": "approved_for_implementation",
+    "scope": "Oracle review repairs to SPEC, PLAN and 16 local tickets; no implementation or product tests",
+    "next_on_explicit_approval": "$implement docs/features/core-workbench",
+    "implementation_approval_record": ".workflow/core-workbench/runs/implement-p2-20260923/approval.json"
+  },
+  "planning_history": [
+    {
+      "record": ".workflow/core-workbench/runs/planning-p1/manifest.json",
+      "spec_revision": "s1",
+      "plan_revision": "p1",
+      "bundle_sha256": "6a1ada2354fdd43ce510fe734fabbdcd96418550c7ce7645bb025b642492ab87",
+      "approval_status": "proposed_unapproved",
+      "scope": "SPEC, PLAN and 16 local tickets; no implementation or product tests",
+      "next_on_explicit_approval": "$implement docs/features/core-workbench"
+    }
+  ],
+  "implementation": {
+    "run_record": ".workflow/core-workbench/runs/implement-p2-20260923/ledger.json",
+    "status": "blocked_g1_g2_g3",
+    "approved_bundle_sha256": "e76c0bde27d2d040e373d0a0ed5d90458960f76fbbf3e2ca163cb590a11f1c06",
+    "policy_approval_record": ".workflow/core-workbench/runs/implement-p2-20260923/cd49-doc-final-approval.json",
+    "handoff_record": ".workflow/core-workbench/runs/implement-p2-20260923/HANDOFF-2026-09-23-2225.md",
+    "snapshot_record": ".workflow/core-workbench/runs/implement-p2-20260923/commit-checkpoint-20260924-090050.json"
+  }
+}

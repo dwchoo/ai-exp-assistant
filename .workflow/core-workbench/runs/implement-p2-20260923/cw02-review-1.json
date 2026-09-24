@@ -1,0 +1,29 @@
+{
+  "ticket": "CW-02",
+  "candidate_id": "ced6d68b6e3744b26c0c52116efb92b4c4d372cc27116cc1fdcb38057fa45d1d",
+  "result": "findings_require_fix",
+  "findings": [
+    {
+      "severity": "high",
+      "file": "src/workbench/ui/terminal_g1/input_router.py",
+      "summary": "split bracketed-paste start/end marker around 60ms timeout can process F10 as quit or retain paste mode"
+    },
+    {
+      "severity": "high",
+      "file": "src/workbench/terminal/vt_g1/session.py",
+      "summary": "unbounded EAGAIN retry on large paste blocks single UI loop"
+    },
+    {
+      "severity": "medium",
+      "file": "src/workbench/ui/terminal_g1/app.py",
+      "summary": "exited PTY remains registered in selector causing busy loop"
+    },
+    {
+      "severity": "low",
+      "file": "docs/features/core-workbench/gates/G1.md",
+      "summary": "fixture count stale 6 instead of 11"
+    }
+  ],
+  "gate_status": "still pending",
+  "recorded_at_utc": "2026-09-23T08:23:54.534397+00:00"
+}
