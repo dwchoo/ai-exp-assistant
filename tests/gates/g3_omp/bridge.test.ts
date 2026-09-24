@@ -11,7 +11,7 @@ import workbenchG3Extension from "../../../omp_bridge/g3/bridge.ts";
 type Frame = Record<string, any>;
 const SESSION_ID = "30000000-0000-4000-8000-000000000001";
 
-async function startBridge(role: "manager" | "worker" = "worker") {
+async function startBridge(role: "manager" | "worker" = "worker", eventSurfaceProbe = false) {
 	const directory = await mkdtemp(join(tmpdir(), "cw04-g3-test-"));
 	const socketPath = join(directory, "bridge.sock");
 	const frames: Frame[] = [];
@@ -33,12 +33,14 @@ async function startBridge(role: "manager" | "worker" = "worker") {
 		server.listen(socketPath, resolve);
 	});
 
-	const names = ["WORKBENCH_G3_BRIDGE_SOCKET", "WORKBENCH_G3_ROLE", "WORKBENCH_G3_TOKEN", "WORKBENCH_G3_GENERATION"];
+	const names = ["WORKBENCH_G3_BRIDGE_SOCKET", "WORKBENCH_G3_ROLE", "WORKBENCH_G3_TOKEN", "WORKBENCH_G3_GENERATION", "WORKBENCH_G3_EVENT_SURFACE_PROBE"];
 	const previous = new Map(names.map(name => [name, process.env[name]]));
 	process.env.WORKBENCH_G3_BRIDGE_SOCKET = socketPath;
 	process.env.WORKBENCH_G3_ROLE = role;
 	process.env.WORKBENCH_G3_TOKEN = randomUUID();
 	process.env.WORKBENCH_G3_GENERATION = "1";
+	if (eventSurfaceProbe) process.env.WORKBENCH_G3_EVENT_SURFACE_PROBE = "1";
+	else delete process.env.WORKBENCH_G3_EVENT_SURFACE_PROBE;
 
 	const handlers = new Map<string, (...args: any[]) => any>();
 	const registeredTools = new Map<string, Frame>();
@@ -508,6 +510,113 @@ test("session switch rejects a late frame from the previous socket", async () =>
 			(await bridge.request({ kind: "deliver", envelope: JSON.stringify(envelope({ sessionId: nextSessionId, sessionGeneration: 2 })) })).status,
 			"api_accepted",
 		);
+	} finally {
+		await bridge.close();
+	}
+});
+
+test("opt-in provider request identity uses only one structured final user message", async () => {
+	const bridge = await startBridge("worker", true);
+	const keys = ["workbench_message_id", "workbench_delivery_attempt_id", "kind", "task_id", "revision_id", "run_id"];
+	const secret = "PRIVATE_PROVIDER_BODY_AND_CREDENTIAL";
+	try {
+		const candidate = envelope({
+			event: { type: "message", messageKind: "task", payload: { text: secret } },
+		});
+		const ack = await bridge.request({ kind: "deliver", envelope: JSON.stringify(candidate) });
+		assert.equal(ack.status, "api_accepted");
+		assert.equal(ack.modelProcessed, false);
+		const injected = JSON.parse(bridge.sent[0].message) as Frame;
+		bridge.handlers.get("before_provider_request")!({
+			payload: { model: "local-openai-completions", messages: [
+				{ role: "system", content: "prior context" },
+				{ role: "user", content: [{ type: "text", text: JSON.stringify(injected) }] },
+			] },
+		});
+		const observed = await bridge.waitFor(frame => frame.kind === "omp_event" && frame.name === "provider_request_identity_probe");
+		assert.equal(observed.sessionId, SESSION_ID);
+		assert.equal(observed.generation, 1);
+		assert.equal(observed.roleMatched, true);
+		assert.equal(observed.sessionMatched, true);
+		assert.equal(observed.generationMatched, true);
+		assert.equal(observed.payloadShape, "object");
+		assert.equal(observed.messagesArray, true);
+		assert.equal(observed.lastMessageRole, "user");
+		assert.equal(observed.structuredBlockCount, 1);
+		assert.equal(observed.identityFieldsPresent, true);
+		assert.deepEqual(observed.matches, Object.fromEntries(keys.map(key => [key, true])));
+		assert.equal("status" in observed, false);
+		assert.equal("modelProcessed" in observed, false);
+		assert.equal(JSON.stringify(observed).includes(secret), false);
+	} finally {
+		await bridge.close();
+	}
+});
+
+test("provider identity rejects history-only IDs, malformed input, duplicate JSON, and wrong attempt", async () => {
+	const bridge = await startBridge("worker", true);
+	const keys = ["workbench_message_id", "workbench_delivery_attempt_id", "kind", "task_id", "revision_id", "run_id"];
+	try {
+		const candidate = envelope();
+		assert.equal((await bridge.request({ kind: "deliver", envelope: JSON.stringify(candidate) })).status, "api_accepted");
+		const injected = JSON.parse(bridge.sent[0].message) as Frame;
+		const current = JSON.stringify(injected);
+		const cases: Array<{ name: string; event: unknown; shape?: string; blocks?: number }> = [
+			{ name: "prior history only", event: { payload: { messages: [
+				{ role: "user", content: current }, { role: "user", content: "unrelated latest input" },
+			] } }, blocks: 0 },
+			{ name: "missing payload", event: {}, shape: "other" },
+			{ name: "null payload", event: { payload: null }, shape: "null" },
+			{ name: "string payload", event: { payload: "raw" }, shape: "string" },
+			{ name: "malformed messages", event: { payload: { messages: {} } }, shape: "object" },
+			{ name: "duplicate structured blocks", event: { payload: { messages: [
+				{ role: "user", content: [{ type: "text", text: current }, { type: "text", text: current }] },
+			] } }, blocks: 2 },
+			{ name: "wrong attempt", event: { payload: { messages: [
+				{ role: "user", content: JSON.stringify({ ...injected, workbench_delivery_attempt_id: randomUUID() }) },
+			] } }, blocks: 1 },
+			{ name: "non-user final message", event: { payload: { messages: [
+				{ role: "user", content: current }, { role: "assistant", content: current },
+			] } }, blocks: 0 },
+		];
+		for (const item of cases) {
+			bridge.handlers.get("before_provider_request")!(item.event);
+			const observed = await bridge.waitFor(frame => frame.kind === "omp_event" && frame.name === "provider_request_identity_probe");
+			assert.equal(keys.every(key => observed.matches[key] === true), false, item.name);
+			if (item.shape !== undefined) assert.equal(observed.payloadShape, item.shape, item.name);
+			if (item.blocks !== undefined) assert.equal(observed.structuredBlockCount, item.blocks, item.name);
+		}
+
+		const nextSessionId = randomUUID();
+		bridge.handlers.get("session_switch")!(undefined, {
+			sessionManager: { getSessionId: () => nextSessionId },
+			isIdle: () => true, hasPendingMessages: () => false,
+			ui: { getEditorText: () => "" },
+		});
+		await bridge.waitFor(frame => frame.kind === "hello" && frame.generation === 2);
+		bridge.handlers.get("before_provider_request")!({ payload: { messages: [{ role: "user", content: current }] } });
+		const switched = await bridge.waitFor(frame => frame.kind === "omp_event" && frame.name === "provider_request_identity_probe" && frame.generation === 2);
+		assert.equal(switched.sessionId, nextSessionId);
+		assert.equal(switched.generation, 2);
+		assert.equal(switched.roleMatched, false);
+		assert.equal(switched.sessionMatched, false);
+		assert.equal(switched.generationMatched, false);
+		assert.equal(keys.every(key => switched.matches[key] === true), false);
+	} finally {
+		await bridge.close();
+	}
+});
+
+test("provider request diagnostic event is absent without explicit opt-in", async () => {
+	const bridge = await startBridge();
+	try {
+		const candidate = envelope();
+		assert.equal((await bridge.request({ kind: "deliver", envelope: JSON.stringify(candidate) })).status, "api_accepted");
+		const injected = JSON.parse(bridge.sent[0].message) as Frame;
+		bridge.handlers.get("before_provider_request")!({ payload: { messages: [{ role: "user", content: JSON.stringify(injected) }] } });
+		await bridge.waitFor(frame => frame.kind === "omp_event" && frame.name === "provider_request_started");
+		await delay(20);
+		assert.equal(bridge.frames.some(frame => frame.kind === "omp_event" && frame.name === "provider_request_identity_probe"), false);
 	} finally {
 		await bridge.close();
 	}

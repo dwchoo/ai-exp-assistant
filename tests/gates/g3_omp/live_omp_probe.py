@@ -155,11 +155,28 @@ class PeerHandler(socketserver.StreamRequestHandler):
                         self.server.events.append({
                             "role": role,
                             "name": frame.get("name"),
+                            "observedAt": time.monotonic(),
                             "toolName": frame.get("toolName"),
                             "approved": frame.get("approved"),
                             "sessionId": frame.get("sessionId"),
                             "generation": frame.get("generation"),
                             "responseMarkerMatched": frame.get("responseMarkerMatched"),
+                            "identityFieldsPresent": frame.get("identityFieldsPresent"),
+                            "matches": frame.get("matches"),
+                            "roleMatched": frame.get("roleMatched"),
+                            "sessionMatched": frame.get("sessionMatched"),
+                            "generationMatched": frame.get("generationMatched"),
+                            "stopReason": frame.get("stopReason"),
+                            "errorMessagePresent": frame.get("errorMessagePresent"),
+                            "willContinue": frame.get("willContinue"),
+                            "eventObject": frame.get("eventObject"),
+                            "payloadShape": frame.get("payloadShape"),
+                            "payloadKeys": frame.get("payloadKeys"),
+                            "messagesArray": frame.get("messagesArray"),
+                            "lastMessageRole": frame.get("lastMessageRole"),
+                            "lastContentShape": frame.get("lastContentShape"),
+                            "textBlockCount": frame.get("textBlockCount"),
+                            "structuredBlockCount": frame.get("structuredBlockCount"),
                         })
                     self.server.condition.notify_all()
         except (ConnectionError, OSError, ValueError, json.JSONDecodeError):
@@ -190,6 +207,9 @@ def _start_omp(
     *,
     expected_marker: str | None = None,
     max_time: str | None = None,
+    profile: Path | None = None,
+    model: str | None = None,
+    event_surface_probe: bool = False,
 ) -> dict[str, object]:
     cwd = root / f"cwd-{role}"
     session_dir = root / f"sessions-{role}"
@@ -200,6 +220,7 @@ def _start_omp(
         os.chdir(cwd)
         fcntl.ioctl(0, termios.TIOCSWINSZ, struct.pack("HHHH", 30, 100, 0, 0))
         env = dict(os.environ)
+        env.pop("WORKBENCH_G3_EVENT_SURFACE_PROBE", None)
         env.update({
             "TERM": "xterm-256color",
             "LANG": "C.UTF-8",
@@ -210,6 +231,10 @@ def _start_omp(
             "WORKBENCH_G3_GENERATION": "1",
             "WORKBENCH_G3_EXPECTED_OMP_VERSION": OMP_VERSION,
         })
+        if profile is not None:
+            env["PI_CODING_AGENT_DIR"] = str(profile)
+        if event_surface_probe:
+            env["WORKBENCH_G3_EVENT_SURFACE_PROBE"] = "1"
         if expected_marker is not None:
             env["WORKBENCH_G3_EXPECTED_RESPONSE_MARKER"] = expected_marker
         args = [
@@ -230,6 +255,8 @@ def _start_omp(
             "--config",
             str(config),
         ]
+        if model is not None:
+            args.extend(["--model", model])
         if max_time is not None:
             args.extend(["--max-time", max_time])
         os.execvpe(omp, args, env)

@@ -25,6 +25,7 @@ export default function workbenchG3Extension(pi: any): void {
 	const role = env("WORKBENCH_G3_ROLE") as Role;
 	const token = env("WORKBENCH_G3_TOKEN");
 	const expectedResponseMarker = process.env.WORKBENCH_G3_EXPECTED_RESPONSE_MARKER;
+	const eventSurfaceProbe = process.env.WORKBENCH_G3_EVENT_SURFACE_PROBE === "1";
 	let generation = Number(env("WORKBENCH_G3_GENERATION"));
 	if ((role !== "manager" && role !== "worker") || !Number.isSafeInteger(generation) || generation < 1) {
 		throw new Error("invalid G3 role or session generation");
@@ -46,6 +47,7 @@ export default function workbenchG3Extension(pi: any): void {
 	let abortStatus: "none" | "requested" | "stop_observed" | "request_failed" = "none";
 	let pauseEpoch = 0;
 	const seen = new Map<string, "deferred" | "sending" | "api_accepted" | "unknown">();
+	let probeDelivery: { message: Record<string, unknown>; role: Role; sessionId: string; generation: number } | undefined;
 	const approvals = new Set<string>();
 	const executingCalls = new Set<string>();
 	const unknownOutcomeCalls = new Set<string>();
@@ -258,6 +260,7 @@ export default function workbenchG3Extension(pi: any): void {
 			run_id: envelope.runId,
 			payload: envelope.event.payload,
 		};
+		if (eventSurfaceProbe) probeDelivery = { message, role, sessionId, generation: sessionGeneration };
 		try {
 			await pi.sendUserMessage(JSON.stringify(message), {
 				attribution: "agent",
@@ -355,6 +358,7 @@ export default function workbenchG3Extension(pi: any): void {
 	function connect(ctx: any, reason: "start" | "switch"): void {
 		if (shuttingDown) return;
 		if (reason === "switch") {
+			probeDelivery = undefined;
 			const unresolvedTools = new Set([...executingCalls, ...unknownOutcomeCalls]);
 			if (abortStatus === "requested" || abortStatus === "request_failed" || unresolvedTools.size > 0) {
 				unresolvedPriorSessions.push({
@@ -419,9 +423,93 @@ export default function workbenchG3Extension(pi: any): void {
 		}
 		publishState();
 	});
-	pi.on("before_provider_request", () => sendEvent("provider_request_started"));
+	pi.on("before_provider_request", (event: unknown) => {
+		sendEvent("provider_request_started");
+		if (!eventSurfaceProbe) return;
+		const record = typeof event === "object" && event !== null ? event as Record<string, unknown> : undefined;
+		const payload = record?.payload;
+		const payloadShape = payload === null ? "null" : Array.isArray(payload) ? "array"
+			: typeof payload === "object" ? "object" : typeof payload === "string" ? "string" : "other";
+		const request = payloadShape === "object" ? payload as Record<string, unknown> : undefined;
+		const payloadKeys = ["messages", "model", "stream", "tools", "temperature"]
+			.filter(key => request !== undefined && Object.hasOwn(request, key));
+		const messages = Array.isArray(request?.messages) ? request.messages : undefined;
+		const last = messages?.at(-1);
+		const lastMessage = typeof last === "object" && last !== null ? last as Record<string, unknown> : undefined;
+		const lastRole = lastMessage?.role;
+		const content = lastMessage?.content;
+		const contentShape = typeof content === "string" ? "string" : Array.isArray(content) ? "blocks" : "other";
+		const textBlocks = Array.isArray(content)
+			? content.filter((block): block is { type: string; text: string } =>
+				typeof block === "object" && block !== null
+				&& "type" in block && block.type === "text"
+				&& "text" in block && typeof block.text === "string")
+				.map(block => block.text) : [];
+		const candidateTexts = typeof content === "string" ? [content] : textBlocks;
+		const structured: Record<string, unknown>[] = [];
+		let observed: Record<string, unknown> | undefined;
+		if (lastRole === "user") {
+			for (const text of candidateTexts) {
+				try {
+					const parsed: unknown = JSON.parse(text);
+					if (typeof parsed === "object" && parsed !== null && !Array.isArray(parsed)) structured.push(parsed as Record<string, unknown>);
+				} catch { /* Do not inspect earlier history when the last message is unparseable. */ }
+			}
+		}
+		if (structured.length === 1) observed = structured[0];
+		const keys = ["workbench_message_id", "workbench_delivery_attempt_id", "kind", "task_id", "revision_id", "run_id"];
+		const matches = Object.fromEntries(keys.map(key => [key, observed !== undefined && probeDelivery !== undefined
+			&& typeof observed[key] === "string" && observed[key] === probeDelivery.message[key]]));
+		sendEvent("provider_request_identity_probe", {
+			eventObject: record !== undefined,
+			payloadShape,
+			payloadKeys,
+			messagesArray: messages !== undefined,
+			lastMessageRole: lastRole === "user" || lastRole === "assistant" || lastRole === "tool" || lastRole === "system" ? lastRole : "other",
+			lastContentShape: contentShape,
+			textBlockCount: textBlocks.length,
+			structuredBlockCount: structured.length,
+			identityFieldsPresent: keys.every(key => typeof observed?.[key] === "string"),
+			matches,
+			roleMatched: probeDelivery?.role === role,
+			sessionMatched: probeDelivery?.sessionId === ompSessionId,
+			generationMatched: probeDelivery?.generation === generation,
+		});
+	});
 	pi.on("after_provider_response", () => sendEvent("provider_response_received"));
-	pi.on("message_end", (event: { message?: { role?: string; content?: unknown } }) => {
+	pi.on("message_end", (event: { message?: { role?: string; content?: unknown; stopReason?: unknown; errorMessage?: unknown }; willContinue?: unknown }) => {
+		if (eventSurfaceProbe && event?.message?.role === "user") {
+			const content = event.message.content;
+			const text = typeof content === "string" ? content : Array.isArray(content)
+				? content.filter((block): block is { type: string; text: string } =>
+					typeof block === "object" && block !== null
+					&& "type" in block && block.type === "text"
+					&& "text" in block && typeof block.text === "string")
+					.map(block => block.text).join("") : "";
+			let observed: Record<string, unknown> | undefined;
+			try {
+				const parsed: unknown = JSON.parse(text);
+				if (typeof parsed === "object" && parsed !== null && !Array.isArray(parsed)) observed = parsed as Record<string, unknown>;
+			} catch { /* Only a structured injected user message can establish identity. */ }
+			const keys = ["workbench_message_id", "workbench_delivery_attempt_id", "kind", "task_id", "revision_id", "run_id"];
+			const matches = Object.fromEntries(keys.map(key => [key, observed !== undefined && probeDelivery !== undefined
+				&& typeof observed[key] === "string" && observed[key] === probeDelivery.message[key]]));
+			sendEvent("delivery_user_message_end_probe", {
+				identityFieldsPresent: keys.every(key => typeof observed?.[key] === "string"),
+				matches,
+				roleMatched: probeDelivery?.role === role,
+				sessionMatched: probeDelivery?.sessionId === ompSessionId,
+				generationMatched: probeDelivery?.generation === generation,
+			});
+		}
+		if (eventSurfaceProbe && event?.message?.role === "assistant") {
+			const reason = event.message.stopReason;
+			sendEvent("delivery_assistant_message_end_probe", {
+				stopReason: reason === "stop" || reason === "length" || reason === "toolUse" || reason === "error" || reason === "aborted" ? reason : null,
+				errorMessagePresent: typeof event.message.errorMessage === "string" && event.message.errorMessage.length > 0,
+				willContinue: typeof event.willContinue === "boolean" ? event.willContinue : null,
+			});
+		}
 		if (!expectedResponseMarker || event?.message?.role !== "assistant") return;
 		const content = event.message.content;
 		const text = Array.isArray(content)
