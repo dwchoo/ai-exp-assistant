@@ -1,0 +1,1180 @@
+{
+  "schema_version": 1,
+  "feature_id": "core-workbench",
+  "revision": "p2.2",
+  "status": "approved_for_implementation",
+  "source_brief": {
+    "path": "BRIEF.md",
+    "revision": "r1.9",
+    "sha256": "f2ff96a06ad624ac36415d11cd699bc501b402e656a482768e89459b132df069",
+    "approval_record": "../../../.workflow/core-workbench/runs/implement-p2-20260923/cd49-policy-approval.json"
+  },
+  "spec": {
+    "path": "SPEC.md",
+    "revision": "s2.2"
+  },
+  "source_snapshot": {
+    "head": "fea46fd561f1da1cef32be191775b56c1cff0a13",
+    "tracked_product_files": [],
+    "tracked_tests": [],
+    "tracked_files": [
+      "README.md"
+    ],
+    "dirty_input": "Workflow·기능 문서가 untracked 상태다. 구현 workspace를 만들기 전에 정확한 byte를 보존한다.",
+    "observed_host": "2026-09-23 관측: Python 3.12.3, OMP 18.2.10, Bash 5.2.21, /bin/sh→dash, tmux·herdr 설치. 호환성 시험 결과가 아니다."
+  },
+  "revision_history": [
+    {
+      "revision": "p1",
+      "change": "승인된 BRIEF r1.7에서 만든 최초 계획안. 기존 ticket·완료 작업·계획 승인은 없다."
+    },
+    {
+      "revision": "p2",
+      "supersedes": "p1",
+      "previous_bundle_sha256": "6a1ada2354fdd43ce510fe734fabbdcd96418550c7ce7645bb025b642492ab87",
+      "previous_record": "../../../.workflow/core-workbench/runs/planning-p1/manifest.json",
+      "change": "Oracle 검토 반영: G3 변경 도구 통제 게이트, CW-05 저장 port, 안정된 message_id, worker 직접 요청, 세션 설정 전이·검증, CW-09→CW-08 의존 관계를 보강. Ticket ID·소유·미승인 상태는 유지."
+    },
+    {
+      "revision": "p2.1",
+      "supersedes": "p2",
+      "previous_bundle_sha256": "d6df4fe834452e6bc0b34a13f4f99ce44381a419714b87b22e0cc6b1e27cba63",
+      "previous_record": "../../../.workflow/core-workbench/runs/implement-p2-20260923/approval.json",
+      "change": "사용자 C-D47/C-D48 보충 승인에 따라 G1 paste 전체 거절·G2 명시적 wb-handoff를 명세에 반영했다. Ticket ID·의존·소유·자원·scope는 유지한다."
+    },
+    {
+      "revision": "p2.2",
+      "supersedes": "p2.1",
+      "previous_bundle_sha256": "922bd0dca00c52e3c6ab60f700a12e58aff6421034b623c76bd63ea87b3e6356",
+      "previous_record": "../../../.workflow/core-workbench/runs/implement-p2-20260923/g1-g2-policy-approval.json",
+      "change": "사용자 C-D49에 따라 일시정지를 manager OMP turn 중단 요청·확인/불명 결과와 자동 모델 작업 보류·명시적 재개 대조로 변경하고 worker의 수정 필요 보고 후 지시 종료를 반영. Ticket ID·의존·소유·자원·scope는 유지."
+    }
+  ],
+  "scheduling": {
+    "max_open_child_threads": 4,
+    "max_parallel_writer_workspaces": 2,
+    "workspace_policy": "동시 작성자는 서로 다른 물리 worktree와 확인된 격리를 사용한다. 격리·공유 자원을 확인하지 못하면 직렬 실행한다.",
+    "dependency_gate": "선행 산출물이 명시된 경계에서 통합되고 독립 검증되어야 한다. Worker 완료 보고만으로 dependency를 해제하지 않는다.",
+    "base_policy": "매 dispatch에서 현재 통합 후보와 dirty/untracked 승인 입력, 복구 가능한 checkpoint를 확보한다.",
+    "root_integration": "Root가 귀속 가능한 delta를 하나씩 통합하고 후속 가정을 재확인한다. 공유 파일의 수정은 지정된 ticket 소유권을 따른다.",
+    "verification_reservation": "Dispatch 전에 test_designer·reviewer·수정·최종 통합 용량을 확보한다.",
+    "ready_not_sufficient": "승인, 현재 base, permission, workspace, mutation lease, resource claim, 검증 예산을 함께 확인한다."
+  },
+  "gate_results": {
+    "G1": {
+      "ticket": "CW-02",
+      "status": "pending_evidence",
+      "unblocks": "원본 OMP TUI와 terminal 렌더링"
+    },
+    "G2": {
+      "ticket": "CW-03",
+      "status": "pending_evidence",
+      "unblocks": "Bash/sh 같은 shell 실행"
+    },
+    "G3": {
+      "ticket": "CW-04",
+      "status": "pending_evidence",
+      "unblocks": "독립 두 OMP bridge·비침범 전달과 manager turn 중단 요청/확인·불명 결과·재개 대조 가능성; 실제 backend 정책은 CW-12"
+    },
+    "G4": {
+      "ticket": "CW-05",
+      "status": "pending_evidence",
+      "unblocks": "Backend/UI 분리, detach, metadata 저장 port와 안정된 통합 계약"
+    }
+  },
+  "integration_checks": {
+    "I-FLOW": "실제 manager·worker OMP에서 승인 목표→Task/revision→worktree/host run→worker 근거→manager 완료·복구를 확인한다. Worker 직접 요청은 기존 범위, 새 작은 명세, 범위 확대의 세 경계를 확인한다. Worker가 수정 필요성을 근거와 함께 보고하면 지시가 끝나며 새 manager 지시 전 자동 반환하지 않는다.",
+    "I-SHELL": "실제 Bash 5.x와 설치된 sh에서 같은 shell의 cwd/환경·입력 owner·lifecycle·재전송 금지를 확인한다.",
+    "I-POLICY": "승인·revision·세션 설정 변경 뒤 현재 run/재시도 유지·활성 중 60초 점검/병합·usage·manager OMP turn 중단 요청/확인·불명 결과 표시·일시정지 중 자동 모델 작업 보류·명시적 재개 상태/승인 대조와 replay 금지·재시도·강제 종료 경계를 확인한다.",
+    "I-FAULT": "Detach, agent/backend/reboot 대조, 모델 장애, metadata/raw log 장애와 보존을 확인한다.",
+    "I-COMPAT": "일반 terminal·외부 tmux·herdr의 원본 TUI 텍스트 조작과 선택한 Bash/sh 조합을 버전별로 확인한다."
+  },
+  "acceptance_trace": {
+    "C-AC-01": {
+      "owner_ticket": "CW-06",
+      "behavior_seam": "원본 manager OMP pane에서 목표·코드 대화",
+      "final_checks": [
+        "I-FLOW"
+      ],
+      "evidence": "pending_implementation"
+    },
+    "C-AC-02": {
+      "owner_ticket": "CW-08",
+      "behavior_seam": "Task 연계 task/question/answer/report 왕복과 동일 메시지 중복 방지",
+      "final_checks": [
+        "I-FLOW"
+      ],
+      "evidence": "pending_implementation"
+    },
+    "C-AC-03": {
+      "owner_ticket": "CW-10",
+      "behavior_seam": "실제 host shell 실행·출력과 worker 실행 의뢰",
+      "final_checks": [
+        "I-FLOW",
+        "I-SHELL"
+      ],
+      "evidence": "pending_implementation"
+    },
+    "C-AC-04": {
+      "owner_ticket": "CW-13",
+      "behavior_seam": "worker 근거를 완료 조건과 대조한 manager 보고",
+      "final_checks": [
+        "I-FLOW"
+      ],
+      "evidence": "pending_implementation"
+    },
+    "C-AC-05": {
+      "owner_ticket": "CW-10",
+      "behavior_seam": "manager 준비·worker 실험/terminal 실행·관측·보고, 수정 필요 보고 시 지시 종료·새 지시 전 자동 반환 금지",
+      "final_checks": [
+        "I-FLOW"
+      ],
+      "evidence": "pending_implementation"
+    },
+    "C-AC-06": {
+      "owner_ticket": "CW-06",
+      "behavior_seam": "세 영역, focus와 입력 owner 별도 표시",
+      "final_checks": [
+        "I-COMPAT"
+      ],
+      "evidence": "pending_implementation"
+    },
+    "C-AC-07": {
+      "owner_ticket": "CW-13",
+      "behavior_seam": "실패 복구 3회·설정 변경 뒤 사용 횟수 유지·추가 자동 실행 금지·시간 상한 없음",
+      "final_checks": [
+        "I-POLICY"
+      ],
+      "evidence": "pending_implementation"
+    },
+    "C-AC-08": {
+      "owner_ticket": "CW-07",
+      "behavior_seam": "사용자 인수 시 자동 입력 중지·반환 후 재확인",
+      "final_checks": [
+        "I-SHELL"
+      ],
+      "evidence": "pending_implementation"
+    },
+    "C-AC-09": {
+      "owner_ticket": "CW-10",
+      "behavior_seam": "commit 기준 실행용 worktree 가이드·준비 실패 처리",
+      "final_checks": [
+        "I-FLOW"
+      ],
+      "evidence": "pending_implementation"
+    },
+    "C-AC-10": {
+      "owner_ticket": "CW-13",
+      "behavior_seam": "실행 종료 확인 뒤 소스·설정 수정",
+      "final_checks": [
+        "I-POLICY"
+      ],
+      "evidence": "pending_implementation"
+    },
+    "C-AC-11": {
+      "owner_ticket": "CW-10",
+      "behavior_seam": "위임 변경만 local commit·push/merge 분리",
+      "final_checks": [
+        "I-FLOW"
+      ],
+      "evidence": "pending_implementation"
+    },
+    "C-AC-12": {
+      "owner_ticket": "CW-11",
+      "behavior_seam": "자동화 활성 중 60초 모델 점검·일시정지 중 모델 점검 중단·무출력 조사",
+      "final_checks": [
+        "I-POLICY"
+      ],
+      "evidence": "pending_implementation"
+    },
+    "C-AC-13": {
+      "owner_ticket": "CW-13",
+      "behavior_seam": "manager의 근거·권한·재시도 판단",
+      "final_checks": [
+        "I-POLICY"
+      ],
+      "evidence": "pending_implementation"
+    },
+    "C-AC-14": {
+      "owner_ticket": "CW-06",
+      "behavior_seam": "두 원본 OMP TUI·명령 유지",
+      "final_checks": [
+        "I-COMPAT"
+      ],
+      "evidence": "pending_implementation"
+    },
+    "C-AC-15": {
+      "owner_ticket": "CW-15",
+      "behavior_seam": "detach 중 두 OMP·실험 지속, 활성 때만 점검·일시정지 보존과 재접속",
+      "final_checks": [
+        "I-FAULT"
+      ],
+      "evidence": "pending_implementation"
+    },
+    "C-AC-16": {
+      "owner_ticket": "CW-15",
+      "behavior_seam": "재시작 뒤 기록/실제 프로세스 대조·불명 자동 replay 금지",
+      "final_checks": [
+        "I-FAULT"
+      ],
+      "evidence": "pending_implementation"
+    },
+    "C-AC-17": {
+      "owner_ticket": "CW-15",
+      "behavior_seam": "모델 오류 중 실행·관측 유지와 재확인",
+      "final_checks": [
+        "I-FAULT"
+      ],
+      "evidence": "pending_implementation"
+    },
+    "C-AC-18": {
+      "owner_ticket": "CW-15",
+      "behavior_seam": "사용자 입력 owner를 detach 뒤에도 보존",
+      "final_checks": [
+        "I-FAULT"
+      ],
+      "evidence": "pending_implementation"
+    },
+    "C-AC-19": {
+      "owner_ticket": "CW-16",
+      "behavior_seam": "일반 terminal/tmux/herdr 조작·재접속 matrix",
+      "final_checks": [
+        "I-COMPAT"
+      ],
+      "evidence": "pending_implementation"
+    },
+    "C-AC-20": {
+      "owner_ticket": "CW-16",
+      "behavior_seam": "Linux 텍스트·Bash 우선·sh fallback 실제 matrix",
+      "final_checks": [
+        "I-COMPAT",
+        "I-SHELL"
+      ],
+      "evidence": "pending_implementation"
+    },
+    "C-AC-21": {
+      "owner_ticket": "CW-11",
+      "behavior_seam": "활성 중 121번째 점검·13번째 peer wake·usage 표시",
+      "final_checks": [
+        "I-POLICY"
+      ],
+      "evidence": "pending_implementation"
+    },
+    "C-AC-22": {
+      "owner_ticket": "CW-15",
+      "behavior_seam": "전체 종료 확인·중단/정리·미종료 표시",
+      "final_checks": [
+        "I-FAULT"
+      ],
+      "evidence": "pending_implementation"
+    },
+    "C-AC-23": {
+      "owner_ticket": "CW-15",
+      "behavior_seam": "재부팅 뒤 확인 전 새 실험 금지",
+      "final_checks": [
+        "I-FAULT"
+      ],
+      "evidence": "pending_implementation"
+    },
+    "C-AC-24": {
+      "owner_ticket": "CW-14",
+      "behavior_seam": "명세/요약/worktree 보존·64/512 MiB raw log cap",
+      "final_checks": [
+        "I-FAULT"
+      ],
+      "evidence": "pending_implementation"
+    },
+    "C-AC-25": {
+      "owner_ticket": "CW-12",
+      "behavior_seam": "승인 범위·Task/revision/run·취소와 중단 요청/확인/불명 결과 연결",
+      "final_checks": [
+        "I-POLICY"
+      ],
+      "evidence": "pending_implementation"
+    },
+    "C-AC-26": {
+      "owner_ticket": "CW-07",
+      "behavior_seam": "cwd/환경 유지·입력 경합 보류·lifecycle 증거",
+      "final_checks": [
+        "I-SHELL"
+      ],
+      "evidence": "pending_implementation"
+    },
+    "C-AC-27": {
+      "owner_ticket": "CW-11",
+      "behavior_seam": "활성 중 busy 점검 최신 한 건·지연, 일시정지 중 자동 점검 보류·즉시 종료 표시",
+      "final_checks": [
+        "I-POLICY"
+      ],
+      "evidence": "pending_implementation"
+    },
+    "C-AC-28": {
+      "owner_ticket": "CW-14",
+      "behavior_seam": "metadata 장애 차단과 raw log 장애 관측",
+      "final_checks": [
+        "I-FAULT"
+      ],
+      "evidence": "pending_implementation"
+    },
+    "C-AC-29": {
+      "owner_ticket": "CW-09",
+      "behavior_seam": "범위 승인+진행 지시로 자동화 시작",
+      "final_checks": [
+        "I-POLICY"
+      ],
+      "evidence": "pending_implementation"
+    },
+    "C-AC-30": {
+      "owner_ticket": "CW-12",
+      "behavior_seam": "일시정지 중 새 자동 모델 작업 보류·로그/프로세스 수집과 기존 실험 유지·수동 조작 독립",
+      "final_checks": [
+        "I-POLICY"
+      ],
+      "evidence": "pending_implementation"
+    },
+    "C-AC-31": {
+      "owner_ticket": "CW-13",
+      "behavior_seam": "새 revision은 다음 run에 적용하고 현재 실행 적용 지시는 종료 확인 뒤 재실행하며 즉시 제한은 우선",
+      "final_checks": [
+        "I-POLICY"
+      ],
+      "evidence": "pending_implementation"
+    },
+    "C-AC-32": {
+      "owner_ticket": "CW-07",
+      "behavior_seam": "기존 conda/venv 재사용·app 환경 분리",
+      "final_checks": [
+        "I-SHELL"
+      ],
+      "evidence": "pending_implementation"
+    },
+    "C-AC-33": {
+      "owner_ticket": "CW-12",
+      "behavior_seam": "manager turn 중단 요청/확인·불명 도구 결과 표시·명시적 재개 대조와 replay 금지",
+      "final_checks": [
+        "I-POLICY"
+      ],
+      "evidence": "pending_implementation"
+    },
+    "C-AC-34": {
+      "owner_ticket": "CW-13",
+      "behavior_seam": "허용된 확인 대상만 강제 종료·실제 종료 검증",
+      "final_checks": [
+        "I-POLICY"
+      ],
+      "evidence": "pending_implementation"
+    }
+  },
+  "path_ownership": {
+    "project dependency and lock files": "CW-01이 임시 기준을 만들고 CW-05가 게이트 결과로 lock을 고정한다. 이후 변경은 Root가 범위를 재확인해 통합한다.",
+    "versioned runtime/control contract and app entry": "CW-01이 임시 계약을 만들고 CW-05가 고정·통합한다. 소비 ticket은 계약을 임의 변경하지 않는다.",
+    "terminal renderer and UI": "CW-02가 가능성을 검증하고 CW-06이 CW-05 이후 production 동작을 소유한다.",
+    "shell adapter": "CW-03이 가능성을 검증하고 CW-07이 CW-05 이후 production 동작을 소유한다.",
+    "OMP extension and mailbox transport": "CW-04가 가능성과 manager turn 중단 요청·확인/불명 결과 경계를 검증한다. CW-08이 CW-05 계약과 CW-09 영속 기록 통합 뒤 production 전달을 소유한다.",
+    "metadata schema": "CW-09가 소유한다. CW-14는 장애 경계를 소비하며 경쟁하는 schema 변경은 하지 않는다.",
+    "PLAN, SPEC, tickets, workflow state and approval": "Root만 수정한다. Worker는 필요한 계획 변경을 보고한다."
+  },
+  "initial_frontier": [
+    "CW-01"
+  ],
+  "frontier_after_CW_01": [
+    "CW-02",
+    "CW-03",
+    "CW-04"
+  ],
+  "parallel_candidates": [
+    {
+      "ready_set": [
+        "CW-02",
+        "CW-03"
+      ],
+      "condition": "서로 다른 worktree이며 G1의 실제 interactive TTY와 G2의 가상 PTY가 분리된 경우."
+    },
+    {
+      "ready_set": [
+        "CW-03",
+        "CW-04"
+      ],
+      "condition": "서로 다른 worktree이며 shell fixture와 OMP session directory가 분리된 경우."
+    },
+    {
+      "ready_set": [
+        "CW-06",
+        "CW-07",
+        "CW-09"
+      ],
+      "condition": "CW-05 통합 뒤 세 ticket 중 최대 두 작성자만 선택한다. CW-08은 CW-09 통합 뒤 준비되며 CW-06과 실제 OMP 시험에서 host:omp-runtime을 함께 써서 동시 실행할 수 없다."
+    }
+  ],
+  "tickets": [
+    {
+      "id": "CW-01",
+      "path": "tickets/CW-01.md",
+      "title": "M0 harness와 임시 공통 계약",
+      "kind": "feasibility_foundation",
+      "depends_on": [],
+      "dependency_reasons": {},
+      "acceptance_ids": [],
+      "deliverable": "최소 Python package·TS contract test harness를 만들고, 세 PTY/두 OMP/host shell이 공유할 versioned control envelope와 Task·revision·run·command·message·session 식별 규칙을 정의한다. `message_id`는 전달 시도마다 바뀌는 값이 아니라 논리 메시지의 안정된 ID다. 이 ticket은 제품 기능이나 외부 라이브러리의 호환 통과를 선언하지 않는다.",
+      "base_requirements": "승인된 BRIEF r1.7 원문, 현재 통합 후보, 기존 dirty/untracked 입력의 복구 가능한 snapshot.",
+      "contract_requirements": "승인된 BRIEF r1.7 byte snapshot과 현재 untracked 입력을 보존한다. PTY display byte와 control event를 분리하고 접수·실제 시작·실제 완료·불명을 다른 상태로 표현한다. 동일 `message_id`의 전달 시도는 별도 기록으로 구분하고 필요할 때만 시도 ID를 둔다. Gate 산출물의 OMP/shell/terminal 버전, 명령, 조건, 결과를 남길 형식을 정한다.",
+      "write_scope_hint": [
+        "pyproject.toml",
+        "src/workbench/contracts/**",
+        "tests/contracts/**",
+        "omp_bridge/contract/**",
+        "tests/gates/harness/**"
+      ],
+      "write_owner": "CW-01 ticket 작성자; Root가 검증된 candidate를 통합",
+      "resource_claims": [
+        {
+          "resource": "repo:dependency-lock",
+          "mode": "exclusive"
+        },
+        {
+          "resource": "repo:shared-contract",
+          "mode": "exclusive"
+        }
+      ],
+      "service_namespaces": [
+        "uds:cw-01-contract",
+        "data-dir:cw-01"
+      ],
+      "workspace_requirement": "verified_isolated_worktree_if_parallel",
+      "verification_requirement": "동작 수준 테스트, 독립 test_designer 평가/필요 테스트, fresh reviewer 검토와 후보별 실제 명령·결과 기록.",
+      "worker": "worker"
+    },
+    {
+      "id": "CW-02",
+      "path": "tickets/CW-02.md",
+      "title": "G1 원본 OMP TUI·VT 충실도",
+      "kind": "feasibility_gate",
+      "depends_on": [
+        "CW-01"
+      ],
+      "dependency_reasons": {
+        "CW-01": "임시 PTY/control 경계와 재현 가능한 게이트 harness가 통합·검증됨."
+      },
+      "acceptance_ids": [],
+      "deliverable": "G1: 원본 OMP 두 개와 host terminal의 실제 PTY stream을 세 pane에 표시하는 후보를 동작시켜 input, paste, resize, scrollback, query reply와 화면 복원을 실증한다.",
+      "base_requirements": "승인된 BRIEF r1.9 원문, 현재 통합 후보, 기존 dirty/untracked 입력의 복구 가능한 snapshot.",
+      "contract_requirements": "CW-01 display/control 경계를 소비한다. 원본 OMP composer·승인·slash command와 한글·wide character·색·도구 출력이 유지되어야 한다. 내부 tmux/headless 대체는 허용되지 않는다.",
+      "write_scope_hint": [
+        "src/workbench/terminal/vt_*/**",
+        "src/workbench/ui/terminal_*/**",
+        "tests/gates/g1_*/**",
+        "docs/features/core-workbench/gates/G1.md"
+      ],
+      "write_owner": "CW-02 ticket 작성자; Root가 검증된 candidate를 통합",
+      "resource_claims": [
+        {
+          "resource": "host:interactive-terminal",
+          "mode": "exclusive"
+        },
+        {
+          "resource": "host:omp-runtime",
+          "mode": "exclusive"
+        },
+        {
+          "resource": "native:vt-build-cache",
+          "mode": "exclusive"
+        }
+      ],
+      "service_namespaces": [
+        "pty:cw-02",
+        "omp-session:cw-02",
+        "data-dir:cw-02"
+      ],
+      "workspace_requirement": "verified_isolated_worktree_if_parallel",
+      "verification_requirement": "동작 수준 테스트, 독립 test_designer 평가/필요 테스트, fresh reviewer 검토와 후보별 실제 명령·결과 기록.",
+      "worker": "complex_worker"
+    },
+    {
+      "id": "CW-03",
+      "path": "tickets/CW-03.md",
+      "title": "G2 Bash/sh 같은 shell 실행",
+      "kind": "feasibility_gate",
+      "depends_on": [
+        "CW-01"
+      ],
+      "dependency_reasons": {
+        "CW-01": "command ID·lifecycle·입력 owner의 임시 계약이 통합·검증됨."
+      },
+      "acceptance_ids": [],
+      "deliverable": "G2: 실제 Bash 5.x와 현재 host의 sh 구현에서 Workbench 전용 persistent interactive shell 하나에 안전하게 자동 명령을 수락·실행·관측할 수 있는지 실증한다.",
+      "base_requirements": "승인된 BRIEF r1.9 원문, 현재 통합 후보, 기존 dirty/untracked 입력의 복구 가능한 snapshot.",
+      "contract_requirements": "CW-01 command ID/lifecycle/input-owner 계약을 소비한다. cwd/export/사용자 선택 환경을 보존하고 prompt·stdout marker·무출력으로 종료를 판정하지 않는다. Bash 부재 시 sh 시작과 실행 중 shell 고정은 별개다.",
+      "write_scope_hint": [
+        "src/workbench/terminal/shell_*/**",
+        "tests/gates/g2_*/**",
+        "docs/features/core-workbench/gates/G2.md"
+      ],
+      "write_owner": "CW-03 ticket 작성자; Root가 검증된 candidate를 통합",
+      "resource_claims": [
+        {
+          "resource": "host:shell-fixture",
+          "mode": "exclusive"
+        }
+      ],
+      "service_namespaces": [
+        "pty:cw-03",
+        "uds:cw-03-shell",
+        "data-dir:cw-03"
+      ],
+      "workspace_requirement": "verified_isolated_worktree_if_parallel",
+      "verification_requirement": "동작 수준 테스트, 독립 test_designer 평가/필요 테스트, fresh reviewer 검토와 후보별 실제 명령·결과 기록.",
+      "worker": "complex_worker"
+    },
+    {
+      "id": "CW-04",
+      "path": "tickets/CW-04.md",
+      "title": "G3 독립 OMP bridge",
+      "kind": "feasibility_gate",
+      "depends_on": [
+        "CW-01"
+      ],
+      "dependency_reasons": {
+        "CW-01": "role/message/session 계약과 게이트 harness가 통합·검증됨."
+      },
+      "acceptance_ids": [],
+      "deliverable": "G3: 고정 OMP 버전의 두 독립 process에 공개 extension을 로드하고 task/question/answer/report의 session-bound 왕복을 실증한다. 실제 manager turn 중 `ctx.abort()`로 중단을 요청하고 확인/불명 결과를 구분한다. Bridge는 일시정지 중 새 자동 전달을 보류하고, gate harness는 실제 파일·도구 결과·terminal 프로세스·작업 상태·승인 범위를 대조한 뒤에만 재개 신호를 보내며 replay 금지를 실증한다. 실제 backend 대조·표시와 worker 모델 점검 보류는 CW-11/12가 소유한다.",
+      "base_requirements": "승인된 BRIEF r1.9 원문, 현재 통합 후보, 기존 dirty/untracked 입력의 복구 가능한 snapshot.",
+      "contract_requirements": "CW-01 versioned envelope를 소비한다. Python local bridge는 role·안정된 `message_id`·대상 session generation을 검증하고, extension은 주입 직전 idle/pending/approval/composer와 pause 상태를 확인한다. API 수락과 모델 처리 완료를 구분한다. 진행 중 manager turn 중단 요청과 실제 확인·불명 도구 결과는 별개다. 도구 A 완료 대기나 준비된 B 별도 차단을 보장하지 않는다.",
+      "write_scope_hint": [
+        "omp_bridge/**",
+        "src/workbench/ipc/bridge_*/**",
+        "tests/gates/g3_*/**",
+        "docs/features/core-workbench/gates/G3.md"
+      ],
+      "write_owner": "CW-04 ticket 작성자; Root가 검증된 candidate를 통합",
+      "resource_claims": [
+        {
+          "resource": "host:omp-runtime",
+          "mode": "exclusive"
+        },
+        {
+          "resource": "repo:bridge-dependency-lock",
+          "mode": "exclusive"
+        }
+      ],
+      "service_namespaces": [
+        "uds:cw-04",
+        "omp-session:cw-04",
+        "data-dir:cw-04"
+      ],
+      "workspace_requirement": "verified_isolated_worktree_if_parallel",
+      "verification_requirement": "동작 수준 테스트, 독립 test_designer 평가/필요 테스트, fresh reviewer 검토와 후보별 실제 명령·결과 기록.",
+      "worker": "complex_worker"
+    },
+    {
+      "id": "CW-05",
+      "path": "tickets/CW-05.md",
+      "title": "G4 detach 실증과 계약 고정",
+      "kind": "feasibility_gate",
+      "depends_on": [
+        "CW-02",
+        "CW-03",
+        "CW-04"
+      ],
+      "dependency_reasons": {
+        "CW-02": "G1 PTY/VT 후보와 실제 OMP 화면 증거가 통합·검증됨.",
+        "CW-03": "G2 Bash/sh 실행·lifecycle 증거가 통합·검증됨.",
+        "CW-04": "G3 공개 extension·session 전달과 manager turn 중단 요청/확인 증거가 통합·검증됨."
+      },
+      "acceptance_ids": [],
+      "deliverable": "G4: 분리된 frontend/backend 후보에서 backend가 세 PTY·두 OMP와 자동화 활성 중 실제 periodic wake를 소유하고, detach 중 유지·재접속 시 중복 시작 방지를 실증한다. G1~G3의 성공 조합, OMP turn 중단 요청·확인/불명 결과 경계, 최소 metadata 저장 port를 통합 contract와 compatibility lock에 고정한다.",
+      "base_requirements": "승인된 BRIEF r1.9 원문, 현재 통합 후보, 기존 dirty/untracked 입력의 복구 가능한 snapshot.",
+      "contract_requirements": "선행 게이트의 검증된 조합만 사용한다. Backend crash 시 child 생존을 가정하지 않고 실제 process identity와 기록을 대조한다. 화면 연결 ID와 Task/run/OMP session identity를 구분한다. Metadata 저장 port는 write 성공·실패를 새 자동 실행 수락 경계에 전달하며 실제 schema는 CW-09가 소유한다.",
+      "write_scope_hint": [
+        "src/workbench/runtime/**",
+        "src/workbench/contracts/**",
+        "src/workbench/app/**",
+        "tests/gates/g4_*/**",
+        "pyproject.toml",
+        "uv.lock",
+        "omp_bridge/package.json",
+        "docs/features/core-workbench/gates/G4.md"
+      ],
+      "write_owner": "CW-05 ticket 작성자; Root가 검증된 candidate를 통합",
+      "resource_claims": [
+        {
+          "resource": "host:interactive-terminal",
+          "mode": "exclusive"
+        },
+        {
+          "resource": "host:omp-runtime",
+          "mode": "exclusive"
+        },
+        {
+          "resource": "host:shell-fixture",
+          "mode": "exclusive"
+        },
+        {
+          "resource": "repo:dependency-lock",
+          "mode": "exclusive"
+        },
+        {
+          "resource": "repo:shared-contract",
+          "mode": "exclusive"
+        }
+      ],
+      "service_namespaces": [
+        "pty:cw-05",
+        "uds:cw-05",
+        "omp-session:cw-05",
+        "data-dir:cw-05"
+      ],
+      "workspace_requirement": "verified_isolated_worktree_if_parallel",
+      "verification_requirement": "동작 수준 테스트, 독립 test_designer 평가/필요 테스트, fresh reviewer 검토와 후보별 실제 명령·결과 기록.",
+      "worker": "complex_worker"
+    },
+    {
+      "id": "CW-06",
+      "path": "tickets/CW-06.md",
+      "title": "세 영역 원본 OMP 조작",
+      "kind": "implementation",
+      "depends_on": [
+        "CW-05"
+      ],
+      "dependency_reasons": {
+        "CW-05": "G4 frontend/backend 계약과 terminal 렌더링이 통합·검증됨."
+      },
+      "acceptance_ids": [
+        "C-AC-01",
+        "C-AC-06",
+        "C-AC-14"
+      ],
+      "deliverable": "원본 manager OMP·worker OMP와 실제 host terminal을 한 화면에 표시하고 사용자 direct chat, focus, host 입력 owner, 상태·마지막 확인 시각을 분리해 보여준다.",
+      "base_requirements": "승인된 BRIEF r1.9 원문, 현재 통합 후보, 기존 dirty/untracked 입력의 복구 가능한 snapshot.",
+      "contract_requirements": "CW-05의 PTY/VT snapshot·input routing 계약을 그대로 소비한다. Focus 변경은 host 입력 owner 변경이 아니다. OMP 화면을 일반 채팅 view로 대체하지 않는다.",
+      "write_scope_hint": [
+        "src/workbench/ui/**",
+        "tests/ui/**"
+      ],
+      "write_owner": "CW-06 ticket 작성자; Root가 검증된 candidate를 통합",
+      "resource_claims": [
+        {
+          "resource": "host:interactive-terminal",
+          "mode": "exclusive"
+        },
+        {
+          "resource": "host:omp-runtime",
+          "mode": "exclusive"
+        }
+      ],
+      "service_namespaces": [
+        "pty:cw-06",
+        "uds:cw-06",
+        "omp-session:cw-06"
+      ],
+      "workspace_requirement": "verified_isolated_worktree_if_parallel",
+      "verification_requirement": "동작 수준 테스트, 독립 test_designer 평가/필요 테스트, fresh reviewer 검토와 후보별 실제 명령·결과 기록.",
+      "worker": "worker"
+    },
+    {
+      "id": "CW-07",
+      "path": "tickets/CW-07.md",
+      "title": "Persistent shell lifecycle과 수동 제어",
+      "kind": "implementation",
+      "depends_on": [
+        "CW-05"
+      ],
+      "dependency_reasons": {
+        "CW-05": "G4 control 계약과 G2에서 증명한 Bash/sh 경로가 통합·검증됨."
+      },
+      "acceptance_ids": [
+        "C-AC-08",
+        "C-AC-26",
+        "C-AC-32"
+      ],
+      "deliverable": "Host persistent Bash/sh에서 사용자 제어권 인수·반환, 같은 shell 자동 실행 eligibility, 명시적 lifecycle과 선택된 conda/venv 재사용을 구현한다.",
+      "base_requirements": "승인된 BRIEF r1.9 원문, 현재 통합 후보, 기존 dirty/untracked 입력의 복구 가능한 snapshot.",
+      "contract_requirements": "CW-05의 G2 shell adapter만 사용한다. 한 foreground run, 한 수락 요청, 숨은 queue 없음. UI focus·owner·pending 입력을 분리한다. Workbench Python 환경을 실험 shell에 주입하지 않는다.",
+      "write_scope_hint": [
+        "src/workbench/terminal/shell_*/**",
+        "src/workbench/terminal/pty_*/**",
+        "tests/terminal/**"
+      ],
+      "write_owner": "CW-07 ticket 작성자; Root가 검증된 candidate를 통합",
+      "resource_claims": [
+        {
+          "resource": "host:shell-fixture",
+          "mode": "exclusive"
+        }
+      ],
+      "service_namespaces": [
+        "pty:cw-07",
+        "uds:cw-07-shell",
+        "data-dir:cw-07"
+      ],
+      "workspace_requirement": "verified_isolated_worktree_if_parallel",
+      "verification_requirement": "동작 수준 테스트, 독립 test_designer 평가/필요 테스트, fresh reviewer 검토와 후보별 실제 명령·결과 기록.",
+      "worker": "complex_worker"
+    },
+    {
+      "id": "CW-08",
+      "path": "tickets/CW-08.md",
+      "title": "Task 연계 두 역할 mailbox",
+      "kind": "implementation",
+      "depends_on": [
+        "CW-05",
+        "CW-09"
+      ],
+      "dependency_reasons": {
+        "CW-05": "G4 protocol과 G3 공개 OMP 전달 경로가 통합·검증됨.",
+        "CW-09": "영속 Task/revision/run·논리 메시지/전달 상태 기록과 metadata write gate가 통합·검증됨."
+      },
+      "acceptance_ids": [
+        "C-AC-02"
+      ],
+      "deliverable": "Manager와 worker의 task/question/answer/report를 영속 Task/revision/run에 연결하고 두 OMP에 비침범 전달한다. 동일 `message_id`의 중복 처리를 막고 접수·주입 시도·API 수락·실제 답변·업무 완료를 구분한다.",
+      "base_requirements": "승인된 BRIEF r1.9 원문, 현재 통합 후보, 기존 dirty/untracked 입력의 복구 가능한 snapshot.",
+      "contract_requirements": "CW-05의 G3 공개 extension/role/session contract와 CW-09의 영속 기록을 소비한다. 주입 직전 pending·approval·composer·session generation 확인과 안정된 `message_id` dedupe를 지킨다. 전달 시도와 논리 메시지를 구분하고 불명 수락은 자동 replay하지 않는다.",
+      "write_scope_hint": [
+        "src/workbench/ipc/**",
+        "omp_bridge/**",
+        "tests/bridge/**"
+      ],
+      "write_owner": "CW-08 ticket 작성자; Root가 검증된 candidate를 통합",
+      "resource_claims": [
+        {
+          "resource": "host:omp-runtime",
+          "mode": "exclusive"
+        },
+        {
+          "resource": "repo:bridge-dependency-lock",
+          "mode": "exclusive"
+        }
+      ],
+      "service_namespaces": [
+        "uds:cw-08",
+        "omp-session:cw-08",
+        "data-dir:cw-08"
+      ],
+      "workspace_requirement": "verified_isolated_worktree_if_parallel",
+      "verification_requirement": "동작 수준 테스트, 독립 test_designer 평가/필요 테스트, fresh reviewer 검토와 후보별 실제 명령·결과 기록.",
+      "worker": "worker"
+    },
+    {
+      "id": "CW-09",
+      "path": "tickets/CW-09.md",
+      "title": "영속 위임과 Task revision",
+      "kind": "implementation",
+      "depends_on": [
+        "CW-05"
+      ],
+      "dependency_reasons": {
+        "CW-05": "G4 Task/control 계약과 저장 경계가 통합·검증됨."
+      },
+      "acceptance_ids": [
+        "C-AC-29"
+      ],
+      "deliverable": "사용자 위임 승인·진행 지시를 TaskSpec revision과 연결하고 run/cancel 이력·세션 공통 설정을 durable metadata에 보존한다. CW-08이 사용할 Task/revision/run 연계 논리 메시지·전달 상태 기록 경계를 제공한다. 새 자동 실행은 승인 범위와 저장 성공이 확인된 때만 허용한다.",
+      "base_requirements": "승인된 BRIEF r1.9 원문, 현재 통합 후보, 기존 dirty/untracked 입력의 복구 가능한 snapshot.",
+      "contract_requirements": "Task ID는 revision/commit 변경으로 재설정하지 않는다. 실행 중 명세 변경은 새 revision을 다음 run에 적용한다. 즉시 중단·권한 철회는 현재 run에 적용한다. 세션 공통 설정은 각 Task의 이후 판단에 적용하고 변경 전후 설정과 사용한 재시도 횟수의 연결을 보존한다. 안정된 `message_id`와 관련 Task/revision/run·전달 상태의 영속 기록 경계를 CW-08에 제공한다. Storage schema 변경은 이 ticket이 소유한다.",
+      "write_scope_hint": [
+        "src/workbench/tasks/**",
+        "src/workbench/storage/metadata_*/**",
+        "tests/tasks/**"
+      ],
+      "write_owner": "CW-09 ticket 작성자; Root가 검증된 candidate를 통합",
+      "resource_claims": [
+        {
+          "resource": "repo:metadata-schema",
+          "mode": "exclusive"
+        }
+      ],
+      "service_namespaces": [
+        "data-dir:cw-09"
+      ],
+      "workspace_requirement": "verified_isolated_worktree_if_parallel",
+      "verification_requirement": "동작 수준 테스트, 독립 test_designer 평가/필요 테스트, fresh reviewer 검토와 후보별 실제 명령·결과 기록.",
+      "worker": "worker"
+    },
+    {
+      "id": "CW-10",
+      "path": "tickets/CW-10.md",
+      "title": "승인 Task에서 host run까지",
+      "kind": "implementation",
+      "depends_on": [
+        "CW-07",
+        "CW-08",
+        "CW-09"
+      ],
+      "dependency_reasons": {
+        "CW-07": "실제 shell 수락·lifecycle·수동 제어가 통합·검증됨.",
+        "CW-08": "연결된 manager/worker 메시지 전달이 통합·검증됨.",
+        "CW-09": "승인된 불변 TaskSpec/run과 metadata gate가 통합·검증됨."
+      },
+      "acceptance_ids": [
+        "C-AC-03",
+        "C-AC-05",
+        "C-AC-09",
+        "C-AC-11"
+      ],
+      "deliverable": "하나의 승인된 목표가 manager 준비/허용 local commit, worker의 실행용 worktree 준비, 같은 host shell 실행, worker 실험·terminal 관측/보고로 이어지는 수직 흐름을 완성한다. Worker 직접 요청도 기존 명세 또는 범위 안의 작은 새 명세에 연결한다.",
+      "base_requirements": "승인된 BRIEF r1.9 원문, 현재 통합 후보, 기존 dirty/untracked 입력의 복구 가능한 snapshot.",
+      "contract_requirements": "CW-07 shell, CW-08 mailbox, CW-09 TaskSpec/run을 소비한다. Worker 직접 요청이 승인 범위를 넓히면 manager 확인 전 실행하지 않는다. Worktree는 일반 Git 도구를 따르는 운영 가이드이며 자동 관리 기능이 아니다. 사용자 변경 삭제·stash·개발 디렉터리 우회, push·merge를 자동 수행하지 않는다. Worker가 코드 수정 필요성을 근거와 함께 manager에게 보고하면 그 지시는 끝나고, 수정 후 같은 작업은 manager의 새 지시가 있어야 한다.",
+      "write_scope_hint": [
+        "src/workbench/workflow/**",
+        "tests/workflow/**",
+        "docs/features/core-workbench/WORKTREE-GUIDE.md"
+      ],
+      "write_owner": "CW-10 ticket 작성자; Root가 검증된 candidate를 통합",
+      "resource_claims": [
+        {
+          "resource": "host:omp-runtime",
+          "mode": "exclusive"
+        },
+        {
+          "resource": "host:shell-fixture",
+          "mode": "exclusive"
+        },
+        {
+          "resource": "repo:integration-wiring",
+          "mode": "exclusive"
+        }
+      ],
+      "service_namespaces": [
+        "pty:cw-10",
+        "uds:cw-10",
+        "omp-session:cw-10",
+        "data-dir:cw-10"
+      ],
+      "workspace_requirement": "verified_isolated_worktree_if_parallel",
+      "verification_requirement": "동작 수준 테스트, 독립 test_designer 평가/필요 테스트, fresh reviewer 검토와 후보별 실제 명령·결과 기록.",
+      "worker": "complex_worker"
+    },
+    {
+      "id": "CW-11",
+      "path": "tickets/CW-11.md",
+      "title": "주기적 worker 점검과 hang 조사",
+      "kind": "implementation",
+      "depends_on": [
+        "CW-10"
+      ],
+      "dependency_reasons": {
+        "CW-10": "활성 run·worker session·종료 이벤트 경로가 통합·검증됨."
+      },
+      "acceptance_ids": [
+        "C-AC-12",
+        "C-AC-21",
+        "C-AC-27"
+      ],
+      "deliverable": "자동화 활성 중 활성 run을 60초마다 worker 모델이 검토한다. Busy 시 최신 점검 하나만 유지하고 사용자 대화를 우선한다. 일시정지 중 새 모델 점검은 시작하지 않고 로그·프로세스 상태 수집은 계속한다. 종료 이벤트는 즉시 표시하고 hang 의심은 프로세스 근거로 조사한다.",
+      "base_requirements": "승인된 BRIEF r1.9 원문, 현재 통합 후보, 기존 dirty/untracked 입력의 복구 가능한 snapshot.",
+      "contract_requirements": "CW-10의 active run/session/exit event를 소비한다. 무출력·경과 시간 자체는 hang/종료가 아니다. Periodic review와 정상 peer wake에는 고정 횟수 상한이 없고 usage는 관측/추정을 구분한다.",
+      "write_scope_hint": [
+        "src/workbench/observation/**",
+        "tests/observation/**"
+      ],
+      "write_owner": "CW-11 ticket 작성자; Root가 검증된 candidate를 통합",
+      "resource_claims": [
+        {
+          "resource": "host:omp-runtime",
+          "mode": "exclusive"
+        }
+      ],
+      "service_namespaces": [
+        "uds:cw-11",
+        "omp-session:cw-11",
+        "data-dir:cw-11"
+      ],
+      "workspace_requirement": "verified_isolated_worktree_if_parallel",
+      "verification_requirement": "동작 수준 테스트, 독립 test_designer 평가/필요 테스트, fresh reviewer 검토와 후보별 실제 명령·결과 기록.",
+      "worker": "worker"
+    },
+    {
+      "id": "CW-12",
+      "path": "tickets/CW-12.md",
+      "title": "자동화 일시정지와 진행 중 도구 작업",
+      "kind": "implementation",
+      "depends_on": [
+        "CW-09",
+        "CW-11"
+      ],
+      "dependency_reasons": {
+        "CW-09": "영속 위임·취소·권한 상태가 통합·검증됨.",
+        "CW-11": "일시정지 중 유지할 로그·프로세스 수집과 중단할 모델 점검 경로가 통합·검증됨."
+      },
+      "acceptance_ids": [
+        "C-AC-25",
+        "C-AC-30",
+        "C-AC-33"
+      ],
+      "deliverable": "일시정지 요청 즉시 새 자동 지시를 보류하고 manager OMP 진행 중 turn 중단을 요청한다. 요청·확인·불명 도구 결과와 마지막 작업·확인된 파일 변경·실행 중 프로세스를 표시한다. 새 자동 manager/worker 모델 작업과 periodic review는 시작하지 않고 로그·프로세스 수집과 기존 실험은 유지한다. 명시적 재개 뒤 실제 상태·승인 범위를 대조하고 중단 명령·대기 요청은 replay하지 않는다.",
+      "base_requirements": "승인된 BRIEF r1.9 원문, 현재 통합 후보, 기존 dirty/untracked 입력의 복구 가능한 snapshot.",
+      "contract_requirements": "CW-09 승인/취소, CW-11 관측·점검 경계, CW-04/05 OMP turn 중단 계약을 소비한다. 일시정지는 rollback이나 실험 중단이 아니다. 사용자 직접 조사·수정·rollback·명시적 agent 수동 지시는 자동 재개가 아니다. 취소는 기록·결과 파일 자동 삭제가 아니다.",
+      "write_scope_hint": [
+        "src/workbench/policy/pause_*/**",
+        "tests/policy/pause_*/**",
+        "omp_bridge/policy_*/**"
+      ],
+      "write_owner": "CW-12 ticket 작성자; Root가 검증된 candidate를 통합",
+      "resource_claims": [
+        {
+          "resource": "host:omp-runtime",
+          "mode": "exclusive"
+        }
+      ],
+      "service_namespaces": [
+        "uds:cw-12",
+        "omp-session:cw-12",
+        "data-dir:cw-12"
+      ],
+      "workspace_requirement": "verified_isolated_worktree_if_parallel",
+      "verification_requirement": "동작 수준 테스트, 독립 test_designer 평가/필요 테스트, fresh reviewer 검토와 후보별 실제 명령·결과 기록.",
+      "worker": "worker"
+    },
+    {
+      "id": "CW-13",
+      "path": "tickets/CW-13.md",
+      "title": "Manager 복구·종료·완료 판단",
+      "kind": "implementation",
+      "depends_on": [
+        "CW-10",
+        "CW-11",
+        "CW-12"
+      ],
+      "dependency_reasons": {
+        "CW-10": "Task→run/worktree 흐름과 불변 run 근거가 통합·검증됨.",
+        "CW-11": "worker 관측과 조사 보고가 통합·검증됨.",
+        "CW-12": "실행 결정을 막는 일시정지·취소 guard가 통합·검증됨."
+      },
+      "acceptance_ids": [
+        "C-AC-04",
+        "C-AC-07",
+        "C-AC-10",
+        "C-AC-13",
+        "C-AC-31",
+        "C-AC-34"
+      ],
+      "deliverable": "Manager가 worker 근거와 승인된 완료 조건을 대조해 완료 또는 추가 조사/복구를 결정한다. 실패 복구 재시도 3회, 종료 확인 뒤 변경·재실행, 권한·대상 확인 후 강제 종료를 집행한다.",
+      "base_requirements": "승인된 BRIEF r1.9 원문, 현재 통합 후보, 기존 dirty/untracked 입력의 복구 가능한 snapshot.",
+      "contract_requirements": "CW-10의 run/worktree, CW-11의 조사 근거, CW-12의 pause/취소 경계를 소비한다. 최초 실행·정상 개선과 복구 재시도를 구분하고 commit/revision·세션 공통 설정 변경으로 count를 초기화하지 않는다. 세션 설정 변경은 다음 판단부터 적용하고 현재 run을 종료하지 않는다. Terminal 입력 owner를 우회하지 않는다.",
+      "write_scope_hint": [
+        "src/workbench/policy/recovery_*/**",
+        "tests/policy/recovery_*/**"
+      ],
+      "write_owner": "CW-13 ticket 작성자; Root가 검증된 candidate를 통합",
+      "resource_claims": [
+        {
+          "resource": "host:omp-runtime",
+          "mode": "exclusive"
+        },
+        {
+          "resource": "host:shell-fixture",
+          "mode": "exclusive"
+        }
+      ],
+      "service_namespaces": [
+        "pty:cw-13",
+        "uds:cw-13",
+        "omp-session:cw-13",
+        "data-dir:cw-13"
+      ],
+      "workspace_requirement": "verified_isolated_worktree_if_parallel",
+      "verification_requirement": "동작 수준 테스트, 독립 test_designer 평가/필요 테스트, fresh reviewer 검토와 후보별 실제 명령·결과 기록.",
+      "worker": "complex_worker"
+    },
+    {
+      "id": "CW-14",
+      "path": "tickets/CW-14.md",
+      "title": "원문 로그 상한과 저장 장애",
+      "kind": "implementation",
+      "depends_on": [
+        "CW-07",
+        "CW-09"
+      ],
+      "dependency_reasons": {
+        "CW-07": "실시간 log 수집에 쓸 PTY/lifecycle stream이 통합·검증됨.",
+        "CW-09": "metadata write gate와 안정적인 run ID가 통합·검증됨."
+      },
+      "acceptance_ids": [
+        "C-AC-24",
+        "C-AC-28"
+      ],
+      "deliverable": "Run raw log 64 MiB·project raw log 512 MiB cap, 잘림·누락·마지막 관측 표시를 구현한다. TaskSpec/결과 요약과 실행용 worktree는 자동 삭제하지 않는다.",
+      "base_requirements": "승인된 BRIEF r1.9 원문, 현재 통합 후보, 기존 dirty/untracked 입력의 복구 가능한 snapshot.",
+      "contract_requirements": "CW-07 PTY byte/lifecycle과 CW-09 metadata write gate를 소비한다. Metadata 실패는 새 자동 실행 보류, raw log 실패/상한은 실행·화면·가능한 관측 유지다. 실험 산출 파일은 cap 밖이다.",
+      "write_scope_hint": [
+        "src/workbench/storage/log_*/**",
+        "tests/storage/**"
+      ],
+      "write_owner": "CW-14 ticket 작성자; Root가 검증된 candidate를 통합",
+      "resource_claims": [
+        {
+          "resource": "host:shell-fixture",
+          "mode": "exclusive"
+        }
+      ],
+      "service_namespaces": [
+        "pty:cw-14",
+        "data-dir:cw-14"
+      ],
+      "workspace_requirement": "verified_isolated_worktree_if_parallel",
+      "verification_requirement": "동작 수준 테스트, 독립 test_designer 평가/필요 테스트, fresh reviewer 검토와 후보별 실제 명령·결과 기록.",
+      "worker": "worker"
+    },
+    {
+      "id": "CW-15",
+      "path": "tickets/CW-15.md",
+      "title": "Detach·복구 대조·전체 종료",
+      "kind": "implementation",
+      "depends_on": [
+        "CW-06",
+        "CW-08",
+        "CW-11",
+        "CW-12",
+        "CW-13",
+        "CW-14"
+      ],
+      "dependency_reasons": {
+        "CW-06": "세 영역 UI와 원본 OMP 직접 입력이 통합·검증됨.",
+        "CW-08": "OMP session ID와 불명 mailbox 처리 경계가 통합·검증됨.",
+        "CW-11": "자동화 활성 중 detach 뒤 유지할 60초 점검과 일시정지 중 보류가 통합·검증됨.",
+        "CW-12": "수명 전환 중 보존할 일시정지·취소 상태가 통합·검증됨.",
+        "CW-13": "종료 확인과 manager 판단 경로가 통합·검증됨.",
+        "CW-14": "영속 기록과 저장 장애 처리가 통합·검증됨."
+      },
+      "acceptance_ids": [
+        "C-AC-15",
+        "C-AC-16",
+        "C-AC-17",
+        "C-AC-18",
+        "C-AC-22",
+        "C-AC-23"
+      ],
+      "deliverable": "정상 detach/재접속, agent/backend 재시작 대조, 재부팅 후 사용자 확인, 모델 오류 hold/recheck, 명시적 전체 종료를 사용자 상태와 실제 process에 연결한다.",
+      "base_requirements": "승인된 BRIEF r1.9 원문, 현재 통합 후보, 기존 dirty/untracked 입력의 복구 가능한 snapshot.",
+      "contract_requirements": "CW-05의 분리된 lifetime contract와 CW-06/08/11/12/13/14의 통합 결과를 소비한다. 사용자 입력 owner·취소·일시정지를 복구가 해제하지 않는다. Backend crash 뒤 child 생존·PTY 재연결을 확인 없이 주장하지 않는다. 재접속/복구는 일시정지를 해제하거나 중단 명령·대기 요청을 replay하지 않는다.",
+      "write_scope_hint": [
+        "src/workbench/runtime/**",
+        "src/workbench/app/**",
+        "tests/lifecycle/**"
+      ],
+      "write_owner": "CW-15 ticket 작성자; Root가 검증된 candidate를 통합",
+      "resource_claims": [
+        {
+          "resource": "host:interactive-terminal",
+          "mode": "exclusive"
+        },
+        {
+          "resource": "host:omp-runtime",
+          "mode": "exclusive"
+        },
+        {
+          "resource": "host:shell-fixture",
+          "mode": "exclusive"
+        },
+        {
+          "resource": "repo:integration-wiring",
+          "mode": "exclusive"
+        }
+      ],
+      "service_namespaces": [
+        "pty:cw-15",
+        "uds:cw-15",
+        "omp-session:cw-15",
+        "data-dir:cw-15"
+      ],
+      "workspace_requirement": "verified_isolated_worktree_if_parallel",
+      "verification_requirement": "동작 수준 테스트, 독립 test_designer 평가/필요 테스트, fresh reviewer 검토와 후보별 실제 명령·결과 기록.",
+      "worker": "complex_worker"
+    },
+    {
+      "id": "CW-16",
+      "path": "tickets/CW-16.md",
+      "title": "최종 통합과 호환성 검증",
+      "kind": "integration_verification",
+      "depends_on": [
+        "CW-15"
+      ],
+      "dependency_reasons": {
+        "CW-15": "모든 production 선행 산출물이 독립 검증 후 통합되어 동결 후보가 준비됨."
+      },
+      "acceptance_ids": [
+        "C-AC-19",
+        "C-AC-20"
+      ],
+      "deliverable": "전체 candidate에서 C-AC-01~34의 사용자 행동과 G1~G4 근거를 연결해 최종 통합한다. 일반 terminal, 외부 tmux/herdr 및 실제 Bash/sh 조합의 호환 결과를 기록한다. C-D49의 turn 중단 요청/확인·불명 결과, 일시정지 중 자동 모델 작업 보류, 명시적 재개 대조, worker 수정 필요 보고 후 지시 종료를 포함한다.",
+      "base_requirements": "승인된 BRIEF r1.9 원문, 현재 통합 후보, 기존 dirty/untracked 입력의 복구 가능한 snapshot.",
+      "contract_requirements": "PLAN.acceptance_trace의 모든 ID와 SPEC의 I-FLOW/I-SHELL/I-POLICY/I-FAULT/I-COMPAT을 사용한다. Integration delta는 Root가 하나씩 합치고 candidate snapshot을 동결한 뒤 독립 review/test evidence를 연결한다.",
+      "write_scope_hint": [
+        "tests/integration/**",
+        "docs/features/core-workbench/VERIFICATION.md",
+        "docs/features/core-workbench/COMPATIBILITY.md"
+      ],
+      "write_owner": "Root 통합 workspace",
+      "resource_claims": [
+        {
+          "resource": "host:interactive-terminal",
+          "mode": "exclusive"
+        },
+        {
+          "resource": "host:omp-runtime",
+          "mode": "exclusive"
+        },
+        {
+          "resource": "host:shell-fixture",
+          "mode": "exclusive"
+        },
+        {
+          "resource": "repo:integration-wiring",
+          "mode": "exclusive"
+        }
+      ],
+      "service_namespaces": [
+        "pty:cw-16",
+        "uds:cw-16",
+        "omp-session:cw-16",
+        "data-dir:cw-16"
+      ],
+      "workspace_requirement": "root_integration_workspace",
+      "verification_requirement": "Root 최종 통합, 독립 test_designer·fresh reviewer 범위와 모든 수락 근거를 동결 후보에 연결.",
+      "owner": "root"
+    }
+  ],
+  "pending_capabilities": [
+    {
+      "item": "OMP 모델 API·인증, 두 실제 session의 60초 review와 실제 manager turn 중단·재개 경계",
+      "status": "pending_evidence",
+      "affects": [
+        "G3",
+        "G4",
+        "I-FLOW",
+        "I-POLICY"
+      ]
+    },
+    {
+      "item": "Textual/libvterm/CFFI와 Python minor의 실제 설치·호환 조합",
+      "status": "pending_evidence",
+      "affects": [
+        "G1",
+        "G4",
+        "I-COMPAT"
+      ]
+    },
+    {
+      "item": "일반 terminal·tmux·herdr의 실제 사용자 조작 matrix",
+      "status": "pending_evidence",
+      "affects": [
+        "G1",
+        "I-COMPAT"
+      ]
+    },
+    {
+      "item": "OS reboot를 포함한 실제 복구 시나리오",
+      "status": "pending_evidence",
+      "affects": [
+        "I-FAULT",
+        "C-AC-23"
+      ]
+    }
+  ],
+  "frontier_after_CW_05": [
+    "CW-06",
+    "CW-07",
+    "CW-09"
+  ]
+}

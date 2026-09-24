@@ -1,0 +1,34 @@
+[
+  {
+    "schemaVersion": 1,
+    "messageId": "10000000-0000-4000-8000-000000000002",
+    "deliveryAttemptId": "20000000-0000-4000-8000-000000000002",
+    "senderRole": "manager",
+    "sessionId": "30000000-0000-4000-8000-000000000001",
+    "sessionGeneration": 2,
+    "taskId": "40000000-0000-4000-8000-000000000001",
+    "revisionId": "50000000-0000-4000-8000-000000000001",
+    "runId": "60000000-0000-4000-8000-000000000001",
+    "event": {
+      "type": "message",
+      "messageKind": "task",
+      "payload": { "goal": "run approved analysis" }
+    }
+  },
+  {
+    "schemaVersion": 1,
+    "messageId": "10000000-0000-4000-8000-000000000002",
+    "deliveryAttemptId": "20000000-0000-4000-8000-000000000003",
+    "senderRole": "manager",
+    "sessionId": "30000000-0000-4000-8000-000000000001",
+    "sessionGeneration": 2,
+    "taskId": "40000000-0000-4000-8000-000000000001",
+    "revisionId": "50000000-0000-4000-8000-000000000001",
+    "runId": "60000000-0000-4000-8000-000000000001",
+    "event": {
+      "type": "message",
+      "messageKind": "task",
+      "payload": { "goal": "run approved analysis" }
+    }
+  }
+]

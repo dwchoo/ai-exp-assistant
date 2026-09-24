@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://omp-workbench.invalid/schemas/gate-evidence-v1.schema.json",
+  "title": "Core Workbench gate evidence, version 1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "gateId",
+    "outcome",
+    "recordedAt",
+    "environment",
+    "conditions",
+    "commands",
+    "observations",
+    "limitations"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "gateId": { "enum": ["G1", "G2", "G3", "G4"] },
+    "outcome": { "enum": ["passed", "failed", "unverified"] },
+    "recordedAt": { "type": "string", "format": "date-time" },
+    "environment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["os", "architecture", "components"],
+      "properties": {
+        "os": { "type": "string", "minLength": 1 },
+        "architecture": { "type": "string", "minLength": 1 },
+        "components": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "version"],
+            "properties": {
+              "name": { "type": "string", "minLength": 1 },
+              "version": { "type": ["string", "null"] }
+            }
+          }
+        }
+      }
+    },
+    "conditions": { "type": "array", "items": { "type": "string" } },
+    "commands": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["command", "cwd", "result"],
+        "properties": {
+          "command": { "type": "string", "minLength": 1 },
+          "cwd": { "type": "string", "minLength": 1 },
+          "result": { "enum": ["passed", "failed", "not_run"] },
+          "exitCode": { "type": ["integer", "null"] },
+          "reason": { "type": "string" },
+          "evidence": { "type": "array", "items": { "type": "string" } }
+        },
+        "allOf": [
+          {
+            "if": { "properties": { "result": { "const": "not_run" } } },
+            "then": { "required": ["reason"] }
+          }
+        ]
+      }
+    },
+    "observations": { "type": "array", "items": { "type": "string" } },
+    "limitations": { "type": "array", "items": { "type": "string" } }
+  }
+}
