@@ -1,0 +1,74 @@
+{
+  "revision": "p2.3",
+  "spec_revision": "s2.3",
+  "source_brief_revision": "r1.10-draft",
+  "status": "proposed_unapproved",
+  "authority": {
+    "user_quote": "$to-tickets  docs/features/core-workbench/BRIEF.md",
+    "scope": "local SPEC/PLAN/ticket planning; no implementation resume",
+    "full_brief_approval_recorded": false
+  },
+  "previous_approved_bundle_sha256": "e76c0bde27d2d040e373d0a0ed5d90458960f76fbbf3e2ca163cb590a11f1c06",
+  "preserved_ticket_ids": [
+    "CW-01",
+    "CW-02",
+    "CW-03",
+    "CW-04",
+    "CW-05",
+    "CW-06",
+    "CW-07",
+    "CW-08",
+    "CW-09",
+    "CW-10",
+    "CW-11",
+    "CW-12",
+    "CW-13",
+    "CW-14",
+    "CW-15",
+    "CW-16"
+  ],
+  "completed_ticket_preserved": "CW-01",
+  "dependency_edges_added": [
+    {
+      "from": "CW-06",
+      "to": "CW-12",
+      "why": "실제 사용자 화면의 pause 결과 표시 port"
+    }
+  ],
+  "dependency_edges_removed": [],
+  "changed_requirements": [
+    "C-D50 managed shell trust boundary",
+    "C-D51 same-interpreter control wait",
+    "C-D52 takeover requested/confirmed, already-sent unknown/no replay"
+  ],
+  "unchanged_policy": "C-D49 pause/worker policy 유지; A 완료 대기/B 별도 차단 시험 복원 없음",
+  "verification_ownership": [
+    "CW-02 local VT/normal resize vs CW-05 live detach vs CW-15/16 production recovery/matrix",
+    "CW-04 TUI delivery/pause gate harness vs CW-11 scheduler vs CW-12 production UI/reconciliation",
+    "CW-05 gate-evidence validator closes current enforcement gap before production release"
+  ],
+  "technical_elaborations": [
+    {
+      "decision": "G1 query reply는 정확한 byte/size/FIFO fixture와 원본 OMP 화면/입력 runtime을 함께 확인한다.",
+      "basis": "DIAGNOSIS d2가 private OMP 해석 관측을 사용자 동작·공개 관측에 연결하도록 위임. Private parser 추적 자체를 필수 gate로 추가하지 않는다."
+    },
+    {
+      "decision": "G3 API 반환과 OMP 처리 관측의 상태 의미를 분리한다.",
+      "basis": "고정 18.2.10의 RPC/Interactive 소스와 현재 bridge의 api_accepted ACK를 정적 대조. 실제 TUI 실패 재현은 아직 없음."
+    },
+    {
+      "decision": "CW-12는 CW-06 실제 UI 상태 표시 port도 선행으로 소비한다.",
+      "basis": "C-AC-33 사용자 표시 검증을 owner와 선행 산출물만으로 수행하기 위한 실제 dependency."
+    },
+    {
+      "decision": "CW-05가 공통 evidence 집계 validator를 구현하며 초기 CW-02..04 근거 대조는 수동임을 표시한다.",
+      "basis": "현재 저장소에는 item/candidate/evidence level 집계 runner가 없다. CW-01 완료는 보존하며 production release 전에 이 enforcement gap을 닫는다."
+    }
+  ],
+  "runtime_outcomes_changed": false,
+  "product_or_tests_changed": false,
+  "child_calls_started": 0,
+  "review_scope": "요구 입력 9파일, SPEC/PLAN, 안정된 16 ticket, G1..G3 근거 소유 문서",
+  "budget": "98/128 사용을 유지. 잔여 30 대 full estimate 44+6은 capacity risk이며 이 계획이 cap을 증액하지 않는다.",
+  "recorded_at_utc": "2026-09-24T05:15:26.612099+00:00"
+}

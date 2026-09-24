@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "feature": "core-workbench",
+  "phase": "refine-spec",
+  "status": "individual_decisions_agreed_bundle_review_pending",
+  "approved_baseline_revision": "r1.9",
+  "approved_baseline_bundle_sha256": "e76c0bde27d2d040e373d0a0ed5d90458960f76fbbf3e2ca163cb590a11f1c06",
+  "draft_revision": "r1.10-draft",
+  "full_brief_approved": false,
+  "implementation_resume_authorized": false,
+  "decisions": [
+    {
+      "id": "C-D50",
+      "authority_ref": "user async reply to call_4DcPz0JPNOKZxnb1f4Mqn0Il question 1",
+      "user_quote": "관리된 shell 동작을 보장: cwd·export·검증된 conda/venv 전환을 지원하고, 비호환 hook·trap 변경은 자동 복귀를 보류한다. 같은 사용자 권한의 코드가 내부 함수를 고의로 변조하거나 event를 위조하는 공격까지 막는 보안 경계는 요구하지 않는다. (권장)",
+      "status": "user_agreed"
+    },
+    {
+      "id": "C-D51",
+      "authority_ref": "user async reply to call_dPD5pivztFR2pkG9aEhn4yV7 question 2",
+      "user_quote": "자동 제어 대기 모드로 전환 (권장): 같은 shell이 전용 control 경로로 명령을 받고 실행한다. 사용자가 제어권을 가져오면 실행 중 실험을 유지하고, 안전한 시점에 수동 prompt로 돌아온다.",
+      "status": "user_agreed"
+    },
+    {
+      "id": "C-D52",
+      "authority_ref": "user async reply to call_RD3bN19YfPUNUsmImBUh8BWI question 3",
+      "user_quote": "인수 요청·확인을 구분 (권장): 요청 즉시 새 자동 전송을 막고, 이미 전달된 명령은 실행 중·종료·미확인으로 표시한다. 실행 중 실험은 유지하고 수동 입력은 확인된 현재 대상에 전달한다. 인수·상태 확인 뒤 오래된 요청을 자동 재실행하지 않는다.",
+      "status": "user_agreed"
+    }
+  ],
+  "open_decisions": [],
+  "recorded_at_utc": "2026-09-24T01:25:10.166157+00:00",
+  "updated_at_utc": "2026-09-24T02:01:08.730039+00:00",
+  "deferred_runtime_questions": [
+    "Bash/dash same-interpreter control-wait feasibility and supported environment transitions",
+    "G1 real resize, composed panes and external terminal compatibility",
+    "G3 actual TUI delivery, editor preservation and session lifecycle",
+    "Production backend, worker review hold, detach/recovery integration"
+  ],
+  "review_candidate_record": ".workflow/core-workbench/runs/refine-recovery-20260924/r1.10-review-candidate.json"
+}

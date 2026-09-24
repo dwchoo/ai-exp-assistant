@@ -1,27 +1,63 @@
 {
   "schema_version": 1,
   "feature_id": "core-workbench",
-  "revision": "p2.2",
+  "revision": "p2.4",
   "status": "approved_for_implementation",
   "source_brief": {
     "path": "BRIEF.md",
-    "revision": "r1.9",
-    "sha256": "f2ff96a06ad624ac36415d11cd699bc501b402e656a482768e89459b132df069",
-    "approval_record": "../../../.workflow/core-workbench/runs/implement-p2-20260923/cd49-policy-approval.json"
+    "revision": "r1.11",
+    "sha256": "cabef56a1caf1773b1873905ac2cde713a29497c91b85ddd247086c4fc8aed3c",
+    "approval_status": "approved_for_implementation",
+    "review_candidate_record": "../../../.workflow/core-workbench/runs/refine-recovery-20260924/r1.10-review-candidate.json",
+    "decisions_record": "../../../.workflow/core-workbench/runs/refine-recovery-20260924/decisions.json",
+    "planning_authority": "current user: $to-tickets  docs/features/core-workbench/BRIEF.md",
+    "approval_record": "../../../.workflow/core-workbench/runs/implement-p2.3-20260924/approval.json"
   },
   "spec": {
     "path": "SPEC.md",
-    "revision": "s2.2"
+    "revision": "s2.4"
   },
   "source_snapshot": {
-    "head": "fea46fd561f1da1cef32be191775b56c1cff0a13",
-    "tracked_product_files": [],
-    "tracked_tests": [],
-    "tracked_files": [
-      "README.md"
+    "head": "0a67572834ddfd6888b534f8a85213f4b1a2e1ca",
+    "inventory_record": "../../../.workflow/core-workbench/runs/planning-p2.3-20260924/baseline.json",
+    "tracked_product_files": [
+      "omp_bridge/contract/v1.ts",
+      "omp_bridge/g3/bridge.ts",
+      "src/workbench/__init__.py",
+      "src/workbench/contracts/__init__.py",
+      "src/workbench/contracts/v1.py",
+      "src/workbench/ipc/bridge_g3/protocol.py",
+      "src/workbench/terminal/shell_g2/prototype.py",
+      "src/workbench/terminal/vt_g1/screen.py",
+      "src/workbench/terminal/vt_g1/session.py",
+      "src/workbench/ui/terminal_g1/app.py",
+      "src/workbench/ui/terminal_g1/input_router.py"
     ],
-    "dirty_input": "Workflow·기능 문서가 untracked 상태다. 구현 workspace를 만들기 전에 정확한 byte를 보존한다.",
-    "observed_host": "2026-09-23 관측: Python 3.12.3, OMP 18.2.10, Bash 5.2.21, /bin/sh→dash, tmux·herdr 설치. 호환성 시험 결과가 아니다."
+    "tracked_tests": [
+      "tests/contracts/fixtures/control-envelope-v1.json",
+      "tests/contracts/fixtures/delivery-attempts-v1.json",
+      "tests/contracts/test_v1.py",
+      "tests/gates/g1_vt/live_omp_probe.py",
+      "tests/gates/g1_vt/live_runtime_probe.py",
+      "tests/gates/g1_vt/test_g1_candidate.py",
+      "tests/gates/g1_vt/test_live_runtime_probe.py",
+      "tests/gates/g2_shell/test_g2_shell.py",
+      "tests/gates/g3_omp/bridge.test.ts",
+      "tests/gates/g3_omp/live_omp_probe.py",
+      "tests/gates/g3_omp/live_pause_abort_probe.py",
+      "tests/gates/g3_omp/live_rpc_contention_probe.py",
+      "tests/gates/g3_omp/live_rpc_pause_probe.py",
+      "tests/gates/g3_omp/live_rpc_reconnect_probe.py",
+      "tests/gates/g3_omp/preexec_wrapper_probe.py",
+      "tests/gates/g3_omp/product_bridge_probe.py",
+      "tests/gates/g3_omp/test_g3_protocol.py",
+      "tests/gates/harness/contracts.test.ts",
+      "tests/gates/harness/gate-evidence-v1.schema.json",
+      "tests/gates/harness/run-contracts.sh"
+    ],
+    "dirty_input": "기존 staged G1 probe/test/gate/ledger와 unstaged r1.10-draft 요구 문서를 보존한다. 시작 시 status/hash는 baseline.json, 변경 대상의 원문은 before-documents.tar.gz에 있다.",
+    "observed_host": "기존 근거: Linux, Python 3.12.3, Node 22.23.2, OMP 18.2.10, Bash 5.2.21, sh→dash. 이번 계획에서 runtime 재실행 없음. Dispatch 전 재확인.",
+    "product_reality": "CW-01 계약/harness 통합. CW-02..04 prototype/독립 테스트/partial runtime 근거 존재. backend/task/policy/storage production은 미구현. pyproject requires-python>=3.12, dependency 없음; Textual/libvterm/CFFI 확정/설치/lock 없음."
   },
   "revision_history": [
     {
@@ -48,14 +84,33 @@
       "previous_bundle_sha256": "922bd0dca00c52e3c6ab60f700a12e58aff6421034b623c76bd63ea87b3e6356",
       "previous_record": "../../../.workflow/core-workbench/runs/implement-p2-20260923/g1-g2-policy-approval.json",
       "change": "사용자 C-D49에 따라 일시정지를 manager OMP turn 중단 요청·확인/불명 결과와 자동 모델 작업 보류·명시적 재개 대조로 변경하고 worker의 수정 필요 보고 후 지시 종료를 반영. Ticket ID·의존·소유·자원·scope는 유지."
+    },
+    {
+      "revision": "p2.3",
+      "supersedes": "p2.2",
+      "previous_bundle_sha256": "e76c0bde27d2d040e373d0a0ed5d90458960f76fbbf3e2ca163cb590a11f1c06",
+      "previous_record": "../../../.workflow/core-workbench/runs/implement-p2-20260923/cd49-doc-final-approval.json",
+      "previous_bytes": "../../../.workflow/core-workbench/runs/planning-p2.3-20260924/before-documents.tar.gz",
+      "change": "C-D50..52와 d2 진단 반영. CW-01 원문/완료·CW ID·유효한 partial evidence 보존. G2 control 대기, G1 실제 resize, G3 TUI 전달 의미의 판별 실험 및 gate 항목별 소유/선행 공급 명시. G4와 production의 수명/점검/표시 검증 분리. CW-12에 실제 상태 표시를 공급하는 CW-06 의존 추가. 개정 묶음은 검토안이며 구현 재개 아님."
+    },
+    {
+      "revision": "p2.3 approval",
+      "change": "현재 사용자 `$implement docs/features/core-workbench` 요청으로 2026-09-24 검토 묶음 승인·구현 재개. 요구/그래프의 행동 변경 없이 상태·문서 참조만 정리. 검토/승인 byte digest를 별도 기록으로 구분.",
+      "approval_record": "../../../.workflow/core-workbench/runs/implement-p2.3-20260924/approval.json"
+    },
+    {
+      "revision": "p2.4",
+      "supersedes": "p2.3",
+      "change": "사용자 C-D53: 관리 대상 종료 사실/unknown은 CW-03, 종료 뒤 로그·결과 기반 worker 1차 판단은 CW-10, 승인 완료 조건 기반 manager 2차 확인·복구/해결 불가 보고는 CW-13으로 명확화. Ticket ID·dependency·resource·write scope·evidence level·기존 G2 안전 결함은 유지. Delegated cgroup 필수 여부는 미결정.",
+      "approval_record": "../../../.workflow/core-workbench/runs/implement-p2.3-20260924/cd53-policy-approval.json"
     }
   ],
   "scheduling": {
     "max_open_child_threads": 4,
     "max_parallel_writer_workspaces": 2,
     "workspace_policy": "동시 작성자는 서로 다른 물리 worktree와 확인된 격리를 사용한다. 격리·공유 자원을 확인하지 못하면 직렬 실행한다.",
-    "dependency_gate": "선행 산출물이 명시된 경계에서 통합되고 독립 검증되어야 한다. Worker 완료 보고만으로 dependency를 해제하지 않는다.",
-    "base_policy": "매 dispatch에서 현재 통합 후보와 dirty/untracked 승인 입력, 복구 가능한 checkpoint를 확보한다.",
+    "dependency_gate": "PLAN.dependency_artifacts에 명시한 산출물이 통합되고 독립 test_designer/reviewer 검증되어야 한다. 초기 G1..G3는 항목별 runtime 근거와 수동 검증 판단으로 후보를 전달하며, CW-05의 집계 validator 통과 전 machine-validated gate라고 표시하지 않는다.",
+    "base_policy": "각 dispatch에서 source/test/config·승인 문서의 현행 hash, staged/unstaged/untracked byte, 복구 checkpoint를 확인한다. 과거 manifest와 파일 수 일치를 요구하지 않는다. 변경 영향이 없는 근거만 재사용한다.",
     "root_integration": "Root가 귀속 가능한 delta를 하나씩 통합하고 후속 가정을 재확인한다. 공유 파일의 수정은 지정된 ticket 소유권을 따른다.",
     "verification_reservation": "Dispatch 전에 test_designer·reviewer·수정·최종 통합 용량을 확보한다.",
     "ready_not_sufficient": "승인, 현재 base, permission, workspace, mutation lease, resource claim, 검증 예산을 함께 확인한다."
@@ -63,30 +118,34 @@
   "gate_results": {
     "G1": {
       "ticket": "CW-02",
-      "status": "pending_evidence",
-      "unblocks": "원본 OMP TUI와 terminal 렌더링"
+      "status": "pending_current_requirements_evidence",
+      "unblocks": "원본 OMP TUI와 terminal 렌더링",
+      "evidence_index": "../../../.workflow/core-workbench/runs/planning-p2.3-20260924/baseline.json"
     },
     "G2": {
       "ticket": "CW-03",
-      "status": "pending_evidence",
-      "unblocks": "Bash/sh 같은 shell 실행"
+      "status": "pending_current_requirements_evidence",
+      "unblocks": "관리된 Bash/sh 동일 interpreter control 대기·실행·인수의 production 전개",
+      "evidence_index": "../../../.workflow/core-workbench/runs/planning-p2.3-20260924/baseline.json"
     },
     "G3": {
       "ticket": "CW-04",
-      "status": "pending_evidence",
-      "unblocks": "독립 두 OMP bridge·비침범 전달과 manager turn 중단 요청/확인·불명 결과·재개 대조 가능성; 실제 backend 정책은 CW-12"
+      "status": "pending_current_requirements_evidence",
+      "unblocks": "독립 두 OMP bridge·비침범 전달과 manager turn 중단 요청/확인·불명 결과·재개 대조 가능성; 실제 backend 정책은 CW-12",
+      "evidence_index": "../../../.workflow/core-workbench/runs/planning-p2.3-20260924/baseline.json"
     },
     "G4": {
       "ticket": "CW-05",
-      "status": "pending_evidence",
-      "unblocks": "Backend/UI 분리, detach, metadata 저장 port와 안정된 통합 계약"
+      "status": "pending_current_requirements_evidence",
+      "unblocks": "Backend/UI 분리와 gate harness의 실제 60초 wake, 계약·metadata port·evidence 집계 고정; production 점검/복구 전체는 후속",
+      "evidence_index": "../../../.workflow/core-workbench/runs/planning-p2.3-20260924/baseline.json"
     }
   },
   "integration_checks": {
-    "I-FLOW": "실제 manager·worker OMP에서 승인 목표→Task/revision→worktree/host run→worker 근거→manager 완료·복구를 확인한다. Worker 직접 요청은 기존 범위, 새 작은 명세, 범위 확대의 세 경계를 확인한다. Worker가 수정 필요성을 근거와 함께 보고하면 지시가 끝나며 새 manager 지시 전 자동 반환하지 않는다.",
-    "I-SHELL": "실제 Bash 5.x와 설치된 sh에서 같은 shell의 cwd/환경·입력 owner·lifecycle·재전송 금지를 확인한다.",
-    "I-POLICY": "승인·revision·세션 설정 변경 뒤 현재 run/재시도 유지·활성 중 60초 점검/병합·usage·manager OMP turn 중단 요청/확인·불명 결과 표시·일시정지 중 자동 모델 작업 보류·명시적 재개 상태/승인 대조와 replay 금지·재시도·강제 종료 경계를 확인한다.",
-    "I-FAULT": "Detach, agent/backend/reboot 대조, 모델 장애, metadata/raw log 장애와 보존을 확인한다.",
+    "I-FLOW": "실제 manager·worker OMP에서 승인 목표→Task/revision→worktree/host run→관리 대상 종료/unknown과 exit status·로그/결과 위치→worker 출처·내용·미확인 기반 성공/실패/판단 보류 1차 판단→manager 승인 조건 기반 2차 확인·추가 조사·복구/보고를 확인한다. Worker 직접 요청은 기존 범위, 새 작은 명세, 범위 확대의 세 경계를 확인한다. Worker가 수정 필요성을 근거와 함께 보고하면 지시가 끝나며 새 manager 지시 전 자동 반환하지 않는다.",
+    "I-SHELL": "Bash 5.x와 실제 sh에서 같은 PID/cwd/export/검증한 conda·venv, control 대기/수동 prompt 전환, 새 전송 보류·전달된 명령의 불명·현재 foreground 수동 입력·no replay를 최종 backend/UI와 확인한다. Shell 평가 반환과 관리 대상 local process의 종료/unknown을 분리하고 실패 exit도 확인된 종료로 기록하며, 실험 성공 판단은 G2에서 하지 않는다.",
+    "I-POLICY": "승인·revision·세션 설정 변경 뒤 현재 run/재시도 유지·활성 중 60초 점검/병합·usage·manager OMP turn 중단 요청/확인·불명 결과 표시·일시정지 중 자동 모델 작업 보류·명시적 재개 상태/승인 대조와 replay 금지·실제 종료 뒤 승인 범위 내 수정/새 worker 지시/재실행·해결 불가 또는 재시도 한도 후 자동 중단과 근거 보고·강제 종료 경계를 확인한다.",
+    "I-FAULT": "Detach, agent/backend/reboot 대조, 모델 장애, metadata/raw log 장애와 보존을 확인한다. C-D52 takeover 상태와 old delivery attempt의 보존/대조, process restart의 durable unknown/no replay도 포함한다.",
     "I-COMPAT": "일반 terminal·외부 tmux·herdr의 원본 TUI 텍스트 조작과 선택한 Bash/sh 조합을 버전별로 확인한다."
   },
   "acceptance_trace": {
@@ -96,7 +155,11 @@
       "final_checks": [
         "I-FLOW"
       ],
-      "evidence": "pending_implementation"
+      "evidence": "pending_current_implementation",
+      "local_item": "P-C-AC-01",
+      "local_required_evidence_level": "runtime",
+      "final_owner_ticket": "CW-16",
+      "integration_boundary": "소유 ticket의 public 행동 port/원본 OMP 또는 shell에서 검증. 실제 3-pane 최종 연결은 final_checks에서 확인한다."
     },
     "C-AC-02": {
       "owner_ticket": "CW-08",
@@ -104,32 +167,48 @@
       "final_checks": [
         "I-FLOW"
       ],
-      "evidence": "pending_implementation"
+      "evidence": "pending_current_implementation",
+      "local_item": "P-C-AC-02",
+      "local_required_evidence_level": "runtime",
+      "final_owner_ticket": "CW-16",
+      "integration_boundary": "소유 ticket의 public 행동 port/원본 OMP 또는 shell에서 검증. 실제 3-pane 최종 연결은 final_checks에서 확인한다."
     },
     "C-AC-03": {
       "owner_ticket": "CW-10",
-      "behavior_seam": "실제 host shell 실행·출력과 worker 실행 의뢰",
+      "behavior_seam": "실제 host shell 실행·출력과 worker 실행 의뢰, 종료/unknown 및 확인 가능한 exit status·로그/결과 위치 기록",
       "final_checks": [
         "I-FLOW",
         "I-SHELL"
       ],
-      "evidence": "pending_implementation"
+      "evidence": "pending_current_implementation",
+      "local_item": "P-C-AC-03",
+      "local_required_evidence_level": "runtime",
+      "final_owner_ticket": "CW-16",
+      "integration_boundary": "소유 ticket의 public 행동 port/원본 OMP 또는 shell에서 검증. 실제 3-pane 최종 연결은 final_checks에서 확인한다."
     },
     "C-AC-04": {
       "owner_ticket": "CW-13",
-      "behavior_seam": "worker 근거를 완료 조건과 대조한 manager 보고",
+      "behavior_seam": "worker의 출처·내용·미확인 기반 1차 판단을 승인 완료 조건에 대조한 manager 2차 확인·추가 조사·보고",
       "final_checks": [
         "I-FLOW"
       ],
-      "evidence": "pending_implementation"
+      "evidence": "pending_current_implementation",
+      "local_item": "P-C-AC-04",
+      "local_required_evidence_level": "fixture",
+      "final_owner_ticket": "CW-16",
+      "integration_boundary": "소유 ticket의 public 행동 port/원본 OMP 또는 shell에서 검증. 실제 3-pane 최종 연결은 final_checks에서 확인한다."
     },
     "C-AC-05": {
       "owner_ticket": "CW-10",
-      "behavior_seam": "manager 준비·worker 실험/terminal 실행·관측·보고, 수정 필요 보고 시 지시 종료·새 지시 전 자동 반환 금지",
+      "behavior_seam": "manager 준비·worker 실행/관측과 종료 후 출처·내용·미확인 기반 성공/실패/판단 보류 1차 판단 보고, 수정 필요 보고 시 지시 종료·새 지시 전 자동 반환 금지",
       "final_checks": [
         "I-FLOW"
       ],
-      "evidence": "pending_implementation"
+      "evidence": "pending_current_implementation",
+      "local_item": "P-C-AC-05",
+      "local_required_evidence_level": "runtime",
+      "final_owner_ticket": "CW-16",
+      "integration_boundary": "소유 ticket의 public 행동 port/원본 OMP 또는 shell에서 검증. 실제 3-pane 최종 연결은 final_checks에서 확인한다."
     },
     "C-AC-06": {
       "owner_ticket": "CW-06",
@@ -137,23 +216,35 @@
       "final_checks": [
         "I-COMPAT"
       ],
-      "evidence": "pending_implementation"
+      "evidence": "pending_current_implementation",
+      "local_item": "P-C-AC-06",
+      "local_required_evidence_level": "runtime",
+      "final_owner_ticket": "CW-16",
+      "integration_boundary": "소유 ticket의 public 행동 port/원본 OMP 또는 shell에서 검증. 실제 3-pane 최종 연결은 final_checks에서 확인한다."
     },
     "C-AC-07": {
       "owner_ticket": "CW-13",
-      "behavior_seam": "실패 복구 3회·설정 변경 뒤 사용 횟수 유지·추가 자동 실행 금지·시간 상한 없음",
+      "behavior_seam": "실제 종료 뒤 승인 범위 내 수정·새 worker 지시·재실행, 실패 복구 3회·설정 변경 뒤 사용 횟수 유지·해결 불가/한도 후 자동 중단·근거 보고·시간 상한 없음",
       "final_checks": [
         "I-POLICY"
       ],
-      "evidence": "pending_implementation"
+      "evidence": "pending_current_implementation",
+      "local_item": "P-C-AC-07",
+      "local_required_evidence_level": "fixture",
+      "final_owner_ticket": "CW-16",
+      "integration_boundary": "소유 ticket의 public 행동 port/원본 OMP 또는 shell에서 검증. 실제 3-pane 최종 연결은 final_checks에서 확인한다."
     },
     "C-AC-08": {
       "owner_ticket": "CW-07",
-      "behavior_seam": "사용자 인수 시 자동 입력 중지·반환 후 재확인",
+      "behavior_seam": "Shell adapter 인수 요청 즉시 새 전송 보류, 요청/확인 분리, 이미 전송된 명령 상태·foreground 수동 입력, 같은 interpreter wb-handoff/control 대기와 no replay",
       "final_checks": [
         "I-SHELL"
       ],
-      "evidence": "pending_implementation"
+      "evidence": "pending_current_implementation",
+      "local_item": "P-C-AC-08",
+      "local_required_evidence_level": "runtime",
+      "final_owner_ticket": "CW-16",
+      "integration_boundary": "소유 ticket의 public 행동 port/원본 OMP 또는 shell에서 검증. 실제 3-pane 최종 연결은 final_checks에서 확인한다."
     },
     "C-AC-09": {
       "owner_ticket": "CW-10",
@@ -161,7 +252,11 @@
       "final_checks": [
         "I-FLOW"
       ],
-      "evidence": "pending_implementation"
+      "evidence": "pending_current_implementation",
+      "local_item": "P-C-AC-09",
+      "local_required_evidence_level": "runtime",
+      "final_owner_ticket": "CW-16",
+      "integration_boundary": "소유 ticket의 public 행동 port/원본 OMP 또는 shell에서 검증. 실제 3-pane 최종 연결은 final_checks에서 확인한다."
     },
     "C-AC-10": {
       "owner_ticket": "CW-13",
@@ -169,7 +264,11 @@
       "final_checks": [
         "I-POLICY"
       ],
-      "evidence": "pending_implementation"
+      "evidence": "pending_current_implementation",
+      "local_item": "P-C-AC-10",
+      "local_required_evidence_level": "fixture",
+      "final_owner_ticket": "CW-16",
+      "integration_boundary": "소유 ticket의 public 행동 port/원본 OMP 또는 shell에서 검증. 실제 3-pane 최종 연결은 final_checks에서 확인한다."
     },
     "C-AC-11": {
       "owner_ticket": "CW-10",
@@ -177,7 +276,11 @@
       "final_checks": [
         "I-FLOW"
       ],
-      "evidence": "pending_implementation"
+      "evidence": "pending_current_implementation",
+      "local_item": "P-C-AC-11",
+      "local_required_evidence_level": "runtime",
+      "final_owner_ticket": "CW-16",
+      "integration_boundary": "소유 ticket의 public 행동 port/원본 OMP 또는 shell에서 검증. 실제 3-pane 최종 연결은 final_checks에서 확인한다."
     },
     "C-AC-12": {
       "owner_ticket": "CW-11",
@@ -185,15 +288,23 @@
       "final_checks": [
         "I-POLICY"
       ],
-      "evidence": "pending_implementation"
+      "evidence": "pending_current_implementation",
+      "local_item": "P-C-AC-12",
+      "local_required_evidence_level": "runtime",
+      "final_owner_ticket": "CW-16",
+      "integration_boundary": "소유 ticket의 public 행동 port/원본 OMP 또는 shell에서 검증. 실제 3-pane 최종 연결은 final_checks에서 확인한다."
     },
     "C-AC-13": {
       "owner_ticket": "CW-13",
-      "behavior_seam": "manager의 근거·권한·재시도 판단",
+      "behavior_seam": "manager의 worker 근거·승인 범위·재시도 대조와 추가 조사/해결 불가 보고 판단",
       "final_checks": [
         "I-POLICY"
       ],
-      "evidence": "pending_implementation"
+      "evidence": "pending_current_implementation",
+      "local_item": "P-C-AC-13",
+      "local_required_evidence_level": "fixture",
+      "final_owner_ticket": "CW-16",
+      "integration_boundary": "소유 ticket의 public 행동 port/원본 OMP 또는 shell에서 검증. 실제 3-pane 최종 연결은 final_checks에서 확인한다."
     },
     "C-AC-14": {
       "owner_ticket": "CW-06",
@@ -201,7 +312,11 @@
       "final_checks": [
         "I-COMPAT"
       ],
-      "evidence": "pending_implementation"
+      "evidence": "pending_current_implementation",
+      "local_item": "P-C-AC-14",
+      "local_required_evidence_level": "runtime",
+      "final_owner_ticket": "CW-16",
+      "integration_boundary": "소유 ticket의 public 행동 port/원본 OMP 또는 shell에서 검증. 실제 3-pane 최종 연결은 final_checks에서 확인한다."
     },
     "C-AC-15": {
       "owner_ticket": "CW-15",
@@ -209,7 +324,11 @@
       "final_checks": [
         "I-FAULT"
       ],
-      "evidence": "pending_implementation"
+      "evidence": "pending_current_implementation",
+      "local_item": "P-C-AC-15",
+      "local_required_evidence_level": "runtime",
+      "final_owner_ticket": "CW-16",
+      "integration_boundary": "소유 ticket의 public 행동 port/원본 OMP 또는 shell에서 검증. 실제 3-pane 최종 연결은 final_checks에서 확인한다."
     },
     "C-AC-16": {
       "owner_ticket": "CW-15",
@@ -217,7 +336,11 @@
       "final_checks": [
         "I-FAULT"
       ],
-      "evidence": "pending_implementation"
+      "evidence": "pending_current_implementation",
+      "local_item": "P-C-AC-16",
+      "local_required_evidence_level": "runtime",
+      "final_owner_ticket": "CW-16",
+      "integration_boundary": "소유 ticket의 public 행동 port/원본 OMP 또는 shell에서 검증. 실제 3-pane 최종 연결은 final_checks에서 확인한다."
     },
     "C-AC-17": {
       "owner_ticket": "CW-15",
@@ -225,15 +348,23 @@
       "final_checks": [
         "I-FAULT"
       ],
-      "evidence": "pending_implementation"
+      "evidence": "pending_current_implementation",
+      "local_item": "P-C-AC-17",
+      "local_required_evidence_level": "runtime",
+      "final_owner_ticket": "CW-16",
+      "integration_boundary": "소유 ticket의 public 행동 port/원본 OMP 또는 shell에서 검증. 실제 3-pane 최종 연결은 final_checks에서 확인한다."
     },
     "C-AC-18": {
       "owner_ticket": "CW-15",
-      "behavior_seam": "사용자 입력 owner를 detach 뒤에도 보존",
+      "behavior_seam": "인수 요청/확인·user owner·전달된 명령 상태를 detach/재접속 뒤 보존하고 명시적 handoff 전 자동 전송 없음",
       "final_checks": [
         "I-FAULT"
       ],
-      "evidence": "pending_implementation"
+      "evidence": "pending_current_implementation",
+      "local_item": "P-C-AC-18",
+      "local_required_evidence_level": "runtime",
+      "final_owner_ticket": "CW-16",
+      "integration_boundary": "소유 ticket의 public 행동 port/원본 OMP 또는 shell에서 검증. 실제 3-pane 최종 연결은 final_checks에서 확인한다."
     },
     "C-AC-19": {
       "owner_ticket": "CW-16",
@@ -241,7 +372,11 @@
       "final_checks": [
         "I-COMPAT"
       ],
-      "evidence": "pending_implementation"
+      "evidence": "pending_current_implementation",
+      "local_item": "P-C-AC-19",
+      "local_required_evidence_level": "runtime",
+      "final_owner_ticket": "CW-16",
+      "integration_boundary": "소유 ticket의 public 행동 port/원본 OMP 또는 shell에서 검증. 실제 3-pane 최종 연결은 final_checks에서 확인한다."
     },
     "C-AC-20": {
       "owner_ticket": "CW-16",
@@ -250,7 +385,11 @@
         "I-COMPAT",
         "I-SHELL"
       ],
-      "evidence": "pending_implementation"
+      "evidence": "pending_current_implementation",
+      "local_item": "P-C-AC-20",
+      "local_required_evidence_level": "runtime",
+      "final_owner_ticket": "CW-16",
+      "integration_boundary": "소유 ticket의 public 행동 port/원본 OMP 또는 shell에서 검증. 실제 3-pane 최종 연결은 final_checks에서 확인한다."
     },
     "C-AC-21": {
       "owner_ticket": "CW-11",
@@ -258,7 +397,11 @@
       "final_checks": [
         "I-POLICY"
       ],
-      "evidence": "pending_implementation"
+      "evidence": "pending_current_implementation",
+      "local_item": "P-C-AC-21",
+      "local_required_evidence_level": "runtime",
+      "final_owner_ticket": "CW-16",
+      "integration_boundary": "소유 ticket의 public 행동 port/원본 OMP 또는 shell에서 검증. 실제 3-pane 최종 연결은 final_checks에서 확인한다."
     },
     "C-AC-22": {
       "owner_ticket": "CW-15",
@@ -266,7 +409,11 @@
       "final_checks": [
         "I-FAULT"
       ],
-      "evidence": "pending_implementation"
+      "evidence": "pending_current_implementation",
+      "local_item": "P-C-AC-22",
+      "local_required_evidence_level": "runtime",
+      "final_owner_ticket": "CW-16",
+      "integration_boundary": "소유 ticket의 public 행동 port/원본 OMP 또는 shell에서 검증. 실제 3-pane 최종 연결은 final_checks에서 확인한다."
     },
     "C-AC-23": {
       "owner_ticket": "CW-15",
@@ -274,7 +421,11 @@
       "final_checks": [
         "I-FAULT"
       ],
-      "evidence": "pending_implementation"
+      "evidence": "pending_current_implementation",
+      "local_item": "P-C-AC-23",
+      "local_required_evidence_level": "runtime",
+      "final_owner_ticket": "CW-16",
+      "integration_boundary": "소유 ticket의 public 행동 port/원본 OMP 또는 shell에서 검증. 실제 3-pane 최종 연결은 final_checks에서 확인한다."
     },
     "C-AC-24": {
       "owner_ticket": "CW-14",
@@ -282,7 +433,11 @@
       "final_checks": [
         "I-FAULT"
       ],
-      "evidence": "pending_implementation"
+      "evidence": "pending_current_implementation",
+      "local_item": "P-C-AC-24",
+      "local_required_evidence_level": "fixture",
+      "final_owner_ticket": "CW-16",
+      "integration_boundary": "소유 ticket의 public 행동 port/원본 OMP 또는 shell에서 검증. 실제 3-pane 최종 연결은 final_checks에서 확인한다."
     },
     "C-AC-25": {
       "owner_ticket": "CW-12",
@@ -290,15 +445,23 @@
       "final_checks": [
         "I-POLICY"
       ],
-      "evidence": "pending_implementation"
+      "evidence": "pending_current_implementation",
+      "local_item": "P-C-AC-25",
+      "local_required_evidence_level": "runtime",
+      "final_owner_ticket": "CW-16",
+      "integration_boundary": "소유 ticket의 public 행동 port/원본 OMP 또는 shell에서 검증. 실제 3-pane 최종 연결은 final_checks에서 확인한다."
     },
     "C-AC-26": {
       "owner_ticket": "CW-07",
-      "behavior_seam": "cwd/환경 유지·입력 경합 보류·lifecycle 증거",
+      "behavior_seam": "관리된 같은 shell의 cwd/환경 보존·미제출 입력/REPL/job/비호환 hook·trap/unknown 보류와 명시적 lifecycle",
       "final_checks": [
         "I-SHELL"
       ],
-      "evidence": "pending_implementation"
+      "evidence": "pending_current_implementation",
+      "local_item": "P-C-AC-26",
+      "local_required_evidence_level": "runtime",
+      "final_owner_ticket": "CW-16",
+      "integration_boundary": "소유 ticket의 public 행동 port/원본 OMP 또는 shell에서 검증. 실제 3-pane 최종 연결은 final_checks에서 확인한다."
     },
     "C-AC-27": {
       "owner_ticket": "CW-11",
@@ -306,7 +469,11 @@
       "final_checks": [
         "I-POLICY"
       ],
-      "evidence": "pending_implementation"
+      "evidence": "pending_current_implementation",
+      "local_item": "P-C-AC-27",
+      "local_required_evidence_level": "runtime",
+      "final_owner_ticket": "CW-16",
+      "integration_boundary": "소유 ticket의 public 행동 port/원본 OMP 또는 shell에서 검증. 실제 3-pane 최종 연결은 final_checks에서 확인한다."
     },
     "C-AC-28": {
       "owner_ticket": "CW-14",
@@ -314,7 +481,11 @@
       "final_checks": [
         "I-FAULT"
       ],
-      "evidence": "pending_implementation"
+      "evidence": "pending_current_implementation",
+      "local_item": "P-C-AC-28",
+      "local_required_evidence_level": "fixture",
+      "final_owner_ticket": "CW-16",
+      "integration_boundary": "소유 ticket의 public 행동 port/원본 OMP 또는 shell에서 검증. 실제 3-pane 최종 연결은 final_checks에서 확인한다."
     },
     "C-AC-29": {
       "owner_ticket": "CW-09",
@@ -322,7 +493,11 @@
       "final_checks": [
         "I-POLICY"
       ],
-      "evidence": "pending_implementation"
+      "evidence": "pending_current_implementation",
+      "local_item": "P-C-AC-29",
+      "local_required_evidence_level": "fixture",
+      "final_owner_ticket": "CW-16",
+      "integration_boundary": "소유 ticket의 public 행동 port/원본 OMP 또는 shell에서 검증. 실제 3-pane 최종 연결은 final_checks에서 확인한다."
     },
     "C-AC-30": {
       "owner_ticket": "CW-12",
@@ -330,7 +505,11 @@
       "final_checks": [
         "I-POLICY"
       ],
-      "evidence": "pending_implementation"
+      "evidence": "pending_current_implementation",
+      "local_item": "P-C-AC-30",
+      "local_required_evidence_level": "runtime",
+      "final_owner_ticket": "CW-16",
+      "integration_boundary": "소유 ticket의 public 행동 port/원본 OMP 또는 shell에서 검증. 실제 3-pane 최종 연결은 final_checks에서 확인한다."
     },
     "C-AC-31": {
       "owner_ticket": "CW-13",
@@ -338,15 +517,23 @@
       "final_checks": [
         "I-POLICY"
       ],
-      "evidence": "pending_implementation"
+      "evidence": "pending_current_implementation",
+      "local_item": "P-C-AC-31",
+      "local_required_evidence_level": "fixture",
+      "final_owner_ticket": "CW-16",
+      "integration_boundary": "소유 ticket의 public 행동 port/원본 OMP 또는 shell에서 검증. 실제 3-pane 최종 연결은 final_checks에서 확인한다."
     },
     "C-AC-32": {
       "owner_ticket": "CW-07",
-      "behavior_seam": "기존 conda/venv 재사용·app 환경 분리",
+      "behavior_seam": "검증한 conda와 venv 전환을 같은 shell에서 재사용·app 환경 분리; 환경 hook 비호환이면 이유와 보류",
       "final_checks": [
         "I-SHELL"
       ],
-      "evidence": "pending_implementation"
+      "evidence": "pending_current_implementation",
+      "local_item": "P-C-AC-32",
+      "local_required_evidence_level": "runtime",
+      "final_owner_ticket": "CW-16",
+      "integration_boundary": "소유 ticket의 public 행동 port/원본 OMP 또는 shell에서 검증. 실제 3-pane 최종 연결은 final_checks에서 확인한다."
     },
     "C-AC-33": {
       "owner_ticket": "CW-12",
@@ -354,7 +541,11 @@
       "final_checks": [
         "I-POLICY"
       ],
-      "evidence": "pending_implementation"
+      "evidence": "pending_current_implementation",
+      "local_item": "P-C-AC-33",
+      "local_required_evidence_level": "runtime",
+      "final_owner_ticket": "CW-16",
+      "integration_boundary": "소유 ticket의 public 행동 port/원본 OMP 또는 shell에서 검증. 실제 3-pane 최종 연결은 final_checks에서 확인한다."
     },
     "C-AC-34": {
       "owner_ticket": "CW-13",
@@ -362,7 +553,11 @@
       "final_checks": [
         "I-POLICY"
       ],
-      "evidence": "pending_implementation"
+      "evidence": "pending_current_implementation",
+      "local_item": "P-C-AC-34",
+      "local_required_evidence_level": "fixture",
+      "final_owner_ticket": "CW-16",
+      "integration_boundary": "소유 ticket의 public 행동 port/원본 OMP 또는 shell에서 검증. 실제 3-pane 최종 연결은 final_checks에서 확인한다."
     }
   },
   "path_ownership": {
@@ -372,10 +567,14 @@
     "shell adapter": "CW-03이 가능성을 검증하고 CW-07이 CW-05 이후 production 동작을 소유한다.",
     "OMP extension and mailbox transport": "CW-04가 가능성과 manager turn 중단 요청·확인/불명 결과 경계를 검증한다. CW-08이 CW-05 계약과 CW-09 영속 기록 통합 뒤 production 전달을 소유한다.",
     "metadata schema": "CW-09가 소유한다. CW-14는 장애 경계를 소비하며 경쟁하는 schema 변경은 하지 않는다.",
-    "PLAN, SPEC, tickets, workflow state and approval": "Root만 수정한다. Worker는 필요한 계획 변경을 보고한다."
+    "PLAN, SPEC, tickets, workflow state and approval": "Root만 수정한다. Worker는 필요한 계획 변경을 보고한다.",
+    "gate evidence validator": "CW-01의 기존 schema/harness 원문은 완료 기준으로 보존. CW-05가 요구 item/source identity/evidence level을 판정하는 runner를 확장한다. 그 전 초기 gate는 수동 근거 대조이며 machine-validated pass를 주장하지 않는다.",
+    "UI status": "CW-06이 안정된 state rendering port를 제공하고 CW-12가 실제 pause 상태를 연결한다. 공유 repo:ui-status를 exclusive로 사용한다."
   },
   "initial_frontier": [
-    "CW-01"
+    "CW-02",
+    "CW-03",
+    "CW-04"
   ],
   "frontier_after_CW_01": [
     "CW-02",
@@ -388,14 +587,14 @@
         "CW-02",
         "CW-03"
       ],
-      "condition": "서로 다른 worktree이며 G1의 실제 interactive TTY와 G2의 가상 PTY가 분리된 경우."
+      "condition": "검증된 별도 worktree 2개, G1 host:interactive-terminal/omp-runtime과 G2 host:shell-fixture 분리. CW-03 먼저 판별 실험 착수 권장. 동일 물리 checkout writer는 직렬."
     },
     {
       "ready_set": [
         "CW-03",
         "CW-04"
       ],
-      "condition": "서로 다른 worktree이며 shell fixture와 OMP session directory가 분리된 경우."
+      "condition": "별도 worktree 2개와 shell fixture/OMP profile·session·provider namespace 분리. G1과 G3 live는 같은 host:omp-runtime/interactive-terminal로 직렬."
     },
     {
       "ready_set": [
@@ -403,7 +602,14 @@
         "CW-07",
         "CW-09"
       ],
-      "condition": "CW-05 통합 뒤 세 ticket 중 최대 두 작성자만 선택한다. CW-08은 CW-09 통합 뒤 준비되며 CW-06과 실제 OMP 시험에서 host:omp-runtime을 함께 써서 동시 실행할 수 없다."
+      "condition": "CW-05 통합 후 최대 2 writers. repo shared-contract/lock/schema와 서비스 사용을 재확인. CW-08은 CW-09 후만 준비."
+    },
+    {
+      "ready_set": [
+        "CW-08",
+        "CW-14"
+      ],
+      "condition": "CW-07/CW-09 완료 뒤 두 ticket이 ready일 때만 가능. OMP runtime과 shell fixture·metadata read 경계를 확인하며 schema 변경은 CW-09 소유."
     }
   ],
   "tickets": [
@@ -456,8 +662,8 @@
         "CW-01": "임시 PTY/control 경계와 재현 가능한 게이트 harness가 통합·검증됨."
       },
       "acceptance_ids": [],
-      "deliverable": "G1: 원본 OMP 두 개와 host terminal의 실제 PTY stream을 세 pane에 표시하는 후보를 동작시켜 input, paste, resize, scrollback, query reply와 화면 복원을 실증한다.",
-      "base_requirements": "승인된 BRIEF r1.9 원문, 현재 통합 후보, 기존 dirty/untracked 입력의 복구 가능한 snapshot.",
+      "deliverable": "G1의 정상 resize·3-pane 입력 routing·텍스트/색/approval·외부 terminal 조합을 실제 OMP에서 확인한다. 이미 유효한 승인/tool 왕복 근거는 보존하고 잘못된 resize predicate를 대체한다.",
+      "base_requirements": "이 p2.4 묶음의 승인과 명시적 implement, 통합된 선행 산출물, 현행 manifest/checkpoint와 기존 변경 보존. 계획 문서는 실행 승인 자체가 아니다.",
       "contract_requirements": "CW-01 display/control 경계를 소비한다. 원본 OMP composer·승인·slash command와 한글·wide character·색·도구 출력이 유지되어야 한다. 내부 tmux/headless 대체는 허용되지 않는다.",
       "write_scope_hint": [
         "src/workbench/terminal/vt_*/**",
@@ -486,13 +692,22 @@
         "data-dir:cw-02"
       ],
       "workspace_requirement": "verified_isolated_worktree_if_parallel",
-      "verification_requirement": "동작 수준 테스트, 독립 test_designer 평가/필요 테스트, fresh reviewer 검토와 후보별 실제 명령·결과 기록.",
-      "worker": "complex_worker"
+      "verification_requirement": "선행 근거 재사용 범위를 명시하고, ticket별 독립 test_designer 및 frozen candidate fresh reviewer를 거친다. PLAN.gate_items의 소유 항목·evidence level·supplier와 final_checks를 적용한다.",
+      "worker": "worker_senior",
+      "required_gate_items": [
+        "G1-RESIZE",
+        "G1-THREE-PANE",
+        "G1-TEXT-TOOLS",
+        "G1-PASTE",
+        "G1-VT-QUERY",
+        "G1-COLOR",
+        "G1-OUTER"
+      ]
     },
     {
       "id": "CW-03",
       "path": "tickets/CW-03.md",
-      "title": "G2 Bash/sh 같은 shell 실행",
+      "title": "G2 관리된 same-shell control 대기와 인수",
       "kind": "feasibility_gate",
       "depends_on": [
         "CW-01"
@@ -501,9 +716,9 @@
         "CW-01": "command ID·lifecycle·입력 owner의 임시 계약이 통합·검증됨."
       },
       "acceptance_ids": [],
-      "deliverable": "G2: 실제 Bash 5.x와 현재 host의 sh 구현에서 Workbench 전용 persistent interactive shell 하나에 안전하게 자동 명령을 수락·실행·관측할 수 있는지 실증한다.",
-      "base_requirements": "승인된 BRIEF r1.9 원문, 현재 통합 후보, 기존 dirty/untracked 입력의 복구 가능한 snapshot.",
-      "contract_requirements": "CW-01 command ID/lifecycle/input-owner 계약을 소비한다. cwd/export/사용자 선택 환경을 보존하고 prompt·stdout marker·무출력으로 종료를 판정하지 않는다. Bash 부재 시 sh 시작과 실행 중 shell 고정은 별개다.",
+      "deliverable": "관리된 Bash/dash의 같은 interpreter control 대기·인수와 shell 평가 반환/관리 대상 local process 종료 확인 또는 unknown을 분리해 입증한다. 확인 가능한 exit status·로그/결과 위치를 기록하며 실험 성공은 판정하지 않는다. 기존 입력 유출·cgroup 정리 안전 결함은 별도 차단이다.",
+      "base_requirements": "이 p2.4 묶음의 승인과 명시적 implement, 통합된 선행 산출물, 현행 manifest/checkpoint와 기존 변경 보존. 계획 문서는 실행 승인 자체가 아니다.",
+      "contract_requirements": "C-D48/C-D50..53 및 ADR-0002. 고의적 내부 변조/event 위조는 보안 경계 밖이며 비호환 hook/trap와 일반 경합은 필수 검증. Backend 전송/수락/시작/shell 반환/관리 대상 종료 확인 또는 unknown를 분리하고 PTY stdin과 control을 분리한다. 인수 즉시 새 전송 금지, 기존 실험 유지, 확인된 foreground 대상의 수동 입력, 오래된 요청 replay 금지. 최초 자동화는 C-AC-29, 수동 개입 뒤만 명시적 wb-handoff. Delegated cgroup 필수 환경 여부는 미결정이다.",
       "write_scope_hint": [
         "src/workbench/terminal/shell_*/**",
         "tests/gates/g2_*/**",
@@ -522,8 +737,16 @@
         "data-dir:cw-03"
       ],
       "workspace_requirement": "verified_isolated_worktree_if_parallel",
-      "verification_requirement": "동작 수준 테스트, 독립 test_designer 평가/필요 테스트, fresh reviewer 검토와 후보별 실제 명령·결과 기록.",
-      "worker": "complex_worker"
+      "verification_requirement": "선행 근거 재사용 범위를 명시하고, ticket별 독립 test_designer 및 frozen candidate fresh reviewer를 거친다. PLAN.gate_items의 소유 항목·evidence level·supplier와 final_checks를 적용한다.",
+      "worker": "worker_senior",
+      "required_gate_items": [
+        "G2-CONTROL",
+        "G2-INPUT-JOBS",
+        "G2-HOOK-ENV",
+        "G2-TAKEOVER",
+        "G2-LIFECYCLE",
+        "G2-LAUNCH"
+      ]
     },
     {
       "id": "CW-04",
@@ -537,9 +760,9 @@
         "CW-01": "role/message/session 계약과 게이트 harness가 통합·검증됨."
       },
       "acceptance_ids": [],
-      "deliverable": "G3: 고정 OMP 버전의 두 독립 process에 공개 extension을 로드하고 task/question/answer/report의 session-bound 왕복을 실증한다. 실제 manager turn 중 `ctx.abort()`로 중단을 요청하고 확인/불명 결과를 구분한다. Bridge는 일시정지 중 새 자동 전달을 보류하고, gate harness는 실제 파일·도구 결과·terminal 프로세스·작업 상태·승인 범위를 대조한 뒤에만 재개 신호를 보내며 replay 금지를 실증한다. 실제 backend 대조·표시와 worker 모델 점검 보류는 CW-11/12가 소유한다.",
-      "base_requirements": "승인된 BRIEF r1.9 원문, 현재 통합 후보, 기존 dirty/untracked 입력의 복구 가능한 snapshot.",
-      "contract_requirements": "CW-01 versioned envelope를 소비한다. Python local bridge는 role·안정된 `message_id`·대상 session generation을 검증하고, extension은 주입 직전 idle/pending/approval/composer와 pause 상태를 확인한다. API 수락과 모델 처리 완료를 구분한다. 진행 중 manager turn 중단 요청과 실제 확인·불명 도구 결과는 별개다. 도구 A 완료 대기나 준비된 B 별도 차단을 보장하지 않는다.",
+      "deliverable": "실제 두 OMP TUI의 composer/session/전달 성공·비동기 오류와 C-D49 turn 중단 경계를 검증한다. public API 복귀를 OMP 처리 완료로 표시하지 않는 bridge 후보와 evidence를 제공한다.",
+      "base_requirements": "이 p2.4 묶음의 승인과 명시적 implement, 통합된 선행 산출물, 현행 manifest/checkpoint와 기존 변경 보존. 계획 문서는 실행 승인 자체가 아니다.",
+      "contract_requirements": "CW-01 envelope 유지. 공개 API만 사용하고 native approval을 우회하는 mutable tool wrapper를 재도입하지 않는다. api_returned/처리 관측/업무 완료 구분, 현재 role/session/generation·idle/pending/approval/composer 재확인. RPC getEditorText 빈 값은 TUI 입력 근거가 아니다. 연결 재접속과 session 전환은 이 ticket, process 재시작 durable 복구는 CW-09/15.",
       "write_scope_hint": [
         "omp_bridge/**",
         "src/workbench/ipc/bridge_*/**",
@@ -555,6 +778,10 @@
         {
           "resource": "repo:bridge-dependency-lock",
           "mode": "exclusive"
+        },
+        {
+          "resource": "host:interactive-terminal",
+          "mode": "exclusive"
         }
       ],
       "service_namespaces": [
@@ -563,8 +790,16 @@
         "data-dir:cw-04"
       ],
       "workspace_requirement": "verified_isolated_worktree_if_parallel",
-      "verification_requirement": "동작 수준 테스트, 독립 test_designer 평가/필요 테스트, fresh reviewer 검토와 후보별 실제 명령·결과 기록.",
-      "worker": "complex_worker"
+      "verification_requirement": "선행 근거 재사용 범위를 명시하고, ticket별 독립 test_designer 및 frozen candidate fresh reviewer를 거친다. PLAN.gate_items의 소유 항목·evidence level·supplier와 final_checks를 적용한다.",
+      "worker": "worker_senior",
+      "required_gate_items": [
+        "G3-TUI-DELIVERY",
+        "G3-TUI-CONTENTION",
+        "G3-SESSION",
+        "G3-RECONNECT",
+        "G3-PAUSE",
+        "G3-EXTENSION"
+      ]
     },
     {
       "id": "CW-05",
@@ -582,9 +817,9 @@
         "CW-04": "G3 공개 extension·session 전달과 manager turn 중단 요청/확인 증거가 통합·검증됨."
       },
       "acceptance_ids": [],
-      "deliverable": "G4: 분리된 frontend/backend 후보에서 backend가 세 PTY·두 OMP와 자동화 활성 중 실제 periodic wake를 소유하고, detach 중 유지·재접속 시 중복 시작 방지를 실증한다. G1~G3의 성공 조합, OMP turn 중단 요청·확인/불명 결과 경계, 최소 metadata 저장 port를 통합 contract와 compatibility lock에 고정한다.",
-      "base_requirements": "승인된 BRIEF r1.9 원문, 현재 통합 후보, 기존 dirty/untracked 입력의 복구 가능한 snapshot.",
-      "contract_requirements": "선행 게이트의 검증된 조합만 사용한다. Backend crash 시 child 생존을 가정하지 않고 실제 process identity와 기록을 대조한다. 화면 연결 ID와 Task/run/OMP session identity를 구분한다. Metadata 저장 port는 write 성공·실패를 새 자동 실행 수락 경계에 전달하며 실제 schema는 CW-09가 소유한다.",
+      "deliverable": "G1..G3 후보를 합친 최소 backend/frontend에서 세 PTY 수명 분리·재접속·실제 60초 OMP wake를 검증하고 control/관측/저장 port·dependency 조합을 고정한다. 요구 항목/입력 identity/evidence level을 판정하는 gate 집계 validator를 제공한다.",
+      "base_requirements": "이 p2.4 묶음의 승인과 명시적 implement, 통합된 선행 산출물, 현행 manifest/checkpoint와 기존 변경 보존. 계획 문서는 실행 승인 자체가 아니다.",
+      "contract_requirements": "CW-02..04 독립 검증 산출물을 소비한다. 최소 timer/Task 승인 fixture/저장 port로 수명 가정을 시험하며 CW-09/11/12/15 production을 요구하지 않는다. v1 공통 envelope는 보존하며 새 shell 상태·delivery 의미·pause/reconcile port를 versioned 확장/adapter로 명시하고 caller 계약을 함께 검증한다. 스키마만으로 gate를 통과시키지 않는다.",
       "write_scope_hint": [
         "src/workbench/runtime/**",
         "src/workbench/contracts/**",
@@ -593,7 +828,10 @@
         "pyproject.toml",
         "uv.lock",
         "omp_bridge/package.json",
-        "docs/features/core-workbench/gates/G4.md"
+        "docs/features/core-workbench/gates/G4.md",
+        "omp_bridge/contract/**",
+        "tests/contracts/**",
+        "tests/gates/harness/**"
       ],
       "write_owner": "CW-05 ticket 작성자; Root가 검증된 candidate를 통합",
       "resource_claims": [
@@ -625,8 +863,15 @@
         "data-dir:cw-05"
       ],
       "workspace_requirement": "verified_isolated_worktree_if_parallel",
-      "verification_requirement": "동작 수준 테스트, 독립 test_designer 평가/필요 테스트, fresh reviewer 검토와 후보별 실제 명령·결과 기록.",
-      "worker": "complex_worker"
+      "verification_requirement": "선행 근거 재사용 범위를 명시하고, ticket별 독립 test_designer 및 frozen candidate fresh reviewer를 거친다. PLAN.gate_items의 소유 항목·evidence level·supplier와 final_checks를 적용한다.",
+      "worker": "worker_senior",
+      "required_gate_items": [
+        "G4-LIFETIME",
+        "G4-WAKE",
+        "G4-STORE-PORT",
+        "G4-CONTRACT",
+        "G4-EVIDENCE"
+      ]
     },
     {
       "id": "CW-06",
@@ -645,8 +890,8 @@
         "C-AC-14"
       ],
       "deliverable": "원본 manager OMP·worker OMP와 실제 host terminal을 한 화면에 표시하고 사용자 direct chat, focus, host 입력 owner, 상태·마지막 확인 시각을 분리해 보여준다.",
-      "base_requirements": "승인된 BRIEF r1.9 원문, 현재 통합 후보, 기존 dirty/untracked 입력의 복구 가능한 snapshot.",
-      "contract_requirements": "CW-05의 PTY/VT snapshot·input routing 계약을 그대로 소비한다. Focus 변경은 host 입력 owner 변경이 아니다. OMP 화면을 일반 채팅 view로 대체하지 않는다.",
+      "base_requirements": "이 p2.4 묶음의 승인과 명시적 implement, 통합된 선행 산출물, 현행 manifest/checkpoint와 기존 변경 보존. 계획 문서는 실행 승인 자체가 아니다.",
+      "contract_requirements": "CW-05의 PTY/VT snapshot·input routing 계약을 그대로 소비한다. Focus 변경은 host 입력 owner 변경이 아니다. OMP 화면을 일반 채팅 view로 대체하지 않는다. Shell/pause 상태는 CW-05 port와 fixture로 렌더링 검증하고 실제 production 상태 연결은 CW-12/15/16에서 확인한다. UI 위치·단축키는 이 계획으로 고정하지 않는다.",
       "write_scope_hint": [
         "src/workbench/ui/**",
         "tests/ui/**"
@@ -660,6 +905,10 @@
         {
           "resource": "host:omp-runtime",
           "mode": "exclusive"
+        },
+        {
+          "resource": "repo:ui-status",
+          "mode": "exclusive"
         }
       ],
       "service_namespaces": [
@@ -668,8 +917,13 @@
         "omp-session:cw-06"
       ],
       "workspace_requirement": "verified_isolated_worktree_if_parallel",
-      "verification_requirement": "동작 수준 테스트, 독립 test_designer 평가/필요 테스트, fresh reviewer 검토와 후보별 실제 명령·결과 기록.",
-      "worker": "worker"
+      "verification_requirement": "선행 근거 재사용 범위를 명시하고, ticket별 독립 test_designer 및 frozen candidate fresh reviewer를 거친다. PLAN.gate_items의 소유 항목·evidence level·supplier와 final_checks를 적용한다.",
+      "worker": "worker",
+      "required_gate_items": [
+        "P-C-AC-01",
+        "P-C-AC-06",
+        "P-C-AC-14"
+      ]
     },
     {
       "id": "CW-07",
@@ -687,9 +941,9 @@
         "C-AC-26",
         "C-AC-32"
       ],
-      "deliverable": "Host persistent Bash/sh에서 사용자 제어권 인수·반환, 같은 shell 자동 실행 eligibility, 명시적 lifecycle과 선택된 conda/venv 재사용을 구현한다.",
-      "base_requirements": "승인된 BRIEF r1.9 원문, 현재 통합 후보, 기존 dirty/untracked 입력의 복구 가능한 snapshot.",
-      "contract_requirements": "CW-05의 G2 shell adapter만 사용한다. 한 foreground run, 한 수락 요청, 숨은 queue 없음. UI focus·owner·pending 입력을 분리한다. Workbench Python 환경을 실험 shell에 주입하지 않는다.",
+      "deliverable": "G2에서 검증된 control 대기를 production shell adapter로 연결한다. 인수 요청/확인, 전송된 명령 상태, 확인된 foreground 수동 입력, 직접 wb-handoff 뒤 환경 보존·현재 권한 재확인을 제공한다.",
+      "base_requirements": "이 p2.4 묶음의 승인과 명시적 implement, 통합된 선행 산출물, 현행 manifest/checkpoint와 기존 변경 보존. 계획 문서는 실행 승인 자체가 아니다.",
+      "contract_requirements": "CW-05가 고정한 G2 adapter port 소비. 입력 owner·shell mode·command state·Task 성공은 별도다. 한 outstanding 자동 요청, PTY/control 분리, unknown 보류, no replay. 같은 PID/cwd/export와 검증한 conda/venv를 유지하고 app 환경을 주입하지 않는다. 인수 확인에 실험 종료를 요구하지 않는다.",
       "write_scope_hint": [
         "src/workbench/terminal/shell_*/**",
         "src/workbench/terminal/pty_*/**",
@@ -708,8 +962,13 @@
         "data-dir:cw-07"
       ],
       "workspace_requirement": "verified_isolated_worktree_if_parallel",
-      "verification_requirement": "동작 수준 테스트, 독립 test_designer 평가/필요 테스트, fresh reviewer 검토와 후보별 실제 명령·결과 기록.",
-      "worker": "complex_worker"
+      "verification_requirement": "선행 근거 재사용 범위를 명시하고, ticket별 독립 test_designer 및 frozen candidate fresh reviewer를 거친다. PLAN.gate_items의 소유 항목·evidence level·supplier와 final_checks를 적용한다.",
+      "worker": "worker_senior",
+      "required_gate_items": [
+        "P-C-AC-08",
+        "P-C-AC-26",
+        "P-C-AC-32"
+      ]
     },
     {
       "id": "CW-08",
@@ -727,9 +986,9 @@
       "acceptance_ids": [
         "C-AC-02"
       ],
-      "deliverable": "Manager와 worker의 task/question/answer/report를 영속 Task/revision/run에 연결하고 두 OMP에 비침범 전달한다. 동일 `message_id`의 중복 처리를 막고 접수·주입 시도·API 수락·실제 답변·업무 완료를 구분한다.",
-      "base_requirements": "승인된 BRIEF r1.9 원문, 현재 통합 후보, 기존 dirty/untracked 입력의 복구 가능한 snapshot.",
-      "contract_requirements": "CW-05의 G3 공개 extension/role/session contract와 CW-09의 영속 기록을 소비한다. 주입 직전 pending·approval·composer·session generation 확인과 안정된 `message_id` dedupe를 지킨다. 전달 시도와 논리 메시지를 구분하고 불명 수락은 자동 replay하지 않는다.",
+      "deliverable": "Manager와 worker의 task/question/answer/report를 영속 Task/revision/run에 연결하고 두 OMP에 비침범 전달한다. 동일 `message_id`의 중복 처리를 막고 접수·주입 시도·API 호출 복귀·OMP 처리 관측·실제 답변·업무 완료를 구분한다.",
+      "base_requirements": "이 p2.4 묶음의 승인과 명시적 implement, 통합된 선행 산출물, 현행 manifest/checkpoint와 기존 변경 보존. 계획 문서는 실행 승인 자체가 아니다.",
+      "contract_requirements": "CW-05의 G3 공개 extension/role/session contract와 CW-09의 영속 기록을 소비한다. 주입 직전 pending·approval·composer·session generation 확인과 안정된 `message_id` dedupe를 지킨다. 전달 시도와 논리 메시지를 구분하고 불명 수락은 자동 replay하지 않는다. TUI에서 method 복귀만으로 전달 완료를 저장하지 않는다. 영속 delivery attempt에 관측 근거와 unknown을 보존하고 새 process/session에 이전 요청을 자동 재주입하지 않는다.",
       "write_scope_hint": [
         "src/workbench/ipc/**",
         "omp_bridge/**",
@@ -752,8 +1011,11 @@
         "data-dir:cw-08"
       ],
       "workspace_requirement": "verified_isolated_worktree_if_parallel",
-      "verification_requirement": "동작 수준 테스트, 독립 test_designer 평가/필요 테스트, fresh reviewer 검토와 후보별 실제 명령·결과 기록.",
-      "worker": "worker"
+      "verification_requirement": "선행 근거 재사용 범위를 명시하고, ticket별 독립 test_designer 및 frozen candidate fresh reviewer를 거친다. PLAN.gate_items의 소유 항목·evidence level·supplier와 final_checks를 적용한다.",
+      "worker": "worker",
+      "required_gate_items": [
+        "P-C-AC-02"
+      ]
     },
     {
       "id": "CW-09",
@@ -770,8 +1032,8 @@
         "C-AC-29"
       ],
       "deliverable": "사용자 위임 승인·진행 지시를 TaskSpec revision과 연결하고 run/cancel 이력·세션 공통 설정을 durable metadata에 보존한다. CW-08이 사용할 Task/revision/run 연계 논리 메시지·전달 상태 기록 경계를 제공한다. 새 자동 실행은 승인 범위와 저장 성공이 확인된 때만 허용한다.",
-      "base_requirements": "승인된 BRIEF r1.9 원문, 현재 통합 후보, 기존 dirty/untracked 입력의 복구 가능한 snapshot.",
-      "contract_requirements": "Task ID는 revision/commit 변경으로 재설정하지 않는다. 실행 중 명세 변경은 새 revision을 다음 run에 적용한다. 즉시 중단·권한 철회는 현재 run에 적용한다. 세션 공통 설정은 각 Task의 이후 판단에 적용하고 변경 전후 설정과 사용한 재시도 횟수의 연결을 보존한다. 안정된 `message_id`와 관련 Task/revision/run·전달 상태의 영속 기록 경계를 CW-08에 제공한다. Storage schema 변경은 이 ticket이 소유한다.",
+      "base_requirements": "이 p2.4 묶음의 승인과 명시적 implement, 통합된 선행 산출물, 현행 manifest/checkpoint와 기존 변경 보존. 계획 문서는 실행 승인 자체가 아니다.",
+      "contract_requirements": "Task ID는 revision/commit 변경으로 재설정하지 않는다. 실행 중 명세 변경은 새 revision을 다음 run에 적용한다. 즉시 중단·권한 철회는 현재 run에 적용한다. 세션 공통 설정은 각 Task의 이후 판단에 적용하고 변경 전후 설정과 사용한 재시도 횟수의 연결을 보존한다. 안정된 `message_id`와 관련 Task/revision/run·전달 상태의 영속 기록 경계를 CW-08에 제공한다. Storage schema 변경은 이 ticket이 소유한다. API 복귀와 확인된 OMP 처리는 서로 다른 기록이다. Shell 전송/수락/시작/종료와 takeover 요청/확인도 기존 run을 덮어쓰지 않고 연결할 port를 제공한다.",
       "write_scope_hint": [
         "src/workbench/tasks/**",
         "src/workbench/storage/metadata_*/**",
@@ -788,8 +1050,11 @@
         "data-dir:cw-09"
       ],
       "workspace_requirement": "verified_isolated_worktree_if_parallel",
-      "verification_requirement": "동작 수준 테스트, 독립 test_designer 평가/필요 테스트, fresh reviewer 검토와 후보별 실제 명령·결과 기록.",
-      "worker": "worker"
+      "verification_requirement": "선행 근거 재사용 범위를 명시하고, ticket별 독립 test_designer 및 frozen candidate fresh reviewer를 거친다. PLAN.gate_items의 소유 항목·evidence level·supplier와 final_checks를 적용한다.",
+      "worker": "worker",
+      "required_gate_items": [
+        "P-C-AC-29"
+      ]
     },
     {
       "id": "CW-10",
@@ -812,9 +1077,9 @@
         "C-AC-09",
         "C-AC-11"
       ],
-      "deliverable": "하나의 승인된 목표가 manager 준비/허용 local commit, worker의 실행용 worktree 준비, 같은 host shell 실행, worker 실험·terminal 관측/보고로 이어지는 수직 흐름을 완성한다. Worker 직접 요청도 기존 명세 또는 범위 안의 작은 새 명세에 연결한다.",
-      "base_requirements": "승인된 BRIEF r1.9 원문, 현재 통합 후보, 기존 dirty/untracked 입력의 복구 가능한 snapshot.",
-      "contract_requirements": "CW-07 shell, CW-08 mailbox, CW-09 TaskSpec/run을 소비한다. Worker 직접 요청이 승인 범위를 넓히면 manager 확인 전 실행하지 않는다. Worktree는 일반 Git 도구를 따르는 운영 가이드이며 자동 관리 기능이 아니다. 사용자 변경 삭제·stash·개발 디렉터리 우회, push·merge를 자동 수행하지 않는다. Worker가 코드 수정 필요성을 근거와 함께 manager에게 보고하면 그 지시는 끝나고, 수정 후 같은 작업은 manager의 새 지시가 있어야 한다.",
+      "deliverable": "승인 목표→manager 준비/worktree→host run→관리 대상 종료/unknown 및 exit status·로그/결과 위치 기록→worker의 출처·내용·미확인 기반 성공/실패/판단 보류 1차 판단 보고를 연결한다. Worker 직접 요청은 기존 명세 또는 범위 안의 작은 새 명세에 연결한다.",
+      "base_requirements": "이 p2.4 묶음의 승인과 명시적 implement, 통합된 선행 산출물, 현행 manifest/checkpoint와 기존 변경 보존. 계획 문서는 실행 승인 자체가 아니다.",
+      "contract_requirements": "CW-07 shell, CW-08 mailbox, CW-09 TaskSpec/run을 소비한다. Worker 직접 요청이 승인 범위를 넓히면 manager 확인 전 실행하지 않는다. Worktree는 일반 Git 도구를 따르는 운영 가이드이며 자동 관리 기능이 아니다. 사용자 변경 삭제·stash·개발 디렉터리 우회, push·merge를 자동 수행하지 않는다. Worker가 코드 수정 필요성을 근거와 함께 manager에게 보고하면 그 지시는 끝나고, 수정 후 같은 작업은 manager의 새 지시가 있어야 한다. 종료 확인 뒤 worker가 사전 실험 기준으로 로그·결과 파일을 대조해 1차 판단과 출처·미확인을 보고한다. 일시정지 중에는 종료·로그 수집만 유지하고 새 자동 분석을 시작하지 않는다.",
       "write_scope_hint": [
         "src/workbench/workflow/**",
         "tests/workflow/**",
@@ -842,8 +1107,14 @@
         "data-dir:cw-10"
       ],
       "workspace_requirement": "verified_isolated_worktree_if_parallel",
-      "verification_requirement": "동작 수준 테스트, 독립 test_designer 평가/필요 테스트, fresh reviewer 검토와 후보별 실제 명령·결과 기록.",
-      "worker": "complex_worker"
+      "verification_requirement": "선행 근거 재사용 범위를 명시하고, ticket별 독립 test_designer 및 frozen candidate fresh reviewer를 거친다. PLAN.gate_items의 소유 항목·evidence level·supplier와 final_checks를 적용한다.",
+      "worker": "worker_senior",
+      "required_gate_items": [
+        "P-C-AC-03",
+        "P-C-AC-05",
+        "P-C-AC-09",
+        "P-C-AC-11"
+      ]
     },
     {
       "id": "CW-11",
@@ -862,8 +1133,8 @@
         "C-AC-27"
       ],
       "deliverable": "자동화 활성 중 활성 run을 60초마다 worker 모델이 검토한다. Busy 시 최신 점검 하나만 유지하고 사용자 대화를 우선한다. 일시정지 중 새 모델 점검은 시작하지 않고 로그·프로세스 상태 수집은 계속한다. 종료 이벤트는 즉시 표시하고 hang 의심은 프로세스 근거로 조사한다.",
-      "base_requirements": "승인된 BRIEF r1.9 원문, 현재 통합 후보, 기존 dirty/untracked 입력의 복구 가능한 snapshot.",
-      "contract_requirements": "CW-10의 active run/session/exit event를 소비한다. 무출력·경과 시간 자체는 hang/종료가 아니다. Periodic review와 정상 peer wake에는 고정 횟수 상한이 없고 usage는 관측/추정을 구분한다.",
+      "base_requirements": "이 p2.4 묶음의 승인과 명시적 implement, 통합된 선행 산출물, 현행 manifest/checkpoint와 기존 변경 보존. 계획 문서는 실행 승인 자체가 아니다.",
+      "contract_requirements": "CW-10의 active run/session/exit event를 소비한다. 무출력·경과 시간 자체는 hang/종료가 아니다. Periodic review와 정상 peer wake에는 고정 횟수 상한이 없고 usage는 관측/추정을 구분한다. CW-05의 AutomationState/observation port를 사용하는 scheduler의 local pause 반응을 검증한다. 실제 사용자 pause→manager abort→reconcile 통합은 CW-12 소유이며 이를 CW-11의 선행 조건으로 요구하지 않는다.",
       "write_scope_hint": [
         "src/workbench/observation/**",
         "tests/observation/**"
@@ -881,8 +1152,13 @@
         "data-dir:cw-11"
       ],
       "workspace_requirement": "verified_isolated_worktree_if_parallel",
-      "verification_requirement": "동작 수준 테스트, 독립 test_designer 평가/필요 테스트, fresh reviewer 검토와 후보별 실제 명령·결과 기록.",
-      "worker": "worker"
+      "verification_requirement": "선행 근거 재사용 범위를 명시하고, ticket별 독립 test_designer 및 frozen candidate fresh reviewer를 거친다. PLAN.gate_items의 소유 항목·evidence level·supplier와 final_checks를 적용한다.",
+      "worker": "worker",
+      "required_gate_items": [
+        "P-C-AC-12",
+        "P-C-AC-21",
+        "P-C-AC-27"
+      ]
     },
     {
       "id": "CW-12",
@@ -891,11 +1167,13 @@
       "kind": "implementation",
       "depends_on": [
         "CW-09",
-        "CW-11"
+        "CW-11",
+        "CW-06"
       ],
       "dependency_reasons": {
         "CW-09": "영속 위임·취소·권한 상태가 통합·검증됨.",
-        "CW-11": "일시정지 중 유지할 로그·프로세스 수집과 중단할 모델 점검 경로가 통합·검증됨."
+        "CW-11": "일시정지 중 유지할 로그·프로세스 수집과 중단할 모델 점검 경로가 통합·검증됨.",
+        "CW-06": "마지막 작업·확인된 변경·process·미확인 결과를 실제 세 영역 UI의 상태 표시 port로 보여주기 위함."
       },
       "acceptance_ids": [
         "C-AC-25",
@@ -903,17 +1181,23 @@
         "C-AC-33"
       ],
       "deliverable": "일시정지 요청 즉시 새 자동 지시를 보류하고 manager OMP 진행 중 turn 중단을 요청한다. 요청·확인·불명 도구 결과와 마지막 작업·확인된 파일 변경·실행 중 프로세스를 표시한다. 새 자동 manager/worker 모델 작업과 periodic review는 시작하지 않고 로그·프로세스 수집과 기존 실험은 유지한다. 명시적 재개 뒤 실제 상태·승인 범위를 대조하고 중단 명령·대기 요청은 replay하지 않는다.",
-      "base_requirements": "승인된 BRIEF r1.9 원문, 현재 통합 후보, 기존 dirty/untracked 입력의 복구 가능한 snapshot.",
+      "base_requirements": "이 p2.4 묶음의 승인과 명시적 implement, 통합된 선행 산출물, 현행 manifest/checkpoint와 기존 변경 보존. 계획 문서는 실행 승인 자체가 아니다.",
       "contract_requirements": "CW-09 승인/취소, CW-11 관측·점검 경계, CW-04/05 OMP turn 중단 계약을 소비한다. 일시정지는 rollback이나 실험 중단이 아니다. 사용자 직접 조사·수정·rollback·명시적 agent 수동 지시는 자동 재개가 아니다. 취소는 기록·결과 파일 자동 삭제가 아니다.",
       "write_scope_hint": [
         "src/workbench/policy/pause_*/**",
         "tests/policy/pause_*/**",
-        "omp_bridge/policy_*/**"
+        "omp_bridge/policy_*/**",
+        "src/workbench/ui/status_*/**",
+        "tests/ui/status_*/**"
       ],
       "write_owner": "CW-12 ticket 작성자; Root가 검증된 candidate를 통합",
       "resource_claims": [
         {
           "resource": "host:omp-runtime",
+          "mode": "exclusive"
+        },
+        {
+          "resource": "repo:ui-status",
           "mode": "exclusive"
         }
       ],
@@ -923,8 +1207,13 @@
         "data-dir:cw-12"
       ],
       "workspace_requirement": "verified_isolated_worktree_if_parallel",
-      "verification_requirement": "동작 수준 테스트, 독립 test_designer 평가/필요 테스트, fresh reviewer 검토와 후보별 실제 명령·결과 기록.",
-      "worker": "worker"
+      "verification_requirement": "선행 근거 재사용 범위를 명시하고, ticket별 독립 test_designer 및 frozen candidate fresh reviewer를 거친다. PLAN.gate_items의 소유 항목·evidence level·supplier와 final_checks를 적용한다.",
+      "worker": "worker",
+      "required_gate_items": [
+        "P-C-AC-25",
+        "P-C-AC-30",
+        "P-C-AC-33"
+      ]
     },
     {
       "id": "CW-13",
@@ -949,9 +1238,9 @@
         "C-AC-31",
         "C-AC-34"
       ],
-      "deliverable": "Manager가 worker 근거와 승인된 완료 조건을 대조해 완료 또는 추가 조사/복구를 결정한다. 실패 복구 재시도 3회, 종료 확인 뒤 변경·재실행, 권한·대상 확인 후 강제 종료를 집행한다.",
-      "base_requirements": "승인된 BRIEF r1.9 원문, 현재 통합 후보, 기존 dirty/untracked 입력의 복구 가능한 snapshot.",
-      "contract_requirements": "CW-10의 run/worktree, CW-11의 조사 근거, CW-12의 pause/취소 경계를 소비한다. 최초 실행·정상 개선과 복구 재시도를 구분하고 commit/revision·세션 공통 설정 변경으로 count를 초기화하지 않는다. 세션 설정 변경은 다음 판단부터 적용하고 현재 run을 종료하지 않는다. Terminal 입력 owner를 우회하지 않는다.",
+      "deliverable": "Manager가 worker의 로그·결과 기반 1차 판단을 승인 완료 조건에 대조해 성공·실패·추가 조사를 2차 확인한다. 실제 종료 뒤 승인 범위 안의 수정·새 worker 지시·재실행을 기본 3회 한도에서 수행하고 해결 불가/한도 후 자동 중단과 근거·시도·남은 문제를 보고한다.",
+      "base_requirements": "이 p2.4 묶음의 승인과 명시적 implement, 통합된 선행 산출물, 현행 manifest/checkpoint와 기존 변경 보존. 계획 문서는 실행 승인 자체가 아니다.",
+      "contract_requirements": "CW-10의 run/worktree, CW-11의 조사 근거, CW-12의 pause/취소 경계를 소비한다. 최초 실행·정상 개선과 복구 재시도를 구분하고 commit/revision·세션 공통 설정 변경으로 count를 초기화하지 않는다. 세션 설정 변경은 다음 판단부터 적용하고 현재 run을 종료하지 않는다. Terminal 입력 owner를 우회하지 않는다. 종료 불명은 완료·수정·재실행으로 넘기지 않는다. Exit 0은 성공의 충분 조건이 아니며 로그 부족은 추가 조사한다.",
       "write_scope_hint": [
         "src/workbench/policy/recovery_*/**",
         "tests/policy/recovery_*/**"
@@ -974,8 +1263,16 @@
         "data-dir:cw-13"
       ],
       "workspace_requirement": "verified_isolated_worktree_if_parallel",
-      "verification_requirement": "동작 수준 테스트, 독립 test_designer 평가/필요 테스트, fresh reviewer 검토와 후보별 실제 명령·결과 기록.",
-      "worker": "complex_worker"
+      "verification_requirement": "선행 근거 재사용 범위를 명시하고, ticket별 독립 test_designer 및 frozen candidate fresh reviewer를 거친다. PLAN.gate_items의 소유 항목·evidence level·supplier와 final_checks를 적용한다.",
+      "worker": "worker_senior",
+      "required_gate_items": [
+        "P-C-AC-04",
+        "P-C-AC-07",
+        "P-C-AC-10",
+        "P-C-AC-13",
+        "P-C-AC-31",
+        "P-C-AC-34"
+      ]
     },
     {
       "id": "CW-14",
@@ -995,7 +1292,7 @@
         "C-AC-28"
       ],
       "deliverable": "Run raw log 64 MiB·project raw log 512 MiB cap, 잘림·누락·마지막 관측 표시를 구현한다. TaskSpec/결과 요약과 실행용 worktree는 자동 삭제하지 않는다.",
-      "base_requirements": "승인된 BRIEF r1.9 원문, 현재 통합 후보, 기존 dirty/untracked 입력의 복구 가능한 snapshot.",
+      "base_requirements": "이 p2.4 묶음의 승인과 명시적 implement, 통합된 선행 산출물, 현행 manifest/checkpoint와 기존 변경 보존. 계획 문서는 실행 승인 자체가 아니다.",
       "contract_requirements": "CW-07 PTY byte/lifecycle과 CW-09 metadata write gate를 소비한다. Metadata 실패는 새 자동 실행 보류, raw log 실패/상한은 실행·화면·가능한 관측 유지다. 실험 산출 파일은 cap 밖이다.",
       "write_scope_hint": [
         "src/workbench/storage/log_*/**",
@@ -1013,8 +1310,12 @@
         "data-dir:cw-14"
       ],
       "workspace_requirement": "verified_isolated_worktree_if_parallel",
-      "verification_requirement": "동작 수준 테스트, 독립 test_designer 평가/필요 테스트, fresh reviewer 검토와 후보별 실제 명령·결과 기록.",
-      "worker": "worker"
+      "verification_requirement": "선행 근거 재사용 범위를 명시하고, ticket별 독립 test_designer 및 frozen candidate fresh reviewer를 거친다. PLAN.gate_items의 소유 항목·evidence level·supplier와 final_checks를 적용한다.",
+      "worker": "worker",
+      "required_gate_items": [
+        "P-C-AC-24",
+        "P-C-AC-28"
+      ]
     },
     {
       "id": "CW-15",
@@ -1046,8 +1347,8 @@
         "C-AC-23"
       ],
       "deliverable": "정상 detach/재접속, agent/backend 재시작 대조, 재부팅 후 사용자 확인, 모델 오류 hold/recheck, 명시적 전체 종료를 사용자 상태와 실제 process에 연결한다.",
-      "base_requirements": "승인된 BRIEF r1.9 원문, 현재 통합 후보, 기존 dirty/untracked 입력의 복구 가능한 snapshot.",
-      "contract_requirements": "CW-05의 분리된 lifetime contract와 CW-06/08/11/12/13/14의 통합 결과를 소비한다. 사용자 입력 owner·취소·일시정지를 복구가 해제하지 않는다. Backend crash 뒤 child 생존·PTY 재연결을 확인 없이 주장하지 않는다. 재접속/복구는 일시정지를 해제하거나 중단 명령·대기 요청을 replay하지 않는다.",
+      "base_requirements": "이 p2.4 묶음의 승인과 명시적 implement, 통합된 선행 산출물, 현행 manifest/checkpoint와 기존 변경 보존. 계획 문서는 실행 승인 자체가 아니다.",
+      "contract_requirements": "CW-05의 분리된 lifetime contract와 CW-06/08/11/12/13/14의 통합 결과를 소비한다. 사용자 입력 owner·취소·일시정지를 복구가 해제하지 않는다. Backend crash 뒤 child 생존·PTY 재연결을 확인 없이 주장하지 않는다. 재접속/복구는 일시정지를 해제하거나 중단 명령·대기 요청을 replay하지 않는다. C-D52 인수 요청/확인·전송된 명령 상태와 C-D51 control mode를 실제 프로세스와 대조하며, 이전 owner epoch/session의 요청을 replay하지 않는다.",
       "write_scope_hint": [
         "src/workbench/runtime/**",
         "src/workbench/app/**",
@@ -1079,8 +1380,16 @@
         "data-dir:cw-15"
       ],
       "workspace_requirement": "verified_isolated_worktree_if_parallel",
-      "verification_requirement": "동작 수준 테스트, 독립 test_designer 평가/필요 테스트, fresh reviewer 검토와 후보별 실제 명령·결과 기록.",
-      "worker": "complex_worker"
+      "verification_requirement": "선행 근거 재사용 범위를 명시하고, ticket별 독립 test_designer 및 frozen candidate fresh reviewer를 거친다. PLAN.gate_items의 소유 항목·evidence level·supplier와 final_checks를 적용한다.",
+      "worker": "worker_senior",
+      "required_gate_items": [
+        "P-C-AC-15",
+        "P-C-AC-16",
+        "P-C-AC-17",
+        "P-C-AC-18",
+        "P-C-AC-22",
+        "P-C-AC-23"
+      ]
     },
     {
       "id": "CW-16",
@@ -1097,8 +1406,8 @@
         "C-AC-19",
         "C-AC-20"
       ],
-      "deliverable": "전체 candidate에서 C-AC-01~34의 사용자 행동과 G1~G4 근거를 연결해 최종 통합한다. 일반 terminal, 외부 tmux/herdr 및 실제 Bash/sh 조합의 호환 결과를 기록한다. C-D49의 turn 중단 요청/확인·불명 결과, 일시정지 중 자동 모델 작업 보류, 명시적 재개 대조, worker 수정 필요 보고 후 지시 종료를 포함한다.",
-      "base_requirements": "승인된 BRIEF r1.9 원문, 현재 통합 후보, 기존 dirty/untracked 입력의 복구 가능한 snapshot.",
+      "deliverable": "전체 candidate에서 C-AC-01~34의 사용자 행동과 G1~G4 근거를 연결해 최종 통합한다. 일반 terminal, 외부 tmux/herdr 및 실제 Bash/sh 조합의 호환 결과를 기록한다. C-D49의 turn 중단 요청/확인·불명 결과, 일시정지 중 자동 모델 작업 보류, 명시적 재개 대조, worker 수정 필요 보고 후 지시 종료를 포함한다. C-D50..52의 관리된 환경·control 대기·인수 중 불명과 foreground 수동 입력도 최종 I-SHELL/I-FAULT에서 검증한다.",
+      "base_requirements": "이 p2.4 묶음의 승인과 명시적 implement, 통합된 선행 산출물, 현행 manifest/checkpoint와 기존 변경 보존. 계획 문서는 실행 승인 자체가 아니다.",
       "contract_requirements": "PLAN.acceptance_trace의 모든 ID와 SPEC의 I-FLOW/I-SHELL/I-POLICY/I-FAULT/I-COMPAT을 사용한다. Integration delta는 Root가 하나씩 합치고 candidate snapshot을 동결한 뒤 독립 review/test evidence를 연결한다.",
       "write_scope_hint": [
         "tests/integration/**",
@@ -1131,44 +1440,72 @@
         "data-dir:cw-16"
       ],
       "workspace_requirement": "root_integration_workspace",
-      "verification_requirement": "Root 최종 통합, 독립 test_designer·fresh reviewer 범위와 모든 수락 근거를 동결 후보에 연결.",
-      "owner": "root"
+      "verification_requirement": "선행 근거 재사용 범위를 명시하고, ticket별 독립 test_designer 및 frozen candidate fresh reviewer를 거친다. PLAN.gate_items의 소유 항목·evidence level·supplier와 final_checks를 적용한다.",
+      "owner": "root",
+      "required_gate_items": [
+        "P-C-AC-19",
+        "P-C-AC-20",
+        "I-FLOW",
+        "I-SHELL",
+        "I-POLICY",
+        "I-FAULT",
+        "I-COMPAT"
+      ]
     }
   ],
   "pending_capabilities": [
     {
-      "item": "OMP 모델 API·인증, 두 실제 session의 60초 review와 실제 manager turn 중단·재개 경계",
+      "item": "관리된 Bash/dash의 control 대기·hook/trap 탐지·일반 race·인수와 conda/venv 조합",
+      "status": "pending_evidence",
+      "affects": [
+        "G2",
+        "I-SHELL"
+      ]
+    },
+    {
+      "item": "실제 normal resize/3-pane·색·일반 terminal/tmux/herdr 지원 matrix",
+      "status": "pending_evidence",
+      "affects": [
+        "G1",
+        "I-COMPAT"
+      ]
+    },
+    {
+      "item": "실제 TUI delivery async failure·composer·session switch와 C-D49 bridge 경계",
       "status": "pending_evidence",
       "affects": [
         "G3",
-        "G4",
         "I-FLOW",
         "I-POLICY"
       ]
     },
     {
-      "item": "Textual/libvterm/CFFI와 Python minor의 실제 설치·호환 조합",
+      "item": "backend 수명·60초 live wake·metadata port/production 대조·reboot 환경",
       "status": "pending_evidence",
       "affects": [
-        "G1",
         "G4",
-        "I-COMPAT"
+        "I-FAULT"
       ]
     },
     {
-      "item": "일반 terminal·tmux·herdr의 실제 사용자 조작 matrix",
-      "status": "pending_evidence",
+      "item": "gate 집계 validator 미구현",
+      "status": "enforcement_gap_until_CW-05",
       "affects": [
-        "G1",
-        "I-COMPAT"
+        "G4-EVIDENCE"
       ]
     },
     {
-      "item": "OS reboot를 포함한 실제 복구 시나리오",
-      "status": "pending_evidence",
+      "item": "개정 BRIEF+SPEC+PLAN+ticket 묶음 승인과 구현 재개 요청",
+      "status": "pending_user_direction",
       "affects": [
-        "I-FAULT",
-        "C-AC-23"
+        "all_dispatch"
+      ]
+    },
+    {
+      "item": "남은 child 호출 30회 대비 full remaining estimate 44회+correction reserve 6회",
+      "status": "capacity_risk_under_explicit_cap",
+      "affects": [
+        "full_completion"
       ]
     }
   ],
@@ -1176,5 +1513,1805 @@
     "CW-06",
     "CW-07",
     "CW-09"
-  ]
+  ],
+  "initial_frontier_note": "개정 묶음 승인·명시적 implement 및 실행 preflight 이후의 논리적 frontier. CW-01 완료 보존. 현재 실행 배정 없음. 첫 변경은 G2 최소 실험을 우선하며 독립 G1/G3는 자원이 허용하면 진행한다.",
+  "preserved_work": {
+    "CW-01": {
+      "status_observed": "integrated",
+      "record": "../../../.workflow/core-workbench/runs/implement-p2-20260923/cw01-integration.json",
+      "ticket_sha256": "7dae35e6d1a4d2a3475609849178bb9ea05a6f790eb4931dc0139925ba75bcb2",
+      "policy": "원문 s2.2 ticket와 v1 계약 완료 보존. 새 control/ACK 상세와 validator는 CW-03/04/05가 담당하며 완료 ticket을 재실행하지 않는다."
+    },
+    "CW-02": {
+      "status_observed": "partial_verified_g1_pending",
+      "evidence": "gates/G1.md",
+      "reuse": "승인 전 파일 부재·승인 뒤 side effect/후속 요청, 29 fixture와 delta review는 같은 입력/항목에 한정하여 재사용. STOP/CONT anchor는 resize 근거에서 제외."
+    },
+    "CW-03": {
+      "status_observed": "blocked_after_fourth_attempt",
+      "evidence": "gates/G2.md",
+      "reuse": "22/26와 4 실패는 이전 후보의 사실로 보존. C-D50 범위 대조표를 작성하되 정상 경합 실패를 면제하지 않는다."
+    },
+    "CW-04": {
+      "status_observed": "cd49_partial_verified_g3_pending",
+      "evidence": "gates/G3.md",
+      "reuse": "RPC turn 중단·ID 왕복·busy/approval 보류·동일 session ACK 유실 근거는 해당 mode에 한정. TUI composer/전송 결과/session 검증을 대신하지 않는다."
+    },
+    "CW-05..16": "미착수; 완료로 승격하지 않는다."
+  },
+  "dependency_artifacts": {
+    "CW-01": [],
+    "CW-02": [
+      {
+        "ticket": "CW-01",
+        "reason": "임시 PTY/control 경계와 재현 가능한 게이트 harness가 통합·검증됨.",
+        "satisfied_by": "CW-01 산출물의 current candidate·독립 test/review·소유 gate item 검증·Root 통합 기록"
+      }
+    ],
+    "CW-03": [
+      {
+        "ticket": "CW-01",
+        "reason": "command ID·lifecycle·입력 owner의 임시 계약이 통합·검증됨.",
+        "satisfied_by": "CW-01 산출물의 current candidate·독립 test/review·소유 gate item 검증·Root 통합 기록"
+      }
+    ],
+    "CW-04": [
+      {
+        "ticket": "CW-01",
+        "reason": "role/message/session 계약과 게이트 harness가 통합·검증됨.",
+        "satisfied_by": "CW-01 산출물의 current candidate·독립 test/review·소유 gate item 검증·Root 통합 기록"
+      }
+    ],
+    "CW-05": [
+      {
+        "ticket": "CW-02",
+        "reason": "G1 PTY/VT 후보와 실제 OMP 화면 증거가 통합·검증됨.",
+        "satisfied_by": "CW-02 산출물의 current candidate·독립 test/review·소유 gate item 검증·Root 통합 기록"
+      },
+      {
+        "ticket": "CW-03",
+        "reason": "G2 Bash/sh 실행·lifecycle 증거가 통합·검증됨.",
+        "satisfied_by": "CW-03 산출물의 current candidate·독립 test/review·소유 gate item 검증·Root 통합 기록"
+      },
+      {
+        "ticket": "CW-04",
+        "reason": "G3 공개 extension·session 전달과 manager turn 중단 요청/확인 증거가 통합·검증됨.",
+        "satisfied_by": "CW-04 산출물의 current candidate·독립 test/review·소유 gate item 검증·Root 통합 기록"
+      }
+    ],
+    "CW-06": [
+      {
+        "ticket": "CW-05",
+        "reason": "G4 frontend/backend 계약과 terminal 렌더링이 통합·검증됨.",
+        "satisfied_by": "CW-05 산출물의 current candidate·독립 test/review·소유 gate item 검증·Root 통합 기록"
+      }
+    ],
+    "CW-07": [
+      {
+        "ticket": "CW-05",
+        "reason": "G4 control 계약과 G2에서 증명한 Bash/sh 경로가 통합·검증됨.",
+        "satisfied_by": "CW-05 산출물의 current candidate·독립 test/review·소유 gate item 검증·Root 통합 기록"
+      }
+    ],
+    "CW-08": [
+      {
+        "ticket": "CW-05",
+        "reason": "G4 protocol과 G3 공개 OMP 전달 경로가 통합·검증됨.",
+        "satisfied_by": "CW-05 산출물의 current candidate·독립 test/review·소유 gate item 검증·Root 통합 기록"
+      },
+      {
+        "ticket": "CW-09",
+        "reason": "영속 Task/revision/run·논리 메시지/전달 상태 기록과 metadata write gate가 통합·검증됨.",
+        "satisfied_by": "CW-09 산출물의 current candidate·독립 test/review·소유 gate item 검증·Root 통합 기록"
+      }
+    ],
+    "CW-09": [
+      {
+        "ticket": "CW-05",
+        "reason": "G4 Task/control 계약과 저장 경계가 통합·검증됨.",
+        "satisfied_by": "CW-05 산출물의 current candidate·독립 test/review·소유 gate item 검증·Root 통합 기록"
+      }
+    ],
+    "CW-10": [
+      {
+        "ticket": "CW-07",
+        "reason": "실제 shell 수락·lifecycle·수동 제어가 통합·검증됨.",
+        "satisfied_by": "CW-07 산출물의 current candidate·독립 test/review·소유 gate item 검증·Root 통합 기록"
+      },
+      {
+        "ticket": "CW-08",
+        "reason": "연결된 manager/worker 메시지 전달이 통합·검증됨.",
+        "satisfied_by": "CW-08 산출물의 current candidate·독립 test/review·소유 gate item 검증·Root 통합 기록"
+      },
+      {
+        "ticket": "CW-09",
+        "reason": "승인된 불변 TaskSpec/run과 metadata gate가 통합·검증됨.",
+        "satisfied_by": "CW-09 산출물의 current candidate·독립 test/review·소유 gate item 검증·Root 통합 기록"
+      }
+    ],
+    "CW-11": [
+      {
+        "ticket": "CW-10",
+        "reason": "활성 run·worker session·종료 이벤트 경로가 통합·검증됨.",
+        "satisfied_by": "CW-10 산출물의 current candidate·독립 test/review·소유 gate item 검증·Root 통합 기록"
+      }
+    ],
+    "CW-12": [
+      {
+        "ticket": "CW-09",
+        "reason": "영속 위임·취소·권한 상태가 통합·검증됨.",
+        "satisfied_by": "CW-09 산출물의 current candidate·독립 test/review·소유 gate item 검증·Root 통합 기록"
+      },
+      {
+        "ticket": "CW-11",
+        "reason": "일시정지 중 유지할 로그·프로세스 수집과 중단할 모델 점검 경로가 통합·검증됨.",
+        "satisfied_by": "CW-11 산출물의 current candidate·독립 test/review·소유 gate item 검증·Root 통합 기록"
+      },
+      {
+        "ticket": "CW-06",
+        "reason": "마지막 작업·확인된 변경·process·미확인 결과를 실제 세 영역 UI의 상태 표시 port로 보여주기 위함.",
+        "satisfied_by": "CW-06 산출물의 current candidate·독립 test/review·소유 gate item 검증·Root 통합 기록"
+      }
+    ],
+    "CW-13": [
+      {
+        "ticket": "CW-10",
+        "reason": "Task→run/worktree 흐름과 불변 run 근거가 통합·검증됨.",
+        "satisfied_by": "CW-10 산출물의 current candidate·독립 test/review·소유 gate item 검증·Root 통합 기록"
+      },
+      {
+        "ticket": "CW-11",
+        "reason": "worker 관측과 조사 보고가 통합·검증됨.",
+        "satisfied_by": "CW-11 산출물의 current candidate·독립 test/review·소유 gate item 검증·Root 통합 기록"
+      },
+      {
+        "ticket": "CW-12",
+        "reason": "실행 결정을 막는 일시정지·취소 guard가 통합·검증됨.",
+        "satisfied_by": "CW-12 산출물의 current candidate·독립 test/review·소유 gate item 검증·Root 통합 기록"
+      }
+    ],
+    "CW-14": [
+      {
+        "ticket": "CW-07",
+        "reason": "실시간 log 수집에 쓸 PTY/lifecycle stream이 통합·검증됨.",
+        "satisfied_by": "CW-07 산출물의 current candidate·독립 test/review·소유 gate item 검증·Root 통합 기록"
+      },
+      {
+        "ticket": "CW-09",
+        "reason": "metadata write gate와 안정적인 run ID가 통합·검증됨.",
+        "satisfied_by": "CW-09 산출물의 current candidate·독립 test/review·소유 gate item 검증·Root 통합 기록"
+      }
+    ],
+    "CW-15": [
+      {
+        "ticket": "CW-06",
+        "reason": "세 영역 UI와 원본 OMP 직접 입력이 통합·검증됨.",
+        "satisfied_by": "CW-06 산출물의 current candidate·독립 test/review·소유 gate item 검증·Root 통합 기록"
+      },
+      {
+        "ticket": "CW-08",
+        "reason": "OMP session ID와 불명 mailbox 처리 경계가 통합·검증됨.",
+        "satisfied_by": "CW-08 산출물의 current candidate·독립 test/review·소유 gate item 검증·Root 통합 기록"
+      },
+      {
+        "ticket": "CW-11",
+        "reason": "자동화 활성 중 detach 뒤 유지할 60초 점검과 일시정지 중 보류가 통합·검증됨.",
+        "satisfied_by": "CW-11 산출물의 current candidate·독립 test/review·소유 gate item 검증·Root 통합 기록"
+      },
+      {
+        "ticket": "CW-12",
+        "reason": "수명 전환 중 보존할 일시정지·취소 상태가 통합·검증됨.",
+        "satisfied_by": "CW-12 산출물의 current candidate·독립 test/review·소유 gate item 검증·Root 통합 기록"
+      },
+      {
+        "ticket": "CW-13",
+        "reason": "종료 확인과 manager 판단 경로가 통합·검증됨.",
+        "satisfied_by": "CW-13 산출물의 current candidate·독립 test/review·소유 gate item 검증·Root 통합 기록"
+      },
+      {
+        "ticket": "CW-14",
+        "reason": "영속 기록과 저장 장애 처리가 통합·검증됨.",
+        "satisfied_by": "CW-14 산출물의 current candidate·독립 test/review·소유 gate item 검증·Root 통합 기록"
+      }
+    ],
+    "CW-16": [
+      {
+        "ticket": "CW-15",
+        "reason": "모든 production 선행 산출물이 독립 검증 후 통합되어 동결 후보가 준비됨.",
+        "satisfied_by": "CW-15 산출물의 current candidate·독립 test/review·소유 gate item 검증·Root 통합 기록"
+      }
+    ]
+  },
+  "feasibility_experiments": [
+    {
+      "id": "E-G2-CONTROL",
+      "owner_ticket": "CW-03",
+      "critical_assumption": "같은 interpreter가 prompt로 복귀하지 않는 control 대기를 소유하면 일반 입력/job 경합을 막으면서 정상 cwd/export 실행과 foreground 인수를 지원할 수 있다.",
+      "requires_tickets": [
+        "CW-01",
+        "CW-03"
+      ],
+      "smallest_runtime_experiment": "격리된 실제 Bash와 /bin/sh→dash 각각에 manual cd/export→직접 wb-handoff→전용 control로 명령 1개→수락/시작/shell 평가 반환과 관리 대상 local process 종료 확인 또는 unknown와 PID/cwd/env를 관측. 같은 harness에서 background/suspend/입력 대기 hook과 takeover 전송 전·전송 후/ACK 유실, stdin 읽는 foreground job의 인수·수동 입력을 짝지어 확인한다.",
+      "decisive_items": [
+        "G2-CONTROL",
+        "G2-INPUT-JOBS",
+        "G2-TAKEOVER"
+      ],
+      "pass_next": "실행권 소유 지점·정상 성공·부정 사례가 모두 입증되면 환경/hook/signal matrix와 adapter를 확대한다. G2 전체 item 통과 전 production으로 확장하지 않는다.",
+      "failed_next": "READY 검사 보강을 반복하지 않고 실패한 실행권 가정을 기록한다. 현재 사용자 행동을 유지하는 새 가설이 없으면 해당 ticket 차단. 사용자 동작 변경만 가능하면 refine-spec.",
+      "inconclusive_next": "PTY/control drain·bounded cleanup·판별법 결함을 먼저 구분한다. 새 관측을 낼 한정된 probe 수정만 허용하며 제품 확장 보류."
+    },
+    {
+      "id": "E-G1-RESIZE",
+      "owner_ticket": "CW-02",
+      "critical_assumption": "현재 VT/renderer가 signal 정지 없이 실제 OMP 크기 변경 뒤 배치와 사용자 입력/승인 상태를 보존한다.",
+      "requires_tickets": [
+        "CW-01",
+        "CW-02"
+      ],
+      "smallest_runtime_experiment": "실제 OMP TUI에서 100x32→84x24→100x32, composer 한글 draft와 native approval/tool 출력 각각의 geometry/줄바꿈/잘림·겹침/입력·승인 상태를 관측. no-resize와 resize 전달 누락 부정 대조로 predicate 검증. 전체 출력 정숙을 강제하지 않는다.",
+      "decisive_items": [
+        "G1-RESIZE"
+      ],
+      "pass_next": "두 OMP+host 실제 3-pane의 outer resize/후속 입력 대상과 일반 terminal/tmux/herdr matrix 검증으로 확대.",
+      "failed_next": "재현한 렌더링/입력 결함을 bounded 수정 또는 기존 범위 안의 VT 후보 교체로 처리. 내부 tmux/headless로 요구를 줄이지 않는다.",
+      "inconclusive_next": "startup wizard/PTY drain/성공 predicate를 고쳐 재관측. STOP/CONT anchor나 파일 command preview를 통과로 쓰지 않는다."
+    },
+    {
+      "id": "E-G3-TUI",
+      "owner_ticket": "CW-04",
+      "critical_assumption": "공개 OMP TUI API로 사용자 composer를 보존하면서 식별 가능한 메시지 전달·실패/불명·session 전환을 관측할 수 있다.",
+      "requires_tickets": [
+        "CW-01",
+        "CW-04"
+      ],
+      "smallest_runtime_experiment": "고정 18.2.10 두 실제 TUI에서 non-empty draft→자동 요청 보류→사용자가 draft 정리 후 새 요청 처리 관측. 정상 전달과 API 복귀 후 scripted provider/전송 비동기 오류를 짝지어 message/session ID·provider 입력·event·초안/focus를 비교한다.",
+      "decisive_items": [
+        "G3-TUI-DELIVERY",
+        "G3-TUI-CONTENTION"
+      ],
+      "pass_next": "session switch·동일 process 재연결·ACK 손실 및 C-D49 실제 TUI pause/reconcile harness로 확대.",
+      "failed_next": "public API 관측 범위에서 상태 의미와 bridge를 수정한다. native approval 우회 wrapper 금지. 사용자 초안 침범을 해결할 수 없으면 관련 전개 차단.",
+      "inconclusive_next": "RPC 빈 editor 값을 TUI 근거로 쓰지 않는다. OMP 처리 identity를 관측할 수 없는 단계는 unknown으로 두고 replay 금지."
+    },
+    {
+      "id": "E-G4-LIFETIME",
+      "owner_ticket": "CW-05",
+      "critical_assumption": "UI 수명과 backend/PTY/OMP/control 수명을 분리하고 사용자 owner·pause를 보존할 수 있다.",
+      "requires_tickets": [
+        "CW-02",
+        "CW-03",
+        "CW-04",
+        "CW-05"
+      ],
+      "smallest_runtime_experiment": "최소 frontend를 닫은 뒤 같은 backend/두 OMP/shell PID와 임시 host 실험을 60초 넘게 관측하고 실제 timer가 OMP worker 요청을 1회 처리하는지 확인한 뒤 재attach한다. 최소 pause port에서는 tick이 모델로 전달되지 않고 관측만 지속하는 대조를 수행한다.",
+      "decisive_items": [
+        "G4-LIFETIME",
+        "G4-WAKE"
+      ],
+      "pass_next": "계약/설치 조합/저장 port/evidence validator를 고정하고 CW-06/07/09로 전개.",
+      "failed_next": "child 종료나 중복 시작이면 runtime 분리 가정을 수정하며 production 차단.",
+      "inconclusive_next": "모델/auth/host capability와 timer/PTY 결함을 분류하고 해당 관측만 재확인. CW-11/15 구현을 선행 요구로 만들지 않는다."
+    }
+  ],
+  "gate_items": [
+    {
+      "id": "M0-CONTRACT",
+      "owner_ticket": "CW-01",
+      "acceptance_ids": [],
+      "requires_tickets": [
+        "CW-01"
+      ],
+      "required_evidence_level": "fixture",
+      "check": "기존 v1 envelope/display/message identity 계약 직렬화·거절·교차 언어 fixture와 독립 검증 기록을 보존한다.",
+      "kind": "preserved_contract",
+      "evidence_status": "pending_current_candidate",
+      "final_checks": []
+    },
+    {
+      "id": "G1-RESIZE",
+      "owner_ticket": "CW-02",
+      "acceptance_ids": [
+        "C-AC-06",
+        "C-AC-14",
+        "C-AC-19"
+      ],
+      "requires_tickets": [
+        "CW-01",
+        "CW-02"
+      ],
+      "required_evidence_level": "runtime",
+      "check": "E-G1-RESIZE의 정상 resize 후 배치/입력/approval 보존과 resize 전달 누락 부정 대조. STOP/CONT anchor를 수락 근거로 쓰지 않는다.",
+      "kind": "feasibility",
+      "evidence_status": "pending_current_candidate",
+      "final_checks": []
+    },
+    {
+      "id": "G1-THREE-PANE",
+      "owner_ticket": "CW-02",
+      "acceptance_ids": [
+        "C-AC-06",
+        "C-AC-14",
+        "C-AC-19"
+      ],
+      "requires_tickets": [
+        "CW-01",
+        "CW-02"
+      ],
+      "required_evidence_level": "runtime",
+      "check": "원본 OMP 두 개와 host PTY를 동시에 표시하고 outer resize 뒤 각 focus 대상에만 입력. 실제 pane 크기·줄바꿈·잘림/겹침과 현재 draft를 확인.",
+      "kind": "feasibility",
+      "evidence_status": "pending_current_candidate",
+      "final_checks": []
+    },
+    {
+      "id": "G1-TEXT-TOOLS",
+      "owner_ticket": "CW-02",
+      "acceptance_ids": [
+        "C-AC-14",
+        "C-AC-19",
+        "C-AC-20"
+      ],
+      "requires_tickets": [
+        "CW-01",
+        "CW-02"
+      ],
+      "required_evidence_level": "runtime",
+      "check": "한글/wide 문자·multiline paste·slash command·scroll·native approval 전 파일 부재와 승인 후 실제 tool side effect·화면 출력/후속 응답을 원본 TUI에서 확인.",
+      "kind": "feasibility",
+      "evidence_status": "pending_current_candidate",
+      "final_checks": []
+    },
+    {
+      "id": "G1-PASTE",
+      "owner_ticket": "CW-02",
+      "acceptance_ids": [
+        "C-AC-19"
+      ],
+      "requires_tickets": [
+        "CW-01",
+        "CW-02"
+      ],
+      "required_evidence_level": "runtime",
+      "check": "Child 미소비 queue 부족과 2 MiB 초과 paste를 일부 byte 없이 전체 거절·이유 표시. 정상 paste 전달, hotkey와 query reply가 계속 동작.",
+      "kind": "feasibility",
+      "evidence_status": "pending_current_candidate",
+      "final_checks": []
+    },
+    {
+      "id": "G1-VT-QUERY",
+      "owner_ticket": "CW-02",
+      "acceptance_ids": [
+        "C-AC-14",
+        "C-AC-19"
+      ],
+      "requires_tickets": [
+        "CW-01",
+        "CW-02"
+      ],
+      "required_evidence_level": "fixture",
+      "check": "Query 종류/정확한 reply/partial write FIFO/resize size 응답과 alternate-screen/scrollback snapshot 복원을 fixture로 확인. 사용자 TUI 동작은 G1-RESIZE/TEXT-TOOLS/OUTER의 runtime과 함께 판단. Private OMP parser 내부 추적은 요구하지 않는다.",
+      "kind": "feasibility",
+      "evidence_status": "pending_current_candidate",
+      "final_checks": []
+    },
+    {
+      "id": "G1-COLOR",
+      "owner_ticket": "CW-02",
+      "acceptance_ids": [
+        "C-AC-14",
+        "C-AC-20"
+      ],
+      "requires_tickets": [
+        "CW-01",
+        "CW-02"
+      ],
+      "required_evidence_level": "runtime",
+      "check": "OMP의 지원 텍스트 색상·구분 가능한 강조를 실제 terminal에서 원본과 대조. pyte truecolor 파싱만으로 curses 256색 근사의 fidelity를 통과시키지 않음. 충족 여부 불명은 보류.",
+      "kind": "feasibility",
+      "evidence_status": "pending_current_candidate",
+      "final_checks": []
+    },
+    {
+      "id": "G1-OUTER",
+      "owner_ticket": "CW-02",
+      "acceptance_ids": [
+        "C-AC-19",
+        "C-AC-20"
+      ],
+      "requires_tickets": [
+        "CW-01",
+        "CW-02"
+      ],
+      "required_evidence_level": "runtime",
+      "check": "일반 terminal·외부 tmux·herdr 각각에서 현재 후보의 입력/paste/resize/로컬 alternate-screen 복원을 확인하고 버전·환경 기록. Backend detach는 G4와 L-15/I-COMPAT에 별도 유지.",
+      "kind": "feasibility",
+      "evidence_status": "pending_current_candidate",
+      "final_checks": []
+    },
+    {
+      "id": "G2-CONTROL",
+      "owner_ticket": "CW-03",
+      "acceptance_ids": [
+        "C-AC-03",
+        "C-AC-08",
+        "C-AC-26"
+      ],
+      "requires_tickets": [
+        "CW-01",
+        "CW-03"
+      ],
+      "required_evidence_level": "runtime",
+      "check": "Bash/dash same interpreter에서 직접 wb-handoff 후 prompt re-entry 없이 control 대기, 요청 1개 수락/시작, shell 평가 반환과 관리 대상 local process의 종료 확인/unknown·PID/cwd/export 보존·stdin/control 분리. 확인 가능한 exit status·로그/결과 위치를 기록하고 실험 성공은 판정하지 않는다. 최초 시작은 C-AC-29 gate-local 승인/진행 fixture이며 CW-09 production은 선행이 아니다.",
+      "kind": "feasibility",
+      "evidence_status": "pending_current_candidate",
+      "final_checks": []
+    },
+    {
+      "id": "G2-INPUT-JOBS",
+      "owner_ticket": "CW-03",
+      "acceptance_ids": [
+        "C-AC-08",
+        "C-AC-26"
+      ],
+      "requires_tickets": [
+        "CW-01",
+        "CW-03"
+      ],
+      "required_evidence_level": "runtime",
+      "check": "일반 미제출/여러 줄 입력·foreground/REPL·background/suspended job·stale generation/owner epoch에서 자동 수락 보류. READY를 먼저 내는 prompt hook 경합을 새 경계에서 재현; 항상 거절하는 후보도 실패.",
+      "kind": "feasibility",
+      "evidence_status": "pending_current_candidate",
+      "final_checks": []
+    },
+    {
+      "id": "G2-HOOK-ENV",
+      "owner_ticket": "CW-03",
+      "acceptance_ids": [
+        "C-AC-26",
+        "C-AC-32"
+      ],
+      "requires_tickets": [
+        "CW-01",
+        "CW-03"
+      ],
+      "required_evidence_level": "runtime",
+      "check": "정상 cd/export와 실제 conda·venv activation/deactivation 보존 및 비호환 hook/trap 변경 자동 복귀 보류를 짝지어 검증. 지원 조합/근거와 기존 4 실패의 C-D50 분류 기록; 의도적 내부 변조를 정상 경합 면제로 확대하지 않음.",
+      "kind": "feasibility",
+      "evidence_status": "pending_current_candidate",
+      "final_checks": []
+    },
+    {
+      "id": "G2-TAKEOVER",
+      "owner_ticket": "CW-03",
+      "acceptance_ids": [
+        "C-AC-08"
+      ],
+      "requires_tickets": [
+        "CW-01",
+        "CW-03"
+      ],
+      "required_evidence_level": "runtime",
+      "check": "전송 전/전송 후/수락 후/시작 후와 ACK 유실 경합에서 인수 요청 즉시 새 전송 금지. 요청/확인 구분, 기존 실험 유지, 확인된 현재 foreground에 수동 입력, 대상 불명 시 보류, 이미 전송된 요청의 unknown/no replay.",
+      "kind": "feasibility",
+      "evidence_status": "pending_current_candidate",
+      "final_checks": []
+    },
+    {
+      "id": "G2-LIFECYCLE",
+      "owner_ticket": "CW-03",
+      "acceptance_ids": [
+        "C-AC-10",
+        "C-AC-26",
+        "C-AC-34"
+      ],
+      "requires_tickets": [
+        "CW-01",
+        "CW-03"
+      ],
+      "required_evidence_level": "runtime",
+      "check": "정상·비정상 exit를 포함한 관리 대상 프로그램의 실제 종료와 확인 가능한 status, shell 반환 뒤 남은 local 작업의 수명/unknown을 구분한다. Ctrl-C/suspend/control loop 이탈·FD 단절·nested shell·exec/종료·background/daemon 경계를 실제 Bash/dash에서 검증한다. stdout marker로 종료 선언·숨은 queue·자동 replay 없음. 로그·결과 성공 판단은 CW-10/13, 강제 종료 정책 완성은 CW-13.",
+      "kind": "feasibility",
+      "evidence_status": "pending_current_candidate",
+      "final_checks": []
+    },
+    {
+      "id": "G2-LAUNCH",
+      "owner_ticket": "CW-03",
+      "acceptance_ids": [
+        "C-AC-20"
+      ],
+      "requires_tickets": [
+        "CW-01",
+        "CW-03"
+      ],
+      "required_evidence_level": "runtime",
+      "check": "Bash 우선·Bash 없는 PATH에서 실제 sh 시작, 둘 다 없을 때 안내, login shell zsh 설정과 독립. 선택 실행 파일 고정, 실행 실패의 새 shell 우회 없음.",
+      "kind": "feasibility",
+      "evidence_status": "pending_current_candidate",
+      "final_checks": []
+    },
+    {
+      "id": "G3-TUI-DELIVERY",
+      "owner_ticket": "CW-04",
+      "acceptance_ids": [
+        "C-AC-02"
+      ],
+      "requires_tickets": [
+        "CW-01",
+        "CW-04"
+      ],
+      "required_evidence_level": "runtime",
+      "check": "두 독립 OMP TUI에 네 message kind와 reply identity 왕복. API 호출 복귀·public event/provider의 해당 ID 처리 관측·업무 완료를 분리하고 비동기 오류/관측 불명에도 false success 또는 replay 없음.",
+      "kind": "feasibility",
+      "evidence_status": "pending_current_candidate",
+      "final_checks": []
+    },
+    {
+      "id": "G3-TUI-CONTENTION",
+      "owner_ticket": "CW-04",
+      "acceptance_ids": [
+        "C-AC-02",
+        "C-AC-27"
+      ],
+      "requires_tickets": [
+        "CW-01",
+        "CW-04"
+      ],
+      "required_evidence_level": "runtime",
+      "check": "실제 TUI non-empty composer/focus·busy·native approval 진입/유지/해제 동안 자동 요청 보류와 사용자 대화 보존, 안전해진 뒤 유효한 요청 처리. RPC editorEmpty나 200ms 관측만으로 모든 전이를 통과시키지 않음.",
+      "kind": "feasibility",
+      "evidence_status": "pending_current_candidate",
+      "final_checks": []
+    },
+    {
+      "id": "G3-SESSION",
+      "owner_ticket": "CW-04",
+      "acceptance_ids": [
+        "C-AC-02",
+        "C-AC-16"
+      ],
+      "requires_tickets": [
+        "CW-01",
+        "CW-04"
+      ],
+      "required_evidence_level": "runtime",
+      "check": "실제 TUI session switch 때 session/generation/connection을 바꾸고 이전 미전송/불명 요청이 새 session으로 유입되지 않음. process restart 영속 대조는 L-15와 I-FAULT.",
+      "kind": "feasibility",
+      "evidence_status": "pending_current_candidate",
+      "final_checks": []
+    },
+    {
+      "id": "G3-RECONNECT",
+      "owner_ticket": "CW-04",
+      "acceptance_ids": [
+        "C-AC-02",
+        "C-AC-16"
+      ],
+      "requires_tickets": [
+        "CW-01",
+        "CW-04"
+      ],
+      "required_evidence_level": "runtime",
+      "check": "같은 살아 있는 OMP process/socket 재접속과 ACK 유실·지연 중복 전송을 구분하고 같은 message ID의 처리 증가가 없음. 단순 경과시간 대신 상태 수명 경계 검증.",
+      "kind": "feasibility",
+      "evidence_status": "pending_current_candidate",
+      "final_checks": []
+    },
+    {
+      "id": "G3-PAUSE",
+      "owner_ticket": "CW-04",
+      "acceptance_ids": [
+        "C-AC-25",
+        "C-AC-30",
+        "C-AC-33"
+      ],
+      "requires_tickets": [
+        "CW-01",
+        "CW-04"
+      ],
+      "required_evidence_level": "runtime",
+      "check": "실제 OMP TUI manager turn 중 ctx.abort 요청/turn 종료 event/unknown tool outcome 구분. Harness가 새 manager/worker 자동 전달을 막고 실제 파일/tool/process/task/승인 대조 후 명시적 resume만 전송, 대기 요청 replay 없음. A 완료 대기/B 별도 차단은 제외.",
+      "kind": "feasibility",
+      "evidence_status": "pending_current_candidate",
+      "final_checks": []
+    },
+    {
+      "id": "G3-EXTENSION",
+      "owner_ticket": "CW-04",
+      "acceptance_ids": [
+        "C-AC-14"
+      ],
+      "requires_tickets": [
+        "CW-01",
+        "CW-04"
+      ],
+      "required_evidence_level": "runtime",
+      "check": "공개 extension 두 process role/session 바인딩과 연결/extension 예외에서 원본 TUI 조작 가능 또는 상태 unknown·전달 보류; process-global hub를 cross-process 근거로 사용하지 않음.",
+      "kind": "feasibility",
+      "evidence_status": "pending_current_candidate",
+      "final_checks": []
+    },
+    {
+      "id": "G4-LIFETIME",
+      "owner_ticket": "CW-05",
+      "acceptance_ids": [
+        "C-AC-15",
+        "C-AC-18"
+      ],
+      "requires_tickets": [
+        "CW-02",
+        "CW-03",
+        "CW-04",
+        "CW-05"
+      ],
+      "required_evidence_level": "runtime",
+      "check": "최소 backend가 세 PTY를 소유하여 frontend detach/재attach 때 같은 OMP/shell/run PID·control mode·user owner 보존, 중복 실행 없음. CW-15 durable 장애 복구는 요구하지 않음.",
+      "kind": "feasibility",
+      "evidence_status": "pending_current_candidate",
+      "final_checks": []
+    },
+    {
+      "id": "G4-WAKE",
+      "owner_ticket": "CW-05",
+      "acceptance_ids": [
+        "C-AC-12",
+        "C-AC-15",
+        "C-AC-30"
+      ],
+      "requires_tickets": [
+        "CW-03",
+        "CW-04",
+        "CW-05"
+      ],
+      "required_evidence_level": "runtime",
+      "check": "최소 timer·승인 fixture로 detach 뒤 실제 60초 tick이 worker OMP에서 처리됨을 관측. pause port가 닫힌 대조에서는 모델 호출 없이 host 실험/관측 유지. production 병합·usage·사용자 조작은 CW-11/12/15.",
+      "kind": "feasibility",
+      "evidence_status": "pending_current_candidate",
+      "final_checks": []
+    },
+    {
+      "id": "G4-STORE-PORT",
+      "owner_ticket": "CW-05",
+      "acceptance_ids": [
+        "C-AC-28",
+        "C-AC-29"
+      ],
+      "requires_tickets": [
+        "CW-01",
+        "CW-05"
+      ],
+      "required_evidence_level": "fixture",
+      "check": "최소 metadata port의 durable write 성공/실패가 dispatch 허용/보류로 연결되며 실패가 기존 run을 종료하지 않음. 실제 schema는 CW-09.",
+      "kind": "feasibility",
+      "evidence_status": "pending_current_candidate",
+      "final_checks": []
+    },
+    {
+      "id": "G4-CONTRACT",
+      "owner_ticket": "CW-05",
+      "acceptance_ids": [
+        "C-AC-08",
+        "C-AC-25",
+        "C-AC-26",
+        "C-AC-33"
+      ],
+      "requires_tickets": [
+        "CW-01",
+        "CW-02",
+        "CW-03",
+        "CW-04",
+        "CW-05"
+      ],
+      "required_evidence_level": "fixture",
+      "check": "G1..G3가 입증한 ShellControl/Takeover/DeliveryObservation/AutomationState/ResumeEvidence port를 확장하고 v1 호환·old version 거절/adapter를 교차 언어에서 검증. 선택 runtime/dependency source/license/설치 명령 고정.",
+      "kind": "feasibility",
+      "evidence_status": "pending_current_candidate",
+      "final_checks": []
+    },
+    {
+      "id": "G4-EVIDENCE",
+      "owner_ticket": "CW-05",
+      "acceptance_ids": [],
+      "requires_tickets": [
+        "CW-01",
+        "CW-02",
+        "CW-03",
+        "CW-04",
+        "CW-05"
+      ],
+      "required_evidence_level": "fixture",
+      "check": "집계 validator가 PLAN 소유 required item 누락·변경된 입력/승인 hash·낮은 evidence level·실패·필수 unknown을 passed로 거절하고 유효한 집합만 수락. 빈 schema/flag를 pass로 처리하지 않음.",
+      "kind": "feasibility",
+      "evidence_status": "pending_current_candidate",
+      "final_checks": []
+    },
+    {
+      "id": "P-C-AC-01",
+      "owner_ticket": "CW-06",
+      "acceptance_ids": [
+        "C-AC-01"
+      ],
+      "requires_tickets": [
+        "CW-05",
+        "CW-06"
+      ],
+      "required_evidence_level": "runtime",
+      "check": "원본 manager OMP pane에서 목표·코드 대화",
+      "kind": "product_behavior",
+      "evidence_status": "pending_current_candidate",
+      "final_checks": [
+        "I-FLOW"
+      ]
+    },
+    {
+      "id": "P-C-AC-02",
+      "owner_ticket": "CW-08",
+      "acceptance_ids": [
+        "C-AC-02"
+      ],
+      "requires_tickets": [
+        "CW-05",
+        "CW-09",
+        "CW-08"
+      ],
+      "required_evidence_level": "runtime",
+      "check": "Task 연계 task/question/answer/report 왕복과 동일 메시지 중복 방지",
+      "kind": "product_behavior",
+      "evidence_status": "pending_current_candidate",
+      "final_checks": [
+        "I-FLOW"
+      ]
+    },
+    {
+      "id": "P-C-AC-03",
+      "owner_ticket": "CW-10",
+      "acceptance_ids": [
+        "C-AC-03"
+      ],
+      "requires_tickets": [
+        "CW-07",
+        "CW-08",
+        "CW-09",
+        "CW-10"
+      ],
+      "required_evidence_level": "runtime",
+      "check": "실제 host shell 실행·출력과 worker 실행 의뢰, 종료/unknown 및 확인 가능한 exit status·로그/결과 위치 기록",
+      "kind": "product_behavior",
+      "evidence_status": "pending_current_candidate",
+      "final_checks": [
+        "I-FLOW",
+        "I-SHELL"
+      ]
+    },
+    {
+      "id": "P-C-AC-04",
+      "owner_ticket": "CW-13",
+      "acceptance_ids": [
+        "C-AC-04"
+      ],
+      "requires_tickets": [
+        "CW-10",
+        "CW-11",
+        "CW-12",
+        "CW-13"
+      ],
+      "required_evidence_level": "fixture",
+      "check": "worker의 출처·내용·미확인 기반 1차 판단을 승인 완료 조건에 대조한 manager 2차 확인·추가 조사·보고",
+      "kind": "product_behavior",
+      "evidence_status": "pending_current_candidate",
+      "final_checks": [
+        "I-FLOW"
+      ]
+    },
+    {
+      "id": "P-C-AC-05",
+      "owner_ticket": "CW-10",
+      "acceptance_ids": [
+        "C-AC-05"
+      ],
+      "requires_tickets": [
+        "CW-07",
+        "CW-08",
+        "CW-09",
+        "CW-10"
+      ],
+      "required_evidence_level": "runtime",
+      "check": "manager 준비·worker 실행/관측과 종료 후 출처·내용·미확인 기반 성공/실패/판단 보류 1차 판단 보고, 수정 필요 보고 시 지시 종료·새 지시 전 자동 반환 금지; 정상 exit+성공 로그, 오류 exit+실패 로그, exit 0 기준 실패, 로그 부족 보류, 종료 unknown 포함",
+      "kind": "product_behavior",
+      "evidence_status": "pending_current_candidate",
+      "final_checks": [
+        "I-FLOW"
+      ]
+    },
+    {
+      "id": "P-C-AC-06",
+      "owner_ticket": "CW-06",
+      "acceptance_ids": [
+        "C-AC-06"
+      ],
+      "requires_tickets": [
+        "CW-05",
+        "CW-06"
+      ],
+      "required_evidence_level": "runtime",
+      "check": "세 영역, focus와 입력 owner 별도 표시",
+      "kind": "product_behavior",
+      "evidence_status": "pending_current_candidate",
+      "final_checks": [
+        "I-COMPAT"
+      ]
+    },
+    {
+      "id": "P-C-AC-07",
+      "owner_ticket": "CW-13",
+      "acceptance_ids": [
+        "C-AC-07"
+      ],
+      "requires_tickets": [
+        "CW-10",
+        "CW-11",
+        "CW-12",
+        "CW-13"
+      ],
+      "required_evidence_level": "fixture",
+      "check": "실제 종료 뒤 승인 범위 내 수정·새 worker 지시·재실행, 실패 복구 3회·설정 변경 뒤 사용 횟수 유지·해결 불가/한도 후 자동 중단·근거 보고·시간 상한 없음",
+      "kind": "product_behavior",
+      "evidence_status": "pending_current_candidate",
+      "final_checks": [
+        "I-POLICY"
+      ]
+    },
+    {
+      "id": "P-C-AC-08",
+      "owner_ticket": "CW-07",
+      "acceptance_ids": [
+        "C-AC-08"
+      ],
+      "requires_tickets": [
+        "CW-05",
+        "CW-07"
+      ],
+      "required_evidence_level": "runtime",
+      "check": "Shell adapter 인수 요청 즉시 새 전송 보류, 요청/확인 분리, 이미 전송된 명령 상태·foreground 수동 입력, 같은 interpreter wb-handoff/control 대기와 no replay",
+      "kind": "product_behavior",
+      "evidence_status": "pending_current_candidate",
+      "final_checks": [
+        "I-SHELL"
+      ]
+    },
+    {
+      "id": "P-C-AC-09",
+      "owner_ticket": "CW-10",
+      "acceptance_ids": [
+        "C-AC-09"
+      ],
+      "requires_tickets": [
+        "CW-07",
+        "CW-08",
+        "CW-09",
+        "CW-10"
+      ],
+      "required_evidence_level": "runtime",
+      "check": "commit 기준 실행용 worktree 가이드·준비 실패 처리",
+      "kind": "product_behavior",
+      "evidence_status": "pending_current_candidate",
+      "final_checks": [
+        "I-FLOW"
+      ]
+    },
+    {
+      "id": "P-C-AC-10",
+      "owner_ticket": "CW-13",
+      "acceptance_ids": [
+        "C-AC-10"
+      ],
+      "requires_tickets": [
+        "CW-10",
+        "CW-11",
+        "CW-12",
+        "CW-13"
+      ],
+      "required_evidence_level": "fixture",
+      "check": "실행 종료 확인 뒤 소스·설정 수정",
+      "kind": "product_behavior",
+      "evidence_status": "pending_current_candidate",
+      "final_checks": [
+        "I-POLICY"
+      ]
+    },
+    {
+      "id": "P-C-AC-11",
+      "owner_ticket": "CW-10",
+      "acceptance_ids": [
+        "C-AC-11"
+      ],
+      "requires_tickets": [
+        "CW-07",
+        "CW-08",
+        "CW-09",
+        "CW-10"
+      ],
+      "required_evidence_level": "runtime",
+      "check": "위임 변경만 local commit·push/merge 분리",
+      "kind": "product_behavior",
+      "evidence_status": "pending_current_candidate",
+      "final_checks": [
+        "I-FLOW"
+      ]
+    },
+    {
+      "id": "P-C-AC-12",
+      "owner_ticket": "CW-11",
+      "acceptance_ids": [
+        "C-AC-12"
+      ],
+      "requires_tickets": [
+        "CW-10",
+        "CW-11"
+      ],
+      "required_evidence_level": "runtime",
+      "check": "자동화 활성 중 60초 모델 점검·일시정지 중 모델 점검 중단·무출력 조사",
+      "kind": "product_behavior",
+      "evidence_status": "pending_current_candidate",
+      "final_checks": [
+        "I-POLICY"
+      ]
+    },
+    {
+      "id": "P-C-AC-13",
+      "owner_ticket": "CW-13",
+      "acceptance_ids": [
+        "C-AC-13"
+      ],
+      "requires_tickets": [
+        "CW-10",
+        "CW-11",
+        "CW-12",
+        "CW-13"
+      ],
+      "required_evidence_level": "fixture",
+      "check": "manager의 worker 근거·승인 범위·재시도 대조와 추가 조사/해결 불가 보고 판단",
+      "kind": "product_behavior",
+      "evidence_status": "pending_current_candidate",
+      "final_checks": [
+        "I-POLICY"
+      ]
+    },
+    {
+      "id": "P-C-AC-14",
+      "owner_ticket": "CW-06",
+      "acceptance_ids": [
+        "C-AC-14"
+      ],
+      "requires_tickets": [
+        "CW-05",
+        "CW-06"
+      ],
+      "required_evidence_level": "runtime",
+      "check": "두 원본 OMP TUI·명령 유지",
+      "kind": "product_behavior",
+      "evidence_status": "pending_current_candidate",
+      "final_checks": [
+        "I-COMPAT"
+      ]
+    },
+    {
+      "id": "P-C-AC-15",
+      "owner_ticket": "CW-15",
+      "acceptance_ids": [
+        "C-AC-15"
+      ],
+      "requires_tickets": [
+        "CW-06",
+        "CW-08",
+        "CW-11",
+        "CW-12",
+        "CW-13",
+        "CW-14",
+        "CW-15"
+      ],
+      "required_evidence_level": "runtime",
+      "check": "detach 중 두 OMP·실험 지속, 활성 때만 점검·일시정지 보존과 재접속",
+      "kind": "product_behavior",
+      "evidence_status": "pending_current_candidate",
+      "final_checks": [
+        "I-FAULT"
+      ]
+    },
+    {
+      "id": "P-C-AC-16",
+      "owner_ticket": "CW-15",
+      "acceptance_ids": [
+        "C-AC-16"
+      ],
+      "requires_tickets": [
+        "CW-06",
+        "CW-08",
+        "CW-11",
+        "CW-12",
+        "CW-13",
+        "CW-14",
+        "CW-15"
+      ],
+      "required_evidence_level": "runtime",
+      "check": "재시작 뒤 기록/실제 프로세스 대조·불명 자동 replay 금지",
+      "kind": "product_behavior",
+      "evidence_status": "pending_current_candidate",
+      "final_checks": [
+        "I-FAULT"
+      ]
+    },
+    {
+      "id": "P-C-AC-17",
+      "owner_ticket": "CW-15",
+      "acceptance_ids": [
+        "C-AC-17"
+      ],
+      "requires_tickets": [
+        "CW-06",
+        "CW-08",
+        "CW-11",
+        "CW-12",
+        "CW-13",
+        "CW-14",
+        "CW-15"
+      ],
+      "required_evidence_level": "runtime",
+      "check": "모델 오류 중 실행·관측 유지와 재확인",
+      "kind": "product_behavior",
+      "evidence_status": "pending_current_candidate",
+      "final_checks": [
+        "I-FAULT"
+      ]
+    },
+    {
+      "id": "P-C-AC-18",
+      "owner_ticket": "CW-15",
+      "acceptance_ids": [
+        "C-AC-18"
+      ],
+      "requires_tickets": [
+        "CW-06",
+        "CW-08",
+        "CW-11",
+        "CW-12",
+        "CW-13",
+        "CW-14",
+        "CW-15"
+      ],
+      "required_evidence_level": "runtime",
+      "check": "인수 요청/확인·user owner·전달된 명령 상태를 detach/재접속 뒤 보존하고 명시적 handoff 전 자동 전송 없음",
+      "kind": "product_behavior",
+      "evidence_status": "pending_current_candidate",
+      "final_checks": [
+        "I-FAULT"
+      ]
+    },
+    {
+      "id": "P-C-AC-19",
+      "owner_ticket": "CW-16",
+      "acceptance_ids": [
+        "C-AC-19"
+      ],
+      "requires_tickets": [
+        "CW-15",
+        "CW-16"
+      ],
+      "required_evidence_level": "runtime",
+      "check": "일반 terminal/tmux/herdr 조작·재접속 matrix",
+      "kind": "product_behavior",
+      "evidence_status": "pending_current_candidate",
+      "final_checks": [
+        "I-COMPAT"
+      ]
+    },
+    {
+      "id": "P-C-AC-20",
+      "owner_ticket": "CW-16",
+      "acceptance_ids": [
+        "C-AC-20"
+      ],
+      "requires_tickets": [
+        "CW-15",
+        "CW-16"
+      ],
+      "required_evidence_level": "runtime",
+      "check": "Linux 텍스트·Bash 우선·sh fallback 실제 matrix",
+      "kind": "product_behavior",
+      "evidence_status": "pending_current_candidate",
+      "final_checks": [
+        "I-COMPAT",
+        "I-SHELL"
+      ]
+    },
+    {
+      "id": "P-C-AC-21",
+      "owner_ticket": "CW-11",
+      "acceptance_ids": [
+        "C-AC-21"
+      ],
+      "requires_tickets": [
+        "CW-10",
+        "CW-11"
+      ],
+      "required_evidence_level": "runtime",
+      "check": "활성 중 121번째 점검·13번째 peer wake·usage 표시",
+      "kind": "product_behavior",
+      "evidence_status": "pending_current_candidate",
+      "final_checks": [
+        "I-POLICY"
+      ]
+    },
+    {
+      "id": "P-C-AC-22",
+      "owner_ticket": "CW-15",
+      "acceptance_ids": [
+        "C-AC-22"
+      ],
+      "requires_tickets": [
+        "CW-06",
+        "CW-08",
+        "CW-11",
+        "CW-12",
+        "CW-13",
+        "CW-14",
+        "CW-15"
+      ],
+      "required_evidence_level": "runtime",
+      "check": "전체 종료 확인·중단/정리·미종료 표시",
+      "kind": "product_behavior",
+      "evidence_status": "pending_current_candidate",
+      "final_checks": [
+        "I-FAULT"
+      ]
+    },
+    {
+      "id": "P-C-AC-23",
+      "owner_ticket": "CW-15",
+      "acceptance_ids": [
+        "C-AC-23"
+      ],
+      "requires_tickets": [
+        "CW-06",
+        "CW-08",
+        "CW-11",
+        "CW-12",
+        "CW-13",
+        "CW-14",
+        "CW-15"
+      ],
+      "required_evidence_level": "runtime",
+      "check": "재부팅 뒤 확인 전 새 실험 금지",
+      "kind": "product_behavior",
+      "evidence_status": "pending_current_candidate",
+      "final_checks": [
+        "I-FAULT"
+      ]
+    },
+    {
+      "id": "P-C-AC-24",
+      "owner_ticket": "CW-14",
+      "acceptance_ids": [
+        "C-AC-24"
+      ],
+      "requires_tickets": [
+        "CW-07",
+        "CW-09",
+        "CW-14"
+      ],
+      "required_evidence_level": "fixture",
+      "check": "명세/요약/worktree 보존·64/512 MiB raw log cap",
+      "kind": "product_behavior",
+      "evidence_status": "pending_current_candidate",
+      "final_checks": [
+        "I-FAULT"
+      ]
+    },
+    {
+      "id": "P-C-AC-25",
+      "owner_ticket": "CW-12",
+      "acceptance_ids": [
+        "C-AC-25"
+      ],
+      "requires_tickets": [
+        "CW-06",
+        "CW-09",
+        "CW-11",
+        "CW-12"
+      ],
+      "required_evidence_level": "runtime",
+      "check": "승인 범위·Task/revision/run·취소와 중단 요청/확인/불명 결과 연결",
+      "kind": "product_behavior",
+      "evidence_status": "pending_current_candidate",
+      "final_checks": [
+        "I-POLICY"
+      ]
+    },
+    {
+      "id": "P-C-AC-26",
+      "owner_ticket": "CW-07",
+      "acceptance_ids": [
+        "C-AC-26"
+      ],
+      "requires_tickets": [
+        "CW-05",
+        "CW-07"
+      ],
+      "required_evidence_level": "runtime",
+      "check": "관리된 같은 shell의 cwd/환경 보존·미제출 입력/REPL/job/비호환 hook·trap/unknown 보류와 명시적 lifecycle",
+      "kind": "product_behavior",
+      "evidence_status": "pending_current_candidate",
+      "final_checks": [
+        "I-SHELL"
+      ]
+    },
+    {
+      "id": "P-C-AC-27",
+      "owner_ticket": "CW-11",
+      "acceptance_ids": [
+        "C-AC-27"
+      ],
+      "requires_tickets": [
+        "CW-10",
+        "CW-11"
+      ],
+      "required_evidence_level": "runtime",
+      "check": "활성 중 busy 점검 최신 한 건·지연, 일시정지 중 자동 점검 보류·즉시 종료 표시",
+      "kind": "product_behavior",
+      "evidence_status": "pending_current_candidate",
+      "final_checks": [
+        "I-POLICY"
+      ]
+    },
+    {
+      "id": "P-C-AC-28",
+      "owner_ticket": "CW-14",
+      "acceptance_ids": [
+        "C-AC-28"
+      ],
+      "requires_tickets": [
+        "CW-07",
+        "CW-09",
+        "CW-14"
+      ],
+      "required_evidence_level": "fixture",
+      "check": "metadata 장애 차단과 raw log 장애 관측",
+      "kind": "product_behavior",
+      "evidence_status": "pending_current_candidate",
+      "final_checks": [
+        "I-FAULT"
+      ]
+    },
+    {
+      "id": "P-C-AC-29",
+      "owner_ticket": "CW-09",
+      "acceptance_ids": [
+        "C-AC-29"
+      ],
+      "requires_tickets": [
+        "CW-05",
+        "CW-09"
+      ],
+      "required_evidence_level": "fixture",
+      "check": "범위 승인+진행 지시로 자동화 시작",
+      "kind": "product_behavior",
+      "evidence_status": "pending_current_candidate",
+      "final_checks": [
+        "I-POLICY"
+      ]
+    },
+    {
+      "id": "P-C-AC-30",
+      "owner_ticket": "CW-12",
+      "acceptance_ids": [
+        "C-AC-30"
+      ],
+      "requires_tickets": [
+        "CW-06",
+        "CW-09",
+        "CW-11",
+        "CW-12"
+      ],
+      "required_evidence_level": "runtime",
+      "check": "일시정지 중 새 자동 모델 작업 보류·로그/프로세스 수집과 기존 실험 유지·수동 조작 독립",
+      "kind": "product_behavior",
+      "evidence_status": "pending_current_candidate",
+      "final_checks": [
+        "I-POLICY"
+      ]
+    },
+    {
+      "id": "P-C-AC-31",
+      "owner_ticket": "CW-13",
+      "acceptance_ids": [
+        "C-AC-31"
+      ],
+      "requires_tickets": [
+        "CW-10",
+        "CW-11",
+        "CW-12",
+        "CW-13"
+      ],
+      "required_evidence_level": "fixture",
+      "check": "새 revision은 다음 run에 적용하고 현재 실행 적용 지시는 종료 확인 뒤 재실행하며 즉시 제한은 우선",
+      "kind": "product_behavior",
+      "evidence_status": "pending_current_candidate",
+      "final_checks": [
+        "I-POLICY"
+      ]
+    },
+    {
+      "id": "P-C-AC-32",
+      "owner_ticket": "CW-07",
+      "acceptance_ids": [
+        "C-AC-32"
+      ],
+      "requires_tickets": [
+        "CW-05",
+        "CW-07"
+      ],
+      "required_evidence_level": "runtime",
+      "check": "검증한 conda와 venv 전환을 같은 shell에서 재사용·app 환경 분리; 환경 hook 비호환이면 이유와 보류",
+      "kind": "product_behavior",
+      "evidence_status": "pending_current_candidate",
+      "final_checks": [
+        "I-SHELL"
+      ]
+    },
+    {
+      "id": "P-C-AC-33",
+      "owner_ticket": "CW-12",
+      "acceptance_ids": [
+        "C-AC-33"
+      ],
+      "requires_tickets": [
+        "CW-06",
+        "CW-09",
+        "CW-11",
+        "CW-12"
+      ],
+      "required_evidence_level": "runtime",
+      "check": "manager turn 중단 요청/확인·불명 도구 결과 표시·명시적 재개 대조와 replay 금지",
+      "kind": "product_behavior",
+      "evidence_status": "pending_current_candidate",
+      "final_checks": [
+        "I-POLICY"
+      ]
+    },
+    {
+      "id": "P-C-AC-34",
+      "owner_ticket": "CW-13",
+      "acceptance_ids": [
+        "C-AC-34"
+      ],
+      "requires_tickets": [
+        "CW-10",
+        "CW-11",
+        "CW-12",
+        "CW-13"
+      ],
+      "required_evidence_level": "fixture",
+      "check": "허용된 확인 대상만 강제 종료·실제 종료 검증",
+      "kind": "product_behavior",
+      "evidence_status": "pending_current_candidate",
+      "final_checks": [
+        "I-POLICY"
+      ]
+    },
+    {
+      "id": "I-FLOW",
+      "owner_ticket": "CW-16",
+      "acceptance_ids": [
+        "C-AC-01",
+        "C-AC-02",
+        "C-AC-03",
+        "C-AC-04",
+        "C-AC-05",
+        "C-AC-09",
+        "C-AC-11"
+      ],
+      "requires_tickets": [
+        "CW-15",
+        "CW-16"
+      ],
+      "required_evidence_level": "runtime",
+      "check": "실제 manager·worker OMP에서 승인 목표→Task/revision→worktree/host run→관리 대상 종료/unknown과 exit status·로그/결과 위치→worker 출처·내용·미확인 기반 성공/실패/판단 보류 1차 판단→manager 승인 조건 기반 2차 확인·추가 조사·복구/보고를 확인한다. Worker 직접 요청은 기존 범위, 새 작은 명세, 범위 확대의 세 경계를 확인한다. Worker가 수정 필요성을 근거와 함께 보고하면 지시가 끝나며 새 manager 지시 전 자동 반환하지 않는다.",
+      "kind": "final_integration",
+      "evidence_status": "pending_current_candidate",
+      "final_checks": [
+        "I-FLOW"
+      ]
+    },
+    {
+      "id": "I-SHELL",
+      "owner_ticket": "CW-16",
+      "acceptance_ids": [
+        "C-AC-03",
+        "C-AC-08",
+        "C-AC-20",
+        "C-AC-26",
+        "C-AC-32"
+      ],
+      "requires_tickets": [
+        "CW-15",
+        "CW-16"
+      ],
+      "required_evidence_level": "runtime",
+      "check": "Bash 5.x와 실제 sh에서 같은 PID/cwd/export/검증한 conda·venv, control 대기/수동 prompt 전환, 새 전송 보류·전달된 명령의 불명·현재 foreground 수동 입력·no replay를 최종 backend/UI와 확인한다. Shell 평가 반환과 관리 대상 local process의 종료/unknown을 분리하고 실패 exit도 확인된 종료로 기록하며, 실험 성공 판단은 G2에서 하지 않는다.",
+      "kind": "final_integration",
+      "evidence_status": "pending_current_candidate",
+      "final_checks": [
+        "I-SHELL"
+      ]
+    },
+    {
+      "id": "I-POLICY",
+      "owner_ticket": "CW-16",
+      "acceptance_ids": [
+        "C-AC-07",
+        "C-AC-10",
+        "C-AC-12",
+        "C-AC-13",
+        "C-AC-21",
+        "C-AC-25",
+        "C-AC-27",
+        "C-AC-29",
+        "C-AC-30",
+        "C-AC-31",
+        "C-AC-33",
+        "C-AC-34"
+      ],
+      "requires_tickets": [
+        "CW-15",
+        "CW-16"
+      ],
+      "required_evidence_level": "runtime",
+      "check": "승인·revision·세션 설정 변경 뒤 현재 run/재시도 유지·활성 중 60초 점검/병합·usage·manager OMP turn 중단 요청/확인·불명 결과 표시·일시정지 중 자동 모델 작업 보류·명시적 재개 상태/승인 대조와 replay 금지·실제 종료 뒤 승인 범위 내 수정/새 worker 지시/재실행·해결 불가 또는 재시도 한도 후 자동 중단과 근거 보고·강제 종료 경계를 확인한다.",
+      "kind": "final_integration",
+      "evidence_status": "pending_current_candidate",
+      "final_checks": [
+        "I-POLICY"
+      ]
+    },
+    {
+      "id": "I-FAULT",
+      "owner_ticket": "CW-16",
+      "acceptance_ids": [
+        "C-AC-15",
+        "C-AC-16",
+        "C-AC-17",
+        "C-AC-18",
+        "C-AC-22",
+        "C-AC-23",
+        "C-AC-24",
+        "C-AC-28"
+      ],
+      "requires_tickets": [
+        "CW-15",
+        "CW-16"
+      ],
+      "required_evidence_level": "runtime",
+      "check": "Detach, agent/backend/reboot 대조, 모델 장애, metadata/raw log 장애와 보존을 확인한다. C-D52 takeover 상태와 old delivery attempt의 보존/대조, process restart의 durable unknown/no replay도 포함한다.",
+      "kind": "final_integration",
+      "evidence_status": "pending_current_candidate",
+      "final_checks": [
+        "I-FAULT"
+      ]
+    },
+    {
+      "id": "I-COMPAT",
+      "owner_ticket": "CW-16",
+      "acceptance_ids": [
+        "C-AC-06",
+        "C-AC-14",
+        "C-AC-19",
+        "C-AC-20"
+      ],
+      "requires_tickets": [
+        "CW-15",
+        "CW-16"
+      ],
+      "required_evidence_level": "runtime",
+      "check": "일반 terminal·외부 tmux·herdr의 원본 TUI 텍스트 조작과 선택한 Bash/sh 조합을 버전별로 확인한다.",
+      "kind": "final_integration",
+      "evidence_status": "pending_current_candidate",
+      "final_checks": [
+        "I-COMPAT"
+      ]
+    }
+  ],
+  "gate_evidence_contract": {
+    "items_source": "PLAN.gate_items",
+    "required_result_fields": [
+      "item_id",
+      "candidate_id",
+      "input_manifest",
+      "approved_requirements_digest",
+      "required_evidence_level",
+      "observed_evidence_level",
+      "command",
+      "cwd",
+      "environment",
+      "exit_code",
+      "result",
+      "evidence_ref",
+      "unknowns"
+    ],
+    "missing_runner_now": "tests/gates/harness에는 schema와 contract tests만 있고 required item/stale evidence를 집계하는 runner는 없다. 초기 결과는 Root 수동 대조로 한정한다.",
+    "runner_owner": "CW-05",
+    "release_boundary": "CW-02..04는 자신의 item과 독립 검증을 충족한 candidate를 제공. CW-05가 current integrated inputs로 선행 근거를 재대조하고 G4-EVIDENCE를 통과해야 production frontier를 연다.",
+    "reuse": "과거 source digest를 새 digest로 덮어 pass를 재발급하지 않는다. 동일 행동/동일 입력에 대한 영향 대조 기록을 붙이거나 영향받은 항목을 재실행한다.",
+    "classification": "static/fixture/skill_behavior/runtime은 같은 의미가 아니다. actual OMP + scripted provider는 runtime이지만 real provider 품질/인증 검증은 아니다.",
+    "evaluation_scope": "Validator는 선택 gate/owner ticket 집합의 required item을 PLAN에서 산출한다. CW-05 production 개방은 M0와 G1..G4 집합, CW-16 완료는 전체 집합이다. 후속 미구현 product item을 초기 gate에 요구하지 않는다."
+  },
+  "budget_policy": {
+    "explicit_user_limits": [
+      {
+        "scope": "core-workbench implementation across resumed runs",
+        "value": 128,
+        "unit": "started_child_invocations",
+        "request_reference": "../../../.workflow/core-workbench/runs/implement-p2-20260923/ledger.json#/budget/budget_changes/1",
+        "user_quote": "128회로 확대 (권장)",
+        "observed_used": 98,
+        "current_reserved": 0,
+        "remaining": 30,
+        "resumption_requirement": "Host started turn 이력과 ledger를 배정 전 대조. Run 이름 변경으로 누적 사용량을 초기화하지 않음."
+      }
+    ],
+    "operating_estimates": {
+      "origin": "Root planning estimate; ticket별 1 worker+독립 test+review, 재사용·coherent unit 재편은 근거를 남기고 조정 가능",
+      "remaining_workers": 14,
+      "remaining_test_designers": 15,
+      "remaining_reviewers": 15,
+      "base_calls": 44,
+      "correction_reserve": 6,
+      "additional_estimate": 50,
+      "cumulative_estimate": 148,
+      "gap_to_current_cap": 20,
+      "allocation_before_dispatch": "현재 cap 안에서 판별 실험과 그 독립 검증을 유한 batch로 예약한다. 이 추정 자체는 사용자 cap 증액 요청/승인이 아니며 full completion을 30회로 약속하지 않는다."
+    },
+    "initial_batch_estimate": {
+      "unit": "G2 decisive probe and verification",
+      "worker": 1,
+      "test_designer": 1,
+      "reviewer": 1,
+      "correction_reserve": 2,
+      "total": 5,
+      "notes": "review는 필수 실패가 해결된 안정 후보에서만. 실패 시 남은 reservation을 미사용으로 유지하고 재평가."
+    },
+    "oracle": {
+      "used_recorded": 5,
+      "previous_internal_limit": 5,
+      "new_consultation_planned": false,
+      "policy": "추가 필요 시 workflow-contract §8의 내부 재배정과 구체 새 evidence를 기록한다. 총 user cap에 포함한다."
+    },
+    "planning_child_calls": 0,
+    "note": "개발 호출 한도와 제품의 periodic review/peer wake 무제한 정책은 별개다. 새 run으로 user cap 우회 금지."
+  },
+  "verification_units": [
+    {
+      "id": "V-CW-02",
+      "tickets": [
+        "CW-02"
+      ],
+      "independent_roles": [
+        "test_designer",
+        "reviewer"
+      ],
+      "dependency_release": "해당 ticket required_gate_items와 frozen 후보의 독립 검증 후 Root 통합",
+      "budget_kind": "operating_estimate",
+      "calls": 3
+    },
+    {
+      "id": "V-CW-03",
+      "tickets": [
+        "CW-03"
+      ],
+      "independent_roles": [
+        "test_designer",
+        "reviewer"
+      ],
+      "dependency_release": "해당 ticket required_gate_items와 frozen 후보의 독립 검증 후 Root 통합",
+      "budget_kind": "operating_estimate",
+      "calls": 3
+    },
+    {
+      "id": "V-CW-04",
+      "tickets": [
+        "CW-04"
+      ],
+      "independent_roles": [
+        "test_designer",
+        "reviewer"
+      ],
+      "dependency_release": "해당 ticket required_gate_items와 frozen 후보의 독립 검증 후 Root 통합",
+      "budget_kind": "operating_estimate",
+      "calls": 3
+    },
+    {
+      "id": "V-CW-05",
+      "tickets": [
+        "CW-05"
+      ],
+      "independent_roles": [
+        "test_designer",
+        "reviewer"
+      ],
+      "dependency_release": "해당 ticket required_gate_items와 frozen 후보의 독립 검증 후 Root 통합",
+      "budget_kind": "operating_estimate",
+      "calls": 3
+    },
+    {
+      "id": "V-CW-06",
+      "tickets": [
+        "CW-06"
+      ],
+      "independent_roles": [
+        "test_designer",
+        "reviewer"
+      ],
+      "dependency_release": "해당 ticket required_gate_items와 frozen 후보의 독립 검증 후 Root 통합",
+      "budget_kind": "operating_estimate",
+      "calls": 3
+    },
+    {
+      "id": "V-CW-07",
+      "tickets": [
+        "CW-07"
+      ],
+      "independent_roles": [
+        "test_designer",
+        "reviewer"
+      ],
+      "dependency_release": "해당 ticket required_gate_items와 frozen 후보의 독립 검증 후 Root 통합",
+      "budget_kind": "operating_estimate",
+      "calls": 3
+    },
+    {
+      "id": "V-CW-08",
+      "tickets": [
+        "CW-08"
+      ],
+      "independent_roles": [
+        "test_designer",
+        "reviewer"
+      ],
+      "dependency_release": "해당 ticket required_gate_items와 frozen 후보의 독립 검증 후 Root 통합",
+      "budget_kind": "operating_estimate",
+      "calls": 3
+    },
+    {
+      "id": "V-CW-09",
+      "tickets": [
+        "CW-09"
+      ],
+      "independent_roles": [
+        "test_designer",
+        "reviewer"
+      ],
+      "dependency_release": "해당 ticket required_gate_items와 frozen 후보의 독립 검증 후 Root 통합",
+      "budget_kind": "operating_estimate",
+      "calls": 3
+    },
+    {
+      "id": "V-CW-10",
+      "tickets": [
+        "CW-10"
+      ],
+      "independent_roles": [
+        "test_designer",
+        "reviewer"
+      ],
+      "dependency_release": "해당 ticket required_gate_items와 frozen 후보의 독립 검증 후 Root 통합",
+      "budget_kind": "operating_estimate",
+      "calls": 3
+    },
+    {
+      "id": "V-CW-11",
+      "tickets": [
+        "CW-11"
+      ],
+      "independent_roles": [
+        "test_designer",
+        "reviewer"
+      ],
+      "dependency_release": "해당 ticket required_gate_items와 frozen 후보의 독립 검증 후 Root 통합",
+      "budget_kind": "operating_estimate",
+      "calls": 3
+    },
+    {
+      "id": "V-CW-12",
+      "tickets": [
+        "CW-12"
+      ],
+      "independent_roles": [
+        "test_designer",
+        "reviewer"
+      ],
+      "dependency_release": "해당 ticket required_gate_items와 frozen 후보의 독립 검증 후 Root 통합",
+      "budget_kind": "operating_estimate",
+      "calls": 3
+    },
+    {
+      "id": "V-CW-13",
+      "tickets": [
+        "CW-13"
+      ],
+      "independent_roles": [
+        "test_designer",
+        "reviewer"
+      ],
+      "dependency_release": "해당 ticket required_gate_items와 frozen 후보의 독립 검증 후 Root 통합",
+      "budget_kind": "operating_estimate",
+      "calls": 3
+    },
+    {
+      "id": "V-CW-14",
+      "tickets": [
+        "CW-14"
+      ],
+      "independent_roles": [
+        "test_designer",
+        "reviewer"
+      ],
+      "dependency_release": "해당 ticket required_gate_items와 frozen 후보의 독립 검증 후 Root 통합",
+      "budget_kind": "operating_estimate",
+      "calls": 3
+    },
+    {
+      "id": "V-CW-15",
+      "tickets": [
+        "CW-15"
+      ],
+      "independent_roles": [
+        "test_designer",
+        "reviewer"
+      ],
+      "dependency_release": "해당 ticket required_gate_items와 frozen 후보의 독립 검증 후 Root 통합",
+      "budget_kind": "operating_estimate",
+      "calls": 3
+    },
+    {
+      "id": "V-CW-16",
+      "tickets": [
+        "CW-16"
+      ],
+      "independent_roles": [
+        "test_designer",
+        "reviewer"
+      ],
+      "dependency_release": "해당 ticket required_gate_items와 frozen 후보의 독립 검증 후 Root 통합",
+      "budget_kind": "operating_estimate",
+      "calls": 2
+    }
+  ],
+  "approval": {
+    "status": "approved_for_implementation",
+    "brief_bundle_approved": true,
+    "plan_approved": true,
+    "implementation_authorized": true,
+    "manifest_record": "../../../.workflow/core-workbench/runs/planning-p2.3-20260924/manifest.json",
+    "approval_record": "../../../.workflow/core-workbench/runs/implement-p2.3-20260924/approval.json",
+    "reviewed_bundle_sha256": "c1a84e1a3cb9d37f36e4807986f7adcde22263fd404add236d453ddec4c48740"
+  },
+  "technical_elaborations": [
+    {
+      "decision": "G1 query reply는 정확한 byte/size/FIFO fixture와 원본 OMP 화면/입력 runtime을 함께 확인한다.",
+      "basis": "DIAGNOSIS d2가 private OMP 해석 관측을 사용자 동작·공개 관측에 연결하도록 위임. Private parser 추적 자체를 필수 gate로 추가하지 않는다."
+    },
+    {
+      "decision": "G3 API 반환과 OMP 처리 관측의 상태 의미를 분리한다.",
+      "basis": "고정 18.2.10의 RPC/Interactive 소스와 현재 bridge의 api_accepted ACK를 정적 대조. 실제 TUI 실패 재현은 아직 없음."
+    },
+    {
+      "decision": "CW-12는 CW-06 실제 UI 상태 표시 port도 선행으로 소비한다.",
+      "basis": "C-AC-33 사용자 표시 검증을 owner와 선행 산출물만으로 수행하기 위한 실제 dependency."
+    },
+    {
+      "decision": "CW-05가 공통 evidence 집계 validator를 구현하며 초기 CW-02..04 근거 대조는 수동임을 표시한다.",
+      "basis": "현재 저장소에는 item/candidate/evidence level 집계 runner가 없다. CW-01 완료는 보존하며 production release 전에 이 enforcement gap을 닫는다."
+    }
+  ],
+  "policy_amendment_record": "../../../.workflow/core-workbench/runs/implement-p2.3-20260924/cd53-policy-approval.json"
 }

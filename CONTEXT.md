@@ -14,8 +14,11 @@
 | Hang 의심 | 실행 진행이 정체되었을 가능성이 있어 로그와 프로세스 상태의 추가 조사가 필요한 상태. 단순한 무출력이나 실행 시간 초과를 뜻하지 않는다. |
 | 실행용 worktree | Worker가 기준 commit의 코드를 실행하기 위해 사용하는 별도 Git 작업 디렉터리. |
 | 개발용 worktree | Manager 또는 사용자가 코드를 수정하는 Git 작업 디렉터리. 실행용 worktree와 분리한다. |
-| Terminal 입력 제어권 | Host terminal에 입력할 주체를 구분하는 권한. 사용자가 가져오면 worker의 자동 입력을 멈추며, 실행 중 프로세스를 중단하는 동작과는 구분한다. |
+| Terminal 입력 제어권 | Host terminal에 입력할 주체를 구분하는 권한. 사용자 인수 요청 즉시 새 자동 전송을 막는다. 이미 전달된 명령의 실행 상태와 실제 인수 확인은 별도로 다루며, 인수만으로 실행 중 프로세스를 종료하지 않는다. |
+| Terminal 인수 확인 | 인수 요청 뒤 현재 입력 대상과 제어 상태를 확인한 사실. 이미 전달된 명령의 취소·종료를 뜻하지 않는다. 수동 입력은 확인된 현재 대상에 전달한다. |
 | Host persistent terminal | Workbench가 실행되는 host의 shell 환경과 상태를 유지하며 명령을 실행하고 출력을 보여주는 terminal. 사용자·agent의 입력 권한과 앱 종료 후 생존 여부는 별도 동작 정책이다. |
+| 관리된 shell | cwd·export·검증된 conda/venv 전환을 지원하며, 비호환 hook·trap 변경이나 상태 불명에서는 자동 복귀를 보류하는 Workbench 전용 shell. 같은 사용자 권한 코드의 고의적 내부 변조·event 위조를 방어하는 보안 경계는 아니다. |
+| 자동 제어 대기 | 사용자가 같은 shell에서 `wb-handoff`를 실행하고 상태 확인을 거친 뒤, 그 interpreter가 prompt로 돌아가지 않고 전용 control 경로로 자동 명령을 기다리는 상태. 같은 shell의 PID·cwd·환경을 보존한다. |
 | 화면 분리 / detach | 사용자 화면 연결만 닫는 동작. 같은 host에서 Workbench 실행·manager·worker는 유지된다. 주기 모델 점검은 자동화 활성 중 계속되고 일시정지 중 새로 시작하지 않는다. |
 | Workbench 종료 | 화면 분리와 구분되는 명시적 실행 환경 종료 동작. 실행 중 실험의 중단·정리 순서는 제품 동작 규약에서 정한다. |
 | Task Inbox & Web Board / Phase 2 | 외부 요청을 접수·보관하고 manager 검토, 승인 명세 및 실행 결과에 연결하는 선택적 부속 기능. |

@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "scope": "planning artifact validation only; no product test or runtime gate executed",
+  "candidate_manifest": ".workflow/core-workbench/runs/planning-p2.3-20260924/manifest.json",
+  "bundle_sha256": "c1a84e1a3cb9d37f36e4807986f7adcde22263fd404add236d453ddec4c48740",
+  "cwd": "/home/dwchoo/ai-exp-assistant",
+  "command": "Root inline Python document validator + git diff --check",
+  "python": "Python 3.12.3",
+  "exit_code": 0,
+  "result": "passed",
+  "checks": {
+    "stable_ticket_graph": {
+      "result": "passed",
+      "detail": "16 stable IDs; no missing dependencies/cycles; CW-16 reaches all 15 predecessors"
+    },
+    "gate_supplier_ancestry": {
+      "result": "passed",
+      "detail": "64 unique items; all suppliers are owner/transitive predecessors; four experiments have explicit outcomes"
+    },
+    "acceptance_and_ticket_trace": {
+      "result": "passed",
+      "detail": "34 owned IDs; SPEC/PLAN/ticket items aligned; all final checks are runtime and owned by CW-16"
+    },
+    "dependency_visual": {
+      "result": "passed",
+      "detail": "30 diagram edges exactly match PLAN"
+    },
+    "local_links": {
+      "result": "passed",
+      "detail": "138 local link targets exist across review Markdown files"
+    },
+    "preexisting_work_preserved": {
+      "result": "passed",
+      "detail": "32 source/test inputs, staged diff, completed CW-01 ticket, and all 9 reviewed refinement files unchanged"
+    },
+    "bundle_identity": {
+      "result": "passed",
+      "detail": "30 review files match c1a84e1a3cb9d37f36e4807986f7adcde22263fd404add236d453ddec4c48740; record excluded from hash inputs"
+    },
+    "authority_and_estimates": {
+      "result": "passed",
+      "detail": "Planning-only authority, pending approval, 98/128 retained; 44+6 additional operating estimate; 20-call gap recorded"
+    },
+    "git_diff_check": {
+      "result": "passed",
+      "detail": "exit 0"
+    }
+  },
+  "runtime_tests": {
+    "result": "not_run",
+    "reason": "to-tickets planning only; G1..G4 feasibility remains pending"
+  },
+  "independent_runtime_test_or_review": "not dispatched during planning",
+  "child_invocations_started": 0,
+  "changed_documents_vs_planning_baseline": [
+    "docs/features/core-workbench/SPEC.md",
+    "docs/features/core-workbench/PLAN.json",
+    "docs/features/core-workbench/tickets/CW-02.md",
+    "docs/features/core-workbench/tickets/CW-03.md",
+    "docs/features/core-workbench/tickets/CW-04.md",
+    "docs/features/core-workbench/tickets/CW-05.md",
+    "docs/features/core-workbench/tickets/CW-06.md",
+    "docs/features/core-workbench/tickets/CW-07.md",
+    "docs/features/core-workbench/tickets/CW-08.md",
+    "docs/features/core-workbench/tickets/CW-09.md",
+    "docs/features/core-workbench/tickets/CW-10.md",
+    "docs/features/core-workbench/tickets/CW-11.md",
+    "docs/features/core-workbench/tickets/CW-12.md",
+    "docs/features/core-workbench/tickets/CW-13.md",
+    "docs/features/core-workbench/tickets/CW-14.md",
+    "docs/features/core-workbench/tickets/CW-15.md",
+    "docs/features/core-workbench/tickets/CW-16.md",
+    "docs/features/core-workbench/gates/G1.md",
+    "docs/features/core-workbench/gates/G2.md",
+    "docs/features/core-workbench/gates/G3.md",
+    ".workflow/core-workbench/state.json"
+  ],
+  "recorded_at_utc": "2026-09-24T05:17:04.489200+00:00"
+}

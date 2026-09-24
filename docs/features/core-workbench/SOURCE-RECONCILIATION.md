@@ -23,6 +23,8 @@ SHA-256: `d9db3315a48b25c831f71f46c438947c6e781dbd424db50e0e2ab2a2ba8193f0`.
 | 전체 종료·재부팅 | 자체 실행 수명 보완 필요 | C-D31/C-D32: 전체 종료는 확인 후 중단·정리, 재부팅 후 새 실험은 사용자 확인 |
 | 로그 보존 | run당 64 MiB·프로젝트당 512 MiB | C-D33으로 채택. 상한 후 추가 저장 중단·잘림 표시, 실행·관측 유지. 작업·요약·실행용 worktree는 자동 삭제하지 않음 |
 | Shell | Bash 5.x·zsh 5.9 | C-D41/C-D42: Bash 우선·sh 최소 지원. 기본/login shell이 zsh여도 전용 persistent Bash 또는 sh 시작, 사용자 기본 shell 설정 유지. zsh adapter는 후속 |
+| Shell 자동 제어 | 같은 shell 상태·명령 실행을 유지 | C-D50/C-D51: 관리된 Bash/sh에서 명시적 handoff 뒤 같은 interpreter가 전용 control 경로로 명령을 기다리는 방향. 일반 입력·job 경합은 검증하고, 고의적 내부 변조·event 위조에 대한 보안 경계는 요구하지 않음. 실제 가능성 검증 전 |
+| Terminal 제어권 인수 | 사용자 입력과 자동 실행의 경합을 확인 | C-D52: 인수 요청 즉시 새 자동 전송을 막고 요청·확인을 구분. 이미 전달된 명령은 실행 중·종료·미확인으로 표시하며, 실험 유지·확인된 대상의 수동 입력·오래된 요청의 replay 금지 |
 | Worktree 준비 실패 | 실행 경로·기준 commit 확인 | C-D40: manager/worker가 허용 범위 내 자동 해결, 해결 불가·추가 권한 필요 시 사용자 확인. 전용 관리 기능은 추가하지 않음 |
 | 실험 환경 | App/host 환경 분리 | C-D43: 기존 conda/venv 재사용, 새 환경·패키지 변경은 위임 범위에서만 |
 | 일시정지 | 새 자동 주입·run 중지 | C-D49: 즉시 새 자동 지시 보류, manager 진행 중 turn 중단 요청·확인/불명 결과 구분, 새 자동 모델 작업 중단; 로그·프로세스 수집과 기존 host 실험 유지 |
@@ -38,6 +40,8 @@ SHA-256: `d9db3315a48b25c831f71f46c438947c6e781dbd424db50e0e2ab2a2ba8193f0`.
 - App Python 환경과 실험 환경을 분리한다. Workbench의 Python executable·venv를 실험용 `python`이나 CUDA 환경으로 치환하지 않는다.
 - 명령 시작·종료는 shell adapter의 lifecycle로 관측한다. Prompt 모양·로그 무출력·stdout의 가짜 marker로 성공이나 종료를 판정하지 않는다.
 - 사용자 미제출 입력·REPL·suspended job과 자동 실행의 경합을 다룬다. 불명확한 입력 경계에서는 새 shell로 우회하지 않고 자동 실행을 보류한다.
+- C-D50/C-D51에 따라 정상 환경 전환과 지원하지 않는 hook·trap 변경을 구분한다. Handoff 뒤 prompt에 command를 타이핑하는 방식에서, 동일 interpreter의 자동 제어 대기로 전환하는 방향을 검증한다. 진단과 미결정은 [DIAGNOSIS.md](DIAGNOSIS.md)에 있다.
+- C-D52에 따라 인수 요청은 이미 전달된 명령의 취소·종료 증명이 아니다. 현재 입력 대상 확인과 명령 상태를 구분하고 인수만으로 실험을 종료하지 않는다.
 - Python이 작업·상태·관측·저장·전달 정책을 소유한다. 작은 TS extension은 공개 OMP API 연결과 주입 직전 session/idle/pending/approval 확인을 담당한다.
 - Model은 기존 manager/worker OMP가 호출한다. Python 본체에 별도 판단 agent나 provider credential 저장소를 만들지 않는다.
 - 본문·로그 출력과 제어 IPC를 분리한다. 명세 revision, command ID, message ID, session binding 및 접수/실제 시작/업무 완료를 구분한다.

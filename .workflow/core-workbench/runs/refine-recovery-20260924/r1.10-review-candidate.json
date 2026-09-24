@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "feature": "core-workbench",
+  "phase": "refine-spec",
+  "revision": "r1.10-draft",
+  "status": "agreement_requested",
+  "full_brief_approved": false,
+  "implementation_resume_authorized": false,
+  "approved_baseline_revision": "r1.9",
+  "approved_baseline_bundle_sha256": "e76c0bde27d2d040e373d0a0ed5d90458960f76fbbf3e2ca163cb590a11f1c06",
+  "decision_record": ".workflow/core-workbench/runs/refine-recovery-20260924/decisions.json",
+  "agreed_individual_decisions": [
+    "C-D50",
+    "C-D51",
+    "C-D52"
+  ],
+  "scope": "Revised Core requirements and diagnosis/solution direction; existing implementation paused. SPEC/PLAN/tickets need affected-scope replanning after approval.",
+  "files_sha256": {
+    "docs/features/core-workbench/BRIEF.md": "e0d31aa00dba5c27423f8b3385c20f47d0f5592c4fe9481335892a404d3e1abc",
+    "docs/features/core-workbench/OPERATING-CONTRACT.md": "6566725cdec75ca283ab03df7ced9685c2e301cb1db342f305756d58a48de20d",
+    "docs/features/core-workbench/DECISIONS.md": "0248d26b9a39c1fd8de12553598525b6d87254f3047335817da22fa2e69056d4",
+    "docs/features/core-workbench/SOURCE-RECONCILIATION.md": "eff6eed97df035ac57e75084406c98afa087dca13a93ceacaafeab0192601b62",
+    "docs/features/core-workbench/DIAGNOSIS.md": "89264aae1379b83e023fb2493befaee9a03f6858b0571aedcba82dff23d37d27",
+    "CONTEXT.md": "391d525ba83a94df88bc2ba054e7d7e04b4874e8053fe841bba8cac931e09013",
+    "docs/adr/0001-no-external-multiplexer.md": "c09799d6ee17fb8273208b74413fc4703df970e643fa52609f61e7c800de1dbf",
+    "docs/adr/0002-managed-shell-control-wait.md": "514f1117821eb0ec57f0e15f838589728ebc0df4319b628b35e17201bee8da8f",
+    "AGENTS.md": "6d9c1ed06864648bb6159663571bbde7ac53fab9993262469ae9bf5a818f0379"
+  },
+  "bundle_hash_method": "SHA-256 of UTF-8 JSON(files_sha256, sort_keys=True, separators=(comma,colon), ensure_ascii=False)",
+  "bundle_sha256": "7eceb502f9df49f9fdb8c38c8b5c7173d8406be0534009d88ec4be3f497b4dc2",
+  "git_head": "0a67572834ddfd6888b534f8a85213f4b1a2e1ca",
+  "existing_staged_diff_sha256": "175a0de8362b6a6ba5a498b84a74e9017e1555d409cb3a39440fbd1c8503c184",
+  "validation": {
+    "documentation_local_links": "passed (9 files)",
+    "acceptance_ids": "34 unique IDs preserved",
+    "spec_plan_and_16_tickets": "unchanged against approved baseline",
+    "inspected_product_and_test_hashes": "5 unchanged from diagnosis inputs",
+    "git_diff_check": "passed",
+    "runtime_or_product_tests": "not run; documentation-only refinement",
+    "python": "3.12.3"
+  },
+  "next_after_approval": {
+    "model_effort": "fresh user-selected Sol XHigh/Max",
+    "command": "$to-tickets docs/features/core-workbench/BRIEF.md",
+    "scope": "Amend affected existing SPEC/PLAN/tickets, preserving completed CW-01, valid evidence and ticket IDs"
+  },
+  "recorded_at_utc": "2026-09-24T02:03:40.604469+00:00"
+}
