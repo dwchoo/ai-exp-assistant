@@ -1,0 +1,88 @@
+{
+  "schema_version": 1,
+  "recorded_at_utc": "2026-09-24T10:29:41+00:00",
+  "ticket": "CW-04",
+  "gate_item": "G3-SESSION",
+  "candidate_sha256": {
+    "tests/gates/g3_omp/live_tui_session_inflight_probe.py": "c3619d36076968fb829cf4323cf320e5a15f8711d4dd7e08bc7504211f6772a8",
+    "tests/gates/g3_omp/test_tui_session_inflight_predicates.py": "4ecab48ec37fab042070dac32665a32979308fca1f0b580694f26b07a98865f5"
+  },
+  "approved_requirements_sha256": "864fcf5616d76b5284d64ff792f392e31d7410650caaee3fa9a5a72fd264cf4b",
+  "scope_audit": "worker_senior corrected only live_tui_session_inflight_probe.py to require distinct new socket and visible new composer; independent test hash unchanged; Root diff --check passed.",
+  "commands": {
+    "test": "timeout 35s env PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g3_omp /tmp/cw02-g1-venv/bin/python -m unittest -q tests.gates.g3_omp.test_tui_session_inflight_predicates",
+    "runtime": "timeout 90s env PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g3_omp /tmp/cw02-g1-venv/bin/python tests/gates/g3_omp/live_tui_session_inflight_probe.py"
+  },
+  "cwd": "/home/dwchoo/ai-exp-assistant",
+  "environment": "Linux host, actual two OMP 18.2.10 TUIs, local held-response provider, controlled doubles, no Docker",
+  "exit_codes": {
+    "test": 0,
+    "runtime": 0
+  },
+  "result": "independent_11_of_11_actual_tui_inflight_session_isolation_partial_G3",
+  "observed": {
+    "result": "observed_session_inflight_isolation",
+    "pids": {
+      "manager": 184691,
+      "worker": 184693
+    },
+    "initial_ready": true,
+    "deliver_ack": "unknown_no_replay",
+    "deliver_model_processed_at_ack": null,
+    "pause_ack": "paused",
+    "provider_started": true,
+    "old_state_before_new": {
+      "editorEmpty": true,
+      "editorKnown": true,
+      "generation": 1,
+      "idle": false,
+      "paused": true,
+      "pending": false,
+      "sessionId": "01a0d2f6-004d-766a-96e8-9885e721253d"
+    },
+    "new_command_editor_length_during_pending": 4,
+    "new_command_visible_during_pending": false,
+    "switch_accepted_while_provider_held": true,
+    "provider_requests_during_hold": 1,
+    "same_worker_pid": true,
+    "old_generation": 1,
+    "new_generation": 2,
+    "old_provider_response_sent_after_switch": false,
+    "new_composer_visible": true,
+    "new_session_ready": true,
+    "old_retry_ack": "rejected",
+    "new_paused_before_resume": true,
+    "resume_ack": "resumed",
+    "new_ack": "api_accepted",
+    "new_model_processed_at_ack": false,
+    "old_provider_identity_matched": [
+      true
+    ],
+    "new_provider_identity_matched": [
+      true
+    ],
+    "provider_request_count": 2,
+    "provider_request_identities": {
+      "1": [
+        "old"
+      ],
+      "2": [
+        "new"
+      ]
+    },
+    "new_agent_end_count": 1,
+    "new_ends_current_session": true,
+    "omp_children_remaining": 0,
+    "cwd_processes_remaining": {
+      "manager": [],
+      "worker": []
+    }
+  },
+  "socket_identity": "_wait_new_peer success now requires candidate socket is not old socket, same PID, new session ID and generation +1.",
+  "interpretation": "Old provider input was observed; old response socket closed at session switch. No old business/model completion claim.",
+  "unknowns": [
+    "other in-flight send/ACK loss and long-lived races",
+    "production backend session/outcome persistence",
+    "G3 overall pending"
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "recorded_at_utc": "2026-09-24T09:41:23+00:00",
+  "ticket": "CW-04",
+  "gate_item": "G3-TUI-DELIVERY",
+  "candidate_sha256": "d2dc0425bbb04879bd51cf228651b2e245d1fcba703d210bc8ad62227d1dc35b",
+  "approved_requirements_sha256": "864fcf5616d76b5284d64ff792f392e31d7410650caaee3fa9a5a72fd264cf4b",
+  "scope_audit": "worker_senior added only assigned live_tui_message_kinds_probe.py; frozen bridge and reference probe hashes unchanged; git diff --check passed.",
+  "command": "timeout 90s env PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g3_omp /tmp/cw02-g1-venv/bin/python tests/gates/g3_omp/live_tui_message_kinds_probe.py",
+  "cwd": "/home/dwchoo/ai-exp-assistant",
+  "environment": "Linux host, two OMP 18.2.10 TUIs, Python 3.12 with pyte 0.8.2, isolated loopback providers and PTYs; no Docker",
+  "exit_code": 0,
+  "result": "passed_pair_tui_four_kinds_partial_G3",
+  "observed": {
+    "omp_pids": {"manager": 151701, "worker": 151703},
+    "kinds_and_targets": ["task:worker", "question:worker", "answer:manager", "report:manager"],
+    "each_api_ack": "api_accepted",
+    "each_model_processed_at_ack": false,
+    "each_new_provider_id_and_related_fields_match": true,
+    "each_target_provider_request_delta": 1,
+    "each_target_agent_end_delta": 1,
+    "each_other_side_delta": 0,
+    "answer_and_report_reply_ids_match": true,
+    "provider_requests_total": {"manager": 2, "worker": 2},
+    "agent_ends_total": {"manager": 2, "worker": 2},
+    "omp_children_remaining": 0,
+    "cwd_processes_remaining": 0,
+    "temporary_directories_remaining": 0
+  },
+  "unknowns": [
+    "independent negative controls for four-kind success predicate",
+    "TUI busy/native approval contention and pause/reconcile",
+    "in-flight reconnect unknown race and production async error mapping",
+    "G3 overall pending"
+  ]
+}

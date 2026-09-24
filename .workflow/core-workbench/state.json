@@ -1,96 +1,95 @@
 {
   "schema_version": 1,
   "feature": "core-workbench",
-  "phase": "blocked",
-  "revision": "r1.9",
-  "approval_status": "approved",
+  "phase": "implementing",
+  "revision": "r1.11",
+  "approval_status": "approved_for_implementation",
   "approval": {
-    "record": ".workflow/core-workbench/runs/implement-p2-20260923/cd49-doc-final-approval.json",
-    "revision": "r1.9",
-    "user_quote": "C-D49: six-point pause and worker role policy supersedes C-D35/C-D44; continue implementation",
-    "reviewed_bundle_sha256": "6f729ab8259c9cefd9cdebaf76dc8af1f8ca9626e119b10265c59a89ee995653",
-    "approved_bundle_sha256": "e76c0bde27d2d040e373d0a0ed5d90458960f76fbbf3e2ca163cb590a11f1c06",
-    "recorded_at_utc": "2026-09-23T15:53:06.221016+00:00",
-    "previous_record": ".workflow/core-workbench/runs/approval-r1.7/approval.json"
+    "record": ".workflow/core-workbench/runs/implement-p2.3-20260924/approval.json",
+    "revision": "r1.10",
+    "user_quote": "$implement  docs/features/core-workbench",
+    "reviewed_bundle_sha256": "c1a84e1a3cb9d37f36e4807986f7adcde22263fd404add236d453ddec4c48740",
+    "approved_bundle_sha256": "4269d6160dd6205e61fba4944f8852d279a7eda02c85a5a9de8157eeb5ff8ee8",
+    "recorded_at_utc": "2026-09-24T05:22:24.192721+00:00",
+    "current_for_checkout": true,
+    "policy_amendment": {
+      "record": ".workflow/core-workbench/runs/implement-p2.3-20260924/cd53-policy-approval.json",
+      "revision": "r1.11",
+      "approved_bundle_sha256": "864fcf5616d76b5284d64ff792f392e31d7410650caaee3fa9a5a72fd264cf4b",
+      "policy_amendment_sha256": "52e60da9b17709dcb9e9826e33d3969f9d9350becbec190c7efcf8d4be1fd1f1",
+      "recorded_at_utc": "2026-09-24T07:26:04.920783+00:00"
+    }
   },
   "candidate": {
-    "bundle_sha256": "e76c0bde27d2d040e373d0a0ed5d90458960f76fbbf3e2ca163cb590a11f1c06",
+    "bundle_sha256": "864fcf5616d76b5284d64ff792f392e31d7410650caaee3fa9a5a72fd264cf4b",
     "files_sha256": {
-      "docs/features/core-workbench/BRIEF.md": "f2ff96a06ad624ac36415d11cd699bc501b402e656a482768e89459b132df069",
-      "docs/features/core-workbench/DECISIONS.md": "7ef05777eae2b65f6b51baee44b4ec6b25eb9640390e0e65514c35d5ea49ef1c",
-      "docs/features/core-workbench/OPERATING-CONTRACT.md": "02e84c2b811555db7700a8cb04580539af658d0394aad52d58b921321bcdd8de",
-      "docs/features/core-workbench/SOURCE-RECONCILIATION.md": "9608b6ae75cd44f3365f0857fc86e1a4fff3ba9ed988ad7dea4f4985a79f156a",
-      "docs/features/core-workbench/SPEC.md": "ea16123aca25468c934ecad92d385dfd75e7530f78434abd1696dcd815e483c8",
-      "docs/features/core-workbench/PLAN.json": "85cd1d331f7d654433a15da79c782eba2d3bad4d6303a9d3f1db95ba0215d8b8",
+      "AGENTS.md": "6d9c1ed06864648bb6159663571bbde7ac53fab9993262469ae9bf5a818f0379",
+      "CONTEXT.md": "391d525ba83a94df88bc2ba054e7d7e04b4874e8053fe841bba8cac931e09013",
+      "docs/adr/0001-no-external-multiplexer.md": "c09799d6ee17fb8273208b74413fc4703df970e643fa52609f61e7c800de1dbf",
+      "docs/adr/0002-managed-shell-control-wait.md": "ff5712171391ac86375be49a13c6a4221b2909c44da9962ab52cc6b7630f2d52",
+      "docs/features/core-workbench/BRIEF.md": "cabef56a1caf1773b1873905ac2cde713a29497c91b85ddd247086c4fc8aed3c",
+      "docs/features/core-workbench/DECISIONS.md": "d0b11de9708929f9dd32ba4cc06b1fce1e686a66eb5f4d31b73d3625229e3312",
+      "docs/features/core-workbench/DIAGNOSIS.md": "63197e1fd30b95fbc18c45f1a663d7211e6d6bafd965f99346239a576b350a7b",
+      "docs/features/core-workbench/OPERATING-CONTRACT.md": "05c34862d05e98d446858a917551f6869317b7d712f375e7925ad56cdbf040a4",
+      "docs/features/core-workbench/PLAN.json": "696270bf612df23e2931ab3350f3146594fa9270598489dbe530f56913587fa7",
+      "docs/features/core-workbench/SOURCE-RECONCILIATION.md": "eff6eed97df035ac57e75084406c98afa087dca13a93ceacaafeab0192601b62",
+      "docs/features/core-workbench/SPEC.md": "ce954cef30504987fabc1983144528f49bccc69543ed99ee16f2e398ffe865e3",
+      "docs/features/core-workbench/gates/G1.md": "6bf21a45503dd6c4f4e0396e6f993f222f7b073f6b999b34da3c3484f1ef5c35",
+      "docs/features/core-workbench/gates/G2.md": "fcefaf28283cc45edfc521043f1f8ed84f7bfcfcd8b33c91c91ed4d81d5a7000",
+      "docs/features/core-workbench/gates/G3.md": "7755743879e808d2d6c8d58a5c021f1aa81b6741563086b3aa79cbe13aaed600",
       "docs/features/core-workbench/tickets/CW-01.md": "7dae35e6d1a4d2a3475609849178bb9ea05a6f790eb4931dc0139925ba75bcb2",
-      "docs/features/core-workbench/tickets/CW-02.md": "c75525a0623a16c2ed5a39c11ac5350e3f394aaee574ec735b05a4fabb3eb07f",
-      "docs/features/core-workbench/tickets/CW-03.md": "8ba1f3e9824fb45932d957a996f6962929ad8e574298dd5af4cd1a037517deb6",
-      "docs/features/core-workbench/tickets/CW-04.md": "503d70bae16f6adf2c5cb8aaeb6bed3b8def16834913892ac716e3fc9e1bc913",
-      "docs/features/core-workbench/tickets/CW-05.md": "2af5779d3f3b5a5af65f09cdc72fa35c14aa3f8b918b24d19862cb919105e242",
-      "docs/features/core-workbench/tickets/CW-06.md": "7abd009af6ca5f86b67891897935c2531e08f5cb555baf86eb2dd9566ad122f3",
-      "docs/features/core-workbench/tickets/CW-07.md": "bafccbfd6e759768bbf0580d71ae36dce261c6cdee740a8a1fca0bd27a89b9da",
-      "docs/features/core-workbench/tickets/CW-08.md": "c76a2e991f21ac760a94ede2db505dc5355d30743790051a9808da468a4a6766",
-      "docs/features/core-workbench/tickets/CW-09.md": "5b540c83527603b073174e1914df2b56ba5d682fb1900013d8e38aae3eb49182",
-      "docs/features/core-workbench/tickets/CW-10.md": "4ac30e06964495650c212a2eed9a5e094d5bfaff5641ff148a131d1c22a1fa5b",
-      "docs/features/core-workbench/tickets/CW-11.md": "afce2bfb82a84a8f40dccca3351789fb074131ebdb57494440630b87cb5f2aed",
-      "docs/features/core-workbench/tickets/CW-12.md": "d8bad1493efbfd66e73638131929c45f4c4c94bb8ef2be1140f9142f35b289c7",
-      "docs/features/core-workbench/tickets/CW-13.md": "1e03c0dd4e21a36bf444f67603a182956b6003c64a74db8bb44bcfa6ee29b579",
-      "docs/features/core-workbench/tickets/CW-14.md": "20d89f909c99ef8b592f69c08fd54d9c28bad9d284fb131e56dd305c9a9011aa",
-      "docs/features/core-workbench/tickets/CW-15.md": "ffa4244d0e6586d4e6444227d53025e756128d91ce71a764455f7a0477de96f5",
-      "docs/features/core-workbench/tickets/CW-16.md": "f8cce696eefcff9679b80d31eb0e9ac4f677b760d3d455418adbee4e0b877511",
-      "CONTEXT.md": "6f385e22c2b0c84333957d4a28f060092edac81e7bbc4c9a6c8e57ab464febed"
+      "docs/features/core-workbench/tickets/CW-02.md": "6e0b5b349ed4c78930c0599b1be069edfb033e384a3a13dfaaaad37938b52b4a",
+      "docs/features/core-workbench/tickets/CW-03.md": "84c8e03c9cf97a909d56ba662265b13a88e4f01457972d94773e9954251b558d",
+      "docs/features/core-workbench/tickets/CW-04.md": "5b048b86f1bae87a6a483e6f490f9562c73f4d5b28f0ee505c4c53d6a19670cc",
+      "docs/features/core-workbench/tickets/CW-05.md": "bc17a507685c7e43b5d30bace5109025e6e078ad27e8abaaddea4a4807e8b775",
+      "docs/features/core-workbench/tickets/CW-06.md": "b82102216931ab650052eabae6dc6b4e14af6102d61ab6df4078e299ef7f6c39",
+      "docs/features/core-workbench/tickets/CW-07.md": "0a0c8178ec4cefbf7c17d77e6966531fb93b9e8498c857c8eaba595d2e05a77f",
+      "docs/features/core-workbench/tickets/CW-08.md": "464e8db03c660b6165b45806bff135a3f159476ff823341af57fc9948ebb5967",
+      "docs/features/core-workbench/tickets/CW-09.md": "a4c7f18e82875f9c236884854b94eeed8796350317ee6619bbbed2b36977bff3",
+      "docs/features/core-workbench/tickets/CW-10.md": "c48c1b8f8e33c7f29bc7783690720610579fbbb5d88766116949f71240f045b0",
+      "docs/features/core-workbench/tickets/CW-11.md": "2fbce6c5eda9cfb2287b7d0d92c0fc6f7ac86dc0bc31d0390f8419c8d07cc3eb",
+      "docs/features/core-workbench/tickets/CW-12.md": "5940cafdaec0a6f0114763ca73a9036361497c89bac3652825a8d9ab6f0a0372",
+      "docs/features/core-workbench/tickets/CW-13.md": "b048e999ba81b1cf5753785523c5d8d66d9f304ef5490d90104f82f605e73fd4",
+      "docs/features/core-workbench/tickets/CW-14.md": "b7a5cf8f0bcca3c44058e0fc22cf6fc3bb1fd445d95bb2e8a0a3d1130cc8ba2f",
+      "docs/features/core-workbench/tickets/CW-15.md": "78b9e00b0e7fad0ffe3550bfcd313e12f26a44471cbee91be31f236c9afac620",
+      "docs/features/core-workbench/tickets/CW-16.md": "928326de0345b394d08d828769c912e36fadf97cb24dd4c69fb628e56ce9e319"
     },
-    "record": ".workflow/core-workbench/runs/implement-p2-20260923/cd49-doc-final-approval.json"
+    "record": ".workflow/core-workbench/runs/implement-p2.3-20260924/cd53-approved-manifest.json",
+    "current_for_checkout": true,
+    "approval_status": "approved_for_implementation",
+    "approval_record": ".workflow/core-workbench/runs/implement-p2.3-20260924/cd53-policy-approval.json"
   },
   "verification": {
     "date": "2026-09-24",
-    "cwd": "/home/dwchoo/ai-exp-assistant",
-    "checks": {
-      "local_links": {
-        "result": "passed"
-      },
-      "source_brief_sha": {
-        "result": "passed"
-      },
-      "acceptance_ids": {
-        "result": "passed",
-        "count": 34
-      },
-      "ticket_count": {
-        "result": "passed",
-        "count": 16
-      },
-      "bundle_hash": {
-        "result": "passed",
-        "sha256": "e76c0bde27d2d040e373d0a0ed5d90458960f76fbbf3e2ca163cb590a11f1c06"
-      }
-    },
-    "scope": "C-D49 policy/document consistency; product/runtime evidence in G3 and run ledger"
+    "scope": "planning artifact validation only; no product test or runtime gate executed",
+    "record": ".workflow/core-workbench/runs/planning-p2.3-20260924/validation.json",
+    "status": "planning_checks_passed",
+    "candidate_bundle_sha256": "c1a84e1a3cb9d37f36e4807986f7adcde22263fd404add236d453ddec4c48740",
+    "runtime_or_product_tests": "not_run"
   },
-  "next_after_approval": "$to-tickets docs/features/core-workbench/BRIEF.md",
-  "discovery_status": "complete",
-  "user_direction": "BRIEF r1.7 approved; refine-spec complete; handoff to fresh planning session.",
+  "next_after_approval": null,
+  "discovery_status": "approved_for_implementation",
+  "user_direction": "User explicitly resumed implementation on 2026-09-24 and expanded explicit child call cap from 160 to 220; retain C-D53 approved bundle and the local-lifetime draft decisions as separate source until scope mapping.",
   "latest_interview": {
-    "answer": "추천대로 해줘.",
+    "answer": "C-D53 termination fact vs worker and manager outcome judgment; no delegated cgroup mandate decision; G2 safety defects remain blocking",
     "decisions": [
-      "C-D43",
-      "C-D44",
-      "C-D45",
-      "C-D46"
+      "C-D53"
     ],
+    "record": ".workflow/core-workbench/runs/implement-p2.3-20260924/cd53-policy-approval.json",
     "next": [
-      "fresh_sol_planning_session"
+      "continue_CW03_G2_safety",
+      "continue_CW02_CW04_gates"
     ]
   },
   "planning": {
-    "record": ".workflow/core-workbench/runs/implement-p2-20260923/cd49-doc-final-approval.json",
-    "spec_revision": "s2.2",
-    "plan_revision": "p2.2",
-    "bundle_sha256": "e76c0bde27d2d040e373d0a0ed5d90458960f76fbbf3e2ca163cb590a11f1c06",
+    "record": ".workflow/core-workbench/runs/implement-p2.3-20260924/cd53-approved-manifest.json",
+    "source_brief_revision": "r1.11",
+    "spec_revision": "s2.4",
+    "plan_revision": "p2.4",
+    "bundle_sha256": "864fcf5616d76b5284d64ff792f392e31d7410650caaee3fa9a5a72fd264cf4b",
     "approval_status": "approved_for_implementation",
-    "scope": "Oracle review repairs to SPEC, PLAN and 16 local tickets; no implementation or product tests",
-    "next_on_explicit_approval": "$implement docs/features/core-workbench",
-    "implementation_approval_record": ".workflow/core-workbench/runs/implement-p2-20260923/approval.json"
+    "current_for_checkout": true,
+    "implementation_approval_record": ".workflow/core-workbench/runs/implement-p2.3-20260924/cd53-policy-approval.json"
   },
   "planning_history": [
     {
@@ -101,14 +100,225 @@
       "approval_status": "proposed_unapproved",
       "scope": "SPEC, PLAN and 16 local tickets; no implementation or product tests",
       "next_on_explicit_approval": "$implement docs/features/core-workbench"
+    },
+    {
+      "record": ".workflow/core-workbench/runs/implement-p2-20260923/cd49-doc-final-approval.json",
+      "spec_revision": "s2.2",
+      "plan_revision": "p2.2",
+      "bundle_sha256": "e76c0bde27d2d040e373d0a0ed5d90458960f76fbbf3e2ca163cb590a11f1c06",
+      "approval_status": "approved_for_implementation",
+      "scope": "Oracle review repairs to SPEC, PLAN and 16 local tickets; no implementation or product tests",
+      "next_on_explicit_approval": "$implement docs/features/core-workbench",
+      "implementation_approval_record": ".workflow/core-workbench/runs/implement-p2-20260923/approval.json",
+      "current_for_checkout": false,
+      "revision_required_reason": "C-D50/C-D51/C-D52 managed shell, control-wait and takeover decisions; revise affected existing tickets after final brief approval"
+    },
+    {
+      "record": ".workflow/core-workbench/runs/planning-p2.3-20260924/manifest.json",
+      "source_brief_revision": "r1.10-draft",
+      "spec_revision": "s2.3",
+      "plan_revision": "p2.3",
+      "bundle_sha256": "c1a84e1a3cb9d37f36e4807986f7adcde22263fd404add236d453ddec4c48740",
+      "approval_status": "proposed_unapproved",
+      "current_for_checkout": false,
+      "scope": "기존 16 ticket·완료 CW-01·유효 evidence를 보존한 부분 재계획",
+      "authority": {
+        "user_quote": "$to-tickets  docs/features/core-workbench/BRIEF.md",
+        "scope": "local SPEC/PLAN/ticket planning; no implementation resume",
+        "full_brief_approval_recorded": false
+      },
+      "validation_record": ".workflow/core-workbench/runs/planning-p2.3-20260924/validation.json",
+      "next_on_explicit_approval": "$implement docs/features/core-workbench",
+      "execution_authorized": false
+    },
+    {
+      "record": ".workflow/core-workbench/runs/implement-p2.3-20260924/cd53-approved-manifest.json",
+      "source_brief_revision": "r1.11",
+      "spec_revision": "s2.4",
+      "plan_revision": "p2.4",
+      "bundle_sha256": "864fcf5616d76b5284d64ff792f392e31d7410650caaee3fa9a5a72fd264cf4b",
+      "approval_status": "approved_for_implementation",
+      "current_for_checkout": true,
+      "scope": "C-D53 amendment; stable 16 tickets and graph; G2 safety defects pending",
+      "implementation_approval_record": ".workflow/core-workbench/runs/implement-p2.3-20260924/cd53-policy-approval.json"
     }
   ],
   "implementation": {
-    "run_record": ".workflow/core-workbench/runs/implement-p2-20260923/ledger.json",
-    "status": "blocked_g1_g2_g3",
-    "approved_bundle_sha256": "e76c0bde27d2d040e373d0a0ed5d90458960f76fbbf3e2ca163cb590a11f1c06",
-    "policy_approval_record": ".workflow/core-workbench/runs/implement-p2-20260923/cd49-doc-final-approval.json",
-    "handoff_record": ".workflow/core-workbench/runs/implement-p2-20260923/HANDOFF-2026-09-23-2225.md",
-    "snapshot_record": ".workflow/core-workbench/runs/implement-p2-20260923/commit-checkpoint-20260924-090050.json"
+    "run_record": ".workflow/core-workbench/runs/implement-p2.3-20260924/ledger.json",
+    "status": "g1_g3_partial_g2_plan_alignment_blocked_no_active_work",
+    "approved_bundle_sha256": "864fcf5616d76b5284d64ff792f392e31d7410650caaee3fa9a5a72fd264cf4b",
+    "policy_approval_record": ".workflow/core-workbench/runs/implement-p2.3-20260924/approval.json",
+    "snapshot_record": ".workflow/core-workbench/runs/implement-p2.3-20260924/pre-writer-recovery.json",
+    "execution_state": "g1_g3_partial_g2_direct_eval_blocked_A_host_feasible_Docker_runtime_deferred"
+  },
+  "refinement": {
+    "status": "approved_in_combined_implement_request",
+    "skill": "refine-spec",
+    "draft_brief": "docs/features/core-workbench/BRIEF.md",
+    "diagnosis": "docs/features/core-workbench/DIAGNOSIS.md",
+    "decision_record": ".workflow/core-workbench/runs/refine-recovery-20260924/decisions.json",
+    "started_at_utc": "2026-09-24T01:25:10.166157+00:00",
+    "implementation_resume_authorized": true,
+    "open_decisions": [],
+    "full_brief_approved": true,
+    "updated_at_utc": "2026-09-24T02:03:40.604469+00:00",
+    "deferred_runtime_questions": [
+      "Bash/dash same-interpreter control-wait feasibility and supported environment transitions",
+      "G1 real resize, composed panes and external terminal compatibility",
+      "G3 actual TUI delivery, editor preservation and session lifecycle",
+      "Production backend, worker review hold, detach/recovery integration"
+    ],
+    "review_candidate_record": ".workflow/core-workbench/runs/refine-recovery-20260924/r1.10-review-candidate.json",
+    "review_candidate_sha256": "7eceb502f9df49f9fdb8c38c8b5c7173d8406be0534009d88ec4be3f497b4dc2",
+    "validation": {
+      "documentation_local_links": "passed (9 files)",
+      "acceptance_ids": "34 unique IDs preserved",
+      "spec_plan_and_16_tickets": "unchanged against approved baseline",
+      "inspected_product_and_test_hashes": "5 unchanged from diagnosis inputs",
+      "git_diff_check": "passed",
+      "runtime_or_product_tests": "not run; documentation-only refinement",
+      "python": "3.12.3"
+    },
+    "next": "combined BRIEF/SPEC/PLAN/ticket approval with explicit implementation request"
+  },
+  "interview_history": [
+    {
+      "answer": "추천대로 해줘.",
+      "decisions": [
+        "C-D43",
+        "C-D44",
+        "C-D45",
+        "C-D46"
+      ],
+      "next": [
+        "fresh_sol_planning_session"
+      ]
+    }
+  ],
+  "candidate_history": [
+    {
+      "bundle_sha256": "e76c0bde27d2d040e373d0a0ed5d90458960f76fbbf3e2ca163cb590a11f1c06",
+      "files_sha256": {
+        "docs/features/core-workbench/BRIEF.md": "f2ff96a06ad624ac36415d11cd699bc501b402e656a482768e89459b132df069",
+        "docs/features/core-workbench/DECISIONS.md": "7ef05777eae2b65f6b51baee44b4ec6b25eb9640390e0e65514c35d5ea49ef1c",
+        "docs/features/core-workbench/OPERATING-CONTRACT.md": "02e84c2b811555db7700a8cb04580539af658d0394aad52d58b921321bcdd8de",
+        "docs/features/core-workbench/SOURCE-RECONCILIATION.md": "9608b6ae75cd44f3365f0857fc86e1a4fff3ba9ed988ad7dea4f4985a79f156a",
+        "docs/features/core-workbench/SPEC.md": "ea16123aca25468c934ecad92d385dfd75e7530f78434abd1696dcd815e483c8",
+        "docs/features/core-workbench/PLAN.json": "85cd1d331f7d654433a15da79c782eba2d3bad4d6303a9d3f1db95ba0215d8b8",
+        "docs/features/core-workbench/tickets/CW-01.md": "7dae35e6d1a4d2a3475609849178bb9ea05a6f790eb4931dc0139925ba75bcb2",
+        "docs/features/core-workbench/tickets/CW-02.md": "c75525a0623a16c2ed5a39c11ac5350e3f394aaee574ec735b05a4fabb3eb07f",
+        "docs/features/core-workbench/tickets/CW-03.md": "8ba1f3e9824fb45932d957a996f6962929ad8e574298dd5af4cd1a037517deb6",
+        "docs/features/core-workbench/tickets/CW-04.md": "503d70bae16f6adf2c5cb8aaeb6bed3b8def16834913892ac716e3fc9e1bc913",
+        "docs/features/core-workbench/tickets/CW-05.md": "2af5779d3f3b5a5af65f09cdc72fa35c14aa3f8b918b24d19862cb919105e242",
+        "docs/features/core-workbench/tickets/CW-06.md": "7abd009af6ca5f86b67891897935c2531e08f5cb555baf86eb2dd9566ad122f3",
+        "docs/features/core-workbench/tickets/CW-07.md": "bafccbfd6e759768bbf0580d71ae36dce261c6cdee740a8a1fca0bd27a89b9da",
+        "docs/features/core-workbench/tickets/CW-08.md": "c76a2e991f21ac760a94ede2db505dc5355d30743790051a9808da468a4a6766",
+        "docs/features/core-workbench/tickets/CW-09.md": "5b540c83527603b073174e1914df2b56ba5d682fb1900013d8e38aae3eb49182",
+        "docs/features/core-workbench/tickets/CW-10.md": "4ac30e06964495650c212a2eed9a5e094d5bfaff5641ff148a131d1c22a1fa5b",
+        "docs/features/core-workbench/tickets/CW-11.md": "afce2bfb82a84a8f40dccca3351789fb074131ebdb57494440630b87cb5f2aed",
+        "docs/features/core-workbench/tickets/CW-12.md": "d8bad1493efbfd66e73638131929c45f4c4c94bb8ef2be1140f9142f35b289c7",
+        "docs/features/core-workbench/tickets/CW-13.md": "1e03c0dd4e21a36bf444f67603a182956b6003c64a74db8bb44bcfa6ee29b579",
+        "docs/features/core-workbench/tickets/CW-14.md": "20d89f909c99ef8b592f69c08fd54d9c28bad9d284fb131e56dd305c9a9011aa",
+        "docs/features/core-workbench/tickets/CW-15.md": "ffa4244d0e6586d4e6444227d53025e756128d91ce71a764455f7a0477de96f5",
+        "docs/features/core-workbench/tickets/CW-16.md": "f8cce696eefcff9679b80d31eb0e9ac4f677b760d3d455418adbee4e0b877511",
+        "CONTEXT.md": "6f385e22c2b0c84333957d4a28f060092edac81e7bbc4c9a6c8e57ab464febed"
+      },
+      "record": ".workflow/core-workbench/runs/implement-p2-20260923/cd49-doc-final-approval.json",
+      "current_for_checkout": false,
+      "stale_reason": "C-D50/C-D51/C-D52 requirements refinement; approved r1.9 snapshot retained as historical baseline"
+    },
+    {
+      "bundle_sha256": "c1a84e1a3cb9d37f36e4807986f7adcde22263fd404add236d453ddec4c48740",
+      "files_sha256": {
+        "AGENTS.md": "6d9c1ed06864648bb6159663571bbde7ac53fab9993262469ae9bf5a818f0379",
+        "CONTEXT.md": "391d525ba83a94df88bc2ba054e7d7e04b4874e8053fe841bba8cac931e09013",
+        "docs/adr/0001-no-external-multiplexer.md": "c09799d6ee17fb8273208b74413fc4703df970e643fa52609f61e7c800de1dbf",
+        "docs/adr/0002-managed-shell-control-wait.md": "514f1117821eb0ec57f0e15f838589728ebc0df4319b628b35e17201bee8da8f",
+        "docs/features/core-workbench/BRIEF.md": "e0d31aa00dba5c27423f8b3385c20f47d0f5592c4fe9481335892a404d3e1abc",
+        "docs/features/core-workbench/DECISIONS.md": "0248d26b9a39c1fd8de12553598525b6d87254f3047335817da22fa2e69056d4",
+        "docs/features/core-workbench/DIAGNOSIS.md": "89264aae1379b83e023fb2493befaee9a03f6858b0571aedcba82dff23d37d27",
+        "docs/features/core-workbench/OPERATING-CONTRACT.md": "6566725cdec75ca283ab03df7ced9685c2e301cb1db342f305756d58a48de20d",
+        "docs/features/core-workbench/PLAN.json": "2dfbcf9817a675c8dff1bc376f0992210a261496d34b176166f86c2b139a2847",
+        "docs/features/core-workbench/SOURCE-RECONCILIATION.md": "eff6eed97df035ac57e75084406c98afa087dca13a93ceacaafeab0192601b62",
+        "docs/features/core-workbench/SPEC.md": "6d892946da5e2036d8503bb8cd4a271f13cdc87cb8f2ba8dcc1a619220b53850",
+        "docs/features/core-workbench/gates/G1.md": "b0236969a3df9bc1b80200152216fde55b4a23446957caa23a97aaa95be4fbe4",
+        "docs/features/core-workbench/gates/G2.md": "d41992ec58140c9ce71a47c274603f78b0ef9fed3d71999d1f9ac003b56e88d0",
+        "docs/features/core-workbench/gates/G3.md": "6eb6a1d9cdfd2d9c38475e60158f049eeee1edc34986d0cd7804c5b4ccf86ad9",
+        "docs/features/core-workbench/tickets/CW-01.md": "7dae35e6d1a4d2a3475609849178bb9ea05a6f790eb4931dc0139925ba75bcb2",
+        "docs/features/core-workbench/tickets/CW-02.md": "30c51c4fa69fe23a042fa34de2024546f36e3799297fc5b453c9dce4739b6a52",
+        "docs/features/core-workbench/tickets/CW-03.md": "d9e24f3a119ea95419f193e472fa4636852799c6832cac1c8a0146e68fc95562",
+        "docs/features/core-workbench/tickets/CW-04.md": "0827090732b619942f37d132a6fd0cf1b6cd43357f70ffc9b35de29a7019fe4b",
+        "docs/features/core-workbench/tickets/CW-05.md": "249d2edcccc4629833db615b303dcc3cd2810fcdfa274e37ecf767eda670f015",
+        "docs/features/core-workbench/tickets/CW-06.md": "d5003501e1c348b1b88eb9c8ccbcf6a99f83db7aff71e9f40e2892390d4e7952",
+        "docs/features/core-workbench/tickets/CW-07.md": "bf98385a49696d122d4998d48a4cfc063def54ea3c94005a90cf7b522685a19d",
+        "docs/features/core-workbench/tickets/CW-08.md": "eaae3e084646803b5f6c51d7c41e26a56e03b9285f1c64198cfee0d157091764",
+        "docs/features/core-workbench/tickets/CW-09.md": "0b28c83cbcd338082bfb6b320c0c834d23f2b3d4635f1dd0e68f058fa30a56fd",
+        "docs/features/core-workbench/tickets/CW-10.md": "cfc40fde74f47148333809c1331eb1414d91994c97dabf43ce4b350d391a7c1a",
+        "docs/features/core-workbench/tickets/CW-11.md": "9e7767f6f7f38c4ab45f7b1b1f9adfd5e9bf3c6fb25d7a25c4086c86e3cbb32b",
+        "docs/features/core-workbench/tickets/CW-12.md": "51d9e4073aeac9268651b9802ea8074b15b90ce37e2684f732b53c3788aab79a",
+        "docs/features/core-workbench/tickets/CW-13.md": "a9c71d324a6b4ab18554dbb6b9eb56107488d4e399790dd1a79eb4c567d97b77",
+        "docs/features/core-workbench/tickets/CW-14.md": "0c3a47d89a9f087fa309217492a867a0ed5570f31fcc44cc606d837fbe851224",
+        "docs/features/core-workbench/tickets/CW-15.md": "1ba5072c6e2420519b9db7bdab00c0db45b1fc284d7cbd34f2343ba10d7549ac",
+        "docs/features/core-workbench/tickets/CW-16.md": "e932e3c2a8036c3ff03193b3a49b34e9c0c8278e880354a2f176e55bedfc776f"
+      },
+      "record": ".workflow/core-workbench/runs/planning-p2.3-20260924/manifest.json",
+      "current_for_checkout": true,
+      "approval_status": "proposed_unapproved"
+    }
+  ],
+  "verification_history": [
+    {
+      "date": "2026-09-24",
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "checks": {
+        "local_links": {
+          "result": "passed"
+        },
+        "source_brief_sha": {
+          "result": "passed"
+        },
+        "acceptance_ids": {
+          "result": "passed",
+          "count": 34
+        },
+        "ticket_count": {
+          "result": "passed",
+          "count": 16
+        },
+        "bundle_hash": {
+          "result": "passed",
+          "sha256": "e76c0bde27d2d040e373d0a0ed5d90458960f76fbbf3e2ca163cb590a11f1c06"
+        }
+      },
+      "scope": "C-D49 policy/document consistency; product/runtime evidence in G3 and run ledger"
+    }
+  ],
+  "approval_history": [
+    {
+      "record": ".workflow/core-workbench/runs/implement-p2-20260923/cd49-doc-final-approval.json",
+      "revision": "r1.9",
+      "user_quote": "C-D49: six-point pause and worker role policy supersedes C-D35/C-D44; continue implementation",
+      "reviewed_bundle_sha256": "6f729ab8259c9cefd9cdebaf76dc8af1f8ca9626e119b10265c59a89ee995653",
+      "approved_bundle_sha256": "e76c0bde27d2d040e373d0a0ed5d90458960f76fbbf3e2ca163cb590a11f1c06",
+      "recorded_at_utc": "2026-09-23T15:53:06.221016+00:00",
+      "previous_record": ".workflow/core-workbench/runs/approval-r1.7/approval.json",
+      "current_for_checkout": false
+    },
+    {
+      "record": ".workflow/core-workbench/runs/implement-p2.3-20260924/cd53-policy-approval.json",
+      "revision": "r1.11",
+      "approved_bundle_sha256": "864fcf5616d76b5284d64ff792f392e31d7410650caaee3fa9a5a72fd264cf4b",
+      "policy_amendment_sha256": "52e60da9b17709dcb9e9826e33d3969f9d9350becbec190c7efcf8d4be1fd1f1",
+      "recorded_at_utc": "2026-09-24T07:26:04.920783+00:00",
+      "previous_record": ".workflow/core-workbench/runs/implement-p2.3-20260924/approval.json",
+      "current_for_checkout": true
+    }
+  ],
+  "pause": {
+    "requested_at_utc": "2026-09-24T07:50:02+00:00",
+    "run_ledger": ".workflow/core-workbench/runs/implement-p2.3-20260924/ledger.json",
+    "resume_requires_explicit_user_decision": false,
+    "no_auto_replay": true,
+    "resumed_at_utc": "2026-09-24T08:24:08.480975+00:00"
   }
 }

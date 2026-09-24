@@ -1,0 +1,1334 @@
+diff --git a/.workflow/core-workbench/runs/implement-p2-20260923/cw02-no-resize-control.json b/.workflow/core-workbench/runs/implement-p2-20260923/cw02-no-resize-control.json
+new file mode 100644
+index 0000000..715c784
+--- /dev/null
++++ b/.workflow/core-workbench/runs/implement-p2-20260923/cw02-no-resize-control.json
+@@ -0,0 +1,33 @@
++{
++  "gate_id": "G1",
++  "item_id": "stop_continue_without_resize_control",
++  "ticket": "CW-02",
++  "candidate_id": "6dbf3758270beaf355828e3df2a8506795fb7eb65d12cb0c7b8d46032bbe5c60",
++  "requirements_digest": "e76c0bde27d2d040e373d0a0ed5d90458960f76fbbf3e2ca163cb590a11f1c06",
++  "observed_evidence_level": "runtime",
++  "command": "dynamic in-memory variant of tests/gates/g1_vt/live_runtime_probe.py with screen.resize/session.resize omitted; no repository file modified",
++  "environment": {
++    "omp": "18.2.10",
++    "provider": "local scripted",
++    "profile_cwd_session": "temporary isolated"
++  },
++  "exit_code": 0,
++  "result": "counterexample_observed",
++  "observations": {
++    "pre_resize_child_stopped": true,
++    "pre_resize_output_quiet": true,
++    "resize_performed": false,
++    "child_tty_geometry": "100x32",
++    "post_continue_redraw_anchor_seen": true,
++    "post_continue_pty_bytes_drained": 27596,
++    "provider_requests": 2,
++    "tool_output_visible": true,
++    "final_visible": true,
++    "child_pid": 3994746,
++    "child_alive_after_cleanup": false,
++    "remaining_temp_directories": 0
++  },
++  "inference": "SIGCONT alone can produce the redraw anchor; prior STOP-resize-CONT predicate does not establish normal resize behavior.",
++  "gate_status": "pending",
++  "recorded_at_utc": "2026-09-24T00:30:26.868550+00:00"
++}
+diff --git a/.workflow/core-workbench/runs/implement-p2-20260923/cw02-onboarding-correction-candidate.json b/.workflow/core-workbench/runs/implement-p2-20260923/cw02-onboarding-correction-candidate.json
+new file mode 100644
+index 0000000..707a5c3
+--- /dev/null
++++ b/.workflow/core-workbench/runs/implement-p2-20260923/cw02-onboarding-correction-candidate.json
+@@ -0,0 +1,21 @@
++{
++  "ticket": "CW-02",
++  "gate": "G1",
++  "candidate_id": "6dbf3758270beaf355828e3df2a8506795fb7eb65d12cb0c7b8d46032bbe5c60",
++  "approved_bundle_sha256": "e76c0bde27d2d040e373d0a0ed5d90458960f76fbbf3e2ca163cb590a11f1c06",
++  "base_commit": "0a67572",
++  "prior_candidate_id": "207c7d6112224dae96f603c4b977bfb1724639d8ff84648ed35022638b247df2",
++  "files_sha256": {
++    "tests/gates/g1_vt/live_runtime_probe.py": "95b96a9d151b42ab686c8ab60fb4677afb1f7e900bfaf1eb2ac1a26d8f4fdac9",
++    "tests/gates/g1_vt/test_live_runtime_probe.py": "8e34f082711afddd225fe282d285c1f4f6a4d00725a0b70fc56a9d9f27be9f00"
++  },
++  "scope": "test-only correction of G1-R1/R2/R3",
++  "test_designer_checks": {
++    "unittest": "27/27 pass",
++    "live_omp": "exit 0 OMP 18.2.10",
++    "cleanup": "child PID/process group and temp directory absent"
++  },
++  "prior_quiet_only_attempt": "exit 1; pre_resize_output_quiet=false, preserved as failed attempt",
++  "gate_status": "partial_pending_other_G1_items",
++  "recorded_at_utc": "2026-09-24T00:26:50.802304+00:00"
++}
+diff --git a/.workflow/core-workbench/runs/implement-p2-20260923/cw02-onboarding-correction-root-result.json b/.workflow/core-workbench/runs/implement-p2-20260923/cw02-onboarding-correction-root-result.json
+new file mode 100644
+index 0000000..8764be7
+--- /dev/null
++++ b/.workflow/core-workbench/runs/implement-p2-20260923/cw02-onboarding-correction-root-result.json
+@@ -0,0 +1,48 @@
++{
++  "gate_id": "G1",
++  "item_id": "live_scripted_provider_tui_partial_corrected",
++  "ticket": "CW-02",
++  "candidate_id": "6dbf3758270beaf355828e3df2a8506795fb7eb65d12cb0c7b8d46032bbe5c60",
++  "requirements_digest": "e76c0bde27d2d040e373d0a0ed5d90458960f76fbbf3e2ca163cb590a11f1c06",
++  "required_evidence_level": "runtime",
++  "observed_evidence_level": "runtime",
++  "command": "PYTHONDONTWRITEBYTECODE=1 /tmp/cw02-g1-venv/bin/python tests/gates/g1_vt/live_runtime_probe.py",
++  "cwd": "/home/dwchoo/ai-exp-assistant",
++  "environment": {
++    "omp": "18.2.10",
++    "provider": "local scripted",
++    "profile_cwd_session": "temporary isolated",
++    "startup.setupWizard": false
++  },
++  "exit_code": 0,
++  "result": "passed_item_only",
++  "observations": {
++    "native_approval_visible": true,
++    "artifact_absent_on_approval_ui": true,
++    "artifact_absent_immediately_before_approval": true,
++    "artifact_present_after_approval": true,
++    "tool_output_visible": true,
++    "provider_requests": 2,
++    "final_response_visible": true,
++    "child_stopped_pre_resize": true,
++    "old_pty_output_quiet": true,
++    "resized_child_tty": "84x24",
++    "new_redraw_anchor_seen": true,
++    "resize_pty_bytes_drained": 48343,
++    "query_replies_total": 9,
++    "query_reply_bytes_accepted": 47,
++    "tty_canonical": false,
++    "tty_input_pending_bytes": 0,
++    "omp_query_interpretation_confirmed": false,
++    "pty_bytes_drained": 107756,
++    "child_pid": 3992857,
++    "child_alive_after_cleanup": false,
++    "remaining_temp_directories": 0
++  },
++  "unknowns": [
++    "OMP semantic interpretation of terminal query replies",
++    "Normal resize without SIGSTOP/SIGCONT barrier, external tmux/herdr, and remaining G1 matrix unverified"
++  ],
++  "gate_status": "pending",
++  "recorded_at_utc": "2026-09-24T00:26:50.802304+00:00"
++}
+diff --git a/.workflow/core-workbench/runs/implement-p2-20260923/cw02-onboarding-delta-review.json b/.workflow/core-workbench/runs/implement-p2-20260923/cw02-onboarding-delta-review.json
+new file mode 100644
+index 0000000..a484623
+--- /dev/null
++++ b/.workflow/core-workbench/runs/implement-p2-20260923/cw02-onboarding-delta-review.json
+@@ -0,0 +1,18 @@
++{
++  "ticket": "CW-02",
++  "gate": "G1",
++  "review_type": "read_only_delta",
++  "candidate_id": "6dbf3758270beaf355828e3df2a8506795fb7eb65d12cb0c7b8d46032bbe5c60",
++  "files_sha256": {
++    "tests/gates/g1_vt/live_runtime_probe.py": "95b96a9d151b42ab686c8ab60fb4677afb1f7e900bfaf1eb2ac1a26d8f4fdac9",
++    "tests/gates/g1_vt/test_live_runtime_probe.py": "8e34f082711afddd225fe282d285c1f4f6a4d00725a0b70fc56a9d9f27be9f00"
++  },
++  "dispositions": {
++    "G1-R2": "closed; ICANON inspected for TTY queue drain claim",
++    "G1-R3": "closed; artifact absence rechecked immediately before Enter",
++    "G1-R1": "pre-resize stale bytes isolated by stopped child and quiet drain; normal resize still unproved because SIGCONT itself might redraw"
++  },
++  "new_actionable_uncertainty": "STOP->CONT without resize control or separate ordinary resize observation needed before normal resize claim",
++  "scope": "G1 live probe partial evidence; gate pending",
++  "recorded_at_utc": "2026-09-24T00:29:02.950742+00:00"
++}
+diff --git a/.workflow/core-workbench/runs/implement-p2-20260923/cw02-onboarding-diagnosis.json b/.workflow/core-workbench/runs/implement-p2-20260923/cw02-onboarding-diagnosis.json
+new file mode 100644
+index 0000000..464ed54
+--- /dev/null
++++ b/.workflow/core-workbench/runs/implement-p2-20260923/cw02-onboarding-diagnosis.json
+@@ -0,0 +1,26 @@
++{
++  "ticket": "CW-02",
++  "gate": "G1",
++  "result": "probe_harness_onboarding_root_cause_observed",
++  "environment": "OMP 18.2.10 local scripted provider, temporary isolated profile/cwd/session/config, no user configuration writes",
++  "baseline_observation": {
++    "provider_requests": 0,
++    "composer_ready": true,
++    "clear_ack": false,
++    "ui_hints": [
++      "select",
++      "provider"
++    ]
++  },
++  "discriminating_observation": {
++    "setup_screen": "Setup step 1 of 5 / Set up your providers",
++    "config_overlay": "startup.setupWizard: false",
++    "provider_requests": 1,
++    "approval_visible": true,
++    "tool_output_visible_probe_predicate": true,
++    "final_visible": false,
++    "resize_screen_restored": false
++  },
++  "interpretation": "Onboarding blocked the original probe input. Provider request and approval UI are now reachable. Existing output marker can appear in command preview and resize predicate expects composer during approval; G1 remains pending until probe predicates are corrected and runtime results reviewed.",
++  "recorded_at_utc": "2026-09-24T00:09:44.009268+00:00"
++}
+diff --git a/.workflow/core-workbench/runs/implement-p2-20260923/cw02-onboarding-early-review.json b/.workflow/core-workbench/runs/implement-p2-20260923/cw02-onboarding-early-review.json
+new file mode 100644
+index 0000000..a5b8c93
+--- /dev/null
++++ b/.workflow/core-workbench/runs/implement-p2-20260923/cw02-onboarding-early-review.json
+@@ -0,0 +1,30 @@
++{
++  "ticket": "CW-02",
++  "gate": "G1",
++  "review_type": "read_only_early_technical",
++  "candidate_id": "207c7d6112224dae96f603c4b977bfb1724639d8ff84648ed35022638b247df2",
++  "files_sha256": {
++    "tests/gates/g1_vt/live_runtime_probe.py": "a8dc8035a9ca24861ac452e895b6a8d8810ce6972ec2621a185efe462dec8dcc",
++    "tests/gates/g1_vt/test_live_runtime_probe.py": "c54caeff7134da763e817e484144e1a800feefa46e11295eec225039ad983be8"
++  },
++  "findings": [
++    {
++      "id": "G1-R1",
++      "severity": "medium",
++      "issue": "resize can pass with local screen.resize plus stale pre-resize raw anchor; need drain and child new geometry/redraw evidence"
++    },
++    {
++      "id": "G1-R2",
++      "severity": "medium",
++      "issue": "FIONREAD==0 can be false positive in canonical TTY; inspect ICANON or downgrade claim"
++    },
++    {
++      "id": "G1-R3",
++      "severity": "low",
++      "issue": "artifact absence checked before 3-second resize wait, not immediately before native approval Enter"
++    }
++  ],
++  "accepted": true,
++  "scope": "probe predicate correction only; G1 remains pending",
++  "recorded_at_utc": "2026-09-24T00:21:28.661504+00:00"
++}
+diff --git a/.workflow/core-workbench/runs/implement-p2-20260923/cw02-onboarding-root-live-result.json b/.workflow/core-workbench/runs/implement-p2-20260923/cw02-onboarding-root-live-result.json
+new file mode 100644
+index 0000000..272fad0
+--- /dev/null
++++ b/.workflow/core-workbench/runs/implement-p2-20260923/cw02-onboarding-root-live-result.json
+@@ -0,0 +1,42 @@
++{
++  "gate_id": "G1",
++  "item_id": "live_scripted_provider_tui_partial",
++  "ticket": "CW-02",
++  "candidate_id": "207c7d6112224dae96f603c4b977bfb1724639d8ff84648ed35022638b247df2",
++  "requirements_digest": "e76c0bde27d2d040e373d0a0ed5d90458960f76fbbf3e2ca163cb590a11f1c06",
++  "required_evidence_level": "runtime",
++  "observed_evidence_level": "runtime",
++  "command": "PYTHONDONTWRITEBYTECODE=1 /tmp/cw02-g1-venv/bin/python tests/gates/g1_vt/live_runtime_probe.py",
++  "cwd": "/home/dwchoo/ai-exp-assistant",
++  "environment": {
++    "omp": "18.2.10",
++    "provider": "local scripted",
++    "profile_cwd_session": "temporary isolated",
++    "startup.setupWizard": false
++  },
++  "exit_code": 0,
++  "result": "passed_item_only",
++  "observations": {
++    "native_approval_visible": true,
++    "artifact_absent_before_approval": true,
++    "artifact_present_after_approval": true,
++    "tool_output_visible": true,
++    "provider_requests": 2,
++    "final_response_visible": true,
++    "resize_approval_surface_restored": true,
++    "query_replies_total": 9,
++    "query_reply_bytes_accepted": 47,
++    "tty_input_pending_bytes": 0,
++    "omp_query_interpretation_confirmed": false,
++    "pty_bytes_drained": 109040,
++    "child_pid": 3986663,
++    "child_alive_after_cleanup": false,
++    "remaining_temp_directories": 0
++  },
++  "unknowns": [
++    "OMP semantic interpretation of terminal query replies",
++    "Other native TUI paths, external tmux/herdr, and full G1 matrix remain unverified"
++  ],
++  "gate_status": "pending",
++  "recorded_at_utc": "2026-09-24T00:17:31.141578+00:00"
++}
+diff --git a/.workflow/core-workbench/runs/implement-p2-20260923/cw02-onboarding-test-candidate.json b/.workflow/core-workbench/runs/implement-p2-20260923/cw02-onboarding-test-candidate.json
+new file mode 100644
+index 0000000..be17bd0
+--- /dev/null
++++ b/.workflow/core-workbench/runs/implement-p2-20260923/cw02-onboarding-test-candidate.json
+@@ -0,0 +1,20 @@
++{
++  "ticket": "CW-02",
++  "gate": "G1",
++  "candidate_id": "207c7d6112224dae96f603c4b977bfb1724639d8ff84648ed35022638b247df2",
++  "approved_bundle_sha256": "e76c0bde27d2d040e373d0a0ed5d90458960f76fbbf3e2ca163cb590a11f1c06",
++  "base_commit": "0a67572",
++  "files_sha256": {
++    "tests/gates/g1_vt/live_runtime_probe.py": "a8dc8035a9ca24861ac452e895b6a8d8810ce6972ec2621a185efe462dec8dcc",
++    "tests/gates/g1_vt/test_live_runtime_probe.py": "c54caeff7134da763e817e484144e1a800feefa46e11295eec225039ad983be8"
++  },
++  "scope": "test-only G1 live OMP setup/predicate correction",
++  "test_designer_checks": {
++    "unittest": "23/23 pass",
++    "live_omp": "exit 0 OMP 18.2.10",
++    "cleanup": "child PID and process group absent"
++  },
++  "prior_probe": "y key did not approve; exit 1, result file absent. Enter corrected.",
++  "gate_status": "partial_pending_other_G1_items",
++  "recorded_at_utc": "2026-09-24T00:16:36.203804+00:00"
++}
+diff --git a/.workflow/core-workbench/runs/implement-p2-20260923/cw02-resize-evidence-candidate.json b/.workflow/core-workbench/runs/implement-p2-20260923/cw02-resize-evidence-candidate.json
+new file mode 100644
+index 0000000..5dafc73
+--- /dev/null
++++ b/.workflow/core-workbench/runs/implement-p2-20260923/cw02-resize-evidence-candidate.json
+@@ -0,0 +1,22 @@
++{
++  "status": "candidate_ready",
++  "scope": "test-only G1 evidence classification",
++  "files_sha256": {
++    "tests/gates/g1_vt/live_runtime_probe.py": "c6143d78f937901b60c23541ebf8502fd92be2b1fa6ade2b0d8064b0b1f14824",
++    "tests/gates/g1_vt/test_live_runtime_probe.py": "a06381fef38456e5070f0ff936ad5eac75cba313e54d73a8c2d3b19c7c07bf15"
++  },
++  "candidate_id": "68dbbe5d92121b67d515fab1907a3563a51fe570ab1c32d4f289c647563fb972",
++  "test": {
++    "command": "PYTHONDONTWRITEBYTECODE=1 /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/gates/g1_vt -p 'test_*.py' -q",
++    "result": "29/29 passed"
++  },
++  "live": {
++    "command": "PYTHONDONTWRITEBYTECODE=1 /tmp/cw02-g1-venv/bin/python tests/gates/g1_vt/live_runtime_probe.py",
++    "result_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-resize-evidence-root-live.json",
++    "exit_code": 0,
++    "child_dead": true,
++    "temp_dirs": 0
++  },
++  "initial_system_python_attempt": "failed_missing_pyte; replaced with established /tmp/cw02-g1-venv environment",
++  "recorded_at_utc": "2026-09-24T00:35:00.214542+00:00"
++}
+diff --git a/.workflow/core-workbench/runs/implement-p2-20260923/cw02-resize-evidence-delta-review.json b/.workflow/core-workbench/runs/implement-p2-20260923/cw02-resize-evidence-delta-review.json
+new file mode 100644
+index 0000000..bfbfd4e
+--- /dev/null
++++ b/.workflow/core-workbench/runs/implement-p2-20260923/cw02-resize-evidence-delta-review.json
+@@ -0,0 +1,21 @@
++{
++  "call_id": "cw02-resize-evidence-delta-review",
++  "candidate_id": "68dbbe5d92121b67d515fab1907a3563a51fe570ab1c32d4f289c647563fb972",
++  "status": "accepted_partial_evidence",
++  "new_material_false_success_findings": [],
++  "findings": [
++    "CLI exit 0 is limited to actual OMP approval/tool/provider/final roundtrip",
++    "No-resize STOP/CONT control also redrew anchor; normal resize restoration remains unverified",
++    "OMP interpretation of query replies remains unverified; noncanonical TTY queue drain is narrower evidence",
++    "Negative unit checks confounded resize and artifact-present-before-approval paths"
++  ],
++  "limits": [
++    "Predicate unit tests do not independently exercise signal/PTY; Root live and no-resize control records support observed behavior",
++    "This is not final G1 acceptance"
++  ],
++  "reviewed_files_sha256": {
++    "tests/gates/g1_vt/live_runtime_probe.py": "c6143d78f937901b60c23541ebf8502fd92be2b1fa6ade2b0d8064b0b1f14824",
++    "tests/gates/g1_vt/test_live_runtime_probe.py": "a06381fef38456e5070f0ff936ad5eac75cba313e54d73a8c2d3b19c7c07bf15"
++  },
++  "recorded_at_utc": "2026-09-24T00:36:07.769264+00:00"
++}
+diff --git a/.workflow/core-workbench/runs/implement-p2-20260923/cw02-resize-evidence-root-live.json b/.workflow/core-workbench/runs/implement-p2-20260923/cw02-resize-evidence-root-live.json
+new file mode 100644
+index 0000000..f5ced50
+--- /dev/null
++++ b/.workflow/core-workbench/runs/implement-p2-20260923/cw02-resize-evidence-root-live.json
+@@ -0,0 +1 @@
++{"approval_surface_present_after_resize": true, "approval_visible": true, "artifact_absent_before_approval": true, "artifact_absent_on_approval_ui": true, "artifact_present_after_approval": true, "child_exit_before_cleanup": null, "child_pid": 3998035, "composer_ready": true, "final_visible": true, "gate_status": "pending", "no_resize_control_redraw_anchor_seen": true, "normal_resize_confirmed": false, "normal_resize_result": "inconclusive_no_resize_control_redrew", "omp_version": "omp/18.2.10", "post_continue_pty_bytes_drained": 48720, "post_continue_redraw_anchor_seen": true, "pre_resize_child_stopped": true, "pre_resize_output_quiet": true, "pre_resize_pty_bytes_drained": 0, "provider_followup_observed": true, "provider_requests": 2, "pty_bytes_drained": 109014, "query_replies_before_resize": 8, "query_replies_total": 9, "query_reply_bytes_accepted": 47, "query_reply_consumption_level": "tty_input_drained", "query_reply_omp_interpretation_confirmed": false, "query_reply_queue_drained": true, "query_reply_tty_canonical": false, "query_reply_tty_input_drained": true, "query_reply_tty_pending_bytes": 0, "resize_child_columns": 84, "resize_child_rows": 24, "result": "approval_tool_scenario_passed", "scenario": "approval_tool_roundtrip", "scenario_passed": true, "tool_output_visible": true}
+diff --git a/.workflow/core-workbench/runs/implement-p2-20260923/ledger.json b/.workflow/core-workbench/runs/implement-p2-20260923/ledger.json
+index be1a87b..85c78c0 100644
+--- a/.workflow/core-workbench/runs/implement-p2-20260923/ledger.json
++++ b/.workflow/core-workbench/runs/implement-p2-20260923/ledger.json
+@@ -22,8 +22,8 @@
+     },
+     "amendment": "CW-01 third bounded correction granted from existing fix/review reserve: new writer defect introduced in cycle 2; total child-run budget remains 64. No acceptance/scope change.",
+     "oracle_calls_used": 5,
+-    "total_child_runs_used": 92,
+-    "total_child_runs_available": 36,
++    "total_child_runs_used": 98,
++    "total_child_runs_available": 30,
+     "reconciliation": {
+       "method": "2026-09-23 host Codex child session task_started events after run start; unique turn_id, excludes parent duplicate event",
+       "completed_calls": 40,
+@@ -36,7 +36,10 @@
+       "cw03_reviewer": 0,
+       "cw02_review": 0,
+       "cw04_worker_test_review": 0,
+-      "cw03_test_worker_review": 0
++      "cw03_test_worker_review": 0,
++      "cw02_onboarding_reviewer": 0,
++      "cw02_onboarding_delta_review": 0,
++      "cw02_resize_evidence_reviewer": 0
+     },
+     "current_reserved_total": 0,
+     "minimum_future_calls_note": "CW-05..CW-15 each require worker/test_designer/reviewer (33 calls) and CW-16 independent test/review (2 calls), plus CW-02..04 remaining work; 128 total now authorized.",
+@@ -97,7 +100,7 @@
+       "integration_record": ".workflow/core-workbench/runs/implement-p2-20260923/cw01-integration.json"
+     },
+     "CW-02": {
+-      "status": "blocked_missing_live_input_evidence",
++      "status": "partial_verified_g1_pending",
+       "base_checkpoint": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-base.tar.gz",
+       "started_at_utc": "2026-09-23T07:49:09.101058+00:00",
+       "candidate_id": "2c46e52e1fc6ad9e66e5cba2001f6037f86b45a60e101fc53944246a98b4c569",
+@@ -115,11 +118,22 @@
+       "latest_independent_test": {
+         "command": "PYTHONDONTWRITEBYTECODE=1 /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/gates/g1_vt -p 'test_*.py' -q",
+         "exit_code": 0,
+-        "passed": 21,
+-        "test_file_sha256": "018b663ba14bc4e2da1434a1d585240ad701902720ea731dc3f3f63229fc5bfe"
++        "passed": 29,
++        "test_file_sha256": "a06381fef38456e5070f0ff936ad5eac75cba313e54d73a8c2d3b19c7c07bf15",
++        "scope": "G1 fixture and live-probe predicate tests"
+       },
+       "live_probe_record": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-live-runtime-resume-result.json",
+-      "blocker": "Actual OMP scripted-provider TUI probe showed provider request 0; composer input and /clear not acknowledged, so approval/tool output/resize not verified"
++      "blocker": "Approval/tool roundtrip verified in actual OMP 18.2.10, but normal resize restoration and OMP query interpretation remain unverified; external tmux/herdr matrix pending.",
++      "onboarding_test_candidate": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-onboarding-test-candidate.json",
++      "onboarding_root_live_result": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-onboarding-root-live-result.json",
++      "onboarding_early_review": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-onboarding-early-review.json",
++      "onboarding_correction_candidate": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-onboarding-correction-candidate.json",
++      "onboarding_correction_root_result": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-onboarding-correction-root-result.json",
++      "onboarding_delta_review": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-onboarding-delta-review.json",
++      "no_resize_control": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-no-resize-control.json",
++      "resize_evidence_candidate": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-resize-evidence-candidate.json",
++      "resize_evidence_root_live_result": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-resize-evidence-root-live.json",
++      "resize_evidence_delta_review": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-resize-evidence-delta-review.json"
+     },
+     "CW-03": {
+       "status": "blocked_after_fourth_attempt",
+@@ -623,6 +637,186 @@
+         "Actual OMP non-empty composer and session switch unverified",
+         "Production backend reconciliation/model review hold unverified"
+       ]
++    },
++    {
++      "gate_id": "G1",
++      "item_id": "live_scripted_provider_tui_partial",
++      "ticket": "CW-02",
++      "candidate_id": "207c7d6112224dae96f603c4b977bfb1724639d8ff84648ed35022638b247df2",
++      "requirements_digest": "e76c0bde27d2d040e373d0a0ed5d90458960f76fbbf3e2ca163cb590a11f1c06",
++      "required_evidence_level": "runtime",
++      "observed_evidence_level": "runtime",
++      "command": "PYTHONDONTWRITEBYTECODE=1 /tmp/cw02-g1-venv/bin/python tests/gates/g1_vt/live_runtime_probe.py",
++      "cwd": "/home/dwchoo/ai-exp-assistant",
++      "environment": {
++        "omp": "18.2.10",
++        "provider": "local scripted",
++        "profile_cwd_session": "temporary isolated",
++        "startup.setupWizard": false
++      },
++      "exit_code": 0,
++      "result": "passed_item_only",
++      "observations": {
++        "native_approval_visible": true,
++        "artifact_absent_before_approval": true,
++        "artifact_present_after_approval": true,
++        "tool_output_visible": true,
++        "provider_requests": 2,
++        "final_response_visible": true,
++        "resize_approval_surface_restored": true,
++        "query_replies_total": 9,
++        "query_reply_bytes_accepted": 47,
++        "tty_input_pending_bytes": 0,
++        "omp_query_interpretation_confirmed": false,
++        "pty_bytes_drained": 109040,
++        "child_pid": 3986663,
++        "child_alive_after_cleanup": false,
++        "remaining_temp_directories": 0
++      },
++      "unknowns": [
++        "OMP semantic interpretation of terminal query replies",
++        "Other native TUI paths, external tmux/herdr, and full G1 matrix remain unverified"
++      ],
++      "gate_status": "pending",
++      "recorded_at_utc": "2026-09-24T00:17:31.141578+00:00",
++      "evidence_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-onboarding-root-live-result.json"
++    },
++    {
++      "gate_id": "G1",
++      "item_id": "live_scripted_provider_tui_partial_corrected",
++      "ticket": "CW-02",
++      "candidate_id": "6dbf3758270beaf355828e3df2a8506795fb7eb65d12cb0c7b8d46032bbe5c60",
++      "requirements_digest": "e76c0bde27d2d040e373d0a0ed5d90458960f76fbbf3e2ca163cb590a11f1c06",
++      "required_evidence_level": "runtime",
++      "observed_evidence_level": "runtime",
++      "command": "PYTHONDONTWRITEBYTECODE=1 /tmp/cw02-g1-venv/bin/python tests/gates/g1_vt/live_runtime_probe.py",
++      "cwd": "/home/dwchoo/ai-exp-assistant",
++      "environment": {
++        "omp": "18.2.10",
++        "provider": "local scripted",
++        "profile_cwd_session": "temporary isolated",
++        "startup.setupWizard": false
++      },
++      "exit_code": 0,
++      "result": "passed_item_only",
++      "observations": {
++        "native_approval_visible": true,
++        "artifact_absent_on_approval_ui": true,
++        "artifact_absent_immediately_before_approval": true,
++        "artifact_present_after_approval": true,
++        "tool_output_visible": true,
++        "provider_requests": 2,
++        "final_response_visible": true,
++        "child_stopped_pre_resize": true,
++        "old_pty_output_quiet": true,
++        "resized_child_tty": "84x24",
++        "new_redraw_anchor_seen": true,
++        "resize_pty_bytes_drained": 48343,
++        "query_replies_total": 9,
++        "query_reply_bytes_accepted": 47,
++        "tty_canonical": false,
++        "tty_input_pending_bytes": 0,
++        "omp_query_interpretation_confirmed": false,
++        "pty_bytes_drained": 107756,
++        "child_pid": 3992857,
++        "child_alive_after_cleanup": false,
++        "remaining_temp_directories": 0
++      },
++      "unknowns": [
++        "OMP semantic interpretation of terminal query replies",
++        "Normal resize without SIGSTOP/SIGCONT barrier, external tmux/herdr, and remaining G1 matrix unverified"
++      ],
++      "gate_status": "pending",
++      "recorded_at_utc": "2026-09-24T00:26:50.802304+00:00",
++      "evidence_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-onboarding-correction-root-result.json"
++    },
++    {
++      "gate_id": "G1",
++      "item_id": "stop_continue_without_resize_control",
++      "ticket": "CW-02",
++      "candidate_id": "6dbf3758270beaf355828e3df2a8506795fb7eb65d12cb0c7b8d46032bbe5c60",
++      "requirements_digest": "e76c0bde27d2d040e373d0a0ed5d90458960f76fbbf3e2ca163cb590a11f1c06",
++      "observed_evidence_level": "runtime",
++      "command": "dynamic in-memory variant of tests/gates/g1_vt/live_runtime_probe.py with screen.resize/session.resize omitted; no repository file modified",
++      "environment": {
++        "omp": "18.2.10",
++        "provider": "local scripted",
++        "profile_cwd_session": "temporary isolated"
++      },
++      "exit_code": 0,
++      "result": "counterexample_observed",
++      "observations": {
++        "pre_resize_child_stopped": true,
++        "pre_resize_output_quiet": true,
++        "resize_performed": false,
++        "child_tty_geometry": "100x32",
++        "post_continue_redraw_anchor_seen": true,
++        "post_continue_pty_bytes_drained": 27596,
++        "provider_requests": 2,
++        "tool_output_visible": true,
++        "final_visible": true,
++        "child_pid": 3994746,
++        "child_alive_after_cleanup": false,
++        "remaining_temp_directories": 0
++      },
++      "inference": "SIGCONT alone can produce the redraw anchor; prior STOP-resize-CONT predicate does not establish normal resize behavior.",
++      "gate_status": "pending",
++      "recorded_at_utc": "2026-09-24T00:30:26.868550+00:00",
++      "evidence_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-no-resize-control.json"
++    },
++    {
++      "gate_id": "G1",
++      "item_id": "live_approval_tool_roundtrip_partial_verified",
++      "ticket": "CW-02",
++      "candidate_id": "68dbbe5d92121b67d515fab1907a3563a51fe570ab1c32d4f289c647563fb972",
++      "requirements_digest": "e76c0bde27d2d040e373d0a0ed5d90458960f76fbbf3e2ca163cb590a11f1c06",
++      "required_evidence_level": "runtime",
++      "observed_evidence_level": "runtime",
++      "command": "PYTHONDONTWRITEBYTECODE=1 /tmp/cw02-g1-venv/bin/python tests/gates/g1_vt/live_runtime_probe.py",
++      "cwd": "/home/dwchoo/ai-exp-assistant",
++      "environment": {
++        "omp": "18.2.10",
++        "provider": "local scripted",
++        "profile_cwd_session": "temporary isolated",
++        "startup.setupWizard": false
++      },
++      "exit_code": 0,
++      "result": "passed_item_only",
++      "observations": {
++        "scenario_passed": true,
++        "gate_status": "pending",
++        "approval_visible": true,
++        "artifact_absent_on_approval_ui": true,
++        "artifact_absent_before_approval": true,
++        "artifact_present_after_approval": true,
++        "tool_output_visible": true,
++        "provider_requests": 2,
++        "provider_followup_observed": true,
++        "final_visible": true,
++        "normal_resize_confirmed": false,
++        "normal_resize_result": "inconclusive_no_resize_control_redrew",
++        "post_continue_redraw_anchor_seen": true,
++        "no_resize_control_redraw_anchor_seen": true,
++        "resize_child_columns": 84,
++        "resize_child_rows": 24,
++        "query_replies_total": 9,
++        "query_reply_bytes_accepted": 47,
++        "query_reply_tty_input_drained": true,
++        "query_reply_omp_interpretation_confirmed": false,
++        "child_pid": 3998035
++      },
++      "child_alive_after_cleanup": false,
++      "remaining_temp_directories": 0,
++      "unknowns": [
++        "Normal resize restoration: no-resize STOP/CONT control also redrew anchor",
++        "OMP interpretation of terminal query replies",
++        "External tmux/herdr and remaining G1 matrix"
++      ],
++      "supersedes_resize_claim_from": "live_scripted_provider_tui_partial",
++      "gate_status": "pending",
++      "recorded_at_utc": "2026-09-24T00:38:34.754911+00:00",
++      "evidence_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-resize-evidence-root-live.json",
++      "review_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-resize-evidence-delta-review.json"
+     }
+   ],
+   "previous_approved_bundle_sha256": "e0b6abefef59c70f2a438c82005c671d23ec4776f4215ae9e8ba96211021f944",
+@@ -1756,6 +1950,90 @@
+       "host_observed_effort": "unverified",
+       "evidence_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-reconnect-delta-review.json",
+       "completed_at_utc": "2026-09-23T16:13:45.225137+00:00"
++    },
++    {
++      "call_id": "cw02-onboarding-test-harness",
++      "role": "test_designer",
++      "assignment": "/root/cw02_onboarding_test",
++      "purpose": "Test-only correction of G1 live OMP probe: isolated setup skip, actual approval/tool effect, valid resize and cleanup predicates",
++      "started_at_utc": "2026-09-24T00:09:44.009268+00:00",
++      "status": "candidate_ready",
++      "configured_model": "gpt-6-sol",
++      "configured_effort": "high",
++      "host_observed_model": "unverified",
++      "host_observed_effort": "unverified",
++      "evidence_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-onboarding-test-candidate.json",
++      "completed_at_utc": "2026-09-24T00:16:36.203804+00:00"
++    },
++    {
++      "call_id": "cw02-onboarding-early-review",
++      "role": "reviewer",
++      "assignment": "/root/cw02_onboarding_review",
++      "purpose": "Read-only technical review of frozen test-only G1 onboarding/predicate candidate; not full G1 final acceptance",
++      "started_at_utc": "2026-09-24T00:17:31.141578+00:00",
++      "status": "completed_findings_accepted",
++      "configured_model": "gpt-6-sol",
++      "configured_effort": "high",
++      "host_observed_model": "unverified",
++      "host_observed_effort": "unverified",
++      "evidence_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-onboarding-early-review.json",
++      "completed_at_utc": "2026-09-24T00:21:28.661504+00:00"
++    },
++    {
++      "call_id": "cw02-onboarding-test-correction",
++      "role": "test_designer",
++      "assignment": "/root/cw02_onboarding_test",
++      "purpose": "Correct three accepted G1 live probe evidence predicate findings; test-only",
++      "started_at_utc": "2026-09-24T00:21:28.661504+00:00",
++      "status": "candidate_ready",
++      "configured_model": "gpt-6-sol",
++      "configured_effort": "high",
++      "host_observed_model": "unverified",
++      "host_observed_effort": "unverified",
++      "evidence_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-onboarding-correction-candidate.json",
++      "completed_at_utc": "2026-09-24T00:26:50.802304+00:00"
++    },
++    {
++      "call_id": "cw02-onboarding-delta-review",
++      "role": "reviewer",
++      "assignment": "/root/cw02_onboarding_review",
++      "purpose": "Read-only delta review of G1-R1/R2/R3 test-only correction on frozen candidate; not full G1 final acceptance",
++      "started_at_utc": "2026-09-24T00:26:50.802304+00:00",
++      "status": "completed_partial_one_uncertainty",
++      "configured_model": "gpt-6-sol",
++      "configured_effort": "high",
++      "host_observed_model": "unverified",
++      "host_observed_effort": "unverified",
++      "evidence_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-onboarding-delta-review.json",
++      "completed_at_utc": "2026-09-24T00:29:02.950742+00:00"
++    },
++    {
++      "call_id": "cw02-resize-evidence-test-correction",
++      "role": "test_designer",
++      "assignment": "/root/cw02_onboarding_test",
++      "purpose": "Test-only correction of G1 resize evidence classification after no-resize SIGCONT counterexample",
++      "started_at_utc": "2026-09-24T00:30:26.868550+00:00",
++      "status": "candidate_ready",
++      "configured_model": "gpt-6-sol",
++      "configured_effort": "high",
++      "host_observed_model": "unverified",
++      "host_observed_effort": "unverified",
++      "evidence_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-resize-evidence-candidate.json",
++      "completed_at_utc": "2026-09-24T00:35:19.841099+00:00"
++    },
++    {
++      "call_id": "cw02-resize-evidence-delta-review",
++      "role": "reviewer",
++      "assignment": "/root/cw02_onboarding_review",
++      "purpose": "Read-only evidence-claim delta review after no-resize STOP/CONT control; not final G1 acceptance",
++      "started_at_utc": "2026-09-24T00:35:19.841099+00:00",
++      "status": "completed_partial_accepted",
++      "configured_model": "gpt-6-sol",
++      "configured_effort": "high",
++      "host_observed_model": "unverified",
++      "host_observed_effort": "unverified",
++      "evidence_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-resize-evidence-delta-review.json",
++      "completed_at_utc": "2026-09-24T00:36:07.769264+00:00"
+     }
+   ],
+   "current_snapshot": ".workflow/core-workbench/runs/implement-p2-20260923/commit-checkpoint-20260924-090050.json",
+@@ -1858,6 +2136,47 @@
+       "observable_progress": "Node 15/15, Python 7/7; actual OMP abort, unknown retention, test-owned reconciliation, four provider-linked message kinds, busy/native approval defer, ACK loss and immediate reconnect duplicate no replay all observed and delta-reviewed",
+       "next_action": "Do not mark G3 passed; resolve live non-empty composer/session switch and integrate backend reconciliation in CW-11/12 after G1/G2 gates. G1 original TUI input and G2 protected same-shell execution remain blocking prerequisites.",
+       "budget_note": "92/128 child calls used; 36 remain, of which 35 are minimum worker/test/review estimates for CW-05..16. Explicit user ceiling retained."
++    },
++    {
++      "at_utc": "2026-09-24T00:09:44.009268+00:00",
++      "incident": "CW-02 G1 live scripted-provider input inconclusive",
++      "observable_progress": "Actual setup wizard screen isolated; temporary config startup.setupWizard:false reaches provider request 1 and native approval UI. Existing output/resize predicates can falsely pass/fail.",
++      "next_action": "One test_designer test-only harness correction, Root live rerun, one fresh reviewer if predicate and cleanup evidence pass.",
++      "finite_batch_calls_reserved": 2,
++      "success_stop_criteria": "No onboarding, actual native approval and tool side effect/output observed, post-resize screen restoration observed, child/temporary process cleanup verified; otherwise retain G1 pending."
++    },
++    {
++      "at_utc": "2026-09-24T00:21:28.661504+00:00",
++      "incident": "CW-02 G1 onboarding probe evidence predicates",
++      "prior_attempts": "initial test-only candidate and read-only early review",
++      "observable_progress": "Initial TUI setup blocker resolved; actual provider/approval/tool/final observed; reviewer isolated three bounded proof gaps without product defect claim.",
++      "next_action": "One test-only correction for resize geometry evidence, noncanonical query reply check or honest downgrade, and approval pre-Enter absence; Root rerun and affected delta review.",
++      "finite_batch_calls_reserved": 2,
++      "success_stop_criteria": "Reviewer findings resolved by tests and actual OMP probe; no inflated G1 pass; process cleanup and candidate hashes verified."
++    },
++    {
++      "at_utc": "2026-09-24T00:29:02.950742+00:00",
++      "incident": "CW-02 G1 normal resize evidence",
++      "observable_progress": "Setup wizard root cause removed; approval/tool/final runtime observed, R2/R3 closed, stale bytes separated. Reviewer identifies SIGCONT-induced redraw as remaining confounder.",
++      "next_action": "One no-file-write STOP->CONT without resize control to discriminate redraw cause; keep G1 pending regardless until ordinary resize/tmux/herdr matrix.",
++      "finite_batch_calls_reserved": 0,
++      "success_stop_criteria": "Control output metadata distinguishes whether SIGCONT alone can produce anchor redraw; no product or test edits and all processes cleaned."
++    },
++    {
++      "at_utc": "2026-09-24T00:30:26.868550+00:00",
++      "incident": "CW-02 G1 resize proof confounded by SIGCONT",
++      "observable_progress": "Actual no-resize STOP->CONT control reproduced redraw anchor (27596 PTY bytes), ruling out anchor as specific normal resize proof. Provider/approval/tool/final evidence remains valid.",
++      "next_action": "Test-only evidence correction: separate verified approval/tool scenario from STOP-resize-CONT observation and mark normal resize unverified; independent delta review.",
++      "finite_batch_calls_reserved": 2,
++      "success_stop_criteria": "No normal resize pass claim from confounded predicate; focused unit and live scenario still report exact observations; review accepts evidence classification."
++    },
++    {
++      "at_utc": "2026-09-24T00:38:34.754911+00:00",
++      "incident": "CW-02 G1 post-onboarding partial evidence",
++      "observable_progress": "Actual OMP 18.2.10 native approval, tool side effect/output, provider followup and final response pass; 29/29 G1 tests and read-only delta review pass. No-resize STOP/CONT control also redraws anchor.",
++      "next_action": "Keep G1 pending. Demonstrate ordinary resize without STOP/CONT confounder, OMP query interpretation and external tmux/herdr matrix before gate acceptance. G2 protected same-shell execution remains independent blocker.",
++      "finite_batch_calls_reserved": 0,
++      "budget_note": "98/128 child calls used; 30 remain, below existing 35-call estimate for CW-05..16 before remaining G1/G2/G3 work. Do not exceed explicit cap."
+     }
+   ],
+   "recoveries": [
+@@ -1865,7 +2184,7 @@
+   ],
+   "technical_blockers": [
+     "CW-03: redesign review complete; no validated protected execution primitive in current stock Bash/dash adapter. Need architecture feasibility or explicit approved behavior change before another product candidate.",
+-    "CW-02: actual scripted-provider TUI input route remains inconclusive; G1 missing live approval/tool output/resize evidence",
++    "CW-02: actual OMP approval/tool/final response verified; normal resize restoration, OMP query interpretation and external tmux/herdr matrix remain unverified.",
+     "CW-04: G3 partial; live composer/session switch and long-term reconnect remain unverified; CW-11/12 own production backend state/approval reconciliation and worker model review hold"
+   ]
+ }
+diff --git a/docs/features/core-workbench/gates/G1.md b/docs/features/core-workbench/gates/G1.md
+index 6f8fd56..647a5e5 100644
+--- a/docs/features/core-workbench/gates/G1.md
++++ b/docs/features/core-workbench/gates/G1.md
+@@ -2,7 +2,7 @@
+ 
+ 상태: **미완료 / 부분 증거 확보**. 이 기록은 CW-02의 feasibility 후보이며 production 호환성 승인이나 G1 완료 선언이 아니다.
+ 
+-## 2026-09-23 재개 관측
++## 2026-09-23 재개 관측 (초기 진단)
+ 
+ `tests/gates/g1_vt/live_runtime_probe.py`에서 OMP `18.2.10` TUI를 실제
+ `PtySession`·`TerminalScreen`에 연결하고, 임시 cwd/profile/session directory와
+@@ -42,6 +42,33 @@ resize 실패 증거가 아니다. 이 결과를 OMP 자체의 기능 실패로
+ 외부 tmux/herdr 실행은 이 bounded probe에서 수행하지 않았다. 기존 G1 fixture는
+ **21/21 통과**했으며, fixture 통과로 누락된 live 근거를 대체하지 않는다.
+ 
++## 2026-09-24 실제 승인·도구 왕복
++
++초기 입력 불능처럼 보인 원인은 격리된 OMP profile의 provider setup wizard였다.
++임시 config에 `startup.setupWizard: false`를 지정해 wizard를 통과했다. 사용자
++설정은 바꾸지 않았고 `--approval-mode=always-ask`를 유지했다. 실제 OMP
++`18.2.10`의 composer에서 prompt를 전송한 뒤 native approval UI를 확인했다.
++승인 UI가 보였을 때와 Enter 직전에 결과 파일이 없었고, Enter 뒤 실제
++`bash` 도구가 파일을 만들고 그 내용을 화면에 출력했다. Scripted provider의
++후속 요청과 최종 응답도 관측했다. Root의 마지막 재실행은
++`approval_tool_scenario_passed=true`, `gate_status=pending`으로 종료했다.
++이 성공은 승인·도구 왕복 시나리오에만 해당한다.
++
++같은 probe에서 child와 screen을 100×32에서 84×24로 바꾼 뒤 approval
++화면 요소를 관측했다. 그러나 resize 없이 `SIGSTOP→SIGCONT`만 수행한
++대조 실행에서도 같은 redraw anchor가 나타났다. 따라서 그 화면 요소를
++정상 resize 복원의 증거로 쓰지 않고 `normal_resize_confirmed=false`로
++기록했다. Query reply는 9회·47 bytes를 PTY에 수락했고 noncanonical child
++TTY 입력 큐가 비었음을 확인했다. OMP 내부에서 답을 해석했는지는
++확인하지 못했다. 실제 terminal·외부 tmux/herdr 조합도 아직 미시험이다.
++
++Root 재실행에서 G1 테스트 **29/29 통과**, 실제 승인·도구 시나리오 exit 0을
++확인했다. 독립 delta review는 새 중대한 오탐을 찾지 못했으며 G1 전체
++통과로 판정하지 않았다. 근거는
++`.workflow/core-workbench/runs/implement-p2-20260923/cw02-resize-evidence-root-live.json`,
++`cw02-no-resize-control.json`, `cw02-resize-evidence-delta-review.json`에 있다.
++실행한 OMP child는 정리됐고 임시 probe 경로는 남지 않았다.
++
+ ## 환경과 후보
+ 
+ - 날짜: 2026-09-23 (Asia/Seoul)
+@@ -68,7 +95,7 @@ Live OMP probe는 두 실제 OMP 프로세스를 별도 controlling PTY에 띄
+ 
+ UI prototype은 xterm 형식 function key를 사용한다: F6은 다음 pane focus, F7/F8은 현재 pane scrollback, F10은 종료다. outer terminal에서 F6 두 번 뒤 host pane에 `printf 'G1_HOST_OUTPUT\n'`과 Enter를 보내 host output을 확인했다.
+ 
+-`omp --help`에서 `--approval-mode=<value>`와 `always-ask|write|yolo` 옵션은 확인했다. 초기 no-tools probe에서는 모델 요청과 도구 승인을 실행하지 않았다. 위 재개 probe는 local provider 요청에 도달하지 못했다.
++`omp --help`에서 `--approval-mode=<value>`와 `always-ask|write|yolo` 옵션은 확인했다. 초기 no-tools probe에서는 모델 요청과 도구 승인을 실행하지 않았다. 2026-09-23 재개 probe는 local provider 요청에 도달하지 못했지만, 2026-09-24 probe는 setup wizard를 지나 native approval과 실제 도구 실행에 도달했다.
+ 
+ ## 관측 결과
+ 
+@@ -80,18 +107,18 @@ UI prototype은 xterm 형식 function key를 사용한다: F6은 다음 pane foc
+ | 원본 composer·한글·multiline paste | 통과 (실제 PTY probe) | 두 OMP 각각에서 `G1_COMPOSER_한글`, `G1_PASTE_A`, `G1_PASTE_B`가 화면에 표시됐다. Enter로 model request를 보내지 않았다. |
+ | slash palette 및 `/clear` | 통과 (no-session) | 두 OMP에서 `/` palette의 `plan-review`/`switch` 항목과 `/clear`의 `Context reset — 0 messages dropped; session continues.` 표시를 확인했다. |
+ | `/help` 명령 | 미확인 | `/help` 명령 이름과 실제 실행 동작은 확인하지 않았다. |
+-| approval UI / 실제 도구 출력 | 미확인 | 초기 probe는 `--no-tools`를 사용했다. 재개 probe는 local provider 요청 0회라 승인 단계에 도달하지 못했다. |
+-| VT/input/PTY/UI lifecycle fixture | 21개 fixture 통과 | wide glyph·truecolor·alternate screen·scrollback, split paste timeout, 최대 2 MiB PTY 입력 큐의 부분 수락, 최대 2 MiB bracketed paste의 원자 수락 또는 visible reject, paste 안의 F10 데이터 보존, saturated queue의 F10 종료, 64 KiB pane outbound FIFO 및 PTY query reply zero·partial write 재시도와 FIFO 순서를 확인했다. |
++| approval UI / 실제 도구 출력 | 통과 (scripted provider 시나리오) | 실제 OMP 18.2.10에서 native approval 전·직전 결과 파일 부재, 승인 뒤 `bash` 파일 생성·화면 출력, provider 후속 요청과 최종 응답을 확인했다. 전체 G1 판정은 pending이다. |
++| VT/input/PTY/UI lifecycle fixture | 29개 테스트 통과 | 기존 21개 fixture에 승인 preview 오탐, resize 대조 실행, 승인 직전 artifact 검사, query TTY 입력 큐 판정 등의 부정 테스트를 더했다. 기존 fixture는 wide glyph·truecolor·alternate screen·scrollback, split paste timeout, 최대 2 MiB PTY 입력 큐의 부분 수락, 최대 2 MiB bracketed paste의 원자 수락 또는 visible reject, paste 안의 F10 데이터 보존, saturated queue의 F10 종료, 64 KiB pane outbound FIFO 및 PTY query reply zero·partial write 재시도와 FIFO 순서를 확인했다. |
+ | 실제 색상 표현 | 부분 후보 | curses view는 truecolor를 256-color palette로 근사한다. 원본 OMP palette와 실제 terminal 간 색상 fidelity는 확인하지 않았다. |
+-| OMP resize / alternate screen / 실제 query 왕복 | 미확인 | 재개 probe에서 query reply callback 8회를 관측했다. OMP의 답 소비와 resize 후 화면 복원은 아직 입증하지 못했다. |
++| OMP resize / alternate screen / 실제 query 왕복 | 부분 관측 / 미확인 | 84×24 child·screen geometry와 approval 화면 요소를 관측했으나, resize 없는 STOP→CONT 대조도 redraw를 만들어 정상 resize 복원은 미확인이다. Noncanonical TTY 입력 큐의 query reply 배출은 확인했지만 OMP 내부 해석은 미확인이다. Alternate screen 실물 복원도 미확인이다. |
+ | detach/reconnect 화면 복원 | 미지원 / 미확인 | UI 종료 시 child도 종료한다. backend를 남긴 채 detach/reconnect하는 기능은 이 후보에 없다. |
+ | 일반 terminal / 외부 tmux / herdr | 미시험 | 실제 사용자 terminal 조합 및 외부 multiplexer 안의 입력·resize·restore는 확인하지 않았다. |
+ 
+ ## 한계와 다음 증거
+ 
+-- 실행한 focused check: `PYTHONDONTWRITEBYTECODE=1 /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/gates/g1_vt -p 'test_*.py' -q` — 21 tests passed.
++- 실행한 focused check: `PYTHONDONTWRITEBYTECODE=1 /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/gates/g1_vt -p 'test_*.py' -q` — 29 tests passed.
+ - 실제 OMP command: `PYTHONDONTWRITEBYTECODE=1 /tmp/cw02-g1-venv/bin/python tests/gates/g1_vt/live_omp_probe.py` — 두 process 모두 version, composer, Korean, multiline paste, slash palette, `/clear` 통과; finally에서 두 OMP 종료.
+ - UI check: app을 240×45 PTY에 실행해 manager/worker/host panes, manager Korean paste, host `printf` output, F10 종료 code 0 및 세 child 종료를 확인했다.
+ - pyte 0.8.2 + curses는 G1 탐색 후보일 뿐이며 24-bit 색상은 256색으로 근사한다. 다른 UI/VT backend나 dependency lock은 결정하지 않았다.
+-- approval/tool output, `/help`, 실제 OMP query 왕복·resize, process detach/reconnect, 일반 terminal/tmux/herdr 조합이 미검증이므로 G1은 **통과가 아니다**.
+-- `tests/gates/g1_vt/test_g1_candidate.py`는 VT/PTY/input fixture이고 `live_omp_probe.py`는 모델 요청 없는 real OMP probe다. 독립 test_designer/reviewer 검토는 Root가 진행해야 한다.
++- `/help`, 실제 OMP query 해석·정상 resize 복원, process detach/reconnect, 일반 terminal/tmux/herdr 조합이 미검증이므로 G1은 **통과가 아니다**.
++- `tests/gates/g1_vt/test_g1_candidate.py`는 VT/PTY/input fixture이고 `live_omp_probe.py`는 모델 요청 없는 real OMP probe다. `live_runtime_probe.py`는 승인·도구 왕복을 계측한다. 이번 test-only 변경은 독립 test_designer와 reviewer가 검토했지만 최종 G1 acceptance는 남아 있다.
+diff --git a/tests/gates/g1_vt/live_runtime_probe.py b/tests/gates/g1_vt/live_runtime_probe.py
+index a48e594..ce42b0f 100644
+--- a/tests/gates/g1_vt/live_runtime_probe.py
++++ b/tests/gates/g1_vt/live_runtime_probe.py
+@@ -5,16 +5,22 @@ Only boolean screen observations and byte counts leave the disposable PTY.
+ 
+ from __future__ import annotations
+ 
++import fcntl
+ import json
+ import os
+-from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+-from pathlib import Path
+ import shutil
++import signal
++import struct
+ import subprocess
+ import sys
+ import tempfile
++import termios
+ import threading
+ import time
++from collections.abc import Callable
++from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
++from pathlib import Path
++from typing import NamedTuple
+ 
+ sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "src"))
+ 
+@@ -23,6 +29,91 @@ from workbench.terminal.vt_g1.session import PtySession
+ 
+ 
+ MARKER = "G1_SCRIPTED_TOOL_OUTPUT_42"
++RESULT_NAME = "g1-tool-result.txt"
++# A bounded OMP 18.2.10 no-resize STOP/CONT control also redrew this anchor.
++NO_RESIZE_CONTROL_REDRAW_ANCHOR_SEEN = True
++
++
++class ChildTtyState(NamedTuple):
++    pending_input_bytes: int
++    canonical: bool
++    size: tuple[int, int]
++
++
++def tool_output_confirmed(screen_text: str, result_file: Path) -> bool:
++    """Require a real shell side effect as well as rendered output."""
++    return result_file.is_file() and result_file.read_text() == MARKER + "\n" and MARKER in screen_text
++
++
++def approval_allowed(approval_visible: bool, result_file: Path) -> bool:
++    return approval_visible and not result_file.exists()
++
++
++def approval_surface_present_after_resize(
++    before: str, after: str, *, pre_resize_quiet: bool,
++    redraw_anchor_seen: bool, screen_size: tuple[int, int], child_size: tuple[int, int] | None,
++) -> bool:
++    """Record the visible modal and geometry; this does not prove resize caused redraw."""
++    anchor = RESULT_NAME
++    permission = ("approve", "allow", "permission")
++    return (
++        anchor in before and anchor in after
++        and any(word in before.lower() for word in permission)
++        and any(word in after.lower() for word in permission)
++        and pre_resize_quiet and redraw_anchor_seen
++        and screen_size == (84, 24) and child_size == (84, 24)
++    )
++
++
++def normal_resize_distinguished(post_continue_anchor: bool, no_resize_control_anchor: bool) -> bool:
++    """A redraw shared with STOP/CONT control cannot establish resize restoration."""
++    return post_continue_anchor and not no_resize_control_anchor
++
++
++def approval_tool_scenario_passed(result: dict[str, object]) -> bool:
++    """Limit CLI success to the live approval, tool, and provider roundtrip."""
++    return all(result.get(key) for key in (
++        "composer_ready", "approval_visible", "artifact_absent_on_approval_ui",
++        "artifact_absent_before_approval", "artifact_present_after_approval",
++        "tool_output_visible", "provider_followup_observed", "final_visible",
++    ))
++
++
++def child_tty_state(pid: int) -> ChildTtyState | None:
++    """Inspect the isolated child's slave TTY without consuming input."""
++    try:
++        slave = os.readlink(f"/proc/{pid}/fd/0")
++        fd = os.open(slave, os.O_RDONLY | os.O_NONBLOCK | os.O_NOCTTY)
++        try:
++            pending = struct.unpack("I", fcntl.ioctl(fd, termios.FIONREAD, struct.pack("I", 0)))[0]
++            canonical = bool(termios.tcgetattr(fd)[3] & termios.ICANON)
++            rows, columns, _, _ = struct.unpack("HHHH", fcntl.ioctl(fd, termios.TIOCGWINSZ, b"\0" * 8))
++            return ChildTtyState(pending, canonical, (columns, rows))
++        finally:
++            os.close(fd)
++    except OSError:
++        return None
++
++
++def query_reply_tty_drained(
++    reply_count: int, accepted: int, generated: int, queued: int, state: ChildTtyState | None,
++) -> bool:
++    """Limit the TTY drain claim to a noncanonical slave input queue."""
++    return bool(
++        reply_count > 0 and accepted == generated and queued == 0
++        and state is not None and not state.canonical and state.pending_input_bytes == 0
++    )
++
++
++def child_stopped(pid: int) -> bool:
++    try:
++        return any(
++            line.split()[1] in {"T", "t"}
++            for line in Path(f"/proc/{pid}/status").read_text().splitlines()
++            if line.startswith("State:")
++        )
++    except (OSError, IndexError):
++        return False
+ 
+ 
+ def visible(screen: TerminalScreen) -> str:
+@@ -43,11 +134,13 @@ def provider() -> ThreadingHTTPServer:
+             self.rfile.read(int(self.headers.get("Content-Length", "0")))
+             type(self).requests += 1
+             if self.requests == 1:
++                encoded = "".join(f"\\{ord(char):03o}" for char in MARKER)
++                command = f"printf '%b\\n' '{encoded}' > {RESULT_NAME} && cat {RESULT_NAME}"
+                 delta = {
+                     "role": "assistant",
+                     "tool_calls": [{
+                         "index": 0, "id": "g1-scripted-write", "type": "function",
+-                        "function": {"name": "bash", "arguments": json.dumps({"command": f"printf '{MARKER}\\n'"})},
++                        "function": {"name": "bash", "arguments": json.dumps({"command": command})},
+                     }],
+                 }
+                 finish = "tool_calls"
+@@ -74,13 +167,18 @@ def provider() -> ThreadingHTTPServer:
+     return ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+ 
+ 
+-def pump(session: PtySession, stream: object, seconds: float, predicate: object) -> tuple[bool, int]:
++def pump(
++    session: PtySession, stream: object, seconds: float, predicate: Callable[[], bool],
++    observe: Callable[[bytes], None] | None = None,
++) -> tuple[bool, int]:
+     deadline = time.monotonic() + seconds
+     count = 0
+     while time.monotonic() < deadline:
+         data = session.read_available()
+         if data:
+             count += len(data)
++            if observe is not None:
++                observe(data)
+             stream.feed(data)
+         session.flush_writes()
+         if predicate():
+@@ -91,11 +189,41 @@ def pump(session: PtySession, stream: object, seconds: float, predicate: object)
+     return bool(predicate()), count
+ 
+ 
++def drain_until_quiet(session: PtySession, stream: object, *, timeout: float = 3, quiet: float = 0.2) -> tuple[bool, int]:
++    """Establish an empty PTY output interval before changing child geometry."""
++    deadline = time.monotonic() + timeout
++    quiet_since = time.monotonic()
++    count = 0
++    while time.monotonic() < deadline:
++        data = session.read_available()
++        if data:
++            count += len(data)
++            stream.feed(data)
++            quiet_since = time.monotonic()
++        session.flush_writes()
++        if session.poll() is not None:
++            return False, count
++        if session.pending_write_bytes == 0 and time.monotonic() - quiet_since >= quiet:
++            final_data = session.read_available()
++            if final_data:
++                count += len(final_data)
++                stream.feed(final_data)
++                quiet_since = time.monotonic()
++            else:
++                return True, count
++        time.sleep(0.01)
++    return False, count
++
++
+ def run() -> dict[str, object]:
+     omp = shutil.which("omp")
+     version = subprocess.run([omp, "--version"], text=True, capture_output=True, timeout=10).stdout.strip() if omp else "missing"
+     if version != "omp/18.2.10":
+-        return {"result": "inconclusive", "omp_version": version}
++        return {
++            "result": "inconclusive_version", "omp_version": version,
++            "scenario": "approval_tool_roundtrip", "scenario_passed": False,
++            "gate_status": "pending",
++        }
+     with tempfile.TemporaryDirectory(prefix="cw02-g1-runtime-") as temporary:
+         root = Path(temporary)
+         cwd = root / "cwd"
+@@ -105,7 +233,7 @@ def run() -> dict[str, object]:
+         profile = root / "agent"
+         profile.mkdir()
+         config = root / "config.yml"
+-        config.write_text("# G1 probe overlay\n")
++        config.write_text("startup:\n  setupWizard: false\n")
+         server = provider()
+         server_thread = threading.Thread(target=server.serve_forever, daemon=True)
+         server_thread.start()
+@@ -127,18 +255,28 @@ def run() -> dict[str, object]:
+             "PI_CODING_AGENT_DIR": str(profile),
+         }
+         session: PtySession | None = None
++        result_file = cwd / RESULT_NAME
+         try:
+             session = PtySession(command, env=env)
+             session.resize(32, 100)
+-            replies: list[bytes] = []
++            reply_count = 0
++            reply_bytes_generated = 0
++            reply_bytes_accepted = 0
+ 
+             def reply(data: bytes) -> None:
+-                replies.append(data)
+-                session.write(data)
++                nonlocal reply_count, reply_bytes_generated, reply_bytes_accepted
++                reply_count += 1
++                reply_bytes_generated += len(data)
++                reply_bytes_accepted += session.write(data)
+ 
+             screen = TerminalScreen(100, 32, reply=reply)
+             stream = make_stream(screen)
+             composer_ready, startup_bytes = pump(session, stream, 8, lambda: "π >" in visible(screen))
++            startup_tty = child_tty_state(session.pid)
++            startup_query_consumed = query_reply_tty_drained(
++                reply_count, reply_bytes_accepted, reply_bytes_generated,
++                session.pending_write_bytes, startup_tty,
++            )
+             clear_ok = False
+             if composer_ready:
+                 session.write(b"/clear\r")
+@@ -171,38 +309,126 @@ def run() -> dict[str, object]:
+                     "child_exit_before_cleanup": session.poll(),
+                     "provider_requests": server.RequestHandlerClass.requests,
+                     "pty_bytes_drained": startup_bytes + input_bytes + n1,
+-                    "query_replies_total": len(replies), "result": "inconclusive_probe_no_request",
++                    "query_replies_total": reply_count,
++                    "query_reply_bytes_accepted": reply_bytes_accepted,
++                    "query_reply_queue_drained": session.pending_write_bytes == 0,
++                    "query_reply_tty_pending_bytes": startup_tty.pending_input_bytes if startup_tty else None,
++                    "query_reply_tty_canonical": startup_tty.canonical if startup_tty else None,
++                    "query_reply_tty_input_drained": startup_query_consumed,
++                    "query_reply_consumption_level": "tty_input_drained" if startup_query_consumed else "unconfirmed",
++                    "query_reply_omp_interpretation_confirmed": False,
++                    "result": "inconclusive_probe_no_request",
++                    "scenario": "approval_tool_roundtrip",
++                    "scenario_passed": False,
++                    "gate_status": "pending",
+                     "child_pid": session.pid,
+                 }
+             before, n1_extra = pump(session, stream, 5, lambda: "approve" in visible(screen).lower())
+             n1 += n1_extra
+-            approval_screen = visible(screen)
+-            approval_visible = before and any(
+-                token in approval_screen.lower() for token in ("approve", "allow", "permission")
++            stop_requested = False
++            pre_resize_child_stopped = False
++            pre_resize_quiet = False
++            pre_resize_drained = 0
++            resized_tty = None
++            try:
++                os.killpg(session.pid, signal.SIGSTOP)
++                stop_requested = True
++                pre_resize_child_stopped, stop_bytes = pump(
++                    session, stream, 2, lambda: child_stopped(session.pid)
++                )
++                n1 += stop_bytes
++                if pre_resize_child_stopped:
++                    pre_resize_quiet, pre_resize_drained = drain_until_quiet(session, stream)
++                n1 += pre_resize_drained
++                approval_screen = visible(screen)
++                approval_visible = before and any(
++                    token in approval_screen.lower() for token in ("approve", "allow", "permission")
++                )
++                artifact_absent_on_approval_ui = not result_file.exists()
++                query_before = reply_count
++                # With the child stopped and the old PTY output drained, change both sizes.
++                screen.resize(lines=24, columns=84)
++                session.resize(24, 84)
++                resized_tty = child_tty_state(session.pid)
++            finally:
++                if stop_requested:
++                    try:
++                        os.killpg(session.pid, signal.SIGCONT)
++                    except ProcessLookupError:
++                        pass
++            redraw_anchor_seen = False
++            redraw_tail = b""
++            anchor = RESULT_NAME.encode()
++
++            def observe_resize(data: bytes) -> None:
++                nonlocal redraw_anchor_seen, redraw_tail
++                redraw_anchor_seen |= anchor in redraw_tail + data
++                redraw_tail = data[-(len(anchor) - 1):]
++
++            _, n2 = pump(session, stream, 3, lambda: False, observe_resize)
++            approval_surface_after_resize = approval_surface_present_after_resize(
++                approval_screen, visible(screen),
++                pre_resize_quiet=pre_resize_child_stopped and pre_resize_quiet,
++                redraw_anchor_seen=redraw_anchor_seen,
++                screen_size=(screen.columns, screen.lines),
++                child_size=resized_tty.size if resized_tty else None,
++            )
++            normal_resize_confirmed = normal_resize_distinguished(
++                redraw_anchor_seen, NO_RESIZE_CONTROL_REDRAW_ANCHOR_SEEN,
++            )
++            artifact_absent_before_approval = not result_file.exists()
++            if approval_allowed(approval_visible, result_file):
++                session.write(b"\r")
++            output_ok, n3 = pump(
++                session, stream, 12,
++                lambda: tool_output_confirmed(visible(screen), result_file),
++            )
++            final_ok, n4 = pump(session, stream, 12, lambda: "G1 scripted probe complete." in visible(screen))
++            final_tty = child_tty_state(session.pid)
++            query_consumed = startup_query_consumed and query_reply_tty_drained(
++                reply_count, reply_bytes_accepted, reply_bytes_generated,
++                session.pending_write_bytes, final_tty,
+             )
+-            query_before = len(replies)
+-            # The same live TUI survives a child PTY and VT-screen size change.
+-            screen.resize(lines=24, columns=84)
+-            session.resize(24, 84)
+-            resize_ok, n2 = pump(session, stream, 2, lambda: "π >" in visible(screen))
+-            if approval_visible:
+-                session.write(b"y")
+-            output_ok, n3 = pump(session, stream, 12, lambda: MARKER in visible(screen))
+-            final_ok, n4 = pump(session, stream, 3, lambda: "G1 scripted probe complete." in visible(screen))
+-            return {
++            observations = {
+                 "omp_version": version,
+                 "composer_ready": composer_ready,
+                 "provider_requests": server.RequestHandlerClass.requests,
+                 "approval_visible": approval_visible,
+-                "resize_screen_restored": resize_ok,
++                "artifact_absent_on_approval_ui": artifact_absent_on_approval_ui,
++                "artifact_absent_before_approval": artifact_absent_before_approval,
++                "artifact_present_after_approval": result_file.is_file(),
++                "approval_surface_present_after_resize": approval_surface_after_resize,
++                "normal_resize_confirmed": normal_resize_confirmed,
++                "normal_resize_result": "inconclusive_no_resize_control_redrew",
++                "pre_resize_child_stopped": pre_resize_child_stopped,
++                "pre_resize_output_quiet": pre_resize_quiet,
++                "pre_resize_pty_bytes_drained": pre_resize_drained,
++                "post_continue_pty_bytes_drained": n2,
++                "post_continue_redraw_anchor_seen": redraw_anchor_seen,
++                "no_resize_control_redraw_anchor_seen": NO_RESIZE_CONTROL_REDRAW_ANCHOR_SEEN,
++                "resize_child_columns": resized_tty.size[0] if resized_tty else None,
++                "resize_child_rows": resized_tty.size[1] if resized_tty else None,
+                 "query_replies_before_resize": query_before,
+-                "query_replies_total": len(replies),
++                "query_replies_total": reply_count,
++                "query_reply_bytes_accepted": reply_bytes_accepted,
++                "query_reply_queue_drained": session.pending_write_bytes == 0,
++                "query_reply_tty_pending_bytes": final_tty.pending_input_bytes if final_tty else None,
++                "query_reply_tty_canonical": final_tty.canonical if final_tty else None,
++                "query_reply_tty_input_drained": query_consumed,
++                "query_reply_consumption_level": "tty_input_drained" if query_consumed else "unconfirmed",
++                "query_reply_omp_interpretation_confirmed": False,
+                 "tool_output_visible": output_ok,
+                 "final_visible": final_ok,
+-                "pty_bytes_drained": n1 + n2 + n3 + n4,
++                "provider_followup_observed": server.RequestHandlerClass.requests >= 2,
++                "pty_bytes_drained": startup_bytes + input_bytes + n1 + n2 + n3 + n4,
+                 "child_pid": session.pid,
+                 "child_exit_before_cleanup": session.poll(),
+             }
++            observations["scenario"] = "approval_tool_roundtrip"
++            observations["scenario_passed"] = approval_tool_scenario_passed(observations)
++            observations["result"] = "approval_tool_scenario_passed" if observations["scenario_passed"] else "approval_tool_scenario_failed"
++            observations["gate_status"] = "pending"
++            return observations
+         finally:
+             if session is not None:
+                 session.close()
+@@ -214,4 +440,4 @@ def run() -> dict[str, object]:
+ if __name__ == "__main__":
+     result = run()
+     print(json.dumps(result, sort_keys=True))
+-    raise SystemExit(0 if result.get("approval_visible") and result.get("tool_output_visible") and result.get("resize_screen_restored") else 1)
++    raise SystemExit(0 if result.get("scenario_passed") else 1)
+diff --git a/tests/gates/g1_vt/test_live_runtime_probe.py b/tests/gates/g1_vt/test_live_runtime_probe.py
+new file mode 100644
+index 0000000..2aa9e5e
+--- /dev/null
++++ b/tests/gates/g1_vt/test_live_runtime_probe.py
+@@ -0,0 +1,112 @@
++from __future__ import annotations
++
++import tempfile
++import unittest
++from pathlib import Path
++
++from live_runtime_probe import (
++    ChildTtyState,
++    MARKER,
++    RESULT_NAME,
++    approval_allowed,
++    approval_surface_present_after_resize,
++    approval_tool_scenario_passed,
++    drain_until_quiet,
++    normal_resize_distinguished,
++    query_reply_tty_drained,
++    tool_output_confirmed,
++)
++
++
++class LiveRuntimePredicateTests(unittest.TestCase):
++    def test_approval_preview_is_not_tool_output(self) -> None:
++        with tempfile.TemporaryDirectory() as temporary:
++            result_file = Path(temporary) / RESULT_NAME
++            self.assertFalse(tool_output_confirmed(f"Approve printf '{MARKER}'", result_file))
++            result_file.write_text(MARKER + "\n")
++            self.assertFalse(tool_output_confirmed("Tool finished without visible output", result_file))
++            self.assertTrue(tool_output_confirmed(MARKER, result_file))
++
++    def test_approval_surface_observation_excludes_composer(self) -> None:
++        before = f"Approve command writing {RESULT_NAME}"
++        after = f"Allow command writing {RESULT_NAME}"
++        evidence = dict(pre_resize_quiet=True, redraw_anchor_seen=True,
++                        screen_size=(84, 24), child_size=(84, 24))
++        self.assertTrue(approval_surface_present_after_resize(before, after, **evidence))
++        self.assertFalse(approval_surface_present_after_resize(before, "π >", **evidence))
++        self.assertFalse(approval_surface_present_after_resize(before, after, **{**evidence, "redraw_anchor_seen": False}))
++
++    def test_stale_pre_resize_output_cannot_count_as_child_redraw(self) -> None:
++        approval = f"Approve command writing {RESULT_NAME}"
++        self.assertFalse(approval_surface_present_after_resize(
++            approval, approval, pre_resize_quiet=False, redraw_anchor_seen=True,
++            screen_size=(84, 24), child_size=(84, 24),
++        ))
++        self.assertFalse(approval_surface_present_after_resize(
++            approval, approval, pre_resize_quiet=True, redraw_anchor_seen=True,
++            screen_size=(84, 24), child_size=(100, 32),
++        ))
++
++    def test_no_resize_stop_continue_control_invalidates_redraw_claim(self) -> None:
++        self.assertFalse(normal_resize_distinguished(True, True))
++        self.assertFalse(normal_resize_distinguished(False, False))
++
++    def test_cli_success_only_describes_approval_tool_roundtrip(self) -> None:
++        observed = {key: True for key in (
++            "composer_ready", "approval_visible", "artifact_absent_on_approval_ui",
++            "artifact_absent_before_approval", "artifact_present_after_approval",
++            "tool_output_visible", "provider_followup_observed", "final_visible",
++        )}
++        observed.update(normal_resize_confirmed=False, query_reply_omp_interpretation_confirmed=False)
++        self.assertTrue(approval_tool_scenario_passed(observed))
++        observed["artifact_absent_before_approval"] = False
++        self.assertFalse(approval_tool_scenario_passed(observed))
++
++    def test_pre_resize_drain_feeds_stale_output_before_resize(self) -> None:
++        class Session:
++            pending_write_bytes = 0
++
++            def __init__(self) -> None:
++                self.chunks = [b"stale", b""]
++
++            def read_available(self) -> bytes:
++                return self.chunks.pop(0) if self.chunks else b""
++
++            def flush_writes(self) -> int:
++                return 0
++
++            def poll(self) -> None:
++                return None
++
++        class Stream:
++            def __init__(self) -> None:
++                self.fed: list[bytes] = []
++
++            def feed(self, data: bytes) -> None:
++                self.fed.append(data)
++
++        session = Session()
++        stream = Stream()
++        quiet, count = drain_until_quiet(session, stream, timeout=0.1, quiet=0.01)
++        self.assertTrue(quiet)
++        self.assertEqual(count, 5)
++        self.assertEqual(stream.fed, [b"stale"])
++        self.assertEqual(session.read_available(), b"")
++
++    def test_zero_input_queue_only_counts_with_noncanonical_tty(self) -> None:
++        raw = ChildTtyState(0, False, (100, 32))
++        canonical = ChildTtyState(0, True, (100, 32))
++        self.assertTrue(query_reply_tty_drained(1, 5, 5, 0, raw))
++        self.assertFalse(query_reply_tty_drained(1, 5, 5, 0, canonical))
++        self.assertFalse(query_reply_tty_drained(1, 5, 5, 0, None))
++
++    def test_approval_requires_artifact_absent_at_send_time(self) -> None:
++        with tempfile.TemporaryDirectory() as temporary:
++            result_file = Path(temporary) / RESULT_NAME
++            self.assertTrue(approval_allowed(True, result_file))
++            result_file.write_text(MARKER + "\n")
++            self.assertFalse(approval_allowed(True, result_file))
++
++
++if __name__ == "__main__":
++    unittest.main()

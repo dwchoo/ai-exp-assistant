@@ -1,0 +1,89 @@
+{
+  "schema_version": 1,
+  "recorded_at_utc": "2026-09-24T10:43:10+00:00",
+  "ticket": "CW-04",
+  "gate_item": "G3-EXTENSION",
+  "candidate_sha256": "e76c0d8a890f60bd70d60573dec1b25dd6e19568bf4a2e1a20fc31801a9e6fdb",
+  "approved_requirements_sha256": "864fcf5616d76b5284d64ff792f392e31d7410650caaee3fa9a5a72fd264cf4b",
+  "scope_audit": "worker_senior changed only live_tui_extension_fault_probe.py adding opt-in malformed-frame branch; frozen existing 9 tests hash unchanged; Root reran both modes.",
+  "commands": {
+    "malformed": "timeout 90s env PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g3_omp /tmp/cw02-g1-venv/bin/python tests/gates/g3_omp/live_tui_extension_fault_probe.py --malformed-frame",
+    "default": "timeout 90s env PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g3_omp /tmp/cw02-g1-venv/bin/python tests/gates/g3_omp/live_tui_extension_fault_probe.py",
+    "existing_test": "timeout 35s env PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g3_omp /tmp/cw02-g1-venv/bin/python -m unittest -q tests.gates.g3_omp.test_tui_extension_fault_predicates"
+  },
+  "cwd": "/home/dwchoo/ai-exp-assistant",
+  "environment": "Linux host, two actual OMP 18.2.10 TUIs, isolated bridge/provider/PTY, no Docker",
+  "exit_codes": {
+    "malformed": 0,
+    "default": 0,
+    "existing_test": 0
+  },
+  "result": "actual_tui_malformed_frame_and_host_outage_partial_G3",
+  "observed": {
+    "malformed": {
+      "result": "passed_pair_tui_malformed_frame",
+      "pids": {
+        "manager": 193721,
+        "worker": 193723
+      },
+      "malformed_frame_no_api_ack": true,
+      "same_worker_connection_after_malformed": true,
+      "manager_binding_after_malformed": true,
+      "worker_composer_usable_after_malformed": true,
+      "worker_composer_cleared_after_malformed": true,
+      "roles_ready_after_malformed": true,
+      "provider_counts_after_malformed": {
+        "manager": 1,
+        "worker": 1
+      },
+      "agent_ends_after_malformed": {
+        "manager": 1,
+        "worker": 1
+      },
+      "no_processing_or_replay_for_malformed": true,
+      "fresh_worker_delivery_after_malformed": true,
+      "final_provider_counts": {
+        "manager": 1,
+        "worker": 2
+      },
+      "final_agent_ends": {
+        "manager": 1,
+        "worker": 2
+      },
+      "omp_children_remaining": 0,
+      "cwd_processes_remaining": {
+        "manager": [],
+        "worker": []
+      }
+    },
+    "default-final": {
+      "result": "passed_pair_tui_extension_fault",
+      "pids": {
+        "manager": 193904,
+        "worker": 193906
+      },
+      "final_provider_counts": {
+        "manager": 1,
+        "worker": 2
+      },
+      "host_unreachable_during_fault": true,
+      "worker_composer_usable_during_fault": true,
+      "worker_composer_cleared_during_fault": true,
+      "no_replay_during_fault": true,
+      "recovery_same_pid_session_generation": true,
+      "recovered_public_states_ready": true,
+      "no_replay_after_reconnect": true,
+      "fresh_delivery_after_recovery": true,
+      "omp_children_remaining": 0,
+      "cwd_processes_remaining": {
+        "manager": [],
+        "worker": []
+      }
+    }
+  },
+  "unknowns": [
+    "independent negative controls for malformed-frame branch",
+    "arbitrary extension crash not injected",
+    "G3 overall pending"
+  ]
+}

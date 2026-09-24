@@ -1,0 +1,685 @@
+{
+  "schema_version": 1,
+  "created_at_utc": "2026-09-24T07:50:02+00:00",
+  "cwd": "/home/dwchoo/ai-exp-assistant",
+  "branch": "main",
+  "head": "0a67572834ddfd6888b534f8a85213f4b1a2e1ca",
+  "entries_count": 82,
+  "entries": [
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-no-resize-control.json",
+      "git_status": "A ",
+      "kind": "file",
+      "size": 1329,
+      "mode": "0o664",
+      "sha256": "74aff224b736e9676cc7af8d8fafe0eaaf4cfd292b39d0584a514960c15dbdd8"
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-onboarding-correction-candidate.json",
+      "git_status": "A ",
+      "kind": "file",
+      "size": 1027,
+      "mode": "0o664",
+      "sha256": "6e667c5be27b2fdc20b4031ed3fd2b7733e84b15dd4b3d54afb3b07d0b509168"
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-onboarding-correction-root-result.json",
+      "git_status": "A ",
+      "kind": "file",
+      "size": 1804,
+      "mode": "0o664",
+      "sha256": "8824c9aeab8bf2f6f3033f13f375b714c0c7dcf9c980811f5ae48de3bfd72fba"
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-onboarding-delta-review.json",
+      "git_status": "A ",
+      "kind": "file",
+      "size": 994,
+      "mode": "0o664",
+      "sha256": "3a6a7a35b405c7884eef5d3bb20d06cd82261f4d1372606a9295998b5aadb0bb"
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-onboarding-diagnosis.json",
+      "git_status": "A ",
+      "kind": "file",
+      "size": 1101,
+      "mode": "0o664",
+      "sha256": "a649c352c9d5506ab91b8314477a4c2478e27defe463e2d4358782f6fd064d6e"
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-onboarding-early-review.json",
+      "git_status": "A ",
+      "kind": "file",
+      "size": 1138,
+      "mode": "0o664",
+      "sha256": "a8ae6db2a575c0b9aac4cf6af7e2ce6815f7c7973755fc4353b60b589f3daad7"
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-onboarding-root-live-result.json",
+      "git_status": "A ",
+      "kind": "file",
+      "size": 1554,
+      "mode": "0o664",
+      "sha256": "6619017dd846790e4fc79df7d5437d22d0fc19947f929e3824275b815b11fd04"
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-onboarding-test-candidate.json",
+      "git_status": "A ",
+      "kind": "file",
+      "size": 921,
+      "mode": "0o664",
+      "sha256": "e8c05791231e463b402580fed57d5cf85963910e53a2125cbe17661dd896aa25"
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-resize-evidence-candidate.json",
+      "git_status": "A ",
+      "kind": "file",
+      "size": 1083,
+      "mode": "0o664",
+      "sha256": "fd8d6dd02fadc06240a6ac5cf9e52dff44825e7b5cf0fd2a7aee8c1856a7ba05"
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-resize-evidence-delta-review.json",
+      "git_status": "A ",
+      "kind": "file",
+      "size": 1147,
+      "mode": "0o664",
+      "sha256": "0468c640cc11a25be426669abb9b5a8af2a7b907eaed164a227bee73dd649cf9"
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-resize-evidence-root-live.json",
+      "git_status": "A ",
+      "kind": "file",
+      "size": 1310,
+      "mode": "0o664",
+      "sha256": "301caea4d56303fa78b81e86da88faecd4ebdbcca49434d1e71624a027d7926f"
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2-20260923/ledger.json",
+      "git_status": "M ",
+      "kind": "file",
+      "size": 114670,
+      "mode": "0o664",
+      "sha256": "162cb73ccbc362157c60015af141756e34cbddcb8374923706e3cff73fa2663c"
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/approval.json",
+      "git_status": "??",
+      "kind": "file",
+      "size": 1829,
+      "mode": "0o664",
+      "sha256": "ae155e3860cfe5d817d6b1cd7e830e449f547a241e487a5b0166e350fd5f9a44"
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/approved-manifest.json",
+      "git_status": "??",
+      "kind": "file",
+      "size": 4506,
+      "mode": "0o664",
+      "sha256": "076165dc7de6305d2546588d98e180be833e7f1abf000e6bca13cee71ff9347a"
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cd53-approved-manifest.json",
+      "git_status": "??",
+      "kind": "file",
+      "size": 5670,
+      "mode": "0o664",
+      "sha256": "f6758bb88fc6b28ac017a4f774bbbf58b78a21b768b61babff71cb7c757a4b6b"
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cd53-policy-approval.json",
+      "git_status": "??",
+      "kind": "file",
+      "size": 1733,
+      "mode": "0o664",
+      "sha256": "8d917e9b91c019246556d65ecd77a9f13c28d7e65080fd033aa7de7063b722d6"
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cd53-policy-candidate.json",
+      "git_status": "??",
+      "kind": "file",
+      "size": 1603,
+      "mode": "0o664",
+      "sha256": "05281de99dbda15697e1b48c6bec72ed29ec586e7c9bea708d6f482e42c6d0f3"
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cd53-policy-prewriter.tar.gz",
+      "git_status": "??",
+      "kind": "file",
+      "size": 66540,
+      "mode": "0o664",
+      "sha256": "ce66ee79f59a668335985dc8af6b564bcfcc05a5d2e6d75516c6cf1f608b2f88"
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw03-cgroup-capability.json",
+      "git_status": "??",
+      "kind": "file",
+      "size": 810,
+      "mode": "0o664",
+      "sha256": "a7101b42032136b55e85ebabc042b26c1db860fe16b28624f42fa7699bd2f07a"
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw03-control-bypass-test-prewriter.tar.gz",
+      "git_status": "??",
+      "kind": "file",
+      "size": 3163,
+      "mode": "0o664",
+      "sha256": "ba1474bc7eaf7d0175e0e56f63527daaab6faad5034be5e9163a4d5c39a818e3"
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw03-recovery-fix-prewriter.tar.gz",
+      "git_status": "??",
+      "kind": "file",
+      "size": 14327,
+      "mode": "0o664",
+      "sha256": "bb131db3797139b0f50830cef03a37d06ba091f1beee4d17f79498d1ca6688c2"
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw03-recovery-test-prewriter.tar.gz",
+      "git_status": "??",
+      "kind": "file",
+      "size": 3432,
+      "mode": "0o664",
+      "sha256": "6bde02b59b1ec70471ff074898069b4e4733fce21781affffe69b8b21e505d33"
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw03-spill-test-prewriter.tar.gz",
+      "git_status": "??",
+      "kind": "file",
+      "size": 1373,
+      "mode": "0o664",
+      "sha256": "c20e7f56e0f58e1b2ecdb65137be12fd8dd0d85b967c7f6e58208cbfac99abcc"
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw03-wait-boundary-fix-prewriter.tar.gz",
+      "git_status": "??",
+      "kind": "file",
+      "size": 11219,
+      "mode": "0o664",
+      "sha256": "3e413ebf57da1c78be5133d5dbe82bb4d7ef5f9ab32a375a2167385814314928"
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw04-async-error-predicate-fix-prewriter.tar.gz",
+      "git_status": "??",
+      "kind": "file",
+      "size": 17932,
+      "mode": "0o664",
+      "sha256": "9a084b8f2e97ba0c441ef07d5a3d900d508659cb25e1e14f43077c7fa7f73d0a"
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw04-async-error-test-prewriter.tar.gz",
+      "git_status": "??",
+      "kind": "file",
+      "size": 2032,
+      "mode": "0o664",
+      "sha256": "2d839c08b0135558ed85a7b94b9a68eb5851149ad098806cf624134824f1e52a"
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw04-tui-async-error-prewriter.tar.gz",
+      "git_status": "??",
+      "kind": "file",
+      "size": 14530,
+      "mode": "0o664",
+      "sha256": "ef387693c63a4eb6cf04006ea675ce5fd2f56a27d18aa8db9be317fbd4dec35f"
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw04-tui-predicate-fix-prewriter.tar.gz",
+      "git_status": "??",
+      "kind": "file",
+      "size": 12305,
+      "mode": "0o664",
+      "sha256": "b38664e351ae16c314f9849bbf4354f5d9bf734ba6d04d76d1597d9cd3a9c5c2"
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw04-tui-screen-prewriter.tar.gz",
+      "git_status": "??",
+      "kind": "file",
+      "size": 15556,
+      "mode": "0o664",
+      "sha256": "51c6af3288ee1ec36de6da91cd27e377c4472ac374cd838c130bb92c64d07113"
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/ledger.json",
+      "git_status": "??",
+      "kind": "file",
+      "size": 124855,
+      "mode": "0o664",
+      "sha256": "dd74e12a558204d7f38aa71a3182e004aed026a5cca51c3e0ba181614c0a133b"
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/pre-writer-recovery.json",
+      "git_status": "??",
+      "kind": "file",
+      "size": 10899,
+      "mode": "0o664",
+      "sha256": "4870894696ef31c6b371dd1df7f4f2b7849d61d0d9ae465f7d293efa78e2e751"
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/pre-writer-recovery.tar.gz",
+      "git_status": "??",
+      "kind": "file",
+      "size": 200690,
+      "mode": "0o664",
+      "sha256": "52d39e9f7103f46c59d467fefe6fd25457fce6727212dec246469a1cc68419ff"
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/pre-writer-staged.patch",
+      "git_status": "??",
+      "kind": "file",
+      "size": 73461,
+      "mode": "0o664",
+      "sha256": "175a0de8362b6a6ba5a498b84a74e9017e1555d409cb3a39440fbd1c8503c184"
+    },
+    {
+      "path": ".workflow/core-workbench/runs/planning-p2.3-20260924/baseline.json",
+      "git_status": "??",
+      "kind": "file",
+      "size": 9150,
+      "mode": "0o664",
+      "sha256": "f299e6e66d2e1ec49bc562e00d645ac01649cf3a2040e11bb35e6c9989295c65"
+    },
+    {
+      "path": ".workflow/core-workbench/runs/planning-p2.3-20260924/before-documents.tar.gz",
+      "git_status": "??",
+      "kind": "file",
+      "size": 45939,
+      "mode": "0o664",
+      "sha256": "3121d58018892ed705326de04c729206b8f0371b74ee9734bdf9eaaf9da568d5"
+    },
+    {
+      "path": ".workflow/core-workbench/runs/planning-p2.3-20260924/changes.json",
+      "git_status": "??",
+      "kind": "file",
+      "size": 3151,
+      "mode": "0o664",
+      "sha256": "11be496ecd93432eb7287e1f95d5c98b52cb351bef427f729b7e422915ea4960"
+    },
+    {
+      "path": ".workflow/core-workbench/runs/planning-p2.3-20260924/manifest.json",
+      "git_status": "??",
+      "kind": "file",
+      "size": 5311,
+      "mode": "0o664",
+      "sha256": "b74cf63f11a807e79faa4e34e0e0f4294da39de8cd3f33cef29ee2b0f9585bba"
+    },
+    {
+      "path": ".workflow/core-workbench/runs/planning-p2.3-20260924/validation.json",
+      "git_status": "??",
+      "kind": "file",
+      "size": 3363,
+      "mode": "0o664",
+      "sha256": "e77156b7a540743c17e9dce7b7997a82c2718cb720a11819a844034ad16d95a5"
+    },
+    {
+      "path": ".workflow/core-workbench/runs/refine-recovery-20260924/decisions.json",
+      "git_status": "??",
+      "kind": "file",
+      "size": 2462,
+      "mode": "0o664",
+      "sha256": "23f6f7885d16616801950fb0d49e45fd7e8c63714d29949d19be4eb30be7ccba"
+    },
+    {
+      "path": ".workflow/core-workbench/runs/refine-recovery-20260924/r1.10-review-candidate.json",
+      "git_status": "??",
+      "kind": "file",
+      "size": 2848,
+      "mode": "0o664",
+      "sha256": "11e30ce4c0fbb92e96d486372b687f14c65ed98ae9a63f54d153083b82f1b741"
+    },
+    {
+      "path": ".workflow/core-workbench/state.json",
+      "git_status": " M",
+      "kind": "file",
+      "size": 21330,
+      "mode": "0o664",
+      "sha256": "ff2f0a4da580c53ca634b9dbbab3a5925970ca2c5cb0aa2fb3a2a20a542af988"
+    },
+    {
+      "path": "CONTEXT.md",
+      "git_status": " M",
+      "kind": "file",
+      "size": 5874,
+      "mode": "0o664",
+      "sha256": "391d525ba83a94df88bc2ba054e7d7e04b4874e8053fe841bba8cac931e09013"
+    },
+    {
+      "path": "docs/adr/0002-managed-shell-control-wait.md",
+      "git_status": "??",
+      "kind": "file",
+      "size": 3721,
+      "mode": "0o664",
+      "sha256": "ff5712171391ac86375be49a13c6a4221b2909c44da9962ab52cc6b7630f2d52"
+    },
+    {
+      "path": "docs/features/core-workbench/BRIEF.md",
+      "git_status": " M",
+      "kind": "file",
+      "size": 29806,
+      "mode": "0o664",
+      "sha256": "cabef56a1caf1773b1873905ac2cde713a29497c91b85ddd247086c4fc8aed3c"
+    },
+    {
+      "path": "docs/features/core-workbench/DECISIONS.md",
+      "git_status": " M",
+      "kind": "file",
+      "size": 16908,
+      "mode": "0o664",
+      "sha256": "d0b11de9708929f9dd32ba4cc06b1fce1e686a66eb5f4d31b73d3625229e3312"
+    },
+    {
+      "path": "docs/features/core-workbench/DIAGNOSIS.md",
+      "git_status": "??",
+      "kind": "file",
+      "size": 23077,
+      "mode": "0o664",
+      "sha256": "63197e1fd30b95fbc18c45f1a663d7211e6d6bafd965f99346239a576b350a7b"
+    },
+    {
+      "path": "docs/features/core-workbench/OPERATING-CONTRACT.md",
+      "git_status": " M",
+      "kind": "file",
+      "size": 21219,
+      "mode": "0o664",
+      "sha256": "05c34862d05e98d446858a917551f6869317b7d712f375e7925ad56cdbf040a4"
+    },
+    {
+      "path": "docs/features/core-workbench/PLAN.json",
+      "git_status": " M",
+      "kind": "file",
+      "size": 140781,
+      "mode": "0o664",
+      "sha256": "696270bf612df23e2931ab3350f3146594fa9270598489dbe530f56913587fa7"
+    },
+    {
+      "path": "docs/features/core-workbench/SOURCE-RECONCILIATION.md",
+      "git_status": " M",
+      "kind": "file",
+      "size": 9927,
+      "mode": "0o664",
+      "sha256": "eff6eed97df035ac57e75084406c98afa087dca13a93ceacaafeab0192601b62"
+    },
+    {
+      "path": "docs/features/core-workbench/SPEC.md",
+      "git_status": " M",
+      "kind": "file",
+      "size": 30643,
+      "mode": "0o664",
+      "sha256": "ce954cef30504987fabc1983144528f49bccc69543ed99ee16f2e398ffe865e3"
+    },
+    {
+      "path": "docs/features/core-workbench/gates/G1.md",
+      "git_status": "MM",
+      "kind": "file",
+      "size": 18004,
+      "mode": "0o664",
+      "sha256": "6bf21a45503dd6c4f4e0396e6f993f222f7b073f6b999b34da3c3484f1ef5c35"
+    },
+    {
+      "path": "docs/features/core-workbench/gates/G2.md",
+      "git_status": " M",
+      "kind": "file",
+      "size": 23790,
+      "mode": "0o664",
+      "sha256": "430ce2fb7d8d4e7a321335b5ab4013a5763cc1a87f708bc1d125fb54dfbf7d0a"
+    },
+    {
+      "path": "docs/features/core-workbench/gates/G3.md",
+      "git_status": " M",
+      "kind": "file",
+      "size": 26745,
+      "mode": "0o664",
+      "sha256": "b50293fb8419fb63c32edb32f88c630f4ad84cf3a464f8d6d8cd43fbc85d4f61"
+    },
+    {
+      "path": "docs/features/core-workbench/tickets/CW-02.md",
+      "git_status": " M",
+      "kind": "file",
+      "size": 6274,
+      "mode": "0o664",
+      "sha256": "6e0b5b349ed4c78930c0599b1be069edfb033e384a3a13dfaaaad37938b52b4a"
+    },
+    {
+      "path": "docs/features/core-workbench/tickets/CW-03.md",
+      "git_status": " M",
+      "kind": "file",
+      "size": 8051,
+      "mode": "0o664",
+      "sha256": "84c8e03c9cf97a909d56ba662265b13a88e4f01457972d94773e9954251b558d"
+    },
+    {
+      "path": "docs/features/core-workbench/tickets/CW-04.md",
+      "git_status": " M",
+      "kind": "file",
+      "size": 6748,
+      "mode": "0o664",
+      "sha256": "5b048b86f1bae87a6a483e6f490f9562c73f4d5b28f0ee505c4c53d6a19670cc"
+    },
+    {
+      "path": "docs/features/core-workbench/tickets/CW-05.md",
+      "git_status": " M",
+      "kind": "file",
+      "size": 6408,
+      "mode": "0o664",
+      "sha256": "bc17a507685c7e43b5d30bace5109025e6e078ad27e8abaaddea4a4807e8b775"
+    },
+    {
+      "path": "docs/features/core-workbench/tickets/CW-06.md",
+      "git_status": " M",
+      "kind": "file",
+      "size": 3479,
+      "mode": "0o664",
+      "sha256": "b82102216931ab650052eabae6dc6b4e14af6102d61ab6df4078e299ef7f6c39"
+    },
+    {
+      "path": "docs/features/core-workbench/tickets/CW-07.md",
+      "git_status": " M",
+      "kind": "file",
+      "size": 4806,
+      "mode": "0o664",
+      "sha256": "0a0c8178ec4cefbf7c17d77e6966531fb93b9e8498c857c8eaba595d2e05a77f"
+    },
+    {
+      "path": "docs/features/core-workbench/tickets/CW-08.md",
+      "git_status": " M",
+      "kind": "file",
+      "size": 3884,
+      "mode": "0o664",
+      "sha256": "464e8db03c660b6165b45806bff135a3f159476ff823341af57fc9948ebb5967"
+    },
+    {
+      "path": "docs/features/core-workbench/tickets/CW-09.md",
+      "git_status": " M",
+      "kind": "file",
+      "size": 3983,
+      "mode": "0o664",
+      "sha256": "a4c7f18e82875f9c236884854b94eeed8796350317ee6619bbbed2b36977bff3"
+    },
+    {
+      "path": "docs/features/core-workbench/tickets/CW-10.md",
+      "git_status": " M",
+      "kind": "file",
+      "size": 5615,
+      "mode": "0o664",
+      "sha256": "c48c1b8f8e33c7f29bc7783690720610579fbbb5d88766116949f71240f045b0"
+    },
+    {
+      "path": "docs/features/core-workbench/tickets/CW-11.md",
+      "git_status": " M",
+      "kind": "file",
+      "size": 4263,
+      "mode": "0o664",
+      "sha256": "2fbce6c5eda9cfb2287b7d0d92c0fc6f7ac86dc0bc31d0390f8419c8d07cc3eb"
+    },
+    {
+      "path": "docs/features/core-workbench/tickets/CW-12.md",
+      "git_status": " M",
+      "kind": "file",
+      "size": 5000,
+      "mode": "0o664",
+      "sha256": "5940cafdaec0a6f0114763ca73a9036361497c89bac3652825a8d9ab6f0a0372"
+    },
+    {
+      "path": "docs/features/core-workbench/tickets/CW-13.md",
+      "git_status": " M",
+      "kind": "file",
+      "size": 5881,
+      "mode": "0o664",
+      "sha256": "b048e999ba81b1cf5753785523c5d8d66d9f304ef5490d90104f82f605e73fd4"
+    },
+    {
+      "path": "docs/features/core-workbench/tickets/CW-14.md",
+      "git_status": " M",
+      "kind": "file",
+      "size": 3338,
+      "mode": "0o664",
+      "sha256": "b7a5cf8f0bcca3c44058e0fc22cf6fc3bb1fd445d95bb2e8a0a3d1130cc8ba2f"
+    },
+    {
+      "path": "docs/features/core-workbench/tickets/CW-15.md",
+      "git_status": " M",
+      "kind": "file",
+      "size": 5670,
+      "mode": "0o664",
+      "sha256": "78b9e00b0e7fad0ffe3550bfcd313e12f26a44471cbee91be31f236c9afac620"
+    },
+    {
+      "path": "docs/features/core-workbench/tickets/CW-16.md",
+      "git_status": " M",
+      "kind": "file",
+      "size": 5755,
+      "mode": "0o664",
+      "sha256": "928326de0345b394d08d828769c912e36fadf97cb24dd4c69fb628e56ce9e319"
+    },
+    {
+      "path": "src/workbench/terminal/shell_g2/control_probe.py",
+      "git_status": "??",
+      "kind": "file",
+      "size": 15532,
+      "mode": "0o664",
+      "sha256": "885253fc5e9223436ab57737cc4abdd3b1e606a65447f132cb7da16ea8b65d8d"
+    },
+    {
+      "path": "src/workbench/terminal/shell_g2/prototype.py",
+      "git_status": " M",
+      "kind": "file",
+      "size": 26558,
+      "mode": "0o664",
+      "sha256": "2e0a7afcc8516fae488954d1bcb4349746904b5e260cc45cc98459064850bcfc"
+    },
+    {
+      "path": "tests/gates/g1_vt/live_normal_resize_probe.py",
+      "git_status": "??",
+      "kind": "file",
+      "size": 13413,
+      "mode": "0o664",
+      "sha256": "74faa58bf10f2c7231a5b0aeb428fb5bd7d9b241d92bba07a131e223ee77b516"
+    },
+    {
+      "path": "tests/gates/g1_vt/live_runtime_probe.py",
+      "git_status": "M ",
+      "kind": "file",
+      "size": 20186,
+      "mode": "0o664",
+      "sha256": "c6143d78f937901b60c23541ebf8502fd92be2b1fa6ade2b0d8064b0b1f14824"
+    },
+    {
+      "path": "tests/gates/g1_vt/live_three_pane_resize_probe.py",
+      "git_status": "??",
+      "kind": "file",
+      "size": 8513,
+      "mode": "0o664",
+      "sha256": "1c609adf317bdbfd05d776e5742186c219dc29bceebcbf1a4c261f7accc7eec8"
+    },
+    {
+      "path": "tests/gates/g1_vt/test_live_resize_evidence.py",
+      "git_status": "??",
+      "kind": "file",
+      "size": 2232,
+      "mode": "0o664",
+      "sha256": "5f500b10be456fec3f27eace636e7357051bc31e8b120757303b0f2cae82bed9"
+    },
+    {
+      "path": "tests/gates/g1_vt/test_live_runtime_probe.py",
+      "git_status": "A ",
+      "kind": "file",
+      "size": 4821,
+      "mode": "0o664",
+      "sha256": "a06381fef38456e5070f0ff936ad5eac75cba313e54d73a8c2d3b19c7c07bf15"
+    },
+    {
+      "path": "tests/gates/g1_vt/test_resize_probe_predicates.py",
+      "git_status": "??",
+      "kind": "file",
+      "size": 7681,
+      "mode": "0o664",
+      "sha256": "750b10f87a1159b5cdcc00432e835ad61e36d4dc5e1924170b74762ad3e7cefd"
+    },
+    {
+      "path": "tests/gates/g2_shell/test_control_boundaries.py",
+      "git_status": "??",
+      "kind": "file",
+      "size": 5586,
+      "mode": "0o664",
+      "sha256": "44fba93c3eb2f73305766f9d048da276aaf6242c983ccfc7e1492a675bc46835"
+    },
+    {
+      "path": "tests/gates/g2_shell/test_control_lifecycle.py",
+      "git_status": "??",
+      "kind": "file",
+      "size": 17409,
+      "mode": "0o664",
+      "sha256": "d1e7750fca80841ccf7dae08d03e0df977b35d07148e8c487cb495b8895a6509"
+    },
+    {
+      "path": "tests/gates/g2_shell/test_control_probe.py",
+      "git_status": "??",
+      "kind": "file",
+      "size": 17844,
+      "mode": "0o664",
+      "sha256": "ce83752ab62060a5ac97de9dbc532c2d97f5ba90fb6eca21321c4d4ed4419f7c"
+    },
+    {
+      "path": "tests/gates/g3_omp/live_omp_probe.py",
+      "git_status": " M",
+      "kind": "file",
+      "size": 20550,
+      "mode": "0o664",
+      "sha256": "0be1373f38d1df5da49fd0c6927abdd908ac19d19a3f5dfc85e2540894e169d9"
+    },
+    {
+      "path": "tests/gates/g3_omp/live_tui_draft_probe.py",
+      "git_status": "??",
+      "kind": "file",
+      "size": 20253,
+      "mode": "0o664",
+      "sha256": "607fbfa23dc105b2ed3b8c5e82a8dec2d3a0302a6015a3c109f358bbd95e8b24"
+    },
+    {
+      "path": "tests/gates/g3_omp/test_tui_draft_predicates.py",
+      "git_status": "??",
+      "kind": "file",
+      "size": 16618,
+      "mode": "0o664",
+      "sha256": "cd44c17d238d573a6beede17895921a584ac0d7f52ffc95e8c9cdc3231865dc9"
+    }
+  ],
+  "index_patch": {
+    "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/handoff-pause-20260924-1650-index.patch",
+    "sha256": "175a0de8362b6a6ba5a498b84a74e9017e1555d409cb3a39440fbd1c8503c184"
+  },
+  "worktree_patch": {
+    "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/handoff-pause-20260924-1650-worktree.patch",
+    "sha256": "c7253e3084126a443f88cf2cad71f65ed13b0e1be0c5b8a55710f18ba75c2968"
+  },
+  "archive": {
+    "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/handoff-pause-20260924-1650.tar.gz",
+    "sha256": "46c714d0f31b89b9b2b273c0e7a7b6fcf03a31c30165bc741950e02678a9fe00"
+  },
+  "excluded_self_and_handoff": [
+    ".workflow/core-workbench/runs/implement-p2.3-20260924/HANDOFF-2026-09-24-1650.md",
+    ".workflow/core-workbench/runs/implement-p2.3-20260924/handoff-pause-20260924-1650-index.patch",
+    ".workflow/core-workbench/runs/implement-p2.3-20260924/handoff-pause-20260924-1650-worktree.patch",
+    ".workflow/core-workbench/runs/implement-p2.3-20260924/handoff-pause-20260924-1650.json",
+    ".workflow/core-workbench/runs/implement-p2.3-20260924/handoff-pause-20260924-1650.tar.gz"
+  ]
+}

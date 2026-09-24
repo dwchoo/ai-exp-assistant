@@ -1,0 +1,64 @@
+{
+  "recorded_at_utc": "2026-09-24T11:09:36.253979+00:00",
+  "gate_id": "G3-TUI-DELIVERY",
+  "required_level": "runtime",
+  "observed_level": "runtime",
+  "status": "partial",
+  "approved_requirements_sha256": "864fcf5616d76b5284d64ff792f392e31d7410650caaee3fa9a5a72fd264cf4b",
+  "candidate_sha256": {
+    "omp_bridge/g3/bridge.ts": "9f4209d3e366aa4940e52e40c5cf843c614029e5de55c99e6e25712d98418c8a",
+    "tests/gates/g3_omp/live_omp_probe.py": "77fa29408469ff721a90b3b16e16efd9e2e9100cb73de6867dfe2b471d47007a",
+    "tests/gates/g3_omp/live_tui_draft_probe.py": "6a81bb43273bd6a5162741efa37e4e0fab80c20aad2f636d48d0d2cc24def550",
+    "tests/gates/g3_omp/live_tui_event_surface_probe.py": "afaa1044e494b0601ed2bac6fc7e0418c56642eb054a5898e2f057956f330855",
+    "tests/gates/g3_omp/test_tui_event_surface_predicates.py": "40a6fd82542846ad09d092e1e1362777c27621d6d5c607aa48cb85e4730b51a9"
+  },
+  "checks": [
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g3_omp /tmp/cw02-g1-venv/bin/python -m unittest -v tests/gates/g3_omp/test_tui_event_surface_predicates.py",
+      "exit_code": 0,
+      "result": "13_of_13_passed"
+    },
+    {
+      "command": "timeout 120s env PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g3_omp /tmp/cw02-g1-venv/bin/python tests/gates/g3_omp/live_tui_event_surface_probe.py",
+      "exit_code": 0,
+      "result": "diagnostic_pair_observed_after_review_corrections"
+    }
+  ],
+  "observations": {
+    "normal": {
+      "harness_result": "passed_pair_tui_draft_delivery",
+      "api_returned": true,
+      "user_identity_fields_matched": 6,
+      "role_session_generation_matched": true,
+      "assistant_stop_reason": "stop",
+      "identity_specific_outcome": "unknown",
+      "provider_identity_matched": true,
+      "children_remaining": 0
+    },
+    "post_ack_http_422": {
+      "harness_result": "observed_async_error",
+      "api_returned": true,
+      "user_identity_fields_matched": 6,
+      "role_session_generation_matched": true,
+      "assistant_stop_reason": "error",
+      "assistant_error_message_present": true,
+      "identity_specific_outcome": "unknown",
+      "provider_identity_matched": true,
+      "provider_error_after_api_ack": true,
+      "children_remaining": 0
+    }
+  },
+  "root_probe_pids": [
+    212576,
+    212578,
+    212666,
+    212668
+  ],
+  "root_probe_pids_absent": true,
+  "unknowns": [
+    "public assistant event has no Workbench message ID",
+    "diagnostic opt-in event surface does not establish per-message final outcome",
+    "all G3 acceptance items and final review remain pending"
+  ],
+  "review_correction": "Requires expected worker/session/generation and ordered exact user event before same-context assistant error; non-diagnostic child strips ambient opt-in."
+}

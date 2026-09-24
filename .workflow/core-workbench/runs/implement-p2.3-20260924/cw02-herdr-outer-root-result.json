@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "recorded_at_utc": "2026-09-24T09:36:39+00:00",
+  "ticket": "CW-02",
+  "gate_item": "G1-OUTER",
+  "candidate_sha256": null,
+  "approved_requirements_sha256": "864fcf5616d76b5284d64ff792f392e31d7410650caaee3fa9a5a72fd264cf4b",
+  "scope_audit": "No file changes. Planned live_outer_herdr_probe.py was not created after isolated nested attach refusal; frozen files unchanged.",
+  "command": "herdr session attach cw02-g1-smoke-20260924-1000",
+  "cwd": "/home/dwchoo/ai-exp-assistant",
+  "environment": "current Herdr-managed pane (HERDR_ENV=1), Herdr 0.9.1, isolated child PTY 240x45; no Docker",
+  "exit_code": 1,
+  "result": "inconclusive_nested_herdr_refusal_before_OMP_start",
+  "observed": {
+    "attempted_child_pid": 148399,
+    "child_pid_absent_after": true,
+    "created_test_session_running_after": false,
+    "only_existing_default_session_listed": true,
+    "new_socket_or_process_remaining": false,
+    "OMP_or_host_app_started": false
+  },
+  "unknowns": [
+    "Herdr actual outer runtime input/paste/resize/restore",
+    "non-nested Herdr context required for isolated runtime evidence",
+    "G1-OUTER and full G1 remain partial"
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "recorded_at_utc": "2026-09-24T08:57:35.228358+00:00",
+  "ticket": "CW-03",
+  "kind": "host-only subreaper descendant lifetime feasibility",
+  "approved_bundle_sha256": "864fcf5616d76b5284d64ff792f392e31d7410650caaee3fa9a5a72fd264cf4b",
+  "probe_sha256": "fd28f3a3b7e2db3733dd363c91e5ce45073884d05a9c8ab8f4c6f451155f661f",
+  "scope_audit": "Only assigned new live_subreaper_lifetime_probe.py created; frozen A probe and product files unchanged; git diff --check passed.",
+  "command": "timeout 20s env PYTHONDONTWRITEBYTECODE=1 python tests/gates/g2_shell/live_subreaper_lifetime_probe.py",
+  "cwd": "/home/dwchoo/ai-exp-assistant",
+  "environment": "unprivileged Linux host, Python 3.12; no Docker",
+  "exit_code": 0,
+  "result": "observed_12_of_12_host_checks_partial_feasibility",
+  "observations": {
+    "subreaper_set_get": true,
+    "double_fork_setsid": true,
+    "adopted_live_child_ppid": 122473,
+    "live_waitpid_WNOHANG": 0,
+    "main_exit": 17,
+    "middle_exit": 19,
+    "descendant_exit": 23,
+    "ECHILD_after_all_reaped": true,
+    "no_residual_processes": true
+  },
+  "host_cleanup": "Root ps PID 122473,122474,122475,122476 absent",
+  "unknowns": [
+    "negative control and failure predicate independent check",
+    "Docker/container runtime deferred by user",
+    "PTY/signal/foreground takeover integration",
+    "full descendant and supervisor-crash matrix",
+    "G2 remains blocked under approved direct eval SPEC"
+  ]
+}

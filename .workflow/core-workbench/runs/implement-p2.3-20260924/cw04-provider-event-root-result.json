@@ -1,0 +1,67 @@
+{
+  "recorded_at_utc": "2026-09-24T11:26:28.684875+00:00",
+  "gate_id": "G3-TUI-DELIVERY",
+  "required_evidence_level": "runtime",
+  "observed_evidence_level": "runtime",
+  "status": "partial",
+  "approved_requirements_sha256": "864fcf5616d76b5284d64ff792f392e31d7410650caaee3fa9a5a72fd264cf4b",
+  "candidate_sha256": {
+    "omp_bridge/g3/bridge.ts": "a41ea4b9ebc08ff0305930e59ab6e616109efdad420ab01422836f4eadfa57ef",
+    "tests/gates/g3_omp/live_omp_probe.py": "41ed009d75fa7f8363e722a710c6a05a3fef84c3bb22c8ede16e59a47f0146df",
+    "tests/gates/g3_omp/live_tui_draft_probe.py": "033d7c9ff3980f658e80cff9d01976b9a021a37d2a6e162c718275b88fbe717d",
+    "tests/gates/g3_omp/live_tui_event_surface_probe.py": "20d40cb582117799ffc494623d21d93f965acce30cf1db3e1f04512bca9da85e",
+    "tests/gates/g3_omp/test_tui_event_surface_predicates.py": "818adb198ffce1a354728ce63954b1245ff78db0581235dd35bc34b91b13a587",
+    "tests/gates/g3_omp/bridge.test.ts": "a982e0e0417a7c5722c2e02c5ff84e51b8c5b1aa6efa94c8dc6ef33818f38812"
+  },
+  "checks": [
+    {
+      "command": "node --experimental-strip-types --test tests/gates/g3_omp/bridge.test.ts",
+      "exit_code": 0,
+      "result": "18_of_18_passed"
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g3_omp /tmp/cw02-g1-venv/bin/python -m unittest -q tests/gates/g3_omp/test_tui_event_surface_predicates.py",
+      "exit_code": 0,
+      "result": "20_of_20_passed"
+    },
+    {
+      "command": "timeout 120s env PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g3_omp /tmp/cw02-g1-venv/bin/python tests/gates/g3_omp/live_tui_event_surface_probe.py --provider-request-probe",
+      "exit_code": 0,
+      "result": "diagnostic_pair_observed"
+    }
+  ],
+  "observations": {
+    "normal": {
+      "api_returned": true,
+      "user_message_end_exact": true,
+      "provider_request_last_user_exact": true,
+      "harness_result": "passed_pair_tui_draft_delivery",
+      "identity_specific_outcome": "unknown",
+      "children_remaining": 0
+    },
+    "post_ack_http_422": {
+      "api_returned": true,
+      "user_message_end_exact": true,
+      "provider_request_last_user_exact": true,
+      "provider_error_after_ack": true,
+      "assistant_stop_reason": "error",
+      "harness_result": "observed_async_error",
+      "identity_specific_outcome": "unknown",
+      "children_remaining": 0
+    },
+    "payload_shape": "local OpenAI completions object with messages array; final role=user; two text blocks, exactly one structured JSON block"
+  },
+  "root_probe_pids": [
+    224193,
+    224195,
+    224341,
+    224343
+  ],
+  "root_probe_pids_absent": true,
+  "unknowns": [
+    "provider-specific payload shape; other providers untested",
+    "assistant error event has no Workbench message ID",
+    "delayed previous-session event provenance and concurrent turns remain unverified",
+    "full G3 gate pending"
+  ]
+}

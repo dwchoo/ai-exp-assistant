@@ -1,0 +1,134 @@
+{
+  "schema_version": 1,
+  "recorded_at_utc": "2026-09-24T10:10:03+00:00",
+  "ticket": "CW-04",
+  "gate_item": "G3-PAUSE",
+  "candidate_sha256": "cf65b482655c91791f9501d179e48c168d5efc7219cbc4a9c2f3e8758bf2467d",
+  "approved_requirements_sha256": "864fcf5616d76b5284d64ff792f392e31d7410650caaee3fa9a5a72fd264cf4b",
+  "scope_audit": "worker_senior added only assigned live_tui_pause_reconcile_probe.py; Root hash matched and diff --check passed.",
+  "command": "timeout 90s env PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g3_omp /tmp/cw02-g1-venv/bin/python tests/gates/g3_omp/live_tui_pause_reconcile_probe.py",
+  "cwd": "/home/dwchoo/ai-exp-assistant",
+  "environment": "Linux host, two OMP 18.2.10 TUI processes, local scripted provider, disposable native bash cwd and PTYs; no Docker",
+  "exit_code": 0,
+  "result": "actual_pair_tui_pause_reconcile_partial_G3",
+  "observed": {
+    "result": "passed_pair_tui",
+    "pids": {
+      "manager": 171258,
+      "worker": 171260
+    },
+    "initial_ready": true,
+    "native_approval_pending_before_pause": true,
+    "native_approval_resolved_before_pause": true,
+    "started_before_pause": true,
+    "result_absent_before_pause": true,
+    "tool_in_flight_before_pause": true,
+    "manager_pause_ack": "abort_requested",
+    "manager_unknown_at_ack": [
+      "pause-probe-bash"
+    ],
+    "tool_end_at_ack": false,
+    "worker_pause_ack": "paused",
+    "turn_stop_observed": true,
+    "manager_agent_end_observed": true,
+    "paused_state": {
+      "manager": {
+        "abortStatus": "stop_observed",
+        "inFlightToolCount": 0,
+        "paused": true,
+        "unknownOutcomeToolCallIds": [
+          "pause-probe-bash"
+        ]
+      },
+      "worker": {
+        "abortStatus": "none",
+        "inFlightToolCount": 0,
+        "paused": true,
+        "unknownOutcomeToolCallIds": []
+      }
+    },
+    "result_file_after_stop": false,
+    "paused_delivery": {
+      "manager": "deferred",
+      "worker": "deferred"
+    },
+    "resume_without_reconciliation": {
+      "manager": "reconciliation_required",
+      "worker": "reconciliation_required"
+    },
+    "provider_delta_while_paused": {
+      "manager": 0,
+      "worker": 0
+    },
+    "agent_start_delta_while_paused": {
+      "manager": 0,
+      "worker": 0
+    },
+    "held_ids_absent_from_provider": {
+      "manager": true,
+      "worker": true
+    },
+    "reconciliation": {
+      "approval_scope_sha256": "6939671ce7d01770b42b276a2eb7226c1edd93fb5e96bb51feb282e134cd7849",
+      "checks": {
+        "files": true,
+        "terminal_process": true,
+        "test_owned_approval_scope": true,
+        "test_owned_task_run": true,
+        "tool_result_unknown": true
+      },
+      "cwd_process_count": 1,
+      "expected_files_sha256": "dc72c616e490ef68060cda5677402dd93956365695f352ab9e62377794b20616",
+      "negative_withheld": {
+        "approval": true,
+        "file": true,
+        "process": true,
+        "symlink": true,
+        "task": true
+      },
+      "observed_files_sha256": "dc72c616e490ef68060cda5677402dd93956365695f352ab9e62377794b20616",
+      "omp_pid": 171258
+    },
+    "worker_reconciled": true,
+    "explicit_resume_allowed": true,
+    "resume_ack": {
+      "manager": "resumed",
+      "worker": "resumed"
+    },
+    "held_retry_after_resume": {
+      "manager": "unknown_no_replay",
+      "worker": "unknown_no_replay"
+    },
+    "ready_after_resume": true,
+    "fresh_ack": "api_accepted",
+    "fresh_model_processed_at_ack": false,
+    "fresh_turn_end": true,
+    "fresh_provider_match": true,
+    "fresh_provider_delta": 1,
+    "worker_provider_requests_final": 0,
+    "held_ids_still_absent": true,
+    "post_resume_state": {
+      "manager": {
+        "paused": false,
+        "unknownOutcomeToolCallIds": [
+          "pause-probe-bash"
+        ]
+      },
+      "worker": {
+        "paused": false,
+        "unknownOutcomeToolCallIds": []
+      }
+    },
+    "omp_children_remaining": 0,
+    "cwd_processes_remaining": {
+      "manager": [],
+      "worker": []
+    }
+  },
+  "unknowns": [
+    "independent negative controls for pause/reconcile predicate",
+    "test-owned reconciliation fixture is not Workbench backend integration",
+    "worker periodic checks/manual action and long-lived race remain unverified",
+    "G3 overall pending"
+  ]
+}

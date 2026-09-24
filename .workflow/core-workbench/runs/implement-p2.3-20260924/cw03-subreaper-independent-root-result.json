@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "recorded_at_utc": "2026-09-24T09:01:30+00:00",
+  "ticket": "CW-03",
+  "gate_item": "G2-LIFECYCLE",
+  "candidate_sha256": {
+    "tests/gates/g2_shell/test_subreaper_lifetime_predicates.py": "b500eb137ef668a5d9501c4d8856ef9c68b2d61c018e48337a1cde1cb3609e1e",
+    "tests/gates/g2_shell/live_subreaper_lifetime_probe.py": "fd28f3a3b7e2db3733dd363c91e5ce45073884d05a9c8ab8f4c6f451155f661f"
+  },
+  "approved_requirements_sha256": "864fcf5616d76b5284d64ff792f392e31d7410650caaee3fa9a5a72fd264cf4b",
+  "scope_audit": "test_designer added only assigned test_subreaper_lifetime_predicates.py; frozen host probe hash unchanged; git diff --check passed.",
+  "command": "timeout 30s env PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python -m unittest tests.gates.g2_shell.test_subreaper_lifetime_predicates -q",
+  "cwd": "/home/dwchoo/ai-exp-assistant",
+  "environment": "unprivileged Linux host, Python 3.12; no Docker",
+  "exit_code": 0,
+  "result": "passed_7_of_7_independent_negative_controls",
+  "coverage": "live WNOHANG cannot mean empty, adopted parent identity, PID start-time identity, reaped PID/exit, ECHILD after reap, residual PID report",
+  "process_cleanup": "Each test checks captured PIDs absent in /proc; Root ps found no matching probe process",
+  "unknowns": [
+    "PTY/signal/foreground takeover integration",
+    "full descendant and supervisor-crash matrix",
+    "G2 remains blocked under approved direct eval SPEC"
+  ]
+}

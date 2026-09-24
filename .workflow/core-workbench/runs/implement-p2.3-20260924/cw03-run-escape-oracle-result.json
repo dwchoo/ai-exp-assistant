@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "recorded_at_utc": "2026-09-24T08:42:25.583858+00:00",
+  "ticket": "CW-03",
+  "incident": "same-shell RUN Ctrl-C and return control escape",
+  "candidate_sha256": {
+    "src/workbench/terminal/shell_g2/prototype.py": "5a192fd0d04abbfc7697046f0289b8789cf24d9b44ef1246fbf9f2a03a893123",
+    "src/workbench/terminal/shell_g2/control_probe.py": "e5914ebb070c049ed2f48c9276c7cdb3b92685eb316ea307d95de586455863f1",
+    "tests/gates/g2_shell/test_control_lifecycle.py": "3fd8526c02258c13ff6da57ebcb4a9206a2a37cf92048cabcff629231fb9b43e"
+  },
+  "observed": "Independent and Root real Bash/dash tests establish RUN Ctrl-C and return required safety failures; direct eval in handoff function permits return to skip controller epilogue.",
+  "advice": "Do not claim local function/trap correction closes arbitrary RUN. Smallest next host-only experiment: parent persistent Bash/dash keeps PID/cwd/export/control wait; fixed foreground supervisor executes user script in child interpreter; supervisor survives SIGINT and reports child status; test Ctrl-C tail, return, exec, queued PTY spill, parent prompt/ACK and no replay.",
+  "scope": "User-selected A supports experiment-local state and parent shell environment; current SPEC direct same-interpreter RUN evaluation and ADR must be reconciled before a new G2 pass. Docker runtime probe deferred per user.",
+  "unknowns": [
+    "supervisor foreground signal boundary",
+    "parent Ctrl-C after child return",
+    "full descendant lifetime",
+    "formal approved bundle alignment"
+  ],
+  "runtime_probe_performed": false
+}

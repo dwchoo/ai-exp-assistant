@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "recorded_at_utc": "2026-09-24T10:39:32+00:00",
+  "ticket": "CW-04",
+  "gate_item": "G3-EXTENSION",
+  "candidate_sha256": {
+    "tests/gates/g3_omp/live_tui_extension_fault_probe.py": "efb033f36ef71fbf15c563d0c5d0ba5f3526a0ac30c7ddc2db241e76d3055640",
+    "tests/gates/g3_omp/test_tui_extension_fault_predicates.py": "6638cbe7c17ca6b5c26ae18abfa4a7bab99c99c35dfd849ef25d5cd03dbb37cf"
+  },
+  "approved_requirements_sha256": "864fcf5616d76b5284d64ff792f392e31d7410650caaee3fa9a5a72fd264cf4b",
+  "scope_audit": "test_designer added only assigned independent predicate test, frozen live probe unchanged.",
+  "command": "timeout 35s env PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g3_omp /tmp/cw02-g1-venv/bin/python -m unittest -q tests.gates.g3_omp.test_tui_extension_fault_predicates",
+  "cwd": "/home/dwchoo/ai-exp-assistant",
+  "environment": "Linux host controlled bridge/provider doubles, no OMP/Docker runtime",
+  "exit_code": 0,
+  "result": "independent_9_of_9_host_outage_negative_controls",
+  "coverage": [
+    "distinct process/session role binding and provider identity",
+    "TUI composer input/clear during unreachable host",
+    "no spontaneous provider/event processing",
+    "reconnect PID/session/generation/new socket/current public state",
+    "fresh worker-only delivery and no replay",
+    "CLI cleanup residual reported separately"
+  ],
+  "unknowns": [
+    "no delivery attempted during host outage; host policy not proven",
+    "extension-internal exception not injected",
+    "G3 overall pending"
+  ]
+}

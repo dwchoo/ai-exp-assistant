@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "observed_at_utc": "2026-09-24T06:10:23.418068+00:00",
+  "command": "systemd-run --user --scope -p Delegate=yes --unit=wb-g2-capability-probe-2-20260924 /usr/bin/python /tmp/wb-g2-cgroup-capability-20260924.py",
+  "exit_code": 0,
+  "scope": "/user.slice/user-1000.slice/user@1000.service/app.slice/wb-g2-capability-probe-2-20260924.scope",
+  "base_procs_writable": true,
+  "shell_entered_run_cgroup": true,
+  "shell_left_run_cgroup_same_process": true,
+  "run_populated_with_child": 1,
+  "run_populated_after_child_terminated": 0,
+  "child": "/bin/sleep 2",
+  "temporary_script_removed": true,
+  "transient_scopes_removed": true,
+  "interpretation": "This host supports a delegated user scope for a bounded prototype; not a product dependency decision or full G2 lifecycle proof."
+}

@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "recorded_at_utc": "2026-09-24T08:49:01.967497+00:00",
+  "ticket": "CW-03",
+  "kind": "A parent-shell supervisor boundary host feasibility",
+  "approved_bundle_sha256": "864fcf5616d76b5284d64ff792f392e31d7410650caaee3fa9a5a72fd264cf4b",
+  "probe_sha256": "44fae4c7a5371c082a415fbd899d0ed6d936616ee4757fc681a2fc5faa2ee255",
+  "scope_audit": "Only assigned new live_supervisor_boundary_probe.py was created; frozen prototype, control_probe and independent lifecycle test hashes unchanged; git diff --check passed.",
+  "command": "timeout 45s env PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python tests/gates/g2_shell/live_supervisor_boundary_probe.py",
+  "cwd": "/home/dwchoo/ai-exp-assistant",
+  "environment": "Linux host, real Bash/dash PTY, Python 3.12; no Docker",
+  "exit_code": 0,
+  "result": "observed_6_of_6_host_cases_partial_feasibility",
+  "observations": {
+    "Bash Ctrl-C": "child SIGINT, supervisor signal 1, parent RETURN:130, WAIT retained, no tail/spill",
+    "dash Ctrl-C": "child SIGINT, supervisor signal 1, parent RETURN:130, WAIT retained, no tail/spill",
+    "Bash/dash return": "parent controller WAIT/PID/cwd/export retained; no queued input",
+    "Bash/dash exec": "child interpreter replaced, parent controller WAIT/PID/cwd/export retained",
+    "all": "supervisor/child reaped before WAIT; no early READY; takeover ACK then fresh READY; no RUN replay"
+  },
+  "host_cleanup": "Root ps for 18 captured PIDs: none remain",
+  "unknowns": [
+    "probe success predicates need independent falsification",
+    "whole descendant lifetime/subreaper",
+    "parent Ctrl-C at foreground transition and FD loss",
+    "approved SPEC/ADR direct eval conflict",
+    "full G2 gate remains blocked"
+  ]
+}

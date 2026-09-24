@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "ticket": "CW-03",
+  "verification_unit": "G2-recovery-boundary",
+  "recorded_at_utc": "2026-09-24T08:24:08.480975+00:00",
+  "approved_requirements_sha256": "864fcf5616d76b5284d64ff792f392e31d7410650caaee3fa9a5a72fd264cf4b",
+  "candidate_sha256": {
+    "src/workbench/terminal/shell_g2/prototype.py": "5a192fd0d04abbfc7697046f0289b8789cf24d9b44ef1246fbf9f2a03a893123",
+    "src/workbench/terminal/shell_g2/control_probe.py": "e5914ebb070c049ed2f48c9276c7cdb3b92685eb316ea307d95de586455863f1",
+    "tests/gates/g2_shell/test_control_lifecycle.py": "d1e7750fca80841ccf7dae08d03e0df977b35d07148e8c487cb495b8895a6509",
+    "tests/gates/g2_shell/test_control_probe.py": "ce83752ab62060a5ac97de9dbc532c2d97f5ba90fb6eca21321c4d4ed4419f7c"
+  },
+  "worker_result": "candidate_ready_partial",
+  "scope_audit": "pause snapshot 82 entries: only Root-owned ledger and two assigned product files differ; no other snapshot input changed",
+  "checks": [
+    {
+      "command": "timeout 90s env PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python -m unittest tests.gates.g2_shell.test_control_lifecycle tests.gates.g2_shell.test_control_probe -q",
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "environment": "Linux host, Python 3.12.3, Bash 5.2.21, dash; nondelegated cgroup",
+      "exit_code": 0,
+      "result": "passed 20 tests, 6 delegated-only skips"
+    },
+    {
+      "command": "timeout 100s systemd-run --user --scope -p Delegate=yes --unit=wb-cw03-recovery-root-20260924 env PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python -m unittest tests.gates.g2_shell.test_control_lifecycle tests.gates.g2_shell.test_control_probe -q",
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "environment": "transient delegated user scope on this host",
+      "exit_code": 0,
+      "result": "passed 20 tests, 1 nondelegated-only skip"
+    }
+  ],
+  "host_cleanup": "ps CW03/control_probe match 0; systemctl wb-cw03 units 0 after checks",
+  "unknowns": [
+    "actual FD9 ACK loss path",
+    "RUN self-stdin/return/exec and remaining G2 matrix",
+    "subreaper in ordinary prepared container",
+    "G2 gate overall pending"
+  ]
+}

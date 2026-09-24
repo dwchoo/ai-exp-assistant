@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "feature": "core-workbench",
+  "revision": {
+    "brief": "r1.11",
+    "spec": "s2.4",
+    "plan": "p2.4"
+  },
+  "base_approved_bundle_sha256": "4269d6160dd6205e61fba4944f8852d279a7eda02c85a5a9de8157eeb5ff8ee8",
+  "authority_ref": "current user async C-D53 policy reply 2026-09-24",
+  "files_sha256": {
+    "docs/features/core-workbench/BRIEF.md": "90ca34c5be2caafb6574811e3b2b1cc75e1899e6b295681e4a8ed55f38303c23",
+    "docs/features/core-workbench/SPEC.md": "76a2699b0a0511ddb3b06c87d051e148ed9d655c9a2672e1a63ead85961bf81e",
+    "docs/features/core-workbench/OPERATING-CONTRACT.md": "54ed8e7ba52ba1632d8a8e3d5bccd9fca9e0cb2bb6417d64961437f07e78aa6c",
+    "docs/features/core-workbench/DECISIONS.md": "d0b11de9708929f9dd32ba4cc06b1fce1e686a66eb5f4d31b73d3625229e3312",
+    "docs/features/core-workbench/PLAN.json": "3ccf44e3b0f62609659bb8cafd1553b4f5317d5ee90a291898623201506dd7d3",
+    "docs/features/core-workbench/gates/G2.md": "b6c9a4b70c448aa8302117ad947d40acf69e2337b6fa3f3ca4ebaf694163ae7d",
+    "docs/features/core-workbench/tickets/CW-03.md": "84c8e03c9cf97a909d56ba662265b13a88e4f01457972d94773e9954251b558d",
+    "docs/features/core-workbench/tickets/CW-10.md": "c48c1b8f8e33c7f29bc7783690720610579fbbb5d88766116949f71240f045b0",
+    "docs/features/core-workbench/tickets/CW-13.md": "b048e999ba81b1cf5753785523c5d8d66d9f304ef5490d90104f82f605e73fd4"
+  },
+  "captured_at_utc": "2026-09-24T07:19:40.092050+00:00",
+  "scope": "termination fact vs worker first judgment vs manager second decision/recovery; no cgroup mandatory choice; G2 safety defects unresolved"
+}

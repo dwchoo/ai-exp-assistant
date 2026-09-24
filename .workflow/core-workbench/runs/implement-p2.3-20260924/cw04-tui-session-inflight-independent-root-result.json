@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "recorded_at_utc": "2026-09-24T10:27:15+00:00",
+  "ticket": "CW-04",
+  "gate_item": "G3-SESSION",
+  "candidate_sha256": {
+    "tests/gates/g3_omp/live_tui_session_inflight_probe.py": "c4e30c67da969875e8dc5c71c4112770ee68a3fb90cf558acaf8b6950da660e6",
+    "tests/gates/g3_omp/test_tui_session_inflight_predicates.py": "4ecab48ec37fab042070dac32665a32979308fca1f0b580694f26b07a98865f5"
+  },
+  "approved_requirements_sha256": "864fcf5616d76b5284d64ff792f392e31d7410650caaee3fa9a5a72fd264cf4b",
+  "command": "timeout 35s env PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g3_omp /tmp/cw02-g1-venv/bin/python -m unittest -v tests.gates.g3_omp.test_tui_session_inflight_predicates",
+  "cwd": "/home/dwchoo/ai-exp-assistant",
+  "environment": "Linux host controlled doubles, no OMP/Docker runtime",
+  "exit_code": 1,
+  "result": "9_of_11_pass_two_valid_predicate_failures",
+  "findings": [
+    "new session public ready without visible new composer can pass",
+    "new hello can reuse old socket and still be treated as new connection"
+  ],
+  "unknowns": [
+    "bounded correction and actual TUI replay",
+    "G3 overall pending"
+  ]
+}

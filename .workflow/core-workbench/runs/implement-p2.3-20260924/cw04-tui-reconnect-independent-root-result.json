@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "recorded_at_utc": "2026-09-24T09:11:42+00:00",
+  "ticket": "CW-04",
+  "gate_item": "G3-RECONNECT",
+  "candidate_sha256": {
+    "tests/gates/g3_omp/test_tui_reconnect_predicates.py": "240a3e1c803b06a227f7b5bf8670b8371b0cd82b759494d5a0d4aac04c1211d6",
+    "tests/gates/g3_omp/live_tui_reconnect_probe.py": "7bf6cadf1f032e6f63a7ee7d998f6e38d20e811cbc12bc9f8f7fef5bbc4b5d10"
+  },
+  "approved_requirements_sha256": "864fcf5616d76b5284d64ff792f392e31d7410650caaee3fa9a5a72fd264cf4b",
+  "scope_audit": "test_designer added only assigned test_tui_reconnect_predicates.py; frozen live probe hash unchanged; git diff --check passed.",
+  "command": "env PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g3_omp /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/gates/g3_omp -p 'test_tui_*predicates.py' -q",
+  "cwd": "/home/dwchoo/ai-exp-assistant",
+  "environment": "Linux host, Python 3.12 with pyte 0.8.2; controlled bridge/provider/screen doubles, no live OMP or Docker in this check",
+  "exit_code": 0,
+  "result": "passed_33_of_33_8_new_reconnect_negative_controls",
+  "coverage": "missing or wrong lost ACK, new socket and stable PID/session/generation, exact provider identity and one processing event, composer/public state recovery, cleanup reported separately",
+  "limitation": "run() success label is computed before cleanup; CLI exit additionally requires omp_children_remaining=0. Root live execution met that condition.",
+  "unknowns": ["TUI sending/unknown disconnect race", "remaining G3 TUI matrix"]
+}

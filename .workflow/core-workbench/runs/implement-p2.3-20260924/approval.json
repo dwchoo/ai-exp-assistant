@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "feature": "core-workbench",
+  "decision": "approve_presented_bundle_and_resume_implementation",
+  "authority_kind": "current_user_explicit_implement_command",
+  "user_quote": "$implement  docs/features/core-workbench",
+  "approved_at_utc": "2026-09-24T05:22:24.192721+00:00",
+  "reviewed_manifest": ".workflow/core-workbench/runs/planning-p2.3-20260924/manifest.json",
+  "reviewed_bundle_sha256": "c1a84e1a3cb9d37f36e4807986f7adcde22263fd404add236d453ddec4c48740",
+  "approved_manifest": ".workflow/core-workbench/runs/implement-p2.3-20260924/approved-manifest.json",
+  "approved_bundle_sha256": "4269d6160dd6205e61fba4944f8852d279a7eda02c85a5a9de8157eeb5ff8ee8",
+  "promotion_scope": "Only approval-status/reference text, BRIEF revision draft→r1.10, corresponding source hash and PLAN approval metadata changed after reviewed candidate. No requirement/acceptance/dependency edit.",
+  "approved_requirements": {
+    "brief": "r1.10",
+    "spec": "s2.3",
+    "plan": "p2.3",
+    "acceptance_ids": 34,
+    "tickets": 16,
+    "scope": "G1..G4 feasibility then Core Workbench production and integration"
+  },
+  "prior_approval_record": ".workflow/core-workbench/runs/implement-p2-20260923/cd49-doc-final-approval.json",
+  "implementation_authorized": true,
+  "publication_commit_push_deploy_authorized": false,
+  "explicit_user_child_call_cap": {
+    "limit": 128,
+    "used_at_entry": 98,
+    "remaining_at_entry": 30,
+    "origin": "user async reply 2026-09-23: 128회로 확대 (권장)",
+    "origin_record": ".workflow/core-workbench/runs/implement-p2-20260923/ledger.json#/budget/budget_changes/1",
+    "amended_by_current_request": false
+  },
+  "note": "Approval by explicit request for the exact presented planning bundle, as workflow-contract section 3 permits. Runtime gates still pending."
+}

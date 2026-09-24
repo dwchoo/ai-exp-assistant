@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "recorded_at_utc": "2026-09-24T10:01:09+00:00",
+  "ticket": "CW-04",
+  "gate_item": "G3-TUI-CONTENTION",
+  "candidate_sha256": {
+    "tests/gates/g3_omp/live_tui_contention_probe.py": "9ce374379d80a13251904c26c91a666c4e0d641f0845c6118dab3e94202bc8a0",
+    "tests/gates/g3_omp/test_tui_contention_predicates.py": "3ee6d26e98ea36209d5c471ccbea330c5a24c67d21f0e29dc292d96db88969fe"
+  },
+  "command": "timeout 35s env PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g3_omp /tmp/cw02-g1-venv/bin/python -m unittest -v tests.gates.g3_omp.test_tui_contention_predicates",
+  "cwd": "/home/dwchoo/ai-exp-assistant",
+  "environment": "Linux host controlled doubles/loopback, no OMP or Docker",
+  "exit_code": 1,
+  "result": "12_of_13_pass_one_valid_transient_preapproval_file_false_positive",
+  "decision": "Actual native approval UI hides composer; test revised to assert editor preservation while native UI hides composer. Remaining failure is valid product-probe predicate defect.",
+  "recorded_coverage": "wrong provider identity, hold activity, session generation, editor intrusion, native release, opposite role, replay, transient file before approval",
+  "unknowns": [
+    "one predicate correction, live replay, G3 overall pending"
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "recorded_at_utc": "2026-09-24T09:07:23+00:00",
+  "ticket": "CW-04",
+  "gate_item": "G3-RECONNECT",
+  "candidate_sha256": {
+    "tests/gates/g3_omp/live_tui_reconnect_probe.py": "7bf6cadf1f032e6f63a7ee7d998f6e38d20e811cbc12bc9f8f7fef5bbc4b5d10",
+    "tests/gates/g3_omp/live_tui_draft_probe.py": "499b22c6bf4181931eace74a0c4f42237e3327dc5d22b585a694e26d18459953",
+    "tests/gates/g3_omp/live_rpc_reconnect_probe.py": "b6005c623ea709f863f390401b3e8e5f578180e5e68a01505b0daad82d80d36f",
+    "tests/gates/g3_omp/live_omp_probe.py": "0be1373f38d1df5da49fd0c6927abdd908ac19d19a3f5dfc85e2540894e169d9",
+    "omp_bridge/g3/bridge.ts": "808f2044d32885ef5df95da3b1f5bca2db601ca462acaa5eac078cf35fed86f6"
+  },
+  "approved_requirements_sha256": "864fcf5616d76b5284d64ff792f392e31d7410650caaee3fa9a5a72fd264cf4b",
+  "scope_audit": "worker_senior added only assigned new live_tui_reconnect_probe.py; frozen inputs unchanged; git diff --check passed.",
+  "command": "timeout 70s env PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g3_omp /tmp/cw02-g1-venv/bin/python tests/gates/g3_omp/live_tui_reconnect_probe.py",
+  "cwd": "/home/dwchoo/ai-exp-assistant",
+  "environment": "Linux host, OMP 18.2.10, Python 3.12 with pyte 0.8.2, isolated profile/session/provider and two PTYs; no Docker",
+  "exit_code": 0,
+  "result": "passed_pair_tui_reconnect_partial_G3",
+  "observed": {
+    "omp_pids": [129523, 129525],
+    "ack_received_and_discarded": true,
+    "new_socket_same_worker_pid_session_generation": true,
+    "retry_status": "duplicate_api_accepted",
+    "provider_requests_before_after_retry": [1, 1],
+    "agent_ends_before_after_retry": [1, 1],
+    "provider_identity_matched": true,
+    "composer_and_public_state_after_reconnect": true,
+    "omp_children_remaining": 0,
+    "temporary_directories_remaining": 0
+  },
+  "unknowns": [
+    "independent negative controls for the success predicate",
+    "TUI sending/unknown disconnect race and delayed duplicate while in flight",
+    "remaining G3 TUI matrix and production delivery observation"
+  ]
+}

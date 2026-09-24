@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "feature": "core-workbench",
+  "decision": "approve_C_D53_policy_amendment_and_continue_implementation",
+  "authority_kind": "current_user_explicit_policy_change_and_continue_request",
+  "user_instruction_summary": "Termination fact and unknown belong to CW-03; worker evaluates logs/results after confirmed termination; manager decides success/failure and bounded recovery; keep G2 safety defects open; do not mandate delegated cgroup without decision.",
+  "approved_at_utc": "2026-09-24T07:25:35.370635+00:00",
+  "base_approval_record": ".workflow/core-workbench/runs/implement-p2.3-20260924/approval.json",
+  "base_approved_bundle_sha256": "4269d6160dd6205e61fba4944f8852d279a7eda02c85a5a9de8157eeb5ff8ee8",
+  "approved_manifest": ".workflow/core-workbench/runs/implement-p2.3-20260924/cd53-approved-manifest.json",
+  "approved_bundle_sha256": "864fcf5616d76b5284d64ff792f392e31d7410650caaee3fa9a5a72fd264cf4b",
+  "policy_amendment_sha256": "52e60da9b17709dcb9e9826e33d3969f9d9350becbec190c7efcf8d4be1fd1f1",
+  "approved_requirements": {
+    "brief": "r1.11",
+    "spec": "s2.4",
+    "plan": "p2.4",
+    "tickets": 16,
+    "ticket_ids_unchanged": true,
+    "dependencies_resources_write_scopes_unchanged": true,
+    "gate_owner_evidence_levels_unchanged": true
+  },
+  "scope": "C-D53 responsibility and acceptance/gate criteria only; no G2 safety pass and no cgroup support decision",
+  "implementation_authorized": true,
+  "publication_commit_push_deploy_authorized": false,
+  "validation": {
+    "json": "pass",
+    "diff_check": "pass",
+    "graph_and_gate_shape": "pass",
+    "source_brief_sha": "pass",
+    "independent_review": "delta_review_pass_30_of_30_hashes_and_approved_digests_match"
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "recorded_at_utc": "2026-09-24T09:59:51+00:00",
+  "ticket": "CW-04",
+  "gate_item": "G3-TUI-CONTENTION",
+  "candidate_sha256": {
+    "tests/gates/g3_omp/live_tui_contention_probe.py": "9ce374379d80a13251904c26c91a666c4e0d641f0845c6118dab3e94202bc8a0",
+    "tests/gates/g3_omp/test_tui_contention_predicates.py": "64cf3ba675007f1d6fb45b78d8dc8026bb6e81caa43c846cd9196a25497e2367"
+  },
+  "approved_requirements_sha256": "864fcf5616d76b5284d64ff792f392e31d7410650caaee3fa9a5a72fd264cf4b",
+  "command": "timeout 35s env PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g3_omp /tmp/cw02-g1-venv/bin/python -m unittest -v tests.gates.g3_omp.test_tui_contention_predicates",
+  "cwd": "/home/dwchoo/ai-exp-assistant",
+  "environment": "Linux host, controlled doubles and local loopback provider, no OMP/Docker runtime",
+  "exit_code": 1,
+  "result": "10_of_12_pass_2_fail_one_valid_probe_defect_one_test_assumption_conflict",
+  "findings": [
+    "valid: approval file present before native release then removed during hold is ignored by final success predicate",
+    "test assumption conflict: actual OMP native approval hides composer at delivery and hold; false/false is expected, so test cannot require composer visible there"
+  ],
+  "actual_tui_screen": {
+    "approval_at_delivery_composer_visible": false,
+    "approval_after_hold_composer_visible": false,
+    "busy_at_delivery_composer_visible": false,
+    "busy_after_hold_composer_visible": false
+  },
+  "unknowns": [
+    "revised screen negative control",
+    "production predicate correction and replay",
+    "G3 overall pending"
+  ]
+}

@@ -1,0 +1,1346 @@
+{
+  "created_at_utc": "2026-09-24T11:33:39.856601+00:00",
+  "cwd": "/home/dwchoo/ai-exp-assistant",
+  "head": "0a67572834ddfd6888b534f8a85213f4b1a2e1ca",
+  "entries_count": 191,
+  "scope": "git tracked modified/staged plus untracked nonignored files; excludes this manifest and ignored outputs",
+  "entries": [
+    {
+      "path": ".agents/skills/ask-workflow/SKILL.md",
+      "kind": "file",
+      "mode": "0o644",
+      "sha256": "e6e4e4fb83984372b03e0cf9d596a85d49d24412d5d5b8458906a2264e1deca4",
+      "bytes": 2444
+    },
+    {
+      "path": ".agents/skills/change-verification/SKILL.md",
+      "kind": "file",
+      "mode": "0o644",
+      "sha256": "ff9f1b6feffbc5b27c135b4dfc788d386567cfb1f18a226ae8985fac94bf290a",
+      "bytes": 5911
+    },
+    {
+      "path": ".agents/skills/investigate-bug/SKILL.md",
+      "kind": "file",
+      "mode": "0o644",
+      "sha256": "35ee395026fae787cbefc918dacdcedbaf10aacbd085ed995ec79616458d185b",
+      "bytes": 6907
+    },
+    {
+      "path": ".agents/skills/investigate-bug/agents/openai.yaml",
+      "kind": "file",
+      "mode": "0o644",
+      "sha256": "92b120cb6fbbea62f55558905b499a67f5c31da67150876ab62cdaad1f4d515e",
+      "bytes": 270
+    },
+    {
+      "path": ".agents/skills/investigate-bug/references/incident-template.md",
+      "kind": "file",
+      "mode": "0o644",
+      "sha256": "b77a3e543ffeed9473e8a771f8395aefd90a11e8ec3bc94e8bd5626c0ca9d211",
+      "bytes": 1763
+    },
+    {
+      "path": ".codex/config.toml",
+      "kind": "file",
+      "mode": "0o644",
+      "sha256": "dc13cc80dc1a079012f0b31e35fab477c7cb057b13df84bd4fe7eb338b3fd4a9",
+      "bytes": 523
+    },
+    {
+      "path": ".codex/notices/SOURCES.md",
+      "kind": "file",
+      "mode": "0o644",
+      "sha256": "c70a5b6968a889168bf8a32dbf1756b831f95950f39f21a6c25a10d9ff253317",
+      "bytes": 1814
+    },
+    {
+      "path": ".codex/workflow-contract.md",
+      "kind": "file",
+      "mode": "0o644",
+      "sha256": "f34c71e2adec9db914bea093b7da762b9d7e5f739c5a7508406f61637bb9130d",
+      "bytes": 26255
+    },
+    {
+      "path": ".gitignore",
+      "kind": "file",
+      "mode": "0o644",
+      "sha256": "1e456cbbd1e3dec571fc5aa0b938f97947a98f3e82c181a605bd43957ed1e8c8",
+      "bytes": 53
+    },
+    {
+      "path": ".workflow/core-workbench/notes/2026-09-24-local-lifetime-draft.md",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "a8d82714d4ae46d96e80d2e81053b1255ece5e32222360654d67e6a13b80eb30",
+      "bytes": 23838
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-no-resize-control.json",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "74aff224b736e9676cc7af8d8fafe0eaaf4cfd292b39d0584a514960c15dbdd8",
+      "bytes": 1329
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-onboarding-correction-candidate.json",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "6e667c5be27b2fdc20b4031ed3fd2b7733e84b15dd4b3d54afb3b07d0b509168",
+      "bytes": 1027
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-onboarding-correction-root-result.json",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "8824c9aeab8bf2f6f3033f13f375b714c0c7dcf9c980811f5ae48de3bfd72fba",
+      "bytes": 1804
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-onboarding-delta-review.json",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "3a6a7a35b405c7884eef5d3bb20d06cd82261f4d1372606a9295998b5aadb0bb",
+      "bytes": 994
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-onboarding-diagnosis.json",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "a649c352c9d5506ab91b8314477a4c2478e27defe463e2d4358782f6fd064d6e",
+      "bytes": 1101
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-onboarding-early-review.json",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "a8ae6db2a575c0b9aac4cf6af7e2ce6815f7c7973755fc4353b60b589f3daad7",
+      "bytes": 1138
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-onboarding-root-live-result.json",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "6619017dd846790e4fc79df7d5437d22d0fc19947f929e3824275b815b11fd04",
+      "bytes": 1554
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-onboarding-test-candidate.json",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "e8c05791231e463b402580fed57d5cf85963910e53a2125cbe17661dd896aa25",
+      "bytes": 921
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-resize-evidence-candidate.json",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "fd8d6dd02fadc06240a6ac5cf9e52dff44825e7b5cf0fd2a7aee8c1856a7ba05",
+      "bytes": 1083
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-resize-evidence-delta-review.json",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "0468c640cc11a25be426669abb9b5a8af2a7b907eaed164a227bee73dd649cf9",
+      "bytes": 1147
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-resize-evidence-root-live.json",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "301caea4d56303fa78b81e86da88faecd4ebdbcca49434d1e71624a027d7926f",
+      "bytes": 1310
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2-20260923/ledger.json",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "162cb73ccbc362157c60015af141756e34cbddcb8374923706e3cff73fa2663c",
+      "bytes": 114670
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/HANDOFF-2026-09-24-1650.md",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "e390609f0854a889baa08ee65d9bf60d9a7bd39c1c820f9438a37f05e7511fd0",
+      "bytes": 15511
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/HANDOFF-2026-09-24-2030.md",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "6bf4778933efb52fa5afd23156ff4327ac48a36a765b5c1da878c5d3a9976443",
+      "bytes": 14221
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/approval.json",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "ae155e3860cfe5d817d6b1cd7e830e449f547a241e487a5b0166e350fd5f9a44",
+      "bytes": 1829
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/approved-manifest.json",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "076165dc7de6305d2546588d98e180be833e7f1abf000e6bca13cee71ff9347a",
+      "bytes": 4506
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cd53-approved-manifest.json",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "f6758bb88fc6b28ac017a4f774bbbf58b78a21b768b61babff71cb7c757a4b6b",
+      "bytes": 5670
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cd53-policy-approval.json",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "8d917e9b91c019246556d65ecd77a9f13c28d7e65080fd033aa7de7063b722d6",
+      "bytes": 1733
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cd53-policy-candidate.json",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "05281de99dbda15697e1b48c6bec72ed29ec586e7c9bea708d6f482e42c6d0f3",
+      "bytes": 1603
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cd53-policy-prewriter.tar.gz",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "ce66ee79f59a668335985dc8af6b564bcfcc05a5d2e6d75516c6cf1f608b2f88",
+      "bytes": 66540
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw02-herdr-outer-prewriter.tar.gz",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "74849f6240a2d7f7492fefe30d75fadc6740d3365413b9f2b3799f06b5e6fc24",
+      "bytes": 18578
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw02-herdr-outer-root-result.json",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "f03a5293d4499f239fadd81974d9ddb98b583d6dc422291e060e5a2fe2622396",
+      "bytes": 1175
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw02-tmux-freshness-prewriter.tar.gz",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "b47d88bede444f0499351af24fccc1bc38955313f397ec4747419a220369297e",
+      "bytes": 6311
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw02-tmux-freshness-root-result.json",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "a46737def498198bf2e6dcf42ef293f57c3b409ed0bda25ba9b7704dbd4a59f3",
+      "bytes": 2026
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw02-tmux-independent-prewriter.tar.gz",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "45e60db51535de68e7de3043c54e09aaef7a7832e7e039c9a2462bd633732073",
+      "bytes": 6106
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw02-tmux-independent-root-result.json",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "2633d133497b9609303e1dbaa3101ca8bf922317497d55b321e20580ea4eb792",
+      "bytes": 1311
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw02-tmux-outer-prewriter.tar.gz",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "d37d742248df706905f4a22f65c4985f0eb35f04a8fa2ae451ac3c0cbffa663c",
+      "bytes": 16191
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw02-tmux-outer-root-result.json",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "1044aa6e1b0d47f086e777c2395901943fa1cbae9c473859fb6f7ef74a81cba9",
+      "bytes": 1449
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw02-tmux-restore-drain-prewriter.tar.gz",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "f56d44fb7e8db75cb82cb13f26fe68d39d55a9b0f66cd99e809b8295502b6702",
+      "bytes": 5320
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw02-tmux-restore-drain-root-result.json",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "c53f9fdbf19e42c2bb1333e84b5aa2c84d0ed655810fcdf5ff4d7cace0402f17",
+      "bytes": 1557
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw02-tmux-startup-diagnostic-prewriter.tar.gz",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "a05f9e7eddf8f64d4e381ad65dfacedee6bd0861dd79b2486e29089455b2c8c8",
+      "bytes": 15601
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw02-tmux-startup-diagnostic-root-result.json",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "a5c0206985461f6cac2453d6200ce52ae74fb360abacb82ae8d976754935c9ed",
+      "bytes": 1599
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw03-a-boundary-root-result.json",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "dd27891eaef765314b0821b414d7ca4d0a2559ff052317a696c22029e98b03f5",
+      "bytes": 1740
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw03-cgroup-capability.json",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "a7101b42032136b55e85ebabc042b26c1db860fe16b28624f42fa7699bd2f07a",
+      "bytes": 810
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw03-control-bypass-test-prewriter.tar.gz",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "ba1474bc7eaf7d0175e0e56f63527daaab6faad5034be5e9163a4d5c39a818e3",
+      "bytes": 3163
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw03-recovery-edge-root-result.json",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "2f0d1e57179c9429e0d22a2c343dc2143b07cf93f4da18f5abd379bb3d81891f",
+      "bytes": 1791
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw03-recovery-edge-test-prewriter.tar.gz",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "19d7503e48bab5686616e282c4d5d5996a42a4dd9cd9f08e1da6fbf71635803d",
+      "bytes": 5983
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw03-recovery-fix-prewriter.tar.gz",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "bb131db3797139b0f50830cef03a37d06ba091f1beee4d17f79498d1ca6688c2",
+      "bytes": 14327
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw03-recovery-root-result.json",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "6c02b1307d0074b6c51b5d67a4a9414f3f64670b115e3168eee58bd3fb636804",
+      "bytes": 2136
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw03-recovery-test-prewriter.tar.gz",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "6bde02b59b1ec70471ff074898069b4e4733fce21781affffe69b8b21e505d33",
+      "bytes": 3432
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw03-run-escape-oracle-result.json",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "f4a19faf43dbd9fff110c387dd491bf0c2ad472617b81a35bb6d3f0988ec5746",
+      "bytes": 1589
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw03-spill-test-prewriter.tar.gz",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "c20e7f56e0f58e1b2ecdb65137be12fd8dd0d85b967c7f6e58208cbfac99abcc",
+      "bytes": 1373
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw03-subreaper-host-prewriter.tar.gz",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "2424b5f58709759f3e01edcd4c327b5bc37a25bca1dfd4bc8644d1733cb0184a",
+      "bytes": 13383
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw03-subreaper-host-root-result.json",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "93a125b04d9017a7e251a3a4914ed31fa4b48d0ccbc5b6313b68742119a7f51a",
+      "bytes": 1472
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw03-subreaper-independent-root-result.json",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "55c638dabf2692b3aa61edbdd7e1da81d3360824f851d62e27fd9583fc3b7aa9",
+      "bytes": 1457
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw03-subreaper-test-prewriter.tar.gz",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "1cc9f682fd6f7f75452a1e66a46611e49dca29a04a24139f0dcb2141dd7d8ab2",
+      "bytes": 3193
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw03-supervisor-boundary-prewriter.tar.gz",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "5261c981413191b97919849f4ad1586ffa17d90a8e15162a134ce104b4860005",
+      "bytes": 13340
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw03-wait-boundary-fix-prewriter.tar.gz",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "3e413ebf57da1c78be5133d5dbe82bb4d7ef5f9ab32a375a2167385814314928",
+      "bytes": 11219
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw04-async-error-predicate-fix-prewriter.tar.gz",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "9a084b8f2e97ba0c441ef07d5a3d900d508659cb25e1e14f43077c7fa7f73d0a",
+      "bytes": 17932
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw04-async-error-test-prewriter.tar.gz",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "2d839c08b0135558ed85a7b94b9a68eb5851149ad098806cf624134824f1e52a",
+      "bytes": 2032
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw04-async-event-pretest.json",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "d4d3a2f66bb080c6d93fae4fbe383134ceda6d465a263e7737da5f6876836a0b",
+      "bytes": 620
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw04-async-event-prewriter.json",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "68ce52b9996c2fe778da7f0028ec04cf5158149591bce026d8f3c1ff9453f4ab",
+      "bytes": 669
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw04-async-event-prewriter.tar.gz",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "08575ef19ea8a9e8194db4bb851784f38722e8272744b64abc182be29d102ea4",
+      "bytes": 15141
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw04-async-event-root-result.json",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "5e3d7e2a676311e7a5819daf11c9c2170f42d9c02ffb16762c3274fe9a7344ec",
+      "bytes": 2777
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw04-provider-event-pretest.json",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "e843db13165ffd67c82ce35c0d781bacb58025647e864d3957b043cc336d12f8",
+      "bytes": 707
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw04-provider-event-prewriter.json",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "542c3bd8b25c886580840dc28f4bcb15fffee81ff35ce165575e500662f8a500",
+      "bytes": 773
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw04-provider-event-prewriter.tar.gz",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "2b067d2fc637029a846f9a34040536662fff5697d0748302bdc3bd7d7ebd58df",
+      "bytes": 19660
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw04-provider-event-root-result.json",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "9d19a0a4d568e3efce37e8f7fcb2396ffb6ff3b0a9bd8b21e5d23030712da79a",
+      "bytes": 2888
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw04-session-independent-root-result.json",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "c390ed9db84eeb36fb8c5a8fc4286c0e54ae15047d2fae1700a0f58381914ff9",
+      "bytes": 1362
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw04-session-predicates-prewriter.tar.gz",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "348f2876a63d0e1f93c3d7d9ba46fbf461aad47291570d9408cdc05d8034e5d7",
+      "bytes": 9601
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw04-tui-async-error-prewriter.tar.gz",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "ef387693c63a4eb6cf04006ea675ce5fd2f56a27d18aa8db9be317fbd4dec35f",
+      "bytes": 14530
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw04-tui-contention-final-root-result.json",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "f80ae94f506a8b0275376f7a489c17c17ecc5abcb6d4244922dec04d0691404f",
+      "bytes": 6999
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw04-tui-contention-fix-prewriter.tar.gz",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "b38c204e35e0275f549e19cf0e94498c8c8758949926f59a71ccf6be94fc8d62",
+      "bytes": 9077
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw04-tui-contention-independent-root-result.json",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "1c3a66d69d8e548866f4e49ef94e8d3962280ff8b50c7032bce4028d61fde6a1",
+      "bytes": 1621
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw04-tui-contention-prewriter.tar.gz",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "ae68cb82478bc5be7008c8e7a777230b769edb83c7adb368b80631317437e67c",
+      "bytes": 22373
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw04-tui-contention-root-result.json",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "be8c8113a076793a031e3468162902e07c859bc4aa950c3707f76280225e56f2",
+      "bytes": 6470
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw04-tui-contention-test-correction-prewriter.tar.gz",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "fa624003dd837342c76f8469bd8ca6c593c652853afe8ece3ba400e816831f3b",
+      "bytes": 8932
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw04-tui-contention-test-correction-root-result.json",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "221492060fd9c157f01d711204f089ae9e5663e597c04901d8d134387f3adc03",
+      "bytes": 1268
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw04-tui-contention-test-prewriter.tar.gz",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "5fae3ef582a605a8096eaadcb43c7c7ebfa3f77473b74acf209c7d9fd60bf2b3",
+      "bytes": 9768
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw04-tui-extension-fault-independent-root-result.json",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "9a281830d6783ab03cb740d9c9dd7853bf1ae8aecbb276f822626f77d5efb31e",
+      "bytes": 1560
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw04-tui-extension-fault-root-result.json",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "3ecff315b96766962bed6541739748ec5ae92d65b100654d3c4cc7a9096f82c9",
+      "bytes": 2778
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw04-tui-extension-malformed-independent-root-result.json",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "b3d10a302e84322ee91ed05a52d727d0739eb1246cd20b3781aabd41bd8bc783",
+      "bytes": 1230
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw04-tui-extension-malformed-prewriter.tar.gz",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "af72001cfccca4ba1e4893c1bb91cb4e4ab6b3e76991de569cdc26a520457f45",
+      "bytes": 11332
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw04-tui-extension-malformed-root-result.json",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "cf5f2efdb780f38905b1d4103979024f6576264284e20c042517dabd4b9ff248",
+      "bytes": 3321
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw04-tui-extension-malformed-test-prewriter.tar.gz",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "a9700669658a2f8c9abd59ca4a6d357385cd68a8920b17621bf719482c866fd8",
+      "bytes": 7892
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw04-tui-extension-prewriter.tar.gz",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "d7792f6357bbb10ce4bcdb51bddc9038470856b1c5f587cb6d5a4ed83a78ebfc",
+      "bytes": 13537
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw04-tui-extension-test-prewriter.tar.gz",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "17fbfbc00affbe23a42e1fb3a6993d9b85079ada1687a66df75d2a910a0d84b1",
+      "bytes": 7639
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw04-tui-four-kinds-independent-root-result.json",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "047280ebe17eccd53c2350cecf9ed423f44e20931b0a4a3b0f858acae485c7f4",
+      "bytes": 1434
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw04-tui-four-kinds-root-result.json",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "fe29ee28d153d9f6a7f006f643c095f573b73ecb66a64f74d2365772d08de7b2",
+      "bytes": 1849
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw04-tui-kinds-prewriter.tar.gz",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "1d0119f9d688690a26d08527e75281460da54c78f8e5629c0b05f0a191faeeaf",
+      "bytes": 31161
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw04-tui-kinds-test-prewriter.tar.gz",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "ff26da1234162c66a35d99a76161c82ecddc578eaaeb740f085ad9d4fdfccb9b",
+      "bytes": 5929
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw04-tui-pause-final-root-result.json",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "a0e2f621b44175f192ad98001af3192cad0077ce15c4945185eae4c308c3491b",
+      "bytes": 4812
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw04-tui-pause-fix-prewriter.tar.gz",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "185cb67166d3fa681de1b0f3cf274d583f09d97c47a7095056513272bfa95b72",
+      "bytes": 8719
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw04-tui-pause-independent-root-result.json",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "7841443829c26a6a86167524edac2f1fe456711012413594520bca40ebc6797a",
+      "bytes": 1207
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw04-tui-pause-prewriter.tar.gz",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "4ab1e7dbc6fd1ab79af26b68477262d78378c2663a9d71281cd0e82deeaec7c2",
+      "bytes": 18569
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw04-tui-pause-root-result.json",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "aa31557e5ed94907c04bc082469a799a6b06b850a8c276bad3785aa6f64010de",
+      "bytes": 4303
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw04-tui-pause-test-prewriter.tar.gz",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "14ac1cf9e06274192ceadd0522325890c526d73a9c91f700aecc08541f625083",
+      "bytes": 16325
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw04-tui-predicate-fix-prewriter.tar.gz",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "b38664e351ae16c314f9849bbf4354f5d9bf734ba6d04d76d1597d9cd3a9c5c2",
+      "bytes": 12305
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw04-tui-reconnect-independent-root-result.json",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "9c397507f42ec60fe907d0a51810b1cf163dc04291af2783a6d44e934b840ef8",
+      "bytes": 1549
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw04-tui-reconnect-prewriter.tar.gz",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "82769b12b6450466fcae72ac0c9f86a64c9a804a08bbed2b1108e9260e48e49e",
+      "bytes": 28201
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw04-tui-reconnect-root-result.json",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "cd8e5c4cbac798ccbb846610c1ec3947821fe4f20cc9d28f843424846f48912a",
+      "bytes": 2076
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw04-tui-reconnect-test-prewriter.tar.gz",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "74cbb34b84d37a5bb990eb504edcd5ee546c3ac38d4a5d4eefac751703c31fcb",
+      "bytes": 10466
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw04-tui-screen-prewriter.tar.gz",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "51c6af3288ee1ec36de6da91cd27e377c4472ac374cd838c130bb92c64d07113",
+      "bytes": 15556
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw04-tui-session-inflight-final-root-result.json",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "8d806f6552c86dc2159623ad50340fbca385956c9dbb9530c7f940f68027fc49",
+      "bytes": 3401
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw04-tui-session-inflight-fix-prewriter.tar.gz",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "561c51279744b10b81ed74f621882855d386513dab5cdf6ff6dfc70cf2e83495",
+      "bytes": 7777
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw04-tui-session-inflight-independent-root-result.json",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "bad59fb46359293184cdadf3a3e36a8a4718917b10f5f5599215c2e611adb71f",
+      "bytes": 1162
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw04-tui-session-inflight-prewriter.tar.gz",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "e6ff4b6e0b476902db26d50c4747cbeaf0ae636ce28c6ba91996333107e7ece8",
+      "bytes": 16298
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw04-tui-session-inflight-root-result.json",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "17de7c441a20494b80f0da725eff4ab5eba448dace680821905549364accc246",
+      "bytes": 2757
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw04-tui-session-inflight-test-prewriter.tar.gz",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "b4395d79b9efcd8e2c780ca0c1206c69df0f3580b2501ca0509adf4ac970d57c",
+      "bytes": 8736
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw04-tui-session-prewriter.tar.gz",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "f41462923393af389051dd93643b1adac704bf1c173cc73604065e24b7a76e4c",
+      "bytes": 18269
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw04-tui-session-root-result.json",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "ebea617e4903a4378577c545f28c67ea223fbf679a502265bd4df316c46ea026",
+      "bytes": 2400
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/handoff-pause-20260924-1650-index.patch",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "175a0de8362b6a6ba5a498b84a74e9017e1555d409cb3a39440fbd1c8503c184",
+      "bytes": 73461
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/handoff-pause-20260924-1650-worktree.patch",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "c7253e3084126a443f88cf2cad71f65ed13b0e1be0c5b8a55710f18ba75c2968",
+      "bytes": 444740
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/handoff-pause-20260924-1650.json",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "2658bfda4cddf757488768e95859170f17e5b9e280f0db862c829054eabb2e98",
+      "bytes": 23312
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/handoff-pause-20260924-1650.tar.gz",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "46c714d0f31b89b9b2b273c0e7a7b6fcf03a31c30165bc741950e02678a9fe00",
+      "bytes": 772213
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/ledger.json",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "6779c4b46af0399dd38a222775c27d37fbbcb6df4f35a2eebd859f9e2fa5d6dd",
+      "bytes": 247957
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/pre-writer-recovery.json",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "4870894696ef31c6b371dd1df7f4f2b7849d61d0d9ae465f7d293efa78e2e751",
+      "bytes": 10899
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/pre-writer-recovery.tar.gz",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "52d39e9f7103f46c59d467fefe6fd25457fce6727212dec246469a1cc68419ff",
+      "bytes": 200690
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/pre-writer-staged.patch",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "175a0de8362b6a6ba5a498b84a74e9017e1555d409cb3a39440fbd1c8503c184",
+      "bytes": 73461
+    },
+    {
+      "path": ".workflow/core-workbench/runs/planning-p2.3-20260924/baseline.json",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "f299e6e66d2e1ec49bc562e00d645ac01649cf3a2040e11bb35e6c9989295c65",
+      "bytes": 9150
+    },
+    {
+      "path": ".workflow/core-workbench/runs/planning-p2.3-20260924/before-documents.tar.gz",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "3121d58018892ed705326de04c729206b8f0371b74ee9734bdf9eaaf9da568d5",
+      "bytes": 45939
+    },
+    {
+      "path": ".workflow/core-workbench/runs/planning-p2.3-20260924/changes.json",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "11be496ecd93432eb7287e1f95d5c98b52cb351bef427f729b7e422915ea4960",
+      "bytes": 3151
+    },
+    {
+      "path": ".workflow/core-workbench/runs/planning-p2.3-20260924/manifest.json",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "b74cf63f11a807e79faa4e34e0e0f4294da39de8cd3f33cef29ee2b0f9585bba",
+      "bytes": 5311
+    },
+    {
+      "path": ".workflow/core-workbench/runs/planning-p2.3-20260924/validation.json",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "e77156b7a540743c17e9dce7b7997a82c2718cb720a11819a844034ad16d95a5",
+      "bytes": 3363
+    },
+    {
+      "path": ".workflow/core-workbench/runs/refine-recovery-20260924/decisions.json",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "23f6f7885d16616801950fb0d49e45fd7e8c63714d29949d19be4eb30be7ccba",
+      "bytes": 2462
+    },
+    {
+      "path": ".workflow/core-workbench/runs/refine-recovery-20260924/r1.10-review-candidate.json",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "11e30ce4c0fbb92e96d486372b687f14c65ed98ae9a63f54d153083b82f1b741",
+      "bytes": 2848
+    },
+    {
+      "path": ".workflow/core-workbench/state.json",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "2dadb92d30b6e55faa16c15f2b69cf8e2bb6860b0637bc82f53555856553545e",
+      "bytes": 21424
+    },
+    {
+      "path": "AGENTS.md",
+      "kind": "file",
+      "mode": "0o644",
+      "sha256": "136a2edb3dfd7f126e3a281166c62d7d50b6520fa38c64f1e98f5be8b72df38d",
+      "bytes": 4204
+    },
+    {
+      "path": "CONTEXT.md",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "391d525ba83a94df88bc2ba054e7d7e04b4874e8053fe841bba8cac931e09013",
+      "bytes": 5874
+    },
+    {
+      "path": "docs/adr/0002-managed-shell-control-wait.md",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "ff5712171391ac86375be49a13c6a4221b2909c44da9962ab52cc6b7630f2d52",
+      "bytes": 3721
+    },
+    {
+      "path": "docs/features/core-workbench/BRIEF.md",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "cabef56a1caf1773b1873905ac2cde713a29497c91b85ddd247086c4fc8aed3c",
+      "bytes": 29806
+    },
+    {
+      "path": "docs/features/core-workbench/DECISIONS.md",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "d0b11de9708929f9dd32ba4cc06b1fce1e686a66eb5f4d31b73d3625229e3312",
+      "bytes": 16908
+    },
+    {
+      "path": "docs/features/core-workbench/DIAGNOSIS.md",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "63197e1fd30b95fbc18c45f1a663d7211e6d6bafd965f99346239a576b350a7b",
+      "bytes": 23077
+    },
+    {
+      "path": "docs/features/core-workbench/OPERATING-CONTRACT.md",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "05c34862d05e98d446858a917551f6869317b7d712f375e7925ad56cdbf040a4",
+      "bytes": 21219
+    },
+    {
+      "path": "docs/features/core-workbench/PLAN.json",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "696270bf612df23e2931ab3350f3146594fa9270598489dbe530f56913587fa7",
+      "bytes": 140781
+    },
+    {
+      "path": "docs/features/core-workbench/SOURCE-RECONCILIATION.md",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "eff6eed97df035ac57e75084406c98afa087dca13a93ceacaafeab0192601b62",
+      "bytes": 9927
+    },
+    {
+      "path": "docs/features/core-workbench/SPEC.md",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "ce954cef30504987fabc1983144528f49bccc69543ed99ee16f2e398ffe865e3",
+      "bytes": 30643
+    },
+    {
+      "path": "docs/features/core-workbench/gates/G1.md",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "8d03ea9abd4200243e8131c31ca4ed98590c5b83dcaa36b562c75f35b3e375d8",
+      "bytes": 20988
+    },
+    {
+      "path": "docs/features/core-workbench/gates/G2.md",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "430ce2fb7d8d4e7a321335b5ab4013a5763cc1a87f708bc1d125fb54dfbf7d0a",
+      "bytes": 23790
+    },
+    {
+      "path": "docs/features/core-workbench/gates/G3.md",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "093cb78caf96c702377138da90fdb62a54d43dd4eb71544b4916a8eb0d46b934",
+      "bytes": 46330
+    },
+    {
+      "path": "docs/features/core-workbench/tickets/CW-02.md",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "6e0b5b349ed4c78930c0599b1be069edfb033e384a3a13dfaaaad37938b52b4a",
+      "bytes": 6274
+    },
+    {
+      "path": "docs/features/core-workbench/tickets/CW-03.md",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "84c8e03c9cf97a909d56ba662265b13a88e4f01457972d94773e9954251b558d",
+      "bytes": 8051
+    },
+    {
+      "path": "docs/features/core-workbench/tickets/CW-04.md",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "5b048b86f1bae87a6a483e6f490f9562c73f4d5b28f0ee505c4c53d6a19670cc",
+      "bytes": 6748
+    },
+    {
+      "path": "docs/features/core-workbench/tickets/CW-05.md",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "bc17a507685c7e43b5d30bace5109025e6e078ad27e8abaaddea4a4807e8b775",
+      "bytes": 6408
+    },
+    {
+      "path": "docs/features/core-workbench/tickets/CW-06.md",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "b82102216931ab650052eabae6dc6b4e14af6102d61ab6df4078e299ef7f6c39",
+      "bytes": 3479
+    },
+    {
+      "path": "docs/features/core-workbench/tickets/CW-07.md",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "0a0c8178ec4cefbf7c17d77e6966531fb93b9e8498c857c8eaba595d2e05a77f",
+      "bytes": 4806
+    },
+    {
+      "path": "docs/features/core-workbench/tickets/CW-08.md",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "464e8db03c660b6165b45806bff135a3f159476ff823341af57fc9948ebb5967",
+      "bytes": 3884
+    },
+    {
+      "path": "docs/features/core-workbench/tickets/CW-09.md",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "a4c7f18e82875f9c236884854b94eeed8796350317ee6619bbbed2b36977bff3",
+      "bytes": 3983
+    },
+    {
+      "path": "docs/features/core-workbench/tickets/CW-10.md",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "c48c1b8f8e33c7f29bc7783690720610579fbbb5d88766116949f71240f045b0",
+      "bytes": 5615
+    },
+    {
+      "path": "docs/features/core-workbench/tickets/CW-11.md",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "2fbce6c5eda9cfb2287b7d0d92c0fc6f7ac86dc0bc31d0390f8419c8d07cc3eb",
+      "bytes": 4263
+    },
+    {
+      "path": "docs/features/core-workbench/tickets/CW-12.md",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "5940cafdaec0a6f0114763ca73a9036361497c89bac3652825a8d9ab6f0a0372",
+      "bytes": 5000
+    },
+    {
+      "path": "docs/features/core-workbench/tickets/CW-13.md",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "b048e999ba81b1cf5753785523c5d8d66d9f304ef5490d90104f82f605e73fd4",
+      "bytes": 5881
+    },
+    {
+      "path": "docs/features/core-workbench/tickets/CW-14.md",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "b7a5cf8f0bcca3c44058e0fc22cf6fc3bb1fd445d95bb2e8a0a3d1130cc8ba2f",
+      "bytes": 3338
+    },
+    {
+      "path": "docs/features/core-workbench/tickets/CW-15.md",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "78b9e00b0e7fad0ffe3550bfcd313e12f26a44471cbee91be31f236c9afac620",
+      "bytes": 5670
+    },
+    {
+      "path": "docs/features/core-workbench/tickets/CW-16.md",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "928326de0345b394d08d828769c912e36fadf97cb24dd4c69fb628e56ce9e319",
+      "bytes": 5755
+    },
+    {
+      "path": "omp_bridge/g3/bridge.ts",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "a41ea4b9ebc08ff0305930e59ab6e616109efdad420ab01422836f4eadfa57ef",
+      "bytes": 21653
+    },
+    {
+      "path": "src/workbench/terminal/shell_g2/control_probe.py",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "e5914ebb070c049ed2f48c9276c7cdb3b92685eb316ea307d95de586455863f1",
+      "bytes": 19648
+    },
+    {
+      "path": "src/workbench/terminal/shell_g2/prototype.py",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "5a192fd0d04abbfc7697046f0289b8789cf24d9b44ef1246fbf9f2a03a893123",
+      "bytes": 28872
+    },
+    {
+      "path": "tests/gates/g1_vt/live_normal_resize_probe.py",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "74faa58bf10f2c7231a5b0aeb428fb5bd7d9b241d92bba07a131e223ee77b516",
+      "bytes": 13413
+    },
+    {
+      "path": "tests/gates/g1_vt/live_outer_tmux_probe.py",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "0609c57ccba0b28e13e88b6885b5c49ab7fb3b59010220a40c49baf791ffb4a6",
+      "bytes": 16410
+    },
+    {
+      "path": "tests/gates/g1_vt/live_runtime_probe.py",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "c6143d78f937901b60c23541ebf8502fd92be2b1fa6ade2b0d8064b0b1f14824",
+      "bytes": 20186
+    },
+    {
+      "path": "tests/gates/g1_vt/live_three_pane_resize_probe.py",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "1c609adf317bdbfd05d776e5742186c219dc29bceebcbf1a4c261f7accc7eec8",
+      "bytes": 8513
+    },
+    {
+      "path": "tests/gates/g1_vt/test_live_resize_evidence.py",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "5f500b10be456fec3f27eace636e7357051bc31e8b120757303b0f2cae82bed9",
+      "bytes": 2232
+    },
+    {
+      "path": "tests/gates/g1_vt/test_live_runtime_probe.py",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "a06381fef38456e5070f0ff936ad5eac75cba313e54d73a8c2d3b19c7c07bf15",
+      "bytes": 4821
+    },
+    {
+      "path": "tests/gates/g1_vt/test_outer_tmux_predicates.py",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "f7f8a1fc0df882cc95f489d57480b95146bd53ff950e074448c8f64a1b69e469",
+      "bytes": 8875
+    },
+    {
+      "path": "tests/gates/g1_vt/test_resize_probe_predicates.py",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "750b10f87a1159b5cdcc00432e835ad61e36d4dc5e1924170b74762ad3e7cefd",
+      "bytes": 7681
+    },
+    {
+      "path": "tests/gates/g2_shell/live_subreaper_lifetime_probe.py",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "fd28f3a3b7e2db3733dd363c91e5ce45073884d05a9c8ab8f4c6f451155f661f",
+      "bytes": 9814
+    },
+    {
+      "path": "tests/gates/g2_shell/live_supervisor_boundary_probe.py",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "44fae4c7a5371c082a415fbd899d0ed6d936616ee4757fc681a2fc5faa2ee255",
+      "bytes": 10919
+    },
+    {
+      "path": "tests/gates/g2_shell/test_control_boundaries.py",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "44fba93c3eb2f73305766f9d048da276aaf6242c983ccfc7e1492a675bc46835",
+      "bytes": 5586
+    },
+    {
+      "path": "tests/gates/g2_shell/test_control_lifecycle.py",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "3fd8526c02258c13ff6da57ebcb4a9206a2a37cf92048cabcff629231fb9b43e",
+      "bytes": 23275
+    },
+    {
+      "path": "tests/gates/g2_shell/test_control_probe.py",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "ce83752ab62060a5ac97de9dbc532c2d97f5ba90fb6eca21321c4d4ed4419f7c",
+      "bytes": 17844
+    },
+    {
+      "path": "tests/gates/g2_shell/test_subreaper_lifetime_predicates.py",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "b500eb137ef668a5d9501c4d8856ef9c68b2d61c018e48337a1cde1cb3609e1e",
+      "bytes": 4456
+    },
+    {
+      "path": "tests/gates/g3_omp/bridge.test.ts",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "a982e0e0417a7c5722c2e02c5ff84e51b8c5b1aa6efa94c8dc6ef33818f38812",
+      "bytes": 27990
+    },
+    {
+      "path": "tests/gates/g3_omp/live_omp_probe.py",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "41ed009d75fa7f8363e722a710c6a05a3fef84c3bb22c8ede16e59a47f0146df",
+      "bytes": 21995
+    },
+    {
+      "path": "tests/gates/g3_omp/live_tui_contention_probe.py",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "e8db05dada785519377e8eed1da6959dc0ffb84b1b26f15c0df71f14f26872a3",
+      "bytes": 23835
+    },
+    {
+      "path": "tests/gates/g3_omp/live_tui_draft_probe.py",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "033d7c9ff3980f658e80cff9d01976b9a021a37d2a6e162c718275b88fbe717d",
+      "bytes": 32961
+    },
+    {
+      "path": "tests/gates/g3_omp/live_tui_event_surface_probe.py",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "20d40cb582117799ffc494623d21d93f965acce30cf1db3e1f04512bca9da85e",
+      "bytes": 5667
+    },
+    {
+      "path": "tests/gates/g3_omp/live_tui_extension_fault_probe.py",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "e76c0d8a890f60bd70d60573dec1b25dd6e19568bf4a2e1a20fc31801a9e6fdb",
+      "bytes": 20011
+    },
+    {
+      "path": "tests/gates/g3_omp/live_tui_message_kinds_probe.py",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "d2dc0425bbb04879bd51cf228651b2e245d1fcba703d210bc8ad62227d1dc35b",
+      "bytes": 13232
+    },
+    {
+      "path": "tests/gates/g3_omp/live_tui_pause_reconcile_probe.py",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "d32a075f7b51bc45444495cab70def2c68c8005cbbda9aeea97e3cea83c96a52",
+      "bytes": 23243
+    },
+    {
+      "path": "tests/gates/g3_omp/live_tui_reconnect_probe.py",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "7bf6cadf1f032e6f63a7ee7d998f6e38d20e811cbc12bc9f8f7fef5bbc4b5d10",
+      "bytes": 13831
+    },
+    {
+      "path": "tests/gates/g3_omp/live_tui_session_inflight_probe.py",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "c3619d36076968fb829cf4323cf320e5a15f8711d4dd7e08bc7504211f6772a8",
+      "bytes": 20422
+    },
+    {
+      "path": "tests/gates/g3_omp/test_tui_contention_predicates.py",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "3ee6d26e98ea36209d5c471ccbea330c5a24c67d21f0e29dc292d96db88969fe",
+      "bytes": 14366
+    },
+    {
+      "path": "tests/gates/g3_omp/test_tui_draft_predicates.py",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "cd44c17d238d573a6beede17895921a584ac0d7f52ffc95e8c9cdc3231865dc9",
+      "bytes": 16618
+    },
+    {
+      "path": "tests/gates/g3_omp/test_tui_event_surface_predicates.py",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "818adb198ffce1a354728ce63954b1245ff78db0581235dd35bc34b91b13a587",
+      "bytes": 19137
+    },
+    {
+      "path": "tests/gates/g3_omp/test_tui_extension_fault_predicates.py",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "bb4508bc8234dcc3b81185ee5053939609e27ca14664a91c02783b8679740748",
+      "bytes": 19181
+    },
+    {
+      "path": "tests/gates/g3_omp/test_tui_message_kinds_predicates.py",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "abc290854a73cf9d83eb1328cd6308ac0f61cf22b522b1dc36d2639d04946046",
+      "bytes": 9912
+    },
+    {
+      "path": "tests/gates/g3_omp/test_tui_pause_reconcile_predicates.py",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "b08a8e5f4d444e3aca37ead81fd95b006c887920cc53abcd76ff8311a54519b5",
+      "bytes": 14713
+    },
+    {
+      "path": "tests/gates/g3_omp/test_tui_reconnect_predicates.py",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "240a3e1c803b06a227f7b5bf8670b8371b0cd82b759494d5a0d4aac04c1211d6",
+      "bytes": 11011
+    },
+    {
+      "path": "tests/gates/g3_omp/test_tui_session_inflight_predicates.py",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "4ecab48ec37fab042070dac32665a32979308fca1f0b580694f26b07a98865f5",
+      "bytes": 13042
+    },
+    {
+      "path": "tests/gates/g3_omp/test_tui_session_predicates.py",
+      "kind": "file",
+      "mode": "0o664",
+      "sha256": "e36826fe18c7198732f4bcaa1051372b386692cdbb0817346a641ebf62441c3f",
+      "bytes": 8934
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "created_at_utc": "2026-09-24T10:58:36.855752+00:00",
+  "frozen_inputs": {
+    "omp_bridge/g3/bridge.ts": "9f4209d3e366aa4940e52e40c5cf843c614029e5de55c99e6e25712d98418c8a",
+    "tests/gates/g3_omp/live_omp_probe.py": "a377900ffbb1d66a33a28a4322600506cff2285e97b86447db9ae30d845dae36",
+    "tests/gates/g3_omp/live_tui_draft_probe.py": "6a81bb43273bd6a5162741efa37e4e0fab80c20aad2f636d48d0d2cc24def550",
+    "tests/gates/g3_omp/live_tui_event_surface_probe.py": "ec2bf83a51da6ea50935bf4162f8e0b94b5e183935c4fe567f12aa3518ffde70"
+  },
+  "allowed_new_test": "tests/gates/g3_omp/test_tui_event_surface_predicates.py"
+}

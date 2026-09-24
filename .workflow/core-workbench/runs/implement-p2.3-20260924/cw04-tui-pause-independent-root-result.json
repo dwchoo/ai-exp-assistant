@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "recorded_at_utc": "2026-09-24T10:14:08+00:00",
+  "ticket": "CW-04",
+  "gate_item": "G3-PAUSE",
+  "candidate_sha256": {
+    "tests/gates/g3_omp/live_tui_pause_reconcile_probe.py": "cf65b482655c91791f9501d179e48c168d5efc7219cbc4a9c2f3e8758bf2467d",
+    "tests/gates/g3_omp/test_tui_pause_reconcile_predicates.py": "b08a8e5f4d444e3aca37ead81fd95b006c887920cc53abcd76ff8311a54519b5"
+  },
+  "approved_requirements_sha256": "864fcf5616d76b5284d64ff792f392e31d7410650caaee3fa9a5a72fd264cf4b",
+  "command": "timeout 35s env PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g3_omp /tmp/cw02-g1-venv/bin/python -m unittest -v tests.gates.g3_omp.test_tui_pause_reconcile_predicates",
+  "cwd": "/home/dwchoo/ai-exp-assistant",
+  "environment": "Linux host controlled doubles, no OMP/Docker runtime",
+  "exit_code": 1,
+  "result": "5_of_6_pass_one_required_failing_test_two_session_generation_subcases",
+  "finding": "Probe counts role agent_end but does not require fresh event sessionId/generation to equal current manager peer; stale session/wrong generation returns passed_pair_tui.",
+  "unknowns": [
+    "bounded predicate correction and live replay",
+    "G3 overall pending"
+  ]
+}

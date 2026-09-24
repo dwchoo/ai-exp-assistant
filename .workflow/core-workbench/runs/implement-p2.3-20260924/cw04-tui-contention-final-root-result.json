@@ -1,0 +1,206 @@
+{
+  "schema_version": 1,
+  "recorded_at_utc": "2026-09-24T10:03:42+00:00",
+  "ticket": "CW-04",
+  "gate_item": "G3-TUI-CONTENTION",
+  "candidate_sha256": {
+    "tests/gates/g3_omp/live_tui_contention_probe.py": "e8db05dada785519377e8eed1da6959dc0ffb84b1b26f15c0df71f14f26872a3",
+    "tests/gates/g3_omp/test_tui_contention_predicates.py": "3ee6d26e98ea36209d5c471ccbea330c5a24c67d21f0e29dc292d96db88969fe"
+  },
+  "approved_requirements_sha256": "864fcf5616d76b5284d64ff792f392e31d7410650caaee3fa9a5a72fd264cf4b",
+  "scope_audit": "worker_senior changed only live_tui_contention_probe.py success predicate to require approval_file_absent_before; independent test hash unchanged; Root diff --check passed.",
+  "commands": {
+    "test": "timeout 35s env PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g3_omp /tmp/cw02-g1-venv/bin/python -m unittest -q tests.gates.g3_omp.test_tui_contention_predicates",
+    "approval": "timeout 90s env PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g3_omp /tmp/cw02-g1-venv/bin/python tests/gates/g3_omp/live_tui_contention_probe.py --scenario approval",
+    "busy": "timeout 90s env PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g3_omp /tmp/cw02-g1-venv/bin/python tests/gates/g3_omp/live_tui_contention_probe.py --scenario busy"
+  },
+  "cwd": "/home/dwchoo/ai-exp-assistant",
+  "environment": "Linux host, two OMP 18.2.10 TUI processes per mode, local scripted provider and PTY; independent Python doubles; no Docker",
+  "exit_codes": {
+    "test": 0,
+    "approval": 0,
+    "busy": 0
+  },
+  "result": "independent_13_of_13_and_two_actual_tui_modes_passed_partial_G3",
+  "observed": {
+    "approval": {
+      "result": "passed_approval",
+      "pids": {
+        "manager": 166915,
+        "worker": 166917
+      },
+      "initial_ready": true,
+      "deferred_ack": "deferred",
+      "model_processed_at_deferred_ack": null,
+      "hold_samples": [
+        {
+          "busy_or_approval": true,
+          "editor_length_unchanged": true,
+          "other_provider_delta": 0,
+          "other_start_delta": 0,
+          "provider_delta": 0,
+          "session_current": true,
+          "start_delta": 0
+        },
+        {
+          "busy_or_approval": true,
+          "editor_length_unchanged": true,
+          "other_provider_delta": 0,
+          "other_start_delta": 0,
+          "provider_delta": 0,
+          "session_current": true,
+          "start_delta": 0
+        },
+        {
+          "busy_or_approval": true,
+          "editor_length_unchanged": true,
+          "other_provider_delta": 0,
+          "other_start_delta": 0,
+          "provider_delta": 0,
+          "session_current": true,
+          "start_delta": 0
+        },
+        {
+          "busy_or_approval": true,
+          "editor_length_unchanged": true,
+          "other_provider_delta": 0,
+          "other_start_delta": 0,
+          "provider_delta": 0,
+          "session_current": true,
+          "start_delta": 0
+        },
+        {
+          "busy_or_approval": true,
+          "editor_length_unchanged": true,
+          "other_provider_delta": 0,
+          "other_start_delta": 0,
+          "provider_delta": 0,
+          "session_current": true,
+          "start_delta": 0
+        },
+        {
+          "busy_or_approval": true,
+          "editor_length_unchanged": true,
+          "other_provider_delta": 0,
+          "other_start_delta": 0,
+          "provider_delta": 0,
+          "session_current": true,
+          "start_delta": 0
+        }
+      ],
+      "approval_file_absent_before": true,
+      "approval_file_absent_during_hold": true,
+      "native_result_exact": null,
+      "approval_resolved_approved": true,
+      "native_write_exact": true,
+      "retry_ack": "api_accepted",
+      "model_processed_at_retry_ack": false,
+      "provider_id_match": true,
+      "target_provider_delta_after_retry": 2,
+      "other_provider_delta": 0,
+      "target_start_delta_after_retry": 1,
+      "other_start_delta": 0,
+      "target_end_delta": 2,
+      "other_end_delta": 0,
+      "duplicate_ack": "duplicate_api_accepted",
+      "no_replay_after_duplicate": true,
+      "omp_children_remaining": 0,
+      "cwd_processes_remaining": {
+        "manager": [],
+        "worker": []
+      }
+    },
+    "busy": {
+      "result": "passed_busy",
+      "pids": {
+        "manager": 167112,
+        "worker": 167114
+      },
+      "initial_ready": true,
+      "deferred_ack": "deferred",
+      "model_processed_at_deferred_ack": null,
+      "hold_samples": [
+        {
+          "busy_or_approval": true,
+          "editor_length_unchanged": true,
+          "other_provider_delta": 0,
+          "other_start_delta": 0,
+          "provider_delta": 0,
+          "session_current": true,
+          "start_delta": 0
+        },
+        {
+          "busy_or_approval": true,
+          "editor_length_unchanged": true,
+          "other_provider_delta": 0,
+          "other_start_delta": 0,
+          "provider_delta": 0,
+          "session_current": true,
+          "start_delta": 0
+        },
+        {
+          "busy_or_approval": true,
+          "editor_length_unchanged": true,
+          "other_provider_delta": 0,
+          "other_start_delta": 0,
+          "provider_delta": 0,
+          "session_current": true,
+          "start_delta": 0
+        },
+        {
+          "busy_or_approval": true,
+          "editor_length_unchanged": true,
+          "other_provider_delta": 0,
+          "other_start_delta": 0,
+          "provider_delta": 0,
+          "session_current": true,
+          "start_delta": 0
+        },
+        {
+          "busy_or_approval": true,
+          "editor_length_unchanged": true,
+          "other_provider_delta": 0,
+          "other_start_delta": 0,
+          "provider_delta": 0,
+          "session_current": true,
+          "start_delta": 0
+        },
+        {
+          "busy_or_approval": true,
+          "editor_length_unchanged": true,
+          "other_provider_delta": 0,
+          "other_start_delta": 0,
+          "provider_delta": 0,
+          "session_current": true,
+          "start_delta": 0
+        }
+      ],
+      "approval_file_absent_before": true,
+      "approval_file_absent_during_hold": true,
+      "native_result_exact": true,
+      "approval_resolved_approved": null,
+      "native_write_exact": null,
+      "retry_ack": "api_accepted",
+      "model_processed_at_retry_ack": false,
+      "provider_id_match": true,
+      "target_provider_delta_after_retry": 2,
+      "other_provider_delta": 0,
+      "target_start_delta_after_retry": 1,
+      "other_start_delta": 0,
+      "target_end_delta": 2,
+      "other_end_delta": 0,
+      "duplicate_ack": "duplicate_api_accepted",
+      "no_replay_after_duplicate": true,
+      "omp_children_remaining": 0,
+      "cwd_processes_remaining": {
+        "manager": [],
+        "worker": []
+      }
+    }
+  },
+  "unknowns": [
+    "TUI focus itself has no direct public state proof",
+    "production pause/reconcile and remaining G3 transitions",
+    "G3 overall pending"
+  ]
+}

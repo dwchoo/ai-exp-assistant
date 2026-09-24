@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "recorded_at_utc": "2026-09-24T08:53:57.004760+00:00",
+  "ticket": "CW-04",
+  "gate_item": "G3-SESSION",
+  "candidate_sha256": {
+    "tests/gates/g3_omp/test_tui_session_predicates.py": "e36826fe18c7198732f4bcaa1051372b386692cdbb0817346a641ebf62441c3f",
+    "tests/gates/g3_omp/live_tui_draft_probe.py": "499b22c6bf4181931eace74a0c4f42237e3327dc5d22b585a694e26d18459953"
+  },
+  "approved_requirements_sha256": "864fcf5616d76b5284d64ff792f392e31d7410650caaee3fa9a5a72fd264cf4b",
+  "scope_audit": "test_designer added only assigned new test_tui_session_predicates.py; frozen probe and existing predicate hashes unchanged; git diff --check passed.",
+  "command": "env PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g3_omp /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/gates/g3_omp -p 'test_tui_*predicates.py' -q",
+  "cwd": "/home/dwchoo/ai-exp-assistant",
+  "environment": "local Python 3.12 with pyte 0.8.2; controlled bridge/provider and screen doubles, no live OMP in this check",
+  "exit_code": 0,
+  "result": "passed_25_of_25_9_new_negative_controls",
+  "coverage": "same PID with stale session/generation/socket, old deferred leak, wrong provider ID, stale agent_end, peer temporary absence vs real transition",
+  "unknowns": [
+    "real session switch sending/unknown race",
+    "remaining G3 TUI matrix"
+  ]
+}

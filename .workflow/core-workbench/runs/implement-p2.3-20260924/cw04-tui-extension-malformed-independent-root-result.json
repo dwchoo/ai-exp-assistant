@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "recorded_at_utc": "2026-09-24T10:46:36+00:00",
+  "ticket": "CW-04",
+  "gate_item": "G3-EXTENSION",
+  "candidate_sha256": {
+    "tests/gates/g3_omp/live_tui_extension_fault_probe.py": "e76c0d8a890f60bd70d60573dec1b25dd6e19568bf4a2e1a20fc31801a9e6fdb",
+    "tests/gates/g3_omp/test_tui_extension_fault_predicates.py": "bb4508bc8234dcc3b81185ee5053939609e27ca14664a91c02783b8679740748"
+  },
+  "approved_requirements_sha256": "864fcf5616d76b5284d64ff792f392e31d7410650caaee3fa9a5a72fd264cf4b",
+  "scope_audit": "test_designer changed only assigned independent test; frozen probe hash unchanged; Root diff --check passed.",
+  "command": "timeout 35s env PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g3_omp /tmp/cw02-g1-venv/bin/python -m unittest -q tests.gates.g3_omp.test_tui_extension_fault_predicates",
+  "cwd": "/home/dwchoo/ai-exp-assistant",
+  "environment": "Linux host controlled bridge/provider doubles, no OMP or Docker runtime",
+  "exit_code": 0,
+  "result": "independent_15_of_15_host_outage_and_malformed_frame_negative_controls",
+  "unknowns": [
+    "arbitrary extension crash not injected",
+    "host delivery withholding during outage not exercised",
+    "G3 overall pending"
+  ]
+}

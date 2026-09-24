@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "recorded_at_utc": "2026-09-24T09:25:02+00:00",
+  "ticket": "CW-02",
+  "gate_item": "G1-OUTER",
+  "candidate_sha256": "d234fd349870cbd67b1b35dbd6cc1f633323024bdc7faa21128c2d232f1d294a",
+  "approved_requirements_sha256": "864fcf5616d76b5284d64ff792f392e31d7410650caaee3fa9a5a72fd264cf4b",
+  "scope_audit": "worker_senior changed only assigned live_outer_tmux_probe.py; frozen app/session hashes unchanged; git diff --check passed.",
+  "command": "timeout 90s env PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python tests/gates/g1_vt/live_outer_tmux_probe.py",
+  "cwd": "/home/dwchoo/ai-exp-assistant",
+  "environment": "Linux host, external tmux 3.4, OMP 18.2.10, Python 3.12 with pyte 0.8.2, isolated socket/profile/cwd; no Docker",
+  "exit_code": 0,
+  "result": "observed_external_tmux_partial_G1",
+  "observed": {
+    "omp_child_pids": [141090, 141091],
+    "host_child_pid": 141092,
+    "input_routed": true,
+    "paste_visible": true,
+    "resize_observed": true,
+    "tmux_window_sequence": ["240x44", "210x38", "240x44"],
+    "alternate_before_quit": true,
+    "post_exit_bytes_drained": 130,
+    "post_exit_drain": "eof",
+    "local_vt_restored": true,
+    "processes_cleaned": true,
+    "tmux_socket_removed": true,
+    "temporary_directories_remaining": 0
+  },
+  "unknowns": [
+    "independent negative controls for tmux success predicates",
+    "earlier intermittent startup misses and complete repeatability",
+    "ordinary terminal/herdr and color fidelity",
+    "full G1 gate remains partial"
+  ]
+}

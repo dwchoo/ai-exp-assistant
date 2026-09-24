@@ -1,0 +1,14 @@
+{
+  "created_at_utc": "2026-09-24T10:53:27.293463+00:00",
+  "checkpoint": ".workflow/core-workbench/runs/implement-p2.3-20260924/cw04-async-event-prewriter.tar.gz",
+  "sha256": {
+    "omp_bridge/g3/bridge.ts": "808f2044d32885ef5df95da3b1f5bca2db601ca462acaa5eac078cf35fed86f6",
+    "tests/gates/g3_omp/live_omp_probe.py": "0be1373f38d1df5da49fd0c6927abdd908ac19d19a3f5dfc85e2540894e169d9",
+    "tests/gates/g3_omp/live_tui_draft_probe.py": "499b22c6bf4181931eace74a0c4f42237e3327dc5d22b585a694e26d18459953"
+  },
+  "new_paths": [
+    "tests/gates/g3_omp/live_tui_event_surface_probe.py"
+  ],
+  "shared_checkout": "/home/dwchoo/ai-exp-assistant",
+  "active_writers": 0
+}
