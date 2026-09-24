@@ -1,0 +1,6 @@
+interface:
+  display_name: "ask-workflow"
+  short_description: "ask-workflow — repository workflow"
+  default_prompt: "Use $ask-workflow for the requested workflow stage."
+policy:
+  allow_implicit_invocation: true

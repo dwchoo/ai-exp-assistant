@@ -1,0 +1,6 @@
+interface:
+  display_name: "refine-spec"
+  short_description: "refine-spec — repository workflow"
+  default_prompt: "Use $refine-spec for the requested workflow stage."
+policy:
+  allow_implicit_invocation: false

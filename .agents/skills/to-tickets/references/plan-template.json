@@ -1,0 +1,186 @@
+{
+  "schema_version": 1,
+  "feature_id": "example-feature",
+  "revision": "p1",
+  "source_brief": {
+    "path": "BRIEF.md",
+    "revision": "b1"
+  },
+  "spec": {
+    "path": "SPEC.md",
+    "revision": "s1"
+  },
+  "note": "Illustrative template, not a schema or Codex config. Replace checks and evidence levels with approved requirements. Validate gate suppliers against owner plus transitive predecessors; record absent evidence explicitly when adapting older plans.",
+  "scheduling": {
+    "max_open_child_threads": 4,
+    "max_parallel_writer_workspaces": 2,
+    "workspace_policy": "isolated_when_parallel",
+    "dependency_gate": "integrated_and_validated",
+    "on_unavailable_isolation": "serial_with_disclosure"
+  },
+  "budget_policy": {
+    "operating_estimates": "Root adjusts finite call allocations to remaining work and verification under workflow-contract section 8.",
+    "explicit_user_limits": [],
+    "note": "Populate actual user ceilings with value, unit and request reference only when specified. Retry counts are reassessment checkpoints, not approval gates. Preserve usage on resume. This template does not enforce budgets."
+  },
+  "tickets": [
+    {
+      "id": "T-01",
+      "path": "tickets/T-01.md",
+      "kind": "implementation",
+      "depends_on": [],
+      "acceptance_ids": [
+        "AC-01"
+      ],
+      "deliverable": "Versioned shared contract with contract tests",
+      "write_scope_hint": [
+        "src/contracts/**",
+        "tests/contracts/**"
+      ],
+      "resource_claims": [],
+      "workspace_requirement": "isolated_if_parallel",
+      "worker": "worker"
+    },
+    {
+      "id": "T-02",
+      "path": "tickets/T-02.md",
+      "kind": "implementation",
+      "depends_on": [
+        "T-01"
+      ],
+      "dependency_reasons": {
+        "T-01": "Consumes the integrated versioned contract"
+      },
+      "acceptance_ids": [
+        "AC-02"
+      ],
+      "deliverable": "First independent end-to-end behavior",
+      "write_scope_hint": [
+        "src/feature-a/**",
+        "tests/feature-a/**"
+      ],
+      "resource_claims": [
+        {
+          "resource": "test-db:feature-a",
+          "mode": "exclusive"
+        }
+      ],
+      "workspace_requirement": "isolated_if_parallel",
+      "worker": "worker"
+    },
+    {
+      "id": "T-03",
+      "path": "tickets/T-03.md",
+      "kind": "implementation",
+      "depends_on": [
+        "T-01"
+      ],
+      "dependency_reasons": {
+        "T-01": "Consumes the same integrated contract, not T-02 implementation"
+      },
+      "acceptance_ids": [
+        "AC-03"
+      ],
+      "deliverable": "Second independent end-to-end behavior",
+      "write_scope_hint": [
+        "src/feature-b/**",
+        "tests/feature-b/**"
+      ],
+      "resource_claims": [
+        {
+          "resource": "test-db:feature-b",
+          "mode": "exclusive"
+        }
+      ],
+      "workspace_requirement": "isolated_if_parallel",
+      "worker": "worker"
+    },
+    {
+      "id": "T-04",
+      "path": "tickets/T-04.md",
+      "kind": "integration_verification",
+      "depends_on": [
+        "T-02",
+        "T-03"
+      ],
+      "dependency_reasons": {
+        "T-02": "Integrated behavior A",
+        "T-03": "Integrated behavior B"
+      },
+      "acceptance_ids": [
+        "AC-01",
+        "AC-02",
+        "AC-03"
+      ],
+      "deliverable": "Verified combined behavior",
+      "write_scope_hint": [
+        "tests/integration/**"
+      ],
+      "resource_claims": [
+        {
+          "resource": "integration-workspace",
+          "mode": "exclusive"
+        }
+      ],
+      "workspace_requirement": "root_integration_workspace",
+      "owner": "root"
+    }
+  ],
+  "gate_items": [
+    {
+      "id": "G-01-contract",
+      "owner_ticket": "T-01",
+      "acceptance_ids": [
+        "AC-01"
+      ],
+      "requires_tickets": [
+        "T-01"
+      ],
+      "required_evidence_level": "fixture",
+      "check": "Contract tests exercise the versioned public interface"
+    },
+    {
+      "id": "G-02-behavior-a",
+      "owner_ticket": "T-02",
+      "acceptance_ids": [
+        "AC-02"
+      ],
+      "requires_tickets": [
+        "T-01",
+        "T-02"
+      ],
+      "required_evidence_level": "fixture",
+      "check": "Behavior A succeeds and handles its specified failure through the public interface"
+    },
+    {
+      "id": "G-03-behavior-b",
+      "owner_ticket": "T-03",
+      "acceptance_ids": [
+        "AC-03"
+      ],
+      "requires_tickets": [
+        "T-01",
+        "T-03"
+      ],
+      "required_evidence_level": "fixture",
+      "check": "Behavior B succeeds and handles its specified failure through the public interface"
+    },
+    {
+      "id": "G-04-live-integration",
+      "owner_ticket": "T-04",
+      "acceptance_ids": [
+        "AC-01",
+        "AC-02",
+        "AC-03"
+      ],
+      "requires_tickets": [
+        "T-01",
+        "T-02",
+        "T-03",
+        "T-04"
+      ],
+      "required_evidence_level": "runtime",
+      "check": "Combined behavior in the required real environment; fixture success alone is insufficient"
+    }
+  ]
+}

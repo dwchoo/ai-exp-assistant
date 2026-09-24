@@ -1,0 +1,6 @@
+interface:
+  display_name: "implement"
+  short_description: "implement — repository workflow"
+  default_prompt: "Use $implement for the requested workflow stage."
+policy:
+  allow_implicit_invocation: true

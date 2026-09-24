@@ -1,0 +1,3 @@
+/.codex-swarm/
+__pycache__/
+*.py[cod]

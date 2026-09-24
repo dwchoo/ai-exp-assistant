@@ -1,0 +1,6 @@
+interface:
+  display_name: "change-verification"
+  short_description: "change-verification — repository workflow"
+  default_prompt: "Use $change-verification for the requested workflow stage."
+policy:
+  allow_implicit_invocation: true
