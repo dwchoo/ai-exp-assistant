@@ -1,6 +1,6 @@
 ---
 name: change-verification
-description: "Root-only independent testing, code review and final candidate verification used inside implement. Preserve read-only review requests; never turn review-only into test/code writes."
+description: "Root-only independent testing, code review and final candidate verification used inside implement or an explicitly requested investigate-bug repair. Preserve read-only review requests; never turn review-only into test/code writes."
 ---
 
 # Change verification — internal procedure
@@ -9,6 +9,11 @@ Read `.codex/workflow-contract.md`. Root performs this procedure; leaf agents re
 instead of delegating. Establish mode, approved criteria, verification-unit scope, candidate
 and environment. Explicit review-only mode permits inspection/findings only: no tests-as-code,
 fixes, integration or implementation dispatch. Do not call implement recursively.
+
+For investigate-bug repairs, use the incident's user request, behavior criteria, scope and
+required evidence instead of a ticket SPEC. Keep worker_senior for production corrections.
+Return results to the invoking Root without starting implement or modifying its ledger.
+Diagnosis-only does not authorize production fixes or this repair pipeline.
 
 ## Independent tests
 
@@ -20,7 +25,7 @@ existing coverage can be reused with named evidence. Documentation-only work can
 no executable test changes. Audit test delta against its baseline.
 
 Classify failures by implementation/test/environment/contract using evidence. For a valid
-failing test Root assigns a production fix to `worker`, preserving independent acceptance tests.
+failing test Root assigns a production fix to the caller-selected writer (`worker_senior` for investigate-bug), preserving independent acceptance tests.
 For a hard diagnosis Root may consult Oracle under the common budget. Do not let fixes
 silently alter the desired behavior or turn failed tests into skipped tests.
 Root reserves the next correction, independent tests and review together. Internal call

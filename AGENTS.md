@@ -38,7 +38,13 @@ not switch models; development defaults to GPT-6 Sol XHigh unless the user selec
 Use `$ask-workflow` when asked what stage/command comes next. Inspect artifacts/evidence,
 recommend one next action, and never execute that recommendation as part of navigation.
 
-`change-verification` is the internal verification procedure. Preserve explicit review-only
+Use `$investigate-bug <symptom-or-incident>` only when the user explicitly invokes it.
+Recommend Astra Root with oracle_senior advice and worker_senior experiments/fixes, without
+switching models or settings. Diagnosis is the default; requested repairs include independent
+verification. Do not invoke it automatically from implement, take over its ledger, or resume
+implement after investigation. Reuse relevant evidence and return a bounded incident result.
+
+`change-verification` is the internal verification procedure for implement and requested bug repair. Preserve explicit review-only
 mode without writes. All custom agents are leaves. Root alone invokes `oracle` or
 `oracle_senior` for concrete deep blockers, including worker help requests.
 

@@ -4,7 +4,7 @@ Repository policy, NOT a Codex API/schema or executable scheduler. Read this doc
 explicitly from the workflow skills. It never overrides system/developer instructions,
 user authorization, managed permissions, or stronger repository rules.
 
-## 1. Three phases and four public entry points
+## 1. Three phases and five public entry points
 
 - `refine-spec`: user-selected Astra session; interview and document agreed intent.
 - `to-tickets`: fresh user-selected Sol XHigh/Max session; compile the persisted brief
@@ -13,7 +13,11 @@ user authorization, managed permissions, or stronger repository rules.
   test and review, repair and run final checks. GPT-6 Sol XHigh is the project default;
   an explicitly chosen supported higher effort is not automatically lowered.
 - `ask-workflow`: inspect current evidence and recommend the next step; do not execute it.
-- `change-verification`: internal Root procedure, also usable for explicit verification.
+- `investigate-bug`: explicit user invocation only; investigate a named bug and, when
+  requested, repair it with independent verification. Recommended user-selected Astra Root,
+  `oracle_senior` advice and `worker_senior` experiments/fixes; no model/config switch.
+- `change-verification`: internal Root procedure for implement and authorized bug repair,
+  also usable for explicit verification.
 
 Skills do not select/switch the active model. Accept the user's stated model selection;
 inspect authoritative host metadata when available. Label unavailable metadata unverified,
@@ -26,6 +30,14 @@ skill re-entry, no hidden CLI/SDK agent processes. A worker requests Oracle help
 Root; Root calls an Oracle sibling and relays the evidence-backed answer. Domain skills
 within assigned scope remain allowed. Root may consult Oracle during planning or development
 for a specific hard technical question; Oracle is not a mandatory planning stage.
+
+When Root has no independent work and is waiting for agent results, use a 60-second
+wait timeout by default. Do not repeatedly request shorter timeouts without a concrete
+reason. Longer waits are allowed only within host limits and higher-priority instructions.
+Messages, completion and user input may return early; respond to those events promptly.
+This is a wait policy, not a mandatory sleep, scheduler, or change to agent/call budgets.
+The installed minimum/default settings require a new session and separate runtime evidence;
+configuration acceptance alone does not prove effective host behavior. Leaf delegation stays disabled.
 
 ## 2. Persistent handoff, not shared conversation memory
 
@@ -313,3 +325,35 @@ This bundle is instruction/configuration scaffolding, not a tested worktree prov
 lock service, durable job runner, sandbox profile or CI gate. Static parsing cannot prove
 runtime model selection, root-only delegation, permissions, actual parallel execution or
 workflow compliance. Test those with the supplied smoke cases on the installed Codex build.
+
+## 10. User-invoked bug investigation
+
+Start `investigate-bug` only when the user invokes that skill. A bug report, repeated failure,
+or a skill-explanation question is not invocation. Implement must not enter it automatically,
+even by reading its instructions as an internal procedure. Ask-workflow may recommend it only.
+
+Resolve diagnosis versus repair from the actual request. Diagnosis permits safe local repros
+and isolated temporary probes, not permanent product changes. Explicit read-only restrictions
+also prohibit writing diagnostic artifacts. Repair requests authorize bounded fixes and
+section 7 verification without another permission question at each phase. Neither mode
+permits unrelated refactors, production changes, or publication without authorization.
+
+A brief/ticket bundle is optional. Record the user request, expected-behavior source, scope,
+acceptance/checks, candidate and environment in an incident under
+`.workflow/diagnostics/<incident-id>/`, respecting project conventions. These are the approved
+criteria for independent verification; they do not create a parallel ticket graph. Keep
+observations distinct from hypotheses and unresolved product decisions. Default to diagnosis
+when an explicit invocation does not request repair. Do not reopen settled requirements.
+
+Reuse existing evidence and link prior incidents, attempts and cumulative budgets. A new
+session does not reset user limits. Do not take over another Root's ledger, active assignments
+or mutation leases. Resolve ownership before mutating the same workspace. Section 8 governs
+internal budgets; use senior personas for this skill's experiments/fixes and hard advice.
+An absent decisive repro allows bounded observation experiments, not claims of a proven fix.
+
+After authorized repair, apply change-verification with the incident's criteria and all
+required evidence levels. Recheck the original scenario on the final cleaned candidate.
+Report diagnosis or verified repair, uncertainty and artifacts; do not mark an unrelated
+feature complete or resume implement. A later explicitly resumed owner reconciles the new
+candidate and evidence against its full ticket acceptance. Without a productive next experiment,
+report the incident blocker; do not expand into other tickets.

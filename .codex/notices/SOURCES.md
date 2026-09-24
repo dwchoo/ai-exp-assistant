@@ -16,3 +16,12 @@ Sol 리뷰, Root가 중계하는 Oracle 및 안내 전용 ask-workflow를 유지
 조사한 revision과 실제 항목별 채택 revision은 별개입니다.
 OpenAI 공식 문서는 설계 참고이며 위 MIT 라이선스를 적용하지 않습니다.
 프로젝트 자체의 라이선스를 이 고지로 정하지 않습니다.
+
+## investigate-bug
+
+M16 diagnosing-bugs at `c55ee46073ed923f86ce59a5eb3b6d895095d1b7` is adapted for explicit user invocation,
+Root-managed experiments, optional requested repair and independent verification.
+Source: https://github.com/mattpocock/skills/blob/c55ee46073ed923f86ce59a5eb3b6d895095d1b7/skills/engineering/diagnosing-bugs/SKILL.md
+M17 HITL script was inspected and excluded; it is not installed or executed.
+Astra Root/senior guidance is a local user decision, not upstream model policy.
+The existing Matt Pocock MIT notice applies to the adapted material.

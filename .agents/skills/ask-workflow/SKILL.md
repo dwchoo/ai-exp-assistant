@@ -20,6 +20,9 @@ Determine stage from evidence, not merely file presence or an `approved`/`comple
 - Plan draft: review/approve that actual revision; do not say coding is authorized.
 - Approved runnable tickets: implement in GPT-6 Sol (XHigh default).
 - Interrupted run: reconcile execution state and resume implement without duplicate writers.
+- A user seeking a separate focused bug investigation: recommend explicit
+  `$investigate-bug <symptom-or-incident>` with diagnosis/repair intent, preferably in Astra.
+  Recommendation is not invocation; do not read and execute it as an internal procedure.
 - Hard implementation blocker: resume the Sol owner with the incident context; Root may
   consult Oracle, but ask-workflow must not invoke it.
 - Implementation exists but review/tests/integration evidence is absent or stale: resume

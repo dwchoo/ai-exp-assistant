@@ -9,3 +9,8 @@ enabled = true
 max_concurrent_threads_per_session = 4
 default_subagent_model = "gpt-6-luna"
 default_subagent_reasoning_effort = "xhigh"
+
+[features.multi_agent_v2]
+default_wait_timeout_ms = 60000
+enabled = true
+min_wait_timeout_ms = 60000
