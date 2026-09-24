@@ -1,0 +1,22 @@
+{
+  "status": "candidate_ready",
+  "scope": "test-only G1 evidence classification",
+  "files_sha256": {
+    "tests/gates/g1_vt/live_runtime_probe.py": "c6143d78f937901b60c23541ebf8502fd92be2b1fa6ade2b0d8064b0b1f14824",
+    "tests/gates/g1_vt/test_live_runtime_probe.py": "a06381fef38456e5070f0ff936ad5eac75cba313e54d73a8c2d3b19c7c07bf15"
+  },
+  "candidate_id": "68dbbe5d92121b67d515fab1907a3563a51fe570ab1c32d4f289c647563fb972",
+  "test": {
+    "command": "PYTHONDONTWRITEBYTECODE=1 /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/gates/g1_vt -p 'test_*.py' -q",
+    "result": "29/29 passed"
+  },
+  "live": {
+    "command": "PYTHONDONTWRITEBYTECODE=1 /tmp/cw02-g1-venv/bin/python tests/gates/g1_vt/live_runtime_probe.py",
+    "result_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-resize-evidence-root-live.json",
+    "exit_code": 0,
+    "child_dead": true,
+    "temp_dirs": 0
+  },
+  "initial_system_python_attempt": "failed_missing_pyte; replaced with established /tmp/cw02-g1-venv environment",
+  "recorded_at_utc": "2026-09-24T00:35:00.214542+00:00"
+}

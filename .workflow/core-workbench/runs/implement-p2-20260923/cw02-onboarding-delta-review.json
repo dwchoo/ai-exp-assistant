@@ -1,0 +1,18 @@
+{
+  "ticket": "CW-02",
+  "gate": "G1",
+  "review_type": "read_only_delta",
+  "candidate_id": "6dbf3758270beaf355828e3df2a8506795fb7eb65d12cb0c7b8d46032bbe5c60",
+  "files_sha256": {
+    "tests/gates/g1_vt/live_runtime_probe.py": "95b96a9d151b42ab686c8ab60fb4677afb1f7e900bfaf1eb2ac1a26d8f4fdac9",
+    "tests/gates/g1_vt/test_live_runtime_probe.py": "8e34f082711afddd225fe282d285c1f4f6a4d00725a0b70fc56a9d9f27be9f00"
+  },
+  "dispositions": {
+    "G1-R2": "closed; ICANON inspected for TTY queue drain claim",
+    "G1-R3": "closed; artifact absence rechecked immediately before Enter",
+    "G1-R1": "pre-resize stale bytes isolated by stopped child and quiet drain; normal resize still unproved because SIGCONT itself might redraw"
+  },
+  "new_actionable_uncertainty": "STOP->CONT without resize control or separate ordinary resize observation needed before normal resize claim",
+  "scope": "G1 live probe partial evidence; gate pending",
+  "recorded_at_utc": "2026-09-24T00:29:02.950742+00:00"
+}

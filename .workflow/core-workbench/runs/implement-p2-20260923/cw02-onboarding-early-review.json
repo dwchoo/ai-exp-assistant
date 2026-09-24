@@ -1,0 +1,30 @@
+{
+  "ticket": "CW-02",
+  "gate": "G1",
+  "review_type": "read_only_early_technical",
+  "candidate_id": "207c7d6112224dae96f603c4b977bfb1724639d8ff84648ed35022638b247df2",
+  "files_sha256": {
+    "tests/gates/g1_vt/live_runtime_probe.py": "a8dc8035a9ca24861ac452e895b6a8d8810ce6972ec2621a185efe462dec8dcc",
+    "tests/gates/g1_vt/test_live_runtime_probe.py": "c54caeff7134da763e817e484144e1a800feefa46e11295eec225039ad983be8"
+  },
+  "findings": [
+    {
+      "id": "G1-R1",
+      "severity": "medium",
+      "issue": "resize can pass with local screen.resize plus stale pre-resize raw anchor; need drain and child new geometry/redraw evidence"
+    },
+    {
+      "id": "G1-R2",
+      "severity": "medium",
+      "issue": "FIONREAD==0 can be false positive in canonical TTY; inspect ICANON or downgrade claim"
+    },
+    {
+      "id": "G1-R3",
+      "severity": "low",
+      "issue": "artifact absence checked before 3-second resize wait, not immediately before native approval Enter"
+    }
+  ],
+  "accepted": true,
+  "scope": "probe predicate correction only; G1 remains pending",
+  "recorded_at_utc": "2026-09-24T00:21:28.661504+00:00"
+}

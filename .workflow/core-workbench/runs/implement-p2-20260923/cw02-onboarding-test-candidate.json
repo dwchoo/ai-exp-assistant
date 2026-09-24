@@ -1,0 +1,20 @@
+{
+  "ticket": "CW-02",
+  "gate": "G1",
+  "candidate_id": "207c7d6112224dae96f603c4b977bfb1724639d8ff84648ed35022638b247df2",
+  "approved_bundle_sha256": "e76c0bde27d2d040e373d0a0ed5d90458960f76fbbf3e2ca163cb590a11f1c06",
+  "base_commit": "0a67572",
+  "files_sha256": {
+    "tests/gates/g1_vt/live_runtime_probe.py": "a8dc8035a9ca24861ac452e895b6a8d8810ce6972ec2621a185efe462dec8dcc",
+    "tests/gates/g1_vt/test_live_runtime_probe.py": "c54caeff7134da763e817e484144e1a800feefa46e11295eec225039ad983be8"
+  },
+  "scope": "test-only G1 live OMP setup/predicate correction",
+  "test_designer_checks": {
+    "unittest": "23/23 pass",
+    "live_omp": "exit 0 OMP 18.2.10",
+    "cleanup": "child PID and process group absent"
+  },
+  "prior_probe": "y key did not approve; exit 1, result file absent. Enter corrected.",
+  "gate_status": "partial_pending_other_G1_items",
+  "recorded_at_utc": "2026-09-24T00:16:36.203804+00:00"
+}

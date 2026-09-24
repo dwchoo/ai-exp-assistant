@@ -1,0 +1,21 @@
+{
+  "call_id": "cw02-resize-evidence-delta-review",
+  "candidate_id": "68dbbe5d92121b67d515fab1907a3563a51fe570ab1c32d4f289c647563fb972",
+  "status": "accepted_partial_evidence",
+  "new_material_false_success_findings": [],
+  "findings": [
+    "CLI exit 0 is limited to actual OMP approval/tool/provider/final roundtrip",
+    "No-resize STOP/CONT control also redrew anchor; normal resize restoration remains unverified",
+    "OMP interpretation of query replies remains unverified; noncanonical TTY queue drain is narrower evidence",
+    "Negative unit checks confounded resize and artifact-present-before-approval paths"
+  ],
+  "limits": [
+    "Predicate unit tests do not independently exercise signal/PTY; Root live and no-resize control records support observed behavior",
+    "This is not final G1 acceptance"
+  ],
+  "reviewed_files_sha256": {
+    "tests/gates/g1_vt/live_runtime_probe.py": "c6143d78f937901b60c23541ebf8502fd92be2b1fa6ade2b0d8064b0b1f14824",
+    "tests/gates/g1_vt/test_live_runtime_probe.py": "a06381fef38456e5070f0ff936ad5eac75cba313e54d73a8c2d3b19c7c07bf15"
+  },
+  "recorded_at_utc": "2026-09-24T00:36:07.769264+00:00"
+}

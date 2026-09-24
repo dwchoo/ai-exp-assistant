@@ -22,8 +22,8 @@
     },
     "amendment": "CW-01 third bounded correction granted from existing fix/review reserve: new writer defect introduced in cycle 2; total child-run budget remains 64. No acceptance/scope change.",
     "oracle_calls_used": 5,
-    "total_child_runs_used": 92,
-    "total_child_runs_available": 36,
+    "total_child_runs_used": 98,
+    "total_child_runs_available": 30,
     "reconciliation": {
       "method": "2026-09-23 host Codex child session task_started events after run start; unique turn_id, excludes parent duplicate event",
       "completed_calls": 40,
@@ -36,7 +36,10 @@
       "cw03_reviewer": 0,
       "cw02_review": 0,
       "cw04_worker_test_review": 0,
-      "cw03_test_worker_review": 0
+      "cw03_test_worker_review": 0,
+      "cw02_onboarding_reviewer": 0,
+      "cw02_onboarding_delta_review": 0,
+      "cw02_resize_evidence_reviewer": 0
     },
     "current_reserved_total": 0,
     "minimum_future_calls_note": "CW-05..CW-15 each require worker/test_designer/reviewer (33 calls) and CW-16 independent test/review (2 calls), plus CW-02..04 remaining work; 128 total now authorized.",
@@ -97,7 +100,7 @@
       "integration_record": ".workflow/core-workbench/runs/implement-p2-20260923/cw01-integration.json"
     },
     "CW-02": {
-      "status": "blocked_missing_live_input_evidence",
+      "status": "partial_verified_g1_pending",
       "base_checkpoint": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-base.tar.gz",
       "started_at_utc": "2026-09-23T07:49:09.101058+00:00",
       "candidate_id": "2c46e52e1fc6ad9e66e5cba2001f6037f86b45a60e101fc53944246a98b4c569",
@@ -115,11 +118,22 @@
       "latest_independent_test": {
         "command": "PYTHONDONTWRITEBYTECODE=1 /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/gates/g1_vt -p 'test_*.py' -q",
         "exit_code": 0,
-        "passed": 21,
-        "test_file_sha256": "018b663ba14bc4e2da1434a1d585240ad701902720ea731dc3f3f63229fc5bfe"
+        "passed": 29,
+        "test_file_sha256": "a06381fef38456e5070f0ff936ad5eac75cba313e54d73a8c2d3b19c7c07bf15",
+        "scope": "G1 fixture and live-probe predicate tests"
       },
       "live_probe_record": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-live-runtime-resume-result.json",
-      "blocker": "Actual OMP scripted-provider TUI probe showed provider request 0; composer input and /clear not acknowledged, so approval/tool output/resize not verified"
+      "blocker": "Approval/tool roundtrip verified in actual OMP 18.2.10, but normal resize restoration and OMP query interpretation remain unverified; external tmux/herdr matrix pending.",
+      "onboarding_test_candidate": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-onboarding-test-candidate.json",
+      "onboarding_root_live_result": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-onboarding-root-live-result.json",
+      "onboarding_early_review": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-onboarding-early-review.json",
+      "onboarding_correction_candidate": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-onboarding-correction-candidate.json",
+      "onboarding_correction_root_result": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-onboarding-correction-root-result.json",
+      "onboarding_delta_review": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-onboarding-delta-review.json",
+      "no_resize_control": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-no-resize-control.json",
+      "resize_evidence_candidate": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-resize-evidence-candidate.json",
+      "resize_evidence_root_live_result": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-resize-evidence-root-live.json",
+      "resize_evidence_delta_review": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-resize-evidence-delta-review.json"
     },
     "CW-03": {
       "status": "blocked_after_fourth_attempt",
@@ -623,6 +637,186 @@
         "Actual OMP non-empty composer and session switch unverified",
         "Production backend reconciliation/model review hold unverified"
       ]
+    },
+    {
+      "gate_id": "G1",
+      "item_id": "live_scripted_provider_tui_partial",
+      "ticket": "CW-02",
+      "candidate_id": "207c7d6112224dae96f603c4b977bfb1724639d8ff84648ed35022638b247df2",
+      "requirements_digest": "e76c0bde27d2d040e373d0a0ed5d90458960f76fbbf3e2ca163cb590a11f1c06",
+      "required_evidence_level": "runtime",
+      "observed_evidence_level": "runtime",
+      "command": "PYTHONDONTWRITEBYTECODE=1 /tmp/cw02-g1-venv/bin/python tests/gates/g1_vt/live_runtime_probe.py",
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "environment": {
+        "omp": "18.2.10",
+        "provider": "local scripted",
+        "profile_cwd_session": "temporary isolated",
+        "startup.setupWizard": false
+      },
+      "exit_code": 0,
+      "result": "passed_item_only",
+      "observations": {
+        "native_approval_visible": true,
+        "artifact_absent_before_approval": true,
+        "artifact_present_after_approval": true,
+        "tool_output_visible": true,
+        "provider_requests": 2,
+        "final_response_visible": true,
+        "resize_approval_surface_restored": true,
+        "query_replies_total": 9,
+        "query_reply_bytes_accepted": 47,
+        "tty_input_pending_bytes": 0,
+        "omp_query_interpretation_confirmed": false,
+        "pty_bytes_drained": 109040,
+        "child_pid": 3986663,
+        "child_alive_after_cleanup": false,
+        "remaining_temp_directories": 0
+      },
+      "unknowns": [
+        "OMP semantic interpretation of terminal query replies",
+        "Other native TUI paths, external tmux/herdr, and full G1 matrix remain unverified"
+      ],
+      "gate_status": "pending",
+      "recorded_at_utc": "2026-09-24T00:17:31.141578+00:00",
+      "evidence_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-onboarding-root-live-result.json"
+    },
+    {
+      "gate_id": "G1",
+      "item_id": "live_scripted_provider_tui_partial_corrected",
+      "ticket": "CW-02",
+      "candidate_id": "6dbf3758270beaf355828e3df2a8506795fb7eb65d12cb0c7b8d46032bbe5c60",
+      "requirements_digest": "e76c0bde27d2d040e373d0a0ed5d90458960f76fbbf3e2ca163cb590a11f1c06",
+      "required_evidence_level": "runtime",
+      "observed_evidence_level": "runtime",
+      "command": "PYTHONDONTWRITEBYTECODE=1 /tmp/cw02-g1-venv/bin/python tests/gates/g1_vt/live_runtime_probe.py",
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "environment": {
+        "omp": "18.2.10",
+        "provider": "local scripted",
+        "profile_cwd_session": "temporary isolated",
+        "startup.setupWizard": false
+      },
+      "exit_code": 0,
+      "result": "passed_item_only",
+      "observations": {
+        "native_approval_visible": true,
+        "artifact_absent_on_approval_ui": true,
+        "artifact_absent_immediately_before_approval": true,
+        "artifact_present_after_approval": true,
+        "tool_output_visible": true,
+        "provider_requests": 2,
+        "final_response_visible": true,
+        "child_stopped_pre_resize": true,
+        "old_pty_output_quiet": true,
+        "resized_child_tty": "84x24",
+        "new_redraw_anchor_seen": true,
+        "resize_pty_bytes_drained": 48343,
+        "query_replies_total": 9,
+        "query_reply_bytes_accepted": 47,
+        "tty_canonical": false,
+        "tty_input_pending_bytes": 0,
+        "omp_query_interpretation_confirmed": false,
+        "pty_bytes_drained": 107756,
+        "child_pid": 3992857,
+        "child_alive_after_cleanup": false,
+        "remaining_temp_directories": 0
+      },
+      "unknowns": [
+        "OMP semantic interpretation of terminal query replies",
+        "Normal resize without SIGSTOP/SIGCONT barrier, external tmux/herdr, and remaining G1 matrix unverified"
+      ],
+      "gate_status": "pending",
+      "recorded_at_utc": "2026-09-24T00:26:50.802304+00:00",
+      "evidence_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-onboarding-correction-root-result.json"
+    },
+    {
+      "gate_id": "G1",
+      "item_id": "stop_continue_without_resize_control",
+      "ticket": "CW-02",
+      "candidate_id": "6dbf3758270beaf355828e3df2a8506795fb7eb65d12cb0c7b8d46032bbe5c60",
+      "requirements_digest": "e76c0bde27d2d040e373d0a0ed5d90458960f76fbbf3e2ca163cb590a11f1c06",
+      "observed_evidence_level": "runtime",
+      "command": "dynamic in-memory variant of tests/gates/g1_vt/live_runtime_probe.py with screen.resize/session.resize omitted; no repository file modified",
+      "environment": {
+        "omp": "18.2.10",
+        "provider": "local scripted",
+        "profile_cwd_session": "temporary isolated"
+      },
+      "exit_code": 0,
+      "result": "counterexample_observed",
+      "observations": {
+        "pre_resize_child_stopped": true,
+        "pre_resize_output_quiet": true,
+        "resize_performed": false,
+        "child_tty_geometry": "100x32",
+        "post_continue_redraw_anchor_seen": true,
+        "post_continue_pty_bytes_drained": 27596,
+        "provider_requests": 2,
+        "tool_output_visible": true,
+        "final_visible": true,
+        "child_pid": 3994746,
+        "child_alive_after_cleanup": false,
+        "remaining_temp_directories": 0
+      },
+      "inference": "SIGCONT alone can produce the redraw anchor; prior STOP-resize-CONT predicate does not establish normal resize behavior.",
+      "gate_status": "pending",
+      "recorded_at_utc": "2026-09-24T00:30:26.868550+00:00",
+      "evidence_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-no-resize-control.json"
+    },
+    {
+      "gate_id": "G1",
+      "item_id": "live_approval_tool_roundtrip_partial_verified",
+      "ticket": "CW-02",
+      "candidate_id": "68dbbe5d92121b67d515fab1907a3563a51fe570ab1c32d4f289c647563fb972",
+      "requirements_digest": "e76c0bde27d2d040e373d0a0ed5d90458960f76fbbf3e2ca163cb590a11f1c06",
+      "required_evidence_level": "runtime",
+      "observed_evidence_level": "runtime",
+      "command": "PYTHONDONTWRITEBYTECODE=1 /tmp/cw02-g1-venv/bin/python tests/gates/g1_vt/live_runtime_probe.py",
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "environment": {
+        "omp": "18.2.10",
+        "provider": "local scripted",
+        "profile_cwd_session": "temporary isolated",
+        "startup.setupWizard": false
+      },
+      "exit_code": 0,
+      "result": "passed_item_only",
+      "observations": {
+        "scenario_passed": true,
+        "gate_status": "pending",
+        "approval_visible": true,
+        "artifact_absent_on_approval_ui": true,
+        "artifact_absent_before_approval": true,
+        "artifact_present_after_approval": true,
+        "tool_output_visible": true,
+        "provider_requests": 2,
+        "provider_followup_observed": true,
+        "final_visible": true,
+        "normal_resize_confirmed": false,
+        "normal_resize_result": "inconclusive_no_resize_control_redrew",
+        "post_continue_redraw_anchor_seen": true,
+        "no_resize_control_redraw_anchor_seen": true,
+        "resize_child_columns": 84,
+        "resize_child_rows": 24,
+        "query_replies_total": 9,
+        "query_reply_bytes_accepted": 47,
+        "query_reply_tty_input_drained": true,
+        "query_reply_omp_interpretation_confirmed": false,
+        "child_pid": 3998035
+      },
+      "child_alive_after_cleanup": false,
+      "remaining_temp_directories": 0,
+      "unknowns": [
+        "Normal resize restoration: no-resize STOP/CONT control also redrew anchor",
+        "OMP interpretation of terminal query replies",
+        "External tmux/herdr and remaining G1 matrix"
+      ],
+      "supersedes_resize_claim_from": "live_scripted_provider_tui_partial",
+      "gate_status": "pending",
+      "recorded_at_utc": "2026-09-24T00:38:34.754911+00:00",
+      "evidence_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-resize-evidence-root-live.json",
+      "review_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-resize-evidence-delta-review.json"
     }
   ],
   "previous_approved_bundle_sha256": "e0b6abefef59c70f2a438c82005c671d23ec4776f4215ae9e8ba96211021f944",
@@ -1756,6 +1950,90 @@
       "host_observed_effort": "unverified",
       "evidence_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw04-cd49-reconnect-delta-review.json",
       "completed_at_utc": "2026-09-23T16:13:45.225137+00:00"
+    },
+    {
+      "call_id": "cw02-onboarding-test-harness",
+      "role": "test_designer",
+      "assignment": "/root/cw02_onboarding_test",
+      "purpose": "Test-only correction of G1 live OMP probe: isolated setup skip, actual approval/tool effect, valid resize and cleanup predicates",
+      "started_at_utc": "2026-09-24T00:09:44.009268+00:00",
+      "status": "candidate_ready",
+      "configured_model": "gpt-6-sol",
+      "configured_effort": "high",
+      "host_observed_model": "unverified",
+      "host_observed_effort": "unverified",
+      "evidence_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-onboarding-test-candidate.json",
+      "completed_at_utc": "2026-09-24T00:16:36.203804+00:00"
+    },
+    {
+      "call_id": "cw02-onboarding-early-review",
+      "role": "reviewer",
+      "assignment": "/root/cw02_onboarding_review",
+      "purpose": "Read-only technical review of frozen test-only G1 onboarding/predicate candidate; not full G1 final acceptance",
+      "started_at_utc": "2026-09-24T00:17:31.141578+00:00",
+      "status": "completed_findings_accepted",
+      "configured_model": "gpt-6-sol",
+      "configured_effort": "high",
+      "host_observed_model": "unverified",
+      "host_observed_effort": "unverified",
+      "evidence_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-onboarding-early-review.json",
+      "completed_at_utc": "2026-09-24T00:21:28.661504+00:00"
+    },
+    {
+      "call_id": "cw02-onboarding-test-correction",
+      "role": "test_designer",
+      "assignment": "/root/cw02_onboarding_test",
+      "purpose": "Correct three accepted G1 live probe evidence predicate findings; test-only",
+      "started_at_utc": "2026-09-24T00:21:28.661504+00:00",
+      "status": "candidate_ready",
+      "configured_model": "gpt-6-sol",
+      "configured_effort": "high",
+      "host_observed_model": "unverified",
+      "host_observed_effort": "unverified",
+      "evidence_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-onboarding-correction-candidate.json",
+      "completed_at_utc": "2026-09-24T00:26:50.802304+00:00"
+    },
+    {
+      "call_id": "cw02-onboarding-delta-review",
+      "role": "reviewer",
+      "assignment": "/root/cw02_onboarding_review",
+      "purpose": "Read-only delta review of G1-R1/R2/R3 test-only correction on frozen candidate; not full G1 final acceptance",
+      "started_at_utc": "2026-09-24T00:26:50.802304+00:00",
+      "status": "completed_partial_one_uncertainty",
+      "configured_model": "gpt-6-sol",
+      "configured_effort": "high",
+      "host_observed_model": "unverified",
+      "host_observed_effort": "unverified",
+      "evidence_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-onboarding-delta-review.json",
+      "completed_at_utc": "2026-09-24T00:29:02.950742+00:00"
+    },
+    {
+      "call_id": "cw02-resize-evidence-test-correction",
+      "role": "test_designer",
+      "assignment": "/root/cw02_onboarding_test",
+      "purpose": "Test-only correction of G1 resize evidence classification after no-resize SIGCONT counterexample",
+      "started_at_utc": "2026-09-24T00:30:26.868550+00:00",
+      "status": "candidate_ready",
+      "configured_model": "gpt-6-sol",
+      "configured_effort": "high",
+      "host_observed_model": "unverified",
+      "host_observed_effort": "unverified",
+      "evidence_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-resize-evidence-candidate.json",
+      "completed_at_utc": "2026-09-24T00:35:19.841099+00:00"
+    },
+    {
+      "call_id": "cw02-resize-evidence-delta-review",
+      "role": "reviewer",
+      "assignment": "/root/cw02_onboarding_review",
+      "purpose": "Read-only evidence-claim delta review after no-resize STOP/CONT control; not final G1 acceptance",
+      "started_at_utc": "2026-09-24T00:35:19.841099+00:00",
+      "status": "completed_partial_accepted",
+      "configured_model": "gpt-6-sol",
+      "configured_effort": "high",
+      "host_observed_model": "unverified",
+      "host_observed_effort": "unverified",
+      "evidence_ref": ".workflow/core-workbench/runs/implement-p2-20260923/cw02-resize-evidence-delta-review.json",
+      "completed_at_utc": "2026-09-24T00:36:07.769264+00:00"
     }
   ],
   "current_snapshot": ".workflow/core-workbench/runs/implement-p2-20260923/commit-checkpoint-20260924-090050.json",
@@ -1858,6 +2136,47 @@
       "observable_progress": "Node 15/15, Python 7/7; actual OMP abort, unknown retention, test-owned reconciliation, four provider-linked message kinds, busy/native approval defer, ACK loss and immediate reconnect duplicate no replay all observed and delta-reviewed",
       "next_action": "Do not mark G3 passed; resolve live non-empty composer/session switch and integrate backend reconciliation in CW-11/12 after G1/G2 gates. G1 original TUI input and G2 protected same-shell execution remain blocking prerequisites.",
       "budget_note": "92/128 child calls used; 36 remain, of which 35 are minimum worker/test/review estimates for CW-05..16. Explicit user ceiling retained."
+    },
+    {
+      "at_utc": "2026-09-24T00:09:44.009268+00:00",
+      "incident": "CW-02 G1 live scripted-provider input inconclusive",
+      "observable_progress": "Actual setup wizard screen isolated; temporary config startup.setupWizard:false reaches provider request 1 and native approval UI. Existing output/resize predicates can falsely pass/fail.",
+      "next_action": "One test_designer test-only harness correction, Root live rerun, one fresh reviewer if predicate and cleanup evidence pass.",
+      "finite_batch_calls_reserved": 2,
+      "success_stop_criteria": "No onboarding, actual native approval and tool side effect/output observed, post-resize screen restoration observed, child/temporary process cleanup verified; otherwise retain G1 pending."
+    },
+    {
+      "at_utc": "2026-09-24T00:21:28.661504+00:00",
+      "incident": "CW-02 G1 onboarding probe evidence predicates",
+      "prior_attempts": "initial test-only candidate and read-only early review",
+      "observable_progress": "Initial TUI setup blocker resolved; actual provider/approval/tool/final observed; reviewer isolated three bounded proof gaps without product defect claim.",
+      "next_action": "One test-only correction for resize geometry evidence, noncanonical query reply check or honest downgrade, and approval pre-Enter absence; Root rerun and affected delta review.",
+      "finite_batch_calls_reserved": 2,
+      "success_stop_criteria": "Reviewer findings resolved by tests and actual OMP probe; no inflated G1 pass; process cleanup and candidate hashes verified."
+    },
+    {
+      "at_utc": "2026-09-24T00:29:02.950742+00:00",
+      "incident": "CW-02 G1 normal resize evidence",
+      "observable_progress": "Setup wizard root cause removed; approval/tool/final runtime observed, R2/R3 closed, stale bytes separated. Reviewer identifies SIGCONT-induced redraw as remaining confounder.",
+      "next_action": "One no-file-write STOP->CONT without resize control to discriminate redraw cause; keep G1 pending regardless until ordinary resize/tmux/herdr matrix.",
+      "finite_batch_calls_reserved": 0,
+      "success_stop_criteria": "Control output metadata distinguishes whether SIGCONT alone can produce anchor redraw; no product or test edits and all processes cleaned."
+    },
+    {
+      "at_utc": "2026-09-24T00:30:26.868550+00:00",
+      "incident": "CW-02 G1 resize proof confounded by SIGCONT",
+      "observable_progress": "Actual no-resize STOP->CONT control reproduced redraw anchor (27596 PTY bytes), ruling out anchor as specific normal resize proof. Provider/approval/tool/final evidence remains valid.",
+      "next_action": "Test-only evidence correction: separate verified approval/tool scenario from STOP-resize-CONT observation and mark normal resize unverified; independent delta review.",
+      "finite_batch_calls_reserved": 2,
+      "success_stop_criteria": "No normal resize pass claim from confounded predicate; focused unit and live scenario still report exact observations; review accepts evidence classification."
+    },
+    {
+      "at_utc": "2026-09-24T00:38:34.754911+00:00",
+      "incident": "CW-02 G1 post-onboarding partial evidence",
+      "observable_progress": "Actual OMP 18.2.10 native approval, tool side effect/output, provider followup and final response pass; 29/29 G1 tests and read-only delta review pass. No-resize STOP/CONT control also redraws anchor.",
+      "next_action": "Keep G1 pending. Demonstrate ordinary resize without STOP/CONT confounder, OMP query interpretation and external tmux/herdr matrix before gate acceptance. G2 protected same-shell execution remains independent blocker.",
+      "finite_batch_calls_reserved": 0,
+      "budget_note": "98/128 child calls used; 30 remain, below existing 35-call estimate for CW-05..16 before remaining G1/G2/G3 work. Do not exceed explicit cap."
     }
   ],
   "recoveries": [
@@ -1865,7 +2184,7 @@
   ],
   "technical_blockers": [
     "CW-03: redesign review complete; no validated protected execution primitive in current stock Bash/dash adapter. Need architecture feasibility or explicit approved behavior change before another product candidate.",
-    "CW-02: actual scripted-provider TUI input route remains inconclusive; G1 missing live approval/tool output/resize evidence",
+    "CW-02: actual OMP approval/tool/final response verified; normal resize restoration, OMP query interpretation and external tmux/herdr matrix remain unverified.",
     "CW-04: G3 partial; live composer/session switch and long-term reconnect remain unverified; CW-11/12 own production backend state/approval reconciliation and worker model review hold"
   ]
 }
