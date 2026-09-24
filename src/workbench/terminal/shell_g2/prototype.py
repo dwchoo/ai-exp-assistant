@@ -13,6 +13,7 @@ import os
 import pty
 import array
 import select
+import secrets
 import shlex
 import shutil
 import signal
@@ -244,10 +245,11 @@ class ShellProcess:
 
     CONTROL_FD = 9
 
-    def __init__(self, choice: ShellChoice | None = None) -> None:
+    def __init__(self, choice: ShellChoice | None = None, *, control_wait: bool = False) -> None:
         if not sys_platform_linux():
             raise OSError("CW-03 shell prototype requires Linux PTY semantics")
         self.choice = choice or select_shell()
+        self.control_wait = control_wait
         self.generation = 1
         self.boundary = InputBoundary(self.generation)
         self.pid: int
@@ -259,18 +261,36 @@ class ShellProcess:
         self._display_tail = bytearray()
         self._closed = False
         self._job_pids: list[int] = []
+        self._recovery_token = secrets.token_hex(16) if control_wait else ""
         self._init_dir = tempfile.TemporaryDirectory(prefix="cw03-g2-")
         self._init_path = os.path.join(self._init_dir.name, "shell-init")
         with open(self._init_path, "w", encoding="utf-8") as init_file:
-            init_file.write(_bash_init() if self.choice.kind == "bash" else _sh_init())
+            init_file.write((
+                (_bash_control_init() if self.choice.kind == "bash" else _sh_control_init())
+                if control_wait else (_bash_init() if self.choice.kind == "bash" else _sh_init())
+            ).replace("__CW_RECOVERY_TOKEN__", self._recovery_token))
         read_fd, write_fd = os.pipe()
+        request_read, request_write = os.pipe()
+        recovery_read, recovery_write = os.pipe()
         pid, master = pty.fork()
         if pid == 0:  # pragma: no cover - exercised by the parent-side tests
             try:
-                os.close(read_fd)
-                if write_fd != self.CONTROL_FD:
-                    os.dup2(write_fd, self.CONTROL_FD)
-                    os.close(write_fd)
+                # Source descriptors can themselves be 7, 8 or 9 when the
+                # caller has other files open. Duplicate first, then assign.
+                request_source = fcntl.fcntl(request_read, fcntl.F_DUPFD_CLOEXEC, 11)
+                recovery_source = fcntl.fcntl(recovery_read, fcntl.F_DUPFD_CLOEXEC, 11)
+                control_source = fcntl.fcntl(write_fd, fcntl.F_DUPFD_CLOEXEC, 11)
+                for fd in (read_fd, write_fd, request_read, request_write,
+                           recovery_read, recovery_write):
+                    os.close(fd)
+                os.dup2(request_source, 8)
+                os.close(request_source)
+                os.set_inheritable(8, True)
+                os.dup2(recovery_source, 7)
+                os.close(recovery_source)
+                os.set_inheritable(7, True)
+                os.dup2(control_source, self.CONTROL_FD)
+                os.close(control_source)
                 os.set_inheritable(self.CONTROL_FD, True)
                 child_env = os.environ.copy()
                 child_env["TERM"] = child_env.get("TERM", "dumb")
@@ -286,7 +306,11 @@ class ShellProcess:
                 finally:
                     os._exit(127)
         os.close(write_fd)
+        os.close(request_read)
+        os.close(recovery_read)
         self.pid, self.master_fd, self._control_fd = pid, master, read_fd
+        self._request_fd = request_write
+        self._recovery_fd = recovery_write
         self.boundary.shell_pid = pid
         os.set_blocking(self.master_fd, False)
         os.set_blocking(self._control_fd, False)
@@ -418,6 +442,11 @@ class ShellProcess:
                 event = raw.decode("utf-8", "replace")
                 self._events.append(event)
                 self.boundary.observe_event(event)
+                if self.control_wait:
+                    self._on_control_event(event)
+
+    def _on_control_event(self, event: str) -> None:
+        """Control-wait probes can classify lifecycle after receiving an event."""
 
     def _detect_nested_shell(self) -> None:
         foreground_group = self._foreground_group()
@@ -494,7 +523,7 @@ class ShellProcess:
             if waited == self.pid:
                 break
             time.sleep(0.01)
-        for fd in (self.master_fd, self._control_fd):
+        for fd in (self.master_fd, self._control_fd, self._request_fd, self._recovery_fd):
             try:
                 os.close(fd)
             except OSError:
@@ -575,5 +604,137 @@ __wb_run() {
     __wb_emit "JOBS_END:$__wb_id"
     __wb_emit "DONE:$__wb_id:$__wb_status"
     return "$__wb_status"
+}
+'''
+
+
+def _bash_control_init() -> str:
+    return r'''__cw_emit() { builtin printf '%s\n' "$1" >&9; }
+__cw_ready() { __cw_emit READY; }
+__cw_recovery_token=__CW_RECOVERY_TOKEN__
+__cw_recovery_epoch=0
+__cw_hold() {
+    trap '' INT
+    __cw_recovery_epoch=$((__cw_recovery_epoch + 1))
+    __cw_emit "RECOVERY_WAIT:$__cw_recovery_epoch"
+    __cw_emit CONTROL_STOPPED
+    while IFS= read -r __cw_recovery <&7; do
+        if [[ $__cw_recovery == "RELEASE:$__cw_recovery_epoch:$__cw_recovery_token" ]]; then
+            __cw_emit "RECOVERY_ACK:$__cw_recovery_epoch:$$"
+            trap - INT
+            return
+        fi
+    done
+    while :; do sleep 1; done
+}
+PROMPT_COMMAND=__cw_ready
+PS1='$ '
+wb-handoff() {
+    __cw_interrupted=0
+    trap '__cw_interrupted=1; __cw_emit CONTROL_INTERRUPTED' INT
+    __cw_emit "HANDOFF:$$"
+    __cw_emit JOBS_BEGIN:HANDOFF
+    builtin jobs -p >&9
+    __cw_emit JOBS_END:HANDOFF
+    __cw_emit "WAIT:$$"
+    while IFS= read -r __cw_line <&8; do
+        if [[ $__cw_interrupted == 1 ]]; then
+            __cw_hold
+            return
+        fi
+        case $__cw_line in
+            RUN:*:__CW_END__)
+                __cw_payload=${__cw_line#RUN:}
+                __cw_id=${__cw_payload%%:*}
+                __cw_script=${__cw_payload#*:}
+                __cw_script=${__cw_script%:__CW_END__}
+                case $__cw_id in ''|*[!a-zA-Z0-9_-]*) __cw_emit BAD_REQUEST; continue;; esac
+                __cw_emit "ACCEPT:$__cw_id"
+                __cw_emit "START:$__cw_id"
+                eval "$__cw_script"
+                __cw_status=$?
+                __cw_emit "JOBS_BEGIN:$__cw_id"
+                builtin jobs -p >&9
+                __cw_emit "JOBS_END:$__cw_id"
+                __cw_emit "RETURN:$__cw_id:$__cw_status"
+                if [[ $__cw_interrupted == 1 ]]; then
+                    __cw_hold
+                    return
+                fi
+                __cw_emit "WAIT:$$"
+                ;;
+            TAKEOVER) trap - INT; __cw_emit "TAKEOVER_ACK:$$"; return;;
+            '') :;;
+            *) __cw_emit BAD_REQUEST;;
+        esac
+    done
+    if [[ $__cw_interrupted != 1 ]]; then __cw_emit CONTROL_LOST; fi
+    __cw_hold
+}
+'''
+
+
+def _sh_control_init() -> str:
+    return r'''__cw_emit() { command printf '%s\n' "$1" >&9; }
+__cw_ready() { __cw_emit READY; }
+__cw_recovery_token=__CW_RECOVERY_TOKEN__
+__cw_recovery_epoch=0
+__cw_hold() {
+    trap '' INT
+    __cw_recovery_epoch=$((__cw_recovery_epoch + 1))
+    __cw_emit "RECOVERY_WAIT:$__cw_recovery_epoch"
+    __cw_emit CONTROL_STOPPED
+    while IFS= read -r __cw_recovery <&7; do
+        if [ "$__cw_recovery" = "RELEASE:$__cw_recovery_epoch:$__cw_recovery_token" ]; then
+            __cw_emit "RECOVERY_ACK:$__cw_recovery_epoch:$$"
+            trap - INT
+            return
+        fi
+    done
+    while :; do sleep 1; done
+}
+PS1='$( __cw_ready; printf "$ " )'
+alias wb-handoff='__cw_handoff'
+__cw_handoff() {
+    __cw_interrupted=0
+    trap '__cw_interrupted=1; __cw_emit CONTROL_INTERRUPTED' INT
+    __cw_emit "HANDOFF:$$"
+    __cw_emit JOBS_BEGIN:HANDOFF
+    jobs -p >&9
+    __cw_emit JOBS_END:HANDOFF
+    __cw_emit "WAIT:$$"
+    while IFS= read -r __cw_line <&8; do
+        if [ "$__cw_interrupted" = 1 ]; then
+            __cw_hold
+            return
+        fi
+        case $__cw_line in
+            RUN:*:__CW_END__)
+                __cw_payload=${__cw_line#RUN:}
+                __cw_id=${__cw_payload%%:*}
+                __cw_script=${__cw_payload#*:}
+                __cw_script=${__cw_script%:__CW_END__}
+                case $__cw_id in ''|*[!a-zA-Z0-9_-]*) __cw_emit BAD_REQUEST; continue;; esac
+                __cw_emit "ACCEPT:$__cw_id"
+                __cw_emit "START:$__cw_id"
+                eval "$__cw_script"
+                __cw_status=$?
+                __cw_emit "JOBS_BEGIN:$__cw_id"
+                jobs -p >&9
+                __cw_emit "JOBS_END:$__cw_id"
+                __cw_emit "RETURN:$__cw_id:$__cw_status"
+                if [ "$__cw_interrupted" = 1 ]; then
+                    __cw_hold
+                    return
+                fi
+                __cw_emit "WAIT:$$"
+                ;;
+            TAKEOVER) trap - INT; __cw_emit "TAKEOVER_ACK:$$"; return;;
+            '') :;;
+            *) __cw_emit BAD_REQUEST;;
+        esac
+    done
+    if [ "$__cw_interrupted" != 1 ]; then __cw_emit CONTROL_LOST; fi
+    __cw_hold
 }
 '''
