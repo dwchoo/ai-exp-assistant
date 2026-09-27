@@ -408,6 +408,20 @@ class ControlWaitProbe(ShellProcess):
             offset = 0
             deadline = time.monotonic() + 0.25
             while offset < len(view):
+                # A short write or zero-progress wait can outlive the target.
+                # Check every attempt; the check and write are separate syscalls.
+                self._drain(timeout=0)
+                if (
+                    self.confirmed_target != target
+                    or not self.takeover_requested
+                    or target.command_id != self.sent_id
+                    or self._current_foreground_child_group() != target.process_group
+                    or any(event.startswith((f"DONE:{target.command_id}:",
+                                             f"ACTIVE_JOBS:{target.command_id}"))
+                           for event in self.events)
+                ):
+                    self.boundary.fail_closed()
+                    raise UnsafeShellState("foreground write target changed")
                 try:
                     written = os.write(self.master_fd, view[offset:])
                 except BlockingIOError:

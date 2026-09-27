@@ -140,6 +140,25 @@ class InputBoundary:
 
     def observe_event(self, event: str) -> None:
         with self.lock:
+            if event.startswith("CONTROL_READY:"):
+                # A verified handoff remains inside the parent controller;
+                # there is deliberately no interactive prompt READY here.
+                if (
+                    event == f"CONTROL_READY:{self.shell_pid}"
+                    and self._handoff_seen
+                    and self._handoff_hook_checked
+                    and self._handoff_jobs_checked
+                    and self.submitted_lines == 1
+                    and not self.pending_line
+                    and not self.uncertain
+                    and not self.needs_review
+                    and self.active_command is None
+                ):
+                    self.submitted_lines = 0
+                    self.ready = True
+                    self._handoff_ready = True
+                    self._reconcile_clean()
+                return
             if event == "READY":
                 self.ready = True
                 if self.submitted_lines:
