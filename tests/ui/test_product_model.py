@@ -1651,5 +1651,391 @@ class SplitModelTests(unittest.TestCase):
         self.assertEqual(self.model.scroll_history(PaneId.HOST_SHELL), self.model.scroll_offset(PaneId.HOST_SHELL))
 
 
+# ---------------------------------------------------------------------------------------- IME-neutral prefix commands
+CTRL = lambda ch: bytes([ord(ch) & 0x1F])  # noqa: E731
+HANGUL_HINT = "한글 입력 상태: Ctrl을 누른 채 명령 키(예: Ctrl-] Ctrl-d)나 Ctrl-] Space 메뉴를 쓰세요"
+# letter -> Ctrl alias (handoff/mouse move off the ambiguous Ctrl-h/Ctrl-m)
+CTRL_ALIAS = {"d": "d", "t": "t", "c": "y", "r": "r", "z": "z", "h": "o", "m": "e"}
+AMBIGUOUS_CTRL = (b"\x08", b"\x09", b"\x0a", b"\x0d", b"\x1b")  # Ctrl-h/i/j/m/[ = Backspace/Tab/LF/Enter/Esc
+MENU_ORDER = ("[", "z", "t", "c", "h", "r", "m", "=", "?", "d")  # digits 1..9,0
+
+
+def _effects(model, sender):
+    return (model.quit, model.zoom, model.mouse_capture, model.help_open, model.scroll_pane,
+            [x[0] for x in sender.sent])
+
+
+class CtrlAliasTests(unittest.TestCase):
+    def test_every_letter_command_has_a_ctrl_alias_with_the_same_effect(self):
+        for letter, alias in CTRL_ALIAS.items():
+            with self.subTest(letter=letter, alias=alias):
+                plain, plain_sender = make()
+                aliased, aliased_sender = make()
+                plain.handle_input(P + letter.encode())
+                aliased.handle_input(P + CTRL(alias))
+                self.assertEqual(_effects(plain, plain_sender), _effects(aliased, aliased_sender))
+                self.assertNotEqual(_effects(*make()), _effects(aliased, aliased_sender))
+                self.assertEqual([], aliased_sender.of("input"))
+                self.assertFalse(aliased.parser.prefix_active)
+
+    def test_specific_ctrl_aliases(self):
+        model, sender = make()
+        model.handle_input(P + CTRL("t"))
+        self.assertEqual(1, len(sender.of("takeover_request")))
+        model.handle_input(P + CTRL("y"))
+        self.assertEqual(1, len(sender.of("takeover_confirm")))
+        model.handle_input(P + CTRL("o"))
+        self.assertEqual(1, len(sender.of("handoff")))
+        sender.sent.clear()
+        model.handle_input(P + CTRL("r"))
+        self.assertTrue(model.take_mouse_reassert())
+        model.handle_input(P + CTRL("z"))
+        self.assertIsNotNone(model.zoom)
+        model.handle_input(P + CTRL("e"))
+        self.assertFalse(model.mouse_capture)
+        model.handle_input(P + CTRL("d"))
+        self.assertTrue(model.quit)
+
+    def test_held_ctrl_sequence_in_one_read_and_split_reads(self):
+        model, sender = make()
+        model.handle_input(P + CTRL("z") + P + CTRL("z"))  # zoom on, zoom off, no bytes to the pane
+        self.assertIsNone(model.zoom)
+        self.assertEqual([], sender.of("input"))
+        model.handle_input(P)
+        model.handle_input(CTRL("d"))
+        self.assertTrue(model.quit)
+        parser = InputParser()
+        self.assertEqual([Command("\x04")], parser.feed(P + CTRL("d")))
+
+    def test_plain_letters_still_work_in_english_mode(self):
+        for key, check in ((b"d", lambda m, s: m.quit), (b"z", lambda m, s: m.zoom is not None),
+                           (b"m", lambda m, s: not m.mouse_capture), (b"t", lambda m, s: s.of("takeover_request")),
+                           (b"c", lambda m, s: s.of("takeover_confirm")), (b"h", lambda m, s: s.of("handoff")),
+                           (b"r", lambda m, s: m.take_mouse_reassert())):
+            model, sender = make()
+            model.handle_input(P + key)
+            self.assertTrue(check(model, sender), key)
+
+    def test_ambiguous_ctrl_keys_are_not_commands(self):
+        for raw in AMBIGUOUS_CTRL:
+            if raw == b"\x09":  # Tab is the existing next-pane command
+                continue
+            with self.subTest(key=raw):
+                model, sender = make()
+                model.handle_input(P + raw, now=0.0)
+                model.flush_input(now=0.5)
+                self.assertFalse(model.quit)
+                self.assertIsNone(model.zoom)
+                self.assertTrue(model.mouse_capture)
+                self.assertFalse(model.help_open)
+                self.assertFalse(model.menu_open)
+                self.assertEqual([], [x for x in sender.sent if x[0] != "focus"])
+                self.assertIn("알 수 없는", model.notice)
+
+    def test_ctrl_bracket_prefix_twice_and_other_ctrl_letters_are_not_aliases(self):
+        model, sender = make()
+        model.handle_input(P + P)
+        self.assertEqual([b"\x1d"], [x[2] for x in sender.of("input")])
+        for letter in "abcfgklnpqsuvwx":
+            other, other_sender = make()
+            other.handle_input(P + CTRL(letter))
+            self.assertEqual([], other_sender.sent)
+            self.assertFalse(other.quit)
+            self.assertIsNone(other.zoom)
+            self.assertIn("알 수 없는", other.notice)
+
+    def test_ctrl_alias_while_prefix_arrow_resize_repeat_is_unchanged(self):
+        model, sender = make()
+        model.handle_input(P + b"\x1b[D", now=1.0)
+        self.assertTrue(model.resize_repeat_active)
+        model.handle_input(b"\x1b[D", now=1.2)  # bare arrow keeps resizing
+        self.assertEqual([], sender.of("input"))
+        model.handle_input(P + CTRL("z"), now=1.3)
+        self.assertIsNotNone(model.zoom)
+        self.assertFalse(model.resize_repeat_active)
+
+    def test_bracketed_paste_after_prefix_is_unaffected(self):
+        model, sender = make()
+        model.handle_input(P)
+        model.handle_input(b"\x1b[200~pa\nste\x1b[201~")
+        self.assertEqual(1, len(sender.of("paste")))
+        self.assertFalse(model.parser.prefix_active)
+        self.assertEqual([], sender.of("input"))
+        self.assertFalse(model.menu_open)
+
+
+class HangulHintTests(unittest.TestCase):
+    def test_hangul_after_prefix_shows_hint_and_forwards_nothing(self):
+        for char in ("ㅇ", "한", "ㅈ", "ㅌ"):
+            with self.subTest(char=char):
+                model, sender = make()
+                model.handle_input(P + char.encode())
+                self.assertEqual(HANGUL_HINT, model.notice)
+                self.assertIn(HANGUL_HINT, model.footer())
+                self.assertEqual([], sender.sent)
+                self.assertFalse(model.parser.prefix_active)
+                self.assertFalse(model.quit)
+                self.assertFalse(model.menu_open)
+                model.handle_input(b"x")  # prefix state cleared: plain key reaches the pane
+                self.assertEqual([b"x"], [s[2] for s in sender.of("input")])
+
+    def test_split_hangul_bytes_after_prefix_are_dropped_whole(self):
+        model, sender = make()
+        model.handle_input(P + b"\xe3\x85")
+        model.handle_input(b"\x87d")  # 'ㅇ' split across reads, then an English d
+        self.assertEqual(HANGUL_HINT, model.notice)
+        self.assertEqual([b"d"], [s[2] for s in sender.of("input")])
+        self.assertFalse(model.quit)
+
+    def test_hangul_hint_does_not_fire_without_prefix_and_english_clears_nothing_else(self):
+        model, sender = make()
+        model.handle_input("한글".encode())
+        self.assertEqual("", model.notice)
+        self.assertEqual(["한글".encode()], [s[2] for s in sender.of("input")])
+
+    def test_hangul_hint_for_alt_multibyte_key(self):
+        model, sender = make()
+        model.handle_input(P + b"\x1b" + "한".encode())
+        self.assertEqual(HANGUL_HINT, model.notice)
+        self.assertEqual([], sender.sent)
+
+    def test_multi_syllable_burst_after_prefix_is_dropped_whole_with_one_hint(self):
+        for text in ("안녕", "안녕하세요", "ㅇㅏㅠ글"):
+            data = text.encode()
+            for cut in range(1, len(data)):
+                with self.subTest(text=text, cut=cut):
+                    model, sender = make()
+                    model.handle_input(P + data[:cut], now=0.0)
+                    model.handle_input(data[cut:] + b"d", now=0.01)  # the rest of the run, then an English d
+                    self.assertEqual(HANGUL_HINT, model.notice)
+                    self.assertEqual([b"d"], [s[2] for s in sender.of("input")])
+                    self.assertFalse(model.quit)
+                    self.assertFalse(model.parser.prefix_active)
+
+    def test_multi_syllable_burst_followed_by_a_command_in_the_same_read(self):
+        model, sender = make()
+        model.handle_input(P + "안녕".encode() + P + b"\x04")  # Ctrl-d alias right after the run
+        self.assertTrue(model.quit)
+        self.assertEqual([], sender.of("input"))
+
+    def test_ime_commit_key_right_after_the_run_is_consumed_too(self):
+        keys = {"Enter": b"\r", "LF": b"\n", "Space": b" ", "Tab": b"\t", "Ctrl-d": b"\x04", "Ctrl-c": b"\x03"}
+        for text in ("ㅇ", "안녕"):
+            data = text.encode()
+            for name, key in keys.items():
+                for cut in range(1, len(data) + 1):
+                    with self.subTest(text=text, key=name, cut=cut):
+                        model, sender = make()
+                        model.handle_input(P + data[:cut], now=0.0)
+                        model.handle_input(data[cut:] + key, now=0.01)  # same read (cut == len: key alone, split read)
+                        self.assertEqual(HANGUL_HINT, model.notice)
+                        self.assertEqual([], sender.sent)
+                        self.assertFalse(model.quit)
+                        self.assertFalse(model.menu_open)
+                        self.assertFalse(model.parser.prefix_active)
+                        model.handle_input(b"x", now=0.02)  # only the one commit key is spent
+                        self.assertEqual([b"x"], [s[2] for s in sender.of("input")])
+
+    def test_second_key_after_the_commit_key_is_handled_normally(self):
+        model, sender = make()
+        model.handle_input(P + "ㅇ".encode() + b"\r\r", now=0.0)
+        self.assertEqual([b"\r"], [s[2] for s in sender.of("input")])
+        model, sender = make()
+        model.handle_input(P + "ㅇ".encode() + b" d", now=0.0)  # Space spent (opens no menu), d is text
+        self.assertFalse(model.menu_open)
+        self.assertEqual([b"d"], [s[2] for s in sender.of("input")])
+
+    def test_commit_key_long_after_the_run_or_esc_or_prefix_is_not_swallowed(self):
+        model, sender = make()
+        model.handle_input(P + "ㅇ".encode(), now=0.0)
+        model.handle_input(b"\r", now=5.0)
+        self.assertEqual([b"\r"], [s[2] for s in sender.of("input")])
+        model, sender = make()
+        model.handle_input(P + "ㅇ".encode() + P + b"\x04", now=0.0)  # the prefix still starts a command
+        self.assertTrue(model.quit)
+        self.assertEqual([], sender.of("input"))
+
+    def test_hangul_typed_long_after_the_dropped_run_reaches_the_pane(self):
+        model, sender = make()
+        model.handle_input(P + "안녕".encode(), now=0.0)
+        model.flush_input(now=0.1)
+        model.handle_input("글".encode(), now=5.0)
+        self.assertEqual(["글".encode()], [s[2] for s in sender.of("input")])
+
+    def test_prefix_key_alone_closes_the_open_menu(self):
+        model, sender = make()
+        model.handle_input(P + b" ", now=0.0)
+        self.assertTrue(model.menu_open)
+        self.assertTrue(model.handle_input(P, now=1.0))  # a redraw is requested
+        self.assertFalse(model.menu_open)
+        self.assertEqual([], sender.sent)
+        self.assertFalse(model.parser.prefix_active)
+        model.handle_input(b"1", now=2.0)  # fresh state: an ordinary key for the pane
+        model.handle_input(b"x", now=3.0)
+        self.assertEqual([b"1", b"x"], [s[2] for s in sender.of("input")])
+
+    def test_prefix_alone_then_new_prefix_command_runs_normally_and_stays_closed(self):
+        model, sender = make()
+        model.handle_input(P + b" ", now=0.0)
+        model.handle_input(P, now=1.0)
+        model.handle_input(P + b"y", now=2.0)  # a fresh prefix + unknown key: nothing forwarded, no menu
+        self.assertEqual([], sender.sent)
+        self.assertFalse(model.menu_open)
+        self.assertFalse(model.parser.prefix_active)
+
+    def test_prefix_plus_lone_esc_closing_the_menu_leaks_nothing_even_after_the_flush(self):
+        model, sender = make()
+        model.handle_input(P + b" ", now=0.0)
+        model.handle_input(P + b"\x1b", now=1.0)
+        model.flush_input(now=2.0)
+        self.assertFalse(model.menu_open)
+        self.assertEqual([], sender.sent)
+        model.handle_input(b"x", now=3.0)
+        self.assertEqual([b"x"], [s[2] for s in sender.of("input")])
+
+    def test_prefix_closing_the_menu_clears_the_parser_prefix_state(self):
+        for follow in (b"d", b"1", b" ", b"x"):
+            with self.subTest(follow=follow):
+                model, sender = make()
+                model.handle_input(P + b" ", now=0.0)
+                model.handle_input(P, now=1.0)
+                self.assertFalse(model.menu_open)
+                self.assertFalse(model.parser.prefix_active)
+                self.assertNotIn("prefix…", model.footer())
+                model.handle_input(follow, now=2.0)  # a fresh state: the key goes to the pane, runs nothing
+                self.assertEqual([follow], [s[2] for s in sender.of("input")])
+                self.assertFalse(model.quit)
+                self.assertFalse(model.menu_open)
+
+    def test_hangul_while_menu_open_is_dropped_without_leaving_the_menu(self):
+        model, sender = make()
+        model.handle_input(P + b" ")
+        model.handle_input("ㅇ".encode())
+        self.assertTrue(model.menu_open)
+        self.assertEqual([], sender.sent)
+
+
+class CommandMenuTests(unittest.TestCase):
+    def open(self):
+        model, sender = make()
+        model.handle_input(P + b" ")
+        self.assertTrue(model.menu_open)
+        return model, sender
+
+    def test_prefix_space_opens_menu_listing_all_commands_with_keys_and_digits(self):
+        model, sender = self.open()
+        lines = model.menu_lines()
+        joined = "\n".join(lines)
+        for digit, key in zip("1234567890", MENU_ORDER):
+            self.assertTrue(any(line.lstrip("> ").startswith(digit) for line in lines), (digit, joined))
+        for needle in ("Ctrl-d", "Ctrl-t", "Ctrl-y", "Ctrl-o", "Ctrl-r", "Ctrl-e", "Ctrl-z", "detach", "1/2/3",
+                       "↑/↓", "Enter", "Esc"):
+            self.assertIn(needle, joined)
+        self.assertEqual(0, model.menu_index)
+        self.assertEqual([], sender.sent)
+        self.assertIn("메뉴", model.footer())
+
+    def test_enter_runs_the_selected_item_and_arrows_navigate(self):
+        for digit_index, key in enumerate(MENU_ORDER):
+            with self.subTest(index=digit_index, key=key):
+                model, sender = self.open()
+                for _ in range(digit_index):
+                    model.handle_input(b"\x1b[B")
+                self.assertEqual(digit_index, model.menu_index)
+                model.handle_input(b"\r")
+                self.assertFalse(model.menu_open)
+                ref, ref_sender = make()
+                ref.handle_input(P + key.encode())
+                self.assertEqual(_effects(ref, ref_sender), _effects(model, sender))
+
+    def test_arrow_wraparound_and_ss3_arrows_and_newline_enter(self):
+        model, sender = self.open()
+        model.handle_input(b"\x1b[A")
+        self.assertEqual(len(MENU_ORDER) - 1, model.menu_index)  # wraps to detach
+        model.handle_input(b"\x1bOB")
+        self.assertEqual(0, model.menu_index)
+        model.handle_input(b"\x1bOB\x1b[B\x1b[A")
+        self.assertEqual(1, model.menu_index)
+        model.handle_input(b"\n")  # zoom
+        self.assertIsNotNone(model.zoom)
+
+    def test_digits_select_and_run_immediately(self):
+        for digit, key in zip(b"1234567890", MENU_ORDER):
+            with self.subTest(digit=chr(digit), key=key):
+                model, sender = self.open()
+                model.handle_input(bytes([digit]))
+                self.assertFalse(model.menu_open)
+                ref, ref_sender = make()
+                ref.handle_input(P + key.encode())
+                self.assertEqual(_effects(ref, ref_sender), _effects(model, sender))
+                self.assertEqual([], sender.of("input"))
+
+    def test_esc_cancels_and_nothing_is_sent(self):
+        model, sender = self.open()
+        model.handle_input(b"\x1b", now=0.0)
+        model.flush_input(now=0.5)
+        self.assertFalse(model.menu_open)
+        self.assertEqual([], sender.sent)
+        self.assertFalse(model.quit)
+
+    def test_prefix_cancels_menu_without_running_the_following_key(self):
+        for follow in (b" ", b"d", CTRL("d"), b"z"):
+            with self.subTest(follow=follow):
+                model, sender = self.open()
+                model.handle_input(P + follow)
+                self.assertFalse(model.menu_open)
+                self.assertFalse(model.quit)
+                self.assertIsNone(model.zoom)
+                self.assertEqual([], sender.sent)
+        model, sender = self.open()
+        model.handle_input(P + P)  # literal-prefix form cancels too and is not forwarded
+        self.assertFalse(model.menu_open)
+        self.assertEqual([], sender.sent)
+
+    def test_no_key_reaches_a_pane_while_the_menu_is_open(self):
+        model, sender = self.open()
+        for data in (b"hello", b"\x03", b"\t", b"\x7f", b"\x1b[5~", b"\x1b[6;2~", "한글".encode(), b"jk", b"\x1bx",
+                     b"\x1b[<64;10;5M", b"\x1b[200~paste\x1b[201~"):
+            model.handle_input(data, now=0.0)
+            model.flush_input(now=1.0)
+            self.assertTrue(model.menu_open, data)
+        self.assertEqual([], sender.sent)
+        self.assertEqual(0, model.menu_index)
+        self.assertIn("메뉴", model.notice or model.footer())
+
+    def test_focus_and_scroll_state_untouched_by_menu_open_close(self):
+        model, sender = make()
+        model.handle_input(P + b"3")
+        sender.sent.clear()
+        model.handle_input(P + b" ")
+        model.handle_input(b"\x1b", now=0.0)
+        model.flush_input(now=1.0)
+        self.assertEqual(PaneId.HOST_SHELL, model.focus)
+        self.assertEqual([], sender.sent)
+
+    def test_menu_stays_ime_neutral_help_item_opens_help_and_footer_lists_menu(self):
+        model, sender = self.open()
+        model.handle_input(b"9")
+        self.assertTrue(model.help_open)
+        text = "\n".join(HELP_LINES)
+        for needle in ("Ctrl-d", "Ctrl-t", "Ctrl-y", "Ctrl-o", "Ctrl-r", "Ctrl-e", "Ctrl-z", "Space", "한글"):
+            self.assertIn(needle, text)
+        closed, _ = make()
+        self.assertIn("Space", closed.footer())
+        closed.handle_input(P)
+        self.assertIn("Ctrl", closed.footer())
+        self.assertIn("Space", closed.footer())
+        self.assertIn("←↑↓→", closed.footer())
+        self.assertIn("[", closed.footer())
+
+    def test_reopening_menu_resets_selection(self):
+        model, _ = self.open()
+        model.handle_input(b"\x1b[B\x1b[B")
+        model.handle_input(b"\x1b", now=0.0)
+        model.flush_input(now=1.0)
+        model.handle_input(P + b" ")
+        self.assertEqual(0, model.menu_index)
+
+
 if __name__ == "__main__":
     unittest.main()

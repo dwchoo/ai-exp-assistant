@@ -102,6 +102,8 @@ class ProductPtyTests(unittest.TestCase):
         ui = UiProcess(server.path)
         self.addCleanup(ui.close)
         self.assertTrue(server.wait_for(server.attached.is_set), "attach not received")
+        # keys sent before curses raw mode would hit the cooked tty (Ctrl-z -> SIGTSTP): wait for the first draw
+        self.assertTrue(ui.until(lambda: "MANAGER OMP" in ui.text()), ui.text())
         return server, ui
 
     def test_renders_three_panes_focus_and_detach_restores_terminal(self):
@@ -719,6 +721,96 @@ class OuterTerminalMouseTests(unittest.TestCase):
         ui.send(P + b"r")  # redraw request re-asserts too
         self.assertTrue(ui.until(lambda: self.outer(ui).tracking == 1002), "not re-asserted after prefix r")
         ui.send(P + b"d")
+        self.assertEqual(0, ui.wait_exit())
+
+
+class ImeNeutralPrefixTests(unittest.TestCase):
+    """Ctrl aliases, the prefix Space menu and the Hangul hint on the real curses UI (client IME cannot be switched)."""
+
+    def start(self, **kwargs):
+        server = FixtureServer(**kwargs)
+        self.addCleanup(server.close)
+        ui = UiProcess(server.path)
+        self.addCleanup(ui.close)
+        self.assertTrue(server.wait_for(server.attached.is_set), "attach not received")
+        # keys sent before curses raw mode would hit the cooked tty (Ctrl-z -> SIGTSTP): wait for the first draw
+        self.assertTrue(ui.until(lambda: "MANAGER OMP" in ui.text()), ui.text())
+        return server, ui
+
+    def test_ctrl_alias_zoom_then_ctrl_d_detach_in_one_held_sequence(self):
+        server, ui = self.start()
+        ui.send(P + b"\x1a")  # Ctrl-] Ctrl-z
+        self.assertTrue(ui.until(lambda: "[ZOOM]" in ui.text() and "WORKER OMP" not in ui.text()), ui.text())
+        ui.send(P + b"\x1a")
+        self.assertTrue(ui.until(lambda: "[ZOOM]" not in ui.text() and "WORKER OMP" in ui.text()), ui.text())
+        self.assertEqual([], server.received("input"))
+        ui.send(P + b"\x04")  # Ctrl-] Ctrl-d
+        self.assertEqual(0, ui.wait_exit())
+        self.assertTrue(server.wait_for(lambda: server.received("detach")))
+        self.assertEqual([], server.received("input"))
+        assert_mouse_restored(self, bytes(ui.raw))
+
+    def test_ctrl_alias_takeover_request_confirm_handoff_and_redraw(self):
+        server, ui = self.start()
+        ui.send(P + b"\x14")
+        self.assertTrue(server.wait_for(lambda: server.received("takeover_request")))
+        ui.send(P + b"\x19")
+        self.assertTrue(server.wait_for(lambda: server.received("takeover_confirm")))
+        ui.send(P + b"\x0f")
+        self.assertTrue(server.wait_for(lambda: server.received("handoff")))
+        self.assertTrue(server.wait_for(lambda: len(server.received("resize")) >= 3))
+        ui.drain(0.3)
+        before = len(server.received("resize"))
+        ui.send(P + b"\x12")  # redraw nudge = two more resize frames for the focus pane
+        self.assertTrue(server.wait_for(lambda: len(server.received("resize")) >= before + 2))
+        self.assertEqual([], server.received("input"))
+        ui.send(P + b"\x04")
+        self.assertEqual(0, ui.wait_exit())
+
+    def test_menu_arrows_enter_digits_and_esc(self):
+        server, ui = self.start()
+        ui.send(P + b" ")
+        self.assertTrue(ui.until(lambda: "명령 메뉴" in ui.text() and "> 1" in ui.text()), ui.text())
+        for needle in ("Ctrl-d", "Ctrl-z", "1/2/3", "Esc"):
+            self.assertIn(needle, ui.text())
+        ui.send(b"\x1b[B")  # down -> item 2 (zoom)
+        self.assertTrue(ui.until(lambda: "> 2" in ui.text()), ui.text())
+        ui.send(b"hello\x03")  # nothing reaches a pane while the menu is open
+        ui.drain(0.3)
+        self.assertEqual([], server.received("input"))
+        ui.send(b"\r")
+        self.assertTrue(ui.until(lambda: "[ZOOM]" in ui.text() and "명령 메뉴" not in ui.text()), ui.text())
+        ui.send(P + b" ")
+        self.assertTrue(ui.until(lambda: "명령 메뉴" in ui.text()), ui.text())
+        ui.send(b"\x1b")  # lone Esc cancels
+        self.assertTrue(ui.until(lambda: "명령 메뉴" not in ui.text()), ui.text())
+        self.assertEqual([], server.received("input"))
+        ui.send(P + b" ")
+        self.assertTrue(ui.until(lambda: "명령 메뉴" in ui.text()), ui.text())
+        ui.send(b"0")  # digit 0 = detach
+        self.assertEqual(0, ui.wait_exit())
+        self.assertTrue(server.wait_for(lambda: server.received("detach")))
+        self.assertEqual([], server.received("input"))
+
+    def test_hangul_after_prefix_shows_hint_and_sends_nothing(self):
+        server, ui = self.start()
+        ui.send(P + "ㅇ".encode())
+        self.assertTrue(ui.until(lambda: "한글 입력 상태" in ui.text() and "Ctrl-] Space" in ui.text()), ui.text())
+        ui.drain(0.3)
+        self.assertEqual([], server.received("input"))
+        ui.send(b"x")
+        self.assertTrue(server.wait_for(lambda: any(f.payload == b"x" for f in server.received("input"))))
+        ui.send(P + b"\x04")
+        self.assertEqual(0, ui.wait_exit())
+
+    def test_footer_and_help_list_the_ctrl_forms_and_menu(self):
+        server, ui = self.start()
+        ui.send(P)
+        self.assertTrue(ui.until(lambda: "Space 메뉴" in ui.text() and "Ctrl+d" in ui.text()), ui.text())
+        ui.send(b"?")
+        self.assertTrue(ui.until(lambda: "Ctrl-t" in ui.text() and "prefix Space" in ui.text()), ui.text())
+        ui.send(b" ")
+        ui.send(P + b"\x04")
         self.assertEqual(0, ui.wait_exit())
 
 

@@ -17,6 +17,7 @@ PASTE_START = b"\x1b[200~"
 PASTE_END = b"\x1b[201~"
 MAX_PASTE_BYTES = 2 * 1024 * 1024
 PARTIAL_HOLD_SECONDS = 0.05  # lone ESC / 'ESC [' (real Esc or Alt keys)
+RUN_SWALLOW_SECONDS = 0.5  # non-ASCII text right after a swallowed prefix key: the run continues while it keeps arriving
 INTRODUCER_HOLD_SECONDS = 0.5  # 'ESC [ 2', 'ESC [ 2 0', 'ESC [ 2 0 0': a paste introducer split across reads
 SHIFT_PAGE_KEYS = {b"\x1b[5;2~": 1, b"\x1b[6;2~": -1}  # Shift+PgUp (back in history) / Shift+PgDn
 _MOUSE = re.compile(rb"\x1b\[<(\d{1,5});(\d{1,5});(\d{1,5})([Mm])")  # xterm SGR (1006) mouse report
@@ -92,6 +93,14 @@ class InputParser:
         self._paste = bytearray()
         self._discard = False
         self._skip = 0  # UTF-8 continuation bytes still to swallow after a prefix command
+        self._run = False  # the non-ASCII run after a prefix key (an IME committing several syllables) is being dropped
+        self._run_at = 0.0
+
+    def cancel_prefix(self) -> None:
+        """Drop a pending prefix and the partial key held for it (e.g. a lone Esc awaiting its flush)."""
+        if self._prefix:
+            self._prefix = False
+            self._pending.clear()
 
     @property
     def prefix_active(self) -> bool:
@@ -150,6 +159,18 @@ class InputParser:
                     del buf[0]
                     continue
                 self._skip = 0
+            if self._run:
+                if byte >= 0x80 and now - self._run_at <= RUN_SWALLOW_SECONDS:
+                    self._run_at = now  # the rest of the same non-ASCII run: dropped, no further hint
+                    if byte >= 0xC0:
+                        self._skip = 3 if byte >= 0xF0 else 2 if byte >= 0xE0 else 1
+                    del buf[0]
+                    continue
+                self._run = False  # ASCII (or a long pause) ends the run
+                if byte < 0x80 and now - self._run_at <= RUN_SWALLOW_SECONDS and (
+                        byte == 0x20 or (byte < 0x20 and byte not in (0x1B, PREFIX))):
+                    del buf[0]  # the IME's commit key (Enter/Space/Tab/Ctrl-x) right after the run: spent, not forwarded
+                    continue
             if self._prefix:
                 if byte == 0x1B:
                     rest = bytes(buf)
@@ -170,6 +191,8 @@ class InputParser:
                     length = length or len(rest)
                     self._prefix = False
                     out()
+                    if any(b >= 0x80 for b in rest[:length]):
+                        self._run, self._run_at = True, now
                     events.append(Command(rest[:length].decode("utf-8", "replace")))
                     del buf[:length]
                     continue
@@ -181,6 +204,8 @@ class InputParser:
                     out()
                     if byte >= 0xC0:  # swallow the whole UTF-8 sequence as one unknown key
                         self._skip = 3 if byte >= 0xF0 else 2 if byte >= 0xE0 else 1
+                    if byte >= 0x80:
+                        self._run, self._run_at = True, now  # the whole contiguous non-ASCII run is one unknown key
                     events.append(Command(chr(byte) if byte < 128 else "�"))
                 continue
             if byte == PREFIX:

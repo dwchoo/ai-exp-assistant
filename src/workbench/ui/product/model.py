@@ -12,7 +12,7 @@ from workbench.contracts import ui_v1
 from workbench.contracts.ui_v1 import ClientType
 from workbench.contracts.v1 import PaneId
 from workbench.terminal.vt_g1.screen import TerminalScreen, make_stream
-from workbench.ui.product.input import (PASTE_END, PASTE_START, Command, InputParser, Mouse, PageScroll, Paste,
+from workbench.ui.product.input import (PASTE_END, PREFIX, PASTE_START, Command, InputParser, Mouse, PageScroll, Paste,
                                        PasteRejected, Passthrough, _sequence_length)
 from workbench.ui.product.layout import (DEFAULT_LAYOUT, Layout, clamp_height, clamp_width, left_width,
                                          top_height)
@@ -42,6 +42,26 @@ RESIZE_REPEAT_SECONDS = 1.0  # bare arrows keep resizing this long after the las
 DRAG_RESIZE_DEBOUNCE = 0.1  # while a divider is dragged, resize frames go out at most this often (+ one on release)
 _ARROWS = {"\x1b[A": "up", "\x1bOA": "up", "\x1b[B": "down", "\x1bOB": "down",
            "\x1b[C": "right", "\x1bOC": "right", "\x1b[D": "left", "\x1bOD": "left"}
+# IME-neutral prefix commands: Korean IMEs hold letters in a preedit buffer, but Ctrl combos, digits, punctuation,
+# arrows, Tab/Enter/Esc/Space pass through. Ctrl-h/i/j/m/[ collide with Backspace/Tab/LF/Enter/Esc, so handoff and
+# mouse use Ctrl-o / Ctrl-e instead; confirm uses Ctrl-y (yes), so Ctrl-c stays an unknown key (an interrupt reflex
+# must not confirm a takeover). The plain letters keep working in English mode.
+CTRL_ALIASES = {"\x04": "d", "\x14": "t", "\x19": "c", "\x0f": "h", "\x12": "r", "\x05": "m", "\x1a": "z"}
+HANGUL_HINT = "한글 입력 상태: Ctrl을 누른 채 명령 키(예: Ctrl-] Ctrl-d)나 Ctrl-] Space 메뉴를 쓰세요"
+# (command key, label, letter form, Ctrl form); menu digits are 1..9 then 0 in this order
+MENU_ITEMS = (
+    ("[", "scroll 모드 (지나간 출력 보기)", "[", ""),
+    ("z", "focus pane 확대/복원", "z", "Ctrl-z"),
+    ("t", "host shell 인수 요청", "t", "Ctrl-t"),
+    ("c", "인수 확인 (요청 후)", "c", "Ctrl-y"),
+    ("h", "host shell을 manager에게 되돌리기(handoff)", "h", "Ctrl-o"),
+    ("r", "focus pane 다시 그리기", "r", "Ctrl-r"),
+    ("m", "마우스 캡처 켜기/끄기", "m", "Ctrl-e"),
+    ("=", "배치 초기화", "=", ""),
+    ("?", "도움말", "?", ""),
+    ("d", "detach (backend와 PTY는 계속 실행)", "d", "Ctrl-d"),
+)
+MENU_DIGITS = "1234567890"
 CATCHUP_NUDGE_SECONDS = 0.5  # repaint nudges while catch-ups repeat under a sustained flood: at most this often
 
 # Kinds of queued display output. Each is accounted separately so every loop decision is O(1).
@@ -57,14 +77,17 @@ HELP_LINES = (
     "  prefix prefix   prefix 바이트(0x1d)를 그대로 전송",
     "  prefix 1/2/3    manager OMP / worker OMP / host shell로 focus",
     "  prefix Tab      다음 pane으로 focus",
-    "  prefix t        host shell 사용자 인수 요청",
-    "  prefix c        인수 확인 (요청 후)",
-    "  prefix h        host shell을 manager에게 되돌리기(handoff)",
-    "  prefix r        focus pane 다시 그리기 요청",
+    "  prefix t        host shell 사용자 인수 요청      (한글 입력 상태: prefix Ctrl-t)",
+    "  prefix c        인수 확인 (요청 후)              (prefix Ctrl-y)",
+    "  prefix h        host shell을 manager에게 되돌리기(handoff)  (prefix Ctrl-o)",
+    "  prefix r        focus pane 다시 그리기 요청      (prefix Ctrl-r)",
     "  prefix [        scroll 모드: focus pane의 지나간 출력 보기 (prefix PgUp 도 진입+한 페이지 위)",
-    "  prefix m        마우스 캡처 켜기/끄기 (켜져 있으면 텍스트 선택은 Shift+드래그)",
-    "  prefix d        detach (backend와 PTY는 계속 실행)",
+    "  prefix m        마우스 캡처 켜기/끄기 (켜져 있으면 텍스트 선택은 Shift+드래그)  (prefix Ctrl-e)",
+    "  prefix d        detach (backend와 PTY는 계속 실행)  (prefix Ctrl-d)",
     "  prefix ?        이 도움말 (아무 키로 닫기)",
+    "  prefix Space    명령 메뉴: ↑/↓+Enter 또는 숫자 1-9/0 (Esc 취소) — 글자 키 없이 쓸 수 있음",
+    "한글 IME: 글자 키는 조합 중이라 prefix 뒤에 안 먹힘 → Ctrl을 누른 채 명령 키(Ctrl-] Ctrl-d),",
+    "  숫자·Tab·[ = ? 방향키는 그대로 동작, 또는 Ctrl-] Space 메뉴 (Ctrl-h/m/i/[ 는 Backspace/Enter/Tab/Esc와 같아 제외)",
     "",
     "바로 scroll (모드 없음): 마우스 휠(해당 pane, 3줄) · Shift+PgUp/Shift+PgDn (focus pane 한 페이지)",
     "  스크롤한 pane에 입력/붙여넣기하면 자동으로 live 복귀 (다른 pane 위치는 유지)",
@@ -76,7 +99,7 @@ HELP_LINES = (
 
     "배치: 위 = manager OMP | worker OMP, 아래 = host shell 전체 폭.",
     "  경계 조절: 마우스로 pane 사이 경계선 드래그 · prefix ←/→ manager|worker 폭 · prefix ↑/↓ 위|host 높이",
-    "  (prefix 방향키 뒤 1초 안의 방향키는 계속 조절)  prefix z focus pane 확대/복원  prefix = 배치 초기화",
+    "  (prefix 방향키 뒤 1초 안의 방향키는 계속 조절)  prefix z(Ctrl-z) focus pane 확대/복원  prefix = 배치 초기화",
     "focus 변경은 host 입력 owner를 바꾸지 않는다.",
 )
 
@@ -245,6 +268,8 @@ class ProductModel:
         self.last_seen: float | None = None
         self.notice = ""
         self.help_open = False
+        self.menu_open = False  # prefix Space command menu (IME-neutral: arrows/Enter/digits/Esc only)
+        self.menu_index = 0
         self._mode: PaneId | None = None  # explicit scroll mode (prefix [): keys drive the view, never the pane
         self._views: dict[PaneId, _ScrollView] = {}  # panes whose view is scrolled back (wheel, Shift+PgUp, mode)
         self.mouse_capture = True  # outer-terminal mouse reporting wanted (prefix m toggles; the app loop applies it)
@@ -526,6 +551,14 @@ class ProductModel:
         return bracketed is not False
 
     def _handle_events(self, events: list) -> bool:
+        handled = self._handle_event_list(events)
+        if self.menu_open and self.parser.prefix_active:
+            self.menu_open = False  # the prefix key alone closes the menu (its label says so)
+            self.parser.cancel_prefix()  # ... and is spent: the next key is ordinary input again
+            handled = True
+        return handled
+
+    def _handle_event_list(self, events: list) -> bool:
         for event in events:
             if self._repeat_until is not None:
                 if self._last_now >= self._repeat_until or self._mode is not None:
@@ -538,6 +571,9 @@ class ProductModel:
                     self._repeat_until = None
                 elif not isinstance(event, Mouse):
                     self._repeat_until = None
+            if self.menu_open:
+                self._menu_event(event)
+                continue
             if isinstance(event, Command):
                 self.help_open = False
                 self._end_drag()
@@ -579,27 +615,80 @@ class ProductModel:
             data = data[3:]
         return data
 
+    def _menu_event(self, event: Any) -> None:
+        """While the menu is open no event reaches a pane; prefix (plus its key) cancels, Esc cancels."""
+        if isinstance(event, Command):
+            self.menu_open = False  # prefix cancels; the key after it is not run
+        elif isinstance(event, Passthrough):
+            self._menu_input(event.data)
+        elif isinstance(event, (Paste, PasteRejected)):
+            self.notice = "명령 메뉴 열림: 붙여넣기는 pane으로 전달되지 않음 (Esc로 닫기)"
+
+    def _menu_input(self, data: bytes) -> None:
+        i = 0
+        while i < len(data) and self.menu_open:
+            byte = data[i]
+            if byte == 0x1B:
+                rest = data[i:]
+                length = _sequence_length(rest) if len(rest) > 1 else 0
+                if length == 0:
+                    self.menu_open = False  # a lone Esc closes the menu
+                    return
+                seq = rest[:length]
+                if seq in (b"\x1b[A", b"\x1bOA"):
+                    self.menu_index = (self.menu_index - 1) % len(MENU_ITEMS)
+                elif seq in (b"\x1b[B", b"\x1bOB"):
+                    self.menu_index = (self.menu_index + 1) % len(MENU_ITEMS)
+                i += length
+                continue
+            i += 1
+            if byte in (0x0D, 0x0A):
+                self._menu_run(self.menu_index)
+            elif byte == PREFIX:
+                self.menu_open = False
+            elif 0x30 <= byte <= 0x39 and chr(byte) in MENU_DIGITS:
+                self._menu_run(MENU_DIGITS.index(chr(byte)))
+            # anything else (letters, Hangul, Tab, Backspace, ...) is swallowed: the menu is arrows/Enter/digits/Esc
+
+    def _menu_run(self, index: int) -> None:
+        self.menu_open = False
+        self._command(MENU_ITEMS[index][0])
+
+    def menu_lines(self) -> list[str]:
+        lines = ["명령 메뉴 (Ctrl-] Space)   ↑/↓ + Enter 또는 숫자 · Esc / Ctrl-] 취소", ""]
+        for index, (_, label, letter, ctrl) in enumerate(MENU_ITEMS):
+            keys = f"Ctrl-] {letter}" + (f" / Ctrl-] {ctrl}" if ctrl else "")
+            lines.append(f"{'>' if index == self.menu_index else ' '} {MENU_DIGITS[index]}  {label}   [{keys}]")
+        lines += ["", "focus: Ctrl-] 1/2/3 · Tab   경계 조절: Ctrl-] ←↑↓→   literal prefix: Ctrl-] Ctrl-]",
+                  "한글 입력 상태에서는 글자 키 대신 Ctrl 조합이나 이 메뉴를 쓰세요"]
+        return lines
+
     def _command(self, key: str) -> None:
-        if key in _ARROWS:
+        key = CTRL_ALIASES.get(key, key)
+        if any(ord(ch) >= 128 for ch in key):
+            self.notice = HANGUL_HINT  # IME text right after the prefix: never guessed, never forwarded
+        elif key == " ":
+            self.menu_open, self.menu_index, self.notice = True, 0, ""
+        elif key in _ARROWS:
             self._resize_arrow(_ARROWS[key])
             self._repeat_until = self._last_now + RESIZE_REPEAT_SECONDS
         elif key == "z":
             self.toggle_zoom()
         elif key == "=":
             self.reset_layout()
-        elif key in "123":
+        elif key in ("1", "2", "3"):
             self.set_focus(PANES[int(key) - 1])
         elif key == "\t":
             self.set_focus(PANES[(PANES.index(self.focus) + 1) % len(PANES)])
-        elif key in "dD":
+        elif key in "dD" and len(key) == 1:
             self.quit = True
-        elif key in "tT":
+        elif key in "tT" and len(key) == 1:
             self._send(ClientType.TAKEOVER_REQUEST)
-        elif key in "cC":
+        elif key in "cC" and len(key) == 1:
             self._send(ClientType.TAKEOVER_CONFIRM)
-        elif key in "hH":
+        elif key in "hH" and len(key) == 1:
             self._send(ClientType.HANDOFF)
-        elif key in "rR":
+        elif key in "rR" and len(key) == 1:
             self.redraw(self.focus)
             self._mouse_reassert = True
         elif key == "[":
@@ -607,14 +696,14 @@ class ProductModel:
         elif key == "\x1b[5~":  # prefix PgUp: scroll mode + one page up
             self.enter_scroll()
             self.scroll_by(self._page())
-        elif key in "mM":
+        elif key in "mM" and len(key) == 1:
             self.mouse_capture = not self.mouse_capture
             self.notice = ("마우스 캡처 켜짐: 휠 스크롤 · 클릭 focus (텍스트 선택은 Shift+드래그)" if self.mouse_capture
                            else "마우스 캡처 꺼짐: 터미널 텍스트 선택 가능 (prefix m 으로 다시 켬)")
         elif key == "?":
             self.help_open = True
         else:
-            self.notice = f"알 수 없는 prefix 명령 {key!r} (prefix ? 도움말)"
+            self.notice = f"알 수 없는 prefix 명령 {key!r} (Ctrl-] Space 메뉴 · Ctrl-] ? 도움말)"
 
     def set_focus(self, pane: PaneId) -> None:
         self.exit_scroll()  # leaves scroll mode; panes scrolled directly keep their position
@@ -1082,8 +1171,11 @@ class ProductModel:
     def footer(self) -> str:
         if self.closed_reason:
             return self.notice
+        if self.menu_open:
+            return self.notice or "명령 메뉴: ↑/↓ + Enter · 숫자 1-9/0 · Esc 취소 · 키는 pane으로 전달되지 않음"
         if self.parser.prefix_active:
-            return "prefix… (1/2/3 Tab t c h r [ m d ? , Ctrl-] 한 번 더 = 리터럴 · ←↑↓→ 분할 z 확대 = 초기화)"
+            return ("prefix… Space 메뉴 · 한글 IME는 Ctrl+d/t/y(확인)/o(handoff)/r/e(mouse)/z · 1/2/3 Tab [ = ? · "
+                    "영문 d t c h r m z · ←↑↓→ 분할 · Ctrl-] 한 번 더 = 리터럴")
         if self.resize_repeat_active:
             return (f"{self.notice} · " if self.notice else "") + "←↑↓→ 계속 조절 · 다른 키는 종료 후 그대로 처리"
         if self._mode is not None:
@@ -1091,7 +1183,7 @@ class ProductModel:
                                    "키는 pane으로 전달되지 않음")
         if self.scrolled(self.focus):
             return self.notice or "SCROLL: 휠/Shift+PgUp·PgDn 이동 · 입력하면 live로 복귀"
-        default = "원본 키는 focus pane으로 그대로 전달됩니다 · Ctrl-] d = detach"
+        default = "원본 키는 focus pane으로 그대로 전달됩니다 · Ctrl-] Space 메뉴 · Ctrl-] d/Ctrl-d = detach"
         if self.mouse_capture:
             default += " · 휠/Shift+PgUp 스크롤 · 선택은 Shift+드래그"
         return self.notice or default

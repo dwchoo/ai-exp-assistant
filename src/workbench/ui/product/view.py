@@ -71,6 +71,10 @@ def draw(win: curses.window, model: ProductModel, colors: _ColorPairs) -> None:
     if model.help_open:
         _cursor(False)
         _draw_help(win, rows, cols)
+    elif model.menu_open:
+        _cursor(False)
+        _draw_menu(win, rows, cols, model)
+        _put(win, rows - 1, 0, model.footer(), cols - 1, curses.A_BOLD)
     else:
         _cursor(not model.scrolled(model.focus) and not model.panes[model.focus].screen.cursor.hidden)
         _put(win, rows - 1, 0, model.footer(), cols - 1, curses.A_BOLD if model.notice else 0)
@@ -101,6 +105,20 @@ def _draw_help(win: curses.window, rows: int, cols: int) -> None:
         _put(win, top + y, left, " " * width, width, curses.A_REVERSE)
     for i, line in enumerate(HELP_LINES[:height - 2]):
         _put(win, top + 1 + i, left + 2, line, width - 4, curses.A_REVERSE)
+
+
+def _draw_menu(win: curses.window, rows: int, cols: int, model: ProductModel) -> None:
+    lines = model.menu_lines()
+    width = min(cols - 2, max(wcswidth(line) for line in lines) + 4)
+    height = min(rows - 2, len(lines) + 2)
+    top, left = max(0, (rows - height) // 2), max(0, (cols - width) // 2)
+    for y in range(height):
+        _put(win, top + y, left, " " * width, width, curses.A_REVERSE)
+    for i, line in enumerate(lines[:height - 2]):
+        selected = line.startswith(">")
+        if selected:  # the chosen row is drawn un-reversed over its whole width
+            _put(win, top + 1 + i, left + 1, " " * (width - 2), width - 2, curses.A_BOLD)
+        _put(win, top + 1 + i, left + 2, line, width - 4, curses.A_BOLD if selected else curses.A_REVERSE)
 
 
 def _cursor(visible: bool) -> None:
