@@ -134,7 +134,7 @@ TaskSpec은 목표·완료 조건·허용 변경/실행/자원·중단 조건·�
 - Busy·미제출 입력·REPL·background/suspended job·stale owner/generation·cwd 불일치·비호환 hook/trap·
   control 손실은 자동 전송/수락을 보류한다. 내부 상태를 무조건 초기화하거나 새 shell로 우회하지 않는다.
   Ctrl-C·loop 이탈·exec·shell 종료·supervisor 사망·daemon 경계를 completed로 추정하지 않는다.
-  Supervisor 이전 수동 작업의 daemon을 발견·소급 관리한다고 보장하지 않으며 불명 잔존은 사유를 표시하고 handoff를 보류한다. 사용자가 정리한 뒤 다시 확인한다. 사용자 확인만으로 unknown을 종료 완료로 바꾸거나 귀속이 불명확한 프로세스를 자동 종료하지 않는다.
+  Supervisor 이전 수동 작업의 daemon을 발견·소급 관리한다고 보장하지 않으며 불명 잔존은 사유를 표시하고 handoff를 보류한다. 사용자가 정리한 뒤 다시 확인한다. [C-D58](DECISIONS.md#C-D58): 보류 중에도 사용자는 host 입력 owner로 남거나 인수로 제어를 되찾아 수동으로 정리할 수 있어야 하며, 보류가 사용자 입력·인수를 막는 막다른 상태가 되어서는 안 된다. 자동 전송·수락 보류는 유지한다. 사용자 확인만으로 unknown을 종료 완료로 바꾸거나 귀속이 불명확한 프로세스를 자동 종료하지 않는다.
 
 ### OMP 전달과 중단
 
@@ -206,7 +206,7 @@ p2.6 최종 gate는 local 부품 gate가 모두 통과했음에도 `passed: fals
   - 단일 진입점(`python -m workbench`/`[project.scripts]`)을 둔다.
   - backend process는 `setsid`로 분리하고 data dir마다 하나만 실행한다.
   - data dir은 CLI·환경 변수·XDG state 순으로 정하고 권한은 0700이다.
-  - bridge extension을 주입한 OMP launcher를 제공한다.
+  - bridge extension을 주입한 OMP launcher를 제공한다. 두 OMP는 사용자 주변 설정(skill, context 파일, rules, 자동 발견 extension·MCP·memory)에서 격리하고 인증·provider·모델 설정만 쓴다([C-D59](DECISIONS.md#C-D59)).
   - backend가 `PersistentShell`을 소유한다.
   - UDS 위의 versioned framed `ui_v1`을 둔다. 다룰 메시지는 attach/detach/snapshot, `DisplayChunk` stream, input/paste/resize, focus·입력 owner, 인수·handoff, 자동화 상태, 전체 종료, `confirm_boot`이다.
   - 기존 v1/ports_v2는 바꾸지 않는다.
@@ -222,6 +222,7 @@ p2.6 최종 gate는 local 부품 gate가 모두 통과했음에도 `passed: fals
   - SQLite `RecoveryPort`를 제공한다.
   - 실제 종료 callback과 장애 표시를 연결한다.
   - 재부팅 뒤 backend 자동 시작(systemd 등)은 범위가 아니며, 사용자가 진입점을 다시 실행한다.
+  - 전체 종료와 `confirm_boot`는 CLI 진입점 명령으로 충분하고 제품 UI 조작은 요구하지 않는다([C-D58](DECISIONS.md#C-D58)).
 
 사용자 검토 checkpoint([C-D57](DECISIONS.md#C-D57)): UR-UX는 CW-06 통합 뒤 CW-18 전에, UR-USABILITY는 CW-18 통합 뒤 CW-16 전에 사용자가 실제 진입점으로 수행한다. 배치·키·문구 피드백은 해당 ticket delta로, 동작 변경은 새 결정으로 처리한다. 자동 gate와 사용자 검토는 서로 대체하지 않는다.
 

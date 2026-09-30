@@ -3511,7 +3511,7 @@
         "CW-18"
       ],
       "required_evidence_level": "runtime",
-      "check": "실제 OMP 18.2.10 두 개(scripted provider)·persistent shell로 진입점에서 승인 전 무실행, 사용자 승인·진행 뒤 Task/revision→worktree/run→worker 1차 판단→manager 2차 확인·완료, worker 직접 요청 세 경계, 수정 필요 보고 뒤 자동 반환 없음",
+      "check": "실제 OMP 18.2.10 두 개(scripted provider)·persistent shell로 진입점에서 승인 전 무실행, 사용자 승인·진행 뒤 Task/revision→worktree/run→worker 1차 판단→manager 2차 확인·완료, worker 직접 요청 세 경계, 수정 필요 보고 뒤 자동 반환 없음, 보류된 wb-handoff(사용자 background job·불명 잔존) 중에도 사용자 owner 유지 또는 인수·수동 입력으로 정리 후 재handoff 가능(C-D58)",
       "kind": "composition_behavior",
       "evidence_status": "pending_current_implementation",
       "final_checks": [
