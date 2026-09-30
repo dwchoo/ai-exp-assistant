@@ -29,13 +29,8 @@ def rejects(action) -> None:
 
 
 def case(shell: str, fault: str) -> dict:
-    source = combined.controller_source(shell).replace(
-        "                    __b_emit START", "                    __b_emit ACCEPT\n                    __b_emit START"
-    )
     identities = []
-    with patch.object(combined.boundary.prototype, "_bash_control_init", return_value=source), \
-         patch.object(combined.boundary.prototype, "_sh_control_init", return_value=source), \
-         tempfile.TemporaryDirectory(prefix="cw03-lifecycle-") as directory, \
+    with tempfile.TemporaryDirectory(prefix="cw03-lifecycle-") as directory, \
          ManagedLifecycleProbe(ShellChoice("bash" if Path(shell).name == "bash" else "sh", shell)) as session, \
          combined.cleanup_owned(identities):
         combined.wait(session, "READY", 0)

@@ -38,6 +38,17 @@ class TerminalScreen(pyte.HistoryScreen):
         if callback is not None:
             callback(data.encode("utf-8"))
 
+    def report_device_status(self, mode: int, **kwargs: object) -> None:
+        if not kwargs.get("private"):
+            super().report_device_status(mode)
+        elif mode == 6:
+            # DEC CPR is private; pyte's public DSR handler rejects that keyword.
+            row = self.cursor.y + 1
+            if pyte.modes.DECOM in self.mode and self.margins is not None:
+                row -= self.margins.top
+            self.write_process_input(f"\x1b[?{row};{self.cursor.x + 1}R")
+        # Unknown private DSRs make no unsupported capability claim.
+
     def _capture(self) -> dict[str, object]:
         return {key: value for key, value in self.__dict__.items() if key != "_terminal_control"}
 
@@ -110,6 +121,49 @@ class TerminalScreen(pyte.HistoryScreen):
             return
         super().reset_mode(*modes, **kwargs)
 
+    def _blank_scrolled_line(self, y: int) -> None:
+        """Replace row ``y`` with a blank line carrying the erase attributes."""
+        self.buffer.pop(y, None)
+        attrs = self.cursor.attrs
+        if attrs != self.default_char:
+            self.buffer[y].default = attrs._replace(data=" ")
+
+    def _scroll_region(self, count: int | None, *, up: bool) -> None:
+        """xterm SU/SD: scroll the DECSTBM region; the cursor does not move."""
+        top, bottom = self.margins or pyte.screens.Margins(0, self.lines - 1)
+        height = bottom - top + 1
+        if height <= 0:
+            return
+        count = min(max(count or 1, 1), height)
+        self.dirty.update(range(top, bottom + 1))
+        history = self.history
+        if up:
+            for y in range(top, top + count):
+                history.top.append(self.buffer[y])
+            for y in range(top, bottom + 1 - count):
+                self.buffer[y] = self.buffer[y + count]
+            for y in range(bottom + 1 - count, bottom + 1):
+                self._blank_scrolled_line(y)
+        else:
+            for y in range(bottom, bottom - count, -1):
+                history.bottom.append(self.buffer[y])
+            for y in range(bottom, top + count - 1, -1):
+                self.buffer[y] = self.buffer[y - count]
+            for y in range(top, top + count):
+                self._blank_scrolled_line(y)
+
+    def scroll_up(self, *params: int, **kwargs: object) -> None:
+        """CSI Ps S (SU). Private and multi-parameter forms are not SU."""
+        if kwargs.get("private") or len(params) > 1:
+            return
+        self._scroll_region(params[0] if params else None, up=True)
+
+    def scroll_down(self, *params: int, **kwargs: object) -> None:
+        """CSI Ps T (SD). Multi-parameter forms are xterm mouse tracking, not SD."""
+        if kwargs.get("private") or len(params) > 1:
+            return
+        self._scroll_region(params[0] if params else None, up=False)
+
     def resize(self, lines: int | None = None, columns: int | None = None) -> None:
         control = self._terminal_control
         if lines:
@@ -119,5 +173,12 @@ class TerminalScreen(pyte.HistoryScreen):
         super().resize(lines=lines, columns=columns)
 
 
+class TerminalByteStream(pyte.ByteStream):
+    """pyte ByteStream that also dispatches CSI S (SU) and CSI T (SD)."""
+
+    csi = {**pyte.ByteStream.csi, "S": "scroll_up", "T": "scroll_down"}
+    events = frozenset(pyte.ByteStream.events | {"scroll_up", "scroll_down"})
+
+
 def make_stream(screen: TerminalScreen) -> pyte.ByteStream:
-    return pyte.ByteStream(screen)
+    return TerminalByteStream(screen)

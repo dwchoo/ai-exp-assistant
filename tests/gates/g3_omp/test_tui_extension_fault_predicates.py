@@ -1,7 +1,6 @@
 """Independent negative controls for two-TUI host outage and recovery evidence.
 
-The doubles exercise the probe's decisions, not OMP itself. In particular, the
-outage has no delivery attempt, so it cannot prove a production withholding policy.
+The doubles exercise the probe's decisions, not OMP itself.
 """
 
 from __future__ import annotations
@@ -47,8 +46,20 @@ class _Socket:
         self.sent.append(data)
         self.bridge.bad_frame_seen = True
         defect = self.bridge.defect
+        try:
+            frame = json.loads(data)
+        except json.JSONDecodeError:
+            frame = None
+        if frame and frame.get("diagnosticFault") == "handler_exception":
+            envelope = json.loads(frame["envelope"])
+            self.bridge.failed_message = envelope["messageId"]
+            self.bridge.events.append({"role": "worker", "name": f"diagnostic_handler_fault:{frame['requestId']}",
+                                       "requestId": frame["requestId"], "messageId": envelope["messageId"],
+                                       "sessionId": self.bridge.peers["worker"]["session_id"], "generation": 1})
+            if defect == "handler_wrong_generation":
+                self.bridge.events[-1]["generation"] = 2
         if defect == "malformed_ack":
-            match = re.search(rb'"requestId":"([^"]+)"', data)
+            match = re.search(rb'"requestId":\s*"([^"]+)"', data)
             assert match is not None
             self.bridge.acks[match.group(1).decode()] = {"status": "api_accepted"}
         if defect == "malformed_provider":
@@ -57,6 +68,8 @@ class _Socket:
             self.bridge.events.append({"role": "worker", "name": "agent_end",
                                        "sessionId": self.bridge.peers["worker"]["session_id"],
                                        "generation": 1})
+        if defect == "malformed_start":
+            self.bridge.events.append({"role": "worker", "name": "agent_start"})
         if defect == "malformed_worker_socket_changed":
             self.bridge.peers["worker"] = {
                 **self.bridge.peers["worker"], "socket": _Socket(self.bridge, "worker"),
@@ -86,6 +99,8 @@ class _Bridge:
         self.deliveries: list[tuple[str, dict[str, object]]] = []
         self.acks: dict[str, dict[str, object]] = {}
         self.bad_frame_seen = False
+        self.failed_message = None
+        self.outage_attempts: list[dict[str, object]] = []
         self.peers: dict[str, dict[str, object]] = {}
         for index, role in enumerate(probe.ROLES):
             old = previous.peers_at_start[role] if previous else None
@@ -114,6 +129,8 @@ class _Bridge:
             self.events.append({"role": "worker", "name": "agent_end",
                                 "sessionId": self.peers["worker"]["session_id"],
                                 "generation": self.peers["worker"]["generation"]})
+        if previous and defect == "spontaneous_start_on_reconnect":
+            self.events.append({"role": "worker", "name": "agent_start"})
 
     def serve_forever(self) -> None:
         pass
@@ -122,6 +139,11 @@ class _Bridge:
         return self.peers[role]
 
     def request(self, role: str, frame: dict[str, object], **_kwargs: object) -> dict[str, object]:
+        if role not in self.peers:
+            self.outage_attempts.append(frame)
+            if self.defect == "outage_false_success":
+                return {"status": "api_accepted"}
+            raise TimeoutError("host unavailable")
         if frame["kind"] == "probe":
             peer = self.peers[role]
             malformed_state_changed = self.bad_frame_seen and (
@@ -140,6 +162,10 @@ class _Bridge:
             }}
 
         envelope = json.loads(str(frame["envelope"]))
+        if envelope["messageId"] == self.failed_message:
+            if self.defect == "handler_false_retry_success":
+                return {"status": "api_accepted"}
+            return {"status": "unknown_no_replay"}
         self.deliveries.append((role, envelope))
         target = self.providers[role]
         other = "manager" if role == "worker" else "worker"
@@ -181,6 +207,9 @@ class _Bridge:
     def event_count(self, role: str, name: str) -> int:
         return sum(event["role"] == role and event["name"] == name for event in self.events)
 
+    def wait_event(self, role: str, name: str, **_kwargs: object) -> dict[str, object]:
+        return next(event for event in self.events if event["role"] == role and event["name"] == name)
+
     def shutdown(self) -> None:
         pass
 
@@ -189,7 +218,8 @@ class _Bridge:
 
 
 class ExtensionFaultOutcomeTests(unittest.TestCase):
-    def _run_case(self, defect: str = "", *, malformed_frame: bool = False
+    def _run_case(self, defect: str = "", *, malformed_frame: bool = False,
+                  outage_delivery: bool = False, handler_fault: bool = False
                   ) -> tuple[dict[str, object], list[_Bridge], dict[str, _Provider], list[bool]]:
         providers: dict[str, _Provider] = {}
         bridges: list[_Bridge] = []
@@ -223,7 +253,7 @@ class ExtensionFaultOutcomeTests(unittest.TestCase):
 
         def screen(*_args: object, present: bool, **_kwargs: object) -> bool:
             # The first check occurs after unlink and after old accepted peers close.
-            boundary_reached = (bridges[0].bad_frame_seen and bridges[0].path.exists()) if malformed_frame else (
+            boundary_reached = (bridges[0].bad_frame_seen and bridges[0].path.exists()) if (malformed_frame or handler_fault) else (
                 not bridges[0].path.exists() and not bridges[0].peers
             )
             outage_screen_checks.append(boundary_reached)
@@ -233,6 +263,8 @@ class ExtensionFaultOutcomeTests(unittest.TestCase):
                 bridges[0].events.append({"role": "worker", "name": "agent_end",
                                           "sessionId": bridges[0].peers_at_start["worker"]["session_id"],
                                           "generation": 1})
+            if present and defect == "spontaneous_start_during_fault":
+                bridges[0].events.append({"role": "worker", "name": "agent_start"})
             if defect == "composer_input_missing" and present:
                 return False
             if defect == "composer_not_cleared" and not present:
@@ -258,8 +290,37 @@ class ExtensionFaultOutcomeTests(unittest.TestCase):
             patch.object(probe.Path, "exists", autospec=True, side_effect=exists),
             patch.object(probe, "cwd_processes", return_value=[]),
         ):
-            outcome = probe.run("unused-omp", malformed_frame=malformed_frame)
+            outcome = probe.run("unused-omp", malformed_frame=malformed_frame,
+                                outage_delivery=outage_delivery, handler_fault=handler_fault)
         return outcome, bridges, providers, outage_screen_checks
+
+    def test_actual_outage_attempt_is_unavailable_not_replayed_then_fresh_only(self) -> None:
+        outcome, bridges, _, _ = self._run_case(outage_delivery=True)
+        self.assertEqual(outcome["result"], "passed_pair_tui_outage_delivery")
+        self.assertEqual(len(bridges[0].outage_attempts), 1)
+        self.assertEqual(outcome["outage_delivery_status"], "unavailable")
+        self.assertTrue(outcome["outage_delivery_not_replayed"])
+        self.assertTrue(outcome["fresh_message_distinct_from_outage"])
+        outcome, _, _, _ = self._run_case("outage_false_success", outage_delivery=True)
+        self.assertEqual(outcome["result"], "outage_delivery_false_success")
+        for defect in ("spontaneous_provider_during_fault", "spontaneous_start_during_fault",
+                       "replay_on_reconnect", "stale_end_on_reconnect", "spontaneous_start_on_reconnect"):
+            with self.subTest(defect=defect):
+                outcome, _, _, _ = self._run_case(defect, outage_delivery=True)
+                self.assertNotEqual(outcome["result"], "passed_pair_tui_outage_delivery")
+
+    def test_internal_exception_has_no_ack_or_processing_and_retry_stays_unknown(self) -> None:
+        outcome, _, _, _ = self._run_case(handler_fault=True)
+        self.assertEqual(outcome["result"], "passed_pair_tui_internal_handler_fault")
+        self.assertTrue(outcome["internal_handler_exception_observed"])
+        self.assertTrue(outcome["malformed_frame_no_api_ack"])
+        self.assertEqual(outcome["internal_fault_retry_status"], "unknown_no_replay")
+        for defect in ("malformed_ack", "malformed_provider", "malformed_end", "malformed_start",
+                       "malformed_composer_input_missing", "handler_false_retry_success",
+                       "handler_wrong_generation", "malformed_fresh_duplicate"):
+            with self.subTest(defect=defect):
+                outcome, _, _, _ = self._run_case(defect, handler_fault=True)
+                self.assertNotEqual(outcome["result"], "passed_pair_tui_internal_handler_fault")
 
     def test_host_outage_and_fresh_worker_only_recovery(self) -> None:
         outcome, bridges, providers, screen_checks = self._run_case()

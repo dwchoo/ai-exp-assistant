@@ -1,0 +1,466 @@
+"""CW-10 vertical run checks with actual temporary Git and Bash/sh PTYs."""
+
+import json
+from pathlib import Path
+import subprocess
+import tempfile
+import unittest
+from unittest.mock import patch
+from types import SimpleNamespace
+from uuid import uuid4
+
+from workbench.ipc.bridge_g3.mailbox import MailboxStatus, TaskMailbox
+from workbench.tasks.repository import AuthorizationError, TaskRepository
+from workbench.terminal.shell_persistent.adapter import PersistentShell
+from workbench.workflow import (
+    TaskWorkflow, WorkflowHeld, WorktreePreparationError,
+    classify_worker_request, prepare_execution_worktree, verified_worker_response,
+)
+
+
+AUTOMATION = {"portVersion": 2, "kind": "AutomationState", "payload": {
+    "paused": False, "cancelled": False, "metadataHealthy": True, "approvalValid": True,
+}}
+
+
+def git(directory, *args):
+    result = subprocess.run(["git", "-C", str(directory), *args], capture_output=True,
+                            text=True, timeout=10, check=True)
+    return result.stdout.strip()
+
+
+class PublicMailboxFixture:
+    def __init__(self, repository):
+        self.repository = repository
+        self.messages = []
+
+    def create_message(self, task_id, revision, run_id, sender, target, kind, payload,
+                       *, in_reply_to_message_id=None):
+        assert self.repository.get_run(run_id)["task_id"] == task_id
+        message = SimpleNamespace(message_id=str(uuid4()), task_id=task_id, revision=revision,
+                                  run_id=run_id, sender=sender, target=target, kind=kind,
+                                  payload=payload, reply_to=in_reply_to_message_id)
+        self.messages.append(message)
+        return message
+
+    def deliver(self, message):
+        assert message in self.messages
+        return SimpleNamespace(status=MailboxStatus.OMP_PROCESSED)
+
+
+class StrictMailboxFixture(TaskMailbox):
+    """Public TaskMailbox type with fixture transport, for fail-closed port tests."""
+    def __init__(self, repository):
+        self.fixture = PublicMailboxFixture(repository)
+
+    @property
+    def messages(self):
+        return self.fixture.messages
+
+    def create_message(self, *args, **kwargs):
+        return self.fixture.create_message(*args, **kwargs)
+
+    def deliver(self, message):
+        self.fixture.deliver(message)
+        return SimpleNamespace(status=MailboxStatus.OMP_PROCESSED,
+                               delivery_attempt_id=str(uuid4()),
+                               session_id="11111111-1111-4111-8111-111111111111",
+                               session_generation=1)
+
+
+class WorkerPortFixture:
+    def __init__(self, repository, automation_state):
+        self.repository = repository
+        self.automation_state = automation_state
+        self.after_execute = None
+        self.after_analysis = None
+        self.mismatch = False
+        self.armed = []
+
+    def arm(self, stage, message):
+        self.armed.append((stage, message.message_id))
+
+    def observe(self, stage, message, receipt):
+        assert (stage, message.message_id) in self.armed
+        if stage == "execute" and self.after_execute is not None:
+            self.after_execute(message)
+        if stage == "analysis" and self.after_analysis is not None:
+            self.after_analysis(message)
+        return {"stage": stage, "task_id": message.task_id, "revision": message.revision,
+                "run_id": message.run_id,
+                "message_id": str(uuid4()) if self.mismatch else message.message_id,
+                "delivery_attempt_id": receipt.delivery_attempt_id,
+                "session_id": receipt.session_id, "session_generation": receipt.session_generation,
+                "source": "omp_assistant_response", "response_id": str(uuid4()),
+                "assistant_event_sequence": len(self.armed),
+                "delivery_event_sequence": len(self.armed) + 1,
+                "decision": "execute" if stage == "execute" else (
+                    "indeterminate" if "preparation_error" in message.payload.get("facts", {}) else "success")}
+
+
+class WorkflowRuntimeTests(unittest.TestCase):
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory(prefix="cw10-workflow-")
+        self.addCleanup(self.temp.cleanup)
+        self.root = Path(self.temp.name)
+        self.source = self.root / "source"
+        self.source.mkdir()
+        git(self.source, "init", "-q")
+        git(self.source, "config", "user.email", "fixture@example.invalid")
+        git(self.source, "config", "user.name", "CW10 Fixture")
+        (self.source / "tracked.txt").write_text("base\n")
+        git(self.source, "add", "tracked.txt")
+        git(self.source, "commit", "-qm", "fixture baseline")
+        self.commit = git(self.source, "rev-parse", "HEAD")
+        (self.source / "tracked.txt").write_text("user dirty content\n")
+        (self.source / "untracked.txt").write_text("preserve me\n")
+        self.status = git(self.source, "status", "--porcelain=v1", "--untracked-files=all")
+        self.artifacts = self.root / "artifacts"
+        self.artifacts.mkdir()
+        self.repository = TaskRepository(self.root / "metadata.sqlite3")
+        self.addCleanup(self.repository.close)
+        self.mailbox = PublicMailboxFixture(self.repository)
+        self.workflow = TaskWorkflow(self.repository, self.mailbox)
+
+    def approved_task(self, command, *, shell="bash"):
+        execution = {"source": str(self.source), "commit": self.commit,
+                     "command": command, "criteria": {"log_contains": "PASS",
+                     "result_file": "outcome.txt", "result_contains": "PASS"},
+                     "environment": {"PATH": "/usr/bin:/bin", "TERM": "xterm"}, "shell": shell}
+        task_id = self.repository.create_task({"goal": "bounded fixture", "execution": execution})
+        self.repository.approve_scope(task_id, 1, {"execution": execution, "paths": ["outcome.txt"]})
+        self.repository.proceed(task_id, 1, "run approved fixture")
+        return task_id
+
+    def strict_task(self, command="printf 'PASS\\n'; printf PASS > outcome.txt"):
+        state = {"portVersion": 2, "kind": "AutomationState", "payload": dict(AUTOMATION["payload"])}
+        mailbox = StrictMailboxFixture(self.repository)
+        worker_port = WorkerPortFixture(self.repository, state)
+        workflow = TaskWorkflow(self.repository, mailbox, worker_port=worker_port,
+                                automation_source=lambda: state)
+        execution = {"source": str(self.source), "commit": self.commit,
+                     "command": command, "criteria": {"log_contains": "PASS",
+                     "result_file": "outcome.txt", "result_contains": "PASS"},
+                     "environment": ["PATH", "TERM", "CW10_SECRET"], "shell": "bash"}
+        task_id = self.repository.create_task({"goal": "bounded strict fixture", "execution": execution})
+        self.repository.approve_scope(task_id, 1, {"execution": execution, "paths": ["outcome.txt"]})
+        self.repository.proceed(task_id, 1, "run approved strict fixture")
+        return workflow, mailbox, worker_port, state, task_id
+
+    def test_four_exit_and_evidence_outcomes_on_real_host_shell(self):
+        cases = (
+            ("success", "printf 'PASS\\n'; printf PASS > outcome.txt", "success", 0),
+            ("nonzero", "printf 'ERROR\\n'; printf BAD > outcome.txt; exit 7", "failure", 7),
+            ("criteria_fail", "printf 'WRONG\\n'; printf BAD > outcome.txt", "failure", 0),
+            ("insufficient", "printf PASS > outcome.txt", "indeterminate", 0),
+        )
+        for name, command, expected, exit_status in cases:
+            with self.subTest(case=name):
+                task_id = self.approved_task(command, shell="sh" if name == "criteria_fail" else "bash")
+                worktree_path = self.root / f"execution-{name}"
+                run = self.workflow.start(task_id, 1, worktree_path=worktree_path,
+                                          artifacts_root=self.artifacts, automation=AUTOMATION)
+                try:
+                    collected = run.collect(timeout=8)
+                    self.assertTrue(collected["exit_confirmed"], collected)
+                    self.assertEqual(collected["exit_status"], exit_status)
+                    judged = run.judge()
+                    self.assertEqual(judged["worker_judgment"]["judgment"], expected)
+                    self.assertEqual(judged["report"]["status"], "omp_processed")
+                    self.assertEqual(judged["worker_judgment"]["run_id"], run.run_id)
+                    self.assertEqual(json.loads(run.result_path.read_text())["run_id"], run.run_id)
+                    self.assertEqual(git(worktree_path, "rev-parse", "HEAD"), self.commit)
+                    self.assertEqual(git(self.source, "status", "--porcelain=v1", "--untracked-files=all"), self.status)
+                    self.assertEqual((self.source / "untracked.txt").read_text(), "preserve me\n")
+                    self.assertEqual([e["kind"] for e in self.repository.get_shell_history(run.run_id)],
+                                     ["sent", "accepted", "started", "ended"])
+                    self.assertIsNone(self.repository.get_current_run(task_id))
+                    self.assertTrue(run.raw_log.is_file())
+                    self.assertTrue(worktree_path.is_dir(), "execution worktree is retained")
+                finally:
+                    run.close()
+
+    def test_pause_collects_exit_without_new_report_then_resumes(self):
+        task_id = self.approved_task("sleep 0.1; printf 'PASS\\n'; printf PASS > outcome.txt")
+        run = self.workflow.start(task_id, 1, worktree_path=self.root / "paused-execution",
+                                  artifacts_root=self.artifacts, automation=AUTOMATION)
+        try:
+            state = run.collect(timeout=8, paused=True)
+            self.assertTrue(state["exit_confirmed"])
+            self.assertEqual(run.judge(paused=True)["status"], "deferred_paused")
+            self.assertEqual(len(self.mailbox.messages), 1)
+            self.assertEqual(run.judge()["worker_judgment"]["judgment"], "success")
+            self.assertEqual(len(self.mailbox.messages), 2)
+        finally:
+            run.close()
+
+    def test_code_modification_report_ends_instruction_without_auto_return(self):
+        task_id = self.approved_task("printf 'PASS\\n'; printf PASS > outcome.txt")
+        run = self.workflow.start(task_id, 1, worktree_path=self.root / "modification-execution",
+                                  artifacts_root=self.artifacts, automation=AUTOMATION)
+        try:
+            run.collect(timeout=8)
+            state = run.judge(requires_code_change=True, code_change_reason="result shows a source fix is needed")
+            self.assertTrue(state["instruction_ended"])
+            self.assertIsNone(self.repository.get_current_run(task_id))
+            self.assertEqual(len(self.mailbox.messages), 2)
+            with self.assertRaises(WorkflowHeld):
+                run.judge()
+            self.assertEqual(len(self.mailbox.messages), 2)
+        finally:
+            run.close()
+
+    def test_ambiguous_report_delivery_is_not_replayed(self):
+        task_id = self.approved_task("printf 'PASS\\n'; printf PASS > outcome.txt")
+        run = self.workflow.start(task_id, 1, worktree_path=self.root / "uncertain-delivery",
+                                  artifacts_root=self.artifacts, automation=AUTOMATION)
+        try:
+            run.collect(timeout=8)
+            original_deliver = self.mailbox.deliver
+
+            def lost_receipt(message):
+                original_deliver(message)
+                raise RuntimeError("receipt lost after delivery")
+
+            self.mailbox.deliver = lost_receipt
+            with self.assertRaisesRegex(RuntimeError, "receipt lost"):
+                run.judge()
+            self.assertEqual(json.loads(run.result_path.read_text())["report"]["status"], "delivery_unknown")
+            with self.assertRaises(WorkflowHeld):
+                run.judge()
+            self.assertEqual(len(self.mailbox.messages), 2)
+        finally:
+            run.close()
+
+    def test_preparation_failure_preserves_source_and_existing_target(self):
+        task_id = self.approved_task("printf 'PASS\\n'; printf PASS > outcome.txt")
+        target = self.root / "existing-target"
+        target.mkdir()
+        (target / "user.txt").write_text("do not touch\n")
+        with self.assertRaises(WorktreePreparationError):
+            self.workflow.start(task_id, 1, worktree_path=target,
+                                artifacts_root=self.artifacts, automation=AUTOMATION)
+        self.assertEqual((target / "user.txt").read_text(), "do not touch\n")
+        self.assertEqual(git(self.source, "status", "--porcelain=v1", "--untracked-files=all"), self.status)
+        self.assertEqual((self.source / "untracked.txt").read_text(), "preserve me\n")
+        self.assertIsNone(self.repository.get_current_run(task_id))
+        self.assertEqual(len(self.mailbox.messages), 2)
+        self.assertEqual(self.mailbox.messages[-1].payload["stage"], "preparation")
+        self.assertTrue(self.mailbox.messages[-1].payload["requires_manager_resolution"])
+        self.assertTrue(list(self.artifacts.glob("*/run.json")))
+
+    def test_authority_and_direct_request_classification(self):
+        task_id = self.repository.create_task({"goal": "no scope", "execution": {
+            "source": str(self.source), "commit": self.commit,
+            "command": ":", "criteria": {"log_contains": "PASS", "result_file": "outcome.txt",
+            "result_contains": "PASS"}, "environment": {"PATH": "/usr/bin:/bin"}, "shell": "bash",
+        }})
+        with self.assertRaises(AuthorizationError):
+            self.workflow.start(task_id, 1, worktree_path=self.root / "unauthorized",
+                                artifacts_root=self.artifacts, automation=AUTOMATION)
+        self.assertEqual(classify_worker_request({"paths": ["allowed.py"]}, ["allowed.py"]),
+                         "existing_task_scope")
+        self.assertEqual(classify_worker_request({"paths": ["other.py"]}, ["allowed.py"]),
+                         "scope_expansion_manager_confirmation")
+        self.assertEqual(classify_worker_request({"paths": ["src/deep/file.py"]}, ["src/"]),
+                         "existing_task_scope")
+        self.assertEqual(classify_worker_request({"paths": ["src/deep/file.py"]}, ["src"]),
+                         "scope_expansion_manager_confirmation")
+        with self.assertRaises(ValueError):
+            classify_worker_request({"paths": ["src/../other.py"]}, ["src/"])
+        self.assertEqual(classify_worker_request({"paths": ["small.py"], "goal": "tiny",
+                                                  "bounded_small_spec": True}, None),
+                         "bounded_new_spec_requires_manager_approval")
+        paused = {"portVersion": 2, "kind": "AutomationState", "payload": {
+            **AUTOMATION["payload"], "paused": True,
+        }}
+        with self.assertRaises(WorkflowHeld):
+            self.workflow.start(task_id, 1, worktree_path=self.root / "paused-not-started",
+                                artifacts_root=self.artifacts, automation=paused)
+        self.assertIsNone(self.repository.get_current_run(task_id))
+
+    def test_explicit_commit_and_target_guards_do_not_mutate_source(self):
+        with self.assertRaises(WorktreePreparationError):
+            prepare_execution_worktree(self.source, "HEAD", self.root / "bad-ref")
+        with self.assertRaises(WorktreePreparationError):
+            prepare_execution_worktree(self.source, self.commit, self.source / "inside-source")
+        self.assertEqual(git(self.source, "status", "--porcelain=v1", "--untracked-files=all"), self.status)
+
+    def test_public_worker_port_identity_and_current_authority_fail_closed(self):
+        workflow, mailbox, worker_port, state, task_id = self.strict_task()
+        no_port = TaskWorkflow(self.repository, mailbox)
+        with self.assertRaises(WorkflowHeld):
+            no_port.start(task_id, 1, worktree_path=self.root / "no-port",
+                          artifacts_root=self.artifacts, automation=AUTOMATION)
+        self.assertFalse((self.root / "no-port").exists())
+        worker_port.mismatch = True
+        with self.assertRaises(ValueError):
+            workflow.start(task_id, 1, worktree_path=self.root / "wrong-worker-identity",
+                           artifacts_root=self.artifacts, automation=AUTOMATION,
+                           environment_values={"PATH": "/usr/bin:/bin", "TERM": "xterm",
+                                               "CW10_SECRET": "private-sentinel"})
+        self.assertFalse((self.root / "wrong-worker-identity").exists())
+        self.assertIsNone(self.repository.get_current_run(task_id))
+        self.assertEqual(len(mailbox.messages), 1)
+        with self.assertRaises(ValueError):
+            verified_worker_response("execute", mailbox.messages[0],
+                                     mailbox.deliver(mailbox.messages[0]), {})
+
+    def test_cancel_revoke_and_pause_at_worker_and_analysis_barriers(self):
+        for action in ("cancel", "revoke", "pause"):
+            with self.subTest(action=action):
+                workflow, mailbox, worker_port, state, task_id = self.strict_task()
+                def interrupt(message):
+                    if action == "cancel":
+                        self.repository.cancel_run(message.run_id, "cancel before worktree")
+                    elif action == "revoke":
+                        self.repository.revoke_authority(task_id, 1, "revoke before worktree")
+                    else:
+                        state["payload"]["paused"] = True
+                worker_port.after_execute = interrupt
+                target = self.root / f"barrier-{action}"
+                with self.assertRaises(WorkflowHeld):
+                    workflow.start(task_id, 1, worktree_path=target,
+                                   artifacts_root=self.artifacts, automation=AUTOMATION,
+                                   environment_values={"PATH": "/usr/bin:/bin", "TERM": "xterm",
+                                                       "CW10_SECRET": "private-sentinel"})
+                self.assertFalse(target.exists())
+                self.assertEqual(len(mailbox.messages), 1)
+        workflow, mailbox, worker_port, state, task_id = self.strict_task()
+        run = workflow.start(task_id, 1, worktree_path=self.root / "analysis-paused",
+                             artifacts_root=self.artifacts, automation=AUTOMATION,
+                             environment_values={"PATH": "/usr/bin:/bin", "TERM": "xterm",
+                                                 "CW10_SECRET": "private-sentinel"})
+        try:
+            self.assertTrue(run.collect(timeout=8)["exit_confirmed"])
+            state["payload"]["paused"] = True
+            with self.assertRaises(WorkflowHeld):
+                run.judge()
+            self.assertEqual(len(mailbox.messages), 1)
+            state["payload"]["paused"] = False
+            judged = run.judge()
+            self.assertEqual(judged["worker_judgment"]["worker_response"]["decision"], "success")
+            self.assertEqual([m.kind.value for m in mailbox.messages], ["task", "question", "report"])
+        finally:
+            run.close()
+
+    def test_pause_after_worktree_before_shell_dispatch_holds_without_sent_event(self):
+        workflow, mailbox, _worker_port, state, task_id = self.strict_task()
+        original_claim = PersistentShell.claim_manager
+
+        def pause_after_claim(shell):
+            result = original_claim(shell)
+            state["payload"]["paused"] = True
+            return result
+
+        target = self.root / "pre-dispatch-paused"
+        with patch.object(PersistentShell, "claim_manager", pause_after_claim):
+            with self.assertRaises(WorkflowHeld):
+                workflow.start(task_id, 1, worktree_path=target,
+                               artifacts_root=self.artifacts, automation=AUTOMATION,
+                               environment_values={"PATH": "/usr/bin:/bin", "TERM": "xterm",
+                                                   "CW10_SECRET": "private-sentinel"})
+        self.assertTrue(target.is_dir(), "prepared worktree remains for explicit disposition")
+        run_id = mailbox.messages[0].run_id
+        self.assertFalse(any(event["kind"] == "sent" for event in self.repository.get_shell_history(run_id)))
+        self.assertEqual(len(mailbox.messages), 1)
+
+    def test_cancel_and_revoke_after_collection_block_worker_analysis(self):
+        for action in ("cancel", "revoke"):
+            with self.subTest(action=action):
+                workflow, mailbox, _worker_port, _state, task_id = self.strict_task()
+                run = workflow.start(task_id, 1, worktree_path=self.root / f"analysis-{action}",
+                                     artifacts_root=self.artifacts, automation=AUTOMATION,
+                                     environment_values={"PATH": "/usr/bin:/bin", "TERM": "xterm",
+                                                         "CW10_SECRET": "private-sentinel"})
+                try:
+                    self.assertTrue(run.collect(timeout=8)["exit_confirmed"])
+                    if action == "cancel":
+                        self.repository.cancel_run(run.run_id, "cancel before analysis")
+                    else:
+                        self.repository.revoke_authority(task_id, 1, "revoke before analysis")
+                    with self.assertRaises(WorkflowHeld):
+                        run.judge()
+                    self.assertEqual(len(mailbox.messages), 1)
+                    self.assertIsNone(json.loads(run.result_path.read_text())["worker_judgment"])
+                finally:
+                    run.close()
+
+    def test_strict_preparation_failure_requires_worker_analysis_before_report(self):
+        workflow, mailbox, worker_port, _state, task_id = self.strict_task()
+        worker_port.after_analysis = lambda _message: None
+        target = self.root / "strict-existing-target"
+        target.mkdir()
+        (target / "user.txt").write_text("preserve")
+        with self.assertRaises(WorktreePreparationError):
+            workflow.start(task_id, 1, worktree_path=target,
+                           artifacts_root=self.artifacts, automation=AUTOMATION,
+                           environment_values={"PATH": "/usr/bin:/bin", "TERM": "xterm",
+                                               "CW10_SECRET": "private-sentinel"})
+        self.assertEqual((target / "user.txt").read_text(), "preserve")
+        self.assertEqual([message.kind.value for message in mailbox.messages], ["task", "question", "report"])
+        report_record = json.loads(next(self.artifacts.glob("*/run.json")).read_text())
+        self.assertEqual(report_record["preparation_report"]["status"], "omp_processed")
+        self.assertIsNone(self.repository.get_current_run(task_id))
+
+    def test_worker_analysis_cannot_promote_missing_evidence_or_wrong_identity(self):
+        for case in ("missing-log", "wrong-identity"):
+            with self.subTest(case=case):
+                command = "printf PASS > outcome.txt" if case == "missing-log" else "printf 'PASS\\n'; printf PASS > outcome.txt"
+                workflow, mailbox, worker_port, _state, task_id = self.strict_task(command)
+                run = workflow.start(task_id, 1, worktree_path=self.root / case,
+                                     artifacts_root=self.artifacts, automation=AUTOMATION,
+                                     environment_values={"PATH": "/usr/bin:/bin", "TERM": "xterm",
+                                                         "CW10_SECRET": "private-sentinel"})
+                try:
+                    self.assertTrue(run.collect(timeout=8)["exit_confirmed"])
+                    if case == "wrong-identity":
+                        worker_port.mismatch = True
+                    with self.assertRaises((WorkflowHeld, ValueError)):
+                        run.judge()
+                    self.assertEqual([message.kind.value for message in mailbox.messages], ["task", "question"])
+                    self.assertNotIn("report", json.loads(run.result_path.read_text()))
+                finally:
+                    run.close()
+
+    def test_direct_request_durable_routes_and_secret_values_not_recorded(self):
+        workflow, _mailbox, _port, _state, task_id = self.strict_task()
+        within = workflow.route_worker_request({"paths": ["outcome.txt"]}, task_id=task_id, revision=1)
+        self.assertEqual(within["classification"], "existing_task_scope")
+        self.assertEqual(within["task_id"], task_id)
+        self.assertEqual(within["revision"], 2)
+        self.assertIsNotNone(within["prior_approval_decision_id"])
+        self.assertEqual(self.repository.get_task_spec(task_id, 2)["spec"]["worker_request"]["paths"],
+                         ["outcome.txt"])
+        bounded = workflow.route_worker_request({"paths": ["new.txt"], "goal": "small bounded job",
+                                                 "bounded_small_spec": True})
+        self.assertEqual(bounded["classification"], "bounded_new_spec_requires_manager_approval")
+        self.assertEqual(self.repository.get_task_spec(bounded["task_id"], 1)["spec"]["worker_request"]["paths"],
+                         ["new.txt"])
+        expanded = workflow.route_worker_request({"paths": ["outside.txt"], "goal": "expanded job"},
+                                                 task_id=task_id, revision=1)
+        self.assertEqual(expanded["classification"], "scope_expansion_manager_confirmation")
+        self.assertEqual(expanded["revision"], 3)
+        self.assertFalse(expanded["dispatch_authorized"])
+        with self.assertRaises(AuthorizationError):
+            workflow.start(task_id, 3, worktree_path=self.root / "unapproved-expansion",
+                           artifacts_root=self.artifacts, automation=AUTOMATION,
+                           environment_values={"PATH": "/usr/bin:/bin", "TERM": "xterm",
+                                               "CW10_SECRET": "private-sentinel"})
+        secret = "PRIVATE_CW10_SENTINEL_" + str(uuid4())
+        run = workflow.start(task_id, 1, worktree_path=self.root / "secret-safe",
+                             artifacts_root=self.artifacts, automation=AUTOMATION,
+                             environment_values={"PATH": "/usr/bin:/bin", "TERM": "xterm",
+                                                 "CW10_SECRET": secret})
+        try:
+            run.collect(timeout=8)
+            run.judge()
+            self.assertNotIn(secret, run.result_path.read_text())
+            self.assertNotIn(secret.encode(), (self.root / "metadata.sqlite3").read_bytes())
+            self.assertNotIn(secret.encode(), run.raw_log.read_bytes())
+        finally:
+            run.close()
+
+
+if __name__ == "__main__":
+    unittest.main()

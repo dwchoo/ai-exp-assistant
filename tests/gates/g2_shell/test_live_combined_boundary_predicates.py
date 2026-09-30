@@ -31,6 +31,31 @@ class CombinedInputReturnPredicatesTest(unittest.TestCase):
                 probe.case(self.shell, negative=False)
         self.assertGreaterEqual(flush.call_count, 1)
 
+    def test_child_return_and_exec_keep_parent_and_input_barriers(self) -> None:
+        """Current child execution must reject the legacy eval escape mechanism."""
+        for shell in (shutil.which("bash"), shutil.which("dash")):
+            for name in ("return", "exec"):
+                with self.subTest(shell=shell, case=name):
+                    self.assertIsNotNone(shell)
+                    result = probe.simple_case(shell, name)
+                    self.assertFalse(result["marker_spilled"])
+                    self.assertTrue(result["trap_restored"])
+                    self.assertTrue(result["main_return"].startswith("MAIN_RETURN:"))
+                    for pid in result["owned_pids"]:
+                        self.assertFalse(Path(f"/proc/{pid}").exists(), pid)
+
+    def test_current_control_wait_rejects_incompatible_prompt_and_trap(self) -> None:
+        """No prompt readiness snapshot may bypass current admission checks."""
+        from tests.gates.g2_shell import live_env_launch_probe as env
+
+        for shell in (shutil.which("bash"), shutil.which("dash")):
+            for kind in ("prompt", "trap"):
+                with self.subTest(shell=shell, kind=kind):
+                    self.assertIsNotNone(shell)
+                    result = env.incompatible_case(shell, kind)
+                    self.assertTrue(result["held_before_run"])
+                    self.assertTrue(result["parent_pid_preserved"])
+
     def test_missing_child_ready_never_sends_interrupt(self) -> None:
         writes: list[bytes] = []
         original_write = probe.boundary.prototype.ShellProcess._write_all
@@ -382,6 +407,13 @@ class CombinedInputReturnPredicatesTest(unittest.TestCase):
                 for signame in ("INT", "QUIT", "TSTP", "CONT"):
                     with self.subTest(shell=shell, stage=stage, signal=signame):
                         self.assertIsNotNone(shell)
+                        if signame == "TSTP":
+                            negative = probe.shared_pg_negative(shell, stage)
+                            self.assertEqual(negative["classification"],
+                                             "parent_escape_before_input_release")
+                            candidate = probe.split_case(shell, "start")
+                            self.assertEqual(candidate["main_return"], "MAIN_RETURN:17")
+                            continue
                         observed: dict[str, object] = {}
                         original_wait = probe.wait
                         original_write = probe.boundary.prototype.ShellProcess._write_all
@@ -567,33 +599,42 @@ class CombinedInputReturnPredicatesTest(unittest.TestCase):
     def test_aggregate_treats_missing_cont_event_as_failure(self) -> None:
         shell = shutil.which("bash")
         self.assertIsNotNone(shell)
-        original_case = probe.signal_stage_case
-        original_killpg = os.killpg
+        original_case = probe.split_case
+        original_kill = os.kill
 
-        def drop_cont(group: int, signum: int) -> None:
-            if signum != signal.SIGCONT:
-                original_killpg(group, signum)
+        def missing_cont(target_shell: str, name: str) -> dict:
+            if (target_shell, name) != (shell, "suspend"):
+                return original_case(target_shell, name)
+            observed = {}
+            original_wait = probe.wait
 
-        def missing_cont(target_shell: str, stage: str, signame: str) -> dict:
-            if (target_shell, stage, signame) != (shell, "start", "CONT"):
-                return original_case(target_shell, stage, signame)
+            def capture_wait(session: object, prefix: str, since: int) -> str:
+                result = original_wait(session, prefix, since)
+                if prefix.startswith("MAIN_STOPPED:"):
+                    observed["stopped"] = True
+                return result
+
+            def drop_resume(pid: int, signum: int) -> None:
+                if signum == signal.SIGUSR2 and observed.get("stopped"):
+                    return
+                original_kill(pid, signum)
+
             with mock.patch.object(probe, "TIMEOUT", 0.2), \
-                 mock.patch.object(probe.os, "killpg", side_effect=drop_cont):
-                return original_case(target_shell, stage, signame)
+                 mock.patch.object(probe, "wait", side_effect=capture_wait), \
+                 mock.patch.object(probe.os, "kill", side_effect=drop_resume):
+                return original_case(target_shell, name)
 
         output = io.StringIO()
-        with mock.patch.object(probe, "signal_stage_case", side_effect=missing_cont), \
+        with mock.patch.object(probe, "split_case", side_effect=missing_cont), \
              redirect_stdout(output):
             status = probe.main()
         report = json.loads(output.getvalue().splitlines()[-1])
         self.assertEqual(status, 1)
         self.assertEqual(report["result"], "failed")
-        self.assertEqual((report["shell"], report["stage"], report["signal"]),
-                         (shell, "start", "CONT"))
-        self.assertIn("TimeoutError: missing event SIGNAL_CONT", report["error"])
+        self.assertEqual((report["shell"], report["case"]), (shell, "suspend"))
+        self.assertIn("TimeoutError: missing event FOREGROUND_VERIFIED", report["error"])
         self.assertNotIn("signal_unknowns", report)
-        self.assertFalse(any(item.get("stage") == "start" and
-                             item.get("signal") == "CONT" for item in report["cases"]))
+        self.assertFalse(any(item.get("mode") == "split_pg" for item in report["cases"]))
 
     def test_wrong_signal_and_delivery_error_do_not_pass_cell(self) -> None:
         shell = shutil.which("bash")
@@ -632,95 +673,116 @@ class CombinedInputReturnPredicatesTest(unittest.TestCase):
                 probe.signal_stage_case(shell, "start", "CONT")
 
     def test_aggregate_reports_no_t_parent_wait_as_inconclusive(self) -> None:
-        original_case = probe.simple_case
-        original_wait = probe.wait
-        original_fields = probe.proc_fields
-        original_os_write = os.write
-        observed: dict[str, dict] = {}
+        original_snapshot = probe.signal_snapshot
 
-        def no_t_case(shell: str, name: str) -> dict:
-            if name != "parent_wait_suspend":
-                return original_case(shell, name)
-            case: dict[str, object] = {"requests": [], "waits": 0}
-            observed[shell] = case
-            short_deadline = None
-
-            def capture_wait(session: object, prefix: str, since: int) -> str:
-                nonlocal short_deadline
-                case["session"] = session
-                result = original_wait(session, prefix, since)
-                if prefix == "WAIT:":
-                    case["waits"] += 1
-                    if case["waits"] == 2:
-                        short_deadline = mock.patch.object(probe, "TIMEOUT", 0.2)
-                        short_deadline.start()
-                return result
-
-            def hide_stopped_state(pid: int) -> tuple[int, int, int, str]:
-                fields = original_fields(pid)
-                session = case.get("session")
-                if session is not None and pid == session.pid and fields[3] == "T":
-                    return fields[0], fields[1], fields[2], "S"
-                return fields
-
-            def capture_request(fd: int, data: bytes) -> int:
-                if data in {b"PING\n", b"TAKEOVER\n"}:
-                    case["requests"].append(data)
-                return original_os_write(fd, data)
-
-            try:
-                with mock.patch.object(probe, "wait", side_effect=capture_wait), \
-                     mock.patch.object(probe, "proc_fields", side_effect=hide_stopped_state), \
-                     mock.patch.object(probe.os, "write", side_effect=capture_request):
-                    return original_case(shell, name)
-            finally:
-                if short_deadline is not None:
-                    short_deadline.stop()
+        def unknown_disposition(pid: int) -> dict:
+            result = original_snapshot(pid)
+            result["tstp_ignored"] = False
+            return result
 
         output = io.StringIO()
-        with mock.patch.object(probe, "simple_case", side_effect=no_t_case), \
+        with mock.patch.object(probe, "signal_snapshot", side_effect=unknown_disposition), \
              redirect_stdout(output):
             status = probe.main()
         report = json.loads(output.getvalue().splitlines()[-1])
         self.assertEqual(status, 2)
         self.assertEqual(report["result"], "inconclusive")
-        expected = {(shutil.which(shell), "parent_wait_suspend")
-                    for shell in ("bash", "dash")}
-        self.assertEqual({(item["shell"], item["case"])
-                          for item in report["unknowns"]}, expected)
-        self.assertFalse(any(item.get("case") == "parent_wait_suspend"
+        self.assertEqual(report["case"], "parent_wait")
+        self.assertIn("native TSTP disposition is not proven ignored", report["error"])
+        self.assertFalse(any(item.get("case") == "parent_wait"
                              for item in report["cases"]))
-        matrix = [item for item in report["cases"]
-                  if "stage" in item and "signal" in item]
-        expected_matrix = {(shell, stage, signame)
-                           for shell in ("bash", "dash")
-                           for stage in ("start", "return")
-                           for signame in ("INT", "QUIT", "TSTP", "CONT")}
-        self.assertEqual(len(matrix), 16)
-        self.assertEqual({(item["shell"], item["stage"], item["signal"])
-                          for item in matrix}, expected_matrix)
-        expected_signal_unknowns = {(shutil.which(shell), stage, "TSTP")
-                                    for shell in ("bash", "dash")
-                                    for stage in ("start", "return")}
-        self.assertEqual({(item["shell"], item["stage"], item["signal"])
-                          for item in report["signal_unknowns"]},
-                         expected_signal_unknowns)
-        self.assertEqual(len(report["unknowns"]) + len(report["signal_unknowns"]), 6)
-        self.assertTrue(all(item["classification"] == "unknown_no_stop"
-                            for item in matrix if item["signal"] == "TSTP"))
-        self.assertTrue(all(item["classification"] ==
-                            ("native_noop" if item["signal"] == "CONT" else "observed")
-                            for item in matrix if item["signal"] != "TSTP"))
-        self.assertEqual(set(observed), {shell for shell, _ in expected})
-        for case in observed.values():
-            self.assertEqual(case["requests"], [])
-            session = case["session"]
-            pids = [session.pid] + [
-                int(event.split(":")[1]) for event in session.events
-                if event.startswith(("SUPERVISOR:", "CHILD:"))
-            ]
-            for pid in pids:
-                self.assertFalse(Path(f"/proc/{pid}").exists(), pid)
+
+    def test_split_suspend_exit148_and_parent_native_noop(self) -> None:
+        for shell in (shutil.which("bash"), shutil.which("dash")):
+            for name in ("suspend", "exit148", "parent_wait"):
+                with self.subTest(shell=shell, case=name):
+                    result = probe.split_case(shell, name)
+                    if name == "suspend":
+                        self.assertEqual(len(result["stop_continue_cycles"]), 2)
+                        self.assertEqual(result["main_return"], "MAIN_RETURN:17")
+                    elif name == "exit148":
+                        self.assertEqual(result["main_return"], "MAIN_RETURN:148")
+                        self.assertEqual(result["stop_continue_cycles"], [])
+                    else:
+                        self.assertEqual(result["classification"], "native_ignore_noop")
+                        self.assertTrue(result["parent_disposition"]["tstp_ignored"])
+                    for pid in result["owned_pids"]:
+                        self.assertFalse(Path(f"/proc/{pid}").exists(), pid)
+
+    def test_split_missing_prepared_barrier_never_injects_tstp(self) -> None:
+        original_wait = probe.wait
+        original_write = probe.boundary.prototype.ShellProcess._write_all
+        observed = {"writes": []}
+
+        def hide_prepared(session: object, prefix: str, since: int) -> str:
+            observed["session"] = session
+            if prefix == "PREPARED:":
+                raise TimeoutError("prepared child unavailable")
+            return original_wait(session, prefix, since)
+
+        def capture_write(session: object, data: bytes) -> None:
+            observed["writes"].append(data)
+            original_write(session, data)
+
+        with mock.patch.object(probe, "wait", side_effect=hide_prepared), \
+             mock.patch.object(probe.boundary.prototype.ShellProcess,
+                               "_write_all", capture_write):
+            with self.assertRaisesRegex(TimeoutError, "prepared child unavailable"):
+                probe.split_case(self.shell, "suspend")
+        self.assertNotIn(b"\x1a", observed["writes"])
+        session = observed["session"]
+        for event in session.events:
+            if event.startswith(("SUPERVISOR:", "CHILD:")):
+                self.assertFalse(Path(f"/proc/{event.split(':')[1]}").exists())
+
+    def test_split_failed_foreground_restore_never_continues(self) -> None:
+        previous = signal.pthread_sigmask(signal.SIG_BLOCK, set())
+        for failure in ("set", "verify"):
+            with self.subTest(failure=failure), \
+                 mock.patch.object(probe.os, "tcsetpgrp") as setter, \
+                 mock.patch.object(probe.os, "tcgetpgrp", return_value=42), \
+                 mock.patch.object(probe.os, "killpg") as deliver, \
+                 mock.patch.object(probe, "emit") as emit:
+                if failure == "set":
+                    setter.side_effect = OSError("foreground restoration unavailable")
+                with self.assertRaises((OSError, RuntimeError)):
+                    probe.continue_experiment(43)
+                deliver.assert_not_called()
+                emit.assert_not_called()
+                self.assertEqual(signal.pthread_sigmask(signal.SIG_BLOCK, set()), previous)
+
+    def test_split_foreground_int_quit_preserve_observer_and_live_sets_id_descendant(self) -> None:
+        for shell in (shutil.which("bash"), shutil.which("dash")):
+            for signame in ("int", "quit"):
+                for stage in ("start", "return", "running"):
+                    with self.subTest(shell=shell, signal=signame, stage=stage):
+                        result = probe.split_case(shell, f"{signame}_{stage}")
+                        if stage == "running":
+                            expected = -2 if signame == "int" else -3
+                            self.assertEqual(result["main_return"], f"MAIN_RETURN:{expected}")
+                            self.assertEqual(result["parent_return"], f"RETURN:{128 - expected}")
+                        else:
+                            self.assertEqual(result["main_return"], "MAIN_RETURN:17")
+                            self.assertEqual(result["parent_return"], "RETURN:17")
+                            self.assertEqual(result["signal_events"], [
+                                f"SIGNAL_{signame.upper()}", f"NO_TARGET:{stage}:SIG{signame.upper()}"
+                            ])
+            for code in (130, 131):
+                with self.subTest(shell=shell, numeric_exit=code):
+                    result = probe.split_case(shell, f"exit{code}")
+                    self.assertEqual(result["main_return"], f"MAIN_RETURN:{code}")
+                    self.assertEqual(result["signal_events"], [])
+
+    def test_split_cleanup_rediscovers_descendant_after_unregistered_sets_id_failure(self) -> None:
+        for shell in (shutil.which("bash"), shutil.which("dash")):
+            with self.subTest(shell=shell):
+                result = probe.split_failure_case(shell)
+                self.assertEqual(result["classification"], "explicit_unknown_cleanup_empty")
+                self.assertIn("UNKNOWN:INJECTED_FAILURE", result["events"])
+                self.assertGreaterEqual(sum(event.startswith("CLEANUP_SCAN:")
+                                            for event in result["events"]), 3)
+                for pid in result["owned_pids"]:
+                    self.assertFalse(Path(f"/proc/{pid}").exists(), pid)
 
 
 if __name__ == "__main__":

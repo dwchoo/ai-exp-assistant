@@ -24,23 +24,23 @@ prototype = inputs.prototype
 def controller_source(shell: str) -> str:
     source = inputs.controller_source(shell)
     source = source.replace(
-        '    while :; do\n        __b_interrupted=0',
+        '    while :; do\n        if IFS= read',
         '''    while :; do
         if [ "$WB_TAKEOVER_HOLD" = after_send ]; then
             WB_TAKEOVER_HOLD=none
             __b_emit BEFORE_ACCEPT
             IFS= read -r __b_gate <&7 || return 1
         fi
-        __b_interrupted=0''',
+        if IFS= read''',
     ).replace(
-        '                    __b_emit START',
+        '                    __b_emit ACCEPT',
         '''                    __b_emit ACCEPT
                     if [ "$WB_TAKEOVER_HOLD" = after_accept ]; then
                         WB_TAKEOVER_HOLD=none
                         __b_emit ACCEPT_BARRIER
                         IFS= read -r __b_gate <&7 || return 1
                     fi
-                    __b_emit START''',
+''',
     ).replace(
         '                    __b_emit "TAKEOVER_ACK:$$"',
         '''                    if [ "$WB_TAKEOVER_ACK" = lost ]; then
@@ -61,6 +61,9 @@ class TakeoverSession(inputs.InputJobsSession):
 
     confirm_foreground_takeover = ControlWaitProbe.confirm_foreground_takeover
     send_confirmed_foreground = ControlWaitProbe.send_confirmed_foreground
+
+    def _control_init_source(self) -> str:
+        return controller_source(self.choice.executable)
 
     def __init__(self, *args, **kwargs) -> None:
         self.sent_id = None
@@ -83,6 +86,11 @@ class TakeoverSession(inputs.InputJobsSession):
             self._drain(timeout=0)
             if self._control_entered and not self.manual_prompt_confirmed:
                 self.send_confirmed_foreground(data)
+            elif self.manual_prompt_confirmed:
+                # A failed automatic/write-race outcome stays unknown. A
+                # separately verified same-parent manual prompt permits user
+                # input, never another automatic RUN or request replay.
+                prototype.ShellProcess.send_user(self, data)
             else:
                 super().send_user(data)
 
@@ -189,11 +197,8 @@ def release_input(session: TakeoverSession, since: int) -> None:
 def case(shell: str, name: str, *, partial_negative: bool = False) -> dict:
     if partial_negative and name not in {"partial_race", "eagain_race", "zero_race"}:
         raise ValueError("write-retry negative control requires a write race")
-    source = controller_source(shell)
     pids = []
-    with patch.object(prototype, "_bash_control_init", return_value=source), \
-         patch.object(prototype, "_sh_control_init", return_value=source), \
-         tempfile.TemporaryDirectory(prefix="cw03-takeover-") as directory, \
+    with tempfile.TemporaryDirectory(prefix="cw03-takeover-") as directory, \
          TakeoverSession(prototype.ShellChoice(
              "bash" if Path(shell).name == "bash" else "sh", shell
          ), control_wait=True) as session:
@@ -235,6 +240,7 @@ def case(shell: str, name: str, *, partial_negative: bool = False) -> dict:
                 reject(lambda: session.dispatch_control(":", generation=session.generation, owner_epoch=epoch))
                 os.write(session._recovery_fd, b"release\n")
             combined.wait(session, "READER_READY", since)
+            inputs.assert_canonical_run(session, since)
             assert session.child_identity is not None
             pids.extend((session.supervisor_pid, session.child_identity[0]))
             if name not in {"after_send", "after_accept"}:

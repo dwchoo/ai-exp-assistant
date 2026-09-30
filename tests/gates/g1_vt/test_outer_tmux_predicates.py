@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import errno
+import copy
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
@@ -202,6 +203,41 @@ class PostExitDrainTests(unittest.TestCase):
 
         self.assertEqual((status, length), ("eof", len(queued)))
         stream.feed.assert_called_once_with(queued)
+
+
+class StageFrameTests(unittest.TestCase):
+    def observation(self):
+        return {"titles": [True] * 3, "target": [True] * 3,
+                "cross_routed": [False] * 3, "child_pids": [11, 12, 13],
+                "child_sizes": [[68, 34]] * 3}
+
+    def observe(self, first, later):
+        def pump(_session, _stream, seconds, predicate):
+            self.assertEqual(seconds, 3)
+            return predicate(), 10
+        with patch.object(outer, "pane_observation", side_effect=[first, later]), \
+                patch.object(outer, "pump", side_effect=pump):
+            return outer.stage_observation(None, None, None, ("M", "W", "H"),
+                                           3, [68, 34], [11, 12, 13])
+
+    def test_host_echo_before_omp_redraw_requires_complete_same_size_frame(self):
+        first = self.observation()
+        first["target"] = [False, False, True]
+        before, after, settled, _ = self.observe(first, self.observation())
+        self.assertEqual(before["target"], [False, False, True])
+        self.assertTrue(settled)
+        self.assertEqual(after["target"], [True] * 3)
+
+    def test_missing_or_contradictory_frame_evidence_never_settles(self):
+        for key, value in (("target", [False, False, True]), ("titles", [True, False, True]),
+                           ("cross_routed", [True, False, False]),
+                           ("child_sizes", [[68, 35]] * 3), ("child_pids", [11, 12, 14])):
+            with self.subTest(key=key):
+                missing = copy.deepcopy(self.observation())
+                missing[key] = value
+                before, after, settled, _ = self.observe(missing, missing)
+                self.assertFalse(settled)
+                self.assertEqual(before, after)
 
 
 if __name__ == "__main__":

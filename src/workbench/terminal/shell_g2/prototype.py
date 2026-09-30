@@ -59,6 +59,14 @@ class InputBoundary:
     Unknown editing controls and paste framing latch the state dirty. A manual
     line is considered consumed only after the shell's control channel reports
     a fresh ready event for it.
+
+    ``uncertain`` only holds automatic dispatch and manager return; it never
+    decides whether manual bytes may reach the PTY. Bytes observed through
+    ``observe_user_bytes`` (target unknown) keep the latch for the session.
+    Bytes observed through ``observe_manual_bytes`` carry the write-time PTY
+    foreground target, so their line-edit uncertainty is cleared by the next
+    control-channel READY that consumes every counted line with no pending,
+    edited or foreground-program tail left. Timers and output never clear it.
     """
 
     def __init__(self, generation: int) -> None:
@@ -73,8 +81,14 @@ class InputBoundary:
         self.pending_line = bytearray()
         self.submitted_lines = 0
         self.uncertain = False
+        # Line-scoped sources of ``uncertain`` (see observe_manual_bytes).
+        self._line_uncertain = False
+        self._residue_open = False
+        self._sticky_uncertain = False
         self.active_command: str | None = None
         self.needs_review = False
+        # The control FD reached EOF: shell state is no longer observable.
+        self.control_lost = False
         self.last_exit_code: int | None = None
         self._job_probe = False
         self._job_pids: list[int] = []
@@ -124,18 +138,100 @@ class InputBoundary:
                 elif byte in (0x08, 0x7F, 0x15, 0x17):
                     # Readline, canonical erase and word/line kill semantics
                     # vary. Keep the latch dirty until an explicit safe event.
-                    self.uncertain = True
+                    self.uncertain = self._sticky_uncertain = True
                     if byte == 0x15:
                         self.pending_line.clear()
                     elif self.pending_line:
                         self.pending_line.pop()
                 elif byte == 0x1B or byte < 0x20:
-                    self.uncertain = True
+                    self.uncertain = self._sticky_uncertain = True
                     self.pending_line.append(byte)
                 else:
                     self.pending_line.append(byte)
                 if byte not in (0x0A, 0x0D):
                     self._handoff_ready = False
+            return self.input_sequence
+
+    def observe_manual_bytes(self, data: bytes, *, shell_foreground: bool) -> int:
+        """Account bytes already written to an observed manual PTY target.
+
+        ``shell_foreground`` is the write-time foreground process group: true
+        when it was the parent shell itself (prompt/line editor), false when it
+        was a program the user started. Program input is never counted as a
+        shell line; it only holds automation until a later fresh READY, and an
+        unterminated tail may still prefix the shell's next line.
+        """
+        with self.lock:
+            if self.owner != "user":
+                raise UnsafeShellState("user does not own terminal input")
+            if not data:
+                return self.input_sequence
+            self.input_sequence += 1
+            self.dirty = True
+            self.ready = False
+            self._handoff_ready = False
+            if not shell_foreground:
+                self.uncertain = True
+                for byte in data:
+                    if byte in (0x0A, 0x0D, 0x03, 0x1A, 0x1C):
+                        # Line end, or an ISIG key that flushes the tty queue.
+                        self._residue_open = False
+                    elif byte != 0x04:
+                        # EOF keeps the prior state: it ends an empty canonical
+                        # read, but pushes a partial line without a newline.
+                        self._residue_open = True
+                return self.input_sequence
+            if self._residue_open:
+                self._line_uncertain = self.uncertain = True
+                self._residue_open = False
+            for byte in data:
+                if byte in (0x0A, 0x0D):
+                    self._handoff_line = (bytes(self.pending_line).strip() == b"wb-handoff"
+                                          and not self._line_uncertain)
+                    self._handoff_seen = False
+                    self._handoff_hook_checked = False
+                    self._handoff_jobs_checked = False
+                    self.pending_line.clear()
+                    self.submitted_lines += 1
+                    self._line_uncertain = False
+                elif byte == 0x03:
+                    # SIGINT to the foreground shell discards its current line
+                    # and redisplays the prompt (one READY). While counted lines
+                    # are outstanding, their own READY covers the interrupt.
+                    self.uncertain = True
+                    self._handoff_line = False
+                    self._line_uncertain = False
+                    self.pending_line.clear()
+                    if self.submitted_lines == 0:
+                        self.submitted_lines = 1
+                elif byte in (0x08, 0x7F, 0x15, 0x17):
+                    self.uncertain = self._line_uncertain = True
+                    if byte == 0x15:
+                        self.pending_line.clear()
+                    elif self.pending_line:
+                        self.pending_line.pop()
+                elif byte == 0x1B or byte < 0x20:
+                    self.uncertain = self._line_uncertain = True
+                    self.pending_line.append(byte)
+                else:
+                    self.pending_line.append(byte)
+            return self.input_sequence
+
+    def observe_run_bytes(self, data: bytes) -> int:
+        """Account bytes written to a confirmed automation foreground run.
+
+        They are the experiment's input, not parent line edits: the parent is
+        in control wait and the supervisor's input barrier plus the takeover
+        flush discard any unread remainder before the parent reads its PTY.
+        """
+        with self.lock:
+            if self.owner != "user":
+                raise UnsafeShellState("user does not own terminal input")
+            if not data:
+                return self.input_sequence
+            self.input_sequence += 1
+            self.dirty = True
+            self._handoff_ready = False
             return self.input_sequence
 
     def observe_event(self, event: str) -> None:
@@ -167,6 +263,17 @@ class InputBoundary:
                     # A prompt returned before the command lifecycle finished.
                     self.needs_review = True
                     self.active_command = None
+                if (
+                    self.uncertain
+                    and not self._sticky_uncertain
+                    and self.submitted_lines == 0
+                    and not self.pending_line
+                    and not self._line_uncertain
+                    and not self._residue_open
+                ):
+                    # Fresh prompt after every counted line with nothing typed
+                    # since: the edited/interrupted lines were consumed.
+                    self.uncertain = False
                 self._reconcile_clean()
                 return
             if event.startswith("START:"):
@@ -264,7 +371,8 @@ class ShellProcess:
 
     CONTROL_FD = 9
 
-    def __init__(self, choice: ShellChoice | None = None, *, control_wait: bool = False) -> None:
+    def __init__(self, choice: ShellChoice | None = None, *, control_wait: bool = False,
+                 environment: dict[str, str] | None = None) -> None:
         if not sys_platform_linux():
             raise OSError("CW-03 shell prototype requires Linux PTY semantics")
         self.choice = choice or select_shell()
@@ -285,7 +393,7 @@ class ShellProcess:
         self._init_path = os.path.join(self._init_dir.name, "shell-init")
         with open(self._init_path, "w", encoding="utf-8") as init_file:
             init_file.write((
-                (_bash_control_init() if self.choice.kind == "bash" else _sh_control_init())
+                self._control_init_source()
                 if control_wait else (_bash_init() if self.choice.kind == "bash" else _sh_init())
             ).replace("__CW_RECOVERY_TOKEN__", self._recovery_token))
         read_fd, write_fd = os.pipe()
@@ -311,13 +419,16 @@ class ShellProcess:
                 os.dup2(control_source, self.CONTROL_FD)
                 os.close(control_source)
                 os.set_inheritable(self.CONTROL_FD, True)
-                child_env = os.environ.copy()
+                child_env = os.environ.copy() if environment is None else dict(environment)
                 child_env["TERM"] = child_env.get("TERM", "dumb")
                 if self.choice.kind == "bash":
                     argv = [self.choice.executable, "--noprofile", "--rcfile", self._init_path, "-i"]
                 else:
                     child_env["ENV"] = self._init_path
                     argv = [self.choice.executable, "-i"]
+                # Python ignores SIGPIPE/SIGXFSZ; the user shell starts with defaults.
+                signal.signal(signal.SIGPIPE, signal.SIG_DFL)
+                signal.signal(signal.SIGXFSZ, signal.SIG_DFL)
                 os.execve(self.choice.executable, argv, child_env)
             except BaseException as exc:
                 try:
@@ -337,6 +448,9 @@ class ShellProcess:
     @property
     def owner_epoch(self) -> int:
         return self.boundary.owner_epoch
+
+    def _control_init_source(self) -> str:
+        return _bash_control_init() if self.choice.kind == "bash" else _sh_control_init()
 
     @property
     def events(self) -> tuple[str, ...]:
@@ -452,6 +566,7 @@ class ShellProcess:
                     raise
                 data = b""
             if not data:
+                self.boundary.control_lost = True
                 self.boundary.observe_event("HOOK_LOST")
                 return
             self._control_tail.extend(data)

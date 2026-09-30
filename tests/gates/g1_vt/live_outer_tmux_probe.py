@@ -104,6 +104,33 @@ def pane_observation(screen: TerminalScreen, expected: tuple[str, str, str]) -> 
     }
 
 
+def stage_observation(session: PtySession, stream: object, screen: TerminalScreen,
+                      expected: tuple[str, str, str], required_targets: int,
+                      child_size: list[int], previous_pids: list[int] | None = None
+                      ) -> tuple[dict[str, object], dict[str, object], bool, int]:
+    """Wait for one complete same-size frame, not just the last input marker.
+
+    tmux can deliver a host echo before the resized OMP redraw is complete.
+    Missing title/marker/geometry evidence still fails after the bounded wait.
+    """
+    first = observation = pane_observation(screen, expected)
+
+    def complete() -> bool:
+        nonlocal observation
+        observation = pane_observation(screen, expected)
+        pids = observation["child_pids"]
+        return bool(all(observation["titles"])
+                    and all(observation["target"][:required_targets])
+                    and not any(observation["cross_routed"])
+                    and observation["child_sizes"] == [child_size] * 3
+                    and len(pids) == 3 and all(type(pid) is int and pid > 0 for pid in pids)
+                    and len(set(pids)) == 3
+                    and (previous_pids is None or pids == previous_pids))
+
+    settled, drained = pump(session, stream, 3, complete)
+    return first, observation, settled, drained
+
+
 def run() -> dict[str, object]:
     tmux = shutil.which("tmux")
     omp = shutil.which("omp")
@@ -210,7 +237,9 @@ def run() -> dict[str, object]:
             session.write(FOCUS + b"WRK_TMUX")
             worker_visible, drained = pump(session, stream, 3, lambda: "WRK_TMUX" in panes(screen)[1])
             byte_count += drained
-            initial = pane_observation(screen, ("MGR_TMUX", "WRK_TMUX", "HOST_TMUX"))
+            initial_first, initial, initial_settled, drained = stage_observation(
+                session, stream, screen, ("MGR_TMUX", "WRK_TMUX", "HOST_TMUX"), 2, [78, 40])
+            byte_count += drained
             observed_pids.update(pid for pid in initial["child_pids"] if pid)
 
             screen.resize(lines=39, columns=210)
@@ -227,7 +256,10 @@ def run() -> dict[str, object]:
             session.write(FOCUS + b"printf 'HOST_%s\\n' TMUX\r")
             host_visible, drained = pump(session, stream, 3, lambda: "HOST_TMUX" in panes(screen)[2])
             byte_count += drained
-            small = pane_observation(screen, ("MGR_TMUX", "WRK_TMUX_W", "HOST_TMUX"))
+            small_first, small, small_settled, drained = stage_observation(
+                session, stream, screen, ("MGR_TMUX", "WRK_TMUX_W", "HOST_TMUX"),
+                3, [68, 34], initial["child_pids"])
+            byte_count += drained
             observed_pids.update(pid for pid in small["child_pids"] if pid)
 
             screen.resize(lines=45, columns=240)
@@ -246,7 +278,15 @@ def run() -> dict[str, object]:
             paste_after, drained = pump(session, stream, 3, lambda: all(
                 marker in panes(screen)[0] for marker in paste_markers))
             byte_count += drained
-            restored = pane_observation(screen, ("MGR_TMUX_M", "WRK_TMUX_W", "HOST_TMUX"))
+            restored_first, restored, restored_settled, drained = stage_observation(
+                session, stream, screen, ("MGR_TMUX_M", "WRK_TMUX_W", "HOST_TMUX"),
+                3, [78, 40], initial["child_pids"])
+            byte_count += drained
+            result["stages"] = {"initial": initial, "small": small, "restored": restored}
+            result["stage_first"] = {"initial": initial_first, "small": small_first,
+                                     "restored": restored_first}
+            result["stage_settled"] = {"initial": initial_settled, "small": small_settled,
+                                       "restored": restored_settled}
             observed_pids.update(pid for pid in restored["child_pids"] if pid)
             result["pty_bytes_drained"] = byte_count
             result["fresh_input_before"] = fresh_before
@@ -258,6 +298,7 @@ def run() -> dict[str, object]:
             result["paste_absent_before"] = paste_absent_before
             result["input_routed"] = bool(
                 all(fresh_before.values()) and all(result["fresh_input_after"].values())
+                and all(result["stage_settled"].values())
                 and all(initial["titles"]) and initial["target"][:2] == [True, True]
                 and all(small["titles"]) and all(small["target"])
                 and all(restored["titles"]) and all(restored["target"])

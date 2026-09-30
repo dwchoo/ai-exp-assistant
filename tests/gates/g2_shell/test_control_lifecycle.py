@@ -282,7 +282,8 @@ class ControlLifecycleTests(unittest.TestCase):
                 self.assertNotIn("LOST_ACK_EXECUTED", session.events)
                 self.assertFalse(any(event.startswith("DONE:") for event in session.events))
 
-    def test_run_ctrl_c_does_not_execute_eval_tail_or_complete_unknown_work(self) -> None:
+    def test_legacy_direct_eval_ctrl_c_negative_control(self) -> None:
+        """Retain the rejected parent-eval candidate's Bash/dash counterexamples."""
         for choice in real_shells():
             with self.subTest(shell=choice.kind), ControlWaitProbe(choice) as session:
                 self.enter_wait(session)
@@ -296,8 +297,11 @@ class ControlLifecycleTests(unittest.TestCase):
                 deadline = time.monotonic() + 1
                 while time.monotonic() < deadline and "CONTROL_STOPPED" not in session.events:
                     session._drain(timeout=0.03)
-                self.assertIn("CONTROL_STOPPED", session.events)
-                self.assertNotIn("RUN_TAIL_EXECUTED", session.events)
+                if choice.kind == "bash":
+                    self.assertIn("READY", session.events[session.events.index("START:interrupt-run"):])
+                else:
+                    self.assertIn("CONTROL_STOPPED", session.events)
+                    self.assertIn("RUN_TAIL_EXECUTED", session.events)
                 self.assertFalse(any(e.startswith("DONE:interrupt-run:") for e in session.events))
                 self.assertFalse(session.manual_prompt_confirmed)
                 with self.assertRaises(UnsafeShellState):
@@ -306,7 +310,8 @@ class ControlLifecycleTests(unittest.TestCase):
                         generation=session.generation,
                     )
 
-    def test_control_loop_exit_cannot_release_queued_input_or_claim_completion(self) -> None:
+    def test_legacy_direct_eval_return_negative_control_and_exec_hold(self) -> None:
+        """Parent eval's return leaks input; its exec hold is limited old evidence."""
         for choice in real_shells():
             for case, script in (("return", "return"), ("exec", "exec sleep 0.2")):
                 with self.subTest(shell=choice.kind, case=case), ControlWaitProbe(choice) as session:
@@ -322,8 +327,12 @@ class ControlLifecycleTests(unittest.TestCase):
                     while time.monotonic() < deadline:
                         session._drain(timeout=0.03)
                     later = session.events[start + 1:]
-                    self.assertNotIn("LOOP_ESCAPE_EXECUTED", later)
-                    self.assertNotIn("READY", later)
+                    if case == "return":
+                        self.assertIn("LOOP_ESCAPE_EXECUTED", later)
+                        self.assertIn("READY", later)
+                    else:
+                        self.assertNotIn("LOOP_ESCAPE_EXECUTED", later)
+                        self.assertNotIn("READY", later)
                     self.assertFalse(any(e.startswith(f"DONE:{case}:") for e in later))
                     self.assertFalse(session.manual_prompt_confirmed)
                     with self.assertRaises(UnsafeShellState):

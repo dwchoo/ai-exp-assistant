@@ -20,18 +20,16 @@ sys.path.insert(0, str(ROOT))
 
 from tests.gates.g2_shell import live_combined_boundary_probe as combined
 from tests.gates.g2_shell.live_subreaper_lifetime_probe import proc_fields as raw_proc_fields
+from workbench.terminal.shell_g2.lifecycle import ManagedLifecycleProbe, encode_run, normalize_run
 
 
 @contextmanager
 def controlled(shell: str, directory: str, preparation: str = ""):
-    source = combined.controller_source(shell)
     prototype = combined.boundary.prototype
     choice = prototype.ShellChoice("bash" if Path(shell).name == "bash" else "sh", shell)
     traps_before = Path(directory) / "traps-before"
     traps_after = Path(directory) / "traps-after"
-    with patch.object(prototype, "_bash_control_init", return_value=source), \
-         patch.object(prototype, "_sh_control_init", return_value=source), \
-         prototype.ShellProcess(choice, control_wait=True) as session:
+    with ManagedLifecycleProbe(choice) as session:
         combined.wait(session, "READY", 0)
         parent = session.pid
         line = (f"cd {shlex.quote(directory)}; export BOUNDARY_PREPARED=kept "
@@ -50,8 +48,12 @@ def run_payload(session, parent: int, first_wait: str, traps_before: Path,
                 identity_expected: str | None = None,
                 launch_expected: str | None = None):
     since = len(session.events)
-    token = base64.b64encode(payload.encode()).decode("ascii")
-    os.write(session._request_fd, f"RUN:{token}\n".encode())
+    if isinstance(session, ManagedLifecycleProbe):
+        session.dispatch_managed("one", payload)
+    else:
+        # Manual-residue fixtures retain their explicit legacy control path.
+        token = base64.b64encode(payload.encode()).decode("ascii")
+        os.write(session._request_fd, f"RUN:{token}\n".encode())
     combined.wait(session, "START", since)
     sup = combined.wait(session, "SUPERVISOR:", since)
     sup_pid = int(sup.split(":")[1])
@@ -63,6 +65,16 @@ def run_payload(session, parent: int, first_wait: str, traps_before: Path,
     child = combined.wait(session, "CHILD:", since)
     child_pid = int(child.split(":")[1])
     assert child_pid not in {parent, sup_pid}
+    if isinstance(session, ManagedLifecycleProbe):
+        prepared = combined.wait(session, "CHILD_PREPARED:", since)
+        foreground = combined.wait(session, "FOREGROUND_VERIFIED:", since)
+        executed = combined.wait(session, "EXEC_READY:", since)
+        assert prepared == f"CHILD_PREPARED:{child_pid}:{child_pid}:{parent}"
+        assert foreground == f"FOREGROUND_VERIFIED:{child_pid}"
+        assert executed == f"EXEC_READY:{child_pid}"
+        assert child_pid != int(sup.split(":")[2])
+        events = session.events[since:]
+        assert events.index(prepared) < events.index(foreground) < events.index(executed) < events.index(child)
     if launch_expected is not None:
         assert combined.wait(session, "LAUNCH:", since) == launch_expected
     actual_executable = None
@@ -331,12 +343,15 @@ def launch_selection() -> dict:
          ):
         since = len(session.events)
         payload = "#WB_ARGV_JSON\n" + json.dumps([missing])
+        session.lifecycle.begin("failed-child")
         os.write(session._request_fd,
-                 f"RUN:{base64.b64encode(payload.encode()).decode()}\n".encode())
+                 f"RUN:{encode_run(normalize_run(chosen.executable, payload, 'failed-child'))}\n".encode())
         combined.wait(session, "START", since)
         supervisor_pid = int(combined.wait(session, "SUPERVISOR:", since).split(":")[1])
         assert combined.wait(session, "LAUNCH:argv:", since) == f"LAUNCH:argv:{missing}"
         assert combined.wait(session, "RETURN:", since) == "RETURN:1"
+        assert any(event.startswith("EXEC_ERROR:") for event in session.events[since:])
+        assert not session.lifecycle.exec_ready and session.lifecycle.unknown
         assert combined.wait(session, "WAIT:", since) == first_wait
         assert not any(event.startswith(("CHILD:", "MAIN_RETURN:", "INPUT_BARRIER"))
                        for event in session.events[since:])

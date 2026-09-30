@@ -11,7 +11,7 @@ import workbenchG3Extension from "../../../omp_bridge/g3/bridge.ts";
 type Frame = Record<string, any>;
 const SESSION_ID = "30000000-0000-4000-8000-000000000001";
 
-async function startBridge(role: "manager" | "worker" = "worker", eventSurfaceProbe = false) {
+async function startBridge(role: "manager" | "worker" = "worker", eventSurfaceProbe = false, handlerFaultProbe = false) {
 	const directory = await mkdtemp(join(tmpdir(), "cw04-g3-test-"));
 	const socketPath = join(directory, "bridge.sock");
 	const frames: Frame[] = [];
@@ -33,7 +33,7 @@ async function startBridge(role: "manager" | "worker" = "worker", eventSurfacePr
 		server.listen(socketPath, resolve);
 	});
 
-	const names = ["WORKBENCH_G3_BRIDGE_SOCKET", "WORKBENCH_G3_ROLE", "WORKBENCH_G3_TOKEN", "WORKBENCH_G3_GENERATION", "WORKBENCH_G3_EVENT_SURFACE_PROBE"];
+	const names = ["WORKBENCH_G3_BRIDGE_SOCKET", "WORKBENCH_G3_ROLE", "WORKBENCH_G3_TOKEN", "WORKBENCH_G3_GENERATION", "WORKBENCH_G3_EVENT_SURFACE_PROBE", "WORKBENCH_G3_HANDLER_FAULT_PROBE"];
 	const previous = new Map(names.map(name => [name, process.env[name]]));
 	process.env.WORKBENCH_G3_BRIDGE_SOCKET = socketPath;
 	process.env.WORKBENCH_G3_ROLE = role;
@@ -41,6 +41,8 @@ async function startBridge(role: "manager" | "worker" = "worker", eventSurfacePr
 	process.env.WORKBENCH_G3_GENERATION = "1";
 	if (eventSurfaceProbe) process.env.WORKBENCH_G3_EVENT_SURFACE_PROBE = "1";
 	else delete process.env.WORKBENCH_G3_EVENT_SURFACE_PROBE;
+	if (handlerFaultProbe) process.env.WORKBENCH_G3_HANDLER_FAULT_PROBE = "1";
+	else delete process.env.WORKBENCH_G3_HANDLER_FAULT_PROBE;
 
 	const handlers = new Map<string, (...args: any[]) => any>();
 	const registeredTools = new Map<string, Frame>();
@@ -127,6 +129,199 @@ function envelope(overrides: Frame = {}): Frame {
 		...overrides,
 	};
 }
+
+function workerResponse(target: Frame, overrides: Frame = {}): Frame {
+	return {
+		stage: "execute", kind: "task", task_id: target.taskId, revision_id: target.revisionId,
+		revision: 1, run_id: target.runId, message_id: target.messageId,
+		delivery_attempt_id: target.deliveryAttemptId, session_id: SESSION_ID,
+		session_generation: 1, response_id: randomUUID(), decision: "execute", ...overrides,
+	};
+}
+
+async function driveWorkerTurn(bridge: Awaited<ReturnType<typeof startBridge>>, target: Frame,
+	text: string, options: Frame = {}): Promise<Frame> {
+	assert.equal((await bridge.request({ kind: "deliver", envelope: JSON.stringify(target) })).status, "api_accepted");
+	bridge.handlers.get("before_provider_request")!({ payload: { messages: [
+		{ role: "user", content: [{ type: "text", text: bridge.sent.at(-1)!.message }] },
+	] } });
+	bridge.handlers.get("after_provider_response")!();
+	bridge.handlers.get("message_end")!({ message: {
+		role: "assistant", content: [{ type: "text", text }], stopReason: options.stopReason ?? "stop",
+		...(options.errorMessage ? { errorMessage: options.errorMessage } : {}),
+	}, willContinue: options.willContinue ?? false });
+	if (options.extraMessage) bridge.handlers.get("message_end")!({ message: {
+		role: "assistant", content: [{ type: "text", text }], stopReason: "stop",
+	}, willContinue: false });
+	if (options.extraRound) bridge.handlers.get("before_provider_request")!({ payload: { messages: [
+		{ role: "user", content: [{ type: "text", text: bridge.sent.at(-1)!.message }] },
+	] } });
+	if (options.tool) bridge.handlers.get("tool_call")!({ toolCallId: "tool", toolName: "bash" });
+	bridge.handlers.get("agent_end")!();
+	return bridge.waitFor(frame => frame.kind === "omp_event" && frame.name === "delivery_omp_processed");
+}
+
+test("worker response is public only after terminal agent_end and linked to exact delivery", async () => {
+	const bridge = await startBridge();
+	try {
+		const target = envelope({ event: { type: "message", messageKind: "task", payload: { stage: "execute", revision: 1 } } });
+		const response = workerResponse(target);
+		const text = "WB_WORKER_RESPONSE:" + JSON.stringify(response);
+		const processed = await driveWorkerTurn(bridge, target, text);
+		const assistant = await bridge.waitFor(frame => frame.kind === "omp_event" && frame.name === "assistant_message_end");
+		assert.deepEqual(assistant.workerResponse, response);
+		assert.equal(assistant.messageId, target.messageId);
+		assert.equal(processed.workerResponseId, response.response_id);
+		assert.equal(JSON.stringify({ assistant, processed }).includes(text), false, "raw model text must not cross bridge");
+	} finally { await bridge.close(); }
+});
+
+test("execute and analysis injections specify the exact self-consistent response contract", async () => {
+	for (const [stage, kind, revision, decisions] of [
+		["execute", "task", 1, ["execute", "hold"]],
+		["analysis", "question", 2, ["success", "failure", "indeterminate"]],
+	] as const) {
+		const bridge = await startBridge();
+		try {
+			const target = envelope({ event: { type: "message", messageKind: kind, payload: { stage, revision } } });
+			assert.equal((await bridge.request({ kind: "deliver", envelope: JSON.stringify(target) })).status, "api_accepted");
+			const injected = JSON.parse(bridge.sent.at(-1)!.message);
+			const contract = injected.response_contract;
+			assert.equal(contract.marker, "WB_WORKER_RESPONSE:");
+			assert.equal(contract.format, "marker_plus_compact_flat_json");
+			assert.deepEqual(contract.field_order, ["stage", "kind", "task_id", "revision_id", "revision", "run_id",
+				"message_id", "delivery_attempt_id", "session_id", "session_generation", "response_id", "decision"]);
+			assert.deepEqual(contract.fields.map((field: Frame) => field.name), contract.field_order);
+			const fields = Object.fromEntries(contract.fields.map((field: Frame) => [field.name, field]));
+			assert.equal(fields.stage.value, stage);
+			assert.equal(fields.kind.value, kind);
+			assert.equal(fields.revision.value, revision);
+			for (const [name, value] of Object.entries({
+				task_id: target.taskId, revision_id: target.revisionId, run_id: target.runId,
+				message_id: target.messageId, delivery_attempt_id: target.deliveryAttemptId,
+				session_id: SESSION_ID,
+			})) assert.deepEqual(fields[name], { name, type: "canonical_uuid", value });
+			assert.deepEqual(fields.session_generation, { name: "session_generation", type: "positive_safe_integer", value: 1 });
+			assert.deepEqual(fields.response_id, { name: "response_id", type: "canonical_uuid", generate: "canonical_uuid" });
+			assert.deepEqual(fields.decision, { name: "decision", type: "enum_string", allowed: decisions });
+			assert.deepEqual(contract.output_rules, { exactly_one_frame: true, no_prose: true,
+				no_tools: true, no_thinking: true, no_markdown: true, no_extra_content: true });
+			assert.match(contract.instruction, /only the marker.*no prose, tools, thinking/);
+			assert.equal(JSON.stringify(contract).includes("CW10_SECRET"), false);
+		} finally { await bridge.close(); }
+	}
+	for (const [role, target] of [
+		["worker", envelope()],
+		["manager", envelope({ senderRole: "worker", event: { type: "message", messageKind: "report", payload: { stage: "analysis", revision: 1 } } })],
+	] as const) {
+		const bridge = await startBridge(role);
+		try {
+			assert.equal((await bridge.request({ kind: "deliver", envelope: JSON.stringify(target) })).status, "api_accepted");
+			assert.equal(Object.hasOwn(JSON.parse(bridge.sent.at(-1)!.message), "response_contract"), false);
+		} finally { await bridge.close(); }
+	}
+});
+
+test("worker response rejects malformed, ambiguous, mismatched and nonterminal assistant output", async () => {
+	for (const variant of ["prose", "suffix", "duplicate_key", "unknown_key", "wrong_identity", "wrong_order",
+		"wrong_stage", "wrong_decision", "unsafe_revision", "multiple", "length", "continuation",
+		"extra_message", "extra_round", "tool"]) {
+		const bridge = await startBridge();
+		try {
+			const target = envelope({ event: { type: "message", messageKind: "task", payload: { stage: "execute", revision: 1 } } });
+			const response = workerResponse(target, variant === "wrong_identity" ? { message_id: randomUUID() }
+				: variant === "wrong_stage" ? { stage: "analysis" }
+				: variant === "wrong_decision" ? { decision: "success" }
+				: variant === "unsafe_revision" ? { revision: Number.MAX_SAFE_INTEGER + 1 } : {});
+			let text = "WB_WORKER_RESPONSE:" + JSON.stringify(response);
+			if (variant === "prose") text = "intro " + text;
+			if (variant === "suffix") text += " ending";
+			if (variant === "duplicate_key") text = text.slice(0, -1) + ',"decision":"execute"}';
+			if (variant === "unknown_key") text = text.slice(0, -1) + ',"extra":"x"}';
+			if (variant === "multiple") text += text;
+			if (variant === "wrong_order") {
+				const reordered = { kind: response.kind, stage: response.stage, ...response };
+				delete reordered.stage;
+				reordered.stage = response.stage;
+				text = "WB_WORKER_RESPONSE:" + JSON.stringify(reordered);
+			}
+			const processed = await driveWorkerTurn(bridge, target, text, {
+				stopReason: variant === "length" ? "length" : "stop",
+				willContinue: variant === "continuation", extraMessage: variant === "extra_message",
+				extraRound: variant === "extra_round", tool: variant === "tool",
+			});
+			const rejected = await bridge.waitFor(frame => frame.kind === "omp_event" && frame.name === "worker_response_rejected");
+			assert.equal(typeof rejected.reason, "string", variant);
+			assert.equal(processed.workerResponseId, undefined, variant);
+			assert.equal(bridge.frames.some(frame => frame.name === "assistant_message_end"), false, variant);
+			assert.equal(JSON.stringify({ rejected, processed }).includes(text), false, variant);
+		} finally { await bridge.close(); }
+	}
+});
+
+test("worker response remains untrusted across pause and session switch", async () => {
+	for (const interruption of ["pause", "switch"]) {
+		const bridge = await startBridge();
+		try {
+			const target = envelope({ event: { type: "message", messageKind: "task", payload: { stage: "execute", revision: 1 } } });
+			assert.equal((await bridge.request({ kind: "deliver", envelope: JSON.stringify(target) })).status, "api_accepted");
+			bridge.handlers.get("before_provider_request")!({ payload: { messages: [
+				{ role: "user", content: [{ type: "text", text: bridge.sent.at(-1)!.message }] },
+			] } });
+			bridge.handlers.get("after_provider_response")!();
+			bridge.handlers.get("message_end")!({ message: { role: "assistant", stopReason: "stop",
+				content: [{ type: "text", text: "WB_WORKER_RESPONSE:" + JSON.stringify(workerResponse(target)) }] },
+				willContinue: false });
+			if (interruption === "pause") {
+				assert.equal((await bridge.request({ kind: "pause" })).status, "paused");
+				bridge.handlers.get("agent_end")!();
+				const rejected = await bridge.waitFor(frame => frame.kind === "omp_event" && frame.name === "worker_response_rejected");
+				assert.equal(rejected.reason, "automation_paused");
+				const processed = await bridge.waitFor(frame => frame.kind === "omp_event" && frame.name === "delivery_omp_processed");
+				assert.equal(processed.workerResponseId, undefined);
+			} else {
+				bridge.handlers.get("session_switch")!(undefined, {
+					sessionManager: { getSessionId: () => randomUUID() }, isIdle: () => true,
+					hasPendingMessages: () => false, ui: { getEditorText: () => "" }, abort: () => {},
+				});
+				const unknown = await bridge.waitFor(frame => frame.kind === "omp_event" && frame.name === "delivery_processing_unknown");
+				assert.equal(unknown.reason, "session_switched");
+			}
+			assert.equal(bridge.frames.some(frame => frame.name === "assistant_message_end"), false);
+		} finally { await bridge.close(); }
+	}
+});
+
+test("internal handler fault is opt-in, one-shot, ACK-free and permanently no-replay", async () => {
+	const disabled = await startBridge();
+	try {
+		assert.equal((await disabled.request({ kind: "deliver", envelope: JSON.stringify(envelope()),
+			diagnosticFault: "handler_exception" })).status, "api_accepted");
+		assert.equal(disabled.sent.length, 1);
+	} finally { await disabled.close(); }
+	const bridge = await startBridge("worker", false, true);
+	try {
+		const failed = envelope();
+		const requestId = randomUUID();
+		bridge.sockets.at(-1)!.write(JSON.stringify({ kind: "deliver", requestId,
+			envelope: JSON.stringify(failed), diagnosticFault: "handler_exception" }) + "\n");
+		const event = await bridge.waitFor(frame => frame.kind === "omp_event" && frame.name === `diagnostic_handler_fault:${requestId}`);
+		assert.equal(event.requestId, requestId);
+		assert.equal(event.messageId, failed.messageId);
+		assert.equal((await bridge.request({ kind: "probe" })).status, "state");
+		assert.equal(bridge.frames.some(frame => frame.kind === "api_ack" && frame.requestId === requestId), false);
+		assert.equal(bridge.sent.length, 0);
+		assert.equal(bridge.startedTurns, 0);
+		assert.equal((await bridge.request({ kind: "deliver", envelope: JSON.stringify(failed) })).status, "unknown_no_replay");
+		bridge.sockets.at(-1)!.destroy();
+		await bridge.waitFor(frame => frame.kind === "hello");
+		assert.equal(bridge.sent.length, 0);
+		assert.equal((await bridge.request({ kind: "deliver", envelope: JSON.stringify(failed) })).status, "unknown_no_replay");
+		assert.equal((await bridge.request({ kind: "deliver", envelope: JSON.stringify(envelope()),
+			diagnosticFault: "handler_exception" })).status, "api_accepted");
+		assert.equal(bridge.sent.length, 1);
+	} finally { await bridge.close(); }
+});
 
 test("extension binds role/session and defers busy, pending, approval, and composer states", async () => {
 	const bridge = await startBridge();

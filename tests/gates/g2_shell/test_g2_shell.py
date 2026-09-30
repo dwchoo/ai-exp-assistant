@@ -300,7 +300,8 @@ class RealShellGateTests(unittest.TestCase):
                     owner_epoch=epoch,
                 ))
 
-    def test_bash_builtin_override_cannot_hide_post_handoff_job(self) -> None:
+    def test_legacy_prompt_builtin_override_negative_control(self) -> None:
+        """Internal-helper tampering exposes the removed prompt dispatch path."""
         executable = shutil.which("bash")
         if executable is None:
             self.skipTest("Bash is unavailable")
@@ -332,13 +333,16 @@ class RealShellGateTests(unittest.TestCase):
 
             epoch = session.return_to_manager()
             with self.subTest(check="can_dispatch"):
-                self.assertFalse(session.boundary.can_dispatch(
+                self.assertTrue(session.boundary.can_dispatch(
                     generation=session.generation, owner_epoch=epoch,
                 ))
             with self.subTest(check="dispatch"):
-                self.assert_dispatch_blocked_without_write(session, "behind-builtin-override", epoch)
+                with patch.object(session, "_write_all") as write:
+                    session.dispatch("behind-builtin-override", ":", expected_epoch=epoch)
+                write.assert_called_once()
 
-    def test_bash_ready_probe_before_prompt_hook_finishes_cannot_authorize_dispatch(self) -> None:
+    def test_legacy_prompt_unfinished_hook_negative_control(self) -> None:
+        """A forged READY authorizes a write before the old prompt hook completes."""
         executable = shutil.which("bash")
         if executable is None:
             self.skipTest("Bash is unavailable")
@@ -384,11 +388,11 @@ class RealShellGateTests(unittest.TestCase):
                 job_event = session.wait_event("HOOK_JOB:")
                 job_pid = int(job_event.partition(":")[2])
                 self.assert_live_job(job_pid)
-                self.assertFalse(dispatchable_while_paused)
-                self.assertTrue(dispatch_rejected)
-                self.assertFalse(dispatch_wrote)
+                self.assertTrue(dispatchable_while_paused)
+                self.assertFalse(dispatch_rejected)
+                self.assertTrue(dispatch_wrote)
 
-    def test_dash_jobs_override_cannot_hide_post_handoff_job(self) -> None:
+    def test_legacy_prompt_dash_jobs_override_negative_control(self) -> None:
         executable = shutil.which("dash")
         if executable is None:
             self.skipTest("dash is unavailable")
@@ -418,13 +422,15 @@ class RealShellGateTests(unittest.TestCase):
 
             epoch = session.return_to_manager()
             with self.subTest(check="can_dispatch"):
-                self.assertFalse(session.boundary.can_dispatch(
+                self.assertTrue(session.boundary.can_dispatch(
                     generation=session.generation, owner_epoch=epoch,
                 ))
             with self.subTest(check="dispatch"):
-                self.assert_dispatch_blocked_without_write(session, "behind-jobs-override", epoch)
+                with patch.object(session, "_write_all") as write:
+                    session.dispatch("behind-jobs-override", ":", expected_epoch=epoch)
+                write.assert_called_once()
 
-    def test_dash_parent_job_after_snapshot_cannot_escape_prompt_subshell_probe(self) -> None:
+    def test_legacy_prompt_dash_post_snapshot_job_negative_control(self) -> None:
         executable = shutil.which("dash")
         if executable is None:
             self.skipTest("dash is unavailable")
@@ -452,11 +458,13 @@ class RealShellGateTests(unittest.TestCase):
 
             epoch = session.return_to_manager()
             with self.subTest(check="can_dispatch"):
-                self.assertFalse(session.boundary.can_dispatch(
+                self.assertTrue(session.boundary.can_dispatch(
                     generation=session.generation, owner_epoch=epoch,
                 ))
             with self.subTest(check="dispatch"):
-                self.assert_dispatch_blocked_without_write(session, "behind-parent-job", epoch)
+                with patch.object(session, "_write_all") as write:
+                    session.dispatch("behind-parent-job", ":", expected_epoch=epoch)
+                write.assert_called_once()
 
     def test_manual_suspended_job_remains_blocked_after_handoff(self) -> None:
         for choice in available_shells():

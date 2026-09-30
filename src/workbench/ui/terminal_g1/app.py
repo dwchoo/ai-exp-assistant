@@ -13,6 +13,8 @@ import time
 from collections import deque
 from pathlib import Path
 
+from wcwidth import wcswidth
+
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 from workbench.terminal.vt_g1.screen import TerminalScreen, make_stream
@@ -129,6 +131,28 @@ def _attributes(cell: object, colors: _ColorPairs) -> int:
     return attrs
 
 
+def _rgb(value: str) -> bool:
+    return len(value) == 6 and all(char in "0123456789abcdef" for char in value.lower())
+
+
+def _rgb_cell_style(cell: object) -> str:
+    """Preserve exact RGB after curses' palette-only layout refresh."""
+    codes = ["0"]
+    for name, code in (("bold", 1), ("italics", 3), ("underscore", 4),
+                       ("blink", 5), ("reverse", 7), ("strikethrough", 9)):
+        if getattr(cell, name):
+            codes.append(str(code))
+    for value, base, default in ((cell.fg, 38, 39), (cell.bg, 48, 49)):
+        if value == "default":
+            codes.append(str(default))
+        elif _rgb(value):
+            rgb = ";".join(str(int(value[offset:offset + 2], 16)) for offset in (0, 2, 4))
+            codes.append(f"{base};2;{rgb}")
+        else:
+            codes.append(f"{base};5;{_color_index(value, 256)}")
+    return "\x1b[" + ";".join(codes) + "m"
+
+
 def _draw(
     stdscr: curses.window,
     panes: list[tuple[str, PtySession, TerminalScreen]],
@@ -145,6 +169,9 @@ def _draw(
     base_width = max(1, columns // 3)
     starts = (0, base_width, base_width * 2)
     widths = (base_width, base_width, max(1, columns - base_width * 2))
+    rgb_output: list[str] = []
+    rgb_last: tuple[int, int] | None = None
+    rgb_style = ""
 
     for index, ((title, session, screen), left, width) in enumerate(zip(panes, starts, widths)):
         height = content_height
@@ -174,10 +201,24 @@ def _draw(
                 cell = line.get(x, screen.default_char)
                 if not cell.data:  # second cell of a wide glyph
                     continue
+                cell_width = wcswidth(cell.data)
+                if cell_width < 0 or x + cell_width > inner_columns:
+                    continue
                 try:
                     stdscr.addstr(content_top + 1 + y, left + 1 + x, cell.data, _attributes(cell, colors))
                 except curses.error:
                     pass
+                row, column = content_top + 1 + y, left + 1 + x
+                if (os.environ.get("COLORTERM") == "truecolor" and row < rows and column < columns
+                        and (_rgb(cell.fg) or _rgb(cell.bg))):
+                    style = _rgb_cell_style(cell)
+                    if rgb_last != (row, column - 1):
+                        rgb_output.append(f"\x1b[{row + 1};{column + 1}H")
+                    if style != rgb_style:
+                        rgb_output.append(style)
+                        rgb_style = style
+                    rgb_output.append(cell.data)
+                    rgb_last = row, column + cell_width - 1
 
         if index == focus and not screen.cursor.hidden and width > 2 and height > 2:
             cursor_x = min(inner_columns - 1, max(0, screen.cursor.x))
@@ -194,6 +235,10 @@ def _draw(
     try:
         stdscr.addnstr(rows - 1, 0, footer, max(1, columns - 1))
         stdscr.refresh()
+        if rgb_output:
+            # DEC save/restore keeps curses' physical cursor position intact.
+            sys.stdout.write("\x1b7" + "".join(rgb_output) + "\x1b[0m\x1b8")
+            sys.stdout.flush()
     except curses.error:
         pass
 

@@ -3,6 +3,97 @@ import { parseControlEnvelope } from "../contract/v1.ts";
 
 type Role = "manager" | "worker";
 type Frame = Record<string, unknown>;
+type DeliveryEvidence = {
+	messageId: string;
+	deliveryAttemptId: string;
+	taskId: string;
+	revisionId: string;
+	runId: string;
+	kind: string;
+	role: Role;
+	sessionId: string;
+	generation: number;
+	apiAccepted: boolean;
+	providerRequestMatched: boolean;
+	providerResponseObserved: boolean;
+	awaitingProviderResponse: boolean;
+	agentEndObserved: boolean;
+	terminal: "pending" | "unknown" | "processed";
+	workerStage?: "execute" | "analysis";
+	workerRevision?: number;
+	workerResponse?: Record<string, unknown>;
+	workerResponseRejected?: string;
+	providerRequestCount: number;
+	assistantMessageCount: number;
+};
+
+const WORKER_RESPONSE_MARKER = "WB_WORKER_RESPONSE:";
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
+type WorkerResponseField = {
+	name: string;
+	type: "literal_string" | "canonical_uuid" | "positive_safe_integer" | "enum_string";
+	value?: string | number;
+	generate?: "canonical_uuid";
+	allowed?: string[];
+};
+
+function workerResponseFields(delivery: DeliveryEvidence): WorkerResponseField[] {
+	return [
+		{ name: "stage", type: "literal_string", value: delivery.workerStage! },
+		{ name: "kind", type: "literal_string", value: delivery.kind },
+		{ name: "task_id", type: "canonical_uuid", value: delivery.taskId },
+		{ name: "revision_id", type: "canonical_uuid", value: delivery.revisionId },
+		{ name: "revision", type: "positive_safe_integer", value: delivery.workerRevision! },
+		{ name: "run_id", type: "canonical_uuid", value: delivery.runId },
+		{ name: "message_id", type: "canonical_uuid", value: delivery.messageId },
+		{ name: "delivery_attempt_id", type: "canonical_uuid", value: delivery.deliveryAttemptId },
+		{ name: "session_id", type: "canonical_uuid", value: delivery.sessionId },
+		{ name: "session_generation", type: "positive_safe_integer", value: delivery.generation },
+		{ name: "response_id", type: "canonical_uuid", generate: "canonical_uuid" },
+		{ name: "decision", type: "enum_string", allowed: delivery.workerStage === "execute"
+			? ["execute", "hold"] : ["success", "failure", "indeterminate"] },
+	];
+}
+
+function workerResponseContract(delivery: DeliveryEvidence): Frame {
+	const fields = workerResponseFields(delivery);
+	return {
+		version: 1,
+		marker: WORKER_RESPONSE_MARKER,
+		format: "marker_plus_compact_flat_json",
+		field_order: fields.map(field => field.name),
+		fields,
+		output_rules: {
+			exactly_one_frame: true, no_prose: true, no_tools: true,
+			no_thinking: true, no_markdown: true, no_extra_content: true,
+		},
+		instruction: "Emit only the marker immediately followed by one compact flat JSON object in field_order; no prose, tools, thinking, markdown, whitespace, or additional messages.",
+	};
+}
+
+function parseWorkerResponse(text: string, delivery: DeliveryEvidence): Record<string, unknown> | undefined {
+	if (!text.startsWith(WORKER_RESPONSE_MARKER)) return undefined;
+	const body = text.slice(WORKER_RESPONSE_MARKER.length);
+	if (!body.startsWith("{") || !body.endsWith("}")) return undefined;
+	const fields = workerResponseFields(delivery);
+	const tokens = body.slice(1, -1).split(",");
+	if (tokens.length !== fields.length) return undefined;
+	const result: Record<string, unknown> = {};
+	for (let index = 0; index < fields.length; index += 1) {
+		const field = fields[index];
+		const match = /^"([a-z_]+)":(?:"([A-Za-z0-9_-]+)"|([1-9][0-9]*))$/.exec(tokens[index]);
+		if (!match || match[1] !== field.name) return undefined;
+		const value = match[3] === undefined ? match[2] : Number(match[3]);
+		if (field.type === "canonical_uuid" && (typeof value !== "string" || !UUID_PATTERN.test(value))) return undefined;
+		if (field.type === "positive_safe_integer" && (typeof value !== "number"
+			|| !Number.isSafeInteger(value) || value < 1)) return undefined;
+		if ((field.type === "literal_string" || field.type === "enum_string") && typeof value !== "string") return undefined;
+		if (field.value !== undefined && value !== field.value) return undefined;
+		if (field.allowed !== undefined && !field.allowed.includes(value as string)) return undefined;
+		result[field.name] = value;
+	}
+	return result;
+}
 
 function env(name: string): string {
 	const value = process.env[name];
@@ -26,6 +117,8 @@ export default function workbenchG3Extension(pi: any): void {
 	const token = env("WORKBENCH_G3_TOKEN");
 	const expectedResponseMarker = process.env.WORKBENCH_G3_EXPECTED_RESPONSE_MARKER;
 	const eventSurfaceProbe = process.env.WORKBENCH_G3_EVENT_SURFACE_PROBE === "1";
+	const handlerFaultProbe = process.env.WORKBENCH_G3_HANDLER_FAULT_PROBE === "1";
+	let handlerFaultInjected = false;
 	let generation = Number(env("WORKBENCH_G3_GENERATION"));
 	if ((role !== "manager" && role !== "worker") || !Number.isSafeInteger(generation) || generation < 1) {
 		throw new Error("invalid G3 role or session generation");
@@ -41,6 +134,7 @@ export default function workbenchG3Extension(pi: any): void {
 	let reconnectTimer: ReturnType<typeof setTimeout> | undefined;
 	let reconnectAttempt = 0;
 	let agentActive = false;
+	let activeDelivery: DeliveryEvidence | undefined;
 	let turnSequence = 0;
 	let abortTargetTurn: number | undefined;
 	let abortRequestId: string | undefined;
@@ -122,6 +216,101 @@ export default function workbenchG3Extension(pi: any): void {
 		sendLine(socket!, { kind: "omp_event", name, sessionId: ompSessionId, generation, ...fields });
 	}
 
+	function deliveryIdentity(delivery: DeliveryEvidence): Frame {
+		return {
+			messageId: delivery.messageId,
+			deliveryAttemptId: delivery.deliveryAttemptId,
+			taskId: delivery.taskId,
+			revisionId: delivery.revisionId,
+			runId: delivery.runId,
+			sessionId: delivery.sessionId,
+			generation: delivery.generation,
+		};
+	}
+
+	function finishDeliveryEvidence(): void {
+		const delivery = activeDelivery;
+		if (!delivery || delivery.terminal !== "pending" || !delivery.apiAccepted || !delivery.agentEndObserved) return;
+		if (delivery.providerRequestMatched && delivery.providerResponseObserved) {
+		if (delivery.workerStage && delivery.workerResponse && !delivery.workerResponseRejected
+			&& delivery.providerRequestCount === 1 && delivery.assistantMessageCount === 1
+			&& delivery.sessionId === ompSessionId && delivery.generation === generation && !paused) {
+			sendEvent("assistant_message_end", {
+				...deliveryIdentity(delivery), workerResponse: delivery.workerResponse,
+			});
+		} else if (delivery.workerStage) {
+			sendEvent("worker_response_rejected", {
+				...deliveryIdentity(delivery), reason: delivery.workerResponseRejected ?? "missing_terminal_worker_response",
+			});
+		}
+			delivery.terminal = "processed";
+			sendEvent("delivery_omp_processed", {
+				...deliveryIdentity(delivery),
+				providerRequestMatched: true,
+				providerResponseObserved: true,
+				agentEndObserved: true,
+				...(delivery.workerStage && delivery.workerResponse && !delivery.workerResponseRejected
+					&& delivery.providerRequestCount === 1 && delivery.assistantMessageCount === 1
+					&& delivery.sessionId === ompSessionId && delivery.generation === generation && !paused
+					? { workerResponseId: delivery.workerResponse.response_id } : {}),
+			});
+		} else {
+			delivery.terminal = "unknown";
+			sendEvent("delivery_processing_unknown", {
+				...deliveryIdentity(delivery),
+				providerRequestMatched: delivery.providerRequestMatched,
+				providerResponseObserved: delivery.providerResponseObserved,
+				agentEndObserved: true,
+				reason: "agent_ended_without_complete_provider_evidence",
+			});
+		}
+	}
+
+	function markDeliveryUnknown(reason: string): void {
+		const delivery = activeDelivery;
+		if (!delivery || delivery.terminal !== "pending") return;
+		delivery.terminal = "unknown";
+		sendEvent("delivery_processing_unknown", {
+			...deliveryIdentity(delivery),
+			providerRequestMatched: delivery.providerRequestMatched,
+			providerResponseObserved: delivery.providerResponseObserved,
+			agentEndObserved: delivery.agentEndObserved,
+			reason,
+		});
+	}
+
+	function providerRequestContainsActiveDelivery(event: unknown, delivery: DeliveryEvidence): boolean {
+		if (typeof event !== "object" || event === null) return false;
+		const payload = (event as Record<string, unknown>).payload;
+		if (typeof payload !== "object" || payload === null || Array.isArray(payload)) return false;
+		const messages = (payload as Record<string, unknown>).messages;
+		if (!Array.isArray(messages)) return false;
+		const last = messages.at(-1);
+		if (typeof last !== "object" || last === null) return false;
+		const lastMessage = last as Record<string, unknown>;
+		if (lastMessage.role !== "user") return false;
+		const content = lastMessage.content;
+		const blocks = typeof content === "string" ? [content]
+			: Array.isArray(content) ? content.filter((block): block is { type: string; text: string } =>
+				typeof block === "object" && block !== null && "type" in block && block.type === "text"
+				&& "text" in block && typeof block.text === "string").map(block => block.text)
+			: [];
+		for (const text of blocks) {
+			try {
+				const value: unknown = JSON.parse(text);
+				if (typeof value !== "object" || value === null || Array.isArray(value)) continue;
+				const message = value as Record<string, unknown>;
+				if (message.workbench_message_id === delivery.messageId
+					&& message.workbench_delivery_attempt_id === delivery.deliveryAttemptId
+					&& message.kind === delivery.kind
+					&& message.task_id === delivery.taskId
+					&& message.revision_id === delivery.revisionId
+					&& message.run_id === delivery.runId) return true;
+			} catch { /* The provider request only establishes identity for this exact JSON envelope. */ }
+		}
+		return false;
+	}
+
 	function isMessageSafe(): boolean {
 		const state = snapshot();
 		return state.idle === true
@@ -147,6 +336,7 @@ export default function workbenchG3Extension(pi: any): void {
 		}
 		if (frame.kind === "pause" && typeof frame.requestId === "string") {
 			paused = true;
+			if (activeDelivery?.workerStage) activeDelivery.workerResponseRejected = "automation_paused";
 			pauseEpoch += 1;
 			for (const toolCallId of executingCalls) unknownOutcomeCalls.add(toolCallId);
 			// A deferred request must receive a new manager decision after resume.
@@ -248,7 +438,39 @@ export default function workbenchG3Extension(pi: any): void {
 		}
 
 		seen.set(messageIdentity, "sending");
+		if (handlerFaultProbe && !handlerFaultInjected && frame.diagnosticFault === "handler_exception") {
+			handlerFaultInjected = true;
+			seen.set(messageIdentity, "unknown");
+			sendEvent(`diagnostic_handler_fault:${requestId}`, { requestId, messageId: envelope.messageId });
+			throw new Error("opt-in G3 diagnostic frame-handler exception");
+		}
 		const sendPauseEpoch = pauseEpoch;
+		const payloadStage = envelope.event.payload.stage;
+		const payloadRevision = envelope.event.payload.revision;
+		const workerStage = role === "worker" && ((envelope.event.messageKind === "task" && payloadStage === "execute")
+			|| (envelope.event.messageKind === "question" && payloadStage === "analysis"))
+			&& typeof payloadRevision === "number" && Number.isSafeInteger(payloadRevision) && payloadRevision > 0
+			? payloadStage as "execute" | "analysis" : undefined;
+		activeDelivery = {
+			messageId: envelope.messageId,
+			deliveryAttemptId: envelope.deliveryAttemptId,
+			taskId: envelope.taskId,
+			revisionId: envelope.revisionId,
+			runId: envelope.runId,
+			kind: envelope.event.messageKind,
+			role,
+			sessionId: ompSessionId,
+			generation,
+			apiAccepted: false,
+			providerRequestMatched: false,
+			providerResponseObserved: false,
+			awaitingProviderResponse: false,
+			agentEndObserved: false,
+			terminal: "pending",
+			providerRequestCount: 0,
+			assistantMessageCount: 0,
+			...(workerStage ? { workerStage, workerRevision: payloadRevision as number } : {}),
+		};
 		const message = {
 			workbench_message_id: envelope.messageId,
 			workbench_delivery_attempt_id: envelope.deliveryAttemptId,
@@ -258,7 +480,10 @@ export default function workbenchG3Extension(pi: any): void {
 			task_id: envelope.taskId,
 			revision_id: envelope.revisionId,
 			run_id: envelope.runId,
+			session_id: ompSessionId,
+			session_generation: generation,
 			payload: envelope.event.payload,
+			...(activeDelivery.workerStage ? { response_contract: workerResponseContract(activeDelivery) } : {}),
 		};
 		if (eventSurfaceProbe) probeDelivery = { message, role, sessionId, generation: sessionGeneration };
 		try {
@@ -268,9 +493,14 @@ export default function workbenchG3Extension(pi: any): void {
 			if (pauseEpoch !== sendPauseEpoch) {
 				// The public call may already have enqueued a turn before pause.
 				seen.set(messageIdentity, "unknown");
+				markDeliveryUnknown("automation_paused_during_injection");
 				ack(requestId, "unknown_no_replay", { messageId: envelope.messageId });
 			} else {
 				seen.set(messageIdentity, "api_accepted");
+				if (activeDelivery?.messageId === envelope.messageId) {
+					activeDelivery.apiAccepted = true;
+					finishDeliveryEvidence();
+				}
 				ack(requestId, "api_accepted", {
 					messageId: envelope.messageId,
 					modelProcessed: false,
@@ -279,6 +509,7 @@ export default function workbenchG3Extension(pi: any): void {
 		} catch (error) {
 			// The public call may have enqueued before a later runtime error. Never replay it.
 			seen.set(messageIdentity, "unknown");
+			markDeliveryUnknown("send_user_message_outcome_unknown");
 			ack(requestId, "unknown_no_replay", {
 				messageId: envelope.messageId,
 				reason: error instanceof Error ? error.message : "send failed",
@@ -337,12 +568,14 @@ export default function workbenchG3Extension(pi: any): void {
 		});
 		client.on("error", error => {
 			if (isCurrentConnection(client, sessionId, sessionGeneration)) {
+				if (activeDelivery?.workerStage) markDeliveryUnknown("bridge_disconnected");
 				connected = false;
 				pi.logger?.error?.("workbench G3 bridge disconnected", error);
 			}
 		});
 		client.on("close", () => {
 			if (!isCurrentConnection(client, sessionId, sessionGeneration)) return;
+			if (activeDelivery?.workerStage) markDeliveryUnknown("bridge_disconnected");
 			connected = false;
 			if (shuttingDown || reconnectTimer !== undefined) return;
 			const delayMs = Math.min(50 * (2 ** Math.min(reconnectAttempt, 5)), 1000);
@@ -358,7 +591,9 @@ export default function workbenchG3Extension(pi: any): void {
 	function connect(ctx: any, reason: "start" | "switch"): void {
 		if (shuttingDown) return;
 		if (reason === "switch") {
+			if (activeDelivery?.workerStage) markDeliveryUnknown("session_switched");
 			probeDelivery = undefined;
+			activeDelivery = undefined;
 			const unresolvedTools = new Set([...executingCalls, ...unknownOutcomeCalls]);
 			if (abortStatus === "requested" || abortStatus === "request_failed" || unresolvedTools.size > 0) {
 				unresolvedPriorSessions.push({
@@ -394,6 +629,7 @@ export default function workbenchG3Extension(pi: any): void {
 		connect(ctx, "switch");
 	});
 	pi.on("session_shutdown", () => {
+		if (activeDelivery?.workerStage) markDeliveryUnknown("session_shutdown");
 		shuttingDown = true;
 		clearReconnect();
 		const previous = socket;
@@ -413,6 +649,13 @@ export default function workbenchG3Extension(pi: any): void {
 	pi.on("agent_end", () => {
 		agentActive = false;
 		sendEvent("agent_end");
+		if (activeDelivery?.terminal === "pending"
+			&& activeDelivery.role === role
+			&& activeDelivery.sessionId === ompSessionId
+			&& activeDelivery.generation === generation) {
+			activeDelivery.agentEndObserved = true;
+			finishDeliveryEvidence();
+		}
 		if (abortStatus === "requested" && (abortTargetTurn === undefined || abortTargetTurn === turnSequence)) {
 			// agent_end observes a stopped turn; it does not prove abort causation or tool rollback.
 			abortStatus = "stop_observed";
@@ -425,6 +668,17 @@ export default function workbenchG3Extension(pi: any): void {
 	});
 	pi.on("before_provider_request", (event: unknown) => {
 		sendEvent("provider_request_started");
+		if (activeDelivery?.terminal === "pending") {
+			activeDelivery.providerRequestCount += 1;
+			if (activeDelivery.workerStage && activeDelivery.providerRequestCount !== 1)
+				activeDelivery.workerResponseRejected = "additional_provider_round";
+			if (providerRequestContainsActiveDelivery(event, activeDelivery)) {
+				activeDelivery.providerRequestMatched = true;
+				activeDelivery.awaitingProviderResponse = true;
+			} else if (!activeDelivery.providerRequestMatched) {
+				markDeliveryUnknown("provider_request_identity_not_observed");
+			}
+		}
 		if (!eventSurfaceProbe) return;
 		const record = typeof event === "object" && event !== null ? event as Record<string, unknown> : undefined;
 		const payload = record?.payload;
@@ -476,8 +730,30 @@ export default function workbenchG3Extension(pi: any): void {
 			generationMatched: probeDelivery?.generation === generation,
 		});
 	});
-	pi.on("after_provider_response", () => sendEvent("provider_response_received"));
+	pi.on("after_provider_response", () => {
+		sendEvent("provider_response_received");
+		if (activeDelivery?.terminal === "pending" && activeDelivery.awaitingProviderResponse) {
+			activeDelivery.providerResponseObserved = true;
+			activeDelivery.awaitingProviderResponse = false;
+			finishDeliveryEvidence();
+		}
+	});
 	pi.on("message_end", (event: { message?: { role?: string; content?: unknown; stopReason?: unknown; errorMessage?: unknown }; willContinue?: unknown }) => {
+		const delivery = activeDelivery;
+		if (delivery?.workerStage && delivery.terminal === "pending" && event?.message?.role === "assistant") {
+			delivery.assistantMessageCount += 1;
+			const content = event.message.content;
+			const text = Array.isArray(content) && content.length === 1
+				&& typeof content[0] === "object" && content[0] !== null
+				&& content[0].type === "text" && typeof content[0].text === "string" ? content[0].text : undefined;
+			const response = text === undefined ? undefined : parseWorkerResponse(text, delivery);
+			if (delivery.assistantMessageCount !== 1 || event.message.stopReason !== "stop"
+				|| event.message.errorMessage || event.willContinue === true || !response) {
+				delivery.workerResponseRejected = "invalid_assistant_response";
+			} else {
+				delivery.workerResponse = response;
+			}
+		}
 		if (eventSurfaceProbe && event?.message?.role === "user") {
 			const content = event.message.content;
 			const text = typeof content === "string" ? content : Array.isArray(content)
@@ -509,6 +785,11 @@ export default function workbenchG3Extension(pi: any): void {
 				errorMessagePresent: typeof event.message.errorMessage === "string" && event.message.errorMessage.length > 0,
 				willContinue: typeof event.willContinue === "boolean" ? event.willContinue : null,
 			});
+		}
+		if (event?.message?.role === "assistant"
+			&& (event.message.stopReason === "error" || event.message.stopReason === "aborted"
+				|| (typeof event.message.errorMessage === "string" && event.message.errorMessage.length > 0))) {
+			markDeliveryUnknown("assistant_message_ended_with_error_or_abort");
 		}
 		if (!expectedResponseMarker || event?.message?.role !== "assistant") return;
 		const content = event.message.content;
@@ -543,11 +824,13 @@ export default function workbenchG3Extension(pi: any): void {
 		publishState();
 	});
 	pi.on("tool_call", (event: { toolCallId: string; toolName: string }) => {
+		if (activeDelivery?.workerStage) activeDelivery.workerResponseRejected = "tool_activity";
 		// Native OMP approval and direct manual input keep their own tool path.
 		sendEvent("tool_call_observed", { toolCallId: event.toolCallId, toolName: event.toolName });
 		publishState();
 	});
 	pi.on("tool_execution_start", (event: { toolCallId: string; toolName: string }) => {
+		if (activeDelivery?.workerStage) activeDelivery.workerResponseRejected = "tool_activity";
 		executingCalls.add(event.toolCallId);
 		if (abortStatus === "requested") unknownOutcomeCalls.add(event.toolCallId);
 		sendEvent("tool_execution_start", { toolCallId: event.toolCallId, toolName: event.toolName });

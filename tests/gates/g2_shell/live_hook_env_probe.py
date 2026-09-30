@@ -5,7 +5,6 @@ arbitrary manual daemons. Only owned fixture processes are explicitly cleaned.
 """
 from __future__ import annotations
 
-import base64
 from contextlib import contextmanager
 import ctypes
 import json
@@ -23,6 +22,7 @@ ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT))
 
 from tests.gates.g2_shell import live_env_launch_probe as env
+from workbench.terminal.shell_g2.lifecycle import ManagedLifecycle, ManagedLifecycleProbe, managed_controller_source
 
 combined = env.combined
 
@@ -69,10 +69,10 @@ def own_orphans():
 
 
 def controller_source(shell: str) -> str:
-    source = combined.controller_source(shell)
+    source = managed_controller_source(shell)
     jobs = "builtin jobs" if Path(shell).name == "bash" else "command jobs"
     source = source.replace(
-        "                    __b_emit START",
+        "                    __b_emit ACCEPT",
         f'''                    {jobs} -p > "$WB_MANUAL_JOBS"
                     if [ -s "$WB_MANUAL_JOBS" ]; then
                         __b_emit MANUAL_ACTIVE
@@ -82,7 +82,7 @@ def controller_source(shell: str) -> str:
                         __b_emit MANUAL_UNKNOWN
                         continue
                     fi
-                    __b_emit START''',
+                    __b_emit ACCEPT''',
     )
     return source.replace(
         "                TAKEOVER)",
@@ -97,10 +97,25 @@ def controller_source(shell: str) -> str:
     )
 
 
+class HookEnvSession(ManagedLifecycleProbe):
+    def _control_init_source(self) -> str:
+        return controller_source(self.choice.executable)
+
+    def _on_control_event(self, event: str) -> None:
+        super()._on_control_event(event)
+        if event in {"MANUAL_ACTIVE", "MANUAL_UNKNOWN"} and self.lifecycle.request_id is not None:
+            if self.lifecycle.accepted or self.lifecycle.supervisor_pid is not None or self.lifecycle.unknown:
+                self.lifecycle.fail_unknown("manual_rejection_after_accept")
+                self.boundary.fail_closed()
+            else:
+                # Typed denial before ACCEPT proves that no execution started;
+                # a fresh check is not replay of an unknown accepted request.
+                self.lifecycle = ManagedLifecycle(self.pid)
+
+
 def run_request(session, script: str) -> int:
     since = len(session.events)
-    token = base64.b64encode(script.encode()).decode("ascii")
-    os.write(session._request_fd, f"RUN:{token}\n".encode())
+    session.dispatch_managed(f"manual-check-{since}", script)
     return since
 
 
@@ -129,8 +144,55 @@ def fresh_check_after_owned_cleanup(session, identity: tuple[int, int]) -> None:
     combined.wait(session, "FRESH_MANUAL_CHECK", since)
 
 
+def complete_accepted_recheck(session: HookEnvSession, parent: int, first_wait: str,
+                              traps_before: Path, traps_after: Path) -> tuple[int, int]:
+    """Release input/control only from confirmed canonical lifecycle facts."""
+    since = len(session.events)
+    session.dispatch_managed("recheck", ":")
+    combined.wait(session, "START", since)
+    supervisor = combined.wait(session, "SUPERVISOR:", since)
+    sup = int(supervisor.split(":")[1])
+    assert os.path.realpath(f"/proc/{sup}/exe") == os.path.realpath(sys.executable)
+    prepared = combined.wait(session, "CHILD_PREPARED:", since)
+    child = int(prepared.split(":")[1])
+    assert child not in {parent, sup}
+    assert prepared == f"CHILD_PREPARED:{child}:{child}:{parent}"
+    assert int(supervisor.split(":")[2]) != child
+    foreground = combined.wait(session, f"FOREGROUND_VERIFIED:{child}", since)
+    executed = combined.wait(session, f"EXEC_READY:{child}", since)
+    child_event = combined.wait(session, f"CHILD:{child}:", since)
+    started = combined.wait(session, f"EXPERIMENT_START:{child}", since)
+    events = session.events[since:]
+    assert events.index(prepared) < events.index(foreground) < events.index(executed) < events.index(child_event) < events.index(started)
+    state = session.lifecycle
+    if (state.unknown or not all((state.accepted, state.child_prepared,
+                                state.foreground_verified, state.exec_ready, state.experiment_started))):
+        state.fail_unknown("incomplete_canonical_recheck_start")
+        session.boundary.fail_closed()
+        raise combined.boundary.prototype.UnsafeShellState("recheck has no confirmed exec/start boundary")
+    assert combined.wait(session, "MAIN_RETURN:", since) == "MAIN_RETURN:0"
+    assert combined.wait(session, "WAIT_EMPTY:", since) == "WAIT_EMPTY:ECHILD"
+    combined.wait(session, "LIFETIME_DONE:", since)
+    combined.wait(session, "INPUT_BARRIER", since)
+    assert "READY" not in session.events[since:]
+    assert state.main_exit == 0 and state.wait_empty
+    session.release_input()  # Requires known lifetime/input barrier before flush/SIGUSR1.
+    combined.wait(session, "INPUT_RELEASED", since)
+    assert combined.wait(session, "RETURN:", since) == "RETURN:0"
+    assert combined.wait(session, "WAIT:", since) == first_wait
+    assert state.returned and not state.unknown
+    assert state.lifetime == "ended" and state.input_returned and state.control_returned
+    assert session.pid == parent and os.readlink(f"/proc/{parent}/cwd") == str(traps_before.parent)
+    assert not any(Path(f"/proc/{pid}").exists() for pid in (sup, child))
+    session.release_control()  # Never infer control ownership from raw RETURN alone.
+    combined.wait(session, f"TAKEOVER_ACK:{parent}", since)
+    combined.wait(session, "READY", since)
+    assert session.manual_prompt_confirmed and state.returned and not state.unknown
+    assert traps_before.read_bytes() == traps_after.read_bytes(), "signal trap not restored"
+    return sup, child
+
+
 def case(shell: str, kind: str) -> dict:
-    source = controller_source(shell)
     pids = []
     with own_orphans() as orphans, tempfile.TemporaryDirectory(prefix="cw03-manual-residue-") as directory:
         jobs_file = Path(directory) / "manual-jobs"
@@ -142,11 +204,9 @@ def case(shell: str, kind: str) -> dict:
                        f"WB_MANUAL_JOBS={shlex.quote(str(jobs_file))} "
                        f"WB_MANUAL_OBSERVATION={'unknown' if kind == 'escaped' else 'clear'}; ")
         prototype = combined.boundary.prototype
-        with patch.object(prototype, "_bash_control_init", return_value=source), \
-             patch.object(prototype, "_sh_control_init", return_value=source), \
-             prototype.ShellProcess(prototype.ShellChoice(
+        with HookEnvSession(prototype.ShellChoice(
                  "bash" if Path(shell).name == "bash" else "sh", shell
-             ), control_wait=True) as session:
+             )) as session:
             parent = session.pid
             pids.append(parent)
             combined.wait(session, "READY", 0)
@@ -217,11 +277,8 @@ def case(shell: str, kind: str) -> dict:
             combined.wait(session, f"HANDOFF:{parent}", handoff_since)
             combined.wait(session, f"WAIT:{parent}:", handoff_since)
             since = len(session.events)
-            _, main, returned, sup, child, _ = env.run_payload(
-                session, parent, first_wait, traps_before, traps_after, ":"
-            )
+            sup, child = complete_accepted_recheck(session, parent, first_wait, traps_before, traps_after)
             pids.extend((sup, child))
-            assert main == "MAIN_RETURN:0" and returned == "RETURN:0"
             assert session.pid == parent and not marker.exists()
             assert "START" in session.events[since:]
             assert not Path(f"/proc/{pid}").exists()

@@ -38,6 +38,22 @@ class Inconclusive(RuntimeError):
     """A native shell behavior could not be proved by this fixture."""
 
 
+def signal_snapshot(pid: int) -> dict:
+    """Record disposition and job-control identity without inferring suspension."""
+    status = dict(line.split(":", 1) for line in
+                  Path(f"/proc/{pid}/status").read_text().splitlines() if ":" in line)
+    ignored = int(status["SigIgn"].strip(), 16)
+    caught = int(status["SigCgt"].strip(), 16)
+    blocked = int(status["SigBlk"].strip(), 16)
+    bit = 1 << (signal.SIGTSTP - 1)
+    ppid = proc_fields(pid)[0]
+    return {"pid": pid, "state": proc_fields(pid)[3], "ppid": ppid,
+            "pgid": os.getpgid(pid), "sid": os.getsid(pid),
+            "parent_pgid": os.getpgid(ppid), "parent_sid": os.getsid(ppid),
+            "tstp_ignored": bool(ignored & bit), "tstp_caught": bool(caught & bit),
+            "tstp_blocked": bool(blocked & bit)}
+
+
 def emit(event: str) -> None:
     os.write(9, (event + "\n").encode("ascii"))
 
@@ -125,6 +141,11 @@ def supervisor(shell: str, payload: str) -> int:
 
     def on_tstp(_signum: int, _frame: object) -> None:
         emit("SIGNAL_TSTP")
+        # The marker alone is not suspension evidence. Re-deliver native TSTP
+        # with its default disposition; do not replace it with SIGSTOP.
+        signal.signal(signal.SIGTSTP, signal.SIG_DFL)
+        os.kill(os.getpid(), signal.SIGTSTP)
+        signal.signal(signal.SIGTSTP, on_tstp)
 
     def on_cont(_signum: int, _frame: object) -> None:
         emit("SIGNAL_CONT")
@@ -517,6 +538,7 @@ def simple_case(shell: str, name: str) -> dict:
         assert first == f"WAIT:{parent}:{directory}:kept"
         since = len(session.events)
         script = ("cd /; export BOUNDARY_PREPARED=changed; return" if name == "return"
+                  else "exec true" if name == "exec"
                   else "exit 37" if name == "errexit"
                   else "#WB_START_HOLD\n:" if name == "start"
                   else ":" if name.startswith("parent_wait")
@@ -640,8 +662,10 @@ def simple_case(shell: str, name: str) -> dict:
                     if stopped:
                         break
                 if not stopped:
+                    observation = signal_snapshot(parent)
                     os.killpg(os.getpgid(parent), signal.SIGCONT)
-                    raise Inconclusive("parent WAIT TSTP produced no observed stopped state")
+                    raise Inconclusive("parent WAIT TSTP produced no observed stopped state; "
+                                       + json.dumps(observation, sort_keys=True))
                 os.write(session._request_fd, b"PING\n")
                 quiet_until = time.monotonic() + 0.1
                 while time.monotonic() < quiet_until:
@@ -806,7 +830,11 @@ def signal_stage_case(shell: str, stage: str, signame: str) -> dict:
                 assert "INPUT_BARRIER" not in session.events[signal_since:]
             os.killpg(supervisor_group, signal.SIGCONT)
             wait(session, "SIGNAL_CONT", signal_since)
-        assert "READY" not in session.events[since:]
+        assert "READY" not in session.events[since:], (
+            "native signal returned parent to prompt before lifetime/input return; "
+            f"parent={signal_snapshot(parent)}; supervisor={signal_snapshot(supervisor_pid)}; "
+            f"events={session.events[since:]}"
+        )
         assert "INPUT_BARRIER" not in session.events[since:]
         assert not marker.exists(), "signal released stale input before descendant drain"
         if stage == "start":
@@ -870,7 +898,7 @@ def signal_stage_case(shell: str, stage: str, signame: str) -> dict:
                 "owned_pids": [parent, supervisor_pid, child_pid, descendant_pid]}
 
 
-def main() -> int:
+def legacy_main() -> int:
     shells = [shutil.which("bash"), shutil.which("dash")]
     if sys.platform != "linux" or any(shell is None for shell in shells):
         print(json.dumps({"result": "inconclusive", "reason": "Linux, Bash and dash required"}))
@@ -928,11 +956,641 @@ def main() -> int:
     return 0
 
 
+def prepared_split_child(shell: str, script: str, ready_fd: int, go_fd: int) -> None:
+    """Install native dispositions in PG_E before allowing any payload code."""
+    for signum in (signal.SIGINT, signal.SIGQUIT, signal.SIGTSTP, signal.SIGCONT):
+        signal.signal(signum, signal.SIG_DFL)
+    signal.pthread_sigmask(signal.SIG_SETMASK, set())
+    emit(f"PREPARED:{os.getpid()}:{os.getpgrp()}:{os.getsid(0)}")
+    os.write(ready_fd, b"P")
+    os.close(ready_fd)
+    if os.read(go_fd, 1) != b"G":
+        os._exit(72)
+    os.close(go_fd)
+    os.execv(shell, [shell, "-c", script])
+
+
+def split_running_child() -> None:
+    signal.signal(signal.SIGINT, signal.SIG_DFL)
+    signal.signal(signal.SIGQUIT, signal.SIG_DFL)
+    signal.signal(signal.SIGTSTP, signal.SIG_DFL)
+    signal.signal(signal.SIGCONT, lambda *_: emit(f"RESUMED_ACK:{os.getpid()}"))
+    signal.pthread_sigmask(signal.SIG_BLOCK, {signal.SIGUSR2})
+    emit(f"SPLIT_RUNNING_READY:{os.getpid()}")
+    await_release(signal.SIGUSR2)
+    fork_tree()
+
+
+def restore_foreground(group: int) -> None:
+    """Only the same-session supervisor restores ownership before SIGCONT."""
+    previous = signal.pthread_sigmask(signal.SIG_BLOCK, {signal.SIGTTOU})
+    try:
+        os.tcsetpgrp(0, group)
+        if os.tcgetpgrp(0) != group:
+            raise RuntimeError("foreground restore did not select experiment PG")
+        emit(f"FOREGROUND_VERIFIED:{group}")
+    finally:
+        signal.pthread_sigmask(signal.SIG_SETMASK, previous)
+
+
+def continue_experiment(group: int) -> None:
+    restore_foreground(group)
+    os.killpg(group, signal.SIGCONT)
+    emit(f"CONT_SENT:{group}")
+
+
+def failure_split_tree() -> None:
+    """Hold both ancestors alive after setsid, before host registration."""
+    middle = os.fork()
+    if middle == 0:
+        child = os.fork()
+        if child == 0:
+            os.setsid()
+            emit(f"FAILURE_UNREGISTERED:{os.getpid()}:{proc_fields(os.getpid())[2]}")
+            os.write(int(os.environ["WB_FAILURE_READY_FD"]), b"F")
+        signal.pause()
+        os._exit(70)
+    signal.pause()
+    os._exit(70)
+
+
+def reap_split_failure() -> None:
+    """Rediscover adopted children until ECHILD, with a bounded deadline."""
+    deadline = time.monotonic() + 2.0
+    children_path = Path(f"/proc/{os.getpid()}/task/{os.getpid()}/children")
+    while True:
+        discovered = children_path.read_text().split()
+        if discovered:
+            emit(f"CLEANUP_SCAN:{','.join(discovered)}")
+        for raw_pid in discovered:
+            try:
+                os.kill(int(raw_pid), signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+        while True:
+            try:
+                pid, status = os.waitpid(-1, os.WNOHANG | os.WUNTRACED | os.WCONTINUED)
+            except ChildProcessError:
+                if children_path.read_text().strip():
+                    raise RuntimeError("ECHILD disagrees with owned child inventory")
+                emit("CLEANUP_EMPTY:ECHILD")
+                return
+            if not pid:
+                break
+            if os.WIFEXITED(status) or os.WIFSIGNALED(status):
+                emit(f"CLEANUP_REAPED:{pid}")
+        if time.monotonic() >= deadline:
+            emit("CLEANUP_UNKNOWN:DEADLINE")
+            raise RuntimeError("bounded split cleanup retained children")
+        time.sleep(0.005)
+
+
+def split_supervisor(shell: str, payload: str) -> int:
+    enable_subreaper()
+    resource.setrlimit(resource.RLIMIT_CORE, (0, 0))
+    if signal.getsignal(signal.SIGCHLD) is not signal.SIG_DFL:
+        raise RuntimeError("SIGCHLD is not default")
+    signal.pthread_sigmask(signal.SIG_BLOCK, {
+        signal.SIGCHLD, signal.SIGUSR1, signal.SIGUSR2,
+    })
+    target: int | None = None
+    stage = "start"
+    interrupts = 0
+
+    def observe_signal(signum: int, _frame: object) -> None:
+        nonlocal interrupts
+        if signum == signal.SIGINT:
+            interrupts += 1
+        emit(f"SIGNAL_{signal.Signals(signum).name.removeprefix('SIG')}")
+        if target is None:
+            emit(f"NO_TARGET:{stage}:{signal.Signals(signum).name}")
+
+    def no_target(signum: int, _frame: object) -> None:
+        if target is not None:
+            raise RuntimeError("signal addressed supervisor while experiment target exists")
+        emit(f"NO_TARGET:{stage}:{signal.Signals(signum).name}")
+
+    def terminate(_signum: int, _frame: object) -> None:
+        raise SystemExit(73)
+
+    for signum in (signal.SIGTSTP, signal.SIGCONT):
+        signal.signal(signum, no_target)
+    for signum in (signal.SIGINT, signal.SIGQUIT):
+        signal.signal(signum, observe_signal)
+    signal.signal(signal.SIGWINCH, lambda *_: emit(f"SUPERVISOR_PING:{stage}"))
+    signal.signal(signal.SIGTERM, terminate)
+    config = json.loads(base64.b64decode(payload, validate=True))
+    emit(f"SUPERVISOR:{os.getpid()}:{os.getpgrp()}:SUBREAPER=1:SIGCHLD=DFL")
+    emit(f"SPLIT_SESSION:{os.getsid(0)}")
+    if config["hold_start"]:
+        emit("START_BARRIER")
+        await_release(signal.SIGUSR2)
+    release_read, release_write = os.pipe()
+    ready_read, ready_write = os.pipe()
+    go_read, go_write = os.pipe()
+    failure_read, failure_write = os.pipe()
+    child = None
+    try:
+        env = os.environ.copy()
+        env["WB_RELEASE_FD"] = str(release_read)
+        env["WB_FAILURE_READY_FD"] = str(failure_write)
+        child = subprocess.Popen(
+            [sys.executable, str(Path(__file__).resolve()), "--prepared-split-child",
+             shell, config["script"], str(ready_write), str(go_read)],
+            env=env, pass_fds=(9, release_read, ready_write, go_read, failure_write), process_group=0,
+        )
+        os.close(ready_write)
+        ready_write = -1
+        os.close(go_read)
+        go_read = -1
+        emit(f"CHILD:{child.pid}:{os.getpgid(child.pid)}")
+        ready, _, _ = select.select([ready_read], [], [], TIMEOUT)
+        if not ready or os.read(ready_read, 1) != b"P":
+            raise TimeoutError("experiment child preparation barrier missing")
+        target = child.pid
+        if os.getpgid(target) == os.getpgrp() or os.getsid(target) != os.getsid(0):
+            raise RuntimeError("split PG or same-session invariant violated")
+        emit("CHILD_BARRIER")
+        await_release(signal.SIGUSR2)
+        restore_foreground(target)
+        stage = "running"
+        emit(f"EXPERIMENT_START:{target}")
+        os.write(go_write, b"G")
+        if config.get("failure"):
+            ready, _, _ = select.select([failure_read], [], [], TIMEOUT)
+            if not ready or os.read(failure_read, 1) != b"F":
+                raise TimeoutError("setsid failure barrier missing")
+            emit("FAILURE_ARMED:HOST_UNREGISTERED")
+            await_release(signal.SIGUSR2)
+            emit("UNKNOWN:INJECTED_FAILURE")
+            raise RuntimeError("injected failure before host descendant registration")
+        stopped = False
+        deadline = time.monotonic() + TIMEOUT
+        while True:
+            pid, result = os.waitpid(target, os.WNOHANG | os.WUNTRACED | os.WCONTINUED)
+            if pid:
+                if os.WIFSTOPPED(result):
+                    stopped = True
+                    emit(f"MAIN_STOPPED:{os.WSTOPSIG(result)}")
+                elif os.WIFCONTINUED(result):
+                    stopped = False
+                    emit("MAIN_CONTINUED")
+                else:
+                    status = os.waitstatus_to_exitcode(result)
+                    break
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise TimeoutError("split main program did not return")
+            received = signal.sigtimedwait({signal.SIGCHLD, signal.SIGUSR2}, remaining)
+            if received is not None and received.si_signo == signal.SIGUSR2:
+                if not stopped:
+                    raise RuntimeError("resume requested without observed stopped target")
+                continue_experiment(target)
+        target = None
+        stage = "return"
+        restore_foreground(os.getpgrp())
+        emit(f"MAIN_RETURN:{status}")
+        active = False
+        deadline = time.monotonic() + TIMEOUT
+        while True:
+            try:
+                pid, result = os.waitpid(-1, os.WNOHANG | os.WUNTRACED | os.WCONTINUED)
+            except ChildProcessError:
+                emit("WAIT_EMPTY:ECHILD")
+                break
+            if pid:
+                if os.WIFSTOPPED(result) or os.WIFCONTINUED(result):
+                    emit(f"DESCENDANT_LIVE:{pid}")
+                else:
+                    emit(f"DESCENDANT_REAPED:{pid}:{os.waitstatus_to_exitcode(result)}")
+                continue
+            if not active:
+                emit("LIFETIME_ACTIVE:WNOHANG=0")
+                active = True
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise TimeoutError("split descendant remained active")
+            received = signal.sigtimedwait({signal.SIGCHLD, signal.SIGUSR2}, remaining)
+            if received is not None and received.si_signo == signal.SIGUSR2:
+                os.write(release_write, b"R")
+        emit(f"LIFETIME_DONE:INTERRUPTS={interrupts}")
+        emit("INPUT_BARRIER")
+        await_release(signal.SIGUSR1)
+        emit("INPUT_RELEASED")
+        return status if status >= 0 else 128 - status
+    finally:
+        # Every descendant is either live in the child PG or adopted by this
+        # single subreaper. Failure cannot leave a bounded fixture running.
+        reap_split_failure()
+        for fd in (release_read, release_write, ready_read, ready_write, go_read, go_write,
+                   failure_read, failure_write):
+            if fd >= 0:
+                os.close(fd)
+
+
+@contextmanager
+def cleanup_split(identities: list[tuple[int, int]], groups: list[tuple[int, int]]):
+    try:
+        yield
+    finally:
+        # SIGTERM leaves the single reaper alive to kill and reap its children.
+        if identities:
+            supervisor_pid, started = identities[0]
+            try:
+                if proc_fields(supervisor_pid)[2] == started:
+                    os.kill(supervisor_pid, signal.SIGTERM)
+            except (FileNotFoundError, ProcessLookupError):
+                pass
+            deadline = time.monotonic() + 2.5
+            while time.monotonic() < deadline:
+                live = []
+                for pid, birth in identities:
+                    try:
+                        if proc_fields(pid)[2] == birth:
+                            live.append(pid)
+                    except (FileNotFoundError, ProcessLookupError):
+                        pass
+                if not live:
+                    break
+                time.sleep(0.01)
+        for group, started in groups:
+            try:
+                if proc_fields(group)[2] == started:
+                    os.killpg(group, signal.SIGKILL)
+            except (FileNotFoundError, ProcessLookupError):
+                pass
+        for pid, started in reversed(identities):
+            try:
+                if proc_fields(pid)[2] == started:
+                    os.kill(pid, signal.SIGKILL)
+            except (FileNotFoundError, ProcessLookupError):
+                pass
+
+
+def split_case(shell: str, name: str) -> dict:
+    """Differential split-PG candidate, keeping legacy helpers unchanged."""
+    assert name in {"suspend", "start", "exit130", "exit131", "exit148", "parent_wait",
+                    "int_start", "quit_start", "int_return", "quit_return",
+                    "int_running", "quit_running"}
+    signal_name = "INT" if name.startswith("int_") else "QUIT" if name.startswith("quit_") else None
+    hold_start = name == "start" or name.endswith("_start")
+    tree_case = name in {"suspend", "start"} or name.endswith(("_start", "_return"))
+    running_signal = name.endswith("_running")
+    source = controller_source(shell).replace(" --supervisor ", " --split-supervisor ")
+    identities: list[tuple[int, int]] = []
+    groups: list[tuple[int, int]] = []
+    result = {}
+    try:
+        with patch.object(boundary.prototype, "_bash_control_init", return_value=source), \
+             patch.object(boundary.prototype, "_sh_control_init", return_value=source), \
+             tempfile.TemporaryDirectory(prefix="cw03-split-") as directory, \
+             boundary.prototype.ShellProcess(
+                 boundary.prototype.ShellChoice("bash" if Path(shell).name == "bash" else "sh", shell),
+                 control_wait=True,
+             ) as session, cleanup_split(identities, groups):
+            wait(session, "READY", 0)
+            parent = session.pid
+            marker = Path(directory) / "spill"
+            following = Path(directory) / "following"
+            traps = Path(directory) / "traps-before"
+            after = Path(directory) / "traps-after"
+            session._write_all((f"cd {shlex.quote(directory)}; export BOUNDARY_PREPARED=kept "
+                                f"BOUNDARY_TRAPS={shlex.quote(str(traps))} "
+                                f"BOUNDARY_TRAPS_AFTER={shlex.quote(str(after))}; wb-handoff\n"
+                                f": > {shlex.quote(str(following))}\n").encode())
+            wait(session, f"HANDOFF:{parent}", 0)
+            first = wait(session, "WAIT:", 0)
+            since = len(session.events)
+            helper = f"{shlex.quote(sys.executable)} {shlex.quote(str(Path(__file__).resolve()))}"
+            script = (f"exec {helper} --split-running-child" if name == "suspend" or running_signal else
+                      f"{helper} --fork-tree" if tree_case else
+                      f"exit {name.removeprefix('exit')}" if name.startswith("exit") else ":")
+            payload = base64.b64encode(json.dumps({"script": script,
+                                                   "hold_start": hold_start}).encode()).decode()
+            os.write(session._request_fd, f"RUN:{payload}\n".encode())
+            wait(session, "START", since)
+            sup = wait(session, "SUPERVISOR:", since)
+            sup_pid, sup_pg = map(int, sup.split(":")[1:3])
+            identities.append((sup_pid, proc_fields(sup_pid)[2]))
+
+            def control_held() -> None:
+                events = session.events[since:]
+                assert not any(event == "READY" or event.startswith(("RETURN:", "WAIT:",
+                                                                      "TAKEOVER_ACK:"))
+                               for event in events), events
+                assert not marker.exists() and not following.exists()
+
+            def ping(stage: str) -> None:
+                ping_since = len(session.events)
+                os.kill(sup_pid, signal.SIGWINCH)
+                wait(session, f"SUPERVISOR_PING:{stage}", ping_since)
+                control_held()
+
+            if hold_start:
+                wait(session, "START_BARRIER", since)
+                assert not any(event.startswith("CHILD:") for event in session.events[since:])
+                session._write_all(b"\x03" if signal_name == "INT" else
+                                   b"\x1c" if signal_name == "QUIT" else b"\x1a")
+                wait(session, f"NO_TARGET:start:SIG{signal_name or 'TSTP'}", since)
+                if signal_name is None:
+                    os.killpg(sup_pg, signal.SIGCONT)
+                    wait(session, "NO_TARGET:start:SIGCONT", since)
+                ping("start")
+                os.kill(sup_pid, signal.SIGUSR2)
+            child = wait(session, "CHILD:", since)
+            child_pid, child_pg = map(int, child.split(":")[1:])
+            started = proc_fields(child_pid)[2]
+            identities.append((child_pid, started))
+            groups.append((child_pg, started))
+            prepared = wait(session, "PREPARED:", since)
+            assert prepared == f"PREPARED:{child_pid}:{child_pg}:{os.getsid(parent)}"
+            assert child_pg != sup_pg and os.getsid(sup_pid) == os.getsid(parent)
+            wait(session, "CHILD_BARRIER", since)
+            assert not any(event.startswith("EXPERIMENT_START:") for event in session.events[since:])
+            os.kill(sup_pid, signal.SIGUSR2)
+            wait(session, f"EXPERIMENT_START:{child_pid}", since)
+            cycles = []
+            if running_signal:
+                assert wait(session, "SPLIT_RUNNING_READY:", since) == f"SPLIT_RUNNING_READY:{child_pid}"
+                assert boundary.foreground_group(session) == child_pg
+                session._write_all(b"\x03" if signal_name == "INT" else b"\x1c")
+            if name == "suspend":
+                assert wait(session, "SPLIT_RUNNING_READY:", since) == f"SPLIT_RUNNING_READY:{child_pid}"
+                for cycle in range(2):
+                    cycle_since = len(session.events)
+                    assert boundary.foreground_group(session) == child_pg
+                    session._write_all(b"\x1a")
+                    wait(session, f"MAIN_STOPPED:{signal.SIGTSTP}", cycle_since)
+                    assert proc_fields(child_pid)[3] == "T"
+                    ping("running")
+                    assert not any(event.startswith(("MAIN_RETURN:", "LIFETIME_DONE:",
+                                                     "INPUT_RELEASED")) for event in session.events[since:])
+                    os.kill(sup_pid, signal.SIGUSR2)
+                    foreground = wait(session, f"FOREGROUND_VERIFIED:{child_pg}", cycle_since)
+                    sent = wait(session, f"CONT_SENT:{child_pg}", cycle_since)
+                    wait(session, "MAIN_CONTINUED", cycle_since)
+                    ack = wait(session, f"RESUMED_ACK:{child_pid}", cycle_since)
+                    events = session.events[cycle_since:]
+                    assert events.index(foreground) < events.index(sent)
+                    assert events.index(sent) < events.index("MAIN_CONTINUED")
+                    assert events.index(foreground) < events.index(ack)
+                    assert proc_fields(child_pid)[3] != "T"
+                    assert boundary.foreground_group(session) == child_pg
+                    control_held()
+                    cycles.append("native_stop_foreground_restore_continue_ack")
+                os.kill(child_pid, signal.SIGUSR2)
+            descendant_pid = None
+            if tree_case:
+                descendant = wait(session, "DESCENDANT:", since)
+                _, pid, birth, sid = descendant.split(":")
+                descendant_pid = int(pid)
+                identities.append((descendant_pid, int(birth)))
+                main = wait(session, "MAIN_RETURN:17", since)
+                wait(session, "LIFETIME_ACTIVE:WNOHANG=0", since)
+                adopted = proc_fields(descendant_pid)
+                assert adopted[0] == sup_pid and adopted[2] == int(birth)
+                assert adopted[1] == descendant_pid == int(sid)
+                assert boundary.foreground_group(session) == sup_pg
+                if name.endswith("_return"):
+                    session._write_all(b"\x03" if signal_name == "INT" else b"\x1c")
+                    wait(session, f"NO_TARGET:return:SIG{signal_name}", since)
+                    assert proc_fields(descendant_pid)[3] not in {"Z", "X"}
+                elif signal_name is None:
+                    session._write_all(b"\x1a")
+                    wait(session, "NO_TARGET:return:SIGTSTP", since)
+                    os.killpg(sup_pg, signal.SIGCONT)
+                    wait(session, "NO_TARGET:return:SIGCONT", since)
+                ping("return")
+                assert "INPUT_BARRIER" not in session.events[since:]
+                session._write_all(f": > {shlex.quote(str(marker))}\n".encode())
+                os.kill(sup_pid, signal.SIGUSR2)
+                wait(session, f"DESCENDANT_REAPED:{descendant_pid}:23", since)
+            else:
+                main = wait(session, "MAIN_RETURN:", since)
+            expected_status = (int(name.removeprefix("exit")) if name.startswith("exit") else
+                               -2 if name == "int_running" else -3 if name == "quit_running" else
+                               0 if name == "parent_wait" else 17)
+            assert main == f"MAIN_RETURN:{expected_status}"
+            wait(session, "WAIT_EMPTY:ECHILD", since)
+            wait(session, f"LIFETIME_DONE:INTERRUPTS={int(name in {'int_start', 'int_return'})}", since)
+            wait(session, "INPUT_BARRIER", since)
+            control_held()
+            writer = PreviousWriter(f": > {shlex.quote(str(marker))}\n".encode())
+            session._write_all(f": > {shlex.quote(str(marker))}".encode())
+            writer.close_and_discard()
+            boundary.flush_queued_pty(session)
+            os.kill(sup_pid, signal.SIGUSR1)
+            wait(session, "INPUT_RELEASED", since)
+            returned = wait(session, "RETURN:", since)
+            assert returned == f"RETURN:{expected_status if expected_status >= 0 else 128 - expected_status}"
+            assert wait(session, "WAIT:", since) == first
+            parent_disposition = None
+            if name == "parent_wait":
+                parent_disposition = signal_snapshot(parent)
+                signal_since = len(session.events)
+                session._write_all(b"\x1a")
+                session._write_all(f": > {shlex.quote(str(marker))}\n".encode())
+                boundary.drain_for(session, 0.05)
+                if proc_fields(parent)[3] == "T":
+                    raise Inconclusive("parent WAIT unexpectedly stopped; native ignore experiment unavailable")
+                os.write(session._request_fd, b"PING\n")
+                wait(session, "BAD_REQUEST", signal_since)
+                if not parent_disposition["tstp_ignored"]:
+                    raise Inconclusive("parent WAIT native TSTP disposition is not proven ignored")
+                assert not any(event == "READY" or event.startswith(("RETURN:", "WAIT:",
+                                                                      "TAKEOVER_ACK:"))
+                               for event in session.events[signal_since:])
+                assert not marker.exists() and not following.exists()
+            boundary.flush_queued_pty(session)
+            os.write(session._request_fd, b"TAKEOVER\n")
+            wait(session, "TAKEOVER_ACK:", since)
+            wait(session, "READY", since)
+            assert not writer.drain(session)
+            assert traps.read_bytes() == after.read_bytes()
+            session._write_all(b"__b_emit NEW_INPUT\n")
+            wait(session, "NEW_INPUT", since)
+            assert not marker.exists() and not following.exists()
+            assert session.pid == parent and os.readlink(f"/proc/{parent}/cwd") == directory
+            assert boundary.foreground_group(session) == os.getpgid(parent)
+            result = {"shell": Path(shell).name, "case": name, "mode": "split_pg",
+                      "main_return": main, "parent_return": returned,
+                      "classification": "native_ignore_noop" if name == "parent_wait" else "observed",
+                      "stop_continue_cycles": cycles, "parent_disposition": parent_disposition,
+                      "signal_events": [event for event in session.events[since:]
+                                        if event.startswith(("SIGNAL_", "NO_TARGET:"))],
+                      "owned_pids": [parent, sup_pid, child_pid] +
+                                    ([descendant_pid] if descendant_pid is not None else [])}
+    finally:
+        # Include PG_E even on a failed assertion while it is stopped.
+        for group, started in groups:
+            try:
+                if proc_fields(group)[2] == started:
+                    os.killpg(group, signal.SIGKILL)
+            except (FileNotFoundError, ProcessLookupError):
+                pass
+    for pid in result["owned_pids"]:
+        assert not Path(f"/proc/{pid}").exists(), f"owned process remained: {pid}"
+    owned_groups = [sup_pg, child_pg] + ([descendant_pid] if descendant_pid is not None else [])
+    for group in owned_groups:
+        try:
+            os.killpg(group, 0)
+        except ProcessLookupError:
+            pass
+        else:
+            raise AssertionError(f"owned process group remained: {group}")
+    result["owned_groups"] = owned_groups
+    return result
+
+
+def split_failure_case(shell: str) -> dict:
+    """Inject observer failure after setsid but before host registration."""
+    source = controller_source(shell).replace(" --supervisor ", " --split-supervisor ")
+    identities = []
+    groups = []
+    with patch.object(boundary.prototype, "_bash_control_init", return_value=source), \
+         patch.object(boundary.prototype, "_sh_control_init", return_value=source), \
+         tempfile.TemporaryDirectory(prefix="cw03-split-failure-") as directory, \
+         boundary.prototype.ShellProcess(
+             boundary.prototype.ShellChoice("bash" if Path(shell).name == "bash" else "sh", shell),
+             control_wait=True,
+         ) as session, cleanup_split(identities, groups):
+        wait(session, "READY", 0)
+        parent = session.pid
+        traps = Path(directory) / "traps"
+        after = Path(directory) / "after"
+        session._write_all((f"cd {shlex.quote(directory)}; export BOUNDARY_PREPARED=kept "
+                            f"BOUNDARY_TRAPS={shlex.quote(str(traps))} "
+                            f"BOUNDARY_TRAPS_AFTER={shlex.quote(str(after))}; wb-handoff\n").encode())
+        first = wait(session, "WAIT:", 0)
+        since = len(session.events)
+        helper = f"{shlex.quote(sys.executable)} {shlex.quote(str(Path(__file__).resolve()))}"
+        payload = base64.b64encode(json.dumps({"script": f"exec {helper} --failure-split-tree",
+                                               "hold_start": False, "failure": True}).encode()).decode()
+        os.write(session._request_fd, f"RUN:{payload}\n".encode())
+        sup = wait(session, "SUPERVISOR:", since)
+        sup_pid, sup_pg = map(int, sup.split(":")[1:3])
+        identities.append((sup_pid, proc_fields(sup_pid)[2]))
+        child_pid, child_pg = map(int, wait(session, "CHILD:", since).split(":")[1:])
+        birth = proc_fields(child_pid)[2]
+        identities.append((child_pid, birth))
+        groups.append((child_pg, birth))
+        wait(session, "PREPARED:", since)
+        wait(session, "CHILD_BARRIER", since)
+        os.kill(sup_pid, signal.SIGUSR2)
+        wait(session, "FAILURE_ARMED:HOST_UNREGISTERED", since)
+        unregistered = wait(session, "FAILURE_UNREGISTERED:", since)
+        descendant_pid, descendant_birth = map(int, unregistered.split(":")[1:])
+        middle_pid, descendant_sid, observed_birth, state = proc_fields(descendant_pid)
+        assert descendant_sid == descendant_pid and observed_birth == descendant_birth
+        assert state not in {"Z", "X"}
+        assert middle_pid != sup_pid and proc_fields(middle_pid)[0] == child_pid
+        assert descendant_pid not in [pid for pid, _ in identities]
+        # The host knows only diagnostic identity here; it does not add the
+        # descendant to the cleanup list. The supervisor must find adoption.
+        os.kill(sup_pid, signal.SIGUSR2)
+        wait(session, "UNKNOWN:INJECTED_FAILURE", since)
+        wait(session, f"CLEANUP_REAPED:{descendant_pid}", since)
+        wait(session, "CLEANUP_EMPTY:ECHILD", since)
+        assert wait(session, "RETURN:", since) == "RETURN:1"
+        assert wait(session, "WAIT:", since) == first
+        events = session.events[since:]
+        assert not any(event.startswith(("MAIN_RETURN:", "LIFETIME_DONE:",
+                                         "INPUT_BARRIER", "INPUT_RELEASED", "READY")) for event in events)
+        assert events.index("UNKNOWN:INJECTED_FAILURE") < events.index(f"CLEANUP_REAPED:{descendant_pid}")
+        assert events.index("CLEANUP_EMPTY:ECHILD") < events.index("RETURN:1")
+        scans = [set(map(int, event.split(":")[1].split(","))) for event in events
+                 if event.startswith("CLEANUP_SCAN:")]
+        assert scans[0] == {child_pid}, scans
+        assert descendant_pid not in scans[0] and any(descendant_pid in scan for scan in scans[1:])
+        all_pids = [parent, sup_pid, child_pid, middle_pid, descendant_pid]
+        for pid in all_pids[1:]:
+            assert not Path(f"/proc/{pid}").exists(), f"failure cleanup retained {pid}"
+        boundary.flush_queued_pty(session)
+        os.write(session._request_fd, b"TAKEOVER\n")
+        wait(session, "TAKEOVER_ACK:", since)
+        wait(session, "READY", since)
+        session._write_all(b"__b_emit NEW_INPUT\n")
+        wait(session, "NEW_INPUT", since)
+    for pid in all_pids:
+        assert not Path(f"/proc/{pid}").exists(), f"failure cleanup retained {pid}"
+    return {"shell": Path(shell).name, "mode": "split_pg", "case": "unregistered_failure",
+            "classification": "explicit_unknown_cleanup_empty", "events": events,
+            "owned_pids": all_pids}
+
+
+def shared_pg_negative(shell: str, stage: str) -> dict:
+    """Require the known native job-control escape, never call it a pass."""
+    observed = {}
+    original_wait = wait
+
+    def retain(session: object, prefix: str, since: int) -> str:
+        observed["session"] = session
+        if prefix == "START":
+            observed["since"] = since
+        return original_wait(session, prefix, since)
+
+    with patch(__name__ + ".wait", side_effect=retain):
+        try:
+            signal_stage_case(shell, stage, "TSTP")
+        except AssertionError:
+            session = observed["session"]
+            events = session.events[observed["since"]:]
+            assert "SIGNAL_TSTP" in events
+            before_release = events[:events.index("INPUT_RELEASED")] if "INPUT_RELEASED" in events else events
+            assert "READY" in before_release or "RETURN:148" in before_release, events
+        else:
+            raise AssertionError("shared-PG negative control did not expose parent escape")
+    pids = [session.pid] + [int(event.split(":")[1]) for event in events
+                          if event.startswith(("SUPERVISOR:", "CHILD:", "DESCENDANT:"))]
+    assert not any(Path(f"/proc/{pid}").exists() for pid in pids), pids
+    return {"shell": Path(shell).name, "mode": "shared_pg_negative", "stage": stage,
+            "classification": "parent_escape_before_input_release", "events": events,
+            "owned_pids": pids}
+
+
+def main() -> int:
+    shells = [shutil.which("bash"), shutil.which("dash")]
+    if sys.platform != "linux" or any(shell is None for shell in shells):
+        print(json.dumps({"result": "inconclusive", "reason": "Linux, Bash and dash required"}))
+        return 2
+    results = []
+    for shell in shells:
+        for stage in ("start", "return"):
+            try:
+                results.append(shared_pg_negative(shell, stage))
+            except Exception as exc:
+                print(json.dumps({"result": "failed", "cases": results,
+                                  "shell": shell, "stage": stage,
+                                  "error": f"{type(exc).__name__}: {exc}"}))
+                return 1
+        for name in ("suspend", "start", "exit148", "parent_wait", "int_start", "quit_start",
+                     "int_return", "quit_return", "int_running", "quit_running", "exit130", "exit131",
+                     "unregistered_failure"):
+            try:
+                results.append(split_failure_case(shell) if name == "unregistered_failure"
+                               else split_case(shell, name))
+            except Exception as exc:
+                print(json.dumps({"result": "inconclusive" if isinstance(exc, Inconclusive) else "failed",
+                                  "cases": results, "shell": shell, "case": name,
+                                  "error": f"{type(exc).__name__}: {exc}"}))
+                return 2 if isinstance(exc, Inconclusive) else 1
+    print(json.dumps({"result": "observed", "cases": results}))
+    return 0
+
+
 if __name__ == "__main__":
     if len(sys.argv) == 2 and sys.argv[1] == "--fork-tree":
         fork_tree()
     elif len(sys.argv) == 2 and sys.argv[1] == "--blocking-child":
         blocking_child()
+    elif len(sys.argv) == 2 and sys.argv[1] == "--split-running-child":
+        split_running_child()
+    elif len(sys.argv) == 2 and sys.argv[1] == "--failure-split-tree":
+        failure_split_tree()
+    elif len(sys.argv) == 6 and sys.argv[1] == "--prepared-split-child":
+        prepared_split_child(sys.argv[2], sys.argv[3], int(sys.argv[4]), int(sys.argv[5]))
+    elif len(sys.argv) == 4 and sys.argv[1] == "--split-supervisor":
+        raise SystemExit(split_supervisor(sys.argv[2], sys.argv[3]))
     elif len(sys.argv) == 2 and sys.argv[1] in {"--orphan-immediate", "--orphan-delayed"}:
         orphan_child(sys.argv[1] == "--orphan-delayed")
     elif len(sys.argv) == 4 and sys.argv[1] == "--supervisor":

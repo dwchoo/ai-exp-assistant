@@ -1,7 +1,8 @@
 """Bounded two-TUI bridge outage and extension recovery observation.
 
-The disposable host listener is removed during the fault. No message is sent
-while its status is unknown. Provider bodies and terminal output stay in memory.
+The disposable host listener is removed during the fault. Optional diagnostic
+modes attempt unavailable delivery or throw inside the extension handler.
+Provider bodies and terminal output stay in memory.
 """
 
 from __future__ import annotations
@@ -103,17 +104,34 @@ def _deliver(
     return record
 
 
+def _fault_envelope(peer: dict[str, object]) -> ControlEnvelope:
+    return ControlEnvelope(
+        message_id=str(uuid4()), delivery_attempt_id=str(uuid4()),
+        sender_role=ActorRole.MANAGER, session_id=str(peer["session_id"]),
+        session_generation=int(peer["generation"]),
+        task_id=str(uuid4()), revision_id=str(uuid4()), run_id=str(uuid4()),
+        event=MessageEvent(MessageKind.TASK, {"text": "Never replay this diagnostic request."}),
+    )
+
+
 def _malformed_frame(
     server: BridgeHarness, peers: dict[str, dict[str, object]],
     providers: dict[str, object], screens: dict[str, tuple[TerminalScreen, threading.Lock]],
-    children: list[dict[str, object]], result: dict[str, object],
+    children: list[dict[str, object]], result: dict[str, object], *, handler_fault: bool = False,
 ) -> None:
-    """Send one unparsable host frame to worker, then test the same connection."""
+    """Send malformed JSON or an opt-in handler fault, then test recovery."""
     worker = peers["worker"]
     malformed_id = str(uuid4())
-    # A trailing comma makes this invalid JSON. The request ID is retained only
-    # for checking that no API ACK is falsely attributed to the bad frame.
-    bad_frame = f'{{"kind":"deliver","requestId":"{malformed_id}",}}\n'.encode()
+    fault_envelope = _fault_envelope(worker)
+    if handler_fault:
+        bad_frame = (json.dumps({
+            "kind": "deliver", "requestId": malformed_id,
+            "envelope": fault_envelope.to_json(), "diagnosticFault": "handler_exception",
+        }) + "\n").encode()
+    else:
+        # A trailing comma makes this invalid JSON. Retain the request ID to
+        # detect any API ACK falsely attributed to the bad frame.
+        bad_frame = f'{{"kind":"deliver","requestId":"{malformed_id}",}}\n'.encode()
     with worker["write_lock"]:
         worker["socket"].sendall(bad_frame)
     # A valid probe on the same socket is a processing boundary after the bad
@@ -122,6 +140,21 @@ def _malformed_frame(
     manager_state = server.request("manager", {"kind": "probe"}, timeout=5)["state"]
     with server.condition:
         result["malformed_frame_no_api_ack"] = malformed_id not in server.acks
+    if handler_fault:
+        event_name = f"diagnostic_handler_fault:{malformed_id}"
+        event = server.wait_event("worker", event_name, timeout=5)
+        result["internal_handler_exception_observed"] = (
+            event.get("name") == event_name
+            and event.get("sessionId") == worker["session_id"]
+            and event.get("generation") == worker["generation"]
+        )
+        retry = server.request("worker", {"kind": "deliver", "envelope": fault_envelope.to_json()})
+        result["internal_fault_message_id"] = fault_envelope.message_id
+        result["internal_fault_retry_status"] = retry.get("status")
+        if not (result["internal_handler_exception_observed"]
+                and retry.get("status") == "unknown_no_replay"):
+            result["result"] = "internal_handler_observation_unknown"
+            return
     result["same_worker_connection_after_malformed"] = (
         server.peer("worker")["socket"] is worker["socket"]
         and worker_state.get("sessionId") == worker["session_id"]
@@ -150,9 +183,13 @@ def _malformed_frame(
     result["agent_ends_after_malformed"] = {
         role: server.event_count(role, "agent_end") for role in ROLES
     }
+    result["agent_starts_after_frame_fault"] = {
+        role: server.event_count(role, "agent_start") for role in ROLES
+    }
     result["no_processing_or_replay_for_malformed"] = (
         result["provider_counts_after_malformed"] == result["baseline_counts"]
         and result["agent_ends_after_malformed"] == result["baseline_agent_ends"]
+        and result["agent_starts_after_frame_fault"] == result["baseline_agent_starts"]
     )
     if not all(result[key] for key in (
         "malformed_frame_no_api_ack", "same_worker_connection_after_malformed",
@@ -176,12 +213,24 @@ def _malformed_frame(
         and result["final_agent_ends"] == {"manager": 1, "worker": 2}
         and _ready(server, screens, peers)
     ) else "post_malformed_delivery_unknown"
+    if handler_fault and result["result"] == "passed_pair_tui_malformed_frame":
+        result["internal_fault_no_ack"] = result["malformed_frame_no_api_ack"]
+        result["internal_fault_not_replayed_after_recovery"] = (
+            fault_envelope.message_id not in providers["worker"].semantic_seen
+            and fresh["message_id"] != fault_envelope.message_id
+        )
+        result["result"] = ("passed_pair_tui_internal_handler_fault" if
+                            result["internal_fault_not_replayed_after_recovery"] else
+                            "internal_handler_replay_unknown")
 
 
-def run(omp: str, *, malformed_frame: bool = False) -> dict[str, object]:
+def run(omp: str, *, malformed_frame: bool = False, outage_delivery: bool = False,
+        handler_fault: bool = False) -> dict[str, object]:
     result: dict[str, object] = {
         "result": "inconclusive",
-        "mode": "two-real-tui-malformed-frame" if malformed_frame else "two-real-tui-host-outage",
+        "mode": ("two-real-tui-internal-handler-fault" if handler_fault else
+                 "two-real-tui-malformed-frame" if malformed_frame else
+                 "two-real-tui-outage-delivery" if outage_delivery else "two-real-tui-host-outage"),
     }
     with tempfile.TemporaryDirectory(prefix="cw04-g3-tui-extension-fault-") as temporary:
         root = Path(temporary)
@@ -222,10 +271,18 @@ def run(omp: str, *, malformed_frame: bool = False) -> dict[str, object]:
         screens: dict[str, tuple[TerminalScreen, threading.Lock]] = {}
         try:
             for role in ROLES:
-                child = _start_omp(
-                    omp, role, tokens[role], root, socket_path, config,
-                    profile=profile, model=f"g3-tui-fault-{role}/scripted", max_time="45",
-                )
+                previous_fault = os.environ.pop("WORKBENCH_G3_HANDLER_FAULT_PROBE", None)
+                try:
+                    if handler_fault and role == "worker":
+                        os.environ["WORKBENCH_G3_HANDLER_FAULT_PROBE"] = "1"
+                    child = _start_omp(
+                        omp, role, tokens[role], root, socket_path, config,
+                        profile=profile, model=f"g3-tui-fault-{role}/scripted", max_time="45",
+                    )
+                finally:
+                    os.environ.pop("WORKBENCH_G3_HANDLER_FAULT_PROBE", None)
+                    if previous_fault is not None:
+                        os.environ["WORKBENCH_G3_HANDLER_FAULT_PROBE"] = previous_fault
                 children.append(child)
                 fd = int(child["fd"])
                 stop = threading.Event()
@@ -242,6 +299,8 @@ def run(omp: str, *, malformed_frame: bool = False) -> dict[str, object]:
 
             peers = {role: server.peer(role, timeout=10) for role in ROLES}
             result["pids"] = {role: peers[role]["pid"] for role in ROLES}
+            result["bindings"] = {role: {key: peers[role][key] for key in
+                                  ("pid", "session_id", "generation")} for role in ROLES}
             result["distinct_pids_sessions"] = (
                 len({peers[role]["pid"] for role in ROLES}) == 2
                 and len({peers[role]["session_id"] for role in ROLES}) == 2
@@ -272,14 +331,18 @@ def run(omp: str, *, malformed_frame: bool = False) -> dict[str, object]:
             result["baseline_agent_ends"] = {
                 role: server.event_count(role, "agent_end") for role in ROLES
             }
+            result["baseline_agent_starts"] = {
+                role: server.event_count(role, "agent_start") for role in ROLES
+            }
             result["ready_before_fault"] = _ready(server, screens, peers)
             if not (result["separate_provider_handling"] and result["ready_before_fault"]
                     and result["baseline_counts"] == {"manager": 1, "worker": 1}
                     and result["baseline_agent_ends"] == {"manager": 1, "worker": 1}):
                 result["result"] = "baseline_delivery_unknown"
                 return result
-            if malformed_frame:
-                _malformed_frame(server, peers, providers, screens, children, result)
+            if malformed_frame or handler_fault:
+                _malformed_frame(server, peers, providers, screens, children, result,
+                                 handler_fault=handler_fault)
                 return result
 
             # Stop the disposable host listener before cutting its accepted peers.
@@ -297,6 +360,19 @@ def run(omp: str, *, malformed_frame: bool = False) -> dict[str, object]:
             while server.peers and time.monotonic() < deadline:
                 time.sleep(0.05)
             result["host_unreachable_during_fault"] = not socket_path.exists() and not server.peers
+            if outage_delivery:
+                outage = _fault_envelope(peers["worker"])
+                result["outage_message_id"] = outage.message_id
+                result["outage_delivery_attempted"] = True
+                try:
+                    ack = server.request("worker", {"kind": "deliver", "envelope": outage.to_json()}, timeout=0.3)
+                    result["outage_delivery_status"] = ack.get("status")
+                except (TimeoutError, OSError) as error:
+                    result["outage_delivery_status"] = "unavailable"
+                    result["outage_delivery_error"] = type(error).__name__
+                if result["outage_delivery_status"] not in ("unavailable", "unknown_no_replay", "deferred"):
+                    result["result"] = "outage_delivery_false_success"
+                    return result
             draft = f"fault-{uuid4().hex}"
             for char in draft.encode():
                 os.write(int(children[1]["fd"]), bytes((char,)))
@@ -318,9 +394,13 @@ def run(omp: str, *, malformed_frame: bool = False) -> dict[str, object]:
             result["agent_ends_during_fault"] = {
                 role: server.event_count(role, "agent_end") for role in ROLES
             }
+            result["agent_starts_during_fault"] = {
+                role: server.event_count(role, "agent_start") for role in ROLES
+            }
             result["no_replay_during_fault"] = (
                 result["provider_counts_during_fault"] == result["baseline_counts"]
                 and result["agent_ends_during_fault"] == result["baseline_agent_ends"]
+                and result["agent_starts_during_fault"] == result["baseline_agent_starts"]
             )
             if not (result["host_unreachable_during_fault"]
                     and result["worker_composer_usable_during_fault"]
@@ -351,6 +431,16 @@ def run(omp: str, *, malformed_frame: bool = False) -> dict[str, object]:
                 result["provider_counts_after_reconnect"] == result["baseline_counts"]
                 and all(recovered.event_count(role, "agent_end") == 0 for role in ROLES)
             )
+            if outage_delivery:
+                result["outage_delivery_not_replayed"] = (
+                    result["outage_delivery_status"] in ("unavailable", "unknown_no_replay", "deferred")
+                    and outage.message_id not in providers["worker"].semantic_seen
+                    and all(recovered.event_count(role, "agent_start") == 0 for role in ROLES)
+                    and result["no_replay_after_reconnect"]
+                )
+                if not result["outage_delivery_not_replayed"]:
+                    result["result"] = "outage_replay_unknown"
+                    return result
             if not (result["recovery_same_pid_session_generation"]
                     and result["recovered_public_states_ready"]
                     and result["no_replay_after_reconnect"]):
@@ -361,6 +451,13 @@ def run(omp: str, *, malformed_frame: bool = False) -> dict[str, object]:
                 recovered, providers, new_peers, "worker", MessageKind.TASK, ActorRole.MANAGER,
             )
             result["fresh_delivery_after_recovery"] = bool(fresh["passed"])
+            if outage_delivery:
+                result["fresh_message_distinct_from_outage"] = fresh["message_id"] != outage.message_id
+                result["outage_delivery_not_replayed"] = (
+                    result["outage_delivery_not_replayed"]
+                    and outage.message_id not in providers["worker"].semantic_seen
+                    and result["fresh_message_distinct_from_outage"]
+                )
             result["final_provider_counts"] = {
                 role: providers[role].RequestHandlerClass.requests for role in ROLES
             }
@@ -369,6 +466,9 @@ def run(omp: str, *, malformed_frame: bool = False) -> dict[str, object]:
                 and result["final_provider_counts"] == {"manager": 1, "worker": 2}
                 and _ready(recovered, screens, new_peers)
             ) else "post_recovery_delivery_unknown"
+            if outage_delivery and result["result"] == "passed_pair_tui_extension_fault":
+                result["result"] = ("passed_pair_tui_outage_delivery" if
+                                    result["outage_delivery_not_replayed"] else "outage_replay_unknown")
             return result
         except (TimeoutError, OSError, ValueError) as error:
             result["reason"] = type(error).__name__
@@ -400,14 +500,22 @@ def run(omp: str, *, malformed_frame: bool = False) -> dict[str, object]:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--malformed-frame", action="store_true")
+    modes = parser.add_mutually_exclusive_group()
+    modes.add_argument("--malformed-frame", action="store_true")
+    modes.add_argument("--outage-delivery", action="store_true")
+    modes.add_argument("--handler-fault", action="store_true")
     args = parser.parse_args()
     binary = shutil.which("omp")
     if not binary or _omp_version(binary) != OMP_VERSION:
         raise SystemExit("requires OMP 18.2.10")
-    observation = run(binary, malformed_frame=args.malformed_frame)
+    observation = run(binary, malformed_frame=args.malformed_frame,
+                      outage_delivery=args.outage_delivery, handler_fault=args.handler_fault)
     print(json.dumps(observation, sort_keys=True))
     expected_result = "passed_pair_tui_malformed_frame" if args.malformed_frame else "passed_pair_tui_extension_fault"
+    if args.outage_delivery:
+        expected_result = "passed_pair_tui_outage_delivery"
+    if args.handler_fault:
+        expected_result = "passed_pair_tui_internal_handler_fault"
     raise SystemExit(0 if observation["result"] == expected_result
                      and observation["omp_children_remaining"] == 0
                      and all(not pids for pids in observation["cwd_processes_remaining"].values()) else 1)

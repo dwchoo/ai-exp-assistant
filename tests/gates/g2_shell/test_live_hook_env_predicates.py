@@ -109,7 +109,7 @@ class HookEnvPredicatesTest(unittest.TestCase):
         for shell in (shutil.which("bash"), shutil.which("dash")):
             for kind in ("background", "escaped"):
                 with self.subTest(shell=shell, kind=kind):
-                    with patch.object(probe, "controller_source", probe.combined.controller_source):
+                    with patch.object(probe, "controller_source", probe.managed_controller_source):
                         with self.assertRaisesRegex(AssertionError, "automatically accepted"):
                             probe.case(shell, kind)
 

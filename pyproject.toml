@@ -7,7 +7,10 @@ name = "omp-workbench"
 version = "0.1.0"
 description = "Local contracts and harness for OMP Workbench"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = ["pyte==0.8.2", "wcwidth==0.8.4"]
+
+[project.scripts]
+omp-workbench = "workbench.backend.cli:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
