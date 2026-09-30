@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-ime-test-01",
+  "status": "needs_reroute",
+  "frozen_candidate": "0162c165b3d37763bf1949e775499a30604b23139dd5fe4af3fc2a6cf2091e77",
+  "candidate_after_tests": "636de6d69cf81e104f281a285a4b15f83828680052d71e9703facfd5d3af067b",
+  "agent_result": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-ime-test-01-agent.json",
+  "scope_audit": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-ime-test.json",
+  "checks": [
+    [
+      "p27o unit",
+      1,
+      "44/45; fail: prefix key alone does not close the menu"
+    ],
+    [
+      "live WB_LIVE_IME=1 tmux off/on + isolated herdr",
+      0,
+      "4 OK"
+    ],
+    [
+      "tests/ui x2",
+      1,
+      "451, only the new failure"
+    ],
+    [
+      "contracts",
+      0,
+      "43"
+    ],
+    [
+      "g1_vt",
+      0,
+      "85"
+    ],
+    [
+      "mutation red-run",
+      0,
+      "unit 9 + live 1 detected"
+    ]
+  ],
+  "findings": {
+    "menu_prefix_close": "implementation (minor, deterministic): menu label says 'Esc / Ctrl-] 취소' but Ctrl-] alone leaves menu_open until the next key",
+    "hangul_burst": "observation: multi-syllable Hangul after prefix ('안녕' in one read) - first syllable swallowed, second reaches the pane"
+  },
+  "passes": "Ctrl aliases (d t c->Ctrl-y h->Ctrl-o r m->Ctrl-e z), no collisions, prefix Ctrl-c unknown; menu digits/arrows/Enter/Esc/prefix+key; single Hangul hint split-safe; English/resize/scroll/mouse/paste unaffected; Ctrl-z not SIGTSTP in raw tty; live tmux/herdr pass bytes (SS3 arrows become CSI - equivalent)",
+  "root_disposition": "both fixed now: prefix alone closes menu; drop the whole contiguous non-ASCII run following the prefix (all Hangul in that burst) with one hint",
+  "residue": "none (user tmux/herdr pids unchanged)",
+  "observed_model": "sonnet (wb-test-rerun definition; host metadata unverified)"
+}

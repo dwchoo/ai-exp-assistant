@@ -1,0 +1,106 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-ime-worker-01",
+  "status": "candidate_ready",
+  "candidate_id": "0162c165b3d37763bf1949e775499a30604b23139dd5fe4af3fc2a6cf2091e77",
+  "scope_audit": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-ime.json",
+  "delta_backup": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/p27-ime-delta-backup/ (pre in p27-ime-pre/)",
+  "changed_paths": {
+    "src/workbench/ui/product/model.py": "0bf9c914a1c9423e3bf58716f4b6270dbee4d292e63658e0bc611eeab9b2e457",
+    "src/workbench/ui/product/view.py": "a000466d0bafda379efeafec82ccf644ea4455a73194cb7c288f8c2a5c9d4fbc",
+    "tests/ui/test_product_model.py": "e4dd998d4592bfdb7567b4e34ccab6341e670568138ee5640f5d49a93b392d00",
+    "tests/ui/test_product_pty.py": "9834a34b7f10388e8193cd7229567c214722b9812038f4b693fb78ebc103be5c"
+  },
+  "checks": [
+    [
+      "test_product_model before impl",
+      1,
+      "10 fail 44 error (red)"
+    ],
+    [
+      "test_product_model after",
+      0,
+      "161 OK"
+    ],
+    [
+      "pty ImeNeutralPrefixTests",
+      0,
+      "5 OK"
+    ],
+    [
+      "tests/ui test_*.py",
+      0,
+      "406 OK (first run 1 fail due to Ctrl-c alias vs independent test -> alias changed to Ctrl-y)"
+    ],
+    [
+      "contracts",
+      0,
+      "43"
+    ],
+    [
+      "g1_vt",
+      0,
+      "85"
+    ]
+  ],
+  "key_map": {
+    "scroll mode": [
+      "[",
+      "-",
+      1
+    ],
+    "zoom": [
+      "z",
+      "Ctrl-z",
+      2
+    ],
+    "takeover request": [
+      "t",
+      "Ctrl-t",
+      3
+    ],
+    "takeover confirm": [
+      "c",
+      "Ctrl-y",
+      4
+    ],
+    "handoff": [
+      "h",
+      "Ctrl-o",
+      5
+    ],
+    "redraw": [
+      "r",
+      "Ctrl-r",
+      6
+    ],
+    "mouse capture": [
+      "m",
+      "Ctrl-e",
+      7
+    ],
+    "reset layout": [
+      "=",
+      "-",
+      8
+    ],
+    "help": [
+      "?",
+      "-",
+      9
+    ],
+    "detach": [
+      "d",
+      "Ctrl-d",
+      0
+    ]
+  },
+  "design": "CTRL_ALIASES map Ctrl bytes after prefix to letter commands (held-Ctrl works); non-ASCII after prefix -> HANGUL_HINT notice, nothing forwarded, prefix cleared (split UTF-8 and Alt+Hangul handled); prefix Space opens menu_open overlay: Up/Down (CSI/SS3, wrap), Enter, digits 1-9/0, Esc cancel, prefix closes; paste/mouse ignored while open; no Ctrl-h/i/j/m/[ bindings",
+  "gaps": [
+    "Ctrl-c -> Ctrl-y deviation (independent test expects prefix Ctrl-c unknown)",
+    "menu shows focus 1/2/3 and Tab as hint lines only (10 digit slots)",
+    "real Mac/Windows IME passthrough not verifiable here (byte-level)"
+  ],
+  "residue": "none",
+  "observed_model": "sonnet (wb-worker definition; host metadata unverified)"
+}

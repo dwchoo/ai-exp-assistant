@@ -425,7 +425,7 @@
   "implementation_p27": {
     "run_record": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
     "approved_bundle_sha256": "91fe05dc882d8c00ab0eb28c30e2b6cabcbfacb0f0fee3f0eaeecfaff5b7d3e8",
-    "status": "C-D59 integrated; awaiting user trial + IME key decision; UR-UX open",
+    "status": "C-D59 + IME-neutral prefix commands integrated; awaiting user trial (Hangul mode) + order-worker decision; UR-UX open",
     "resumed_from": ".codex/handoffs/2026-09-29-core-workbench-p27-cw17/HANDOFF.md",
     "units": {
       "V-CW-17-p2.7": {
@@ -454,6 +454,10 @@
       "V-CW-17-p2.7-isolation": {
         "status": "integrated",
         "record": ".workflow/core-workbench/runs/implement-p2.6-20260927/integration-p27-cd59.json"
+      },
+      "V-CW-06-p2.7-ime": {
+        "status": "integrated",
+        "record": ".workflow/core-workbench/runs/implement-p2.6-20260927/integration-p27-ime.json"
       }
     },
     "user_review_checkpoints": {

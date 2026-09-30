@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-ime-worker-01",
+  "ticket_id": "CW-06 (UR-UX follow-up: IME-neutral prefix commands)",
+  "role": "worker",
+  "unit": "V-CW-06-p2.7-ime",
+  "approved_bundle_digest": "91fe05dc882d8c00ab0eb28c30e2b6cabcbfacb0f0fee3f0eaeecfaff5b7d3e8",
+  "authority": "user 2026-09-30 '한글 입력 방식 그대로 진행' (ur-ux-request.json follow_ups); C-D57 keys-level routing",
+  "routing": {
+    "planned_role": "worker",
+    "selected_role": "worker (wb-worker, Sonnet high)",
+    "reason_codes": [
+      "bounded_pattern"
+    ],
+    "evidence_refs": [
+      "UI input parsing and an overlay menu only"
+    ]
+  },
+  "base_candidate": "f214cc8231046100c49794645e5cb76e8fc185cb5ef19216c01844c1162118c9 (p27-snapshot-ime-base.json)",
+  "checkpoint_ref": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-cd59-integrated-checkpoint.json (milestone)",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-ime-pre/ (current UI files)"
+  ],
+  "context": "The user types on a Mac (cmux) over SSH into this host, later also Windows. With a Korean IME active, prefix letter commands (Ctrl-] then d/t/c/h/m/r/z) fail: IMEs compose letters (jamo held in preedit) while Ctrl combos, digits, punctuation, arrows, Tab/Enter/Esc/Space pass through unchanged on Mac/Windows/Linux and over SSH. Host-side IME switching is impossible (client IME). No 1:1 jamo mapping.",
+  "required_behavior": [
+    "Ctrl aliases: after the prefix, Ctrl+letter performs the same command as the letter for every letter command (e.g. prefix Ctrl-d detach, Ctrl-t takeover request, Ctrl-c takeover confirm, Ctrl-r redraw, Ctrl-z zoom). Do not bind commands whose Ctrl form is ambiguous with other keys (Ctrl-m=Enter, Ctrl-i=Tab, Ctrl-[=Esc, Ctrl-h vs Backspace): move such commands (e.g. handoff 'h', mouse 'm') to an IME-neutral alternative (another Ctrl letter or punctuation) or make them reachable through the menu; keep the plain letters working in English mode. Holding Ctrl for both prefix and command (Ctrl-] then Ctrl-x without releasing) must work.",
+    "Command menu: prefix Space opens an overlay listing all prefix commands with their keys; select with Up/Down + Enter or a digit 1-9/0 shown next to each item; Esc or prefix cancels; no key reaches a pane while the menu is open; the menu is IME-neutral (only arrows/Enter/digits/Esc).",
+    "Hangul hint: if non-ASCII text (e.g. Hangul syllables/jamo) arrives right after the prefix, do not guess; drop it from command handling, do not forward it to the pane, and show a notice like '한글 입력 상태: Ctrl을 누른 채 명령 키(예: Ctrl-] Ctrl-d)나 Ctrl-] Space 메뉴를 쓰세요'.",
+    "Help overlay and footer list the Ctrl forms and the menu; keep all existing behaviour (resize repeat with arrows, direct scroll, mouse, zoom, catch-up, paste rules, mouse-mode lifecycle)."
+  ],
+  "acceptance": [
+    "red->green tests (tests/ui/test_product_model.py, test_product_pty.py): every letter command via its Ctrl alias (incl. held-Ctrl sequence), no ambiguous Ctrl bindings, menu navigation by arrows/Enter and digits, Esc cancel, no pane input while menu open, Hangul after prefix -> notice + nothing forwarded + prefix state cleared, English letters still work, bracketed paste after prefix unaffected.",
+    "all tests/ui test_*.py incl. *_independent pass unmodified (list conflicts), tests/contracts, tests/gates/g1_vt (src:.). Never run live_* with model; venv python; short TMPDIR."
+  ],
+  "allowed_write_paths": [
+    "src/workbench/ui/product/**",
+    "tests/ui/test_product_model.py",
+    "tests/ui/test_product_pty.py",
+    "tests/ui/support.py"
+  ],
+  "prohibited_paths": [
+    "tests/**/*_independent*.py",
+    "tests/ui/live_*.py",
+    "src/workbench/backend/**",
+    "src/workbench/contracts/**",
+    "src/workbench/terminal/**",
+    "omp_bridge/**",
+    "docs/**",
+    ".workflow/**",
+    "~/wb-urux-sandbox/.state and its processes"
+  ],
+  "rules": "No graphify update, commits, credentials, real model; never pkill/pattern kills; zero residue.",
+  "result_format": "checks table first, status, changed paths + sha256, final key map (letter / Ctrl alias / menu number), residue, gaps. Korean, concise."
+}

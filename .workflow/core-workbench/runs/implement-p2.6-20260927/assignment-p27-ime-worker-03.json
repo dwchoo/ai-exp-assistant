@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-ime-worker-03",
+  "ticket_id": "CW-06 (IME commit-key leak)",
+  "role": "worker",
+  "unit": "V-CW-06-p2.7-ime",
+  "approved_bundle_digest": "91fe05dc882d8c00ab0eb28c30e2b6cabcbfacb0f0fee3f0eaeecfaff5b7d3e8",
+  "routing": {
+    "planned_role": "worker",
+    "selected_role": "worker (wb-worker, Sonnet high)",
+    "reason_codes": [
+      "bounded_pattern"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-ime-review-01-agent.json P2"
+    ]
+  },
+  "base_candidate": "1208f9b8ebd29ccab6e4154d337316ea85a5e95d840749f992307cf67349b29a",
+  "checkpoint_ref": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-ime-fix-delta-backup/"
+  ],
+  "required_behavior": [
+    "When a non-ASCII run follows the prefix, the single IME commit key that arrives immediately after the run in the same burst - Enter (\\r or \\n), Space, Tab, or a C0 control byte such as Ctrl-d - is also consumed (not sent to any pane, not treated as a command); the hint stays single. A Space in that position should open nothing (user can press prefix Space again). Bytes after that one are handled normally.",
+    "Also fix P3a: when the prefix closes the menu, clear the parser prefix state so the footer/next key behave like a fresh state (the next key goes to the pane normally)."
+  ],
+  "acceptance": [
+    "red->green tests in tests/ui/test_product_model.py for prefix+ㅇ+Enter, prefix+ㅇ+Space, prefix+ㅇ+Ctrl-d (same read and split reads) -> nothing forwarded; subsequent input normal; menu close by prefix then 'd' goes to the pane",
+    "tests/ui/test_product_ime_independent_p27o.py and all tests/ui test_*.py pass UNMODIFIED; tests/contracts; tests/gates/g1_vt (src:.)"
+  ],
+  "allowed_write_paths": [
+    "src/workbench/ui/product/**",
+    "tests/ui/test_product_model.py",
+    "tests/ui/test_product_pty.py"
+  ],
+  "prohibited_paths": [
+    "tests/**/*_independent*.py",
+    "tests/ui/live_*.py",
+    "src/workbench/backend/**",
+    "docs/**",
+    ".workflow/**"
+  ],
+  "rules": "venv python, short TMPDIR; no graphify update, commits, pkill; zero residue.",
+  "result_format": "checks table first, status, changed paths + sha256, residue. Korean, concise."
+}

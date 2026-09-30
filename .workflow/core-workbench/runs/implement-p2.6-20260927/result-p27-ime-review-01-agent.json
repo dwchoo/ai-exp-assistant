@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-ime-review-01",
+  "unit": "V-CW-06-p2.7-ime",
+  "frozen_candidate": "1208f9b8ebd29ccab6e4154d337316ea85a5e95d840749f992307cf67349b29a",
+  "verdict": "integrate",
+  "tests": "tests/ui test_*.py 456 OK (163s, venv python, TMPDIR=/tmp/imerv1); live_* not run",
+  "findings": [
+    {"p": "P2", "where": "src/workbench/ui/product/input.py:153-160,181-199", "issue": "ASCII/control byte right after a swallowed Hangul run ends the run and is forwarded to the pane (IME commit trigger). Probe: prefix+ㅇ then Enter -> pane gets \\r; prefix+ㅇ+Ctrl-d (same read) -> pane gets EOF; prefix+ㅇ then Space -> Space leaks and the menu does not open.", "clause": "Hangul hint: nothing forwarded; no leakage", "fix": "document as limitation, or swallow at most one ASCII control/space byte in the same read directly after the run (only when the run was set by this prefix)"},
+    {"p": "P3", "where": "src/workbench/ui/product/model.py:555-561,595", "issue": "Prefix that cancels the menu leaves parser.prefix_active; footer then shows the 'prefix…' command list but the next key is silently spent (probe: menu, prefix, d, d -> only the second d reaches the pane; menu, prefix, prefix, Space -> Space forwarded).", "fix": "footer/notice while _menu_cancelled: 'menu closed; next key ignored'"},
+    {"p": "P3", "where": "src/workbench/ui/product/view.py:_draw_menu", "issue": "menu is 15 lines; with rows<=16 the tail (incl. item 0 detach) and possibly the selected row are clipped; no test at a small terminal. Digits still work.", "fix": "scroll the window around menu_index or shorten the two footer lines"},
+    {"p": "P3", "where": "model.py:menu_lines", "issue": "menu digit 1 is scroll while the line 'focus: Ctrl-] 1/2/3' refers to prefix-level digits; possible confusion. Menu paste notice stays in footer after close.", "fix": "wording"},
+    {"p": "P3", "where": "input.py RUN_SWALLOW_SECONDS", "issue": "syllables committed >0.5 s apart after the prefix are forwarded as text to the pane (probe: 안, then 녕 at +0.8s -> 녕 forwarded); inherent to the heuristic, matches the tested spec.", "fix": "none / document"}
+  ],
+  "focus_verdicts": {
+    "1_ctrl_aliases": "ok: 0x04 d,0x14 t,0x19 c,0x0f h,0x12 r,0x05 m,0x1a z; no 08/09/0a/0d/1b/1d/03 collision; curses.raw() (app.py:124) so Ctrl-z/c/d/y/o are not signals; Ctrl-c unknown (no confirm); held/split sequences ok; plain letters kept; len(key)==1 guard fixes ''-in-str",
+    "2_menu": "ok: modal (paste/mouse/PageScroll/Hangul/letters/Tab swallowed), Esc/prefix/prefix-prefix close, digit 1-9,0 and Enter map to items, ? -> help, resize-repeat cleared by the Command, scroll mode and zoom untouched; P3 items above",
+    "3_hangul_run": "ok with P2: only set after a prefix; 0.5 s window, ASCII terminator, split UTF-8 (_skip precedes _run), Alt+Hangul, no-prefix Hangul untouched, English commands not lost; trailing ASCII leaks by design",
+    "4_regressions": "none found: full tests/ui incl. *_independent pass; paste, mouse-between-prefix, catch-up/replay, mouse mode, 2004 tests unchanged"
+  }
+}

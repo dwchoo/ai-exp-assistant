@@ -1,0 +1,4 @@
+OBSERVATION prefix+안녕 forwarded_to_pane= b'' notice= 한글 입력 상태: Ctrl을 누른 채
+OBSERVATION bytes_after_menu_selection_in_same_read_forwarded= b''
+Ran 4 tests in 54.474s
+OK

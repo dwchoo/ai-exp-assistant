@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-ime-worker-02",
+  "ticket_id": "CW-06 (IME-neutral commands correction)",
+  "role": "worker",
+  "unit": "V-CW-06-p2.7-ime",
+  "approved_bundle_digest": "91fe05dc882d8c00ab0eb28c30e2b6cabcbfacb0f0fee3f0eaeecfaff5b7d3e8",
+  "routing": {
+    "planned_role": "worker",
+    "selected_role": "worker (wb-worker, Sonnet high)",
+    "reason_codes": [
+      "bounded_pattern"
+    ],
+    "evidence_refs": [
+      "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-ime-test-01-agent.json"
+    ]
+  },
+  "base_candidate": "636de6d69cf81e104f281a285a4b15f83828680052d71e9703facfd5d3af067b",
+  "checkpoint_ref": [
+    "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/p27-ime-delta-backup/",
+    "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/p27-ime-test-delta-backup/"
+  ],
+  "required_behavior": [
+    "While the command menu is open, the prefix key (Ctrl-]) alone closes it immediately (as the label promises); prefix prefix and Esc keep working.",
+    "After the prefix, the entire contiguous run of non-ASCII text in the same input burst (e.g. several Hangul syllables committed at once, possibly split across reads) is dropped with a single hint; none of it reaches a pane; the next ASCII byte/command after the run is handled normally."
+  ],
+  "acceptance": [
+    "tests/ui/test_product_ime_independent_p27o.py passes UNMODIFIED (incl. test_the_prefix_key_alone_closes_the_menu_as_its_own_label_promises)",
+    "red->green own tests for the multi-syllable burst (tests/ui/test_product_model.py)",
+    "tests/ui test_*.py x2, tests/contracts, tests/gates/g1_vt (src:.)"
+  ],
+  "allowed_write_paths": [
+    "src/workbench/ui/product/**",
+    "tests/ui/test_product_model.py",
+    "tests/ui/test_product_pty.py"
+  ],
+  "prohibited_paths": [
+    "tests/**/*_independent*.py",
+    "tests/ui/live_*.py",
+    "src/workbench/backend/**",
+    "docs/**",
+    ".workflow/**"
+  ],
+  "rules": "venv python, short TMPDIR; no graphify update, commits, pkill; zero residue.",
+  "result_format": "checks table first, status, changed paths + sha256, residue. Korean, concise."
+}

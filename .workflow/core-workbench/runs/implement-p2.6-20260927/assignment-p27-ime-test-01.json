@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-ime-test-01",
+  "ticket_id": "CW-06 (IME-neutral prefix commands)",
+  "role": "test_designer",
+  "unit": "V-CW-06-p2.7-ime",
+  "approved_bundle_digest": "91fe05dc882d8c00ab0eb28c30e2b6cabcbfacb0f0fee3f0eaeecfaff5b7d3e8",
+  "routing": {
+    "planned_role": "test_designer",
+    "selected_role": "test_designer (wb-test-rerun, Sonnet high)",
+    "reason_codes": [
+      "delta_verification"
+    ],
+    "evidence_refs": [
+      "behaviour defined by the user request and Root packet assignment-p27-ime-worker-01.json"
+    ]
+  },
+  "frozen_candidate": "0162c165b3d37763bf1949e775499a30604b23139dd5fe4af3fc2a6cf2091e77",
+  "frozen_production_files": {
+    "src/workbench/ui/product/__init__.py": "8b250db57bcf1590be1ba6959cf059139155475f18d84ee4577e84e7ad1d536b",
+    "src/workbench/ui/product/app.py": "dd02b3f64c832e31b5032584db686658448712cbc9bb7f1fd7b0be21b42561e6",
+    "src/workbench/ui/product/input.py": "d95680d255a267ff5dcc5a9ad0773d8b956ec064b07145196026d2536b6b36f1",
+    "src/workbench/ui/product/layout.py": "f7be43692d595ca172c3fca666be3d4f89272615dd3dd8ea0017ca95a685b0e3",
+    "src/workbench/ui/product/model.py": "0bf9c914a1c9423e3bf58716f4b6270dbee4d292e63658e0bc611eeab9b2e457",
+    "src/workbench/ui/product/view.py": "a000466d0bafda379efeafec82ccf644ea4455a73194cb7c288f8c2a5c9d4fbc"
+  },
+  "derive_expectations_from": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/ur-ux/ur-ux-request.json follow_ups (IME requirement: Mac/Windows over SSH, no 1:1 mapping)",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/assignment-p27-ime-worker-01.json required_behavior",
+    "byte-level facts: Korean IMEs on macOS/Windows/Linux pass Ctrl combos (C0 bytes), digits, ASCII punctuation, Space, arrows (CSI/SS3), Tab/Enter/Esc; letters become Hangul (UTF-8) or are held in preedit"
+  ],
+  "worker_result": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-ime-worker-01.json (key map; read after deriving expectations)",
+  "required": [
+    "New independent test tests/ui/test_product_ime_independent_p27o.py: simulate what a Korean-IME client sends (Hangul syllables/jamo in UTF-8, split across reads; C0 control bytes; Space; arrows; digits) and assert: every documented command is reachable using only IME-neutral input (Ctrl aliases or the prefix Space menu); Hangul after prefix never reaches a pane and shows the hint; the menu never forwards keys to panes and closes on Esc/prefix; English letters still work; no documented Ctrl alias collides with Backspace/Tab/LF/Enter/Esc; the independent expectation 'prefix Ctrl-c is unknown' still holds; resize repeat, scroll, mouse, paste unaffected.",
+    "Live (no model): real entrypoint + product UI inside an isolated tmux server (tmux -L unique) and an isolated herdr server (XDG_CONFIG_HOME=<scratch>) with a stub OMP: send Ctrl-] Ctrl-d (detach), Ctrl-] Space + digit, and Hangul bytes after prefix through the multiplexer; verify behaviour and that tmux/herdr pass these bytes unchanged. Never the user's herdr/tmux.",
+    "Regression (pattern test_*.py): tests/ui x2, tests/contracts, tests/gates/g1_vt (src:.)."
+  ],
+  "allowed_write_paths": [
+    "tests/ui/test_product_ime_independent_p27o.py",
+    "tests/ui/live_ime_independent_p27o.py",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-ime-test-01-agent.json"
+  ],
+  "prohibited": "production frozen; other tests unchanged; no model; never pkill/pattern kills; never the user's herdr/tmux/configs or ~/wb-urux-sandbox/.state; venv python; short TMPDIR removed; no graphify update, commits.",
+  "result_format": "Write full JSON; reply <=15 lines: checks table, status, verdicts, files sha256, frozen hashes equal?, residue. Korean."
+}

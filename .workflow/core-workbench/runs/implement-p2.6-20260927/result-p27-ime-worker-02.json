@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-ime-worker-02",
+  "status": "candidate_ready",
+  "candidate_id": "1208f9b8ebd29ccab6e4154d337316ea85a5e95d840749f992307cf67349b29a",
+  "scope_audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-ime-fix.json",
+  "delta_backup": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-ime-fix-delta-backup/",
+  "changed_paths": {
+    "src/workbench/ui/product/input.py": "8e9e2f63581a7ab1c05a5ba48c5e4400630b199ec30e42528139d44460d5d88a",
+    "src/workbench/ui/product/model.py": "437109789106d4d742d77e1c8829b742b7e7d51dff9b8c607f69a7f60c91b42f",
+    "tests/ui/test_product_model.py": "2fc7c412ff7773c9970a526e7d280339dce22d165135289b3dedace41cd5a9e2"
+  },
+  "checks": [
+    [
+      "p27o independent unmodified",
+      0,
+      "45 OK"
+    ],
+    [
+      "tests/ui x2",
+      0,
+      "456 OK"
+    ],
+    [
+      "contracts",
+      0,
+      "43"
+    ],
+    [
+      "g1_vt",
+      0,
+      "85"
+    ],
+    [
+      "HangulHintTests red->green",
+      0,
+      "5 tests (34 subtest failures before)"
+    ]
+  ],
+  "design": "menu open + prefix -> close immediately, next key consumed (no command, literal prefix not forwarded); non-ASCII run after prefix dropped across reads with one hint until ASCII byte or 0.5 s gap (RUN_SWALLOW_SECONDS), Alt+Hangul same",
+  "root_rerun": {
+    "log": ".workflow/core-workbench/runs/implement-p2.6-20260927/check-p27-ime-root-rerun.log",
+    "p27o": "OK",
+    "live_ime_independent_p27o (isolated tmux/herdr)": "4 OK; prefix+안녕 forwarded b''"
+  },
+  "gaps": [
+    "0.5 s run window chosen without measured IME latency"
+  ],
+  "residue": "none",
+  "observed_model": "sonnet (wb-worker definition; host metadata unverified)"
+}

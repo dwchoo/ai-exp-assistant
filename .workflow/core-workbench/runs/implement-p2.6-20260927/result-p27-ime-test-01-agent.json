@@ -1,0 +1,83 @@
+{
+ "schema_version": 1,
+ "invocation": "p27-ime-test-01",
+ "role": "test_designer",
+ "unit": "V-CW-06-p2.7-ime",
+ "status": "needs_reroute",
+ "checks": [
+  {
+   "cmd": "unittest discover -s tests/ui -p test_product_ime_independent_p27o.py",
+   "exit": 1,
+   "counts": "45 tests, 1 fail, 44 pass",
+   "secs": 3.3
+  },
+  {
+   "cmd": "WB_LIVE_IME=1 unittest live_ime_independent_p27o (tmux mouse off/on + isolated herdr + residue)",
+   "exit": 0,
+   "counts": "4 tests OK, 0 false checks",
+   "secs": 54
+  },
+  {
+   "cmd": "unittest discover -s tests/ui -p test_*.py (run 1)",
+   "exit": 1,
+   "counts": "451 tests; only failure = new prefix-alone test",
+   "secs": 162
+  },
+  {
+   "cmd": "same (run 2)",
+   "exit": 1,
+   "counts": "451 tests; identical single failure",
+   "secs": 162
+  },
+  {
+   "cmd": "tests/contracts test_*.py",
+   "exit": 0,
+   "counts": "43 OK",
+   "secs": 0.3
+  },
+  {
+   "cmd": "PYTHONPATH=src:. tests/gates/g1_vt test_*.py",
+   "exit": 0,
+   "counts": "85 OK",
+   "secs": 1.5
+  },
+  {
+   "cmd": "mutation red-runs (9 unit mutants on a scratch src copy; 1 live mutant Ctrl-d removed on tmux)",
+   "exit": "all killed",
+   "counts": "9/9 unit + live",
+   "secs": null
+  }
+ ],
+ "failure_classification": {
+  "test": "test_the_prefix_key_alone_closes_the_menu_as_its_own_label_promises",
+  "class": "implementation (minor UX / contract wording)",
+  "evidence": "menu label says 'Esc / Ctrl-] 취소' but a lone Ctrl-] leaves menu_open True (parser.prefix_active); it closes only when a further key arrives (Command event). Deterministic on both runs.",
+  "fix_hint": "close the menu as soon as the parser enters prefix state (e.g. after handle_input if menu_open and parser.prefix_active), or Root adjudicates that 'prefix+key' is sufficient and rewords the label/test"
+ },
+ "verdicts": {
+  "ctrl_aliases_for_every_letter_command": "pass (discovered by effect: d=Ctrl-d, t=Ctrl-t, c=Ctrl-y, h=Ctrl-o, r=Ctrl-r, m=Ctrl-e, z=Ctrl-z; held/released/byte-by-byte; every pane)",
+  "no_alias_collides_with_bs_tab_lf_cr_esc": "pass",
+  "prefix_ctrl_c_unknown": "pass",
+  "menu_digits_arrows_enter_esc_reach_all_commands_and_labels_truthful": "pass",
+  "menu_never_forwards_to_panes": "pass (letters, Hangul, F-keys, mouse, paste, Shift+PgUp)",
+  "menu_closes_on_esc": "pass",
+  "menu_closes_on_prefix": "partial: prefix+key and prefix prefix close it; lone prefix does not (the one failing test)",
+  "hangul_after_prefix_hint_no_leak_state_spent": "pass for a single syllable/jamo in every 1-3 way byte split incl. late continuation and Alt+Hangul; OBSERVATION: a multi-syllable commit (prefix + 안녕) forwards the 2nd syllable (b'\\xeb\\x85\\x95') to the pane",
+  "english_letters_still_work": "pass",
+  "resize_repeat_scroll_mouse_paste_unaffected": "pass",
+  "tty_raw_and_real_loop_pty": "pass (ISIG/ICANON/IEXTEN/IXON off; Ctrl-z is not SIGTSTP; termios restored)",
+  "live_tmux_and_herdr": "pass: bytes unchanged except SS3 arrows (ESC O A-D) become CSI (ESC [ A-D) in tmux and herdr (same key; UI accepts both); real entrypoint+stub OMP: Ctrl-] Ctrl-d exit 0, Ctrl-] Space + digit, Esc close, Hangul hint with no pane leak, reattach; backend survives detach"
+ },
+ "observations": [
+  "multi-syllable Hangul commit after the prefix: first syllable eaten, remainder forwarded (consistent with ASCII 'prefix x yz' but weaker than 'Hangul after prefix never reaches a pane'; Root to adjudicate)",
+  "bytes after a menu selection in the same read are dropped (safe, not forwarded)",
+  "herdr with an empty config shows a first-run onboarding overlay that offers agent-integration installs; live file uses its own minimal config (onboarding=false, update checks off) and never reads the user's config",
+  "Ctrl-y/Ctrl-o rely on a raw host tty (verified) and on the client/multiplexer passing them (verified in tmux+herdr); Mac ssh clients cooked-mode DSUSP/DISCARD not testable here"
+ ],
+ "files_added": {
+  "tests/ui/test_product_ime_independent_p27o.py": "de41cbea815f4781b6fca7e659eaafb9383e7dea38979ce38a19effeb0e344cb",
+  "tests/ui/live_ime_independent_p27o.py": "d7fa1402e579902ff2627360260213b5bd1c922e906c4980527c808ad7a62c7a"
+ },
+ "frozen_production_files_equal_start_and_end": true,
+ "residue": "none: isolated tmux servers and herdr server stopped by own commands and verified gone; backends shut down; owned_processes empty; TMPDIR /tmp/wbo removed; user's tmux/herdr pids unchanged"
+}

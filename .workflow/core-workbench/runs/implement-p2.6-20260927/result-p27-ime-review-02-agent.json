@@ -1,0 +1,22 @@
+{
+ "schema_version": 1,
+ "invocation": "p27-ime-review-02",
+ "verdict": "integrate",
+ "frozen_candidate": "e30c3e2142c094959c7f16eee07b1c7cc06d3a599ce73d0387d4ff6f1e3186f6",
+ "findings": {
+  "P0": [],
+  "P1": [],
+  "P2": [],
+  "P3": [
+   "input.py:99-103 cancel_prefix clears the whole _pending: if the menu-closing prefix is followed in the same read by a partial mouse/CSI introducer, its head is dropped and the tail may reach the pane as text (very rare; previous code had comparable edge)",
+   "input.py:170-172 0x7f (Backspace) is not swallowed as commit key and 0x03 is (intended per worker-03 C0 rule) - heuristic, documented"
+  ]
+ },
+ "focus": {
+  "P2_closed": "OK: swallow in same read and split reads, Enter/LF/Space/Tab/C0; subtests in test_product_model cover ㅇ/안녕 x 6 keys x every cut; only one key, followed by normal input",
+  "no_overswallow": "OK: only after _run (set only by prefix+non-ASCII), window 0.5s checked, Esc and PREFIX excluded and clear _run; long-delay Enter forwarded (test)",
+  "P3a_closed": "OK: cancel_prefix + tests (d/1/space/x, lone Esc flush)",
+  "pty_test": "OK: readiness wait for 'MANAGER OMP' only, assertions unchanged",
+  "regression": "tests/ui 461 OK; tests/contracts 43 OK; ImeNeutralPrefixTests 10/10 OK"
+ }
+}

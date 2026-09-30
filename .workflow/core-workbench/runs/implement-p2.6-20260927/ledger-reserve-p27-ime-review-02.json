@@ -1,0 +1,24 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 1609,
+  "event": {
+    "id": "reserve-p27-ime-review-02",
+    "kind": "reserve",
+    "data": {
+      "buckets": [
+        "total",
+        "role:reviewer",
+        "unit:V-CW-06-p2.7-ime"
+      ],
+      "effort": "high",
+      "incident": "",
+      "invocation": "p27-ime-review-02",
+      "model": "claude-sonnet-5-5",
+      "purpose": "IME commit-key fix delta review",
+      "role": "reviewer",
+      "unit": "V-CW-06-p2.7-ime",
+      "workspace": "/home/dwchoo/ai-exp-assistant",
+      "writer": false
+    }
+  }
+}

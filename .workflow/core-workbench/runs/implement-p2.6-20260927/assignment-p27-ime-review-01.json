@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-ime-review-01",
+  "ticket_id": "CW-06 (IME-neutral prefix commands)",
+  "role": "reviewer",
+  "unit": "V-CW-06-p2.7-ime",
+  "approved_bundle_digest": "91fe05dc882d8c00ab0eb28c30e2b6cabcbfacb0f0fee3f0eaeecfaff5b7d3e8",
+  "routing": {
+    "planned_role": "reviewer",
+    "selected_role": "reviewer (wb-delta-reviewer, Sonnet high)",
+    "reason_codes": [
+      "bounded_delta_after_full_review"
+    ],
+    "evidence_refs": [
+      "CW-06 full review done earlier; this is a UI input delta"
+    ]
+  },
+  "frozen_candidate": "1208f9b8ebd29ccab6e4154d337316ea85a5e95d840749f992307cf67349b29a",
+  "criteria": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/ur-ux/ur-ux-request.json follow_ups (IME requirement)",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/assignment-p27-ime-worker-01.json required_behavior",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-ime-test-01-agent.json"
+  ],
+  "delta": {
+    "files": [
+      "src/workbench/ui/product/input.py",
+      "src/workbench/ui/product/model.py",
+      "src/workbench/ui/product/view.py",
+      "tests/ui/test_product_model.py",
+      "tests/ui/test_product_pty.py",
+      "tests/ui/test_product_ime_independent_p27o.py",
+      "tests/ui/live_ime_independent_p27o.py"
+    ],
+    "base": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-ime-pre/ (production and own tests); independent tests are new files"
+  },
+  "focus": [
+    "Every command reachable with IME-neutral input; Ctrl alias table has no collision (Backspace/Tab/LF/Enter/Esc) and no surprising action for common reflexes (Ctrl-c, Ctrl-z in raw tty, Ctrl-d); held-Ctrl sequences.",
+    "Menu: modal (nothing reaches panes), closes on prefix/Esc, label matches behaviour, interaction with resize repeat, scroll mode, zoom, help overlay, paste and mouse.",
+    "Non-ASCII run swallowing: never swallows text not preceded by the prefix; 0.5 s window and ASCII terminator correct; split UTF-8; Alt+Hangul; no leakage and no lost English commands.",
+    "No regression of prior invariants (catch-up, replay, mouse mode lifecycle, 2004, signal restore)."
+  ],
+  "scratch": "/tmp/claude-1000/-home-dwchoo-ai-exp-assistant/dd5e2cee-e10d-41c4-8ebb-7c00b50dd465/scratchpad/ime-review/",
+  "rules": "Read-only; write only .workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-ime-review-01-agent.json. Tests with /tmp/cw02-g1-venv/bin/python, pattern test_*.py, short unique TMPDIR; no live model; never pkill.",
+  "result_format": "Findings P0..P3; verdict per focus; overall integrate/block. Write JSON; reply <=15 lines. Korean."
+}

@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-ime-review-02",
+  "verdict": "integrate",
+  "frozen_candidate": "e30c3e2142c094959c7f16eee07b1c7cc06d3a599ce73d0387d4ff6f1e3186f6",
+  "agent_result": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-ime-review-02-agent.json",
+  "findings": {
+    "P2 (review-01)": "closed: input.py:170-172 swallow one commit key after prefix+non-ASCII run, same/split reads",
+    "P3a (review-01)": "closed: model.py:553-558 cancel_prefix on menu close",
+    "new P3-1": "cancel_prefix clears all _pending; partial mouse/CSI right after prefix in same read may leak tail as text (rare)",
+    "new P3-2": "0x7f not swallowed while 0x03 is (heuristic per worker-03 rule)"
+  },
+  "checks": {
+    "tests/ui": "461 OK",
+    "tests/contracts": "43 OK"
+  },
+  "observed_model": "sonnet"
+}

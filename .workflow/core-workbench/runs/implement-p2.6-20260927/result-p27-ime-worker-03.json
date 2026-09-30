@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-ime-worker-03",
+  "status": "complete",
+  "base_candidate": "1208f9b8ebd29ccab6e4154d337316ea85a5e95d840749f992307cf67349b29a",
+  "summary": "P2 IME commit-key swallow after a non-ASCII run following the prefix (Enter/Space/Tab/C0, same or split read) and P3a prefix state cleared when the prefix closes the menu",
+  "changed": {
+    "src/workbench/ui/product/input.py": "see p27-audit-ime-fix.json",
+    "src/workbench/ui/product/model.py": "see p27-audit-ime-fix.json",
+    "tests/ui/test_product_model.py": "see p27-audit-ime-fix.json"
+  },
+  "audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-ime-fix.json",
+  "root_checks": ".workflow/core-workbench/runs/implement-p2.6-20260927/check-p27-ime-root-rerun.log",
+  "note": "Root observed an intermittent PTY test failure (Ctrl-z before raw mode) unrelated to the change; fixed in p27-ime-worker-04",
+  "observed_model": "sonnet"
+}

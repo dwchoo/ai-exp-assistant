@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "units": [
+    "V-CW-06-p2.7-ime"
+  ],
+  "status": "integrated",
+  "recorded_at": "2026-09-30",
+  "approved_bundle_digest": "91fe05dc882d8c00ab0eb28c30e2b6cabcbfacb0f0fee3f0eaeecfaff5b7d3e8",
+  "decision": "user follow-up: prefix commands must work in Hangul IME mode without 1:1 key mapping, on Mac/Windows/SSH ('한글 입력 방식 그대로 진행')",
+  "integrated_candidate": "8637d226a70816e92fd8202c7eb422fbf78afa1b4ce3136f5d2c331bb0adcc69",
+  "manifest": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-ime-integrated-checkpoint.json (milestone, full blobs)",
+  "delta_vs_verified": "graphify-out/** and Root state.json only (p27-snapshot-ime-fix2-after.json -> integrated; .workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-ime-integrated.json)",
+  "behaviour": {
+    "ui": "after Ctrl-]: IME-neutral Ctrl aliases (Ctrl-z zoom, Ctrl-t takeover request, Ctrl-y confirm, Ctrl-o handoff, Ctrl-r redraw, Ctrl-e mouse, Ctrl-d detach) and prefix Space numbered command menu (1 scroll .. 0 detach); letter keys unchanged; Hangul after the prefix shows a hint and is never forwarded, plus the single IME commit key (Enter/Space/Tab/C0) right after it; prefix closes the menu and clears prefix state"
+  },
+  "verification_chain": [
+    "p27-ime-worker-01",
+    "p27-ime-test-01 (independent p27o + live IME probe)",
+    "p27-ime-worker-02",
+    "p27-ime-review-01 (integrate after P2 fix)",
+    "p27-ime-worker-03 (P2 commit-key, P3a)",
+    "p27-ime-worker-04 (PTY test readiness, test-only)",
+    "Root rerun p27o + WB_LIVE_IME (check-p27-ime-root-rerun-2.log)",
+    "p27-ime-review-02 (integrate; tests/ui 461 OK, contracts 43 OK)"
+  ],
+  "carried_forward": {
+    "UI polish (later CW-06 delta)": [
+      "review-01 P3b menu truncated at rows<=16",
+      "review-01 P3c menu item 1 wording vs focus 1/2/3; paste notice lingers after menu close",
+      "review-01 P3d syllables >0.5 s apart after prefix reach the pane (heuristic)",
+      "review-02 P3-1 cancel_prefix clears whole _pending (partial CSI after prefix, rare)",
+      "review-02 P3-2 0x7f not swallowed vs 0x03 swallowed"
+    ]
+  },
+  "pending_user": [
+    "trial in Hangul mode on Mac (cmux over SSH)",
+    "order-worker semantics (가)/(나) for CW-18",
+    "UR-UX close confirmation"
+  ]
+}

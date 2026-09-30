@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-ime-review-01",
+  "verdict": "integrate (P2 fixed before integration by Root decision)",
+  "frozen_candidate": "1208f9b8ebd29ccab6e4154d337316ea85a5e95d840749f992307cf67349b29a",
+  "agent_result": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-ime-review-01-agent.json",
+  "findings": {
+    "P2": "input.py:153-160,181-199 the IME commit key right after the Hangul run (Enter, Space, Ctrl-d in same read) ends the run and reaches the pane: prefix+ㅇ then Enter forwards \\r; prefix+ㅇ+Ctrl-d forwards EOF; prefix+ㅇ then Space forwards space and no menu",
+    "P3a": "closing menu by prefix leaves parser prefix state; footer shows prefix hints and the next key is silently consumed",
+    "P3b": "menu 15 lines truncated when rows<=16",
+    "P3c": "menu item 1 (scroll) vs focus 1/2/3 wording; paste notice lingers after menu close",
+    "P3d": "syllables >0.5 s apart after prefix reach the pane (heuristic, per spec)"
+  },
+  "focus": {
+    "ctrl_aliases": "OK (raw tty; Ctrl-c unknown)",
+    "menu": "OK",
+    "hangul_run": "OK except P2",
+    "regression": "none"
+  },
+  "observed_model": "sonnet (wb-delta-reviewer definition; host metadata unverified)"
+}

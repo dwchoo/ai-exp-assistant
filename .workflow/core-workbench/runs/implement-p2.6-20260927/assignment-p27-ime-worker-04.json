@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-ime-worker-04",
+  "ticket_id": "CW-06 (flaky PTY test readiness)",
+  "role": "worker",
+  "unit": "V-CW-06-p2.7-ime",
+  "approved_bundle_digest": "91fe05dc882d8c00ab0eb28c30e2b6cabcbfacb0f0fee3f0eaeecfaff5b7d3e8",
+  "routing": {
+    "planned_role": "worker",
+    "selected_role": "worker (wb-worker, Sonnet high)",
+    "reason_codes": [
+      "bounded_pattern"
+    ],
+    "evidence_refs": [
+      "Root repro: test_ctrl_alias_zoom_then_ctrl_d_detach_in_one_held_sequence 2/10 fail; ImeNeutralPrefixTests.start waits only for attach; keys sent before curses raw mode -> Ctrl-z (0x1a) becomes SIGTSTP in cooked tty"
+    ]
+  },
+  "required_behavior": [
+    "tests/ui/test_product_pty.py ImeNeutralPrefixTests.start (and any other PTY test class whose start() only waits for attach before sending control bytes) must also wait until the UI has drawn its header (e.g. 'MANAGER OMP' visible), like the other classes. Test-only change; no production edits unless you find the UI can lose keys after it has drawn (then stop and report)."
+  ],
+  "acceptance": [
+    "the named test passes 20x in a row",
+    "tests/ui test_*.py x1 green (all independent unmodified)"
+  ],
+  "allowed_write_paths": [
+    "tests/ui/test_product_pty.py"
+  ],
+  "prohibited_paths": [
+    "everything else"
+  ],
+  "rules": "venv python, short TMPDIR; no pkill, graphify update, commits; zero residue.",
+  "result_format": "checks table, status, sha256, residue. Korean, <=8 lines."
+}

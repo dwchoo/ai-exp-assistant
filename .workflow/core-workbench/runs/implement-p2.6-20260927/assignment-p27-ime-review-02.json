@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-ime-review-02",
+  "ticket_id": "CW-06 (IME commit-key fix delta)",
+  "role": "reviewer",
+  "unit": "V-CW-06-p2.7-ime",
+  "approved_bundle_digest": "91fe05dc882d8c00ab0eb28c30e2b6cabcbfacb0f0fee3f0eaeecfaff5b7d3e8",
+  "routing": {
+    "planned_role": "reviewer",
+    "selected_role": "reviewer (wb-delta-reviewer, Sonnet high)",
+    "reason_codes": [
+      "bounded_delta_after_full_review"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-ime-review-01.json"
+    ]
+  },
+  "frozen_candidate": "e30c3e2142c094959c7f16eee07b1c7cc06d3a599ce73d0387d4ff6f1e3186f6",
+  "criteria": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-ime-review-01.json findings P2 and P3a",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/assignment-p27-ime-worker-03.json required_behavior",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/assignment-p27-ime-worker-04.json"
+  ],
+  "delta": {
+    "files": [
+      "src/workbench/ui/product/input.py",
+      "src/workbench/ui/product/model.py",
+      "tests/ui/test_product_model.py",
+      "tests/ui/test_product_pty.py"
+    ],
+    "base": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-ime-fix-delta-backup/ (state reviewed by p27-ime-review-01); diff each file against it"
+  },
+  "focus": [
+    "P2 closed: after prefix + Hangul run, exactly one immediately following commit key (Enter CR/LF, Space, Tab, C0 such as Ctrl-d) is swallowed in the same read and across split reads; no pane receives it, no command/menu fires; the following bytes are handled normally.",
+    "The swallow never eats a key that was NOT preceded by prefix+non-ASCII run, never persists beyond one key or beyond the time window, and does not eat an escape sequence start (Esc/arrows/paste 200~) in a way that corrupts it.",
+    "P3a closed: prefix while the menu is open closes it and clears prefix state; next key goes to the pane.",
+    "Test-only change in test_product_pty.py is a readiness wait, not a weakened assertion.",
+    "No regression: run tests/ui (pattern test_*.py) and tests/contracts."
+  ],
+  "scratch": "/tmp/claude-1000/-home-dwchoo-ai-exp-assistant/dd5e2cee-e10d-41c4-8ebb-7c00b50dd465/scratchpad/ime-review-02/",
+  "rules": "Read-only; write only .workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-ime-review-02-agent.json. Tests with /tmp/cw02-g1-venv/bin/python, PYTHONPATH=src (tests/gates with src:.), short unique TMPDIR under /tmp removed after; no live model; never pkill or pattern kills; do not touch ~/wb-urux-sandbox.",
+  "result_format": "Findings P0..P3 with file:line; verdict per focus; overall integrate/block. Write JSON; reply <=12 lines. Korean."
+}

@@ -76,6 +76,17 @@
         "title": "--no-title 적용 (Recommended)"
       },
       "routing": "C-D59 detail: do not set personality: none (keep OMP default Personality/Tone/Reasoning Format; check warns if PERSONALITY.md exists); add --no-title to isolation args"
+    },
+    {
+      "date": "2026-09-30",
+      "user": "그리고 현재 타이핑 문자가 한글로 되면 ctrl ] + 명령어가 안먹어 ... 1:1 b는 ㅠ 이런식으로 되지 않으면 좋겠어 ... / 우리에 맞는 방법을 찾아줘 / mac을 사용하고 있어 / 그런데 윈도우에서도 잘 동작하면 좋겠어. ssh로 들어간 상태에서도 잘 동작하면 좋겠고.",
+      "root_analysis": "keyboard/IME is on the client (Mac cmux -> sshd -> cmuxd-remote -> herdr on this host); host ibus cannot switch the client IME; Hangul IMEs hold jamo in preedit so 1:1 mapping is unreliable; Ctrl combos, digits, punctuation, arrows, Tab/Enter/Esc pass through Korean IMEs on Mac/Windows/Linux and over SSH",
+      "proposal": "Ctrl+letter aliases after prefix, prefix Space command menu (arrows/Enter/digits), Hangul-after-prefix hint, keep existing IME-neutral keys"
+    },
+    {
+      "date": "2026-09-30",
+      "user": "한글 입력 방식 그대로 진행하고 커밋해줘",
+      "decision": "proceed with the proposal (CW-06 UI delta, keys-level per C-D57); commit done (a3cc5e6, 3339db6, 480f26f)"
     }
   ]
 }

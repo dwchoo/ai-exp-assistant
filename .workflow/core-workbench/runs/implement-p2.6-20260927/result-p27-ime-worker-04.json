@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-ime-worker-04",
+  "status": "complete",
+  "base_candidate": "(after p27-ime-worker-03) .workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-ime-fix-after.json",
+  "summary": "Test-only readiness fix: ImeNeutralPrefixTests.start and ProductPtyTests.start wait until 'MANAGER OMP' is drawn after attach (UI in raw mode) before sending keys",
+  "checks": {
+    "flaky test 20x repeat": "0 failures",
+    "tests/ui discover": "exit 0"
+  },
+  "changed": {
+    "tests/ui/test_product_pty.py": "b864ced0c8c07399c8ba0e67d805e84816a65098b0562836f77c09aa10e17293"
+  },
+  "audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-ime-fix2.json (outside_scope [])",
+  "candidate": "e30c3e2142c094959c7f16eee07b1c7cc06d3a599ce73d0387d4ff6f1e3186f6",
+  "root_checks": ".workflow/core-workbench/runs/implement-p2.6-20260927/check-p27-ime-root-rerun-2.log (p27o independent + WB_LIVE_IME live probe OK, 4 tests)",
+  "residue": "none",
+  "observed_model": "sonnet"
+}

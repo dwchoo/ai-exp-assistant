@@ -1,0 +1,17 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 1608,
+  "event": {
+    "id": "finished-p27-ime-worker-04",
+    "kind": "transition",
+    "data": {
+      "invocation": "p27-ime-worker-04",
+      "state": "finished",
+      "evidence": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-ime-worker-04.json",
+      "outcome": "complete",
+      "observed_model": "sonnet",
+      "observed_effort": "unverified",
+      "not_started_evidence": null
+    }
+  }
+}
