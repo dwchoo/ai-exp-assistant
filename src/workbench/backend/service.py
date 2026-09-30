@@ -13,13 +13,18 @@ import os
 from pathlib import Path
 import signal
 import sys
+import threading
 import time
 import traceback
 from typing import Any
 from uuid import uuid4
 
 from workbench.app.lifecycle import LifecycleJournal
-from workbench.backend.launcher import LaunchPlan, omp_command, omp_environment, shell_environment
+from workbench.backend.launcher import (
+    LaunchPlan, check_isolation, isolation_check_environment, omp_command, omp_environment, pending_isolation,
+    read_user_config, role_overlay, role_skill_allowlist, shell_environment, summarize_isolation,
+    write_role_overlay,
+)
 from workbench.backend.panes import OmpPane, Pane, ShellPane, process_ref, ref_dict
 from workbench.backend.paths import (
     BackendLocked, DataLayout, InstanceLock, ensure_private_dir, unlink_stale_socket, write_private_json,
@@ -40,6 +45,7 @@ READY_TIMEOUT = 90.0
 STATE_INTERVAL = 0.25
 SHUTDOWN_TOKEN_TTL = 120.0
 OMP_ROLES = (("manager", PaneId.MANAGER_OMP), ("worker", PaneId.WORKER_OMP))
+ISOLATION_JOIN_TIMEOUT = 15.0
 
 
 def _log(message: str) -> None:
@@ -83,6 +89,12 @@ class Backend:
         self._last_state_digest: str | None = None
         self._last_state_at = 0.0
         self.shutdown_result: dict[str, Any] | None = None
+        # C-D59 start-up isolation check: runs off the UI loop in one thread.
+        self.omp_isolation: dict[str, Any] = pending_isolation(plan.omp_version)
+        self._isolation_notes: list[str] = []
+        self._isolation_cancel = threading.Event()
+        self._isolation_thread: threading.Thread | None = None
+        self._isolation_dirty = False
 
     # -- lifecycle -------------------------------------------------------
     def run(self) -> int:
@@ -131,13 +143,55 @@ class Backend:
         self._write_record()
         self.shell = ShellPane(self.plan.shell, shell_environment(self.environment))
         self.panes[PaneId.HOST_SHELL] = self.shell
+        home = Path(self.environment.get("HOME") or Path.home())
+        # Bounded (shared timeout, own process groups): never blocks readiness.
+        user = read_user_config(self.plan.omp, cwd=self.project_dir, environment=self.environment)
+        for key, value in user.items():
+            if value is None:
+                self._isolation_notes.append(f"could not read the user's {key}; the isolation overlay "
+                                             "replaced it for this run")
+        checks: dict[str, tuple[list[str], dict[str, str], tuple[str, ...]]] = {}
         for role, pane_id in OMP_ROLES:
+            overlay = write_role_overlay(layout.root, role, role_overlay(
+                role, project_dir=self.project_dir, home=home, environment=self.environment,
+                user_disabled_providers=user.get("disabledProviders") or (),
+                user_disabled_agents=user.get("task.disabledAgents") or ()))
+            command = omp_command(self.plan, overlay)
             env = omp_environment(self.environment, self.plan, role=role, token=tokens[role],
                                   bridge_socket=layout.bridge_socket)
-            self.panes[pane_id] = OmpPane(pane_id, role, omp_command(self.plan), env, cwd=self.project_dir)
+            self.panes[pane_id] = OmpPane(pane_id, role, command, env, cwd=self.project_dir)
+            checks[role] = (command, isolation_check_environment(
+                self.environment, self.plan, role=role, absent_socket=layout.root / "isolation-check.sock"),
+                role_skill_allowlist(role))
         del tokens  # tokens live only in the bridge and each OMP child environment
         self._ready_deadline = time.monotonic() + READY_TIMEOUT
         self._write_record()
+        # Started after every pane fork so no fork happens while it runs.
+        self._isolation_thread = threading.Thread(target=self._run_isolation_check, args=(checks,),
+                                                  name="omp-isolation-check", daemon=True)
+        self._isolation_thread.start()
+
+    def _run_isolation_check(self, checks: dict[str, tuple[list[str], dict[str, str], tuple[str, ...]]]) -> None:
+        """Check each role's exact OMP command once (RPC introspection only, no model call)."""
+        results: dict[str, dict[str, Any]] = {}
+        try:
+            for role, (command, env, allowed) in checks.items():
+                if self._isolation_cancel.is_set():
+                    break
+                results[role] = check_isolation(command, cwd=self.project_dir, environment=env, role=role,
+                                                allowed_skills=allowed, omp_version=self.plan.omp_version,
+                                                cancel=self._isolation_cancel)
+            summary = summarize_isolation(results, self.plan.omp_version)
+        except Exception as exc:  # never let the check die silently
+            summary = summarize_isolation({}, self.plan.omp_version)
+            summary["warning"] = f"OMP isolation check failed: {exc!r}"
+        summary["notes"] = list(self._isolation_notes)
+        self.omp_isolation = summary
+        self._isolation_dirty = True
+        if summary["state"] == "ok":
+            _log("omp isolation check ok")
+        else:
+            _log(f"WARNING {summary['warning']}")
 
     def _loop(self) -> None:
         assert self.ui is not None
@@ -150,6 +204,9 @@ class Backend:
                 for chunk in pane.pump():
                     self.ui.broadcast(chunk)
             self._check_ready()
+            if self._isolation_dirty:
+                self._isolation_dirty = False
+                self._write_record()
             now = time.monotonic()
             if now - self._last_state_at >= STATE_INTERVAL:
                 self._last_state_at = now
@@ -190,6 +247,9 @@ class Backend:
         return exited
 
     def _close(self) -> dict[str, Any]:
+        self._isolation_cancel.set()
+        if self._isolation_thread is not None:
+            self._isolation_thread.join(ISOLATION_JOIN_TIMEOUT)
         refs = self.process_refs()
         if self.ui is not None:
             self.ui.stop_accepting()
@@ -237,6 +297,8 @@ class Backend:
                 "ui_socket": str(self.layout.ui_socket), "project_dir": self.project_dir,
                 "boot_id": self.boot["boot_id"], "omp_version": self.plan.omp_version,
                 "shell": {"kind": self.plan.shell.kind, "executable": self.plan.shell.executable},
+                "omp_isolation": {key: self.omp_isolation.get(key) for key in
+                                  ("state", "ok", "leaks", "warnings", "warning", "version_drift", "notes")},
                 "processes": {name: asdict(ref) for name, ref in self.process_refs().items()}}
 
     def _write_record(self) -> None:
@@ -268,6 +330,7 @@ class Backend:
                 "focus": self.focus.value,
                 "panes": {pane_id.value: pane.info() for pane_id, pane in self.panes.items()},
                 "bridge": self.bridge_state(), "automation": dict(self.automation),
+                "omp_isolation": self.omp_isolation,
                 "boot": dict(self.boot), "shutdown": {"pending": self._shutdown_token is not None},
                 "ui": dict(self.ui.stats) if self.ui else {}}
 

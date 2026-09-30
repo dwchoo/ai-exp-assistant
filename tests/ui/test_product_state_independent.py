@@ -163,20 +163,31 @@ class ReplayQueryTests(unittest.TestCase):
 
 class GeometryTests(unittest.TestCase):
     def test_reported_pane_sizes_match_drawn_areas(self):
-        for rows in (MIN_ROWS, 9, 24, 30, 51):
+        # C-D58 layout: manager | worker side by side on top, host shell across the full width below.
+        margins = set()
+        for rows in (MIN_ROWS, 9, 12, 24, 30, 51):
             for cols in (MIN_COLS, 31, 80, 100, 101, 102, 200, 317):
                 inner = pane_inner_sizes(rows, cols)
                 rects = pane_rects(rows, cols)
-                right = 0
                 for pane in PANES:
                     top, left, height, width = rects[pane]
                     with self.subTest(rows=rows, cols=cols, pane=pane.value):
                         self.assertEqual(inner[pane], (height - 2, width - 2))
                         self.assertGreaterEqual(inner[pane][0], 1)
                         self.assertGreaterEqual(inner[pane][1], 1)
-                        self.assertEqual(left, right, "panes overlap or leave a gap")
-                        right = left + width
-                self.assertEqual(right, cols)
+                m_top, m_left, m_height, m_width = rects[PaneId.MANAGER_OMP]
+                w_top, w_left, w_height, w_width = rects[PaneId.WORKER_OMP]
+                h_top, h_left, h_height, h_width = rects[PaneId.HOST_SHELL]
+                with self.subTest(rows=rows, cols=cols, check="tiling"):
+                    self.assertEqual(m_left, 0)
+                    self.assertEqual(w_left, m_left + m_width, "top panes overlap or leave a gap")
+                    self.assertEqual(w_left + w_width, cols, "top row does not span the full width")
+                    self.assertEqual((m_top, m_height), (w_top, w_height), "top panes are not one row")
+                    self.assertEqual((h_left, h_width), (0, cols), "host shell is not full width")
+                    self.assertEqual(h_top, m_top + m_height, "host shell overlaps or leaves a gap below the top row")
+                    self.assertLessEqual(h_top + h_height, rows)
+                    margins.add((m_top, rows - (h_top + h_height)))
+        self.assertEqual(len(margins), 1, f"header/footer rows differ between sizes: {margins}")
 
     def test_resize_reports_each_pane_its_own_size(self):
         m, s = model()

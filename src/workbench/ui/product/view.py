@@ -6,16 +6,17 @@ import curses
 from wcwidth import wcswidth
 
 from workbench.contracts.v1 import PaneId
-from workbench.ui.product.model import (FOOTER_ROWS, HEADER_ROWS, HELP_LINES, PANES, ProductModel)
+from workbench.ui.product.layout import DEFAULT_LAYOUT, Layout
+from workbench.ui.product.model import HELP_LINES, ProductModel, pane_boxes
 from workbench.ui.terminal_g1.app import _ColorPairs, _attributes
 
 
-def pane_rects(rows: int, cols: int) -> dict[PaneId, tuple[int, int, int, int]]:
-    """(top, left, height, width) including the border."""
-    height = max(1, rows - HEADER_ROWS - FOOTER_ROWS)
-    base = max(1, cols // 3)
-    widths = (base, base, max(1, cols - 2 * base))
-    return {pane: (HEADER_ROWS, base * i, height, widths[i]) for i, pane in enumerate(PANES)}
+def pane_rects(rows: int, cols: int, layout: Layout = DEFAULT_LAYOUT,
+               zoom: PaneId | None = None) -> dict[PaneId, tuple[int, int, int, int]]:
+    """(top, left, height, width) including the border: OMP panes side by side on top, host shell below.
+
+    Only visible panes: a zoomed pane is the only one listed."""
+    return pane_boxes(rows, cols, layout, zoom)
 
 
 def _put(win: curses.window, y: int, x: int, text: str, width: int, attr: int = 0) -> None:
@@ -35,8 +36,8 @@ def draw(win: curses.window, model: ProductModel, colors: _ColorPairs) -> None:
         return
     line1, line2 = model.status_lines()
     _put(win, 0, 0, line1, cols - 1, curses.A_BOLD)
-    _put(win, 1, 0, line2, cols - 1)
-    for pane, (top, left, height, width) in pane_rects(rows, cols).items():
+    _put(win, 1, 0, line2, cols - 1, curses.A_BOLD | curses.A_REVERSE if model.isolation_warning() else 0)
+    for pane, (top, left, height, width) in pane_rects(rows, cols, model.layout, model.zoom).items():
         focused = pane is model.focus
         border = curses.A_BOLD if focused else curses.A_DIM
         try:
@@ -55,8 +56,7 @@ def draw(win: curses.window, model: ProductModel, colors: _ColorPairs) -> None:
         _put(win, top, left + 2, model.pane_title(pane), width - 4, curses.A_BOLD | (curses.A_REVERSE if focused else 0))
         screen = model.panes[pane].screen
         inner_rows, inner_cols = height - 2, width - 2
-        for y in range(min(inner_rows, screen.lines)):
-            line = screen.buffer.get(y, {})
+        for y, line in enumerate(model.pane_lines(pane, inner_rows)):
             for x in range(min(inner_cols, screen.columns)):
                 cell = line.get(x, screen.default_char)
                 if not cell.data:
@@ -72,7 +72,7 @@ def draw(win: curses.window, model: ProductModel, colors: _ColorPairs) -> None:
         _cursor(False)
         _draw_help(win, rows, cols)
     else:
-        _cursor(not model.panes[model.focus].screen.cursor.hidden)
+        _cursor(not model.scrolled(model.focus) and not model.panes[model.focus].screen.cursor.hidden)
         _put(win, rows - 1, 0, model.footer(), cols - 1, curses.A_BOLD if model.notice else 0)
         _place_cursor(win, model, rows, cols)
     try:
@@ -82,9 +82,9 @@ def draw(win: curses.window, model: ProductModel, colors: _ColorPairs) -> None:
 
 
 def _place_cursor(win: curses.window, model: ProductModel, rows: int, cols: int) -> None:
-    top, left, height, width = pane_rects(rows, cols)[model.focus]
+    top, left, height, width = pane_rects(rows, cols, model.layout, model.zoom)[model.focus]
     screen = model.panes[model.focus].screen
-    if screen.cursor.hidden:
+    if screen.cursor.hidden or model.scrolled(model.focus):
         return
     try:
         win.move(top + 1 + min(height - 3, max(0, screen.cursor.y)),

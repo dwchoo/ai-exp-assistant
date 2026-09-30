@@ -17,12 +17,14 @@ import sys
 import time
 
 from workbench.backend.client import ClientError, NotRunning, UiClient, run_attach
-from workbench.backend.launcher import LaunchPlan, StartRequirementError, build_plan
+from workbench.backend.launcher import ISOLATION_CHECK_TIMEOUT, LaunchPlan, StartRequirementError, build_plan
 from workbench.backend.paths import DataDirError, DataLayout, InstanceLock, ensure_private_dir, resolve_data_dir
 from workbench.contracts.ui_v1 import ClientType
 
 EXIT_FAILURE, EXIT_REQUIREMENT, EXIT_NOT_RUNNING = 1, 2, 3
 START_TIMEOUT = 120.0
+# The backend checks both roles one after the other (each bounded).
+ISOLATION_WAIT = 2 * ISOLATION_CHECK_TIMEOUT + 10.0
 
 
 def _layout(args: argparse.Namespace) -> DataLayout:
@@ -110,6 +112,23 @@ def _wait_started(layout: DataLayout, pid: int, timeout: float) -> dict | None:
     return None
 
 
+def _wait_isolation(layout: DataLayout, snapshot: dict, timeout: float = ISOLATION_WAIT,
+                    stream=sys.stdout) -> dict:
+    """Wait (bounded) for the start-up isolation check so the summary shows its result."""
+    deadline = time.monotonic() + timeout
+    announced = False
+    while (snapshot.get("omp_isolation") or {}).get("state") == "pending" and time.monotonic() < deadline:
+        if not announced:
+            print("waiting for the OMP isolation check ...", file=stream, flush=True)
+            announced = True
+        select.select([], [], [], 0.2)
+        fresh = _running_snapshot(layout)
+        if fresh is None:
+            break
+        snapshot = fresh
+    return snapshot
+
+
 def _print_summary(snapshot: dict, stream=sys.stdout) -> None:
     backend, panes = snapshot["backend"], snapshot["panes"]
     shell = panes.get("host_shell", {}).get("shell", {})
@@ -123,6 +142,18 @@ def _print_summary(snapshot: dict, stream=sys.stdout) -> None:
     if shell:
         print(f"  shell: {shell.get('kind')} {shell.get('executable')} mode={shell.get('parent_mode')}",
               file=stream)
+    isolation = snapshot.get("omp_isolation")
+    if isolation:
+        drift = isolation.get("version_drift") or {}
+        drift_text = (" evidence " + ", ".join(f"{name}={version}" for name, version in sorted(drift.items()))
+                      if drift else "")
+        print(f"omp isolation: {isolation.get('state')} ({backend.get('omp_version')}{drift_text})", file=stream)
+        if isolation.get("state") == "pending":
+            print("  note: the isolation check has no result yet; run 'status' to see it", file=stream)
+        if isolation.get("warning"):
+            print(f"WARNING: {isolation['warning']}", file=stream)
+        for note in isolation.get("notes") or ():
+            print(f"  note: {note}", file=stream)
 
 
 def _attach(layout: DataLayout, args: argparse.Namespace) -> int:
@@ -152,6 +183,7 @@ def cmd_start(args: argparse.Namespace) -> int:
             return EXIT_FAILURE
         if running["backend"]["pid"] != pid:
             print(f"another start won the race; using backend pid {running['backend']['pid']}")
+    running = _wait_isolation(layout, running)
     _print_summary(running)
     if args.no_attach:
         return 0

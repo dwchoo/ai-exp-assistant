@@ -53,10 +53,19 @@ def flood(total: int, tail: bytes):
 
 
 def geometry(lines: list[str]) -> list[tuple[int, int, int, int]]:
-    """(row0, col0, height, width) of each pane interior, from the UI's own border rows (ACS l/k/m/j/q/x)."""
-    top = next(i for i, ln in enumerate(lines) if "lq" in ln)
-    bottom = next(i for i, ln in enumerate(lines) if ln.startswith("mq"))
-    return [(top + 1, m.start() + 1, bottom - top - 1, len(m.group(1))) for m in re.finditer(r"m(q+)j", lines[bottom])]
+    """(row0, col0, height, width) of each pane interior, from the UI's own border rows (ACS l/k/m/j/q/x).
+
+    C-D58 layout, returned in PANES order: manager (top left), worker (top right), host shell (full width below).
+    """
+    top = next(i for i, ln in enumerate(lines) if ln.startswith("lq"))
+    upper_bottom = next(i for i, ln in enumerate(lines) if i > top and ln.startswith("mq"))
+    host_top = next(i for i, ln in enumerate(lines) if i > upper_bottom and ln.startswith("lq"))
+    host_bottom = next(i for i, ln in enumerate(lines) if i > host_top and ln.startswith("mq"))
+    boxes = [(top + 1, m.start() + 1, upper_bottom - top - 1, len(m.group(1)))
+             for m in re.finditer(r"m(q+)j", lines[upper_bottom])]
+    boxes += [(host_top + 1, m.start() + 1, host_bottom - host_top - 1, len(m.group(1)))
+              for m in re.finditer(r"m(q+)j", lines[host_bottom])]
+    return boxes
 
 
 class Harness:
@@ -105,6 +114,15 @@ class ReplayTests(unittest.TestCase):
         self.assertNotIn(CATCHUP, bytes(ui.output), "catch-up indicator shown for replay frames")
         geo = geometry(text.split("\n"))
         self.assertEqual(len(geo), 3, text)
+        (t0, l0, h0, w0), (t1, l1, h1, w1), (t2, l2, h2, w2) = geo
+        self.assertEqual((t0, h0, l0), (t1, h1, 1), "top OMP panes are not one row")
+        self.assertEqual(l1, l0 + w0 + 2, "top OMP panes overlap or leave a gap")
+        self.assertEqual(l1 + w1 + 1, COLS, "top row does not span the full width")
+        self.assertEqual((l2, w2), (1, COLS - 2), "host shell is not full width")
+        self.assertEqual(t2, t0 + h0 + 2, "host shell does not sit directly below the top row")
+        for index, pane in enumerate(PANES):  # the size the UI reported to the backend is the size it draws
+            sent = [(f.header["rows"], f.header["cols"]) for f in server.of("resize") if f.header.get("pane") == pane]
+            self.assertEqual(sent[-1], (geo[index][2], geo[index][3]), f"{pane}: reported size != drawn area")
         for index, pane in enumerate(PANES):
             _, _, height, width = geo[index]
             screen = TerminalScreen(width, height)

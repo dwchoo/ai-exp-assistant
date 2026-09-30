@@ -6,13 +6,17 @@ Expectations (derived from CW-06.md, BRIEF C-AC-14, before the implementation wa
 - A lone Esc is delivered promptly (not held until the next key) and is not
   merged into a different key; Ctrl-C/Ctrl-Z/Ctrl-\\ are bytes, not UI signals.
 - A UI command never leaks stray bytes into the pane.
+- Mouse (UR-UX follow-up, Root-authorised adaptation): the UI itself now owns the mouse. A pane WITHOUT app mouse
+  tracking never receives mouse sequences as text; a pane whose app enabled DECSET 1000+1006 receives wheel/click
+  translated to pane-local (1-based) coordinates.
 """
 import unittest
 
-from independent_support_cw06 import RecordingSender
-from workbench.contracts.v1 import PaneId
+from independent_support_cw06 import SID, RecordingSender
+from workbench.contracts import ui_v1
+from workbench.contracts.v1 import DisplayChunk, PaneId
 from workbench.ui.product.input import PARTIAL_HOLD_SECONDS, PREFIX
-from workbench.ui.product.model import ProductModel
+from workbench.ui.product.model import ProductModel, pane_boxes
 
 OMP_KEYS = {
     "enter": b"\r", "ctrl_j_newline": b"\n", "tab": b"\t", "shift_tab": b"\x1b[Z", "backspace": b"\x7f",
@@ -21,7 +25,7 @@ OMP_KEYS = {
     "up": b"\x1b[A", "down": b"\x1b[B", "left_ss3": b"\x1bOD", "home": b"\x1b[H", "end": b"\x1b[F",
     "pgup": b"\x1b[5~", "delete": b"\x1b[3~", "f9": b"\x1b[20~", "f10": b"\x1b[21~", "f12": b"\x1b[24~",
     "alt_enter": b"\x1b\r", "alt_b": b"\x1bb", "alt_bracket": b"\x1b[", "ctrl_left": b"\x1b[1;5D",
-    "shift_enter_csi_u": b"\x1b[13;2u", "kitty_esc": b"\x1b[27u", "mouse_sgr": b"\x1b[<0;10;5M",
+    "shift_enter_csi_u": b"\x1b[13;2u", "kitty_esc": b"\x1b[27u",
     "focus_in": b"\x1b[I", "slash_help": b"/help\r", "korean": "안녕 세계".encode(),
     "esc_esc": b"\x1b\x1b",
 }
@@ -37,6 +41,22 @@ def feed_and_settle(m, data, t=0.0):
     m.flush_input(now=t + PARTIAL_HOLD_SECONDS + 0.001)
 
 
+def display(m, pane, data, seq=1):
+    raw = ui_v1.encode_display(DisplayChunk(session_id=SID, session_generation=1, pane_id=pane, sequence=seq,
+                                            data=data), replay=False)
+    m.on_display(ui_v1.FrameDecoder().feed(raw)[0])
+
+
+def cell(pane, col, row):
+    """1-based terminal (x, y) of the 1-based pane-local interior cell (col, row), from the documented layout."""
+    top, left, _, _ = pane_boxes(40, 150)[pane]
+    return left + 1 + col, top + 1 + row
+
+
+def sgr(button, x, y, release=False):
+    return f"\x1b[<{button};{x};{y}{'m' if release else 'M'}".encode()
+
+
 class PassthroughTests(unittest.TestCase):
     def test_each_original_key_reaches_every_focused_pane_unchanged(self):
         for pane_key, pane in (("1", PaneId.MANAGER_OMP), ("2", PaneId.WORKER_OMP), ("3", PaneId.HOST_SHELL)):
@@ -49,6 +69,36 @@ class PassthroughTests(unittest.TestCase):
                     self.assertEqual(s.payloads("input", pane.value), key)
                     self.assertEqual(s.payloads("input", None), key, "bytes went to another pane")
                     self.assertEqual(s.of("paste"), [])
+
+    def test_mouse_sequences_never_reach_a_pane_without_mouse_tracking_as_text(self):
+        for pane_key, pane in (("1", PaneId.MANAGER_OMP), ("2", PaneId.WORKER_OMP), ("3", PaneId.HOST_SHELL)):
+            for name, button, release in (("wheel_up", 64, False), ("wheel_down", 65, False), ("click", 0, False),
+                                          ("click_release", 0, True), ("right_click", 2, False)):
+                with self.subTest(pane=pane.value, event=name):
+                    m, s = model()
+                    feed_and_settle(m, bytes([PREFIX]) + pane_key.encode())
+                    for target in PaneId:  # over every pane, focused or not
+                        x, y = cell(target, 4, 2)
+                        feed_and_settle(m, sgr(button, x, y, release), t=1.0)
+                    self.assertEqual(s.of("input"), [], "a mouse report reached a pane without mouse tracking")
+                    self.assertEqual(s.of("paste"), [])
+                    self.assertNotIn(b"<", s.payloads("input"))
+
+    def test_mouse_reaches_a_pane_with_tracking_translated_to_pane_local_coordinates(self):
+        for pane in PaneId:
+            for name, button, release, encoded in (("wheel_up", 64, False, "64;{c};{r}M"),
+                                                   ("wheel_down", 65, False, "65;{c};{r}M"),
+                                                   ("press", 0, False, "0;{c};{r}M"),
+                                                   ("release", 0, True, "0;{c};{r}m")):
+                with self.subTest(pane=pane.value, event=name):
+                    m, s = model()
+                    display(m, pane, b"\x1b[?1000h\x1b[?1006h")
+                    col, row = 7, 3
+                    x, y = cell(pane, col, row)
+                    feed_and_settle(m, sgr(button, x, y, release), t=1.0)
+                    want = ("\x1b[<" + encoded.format(c=col, r=row)).encode()
+                    self.assertEqual(s.payloads("input", pane.value), want)
+                    self.assertEqual(s.payloads("input", None), want, "the report went to another pane")
 
     def test_keys_split_byte_by_byte_still_arrive_in_order(self):
         m, s = model()

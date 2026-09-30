@@ -20,10 +20,17 @@ from uuid import uuid4
 from workbench.backend.client import ClientError, UiClient, _terminal_size, _write_all
 from workbench.contracts import ui_v1
 from workbench.contracts.ui_v1 import ClientType, ServerType
-from workbench.ui.product.model import ProductModel, pane_inner_sizes
+from workbench.ui.product.layout import LAYOUT_FILE, load_layout, save_layout
+from workbench.ui.product.model import ProductModel
 from workbench.ui.product.view import draw
 from workbench.ui.terminal_g1.app import _ColorPairs
 
+# Real terminals and multiplexers (xterm, VTE, tmux, herdr) keep ONE mouse-tracking mode for 1000/1002/1003:
+# setting one replaces the mode, resetting any of them turns reporting off. So the mode is chosen once, at start:
+# 1002 (button-event: press/release, wheel and motion while a button is held, for divider drags; 1000 first for
+# terminals without 1002) with SGR encoding, and never switched while running. Only exit / prefix m reset it.
+MOUSE_ON = b"\x1b[?1000h\x1b[?1002h\x1b[?1006h"
+MOUSE_OFF = b"\x1b[?1006l\x1b[?1002l\x1b[?1000l"
 SNAPSHOT_INTERVAL = 5.0
 FRAME_INTERVAL = 0.03
 BACKLOG_FRAME_INTERVAL = 0.05  # <= 20 fps while pane output is still queued: drawing must not starve intake
@@ -105,7 +112,14 @@ def dispatch_frames(client: UiClient, model: ProductModel) -> None:
             model.on_closing(frame.header)
 
 
-def loop(win: "curses.window", client: UiClient, model: ProductModel, stdin_fd: int, stdout_fd: int = 1) -> int:
+def persist_layout(model: ProductModel, layout_path: Path | None) -> None:
+    """Write the split ratios / zoom next to the UI socket once a change is complete (not while dragging)."""
+    if layout_path is not None and model.layout_dirty and not model.drag_active:
+        save_layout(layout_path, *model.take_layout_state())
+
+
+def loop(win: "curses.window", client: UiClient, model: ProductModel, stdin_fd: int, stdout_fd: int = 1,
+         layout_path: Path | None = None) -> int:
     curses.noecho()
     curses.raw()
     win.keypad(False)
@@ -116,10 +130,14 @@ def loop(win: "curses.window", client: UiClient, model: ProductModel, stdin_fd: 
     dirty, last_draw, last_snapshot = True, 0.0, time.monotonic()
     status = 0
     client.on_display = model.enqueue_display  # cheap: pyte is fed in bounded slices below
+    drag_on = False  # a divider drag is in progress (redraw on change; the mouse mode is never switched for it)
     try:
         # Enabled inside the protected region: a SIGTERM/SIGHUP (Terminate) landing right after the write still
         # unwinds through the ``?2004l`` below, so bracketed paste is never left on in the user's terminal.
         _safe_write(stdout_fd, b"\x1b[?2004h")
+        mouse_on = model.mouse_capture
+        if mouse_on:
+            _safe_write(stdout_fd, MOUSE_ON)
         while True:
             try:
                 if resized["flag"]:
@@ -131,6 +149,8 @@ def loop(win: "curses.window", client: UiClient, model: ProductModel, stdin_fd: 
                         pass
                     win.clear()
                     model.resize(rows, cols)
+                    if mouse_on:  # re-assert: a multiplexer (re)attach or a reset may have changed the mode
+                        _safe_write(stdout_fd, MOUSE_ON)
                     dirty = True
                 try:
                     ready = select.select([stdin_fd, client.sock], [], [], 0 if model.has_backlog() else 0.05)[0]
@@ -166,6 +186,16 @@ def loop(win: "curses.window", client: UiClient, model: ProductModel, stdin_fd: 
                     dirty = True
                 elif model.flush_input():
                     dirty = True  # e.g. a lone Esc that closed the help overlay
+                if model.mouse_capture != mouse_on:  # prefix m
+                    mouse_on = model.mouse_capture
+                    _safe_write(stdout_fd, MOUSE_ON if mouse_on else MOUSE_OFF)
+                elif model.take_mouse_reassert() and mouse_on:  # prefix r: also repair the outer mouse mode
+                    _safe_write(stdout_fd, MOUSE_ON)
+                model.flush_resizes()  # trailing resize frames of a divider drag (debounced)
+                if model.drag_active != drag_on:
+                    drag_on = model.drag_active
+                    dirty = True
+                persist_layout(model, layout_path)
                 if model.quit:
                     break
                 if model.has_backlog():
@@ -185,8 +215,11 @@ def loop(win: "curses.window", client: UiClient, model: ProductModel, stdin_fd: 
                 status = 1
                 break
     finally:
-        _safe_write(stdout_fd, b"\x1b[?2004l")
+        # every exit path (detach, signal, connection loss, exception): mouse reporting and bracketed paste off
+        _safe_write(stdout_fd, MOUSE_OFF + b"\x1b[?2004l")
         signal.signal(signal.SIGWINCH, previous)
+        model.abort_drag()
+        persist_layout(model, layout_path)
     return status
 
 
@@ -199,11 +232,13 @@ def run_product(path: Path, *, stdin_fd: int = 0, stdout_fd: int = 1) -> int:
     client = UiClient(path, name="workbench-ui")
     rows, cols = _terminal_size(stdout_fd)
     model = ProductModel(ClientSender(client), rows, cols)
+    layout_path = path.parent / LAYOUT_FILE  # per data dir: next to the UI socket
+    model.set_layout_state(*load_layout(layout_path))
     status, message = 0, ""
     saved = termios.tcgetattr(stdin_fd)
     try:
         try:
-            attached = client.attach(pane_inner_sizes(rows, cols)[model.focus] if not model.too_small() else None)
+            attached = client.attach(model.sizes[model.focus] if not model.too_small() else None)
         except ClientError as exc:
             print(f"attach refused: {exc.header.get('reason', exc)}", file=sys.stderr)
             return 1
@@ -225,7 +260,7 @@ def run_product(path: Path, *, stdin_fd: int = 0, stdout_fd: int = 1) -> int:
 
         previous_handlers = {sig: signal.signal(sig, on_signal) for sig in (signal.SIGTERM, signal.SIGHUP)}
         try:
-            status = curses.wrapper(loop, client, model, stdin_fd, stdout_fd)
+            status = curses.wrapper(loop, client, model, stdin_fd, stdout_fd, layout_path)
         except Terminate as term:
             status, message = 1, f"signal {signal.Signals(term.signum).name}로 종료됨 (backend는 계속 실행)"
         except ConnectionLost as exc:  # a send failed outside the loop body

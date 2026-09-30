@@ -1,0 +1,47 @@
+# OMP Workbench ambient-configuration isolation overlay (C-D59).
+#
+# Passed to both Workbench-launched OMP processes with `--config` (per run only;
+# the user's ~/.omp config, auth, providers and model settings stay in use and
+# are never edited). A second, per-role overlay generated in the data dir adds
+# skills.customDirectories (omp_bridge/skills), the Workbench-owned skill
+# filter (includeSkills/ignoredSkills), task.disabledAgents (unioned with the
+# user's) and the user's own disabledProviders. The launcher also passes
+# --no-extensions, --append-system-prompt "" (APPEND_SYSTEM.md) and --no-title. Verified
+# against OMP 18.4.4; the backend re-checks it at every start via RPC get_state.
+#
+# Capability providers (context files, skills, rules, commands, prompts,
+# extensions, hooks, tools, MCP, SYSTEM.md). These ids do not collide with model
+# provider ids; the per-role overlay re-adds the user's own entries.
+disabledProviders: [native, omp-managed, skillshare, agents-md, agents, claude-md, claude-plugins, claude, cline, codex, cursor, gemini, github, mcp-json, omp-plugins, opencode, ssh-json, vscode, windsurf, agent-plugins, builtin-defaults]
+skills:
+  # Ambient skill sources off. Do not set skills.enabled=false or pass
+  # --no-skills: both also drop skills.customDirectories (Workbench skills).
+  enableClaudeProject: false
+  enableClaudeUser: false
+  enableCodexUser: false
+  enablePiUser: false
+  enablePiProject: false
+  enableAgentsUser: false
+  enableAgentsProject: false
+commands:
+  enableClaudeProject: false
+  enableOpencodeProject: false
+mcp:
+  enableProjectConfig: false
+memory:
+  backend: "off"
+memories:
+  enabled: false
+advisor:
+  enabled: false
+ttsr:
+  builtinRules: false
+# Personality: deliberately not set. OMP's default Personality/Tone/Reasoning
+# Format blocks stay (user choice); the user's personality preset and
+# ~/.omp/agent/PERSONALITY.md then also apply, and the backend check reports an
+# existing PERSONALITY.md as a warning. The launcher also passes --no-title
+# (no session-title model call, TITLE_SYSTEM.md unused).
+dev:
+  # Auto QA: no consent modal and no report push from Workbench sessions.
+  # PI_AUTO_QA in the environment would win; the launcher drops it for OMP.
+  autoqa: false

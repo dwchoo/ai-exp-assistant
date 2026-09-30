@@ -2,11 +2,14 @@
 
 Everything except the prefix key is forwarded byte-for-byte, so original OMP
 keys (Esc, Ctrl-C, Tab, arrows, slash commands, approval keys) are untouched.
-The prefix pressed twice sends the literal prefix byte.
+The prefix pressed twice sends the literal prefix byte. The only other things the parser
+recognises are xterm SGR mouse reports and Shift+PgUp/PgDn (CSI 5;2~ / 6;2~): they become
+``Mouse`` / ``PageScroll`` events and are never forwarded as text.
 """
 from __future__ import annotations
 
 from dataclasses import dataclass
+import re
 import time
 
 PREFIX = 0x1D  # Ctrl-]  (OMP does not use it; bash readline binds it to character-search, reachable via prefix prefix)
@@ -15,6 +18,10 @@ PASTE_END = b"\x1b[201~"
 MAX_PASTE_BYTES = 2 * 1024 * 1024
 PARTIAL_HOLD_SECONDS = 0.05  # lone ESC / 'ESC [' (real Esc or Alt keys)
 INTRODUCER_HOLD_SECONDS = 0.5  # 'ESC [ 2', 'ESC [ 2 0', 'ESC [ 2 0 0': a paste introducer split across reads
+SHIFT_PAGE_KEYS = {b"\x1b[5;2~": 1, b"\x1b[6;2~": -1}  # Shift+PgUp (back in history) / Shift+PgDn
+_MOUSE = re.compile(rb"\x1b\[<(\d{1,5});(\d{1,5});(\d{1,5})([Mm])")  # xterm SGR (1006) mouse report
+# a proper prefix of an SGR mouse report or of a Shift+PgUp/PgDn key: held briefly so a read boundary cannot split it
+_PARTIAL_SPECIAL = re.compile(rb"\x1b(?:\[(?:<[0-9;]{0,20}|[56](?:;2?)?)?)?\Z")
 
 
 @dataclass(frozen=True, slots=True)
@@ -37,7 +44,21 @@ class Command:
     key: str  # the character pressed after the prefix
 
 
-Event = Passthrough | Paste | PasteRejected | Command
+@dataclass(frozen=True, slots=True)
+class Mouse:
+    """One SGR mouse report: ``button`` is the raw code (modifier/motion/wheel bits included), x/y are 1-based."""
+    button: int
+    x: int
+    y: int
+    release: bool
+
+
+@dataclass(frozen=True, slots=True)
+class PageScroll:
+    direction: int  # +1 = Shift+PgUp (towards older output), -1 = Shift+PgDn
+
+
+Event = Passthrough | Paste | PasteRejected | Command | Mouse | PageScroll
 
 
 def _sequence_length(rest: bytes) -> int:
@@ -56,6 +77,10 @@ def _sequence_length(rest: bytes) -> int:
         need = 1 + (4 if second >= 0xF0 else 3 if second >= 0xE0 else 2)
         return need if len(rest) >= need else 0
     return 2  # Alt + one byte, or ESC ESC
+
+
+def _mouse_event(match: re.Match) -> Mouse:
+    return Mouse(int(match.group(1)), int(match.group(2)), int(match.group(3)), match.group(4) == b"m")
 
 
 class InputParser:
@@ -84,7 +109,8 @@ class InputParser:
         """Release a lone partial paste introducer (e.g. a real Esc key) after a short hold."""
         now = time.monotonic() if now is None else now
         pending = bytes(self._pending)
-        hold = INTRODUCER_HOLD_SECONDS if len(pending) >= 3 and PASTE_START.startswith(pending) else PARTIAL_HOLD_SECONDS
+        long_partial = len(pending) >= 3 and (PASTE_START.startswith(pending) or _PARTIAL_SPECIAL.match(pending))
+        hold = INTRODUCER_HOLD_SECONDS if long_partial else PARTIAL_HOLD_SECONDS
         return self._drain(now, force=bool(pending) and not self._in_paste and now - self._pending_since >= hold)
 
     def _drain(self, now: float, *, force: bool) -> list[Event]:
@@ -130,8 +156,14 @@ class InputParser:
                     if rest.startswith(PASTE_START):
                         self._prefix = False  # a paste cancels the pending prefix; parse it normally
                         continue
-                    if PASTE_START.startswith(rest) and not force:
-                        break  # maybe a split paste introducer; wait briefly
+                    mouse = _MOUSE.match(rest)
+                    if mouse:  # a wheel/click between the prefix and its key does not cancel the prefix
+                        out()
+                        events.append(_mouse_event(mouse))
+                        del buf[:mouse.end()]
+                        continue
+                    if (PASTE_START.startswith(rest) or _PARTIAL_SPECIAL.match(rest)) and not force:
+                        break  # maybe a split paste introducer / mouse report; wait briefly
                     length = _sequence_length(rest)
                     if length == 0 and not force:
                         break  # incomplete escape sequence; wait for the rest
@@ -164,8 +196,20 @@ class InputParser:
                     self._in_paste = True
                     self._paste.extend(PASTE_START)
                     continue
-                if PASTE_START.startswith(rest) and not force:
-                    break  # maybe a split introducer; wait briefly
+                mouse = _MOUSE.match(rest)
+                if mouse:
+                    out()
+                    events.append(_mouse_event(mouse))
+                    del buf[:mouse.end()]
+                    continue
+                shift_page = next((seq for seq in SHIFT_PAGE_KEYS if rest.startswith(seq)), None)
+                if shift_page:
+                    out()
+                    events.append(PageScroll(SHIFT_PAGE_KEYS[shift_page]))
+                    del buf[:len(shift_page)]
+                    continue
+                if (PASTE_START.startswith(rest) or _PARTIAL_SPECIAL.match(rest)) and not force:
+                    break  # maybe a split introducer / mouse report / Shift+PgUp; wait briefly
             literal.append(byte)
             del buf[0]
         out()
