@@ -1,14 +1,14 @@
 # MERGE into the trusted repository config. Do not overwrite unrelated settings.
 # Development default only. The user selects Astra for discovery and
 # Sol xhigh/max for ticket planning in the corresponding fresh session.
-model = "gpt-6-sol"
-model_reasoning_effort = "xhigh"
+model = "gpt-5.6-sol"
+model_reasoning_effort = "high"
 
 [agents]
 enabled = true
 max_concurrent_threads_per_session = 4
 default_subagent_model = "gpt-6-luna"
-default_subagent_reasoning_effort = "xhigh"
+default_subagent_reasoning_effort = "max"
 
 [features.multi_agent_v2]
 default_wait_timeout_ms = 60000

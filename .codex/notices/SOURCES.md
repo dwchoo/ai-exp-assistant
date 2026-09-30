@@ -25,3 +25,14 @@ Source: https://github.com/mattpocock/skills/blob/c55ee46073ed923f86ce59a5eb3b6d
 M17 HITL script was inspected and excluded; it is not installed or executed.
 Astra Root/senior guidance is a local user decision, not upstream model policy.
 The existing Matt Pocock MIT notice applies to the adapted material.
+
+## Handoff and operational helpers
+
+Purpose-specific handoff and canonical references adapt productivity/handoff and the Context
+pointers section of productivity/writing-for-agents from mattpocock/skills at
+`c55ee46073ed923f86ce59a5eb3b6d895095d1b7`. The existing Matt Pocock MIT notice applies.
+Sources: https://github.com/mattpocock/skills/blob/c55ee46073ed923f86ce59a5eb3b6d895095d1b7/skills/productivity/handoff/SKILL.md
+and https://github.com/mattpocock/skills/blob/c55ee46073ed923f86ce59a5eb3b6d895095d1b7/skills/productivity/writing-for-agents/SKILL.md
+Project persistence, explicit authority reconciliation and all ledger/evidence/validator/PTY
+algorithms are local design and implementation. OpenAI and Anthropic articles are design
+references, not MIT-licensed source code or evidence of runtime effectiveness.

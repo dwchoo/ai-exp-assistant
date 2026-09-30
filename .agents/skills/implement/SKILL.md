@@ -7,7 +7,7 @@ description: "Execute an approved ticket graph: schedule safe independent work i
 
 Read `.codex/workflow-contract.md`, the supplied feature's BRIEF, SPEC, PLAN and relevant
 tickets/ADRs. Leaves return to Root. Sol owns the complete execution; the project default is
-XHigh, but honor an explicitly selected supported higher effort. Do not switch models.
+High, but honor an explicitly selected supported higher effort. Do not switch models.
 
 ## Entry and resume
 
@@ -18,30 +18,50 @@ review-only request is not permission to implement. Do not silently generate a n
 if no valid ticket bundle exists, return the precise need for to-tickets. Limited dispatch
 scope/base refresh inside an unchanged approved plan is normal, not a new design interview.
 
-Check actual availability of configured workers, `test_designer`, reviewer and workspace capabilities.
+Check availability of configured workers, `test_designer`, reviewer and workspace capabilities.
 Do not declare supported isolation/model/effort merely because the config names it. Reserve
 finite implementation, Oracle, verification/fix and final integration capacity in the ledger.
-Under contract section 8, Root adjusts internal call budgets to remaining work without asking
-the user again. Distinguish these estimates from explicit user ceilings and host limits.
-Read `references/dispatch-and-oracle.md` when preparing assignments and the ledger. Record
-actual usage as calls start, including early reviews and Oracle, not just initial reservations.
-Unknown historical usage needs reconciliation before spending the affected budget.
-On resume, identify the origin of old limits and record the policy transition without resetting
-usage. Clear obsolete internal-budget approval waits through a recorded Root decision; preserve
-actual user ceilings. A plan's numeric estimate alone is not evidence of a user-imposed cap.
+Read `references/dispatch-and-oracle.md` for assignments and journal evidence. Record every
+started call, including early reviews and Oracle. Reconcile unknown usage before spending.
+On resume preserve cumulative usage and user ceilings; resolve legacy limit origins, record
+policy transitions and clear obsolete internal-budget approval waits through Root decisions.
+A PLAN estimate alone is not a user cap. Reuse already-read instructions; reread needed sections
+after context loss or changed bytes. Missing instructions block affected dispatch; never
+silently substitute another installation scope.
 
-## Reassess retries without routine approval waits
+## Select an implementation worker
 
-The worker/review/Oracle counts in contract section 8 are reassessment checkpoints. Before
-the next batch, compare concrete progress and choose a bounded correction or discriminating
-experiment with independent verification reserved. Resize internal budgets from remaining
-mandatory work and justified correction capacity; report the decision instead of requesting
-permission merely to exceed 2 attempts or an internal total. Keep cumulative usage and causes.
-If attempts make no progress, change approach through reproduction, the existing senior role
-or targeted Oracle diagnosis. If that bounded alternative yields neither progress nor a
-concrete next experiment, block only the affected ticket and continue independent ready work.
-Do not keep increasing budgets to repeat an unchanged failing approach. User/host limits,
-approved requirements, permissions and independent testing/review remain binding.
+Use observed implementation constraints, preserving explicit user role/model pins:
+- `bounded_pattern`: clear contracts and an established bounded pattern → `worker`.
+- `coupled_invariants`: interacting invariants, concurrency or complex compatibility →
+  direct `worker_senior`; no prior failure is required.
+- `stalled_implementation`: known cause/fix direction but a concrete implementation obstacle →
+  consider `worker_senior` using the returned delta and failed checks.
+- `unresolved_diagnosis`: unresolved cause/design question → precise Oracle question or
+  discriminating experiment; use the common contract's Oracle tier/read-only rules.
+- `external_blocker`: environment, permissions, requirements or prerequisites → repair within
+  authority or block affected work, not escalation to a stronger implementer.
+
+File count, description length, keywords, confidence and failure count alone never select
+senior. Senior preserves scope, permissions and independent verification. PLAN is advice;
+record actual selection and evidence in the assignment, not a rewritten PLAN. Use `user_pin`
+and its request reference when a pin determines selection. Surface unavailable roles.
+
+## Reassess results and retries
+
+Classify worker results: candidate_ready needs independent verification; needs_reroute needs
+implementation reassessment; needs_oracle needs a concrete diagnostic/design question;
+blocked needs its authority/environment/contract prerequisite resolved. Counts in contract
+section 8 remain reassessment checkpoints, not automatic escalation or approval gates.
+Compare progress, choose a bounded correction or discriminating experiment, and reserve
+verification/integration capacity. Resize internal estimates with recorded reasons; retain
+cumulative usage and causes. Preserve user/host ceilings and unknown-limit reconciliation.
+Do not repeat an unchanged failing approach. If a bounded alternative yields neither progress
+nor a concrete next experiment, block affected work and continue independent ready tickets.
+
+Before reassignment, confirm the previous writer and child processes stopped, inspect partial
+delta/checkpoint and release safe leases. Unknown state forbids another writer in that workspace.
+Link the prior assignment and create a new invocation without resetting usage.
 
 ## Resolve feasibility before expanding implementation
 
@@ -54,9 +74,8 @@ and process cleanup before attributing timeouts to the system under test.
 
 ## Schedule the ready frontier
 
-Select tickets whose declared dependencies are integrated and validated, base/contract
-assumptions remain current, and resource claims/workspace leases/capacity are available.
-Recompute after any ticket result or integration. No artificial global wave barrier.
+Select tickets with integrated, validated dependencies, current base/contracts and available
+resources/leases/capacity. Recompute after every result/integration; no global wave barrier.
 
 Root provisions/identifies authorized isolated workspaces and verifies actual cwd, writable
 roots, input snapshot, config and environment before allowing concurrent mutation. Default
@@ -68,11 +87,9 @@ not isolate files or shared services.
 Use the contract's actual agent-binding smoke evidence before the first concurrent writers;
 reuse it while the environment is unchanged. Shared live runtime claims remain exclusive.
 
-Delegate each bounded ticket to `worker` or a justified `worker_senior`. Include
-actual workspace/base, acceptance IDs, write scope, resource claims, checks and stop rules.
+Delegate each bounded ticket using the selection criteria and assignment packet.
 Workers use small relevant red/green/refactor checks where practical. Root audits each
 assignment against its own recoverable checkpoint and collects attributable output only.
-A worker's candidate_ready response does not mark its ticket integrated.
 
 ## Verification is automatic, not another user command
 
@@ -95,20 +112,18 @@ cover cross-ticket behavior, not only isolated successes.
 
 ## Handle deep blockers through Oracle
 
-Workers/testers/reviewers return a concise `needs_oracle` evidence packet; they do not spawn.
-Root can make the same request itself. Stop mutating processes, release safe leases, and call
-`oracle` or `oracle_senior` as a sibling when justified. Use the common contract.
-Relay diagnostic guidance, delegate experiments/fix, then repeat required tests/review.
-Keep unaffected ready work moving safely. Oracle advice alone never closes the issue.
+Workers/testers/reviewers return `needs_oracle` evidence to Root; they do not spawn.
+Root may identify the question itself. After process/lease reconciliation, consult an Oracle
+sibling under the common contract. Relay guidance and delegate the resulting experiment/fix;
+repeat required tests/review. Advice alone never resolves an issue. Do not resend an unchanged
+packet without new evidence or a specific unresolved question. Keep unaffected work moving.
 
 ## Close or pause
 
 Record current candidate, acceptance coverage, tests, review/delta review, integration and
-scope-audit evidence. Declare only the contract's supported final status. Known failures,
-permission/scope/plan changes, unsafe recovery, unavailable required roles, a no-progress
-impasse or exhausted explicit user/host limits are blockers. A depleted internal estimate
-calls for Root reassessment under section 8, not automatic user approval. Missing verification
-is not a pass.
+scope-audit evidence. Declare only contract-supported status. Preserve its failure, authority, recovery,
+capability and user/host-limit blockers. Depleted internal estimates require reassessment,
+not automatic approval. Missing verification is not a pass.
 On interruption persist resumable state and actual pending assignment information; do not
 promise future execution. No commit/push/PR/deploy/production migration without authorization.
 
@@ -119,3 +134,8 @@ When reading an existing PLAN or ticket, interpret `luna_worker` as `worker` and
 `oracle_senior`. Dispatch only the current identifier without
 rewriting the user's stored ticket or its history. If another worker identifier is
 unknown, report the mismatch to Root instead of guessing a replacement.
+
+Use `../workflow-ledger/SKILL.md` for durable invocation/reservation records and
+`../workspace-evidence/SKILL.md` for checkpoints, candidates and scope audits. On resume compare
+host assignments/processes and retained checks; unknown starts hold capacity. Read a supplied
+handoff as evidence, preserving prior authority, never as a new authorization by itself.

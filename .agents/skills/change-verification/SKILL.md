@@ -83,3 +83,10 @@ model responses and tool actions as skill behavior evidence, and actual host ses
 runtime evidence. A result at one level does not establish a result at the next level.
 Keep independent testing and frozen review even when a newer prompting guide recommends
 less repetitive checking; scale the checks to the change without weakening acceptance.
+
+Use `scripts/verify.py check --input request.json` to record authorized check execution and
+`gate` to compare all current evidence with approved required items; read the shared
+[formats](../workflow-ledger/references/formats.md) when constructing requests. Exit code 0
+is not an acceptance assertion. Preserve execution records and add explicit item observations,
+unknowns and evidence in a new record. Record the result path/hash through workflow-ledger.
+Read-only review/navigation uses recorded evidence only and never runs the check command.

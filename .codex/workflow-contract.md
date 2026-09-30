@@ -10,7 +10,7 @@ user authorization, managed permissions, or stronger repository rules.
 - `to-tickets`: fresh user-selected Sol XHigh/Max session; compile the persisted brief
   into an implementation specification plus dependency-aware tickets in one invocation.
 - `implement`: Sol-owned development; dispatch ready tickets, integrate, independently
-  test and review, repair and run final checks. GPT-6 Sol XHigh is the project default;
+  test and review, repair and run final checks. GPT-5.6 Sol High is the project default;
   an explicitly chosen supported higher effort is not automatically lowered.
 - `ask-workflow`: inspect current evidence and recommend the next step; do not execute it.
 - `investigate-bug`: explicit user invocation only; investigate a named bug and, when
@@ -82,6 +82,12 @@ its revisions, candidates and evidence against the actual repository and host on
 Changed inputs make dependent evidence stale. Preserve completed/unaffected work when
 regenerating a plan; retain stable IDs and record superseded tickets instead of silently
 renumbering active work. A changed approved bundle needs scope-appropriate authorization.
+PLAN's `worker` is a recommendation, not the actual dispatch role. Optional ticket
+`routing_hint` contains `reason_codes` and `evidence_refs` string lists; validation checks
+structure, not routing quality. Preserve existing PLAN bytes and legacy role spellings.
+Root records the actual choice in its assignment under implement's worker selection rules.
+Explicit user role/model pins take precedence; plan approval alone does not imply a pin.
+
 
 ## 4. Logical dependencies versus execution conflicts
 
@@ -187,7 +193,7 @@ the approved plan, not from whichever checks happened to run. The project gate r
 reject `passed` for missing/stale/failed items, required unknowns, or absent required runtime
 evidence; fixture success cannot substitute. A schema alone does not enforce this decision.
 Without a working validator, record the enforcement gap and do not claim a machine-validated
-gate. This instruction bundle does not supply a project-specific gate runner.
+gate. The shared helper validates required evidence records; project-specific runtime assertions remain external.
 
 ## 7. Mandatory tests, review and integration
 
@@ -357,3 +363,41 @@ Report diagnosis or verified repair, uncertainty and artifacts; do not mark an u
 feature complete or resume implement. A later explicitly resumed owner reconciles the new
 candidate and evidence against its full ticket acceptance. Without a productive next experiment,
 report the incident blocker; do not expand into other tickets.
+
+## 11. Operational tools and requested handoff
+
+Skill profile 3 supplies workflow-ledger and workspace-evidence as internal Root procedures,
+and handoff only on explicit user request. Resolve the shared Python helpers relative to the
+installed skills, including global installs. They record evidence, not host scheduling or authority.
+Separate requirements revision, candidate, invocation, check and execution state from task outcome.
+Worker results candidate_ready/needs_reroute/needs_oracle/blocked are task outcomes, not
+journal lifecycle states or proof of stopped processes. Assignment/result packets link via
+invocation and existing transition evidence; Root checks the journal ID and actual role.
+Rerouting creates a new invocation and retains all prior usage; journal v1 fields stay unchanged.
+Use only the typed `workflow-invocation-journal` v1 for live accounting. Initialize explicitly;
+updates never create a missing ledger. Read the compact summary directly; use full view for
+diagnosis. Legacy records require explicit, source-preserving conversion, never an empty reset.
+Imported baselines exclude every individually represented call; unknown counts remain null.
+Keep operating/user/host limits separately and bind to their minimum. Resolve unknown scope,
+usage and limit origins before the affected dispatch. Conversion retains source hashes, copies,
+field mappings and uncertain facts; source interpretation is not proved by a matching hash.
+Reconcile retained history and active writers before resuming; unknown starts retain capacity.
+Use the common PLAN and gate validators with approved requirements. Project-specific assertions
+and independent review remain necessary; zero exit status alone never establishes acceptance.
+
+Handoff may describe a feature, incident or planning task without a PLAN or ledger. Preserve
+project conventions, otherwise create a new `.workflow/handoffs/<id>/HANDOFF.md` and manifest.
+Never overwrite an earlier handoff. Include purpose, goals, authority and decision evidence,
+partial/failed/unverified results, active work, failed attempts, next actions and purposeful links.
+Use Korean prose by default. Exclude secrets. Capture candidate and referenced record identities;
+mark active writers, changing input, missing records and contradictions explicitly.
+Generation does not resume work, change models, stop processes or run checks. At reception,
+compare actual files, authority, ledger and evidence before acting. Reading/status requests
+remain read-only; retain valid prior authorization without requiring approval merely for a new
+session. Report missing fields, broken references, stale evidence, mismatches and unknowns
+separately, never a single readiness score. Provide a short next-session starter and artifact path.
+
+Handoff manifests written by the helper use version 2 and compact typed invocation snapshots
+bound to the exact journal bytes/hash. They omit completed history. Version 1 manifests remain
+read-only historical evidence; embedded old ledger state is opaque and does not enable legacy
+operational reads. Re-read the current journal and reconcile host observations at resume.

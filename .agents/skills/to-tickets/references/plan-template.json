@@ -39,7 +39,8 @@
       ],
       "resource_claims": [],
       "workspace_requirement": "isolated_if_parallel",
-      "worker": "worker"
+      "worker": "worker",
+      "routing_hint": {"reason_codes": ["bounded_pattern"], "evidence_refs": ["SPEC.md#public-contracts"]}
     },
     {
       "id": "T-02",
@@ -182,5 +183,6 @@
       "required_evidence_level": "runtime",
       "check": "Combined behavior in the required real environment; fixture success alone is insufficient"
     }
-  ]
+  ],
+  "requirements_identity": "Replace with digest of the approved requirements JSON from the PLAN validator."
 }

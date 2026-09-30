@@ -1,5 +1,5 @@
 name = "oracle"
-description = "On-demand expert adviser for a hard bug, conflicting evidence or design contradiction; no planning pipeline ownership."
+description = "Read-only advice for an unresolved cause or design question; not an implementation upgrade or planning owner."
 model = "gpt-6-astra"
 model_reasoning_effort = "high"
 sandbox_mode = "read-only"

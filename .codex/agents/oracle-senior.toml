@@ -1,5 +1,5 @@
 name = "oracle_senior"
-description = "Deeper Oracle consultation for a specifically justified difficult diagnosis or unresolved advisory question."
+description = "Deeper read-only advice for a specifically justified unresolved reasoning question; direct consultation allowed when warranted."
 model = "gpt-6-astra"
 model_reasoning_effort = "max"
 sandbox_mode = "read-only"

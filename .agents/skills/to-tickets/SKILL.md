@@ -42,7 +42,10 @@ where appropriate. Include explicit final cross-ticket integration/verification 
 PLAN.json is the canonical graph. Use `references/plan-template.json`. Record real dependency
 edges separately from mutual-exclusion resources and write ownership. State why each edge
 exists and what verified/integrated artifact satisfies it. Include base/contract requirements,
-proposed write scope, worker tier, workspace requirement and relevant service namespaces.
+proposed write scope, recommended worker, workspace requirement and relevant service namespaces.
+For worker recommendations read only [Select an implementation worker](../implement/SKILL.md#select-an-implementation-worker).
+This reference is not implement invocation or execution authority. Keep `worker`; optionally add
+`routing_hint` with `reason_codes` and `evidence_refs` string lists. Preserve older PLANs without hints.
 Do not mark parallel-safe just because file paths differ. Path scopes are planning estimates
 until implement revalidates them at dispatch.
 
@@ -81,3 +84,10 @@ Mark checks that require unavailable services or runtime capability as pending e
 Do not count a ticket status or an implementation detail assertion as acceptance coverage.
 Keep this trace in SPEC/PLAN and reference it from tickets instead of maintaining separate
 competing graphs. This check stays within the single to-tickets planning command.
+
+Validate the graph and gate coverage with `scripts/validate_plan.py --input request.json`
+and the agreed requirements revision using the shared
+[formats](../workflow-ledger/references/formats.md). Requirements include the complete approved
+acceptance/gate list and real authority reference, not a list inferred from passing checks.
+Unapproved drafts remain drafts even when structurally valid. Preserve older nonstandard
+plans and report missing requirements instead of silently inventing approval or coverage.

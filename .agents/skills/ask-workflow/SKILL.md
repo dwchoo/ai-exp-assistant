@@ -18,7 +18,7 @@ Determine stage from evidence, not merely file presence or an `approved`/`comple
 - No settled intent: refine-spec in Astra.
 - Agreed brief but missing/stale executable plan: to-tickets in Sol XHigh/Max.
 - Plan draft: review/approve that actual revision; do not say coding is authorized.
-- Approved runnable tickets: implement in GPT-6 Sol (XHigh default).
+- Approved runnable tickets: implement in GPT-5.6 Sol (High default).
 - Interrupted run: reconcile execution state and resume implement without duplicate writers.
 - A user seeking a separate focused bug investigation: recommend explicit
   `$investigate-bug <symptom-or-incident>` with diagnosis/repair intent, preferably in Astra.
@@ -36,3 +36,8 @@ run tests merely to answer navigation; report their recorded validity and limita
 Return: feature, observed stage, brief supporting evidence/uncertainty, unresolved blocker,
 recommended model/effort, and exactly one next command/action with a reason. A recommendation
 is not permission to run it. Prefer the narrowest continuation over regenerating all artifacts.
+
+When operational helper records exist, use workflow-ledger's read/reconcile and handoff's
+read-only validation against current files. Preserve unknown/legacy records and report any
+assignment, candidate, check or authority disagreement. Recommend `$handoff` when the user
+wants a model/session transfer; recommendation never invokes it or resumes implementation.
