@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-urux-layout-worker-01",
+  "ticket_id": "CW-06 (UR-UX delta, C-D58)",
+  "role": "worker",
+  "unit": "V-CW-06-p2.7-urux",
+  "approved_bundle_digest": "bdda908bb7215ad5e98eb6b90c2b3f99f34f914e915f701c1f475e164775e6ba",
+  "authority": "C-D58 (user UR-UX answers 2026-09-30), approval-amendment-b.json",
+  "routing": {"planned_role": "worker", "selected_role": "worker (wb-worker, Sonnet high)", "reason_codes": ["bounded_pattern"], "evidence_refs": ["UI layout and scrollback view in the product UI; no backend/contract change"]},
+  "base_candidate": "1401c45cbb98e8d9475e2bf7181e7432dc0183aaeb99f5a4c17cfaa6c5f18422",
+  "checkpoint_ref": [".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-cw06-integrated-checkpoint.json (full milestone)", ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-urux-delta-pre/ (current UI files)"],
+  "user_request": "1. 3열 배치 보다는 상단에 omp 2개, 하단에 터미널 이렇게 해줘. 터미널은 길게 가로로 길게 봐야 하거든. 터미널도 스크롤이 되어야해.",
+  "required_behavior": [
+    "Layout: top row = MANAGER OMP (left) and WORKER OMP (right) side by side, each about half the width; bottom = HOST SHELL spanning the full width. Default height split about half/half (top gets the extra row on odd heights), with minimum sizes so neither row collapses; header (2 rows) and footer unchanged. Per-pane resize frames must report each pane's actual inner size (the host shell gets the full inner width). Too-small handling as today.",
+    "Host terminal scrollback in the UI: the user can scroll the host shell pane back through output that has scrolled off the top (pyte history), and return to live view. Provide a scroll mode entered with a prefix command (e.g. prefix [ like tmux copy-mode, and/or prefix PgUp) with PgUp/PgDn, Up/Down, Home/End (or g/G) and q/Esc to leave; while in scroll mode keys are NOT forwarded to the pane, new output keeps the viewed position (does not jump) and a visible indicator shows the position/lines behind live; leaving returns to the live screen exactly. Keep at least 5000 lines of host shell history. Scroll mode may also work for the OMP panes, but the host shell is required. Do NOT mutate the live pyte screen/cursor to render history (pyte HistoryScreen.prev_page/next_page mutate the buffer - render the view from history + a copy of the display instead) so live output, cursor, 2004 tracking and catch-up keep working. A catch-up reset may clear older history - acceptable, note it.",
+    "Update the help overlay and footer hints for the new keys; keys stay provisional.",
+    "No mouse capture by default (keeps the user's terminal text selection)."
+  ],
+  "acceptance": [
+    "red->green tests (tests/ui/test_product_model.py / test_product_pty.py): pane_rects/pane_inner_sizes for the new layout at 100x30, 160x45, 200x50 and odd sizes; per-pane resize values; scroll mode enter/scroll/exit with >1 screen of history; keys not forwarded while scrolling; new output while scrolled does not move the view; exit returns to live screen identical to a screen that never scrolled; history >= 5000 lines.",
+    "Existing tests/ui/*_independent*.py must still pass UNMODIFIED except assertions that encode the OLD three-column geometry: if an independent test hard-codes the 3-column layout, do NOT edit it - list it with the failing assertion so Root can route it to the test_designer.",
+    "suites: tests/ui (pattern test_*.py) x2, tests/contracts, tests/gates/g1_vt (PYTHONPATH=src:.). Never run live_* or set CW06_LIVE_MODEL=1. /tmp/cw02-g1-venv/bin/python only; short TMPDIR."
+  ],
+  "allowed_write_paths": ["src/workbench/ui/product/**", "tests/ui/test_product_model.py", "tests/ui/test_product_pty.py", "tests/ui/test_product_entrypoint.py", "tests/ui/support.py"],
+  "prohibited_paths": ["tests/**/*_independent*.py", "tests/ui/live_*.py", "tests/ui/independent_support_cw06.py", "src/workbench/backend/**", "src/workbench/contracts/**", "src/workbench/terminal/**", "docs/**", ".workflow/**"],
+  "stop_conditions": ["needs backend/contract change"],
+  "rules": "No graphify update, commits, tmux/herdr, credentials, real model; zero residue.",
+  "result_format": "checks table first, status, changed paths + sha256, key map (new), layout summary, independent tests needing geometry adaptation (file:line), residue, gaps. Korean, concise."
+}

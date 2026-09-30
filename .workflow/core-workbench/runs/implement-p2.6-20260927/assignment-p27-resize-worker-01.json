@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-resize-worker-01",
+  "ticket_id": "CW-06 (C-D59 resizable splits)",
+  "role": "worker",
+  "unit": "V-CW-06-p2.7-resize",
+  "approved_bundle_digest": "91fe05dc882d8c00ab0eb28c30e2b6cabcbfacb0f0fee3f0eaeecfaff5b7d3e8",
+  "authority": "C-D59 (user request 2026-09-30)",
+  "routing": {
+    "planned_role": "worker",
+    "selected_role": "worker (wb-worker, Sonnet high)",
+    "reason_codes": [
+      "bounded_pattern"
+    ],
+    "evidence_refs": [
+      "UI layout state and input handling only"
+    ]
+  },
+  "base_candidate": "d2afb9ad83b64bbf7f886b033fc5b53a41afb7d1f47158ee9c64630b3af0360b",
+  "checkpoint_ref": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-cw06-integrated-checkpoint.json (milestone)",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-resize-pre/ (current UI files)"
+  ],
+  "user_request": "manager, worker, 터미널 간에 좌우 창 길이를 조절할 수 있으면 좋겠어. 때에 따라서 어느것은 작고 크게 만들고 싶은데 그게 안돼.",
+  "required_behavior": [
+    "Two adjustable splits: (a) the vertical divider between MANAGER (left) and WORKER (right) in the top row; (b) the horizontal divider between the top row and the HOST terminal. Each is a ratio clamped so every pane keeps at least a small usable inner size (e.g. >= 10 cols / >= 3 rows) and follows window resizes proportionally.",
+    "Mouse: while mouse capture is on, dragging a divider (press on the divider line, move, release) moves it; clicks on dividers are not delivered to panes and do not change focus.",
+    "Keyboard (provisional keys, shown in help): prefix + Left/Right moves the vertical divider, prefix + Up/Down moves the horizontal divider; after a prefix+arrow, further bare arrow presses within about 1 s keep resizing without repeating the prefix (tmux-like repeat), any other key ends resize repeat and is handled normally. prefix z toggles zoom of the focused pane to the whole body area (others hidden, resize sent) and back; prefix = resets splits to default.",
+    "Every effective layout change sends per-pane resize frames with the actual inner sizes (debounced so dragging does not flood the backend), preserves scroll positions (clamped), and never sends keys to panes.",
+    "Persist the split ratios and zoom state per data dir in a small client-side file next to the UI socket (e.g. <data dir>/ui-layout.json, mode 0600, written atomically); load it on attach; ignore corrupt/unknown content safely.",
+    "Keep all prior behaviour (direct scroll, wheel, Shift+PgUp, click-to-focus, catch-up, replay, 2004/mouse restore)."
+  ],
+  "acceptance": [
+    "red->green tests (tests/ui/test_product_model.py / test_product_pty.py): split math at several sizes incl. clamps and odd sizes; drag moves divider and sends debounced resize with correct sizes; divider clicks not forwarded; prefix+arrow and repeat window; zoom and reset; persistence round trip incl. corrupt file; scroll offsets clamped after resize.",
+    "Existing tests/ui test_*.py incl. *_independent pass unmodified (layout defaults unchanged). If an independent test conflicts, list it with file:line, do not edit.",
+    "suites: tests/ui x2, tests/contracts, tests/gates/g1_vt (src:.). Never live_* / CW06_LIVE_MODEL=1; venv python; short TMPDIR."
+  ],
+  "allowed_write_paths": [
+    "src/workbench/ui/product/**",
+    "tests/ui/test_product_model.py",
+    "tests/ui/test_product_pty.py",
+    "tests/ui/test_product_entrypoint.py",
+    "tests/ui/support.py"
+  ],
+  "prohibited_paths": [
+    "tests/**/*_independent*.py",
+    "tests/ui/live_*.py",
+    "tests/ui/independent_support_cw06.py",
+    "src/workbench/backend/**",
+    "src/workbench/contracts/**",
+    "src/workbench/terminal/**",
+    "docs/**",
+    ".workflow/**"
+  ],
+  "concurrency_note": "A read-only investigator runs OMP probes concurrently in its own scratch dirs; you are the only repository writer.",
+  "stop_conditions": [
+    "needs backend/contract change"
+  ],
+  "rules": "No graphify update, commits, tmux/herdr, credentials, real model; zero residue.",
+  "result_format": "checks table first, status, changed paths + sha256, key/mouse map for resizing, persistence file format, residue, gaps. Korean, concise."
+}

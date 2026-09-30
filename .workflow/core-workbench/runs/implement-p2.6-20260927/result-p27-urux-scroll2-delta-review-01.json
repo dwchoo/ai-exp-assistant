@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-urux-scroll2-delta-review-01",
+  "verdict": "integrate",
+  "frozen_candidate": "eb21863b8b153005fb6eefd95389787fcfcb3529e51302b50ed615f87c3c5226",
+  "agent_result": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-urux-scroll2-delta-review-01-agent.json",
+  "focus_verdicts": {
+    "mouse_parsing": "pass",
+    "mode_symmetry": "pass",
+    "per_pane_scroll": "pass",
+    "key_fidelity_and_test_adaptation": "pass",
+    "click_focus": "conditional (limit to plain left button)"
+  },
+  "prior_p3": {
+    "F2": "fixed",
+    "F3": "fixed",
+    "F4": "fixed"
+  },
+  "findings": {
+    "P3-F1": "model.py:581 extended buttons (128) and modified clicks also change focus - limit to plain left",
+    "P3-F2": "model.py:455 tracked mouse/alt modes not reset by RIS/DECSTR; after app crash/reset wheel may send escape text to host shell",
+    "P3-F3": "model.py:575 wheel/arrow forwarded to non-focused host pane not quiet -> refusal notice per event when owner is not user",
+    "P3-F4": "ESC[5 / ESC[6 held 0.5 s (delay only)",
+    "P3-F5": "tracking panes cannot be focused by click (help line)"
+  },
+  "root_disposition": "integrate; F1-F3 first in the CW-06 UI polish delta list",
+  "observed_model": "sonnet (wb-delta-reviewer definition; host metadata unverified)"
+}

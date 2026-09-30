@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-urux-scroll2-test-01",
+  "ticket_id": "CW-06 (UR-UX follow-up: direct scroll)",
+  "role": "test_designer",
+  "unit": "V-CW-06-p2.7-urux",
+  "approved_bundle_digest": "bdda908bb7215ad5e98eb6b90c2b3f99f34f914e915f701c1f475e164775e6ba",
+  "routing": {
+    "planned_role": "test_designer",
+    "selected_role": "test_designer (wb-test-rerun, Sonnet high)",
+    "reason_codes": [
+      "delta_verification"
+    ],
+    "evidence_refs": [
+      "user follow-up answer '둘 다' (ur-ux-request.json follow_ups) defines behaviour"
+    ]
+  },
+  "frozen_candidate": "c8cf385a0ac03454137c1a88c41a90c0ce773dfc3b42650f0ac3b2bca6f65ceb",
+  "frozen_production_files": {
+    "src/workbench/ui/product/__init__.py": "8b250db57bcf1590be1ba6959cf059139155475f18d84ee4577e84e7ad1d536b",
+    "src/workbench/ui/product/app.py": "b40218946752976bd7a2929da698d337216b71f2ea4b7a4785ed28097d0f9ffe",
+    "src/workbench/ui/product/input.py": "d95680d255a267ff5dcc5a9ad0773d8b956ec064b07145196026d2536b6b36f1",
+    "src/workbench/ui/product/model.py": "7b676069ca7fefd009956d49939cad55d03c24ced12d9d2bea946199b28c4b4f",
+    "src/workbench/ui/product/view.py": "d14269d7e4454e0c4ac061ab61743b418a4f992ec4bc1c6138edbf423fe20cd8",
+    "src/workbench/backend/cli.py": "9b44e4847275514ec27e7c9474dfe7ad0c5556d3803651f7fc292be0402a2b4e",
+    "src/workbench/backend/ui_server.py": "e6aa3e0b12fc48c920ed901d8e3b8ec8e1063d9d1cb3a89bd5345066de533469",
+    "src/workbench/terminal/vt_g1/screen.py": "2dcb887e25269aca54a7372e93fcef7d83a37471b465a56d936f7a9f53b97920"
+  },
+  "derive_expectations_from": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/ur-ux/ur-ux-request.json (follow_ups)",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/assignment-p27-urux-scroll2-worker-01.json required_behavior (Root-specified contract)",
+    "xterm mouse protocol (SGR 1006, X10, DECSET 1000/1002/1003, alternate scroll)"
+  ],
+  "worker_result": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-urux-scroll2-worker-01.json (read after deriving expectations)",
+  "required": [
+    "Root-authorized adaptation (behaviour changed by user choice): (1) tests/ui/test_product_keys_independent.py: replace the 'raw mouse_sgr delivered unchanged to every pane' assumption with the new contract - to a pane WITHOUT app mouse tracking mouse sequences never arrive as text; to a pane WITH tracking (after the pane emits DECSET 1000+1006) wheel/click arrive translated to pane-local coordinates; keep every other original-key assertion unchanged, including split byte-by-byte ordering for the remaining keys. (2) tests/ui/test_product_layout_scroll_independent_p27j.py: replace 'no ?1000h/?1006h' with 'mouse tracking enabled at start and ?1000l/?1006l restored on exit', keeping all other assertions. Record before/after sha256.",
+    "New independent test tests/ui/test_product_direct_scroll_independent_p27k.py derived before reading the implementation: wheel over each pane scrolls only that pane and sends nothing to the backend; Shift+PgUp/PgDn page-scroll focused pane; typing and paste to a scrolled pane return it to live and deliver exactly once; other panes keep position; alt-screen wheel -> arrow keys (DECCKM variant); click focuses a non-tracking pane; prefix m toggles and stops/starts events; split mouse sequences never leak; every exit path (normal detach, SIGTERM, SIGHUP, backend close) restores ?1000l ?1006l ?2004l and termios.",
+    "Runtime (stub OMP / scripted provider, ZERO model turns): real entrypoint + product UI in a PTY; run 'seq 1 400' in the host shell; send SGR wheel-up events over the host pane -> earlier lines visible; type a key -> view returns to live and the key reaches bash; Shift+PgUp works; click on the worker pane changes focus (verify via 'status --json'); detach leaves ?1000l in the output.",
+    "Regression (pattern test_*.py; never live_* with CW06_LIVE_MODEL=1): tests/ui x2, tests/backend (short TMPDIR), tests/contracts, tests/gates/g1_vt (src:.)."
+  ],
+  "allowed_write_paths": [
+    "tests/ui/test_product_keys_independent.py (mouse assumption only)",
+    "tests/ui/test_product_layout_scroll_independent_p27j.py (mouse-tracking assertion only)",
+    "tests/ui/test_product_direct_scroll_independent_p27k.py",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-urux-scroll2-test-01-agent.json"
+  ],
+  "prohibited": "production frozen; other tests unchanged; no model turns; venv python only; short TMPDIR removed; no graphify update, commits, tmux/herdr; never read ~/.omp.",
+  "result_format": "Write full JSON; reply <=20 lines: checks table, status, verdicts with failure classification, adapted files before/after sha256, new file sha256, frozen hashes equal?, residue. Korean."
+}

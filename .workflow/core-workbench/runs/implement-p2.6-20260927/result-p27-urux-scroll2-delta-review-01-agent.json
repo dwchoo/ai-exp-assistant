@@ -1,0 +1,58 @@
+{
+ "schema_version": 1,
+ "invocation": "p27-urux-scroll2-delta-review-01",
+ "role": "reviewer",
+ "frozen_candidate": "eb21863b8b153005fb6eefd95389787fcfcb3529e51302b50ed615f87c3c5226",
+ "verdict": "integrate",
+ "tests": "PYTHONPATH=src:tests/ui /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/ui -t tests/ui -p 'test_*.py' (TMPDIR=/tmp/s2r1): 265 OK (live_* not run). Plus scratch probes (parser split/boundary, model scroll/click/alt-screen).",
+ "findings": [
+  {
+   "id": "F1",
+   "severity": "P3",
+   "where": "model.py:_mouse (left-click branch)",
+   "what": "Click-to-focus accepts any button with (button&3)==0 and no motion bit: extended buttons (128+, e.g. back/forward) and Ctrl/Alt-modified left presses also focus (probe: button 128 -> focus changes).",
+   "fix": "limit to plain left press: (button & ~0b11100) == 0 (modifiers optional) or button==0; modifier click is acceptable, extended buttons should be ignored."
+  },
+  {
+   "id": "F2",
+   "severity": "P3",
+   "where": "model.py:_track_bracketed / _receive",
+   "what": "tracked modes (1000/1002/1003/1006/47/1047/1049) are not reset by RIS (ESC c) or DECSTR; a killed full-screen app or `reset` in host shell leaves stale mouse_tracking, so wheel/clicks keep being forwarded to the shell as escape text (probe: modes stay {1000,1006} after ESC c). Same as a real terminal only if the app never resets.",
+   "fix": "clear view.modes on ESC c / CSI ! p at receipt (or accept and document; prefix m does not help since it only affects outer capture)."
+  },
+  {
+   "id": "F3",
+   "severity": "P3",
+   "where": "model.py:_mouse forward/alt-screen arrows -> _send(INPUT,..., pane)",
+   "what": "wheel/click forwarded to a non-focused pane (by design) uses a normal INPUT; for host shell not owned by user the backend refusal is shown as a notice per event (model.py:424 only silences pane=None), so wheel over a tracking/alt-screen host pane while owner!=user spams notices.",
+   "fix": "mark forwarded mouse/arrow sends as quiet (pending[...] = (INPUT, None)) like _query_reply."
+  },
+  {
+   "id": "F4",
+   "severity": "P3",
+   "where": "input.py:_PARTIAL_SPECIAL / flush",
+   "what": "ESC [ 5 / ESC [ 6 (3 bytes, prefix of PgUp/PgDn and of Shift+PgUp) is held 0.5 s in flush before release; an Alt+[ followed by '5' typed within 0.5 s, or a split PgUp, is delayed at most 0.5 s. Not a leak or loss; complete sequences (Shift+arrows, Ctrl+PgUp, F5, CSI u, Alt keys) pass through unchanged and split byte-by-byte parse identically (probe).",
+   "fix": "accept; optionally hold ESC[5/ESC[6 for PARTIAL_HOLD_SECONDS only."
+  },
+  {
+   "id": "F5",
+   "severity": "P3",
+   "where": "model.py:_mouse (click on tracking pane)",
+   "what": "a pane whose app enabled mouse tracking cannot be focused by click (event forwarded instead); user must use prefix 1/2/3. Consistent with spec; only worth a help line.",
+   "fix": "document in help."
+  }
+ ],
+ "prior_findings": {
+  "F2": "fixed (enter_scroll keeps existing view; tests test_f2_* in model and p27k)",
+  "F3": "fixed (_history_cleared on catch-up and generation change, notice, other panes untouched; probe verified)",
+  "F4": "fixed (apply_snapshot exits scroll mode on focus change; keeps it when unchanged)"
+ },
+ "focus_verdicts": {
+  "mouse_parsing": "pass: SGR/Shift+PgUp/PgDn events; all split points give identical events; Shift+arrows, Ctrl+PgUp, F5/F5-shift, CSI u, Alt keys, ESC alone pass through unchanged; partial mouse released as text only after 0.5 s hold; mouse in paste stays paste content; mouse between prefix and key does not cancel prefix; pane-local 1-based coordinates match view geometry (pane_rects==pane_boxes); wheel with modifiers ok; SGR vs X10 encoding correct incl. release; alt-screen arrows honour DECCKM; borders/header/footer/help/too-small ignored.",
+  "mode_symmetry": "pass: ?1000h?1006h after 2004h inside protected try; finally writes ?1006l?1000l?2004l on every path (PTY tests for detach/SIGTERM/SIGHUP/connection loss); prefix m toggles with immediate write; late reports after toggle-off are swallowed, not leaked.",
+  "per_pane_scroll": "pass: _views per pane; wheel on other pane leaves focus/other views; typing/paste pops focused view once then delivers once; hitting live ends direct scroll; catch-up/generation change returns to live with notice; alt-screen queue swap drops view; prefix [ keeps place; backend focus change exits mode.",
+  "key_fidelity_and_tests": "pass: OMP_KEYS only lost mouse_sgr (intentional) and gained explicit no-leak/translated-delivery tests; p27j adaptation still verifies enable at start and last-word restore (?1000l/?1006l) on real entrypoint; all other assertions unchanged; 265 tests incl. flood latency (0.07 s), replay, catch-up, 2004, signal paths green.",
+  "click_focus_modifiers": "acceptable for Ctrl/Alt-modified left click; extended buttons should be limited to plain left (F1, P3)."
+ },
+ "residue": "none (scratch only under session scratchpad, TMPDIR /tmp/s2r1)"
+}

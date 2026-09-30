@@ -1,0 +1,92 @@
+{
+ "schema_version": 1,
+ "invocation": "p27-urux-scroll2-test-01",
+ "role": "test_designer",
+ "status": "candidate_ready",
+ "checks": [
+  {
+   "cmd": "unittest discover -s tests/ui -p test_product_direct_scroll_independent_p27k.py",
+   "rc": 0,
+   "tests": 55,
+   "secs": 39
+  },
+  {
+   "cmd": "unittest discover -s tests/ui -p test_*.py (run 1/2/3)",
+   "rc": [
+    0,
+    0,
+    0
+   ],
+   "tests": 265,
+   "secs": [
+    110,
+    108,
+    109
+   ]
+  },
+  {
+   "cmd": "unittest discover -s tests/backend (TMPDIR=/tmp/cw-s2t)",
+   "rc": 0,
+   "tests": 71,
+   "secs": 263
+  },
+  {
+   "cmd": "unittest discover -s tests/contracts",
+   "rc": 0,
+   "tests": 43,
+   "secs": 0.3
+  },
+  {
+   "cmd": "PYTHONPATH=src:. unittest discover -s tests/gates/g1_vt",
+   "rc": 0,
+   "tests": 85,
+   "secs": 1.5
+  }
+ ],
+ "mutation_sanity": "5 mutants in a scratch copy (WHEEL_LINES=0, no live-on-type, absolute mouse coords, MOUSE_OFF without ?1006l, click without focus) each killed by the new file",
+ "requirements": {
+  "adapt_keys_independent": "pass",
+  "adapt_p27j": "pass",
+  "wheel_pane_only_no_backend": "pass",
+  "shift_pgup_pgdn": "pass",
+  "type_paste_returns_live_once": "pass",
+  "alt_screen_arrows_deccKM": "pass",
+  "tracking_forward_local_coords_sgr_x10": "pass",
+  "click_focus": "pass",
+  "prefix_m_toggle": "pass",
+  "split_mouse_no_leak": "pass",
+  "exit_paths_restore": "pass (detach, SIGTERM, SIGHUP, closing, drop, scrolled)",
+  "runtime_real_entrypoint_stub_omp": "pass (seq 1 400, wheel, Shift+PgUp, type->live, click focus via status --json, detach ?1000l)"
+ },
+ "failure_classification": "first run 14 failures, all test defects (title_line returned the whole border row; expected pane-local coords off by one in the PTY test; modified/extra-button left press legitimately focuses - a focus frame is not text). No implementation/environment/contract failure.",
+ "observations": [
+  "modified (Ctrl/Alt) or extra-button (128) left press focuses the pane; not a leak, not asserted either way"
+ ],
+ "adapted_files": {
+  "tests/ui/test_product_keys_independent.py": {
+   "before": "279ac34f46bce73d5570e0073c15908f2a727f0e3e1c2de0923dae09d24bef8f",
+   "after": "55ad4853409e7c75f186d8271f2918afb2d1bc20d85f1686d243a3bfc8577ed3",
+   "change": "mouse_sgr removed from the OMP_KEYS passthrough set; two mouse tests added (no text without tracking; translated pane-local with tracking)"
+  },
+  "tests/ui/test_product_layout_scroll_independent_p27j.py": {
+   "before": "c4e7cceb8b365efc0dfbdc68e3d09a26660b687d7b914d6acf33d4a9c6901f36",
+   "after": "f5fcf0d9970a850b8ee0d6dca3b45e170161a70c16bab60f931babdaaf9a4ce6",
+   "change": "MOUSE no-h assertion -> mouse_enabled_then_restored (?1000h/?1006h at start, ?1000l/?1006l last); one test renamed ..._and_mouse_tracking_is_restored; docstring line"
+  }
+ },
+ "files_added": {
+  "tests/ui/test_product_direct_scroll_independent_p27k.py": "6301e30bf04702d1509f91d79c654d0737a53a971377cbed9b113510c45a7a6f"
+ },
+ "frozen_production_hashes_start_equal_end": true,
+ "frozen_production_hashes": {
+  "src/workbench/ui/product/__init__.py": "8b250db57bcf1590be1ba6959cf059139155475f18d84ee4577e84e7ad1d536b",
+  "src/workbench/ui/product/app.py": "b40218946752976bd7a2929da698d337216b71f2ea4b7a4785ed28097d0f9ffe",
+  "src/workbench/ui/product/input.py": "d95680d255a267ff5dcc5a9ad0773d8b956ec064b07145196026d2536b6b36f1",
+  "src/workbench/ui/product/model.py": "7b676069ca7fefd009956d49939cad55d03c24ced12d9d2bea946199b28c4b4f",
+  "src/workbench/ui/product/view.py": "d14269d7e4454e0c4ac061ab61743b418a4f992ec4bc1c6138edbf423fe20cd8",
+  "src/workbench/backend/cli.py": "9b44e4847275514ec27e7c9474dfe7ad0c5556d3803651f7fc292be0402a2b4e",
+  "src/workbench/backend/ui_server.py": "e6aa3e0b12fc48c920ed901d8e3b8ec8e1063d9d1cb3a89bd5345066de533469",
+  "src/workbench/terminal/vt_g1/screen.py": "2dcb887e25269aca54a7372e93fcef7d83a37471b465a56d936f7a9f53b97920"
+ },
+ "residue": "short TMPDIR /tmp/cw-s2t removed; no owned processes left; backend stopped by exact identity in the runtime test (leaked=[])"
+}

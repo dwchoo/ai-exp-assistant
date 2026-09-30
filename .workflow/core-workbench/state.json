@@ -69,14 +69,14 @@
     ]
   },
   "planning": {
-    "record": ".workflow/core-workbench/runs/planning-p2.7-20260929/approval-amendment-a.json",
+    "record": ".workflow/core-workbench/runs/planning-p2.7-20260929/approval-amendment-c.json",
     "source_brief_revision": "r1.13",
     "spec_revision": "s2.7",
-    "plan_revision": "p2.7a",
-    "bundle_sha256": "a521acdc3838b43a26e277afc233bab695c8b02ce0d42392c3678931b2e3f027",
+    "plan_revision": "p2.7c",
+    "bundle_sha256": "91fe05dc882d8c00ab0eb28c30e2b6cabcbfacb0f0fee3f0eaeecfaff5b7d3e8",
     "approval_status": "approved_for_implementation",
     "current_for_checkout": true,
-    "decision": "C-D56+C-D57"
+    "decision": "C-D56+C-D57+C-D58+C-D59"
   },
   "planning_history": [
     {
@@ -424,8 +424,8 @@
   },
   "implementation_p27": {
     "run_record": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
-    "approved_bundle_sha256": "a521acdc3838b43a26e277afc233bab695c8b02ce0d42392c3678931b2e3f027",
-    "status": "paused_awaiting_user_review_UR-UX",
+    "approved_bundle_sha256": "91fe05dc882d8c00ab0eb28c30e2b6cabcbfacb0f0fee3f0eaeecfaff5b7d3e8",
+    "status": "C-D59 integrated; awaiting user trial + IME key decision; UR-UX open",
     "resumed_from": ".codex/handoffs/2026-09-29-core-workbench-p27-cw17/HANDOFF.md",
     "units": {
       "V-CW-17-p2.7": {
@@ -441,16 +441,30 @@
       "V-CW-12-15-p2.7-cw06-delta": {
         "status": "delta_verified_items_remain_stale_pending",
         "record": ".workflow/core-workbench/runs/implement-p2.6-20260927/root-adjudication-p27-cw1215-delta.json"
+      },
+      "V-CW-06-p2.7-urux": {
+        "status": "integrated",
+        "record": ".workflow/core-workbench/runs/implement-p2.6-20260927/integration-p27-v-cw06-urux.json",
+        "candidate": "eb7703fca982aff3a8c2e56896b1d09a6730a76dc21916fc1ffcae1dfdcf93ab"
+      },
+      "V-CW-06-p2.7-resize": {
+        "status": "integrated",
+        "record": ".workflow/core-workbench/runs/implement-p2.6-20260927/integration-p27-cd59.json"
+      },
+      "V-CW-17-p2.7-isolation": {
+        "status": "integrated",
+        "record": ".workflow/core-workbench/runs/implement-p2.6-20260927/integration-p27-cd59.json"
       }
     },
     "user_review_checkpoints": {
-      "UR-UX": "awaiting user review (.workflow/core-workbench/runs/implement-p2.6-20260927/ur-ux/ur-ux-request.json)",
+      "UR-UX": "answered (C-D58) + follow-up direct scroll ('둘 다') integrated; awaiting user confirmation to close",
       "UR-USABILITY": "pending (after CW-18)"
     },
     "note": "state is an operational index; verify against ledger and run records",
     "next_after_ur_ux": "apply UR-UX feedback as CW-06 delta (if any) -> CW-18 -> UR-USABILITY -> CW-19 -> CW-16",
     "minor_findings": [
       "workbench status creates the data dir as a side effect (P3, record for CW-16)"
-    ]
+    ],
+    "environment_note": "OMP upgraded by user to 18.4.4 (was 18.2.10 during CW-02..CW-06 evidence) - compatibility re-check needed (CW-16 I-COMPAT)"
   }
 }

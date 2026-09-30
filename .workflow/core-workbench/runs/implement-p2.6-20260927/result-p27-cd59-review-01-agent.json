@@ -1,0 +1,123 @@
+{
+ "schema_version": 1,
+ "invocation": "p27-cd59-review-01",
+ "role": "reviewer",
+ "reviewed_candidate": "bcda200e81e7078c98f858849d009acaf6f30a7f1403e13ac9a855d0500c6967",
+ "candidate_hash_check": "worker/test 결과의 changed_paths·added_tests sha256 19개 모두 현재 파일과 일치",
+ "overall": "block",
+ "overall_reason": "P1 2건: (1) 격리 상태에서도 project/user APPEND_SYSTEM.md가 system prompt에 주입되고 startup check가 'ok'로 보고(라이브 재현), (2) divider drag 종료 시 ?1002l이 tmux/xterm에서 mouse tracking 전체를 꺼서 첫 drag 이후 마우스(클릭 focus·wheel·재drag)가 죽음(tmux 3.4 재현). 두 수정 모두 국소적이다.",
+ "findings": [
+  {
+   "id": "R1",
+   "severity": "P1",
+   "area": "isolation",
+   "file_line": "src/workbench/backend/launcher.py:167-169 (isolation_args), launcher.py:321-377 (observe_isolation/isolation_leaks)",
+   "scenario": "project 디렉터리에 .claude/APPEND_SYSTEM.md(또는 .omp/.codex/.gemini/APPEND_SYSTEM.md), 또는 ~/.omp/agent/APPEND_SYSTEM.md가 있으면 Workbench OMP의 system prompt 끝에 그 내용이 붙는다. OMP 18.4.4 bgp()가 _xe('APPEND_SYSTEM.md')로 cwd의 .omp/.claude/.codex/.gemini와 사용자 agent dir를 disabledProviders 필터 없이 찾는다(strings.txt:830778-830810, wX 440522). 라이브 재현(scratch canary, RPC get_state만, model call 0): 4개 변형 모두 canary가 get_state에 나타났고 check_isolation은 state 'ok', leaks []로 보고.",
+   "clause": "C-D59 (2) AGENTS.md·CLAUDE.md 등 context/instruction 파일 주입을 끈다; focus 1 isolation completeness; focus 2 leak은 warning으로 드러나야 함",
+   "fix_direction": "isolation_args에 '--append-system-prompt', '' 추가(검증: 빈 문자열이면 bgp()가 호출되지 않아 canary 사라짐; C6t의 `e.appendSystemPrompt ?? bgp()`). CW-18이 role prompt를 --append-system-prompt로 넘기면 그 값으로 대체. observe_isolation에 append 블록(예: '## User Instructions' 헤딩) 또는 알려진 APPEND_SYSTEM.md 경로 존재를 leak으로 보고, live probe에 APPEND_SYSTEM.md canary 추가.",
+   "evidence": "scratchpad cd59/append_probe.py, append_probe2.py 결과"
+  },
+  {
+   "id": "R2",
+   "severity": "P1",
+   "area": "resize",
+   "file_line": "src/workbench/ui/product/app.py:31 (DRAG_OFF), app.py:189-191, app.py:214",
+   "scenario": "tmux 안(Workbench 필수 실행 환경)에서 divider를 한 번 drag: ?1000h 상태에서 ?1002h(=button mode로 교체) 후 release 시 ?1002l을 보내면 tmux는 ALL_MOUSE_MODES를 지운다. tmux 3.4 실측: ?1000h→std=1, ?1002h→btn=1, ?1002l→std=0 btn=0 any=0. 이후 클릭 focus·wheel scroll·다음 drag가 모두 안 되지만 model.mouse_capture는 True라 footer/상태는 켜짐으로 보인다(prefix m 두 번 눌러야 복구). xterm도 1000/1002/1003 reset이 mouse mode OFF로 동작. too-small 중 drag 종료, prefix 명령으로 drag 종료도 같은 경로.",
+   "clause": "focus 4 drag/?1002 lifecycle, prior UI invariant(마우스 capture on이면 wheel/click 동작) 회귀",
+   "fix_direction": "drag 종료 시 ?1002l 대신(또는 뒤에) mouse_on이면 b'\\x1b[?1000h'을 다시 보낸다(1000 set이 1002를 대체). finally 경로는 MOUSE_OFF(?1000l)로 충분. PTY 테스트에 'drag 종료 후 출력의 마지막 mouse mode가 ?1000h' 단언 추가, 가능하면 private tmux(-L) 실측 테스트.",
+   "evidence": "tmux -L 격리 서버에서 seq.sh로 mouse_*_flag 조회"
+  },
+  {
+   "id": "R3",
+   "severity": "P2",
+   "area": "isolation",
+   "file_line": "omp_bridge/omp-isolation.yml (personality 미설정), launcher.py observe_isolation",
+   "scenario": "사용자 agent dir의 PERSONALITY.md(~/.omp/agent/PERSONALITY.md)가 있으면 OMP가 system prompt의 '# Personality' 블록을 그 내용으로 바꾼다(strings.txt:637250 X_l, 637555 loadPersonalityOverride; personality 설정이 'none'일 때만 건너뜀). 격리 overlay가 이를 막지 않고 check도 DEFAULT_PROMPT_MARKER가 남아 있어 감지 못한다. 이 머신에는 파일 없음(코드 근거만; ~/.omp 편집 금지로 라이브 미검증).",
+   "clause": "C-D59 (2) 사용자 전역 설정의 system prompt 주입 격리(인증·provider·모델 외)",
+   "fix_direction": "overlay에 personality: none(Workbench 역할 prompt는 CW-18) 또는 check에서 <agent dir>/PERSONALITY.md 존재를 leak/warning으로 보고. 결정이 필요하면 사용자 결정으로 올린다."
+  },
+  {
+   "id": "R4",
+   "severity": "P3",
+   "area": "isolation",
+   "file_line": "src/workbench/backend/launcher.py:262-276 (role_overlay)",
+   "scenario": "per-role overlay가 task.disabledAgents 배열을 통째로 바꿔 사용자가 전역에서 끈 bundled agent(예: sonic)가 Workbench에서 다시 켜진다. 사용자 skills.includeSkills/ignoredSkills는 role 패턴이 비어 있으면 그대로 남아 Workbench skill을 숨길 수 있다. 프로젝트 .omp/agents에 bundled 이름(scout 등)과 같은 name이 있으면 bundled agent까지 꺼진다. _frontmatter_name은 YAML 주석/블록 스칼라를 OMP와 다르게 읽어 이름이 어긋날 수 있다(이 경우 check가 leak으로 보고하므로 감지는 됨).",
+   "clause": "focus 1 overlay semantics, focus 3 disabledAgents 계산",
+   "fix_direction": "disabledProviders처럼 사용자 task.disabledAgents를 union; role overlay에 skills.includeSkills/ignoredSkills를 명시값으로 고정; 문서화."
+  },
+  {
+   "id": "R5",
+   "severity": "P3",
+   "area": "isolation",
+   "file_line": "src/workbench/backend/cli.py:159-165, src/workbench/ui/product (omp_isolation 미사용)",
+   "scenario": "start summary는 phase가 ready가 되는 즉시 출력되는데 check 스레드는 두 role을 순차 실행(각 ~0.4 s)하므로 요약이 'omp isolation: pending'으로 찍히고 경고가 안 보일 수 있다. product UI는 omp_isolation을 전혀 표시하지 않아 leak 경고는 status CLI·record에서만 보인다.",
+   "clause": "focus 2 failure/leak surfaced as warning",
+   "fix_direction": "start에서 isolation state가 pending이면 짧게(예: ≤ timeout) 더 기다리거나 'status로 확인' 안내; UI header/footer에 leak/failed 표시."
+  },
+  {
+   "id": "R6",
+   "severity": "P3",
+   "area": "isolation",
+   "file_line": "src/workbench/backend/service.py:147, launcher.py:244-258",
+   "scenario": "user_disabled_providers가 backend start 경로에서 동기 실행(실측 0.16 s, 최악 15 s timeout). timeout 시 subprocess.run은 직계 자식만 kill하고 session/group을 만들지 않는다. 또한 lsp.json/dap.json(project .omp/.claude 등, user dir) 같은 도구 설정은 disabledProviders 밖에서 읽힌다(strings.txt:463882, 747426) — prompt 주입은 아니지만 도구 동작 경로로 남음.",
+   "clause": "focus 2 bounded/startup latency, focus 1 tools",
+   "fix_direction": "start_new_session=True + group kill, 또는 isolation 스레드로 이동; LSP/DAP 설정 경로는 잔여 위험으로 문서화하거나 --no-lsp 여부를 사용자 결정으로."
+  },
+  {
+   "id": "R7",
+   "severity": "P3",
+   "area": "isolation",
+   "file_line": "src/workbench/backend/service.py:165",
+   "scenario": "'no fork while check runs' 가정은 현재 pane restart가 없어서만 성립한다. CW-19 restart가 pty.fork를 main thread에서 호출하면 check 스레드와 동시 fork가 생긴다.",
+   "clause": "C-D45/CW-17 process lifetime (forward risk)",
+   "fix_direction": "CW-19에서 restart 전에 check를 cancel+join 하거나 fork 대신 posix_spawn 계열 사용을 요구사항으로 남김."
+  }
+ ],
+ "focus_verdicts": {
+  "1_isolation_completeness_overlay": "FAIL (R1 APPEND_SYSTEM.md 누락·미감지, R3 PERSONALITY.md). 나머지 표 항목(context files, skills 7종, rules, commands, MCP user/project, extensions/plugins/hooks(--no-extensions+providers), SYSTEM.md, subagents(project+ancestors+user; plugin agents는 omp-plugins/claude-plugins provider로 차단됨 strings.txt:601934-601940), memory/memories, advisor, TTSR builtin)은 코드·라이브로 확인. merge 순서(static→role→user --omp-arg→--extension) 정상, disabledProviders union은 omp config get으로 읽기만 함, --profile/PI_CODING_AGENT_DIR 미사용, model 동일(라이브).",
+  "2_startup_check_process": "PASS with notes: 20 s bound + 취소 0.1 s 폴링, 별도 스레드라 loop 비차단, start_new_session·WNOWAIT로 leader 미회수 상태에서 killpg(TERM→KILL)→reap이라 PID 재사용 불가(C-D45 충족), backend에 waitpid(-1) 없음, 실제 bridge socket과 분리된 absent socket, stderr TemporaryFile·pipe close. 라이브 실행 후 rpc 잔여 프로세스 0. 단 R1로 'ok' 판정 신뢰성 결함, R5 표시 경로, R6 동기 config get.",
+  "3_disabledAgents_overlay_files": "PASS with P3(R4): name만 4096 B 읽음, 없는/깨진 파일·FIFO 안전, ancestors walk는 경로 깊이로 유한(OMP는 가장 가까운 것만 쓰므로 superset), overlay는 write_private_json으로 data dir에 0600.",
+  "4_resize": "FAIL (R2 ?1002l로 mouse tracking 소실). 나머지: 레이아웃 계산·clamp, debounce(0.1 s)+release 시 final flush, 모든 exit 경로 ?1002l/?1000l/?2004l, 저장 atomic mkstemp+fsync+replace 0600, load O_NOFOLLOW|O_NONBLOCK·4 KiB·version/ratio 검증, zoom은 focus 추종, divider 클릭은 pane 미전달·focus 불변, scroll 동기화 확인.",
+  "5_tests": "PASS with gap: fake OMP 프로세스 기반 단위 테스트와 opt-in 라이브 probe(RPC only)는 의미 있음. 다만 APPEND_SYSTEM.md/PERSONALITY.md canary가 없고, ?1002 테스트는 바이트 존재만 보아 실제 terminal mode 의미(R2)를 못 잡는다."
+ },
+ "checks": [
+  [
+   "hash check of reported candidate files",
+   0,
+   "19/19 일치"
+  ],
+  [
+   "tests/backend test_*.py",
+   0,
+   "Ran 129, OK (skipped=27)"
+  ],
+  [
+   "tests/ui test_*.py",
+   0,
+   "Ran 357, OK"
+  ],
+  [
+   "WB_LIVE_OMP=1 live_omp_isolation_probe + live_omp_isolation_independent_p27m (1회)",
+   0,
+   "Ran 13, OK; ~/.omp ~/.agents ~/.claude ~/.codex 목록 불변; rpc 잔여 0"
+  ],
+  [
+   "reviewer APPEND_SYSTEM.md canary (check_isolation, RPC get_state/get_available_commands only)",
+   0,
+   ".claude/.omp/.codex/.gemini 4/4 주입, 4/4 state ok(미감지); --append-system-prompt '' 추가 시 미주입"
+  ],
+  [
+   "tmux 3.4 private server (-L) mouse flag probe",
+   0,
+   "?1002l 후 std/btn/any 모두 0"
+  ],
+  [
+   "omp config get disabledProviders latency",
+   0,
+   "0.16 s x3"
+  ]
+ ],
+ "model_calls": 0,
+ "side_effects": "scratch 파일은 session scratchpad·임시 TMPDIR에만 생성 후 삭제; tmux는 -L 전용 소켓 서버를 띄우고 kill-server; repo·~/.omp 등 무편집; credential 미열람.",
+ "residue": "none"
+}

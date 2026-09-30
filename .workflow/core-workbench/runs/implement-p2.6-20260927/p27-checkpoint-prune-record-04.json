@@ -1,0 +1,46 @@
+{
+ "schema_version": 1,
+ "keep": [
+  ".workflow/core-workbench/runs/decisions-cd55-20260926/before.json",
+  ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-cd59-integrated-checkpoint.json",
+  ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-cw17-base.json",
+  ".workflow/core-workbench/runs/implement-p2.6-20260927/preaccounting-checkpoint.json",
+  ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-resume-20260928-checkpoint.json"
+ ],
+ "entries": [
+  {
+   "path": ".workflow/core-workbench/runs/decisions-cd55-20260926/before.json",
+   "action": "kept_milestone",
+   "bytes": 284098008
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-cd59-integrated-checkpoint.json",
+   "action": "kept_milestone",
+   "bytes": 819482280
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-cw06-integrated-checkpoint.json",
+   "action": "pruned",
+   "bytes_before": 763231712,
+   "sha256_before": "29a9954aa187e289924ebe44d87de925a8ca59133d76012ccd39727d1d4ef6b0",
+   "candidate": "671b05d3085701f0111e6440955fa6f4b9edc5ddcdba9f54c6d5af27a7c7351b",
+   "blob_count": 1474,
+   "bytes_after": 405820
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-cw17-base.json",
+   "action": "kept_milestone",
+   "bytes": 711934114
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/preaccounting-checkpoint.json",
+   "action": "kept_milestone",
+   "bytes": 664067256
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-resume-20260928-checkpoint.json",
+   "action": "kept_milestone",
+   "bytes": 727409668
+  }
+ ]
+}

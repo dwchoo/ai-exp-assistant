@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cd59-test-01",
+  "ticket_id": "CW-06 resize + CW-17 OMP isolation (C-D59)",
+  "role": "test_designer",
+  "units": [
+    "V-CW-06-p2.7-resize",
+    "V-CW-17-p2.7-isolation"
+  ],
+  "approved_bundle_digest": "91fe05dc882d8c00ab0eb28c30e2b6cabcbfacb0f0fee3f0eaeecfaff5b7d3e8",
+  "routing": {
+    "planned_role": "test_designer",
+    "selected_role": "test_designer (wb-test-rerun, Sonnet high)",
+    "reason_codes": [
+      "delta_verification"
+    ],
+    "evidence_refs": [
+      "C-D59 user request; single writer for two small units"
+    ]
+  },
+  "frozen_candidate": "aa9ebdc9a19f7f5c03ad4578aa6db562d00795a5cac97199353999c73a6b9f21",
+  "frozen_production_files": {
+    "src/workbench/ui/product/__init__.py": "8b250db57bcf1590be1ba6959cf059139155475f18d84ee4577e84e7ad1d536b",
+    "src/workbench/ui/product/app.py": "256648a89bb33d4358f8dcf77a87c9baacd5c54b10d9db504bfcc2c2c5fb4a9a",
+    "src/workbench/ui/product/input.py": "d95680d255a267ff5dcc5a9ad0773d8b956ec064b07145196026d2536b6b36f1",
+    "src/workbench/ui/product/layout.py": "f7be43692d595ca172c3fca666be3d4f89272615dd3dd8ea0017ca95a685b0e3",
+    "src/workbench/ui/product/model.py": "773937a419c6c21e49a0a1eef8a4a0594b4a6d3b12e54ce2cb7ec8ec2f39b392",
+    "src/workbench/ui/product/view.py": "2d8267abe7cf186e20ff0bd7d208762af1a259a98751589b181d0d0e641c7ae8",
+    "src/workbench/backend/launcher.py": "27d032aa4be9054a148bd653356355f7f13908df128a9041e252a654648ea043",
+    "src/workbench/backend/service.py": "51b4a93e7c18fd206ce01cb72c856fbb0fa6368da21dbb4e90c569cb708312c1",
+    "src/workbench/backend/cli.py": "61f0bc9bd8704adc666e7b912df41de0492a39ba66b8bb76b42a884e299794e5",
+    "src/workbench/backend/ui_server.py": "e6aa3e0b12fc48c920ed901d8e3b8ec8e1063d9d1cb3a89bd5345066de533469",
+    "omp_bridge/omp-isolation.yml": "5680201c7ae3a401b70d6686e2c6f352a495f8761d11e087c767560c3cb98047"
+  },
+  "derive_expectations_from": [
+    "docs/features/core-workbench/DECISIONS.md#C-D59 (user quote)",
+    "docs/features/core-workbench/tickets/CW-17.md (C-D59 sentence)",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/assignment-p27-resize-worker-01.json required_behavior",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/assignment-p27-omp-iso-worker-01.json required_behavior",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-omp-iso-explore-01-agent.json (source table)"
+  ],
+  "worker_results": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-resize-worker-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-omp-iso-worker-01.json"
+  ],
+  "required": [
+    "RESIZE - new independent test tests/ui/test_product_resize_independent_p27l.py derived before reading layout.py/model.py: split ratios and clamps at several sizes; divider drag through SGR mouse events (press on divider, motion, release) moves it and sends debounced per-pane resize equal to drawn areas; divider clicks never reach panes/focus; prefix+arrows with bare-arrow repeat inside the window and termination by other keys (which are then delivered normally); zoom/reset; ?1002h only during drag and ?1002l on release and on every exit path; persistence in <data dir>/ui-layout.json survives detach/reattach through the real entrypoint (stub OMP) and corrupt files are ignored. Show red: run the new tests against the pre-change UI copy (.workflow/.../p27-resize-pre/) in a scratch overlay (not in the repo) and report failures.",
+    "ISOLATION - new independent test tests/backend/test_omp_isolation_independent_p27m.py (non-live, argv/overlay contract) and live check tests/backend/live_omp_isolation_independent_p27m.py (WB_LIVE_OMP=1, REAL OMP 18.4.4, ZERO model calls: rpc get_state/get_available_commands only, --no-session, exact-identity cleanup): derived from C-D59 before reading launcher.py - in a scratch project with canary AGENTS.md, CLAUDE.md in parent dir, .claude/skills, .agents/skills project, .omp/rules, .mcp.json, .omp/agents, .omp/SYSTEM.md, and with the user's real ~/.agents/skills present: the Workbench command (as built by the launcher for manager and for worker) exposes none of them and none of the orca skills; a skill placed in the Workbench skills dir IS visible; the negative control without isolation shows the canaries; the provider/model reported equals the non-isolated one (auth kept); no --profile/PI_CODING_AGENT_DIR in argv/env; user --omp-arg still appended; the backend snapshot/status shows the isolation check result through the real entrypoint (stub OMP where the real one is not needed).",
+    "Regression (pattern test_*.py; never live_* except your own p27m live run and the existing tests/backend/live_omp_isolation_probe.py once): tests/ui x2, tests/backend (short TMPDIR), tests/contracts, tests/gates/g1_vt (src:.)."
+  ],
+  "allowed_write_paths": [
+    "tests/ui/test_product_resize_independent_p27l.py",
+    "tests/backend/test_omp_isolation_independent_p27m.py",
+    "tests/backend/live_omp_isolation_independent_p27m.py",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd59-test-01-agent.json"
+  ],
+  "prohibited": "production frozen; other tests unchanged; never edit ~/.omp ~/.agents ~/.claude ~/.codex or global config; never read credential stores; zero model calls; venv python only; short TMPDIR removed; no graphify update, commits, tmux/herdr.",
+  "result_format": "Write full JSON; reply <=20 lines: checks table, status, per-requirement verdicts with failure classification, red evidence for resize, new files sha256, frozen hashes equal?, residue. Korean."
+}

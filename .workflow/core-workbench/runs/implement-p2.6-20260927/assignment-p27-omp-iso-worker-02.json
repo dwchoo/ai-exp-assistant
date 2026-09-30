@@ -1,0 +1,64 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-omp-iso-worker-02",
+  "ticket_id": "CW-17 (C-D59 isolation corrections)",
+  "role": "worker_senior",
+  "unit": "V-CW-17-p2.7-isolation",
+  "approved_bundle_digest": "91fe05dc882d8c00ab0eb28c30e2b6cabcbfacb0f0fee3f0eaeecfaff5b7d3e8",
+  "prior_assignment_ref": ".workflow/core-workbench/runs/implement-p2.6-20260927/assignment-p27-omp-iso-worker-01.json",
+  "routing": {
+    "planned_role": "worker",
+    "selected_role": "worker_senior (Opus, general-purpose)",
+    "reason_codes": [
+      "coupled_invariants"
+    ],
+    "evidence_refs": [
+      "review P1/P2 on external-tool isolation and startup process handling"
+    ]
+  },
+  "base_candidate": "4aac3ead1267854b3dc54ed1d87c89c0eff0a159df9ad9738ea6e01adb182c29 (p27-snapshot-mux-after.json)",
+  "checkpoint_ref": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-cw06-integrated-checkpoint.json (milestone)",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-omp-iso2-pre/ (current backend/overlay files)"
+  ],
+  "findings": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd59-review-01-agent.json",
+  "adjudication": ".workflow/core-workbench/runs/implement-p2.6-20260927/root-adjudication-p27-cd59-review-01.json",
+  "required_behavior": [
+    "R1: APPEND_SYSTEM.md (project .omp/.claude/.codex/.gemini and ~/.omp/agent) must not reach the system prompt: add the verified per-run override (e.g. --append-system-prompt \"\") to isolation args (CW-18 will later supply the role prompt through this slot); extend check_isolation detection and both live probes with APPEND canaries so a leak is reported (not 'ok').",
+    "R3: PERSONALITY.md (~/.omp/agent and any project variant OMP reads) must not replace the Personality block: use a per-run setting (e.g. personality: none) if OMP honours it, verify, otherwise detect and warn in check_isolation; add a canary.",
+    "Add dev.autoqa: false to omp_bridge/omp-isolation.yml (no consent modal, no external report push inside Workbench); verify with rpc get_state/settings that it is off.",
+    "R4: role overlay unions the user's existing task.disabledAgents with computed names (read-only via omp config get), and handles user skills.includeSkills/ignoredSkills sensibly (Workbench role filter must not be widened by user values; document); avoid disabling bundled agents only because of a name collision unless an ambient definition actually overrides them.",
+    "R6: omp config reads on the start path run with a bounded timeout and own-group cleanup (or asynchronously), never blocking readiness indefinitely.",
+    "R5 (start summary race): the start summary prints the isolation state deterministically (wait bounded for the check or print 'pending' explicitly and let status show the final state).",
+    "Keep everything else from p27-omp-iso-worker-01 (argv order, no --profile, bridge -e kept, auth/model preserved, 0600 overlays, C-D45-safe check cleanup)."
+  ],
+  "acceptance": [
+    "red->green unit tests for each item in tests/backend/test_paths_launcher.py / test_omp_isolation.py",
+    "live (WB_LIVE_OMP=1, REAL OMP 18.4.4, ZERO model calls, rpc get_state/get_available_commands only): APPEND and PERSONALITY canaries absent with isolation and present in the negative control; dev.autoqa off; existing isolation probe still passes",
+    "suites: tests/backend (short TMPDIR), tests/contracts, tests/ui (test_*.py; 4 known p27l conflicts from the UI mouse fix are expected - list, do not edit)"
+  ],
+  "allowed_write_paths": [
+    "src/workbench/backend/launcher.py",
+    "src/workbench/backend/service.py",
+    "src/workbench/backend/cli.py",
+    "omp_bridge/omp-isolation.yml",
+    "tests/backend/test_paths_launcher.py",
+    "tests/backend/test_omp_isolation.py",
+    "tests/backend/live_omp_isolation_probe.py"
+  ],
+  "prohibited_paths": [
+    "tests/**/*_independent*.py",
+    "src/workbench/ui/**",
+    "src/workbench/contracts/**",
+    "docs/**",
+    ".workflow/**",
+    "~/.omp ~/.agents ~/.claude ~/.codex and any global config",
+    "~/wb-urux-sandbox/.state and its running processes"
+  ],
+  "stop_conditions": [
+    "an injection path cannot be disabled per run -> stop and report (user must be told, C-D59)",
+    "isolation would lose auth or need global config edits"
+  ],
+  "rules": "Never read credential stores. Zero model calls. /tmp/cw02-g1-venv/bin/python, short TMPDIR. No graphify update, commits, tmux/herdr. Zero residue.",
+  "result_format": "checks table first, status, changed paths + sha256, per-finding fix + evidence, residual leaks, residue, gaps. Korean, concise."
+}

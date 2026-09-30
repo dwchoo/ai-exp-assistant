@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-urux-delta-review-01",
+  "verdict": "integrate",
+  "frozen_candidate": "9598976b5753a7b4f3128989559393927ec8fb223505f30e867dba754f029554",
+  "agent_result": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-urux-delta-review-01-agent.json",
+  "focus_verdicts": {"layout_resize": "pass", "scroll": "pass (live screen read-only, view stable, clamp on eviction, alt-screen exit, exact live on exit, keys/paste isolated, bounded deque)", "independent_test_adaptation": "pass (no assertion removed or weakened; tiling and reported==drawn checks added)", "regression": "pass (replay equality, catch-up, 2004, flood latency max 0.073s, Ctrl-C 0.051s, signal restore)"},
+  "findings": {"P3-F1": "5000-line host history of 198-col coloured lines ~162 MB (bounded)", "P3-F2": "prefix [ / prefix PgUp while already scrolling resets anchor to live (enter_scroll only when scroll_pane is None)", "P3-F3": "session change or catch-up reset clears history silently while in scroll mode (empty view; no crash)", "P3-F4": "apply_snapshot focus change does not exit scroll mode (harmless)"},
+  "root_disposition": "non-blocking; record for CW-06 UI polish delta (with earlier P3s)",
+  "observed_model": "sonnet (wb-delta-reviewer definition; host metadata unverified)"
+}

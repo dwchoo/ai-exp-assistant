@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-omp-iso-worker-03",
+  "ticket_id": "CW-17 (C-D59 user choices on personality/title)",
+  "role": "worker",
+  "unit": "V-CW-17-p2.7-isolation",
+  "approved_bundle_digest": "91fe05dc882d8c00ab0eb28c30e2b6cabcbfacb0f0fee3f0eaeecfaff5b7d3e8",
+  "authority": "user answers 2026-09-30: personality 'OMP 기본 유지 + 경고', title '--no-title 적용' (ur-ux-request.json follow_ups)",
+  "routing": {
+    "planned_role": "worker",
+    "selected_role": "worker (wb-worker, Sonnet high)",
+    "reason_codes": [
+      "bounded_pattern"
+    ],
+    "evidence_refs": [
+      "two small config/arg changes with existing tests"
+    ]
+  },
+  "base_candidate": "98ae78de448d57b81e394ea9dc9156bb87ff689626ecc12ff3350cefc2169931",
+  "checkpoint_ref": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-omp-iso2-delta-backup/ (current files)"
+  ],
+  "required_behavior": [
+    "Remove 'personality: none' from omp_bridge/omp-isolation.yml so OMP keeps its default Personality/Tone/Reasoning Format blocks; keep the PERSONALITY.md detection in check_isolation but classify an existing ~/.omp/agent/PERSONALITY.md as a WARNING (visible in snapshot/status/UI header) rather than silently ok; keep the canary live check asserting the warning.",
+    "Add --no-title to the isolation args for both roles (TITLE_SYSTEM.md no longer used, no title model call); keep TITLE_SYSTEM.md detection but it should no longer be a leak when --no-title is present.",
+    "Update the non-independent tests (tests/backend/test_paths_launcher.py, test_omp_isolation.py, live_omp_isolation_probe.py) accordingly; independent tests are not edited."
+  ],
+  "acceptance": [
+    "unit tests red->green for both changes",
+    "WB_LIVE_OMP=1 tests/backend/live_omp_isolation_probe.py with the REAL OMP 18.4.4, zero model calls: default personality block present, PERSONALITY canary (fake HOME) reported as warning, --no-title in argv",
+    "suites: tests/backend (short TMPDIR), tests/contracts; known independent conflicts (p27m 5, p27l 4) listed only"
+  ],
+  "allowed_write_paths": [
+    "omp_bridge/omp-isolation.yml",
+    "src/workbench/backend/launcher.py",
+    "src/workbench/backend/service.py",
+    "tests/backend/test_paths_launcher.py",
+    "tests/backend/test_omp_isolation.py",
+    "tests/backend/live_omp_isolation_probe.py"
+  ],
+  "prohibited_paths": [
+    "tests/**/*_independent*.py",
+    "src/workbench/ui/**",
+    "docs/**",
+    ".workflow/**",
+    "~/.omp ~/.agents ~/.claude ~/.codex",
+    "~/wb-urux-sandbox/.state and its processes"
+  ],
+  "rules": "Never read credential stores; zero model calls; venv python, short TMPDIR; no graphify update, commits, tmux/herdr; zero residue.",
+  "result_format": "checks table first, status, changed paths + sha256, residue, gaps. Korean, concise."
+}

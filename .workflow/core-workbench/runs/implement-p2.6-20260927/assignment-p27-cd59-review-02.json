@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cd59-review-02",
+  "ticket_id": "CW-06 mux scrolling + CW-17 isolation corrections (C-D59)",
+  "role": "reviewer",
+  "unit": "V-CW-17-p2.7-isolation",
+  "approved_bundle_digest": "91fe05dc882d8c00ab0eb28c30e2b6cabcbfacb0f0fee3f0eaeecfaff5b7d3e8",
+  "routing": {
+    "planned_role": "reviewer",
+    "selected_role": "reviewer (Opus, general-purpose)",
+    "reason_codes": [
+      "corrective_delta_review_after_block"
+    ],
+    "evidence_refs": [
+      "p27-cd59-review-01 BLOCK (P1 R1/R2); process-lifetime code in delta"
+    ]
+  },
+  "frozen_candidate": "df0e5fa43a346d715de2016cd595716745fc0f973d0f325d3bccbab0d7a3197e",
+  "prior_review": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd59-review-01-agent.json",
+  "adjudication": ".workflow/core-workbench/runs/implement-p2.6-20260927/root-adjudication-p27-cd59-review-01.json",
+  "user_decisions": ".workflow/core-workbench/runs/implement-p2.6-20260927/ur-ux/ur-ux-request.json follow_ups (herdr/tmux scrolling requirement; personality keep+warn; --no-title)",
+  "delta": {
+    "ui": {
+      "files": [
+        "src/workbench/ui/product/app.py",
+        "src/workbench/ui/product/model.py",
+        "src/workbench/ui/product/view.py",
+        "tests/ui/support.py",
+        "tests/ui/test_product_model.py",
+        "tests/ui/test_product_pty.py",
+        "tests/ui/live_mux_scroll_probe.py"
+      ],
+      "base": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-mux-pre/"
+    },
+    "backend": {
+      "files": [
+        "src/workbench/backend/launcher.py",
+        "src/workbench/backend/service.py",
+        "src/workbench/backend/cli.py",
+        "omp_bridge/omp-isolation.yml",
+        "tests/backend/test_paths_launcher.py",
+        "tests/backend/test_omp_isolation.py",
+        "tests/backend/live_omp_isolation_probe.py"
+      ],
+      "base": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-omp-iso2-pre/"
+    },
+    "independent_test_adaptations": {
+      "files": [
+        "tests/ui/test_product_resize_independent_p27l.py",
+        "tests/backend/test_omp_isolation_independent_p27m.py"
+      ],
+      "base": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-cd59-test-delta-backup/"
+    },
+    "new_independent": [
+      "tests/ui/test_product_mux_independent_p27n.py",
+      "tests/ui/live_mux_independent_p27n.py",
+      "tests/backend/test_omp_isolation_independent_p27n.py",
+      "tests/backend/live_omp_isolation_independent_p27n.py"
+    ],
+    "results": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-mux-scroll-worker-01.json",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-omp-iso-worker-02.json",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-omp-iso-worker-03.json",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd59-test-02.json"
+    ]
+  },
+  "focus": [
+    "Each prior finding (R1..R7) resolved or correctly routed; no new ambient path left open (compare with the investigation source table); user choices applied (personality kept with warning, --no-title).",
+    "Mouse tracking: single-mode semantics correct in all paths (start, drag, release, prefix m, SIGWINCH/prefix r re-assert, every exit), no regression of drag/resize/scroll/click; behaviour inside tmux/herdr as evidenced.",
+    "Process handling in read_user_config and check_isolation (bounded, C-D45-safe group cleanup, no zombies/fd leaks, never blocks the backend loop); start summary behaviour.",
+    "Independent test adaptations only replace superseded expectations and keep strength; new tests meaningful."
+  ],
+  "scratch": "/tmp/claude-1000/-home-dwchoo-ai-exp-assistant/dd5e2cee-e10d-41c4-8ebb-7c00b50dd465/scratchpad/cd59-review2/",
+  "rules": "Read-only except the result JSON .workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd59-review-02-agent.json. Tests with /tmp/cw02-g1-venv/bin/python, pattern test_*.py, short unique TMPDIR; live probes allowed once each (zero model calls, isolated tmux -L / isolated herdr only). Never pkill/pattern kills; never edit user configs; never touch ~/wb-urux-sandbox/.state.",
+  "result_format": "Findings P0..P3 (file:line, scenario, clause, fix); per prior finding verdict; per focus verdict; overall integrate/block. Write JSON; reply <=20 lines. Korean."
+}

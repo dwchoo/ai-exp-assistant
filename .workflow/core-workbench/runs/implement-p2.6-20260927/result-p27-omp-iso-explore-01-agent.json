@@ -1,0 +1,188 @@
+{
+ "schema_version": 1,
+ "invocation": "p27-omp-iso-explore-01",
+ "role": "code_explorer",
+ "omp_version": "18.4.4",
+ "evidence_source": "OMP 18.4.4 is a bun-compiled ELF; embedded TS source is readable via `strings -a` (extract: /tmp/claude-1000/-home-dwchoo-ai-exp-assistant/dd5e2cee-e10d-41c4-8ebb-7c00b50dd465/scratchpad/omp-iso/strings.txt, line numbers below refer to it)",
+ "method": "static: embedded TS source; runtime: `omp --mode rpc --no-session --no-title` in scratch canary tree, RPC get_state (systemPrompt+dumpTools) and get_available_commands only, zero model calls, killed by process group",
+ "table": [
+  {
+   "source": "Context files: AGENTS.md / CLAUDE.md standalone (walk-up cwd->repo root)",
+   "discovery": "providers `agents-md`,`claude-md` (prio 10) via GBe walk-up; strings.txt:439697,800185,800559. NOT opt-out, always on. ~/AGENTS.md style user files not read by these.",
+   "disable_per_run": "overlay `disabledProviders: [agents-md, claude-md, ...]` (capability filter oki, strings.txt:288672). No CLI flag exists (no --no-context-files; noContextFiles is SDK-only, :772917).",
+   "verified": "runtime: canary parent-dir AGENTS.md loaded in base; absent with overlay (E_iso). ",
+   "confidence": "high"
+  },
+  {
+   "source": "Context files: .omp/AGENTS.md, .claude/CLAUDE.md, .agents/AGENTS.md, .codex/AGENTS.md, GEMINI.md and user-level ~/.omp/agent/AGENTS.md, ~/.agents/AGENTS.md",
+   "discovery": "providers native(100) agents(70) claude(80) codex(70) gemini(60) ...; native/agents user-level always on; claude/codex/gemini/cursor/opencode/windsurf/github/claude-plugins USER level are opt-out by default (oOo map strings.txt:288818, Xu :288702) unless enabledProviders or env CLAUDE_CONFIG_DIR set (:288715).",
+   "disable_per_run": "same overlay `disabledProviders` list (include native, agents, claude, codex, gemini,...). Unset CLAUDE_CONFIG_DIR in child env as belt-and-braces (disabledProviders wins anyway: Xu checks AK first).",
+   "verified": "runtime: ~/.claude/CLAUDE.md and ~/.codex/AGENTS.md NOT loaded in base; project .omp/AGENTS.md loaded. IMPORTANT observed dedupe: only ONE context file per directory depth, highest provider priority wins (in /home/dwchoo/ai-exp-assistant base run only .claude/CLAUDE.md loaded although AGENTS.md(5800B) and CLAUDE.md exist at repo root; scratch: proj/AGENTS.md, CLAUDE.md, GEMINI.md, .agents/AGENTS.md lost to .omp/AGENTS.md).",
+   "confidence": "high"
+  },
+  {
+   "source": "SYSTEM.md / SYSTEM_TEMPLATE.md (replaces default prompt)",
+   "discovery": "capability system-prompt: native .omp/SYSTEM.md (walk-up) + ~/.omp/agent/SYSTEM.md, agents .agents/SYSTEM.md, claude; only consulted when no --system-prompt given (strings.txt:637480-637550, 544400ish bel).",
+   "disable_per_run": "disabledProviders (native, agents, claude) ; or pass --system-prompt/--system-prompt-template explicitly (skips discovery).",
+   "verified": "runtime: proj/.omp/SYSTEM.md replaced default prompt (len 2201 vs 12235) in base; ignored under overlay (Z3/Z4).",
+   "confidence": "high"
+  },
+  {
+   "source": "--system-prompt / --append-system-prompt behaviour",
+   "discovery": "--system-prompt swaps the bundled system-prompt.md for custom-system-prompt.md but the same po object still renders skills, context files (<project-context><repo-rules>), rules, workstation (strings.txt:637691-637790). --append only appends.",
+   "disable_per_run": "n/a: neither isolates. They are additive to ambient sources.",
+   "verified": "runtime: --system-prompt CUSTOM_SYS_TEXT_XYZ -> prompt len 1885, still contained CANARY skills, CANARY_PARENT_AGENTS, .omp/AGENTS.md, CANARY_RULE_BODY (F_sysprompt). --append-system-prompt present and default kept (G_append).",
+   "confidence": "high"
+  },
+  {
+   "source": "Skills: native (.omp/skills + ~/.omp/agent/skills)",
+   "discovery": "provider native, walk-up project + user; skills.enablePiUser/enablePiProject default true (strings.txt:545094,544440)",
+   "disable_per_run": "overlay skills.enablePiUser:false, skills.enablePiProject:false (or disabledProviders native)",
+   "verified": "runtime C_ov_wbonly",
+   "confidence": "high"
+  },
+  {
+   "source": "Skills: ~/.agents/skills, .agents/skills (walk-up), .agent/",
+   "discovery": "provider agents; skills.enableAgentsUser/Project default TRUE (strings.txt:800267). Real leak on this machine: computer-use, orca-cli, orchestration from ~/.agents/skills appear in base prompt.",
+   "disable_per_run": "overlay skills.enableAgentsUser:false + enableAgentsProject:false",
+   "verified": "runtime: base listed them; C_ov_wbonly listed only order-*",
+   "confidence": "high"
+  },
+  {
+   "source": "Skills: .claude/skills (project), ~/.claude/skills, ~/.codex/skills, ~/.cursor/skills",
+   "discovery": "claude project enabled by default (skills.enableClaudeProject true); user claude/codex default off (enableClaudeUser/CodexUser false, still opt-out provider). cursor etc. opt-out.",
+   "disable_per_run": "overlay skills.enableClaudeProject:false (+ enableClaudeUser/CodexUser false)",
+   "verified": "runtime: project canary-claude loaded, ~/.claude/skills (graphify, codex...) and ~/.codex/skills NOT loaded in scratch base",
+   "confidence": "high"
+  },
+  {
+   "source": "Skills: skillshare registry (skills.lock.json) and managed auto-learn skills (omp-managed)",
+   "discovery": "providers `skillshare` (prio 95) and `omp-managed` (prio 5, ~/.omp/agent/managed-skills); not covered by skills.enable* flags (only by Xu/opt-out logic, strings.txt:545060-545135,544186).",
+   "disable_per_run": "overlay disabledProviders [skillshare, omp-managed]; keep autolearn.enabled false (default).",
+   "verified": "code-only; none present on this machine (no ~/.omp/agent/skills.lock.json, no managed-skills dir)",
+   "confidence": "medium"
+  },
+  {
+   "source": "Skills: Workbench-only skills dir",
+   "discovery": "skills.customDirectories: loaded by direct scan (Xp, providerId custom, level user), independent of provider filter; each skill = <dir>/<name>/SKILL.md with name+description frontmatter (strings.txt:545165-545200)",
+   "disable_per_run": "overlay: skills.enable*:false for all six + customDirectories:[<repo>/omp_bridge/skills] (or disabledProviders list + customDirectories). DO NOT pass --no-skills or skills.enabled:false: both return {skills:[]} before customDirectories (strings.txt:545080 `if(!s) return`; noSkills at :772910).",
+   "verified": "runtime C_ov_wbonly: prompt <skills> = order-manager, order-worker only, commands skill:order-manager/skill:order-worker. --no-skills with the same overlay: zero skills (D). skills.enabled:false: zero (B).",
+   "confidence": "high"
+  },
+  {
+   "source": "Skill exposure",
+   "discovery": "(1) `<skills>` list of name: description in system prompt (setting `skillful`, default true); (2) slash command /skill:<name> [args] (skills.enableSkillCommands default true; strings.txt:545300 qL/tA); inline token /skill:name also expands (SKILL_TOKEN_RE); (3) skill://<name> internal URL read via read tool; skill body is NOT in the prompt, only description.",
+   "disable_per_run": "skillful:false hides listing only; commands remain; skills.enableSkillCommands:false hides /skill:",
+   "verified": "runtime: get_available_commands lists skill:order-worker; with skillful:false prompt has no <skills> and no CANARY_WB text but commands still list both (K_skillful).",
+   "confidence": "high"
+  },
+  {
+   "source": "Role-restricted skills (manager vs worker)",
+   "discovery": "skills.includeSkills glob list / CLI --skills glob filter is applied to the final merged list including custom-dir skills (strings.txt:545121 C(), 545280 q=filter). ignoredSkills also exists.",
+   "disable_per_run": "give each OMP its own --config overlay: either separate customDirectories per role or one shared dir + `--skills order-worker` (worker) / `--skills order-manager` (manager).",
+   "verified": "runtime Z6: wbonly overlay + --skills order-worker -> only order-worker in prompt and only skill:order-worker command. Z7: --skills 'canary-omp,order-*' on ambient -> only canary-omp.",
+   "confidence": "high"
+  },
+  {
+   "source": "Rules (.omp/rules, .claude/rules, .agents/rules, RULES.md, cursor .mdc...) incl. alwaysApply",
+   "discovery": "capability rules; native/agents/claude(project)/... ; alwaysApply rules are injected as <generic-rules> in the prompt (base prompt contained CANARY_RULE_BODY).",
+   "disable_per_run": "--no-rules (CLI) removes them; or disabledProviders. --no-rules alone does NOT remove context files/skills.",
+   "verified": "runtime: Z2 --no-rules: rule body gone, everything else remained; E_iso: gone",
+   "confidence": "high"
+  },
+  {
+   "source": "Builtin TTSR default rules (Go/Rust/TS lint rules)",
+   "discovery": "provider builtin-defaults (prio 1); fire mid-stream only, not startup prompt (strings.txt:800542, settings ttsr.*)",
+   "disable_per_run": "overlay ttsr.builtinRules:false or ttsr.enabled:false; disabledProviders builtin-defaults",
+   "verified": "code-only (not startup injection)",
+   "confidence": "medium"
+  },
+  {
+   "source": "Slash commands and prompt templates (.omp/commands, .claude/commands, .agents/commands, prompts/)",
+   "discovery": "capabilities slash-commands/prompts: native, claude (project default on: commands.enableClaudeProject), opencode project on, agents, ...",
+   "disable_per_run": "disabledProviders list; also commands.enableClaudeProject:false, commands.enableOpencodeProject:false",
+   "verified": "runtime: canary-cmd (.claude/commands) and canary-omp-cmd present in base get_available_commands; absent under overlay (E_iso). builtin commands remain (n=49).",
+   "confidence": "high"
+  },
+  {
+   "source": "Extensions / hooks / custom tools auto-discovery (.omp/extensions, ~/.omp/agent/extensions, claude/opencode dirs, settings extensions[], omp plugins)",
+   "discovery": "capabilities extension-modules, extensions, hooks, tools; strings.txt:544560-544700 (Eel/Oel/Mel/Ael)",
+   "disable_per_run": "--no-extensions (explicit -e still works) AND/OR disabledProviders list; settings `extensions`/`disabledExtensions` arrays; --plugin-dir is explicit only.",
+   "verified": "runtime: project .omp/extensions/canary-ext/index.ts executed in base and with no flag; NOT executed with --no-extensions and NOT with disabledProviders overlay (X_*). Hooks/custom tools: code-only.",
+   "confidence": "high (extensions) / medium (hooks, tools)"
+  },
+  {
+   "source": "MCP servers (user and project)",
+   "discovery": "providers native (.omp/mcp.json, ~/.omp/agent/mcp.json), mcp-json (project-root .mcp.json/mcp.json, gated by mcp.enableProjectConfig), claude (~/.claude.json only if user enabled; .claude/.mcp.json), plus cursor/windsurf/vscode/cline/codex/gemini/github/opencode/omp-plugins/claude-plugins/agent-plugins (strings.txt:544332,801036-801075,802313). MCP tools appear in prompt as `## MCP Tool Routes` (xd://mcp__name) not in tool list.",
+   "disable_per_run": "overlay mcp.enableProjectConfig:false (root .mcp.json) + disabledProviders list (native, claude, mcp-json, ...).",
+   "verified": "runtime: stdio stub server launched via proj/.mcp.json in base (stub.log) and CANARY_MCP_TOOL appeared in prompt; NOT launched with ov_iso.yml and NOT with mcp.enableProjectConfig:false alone (H_*). User-level mcp.json: code-only (no file on this machine).",
+   "confidence": "high (project) / medium (user)"
+  },
+  {
+   "source": "Task subagent definitions (.omp/agents, ~/.omp/agent/agents, plugin agents) -> task tool description",
+   "discovery": "task/discovery.ts PA(): project .omp/agents (walk-up) + ~/.omp/agent/agents + omp-plugins/claude-plugins agents (strings.txt:601921). NOT a capability provider: disabledProviders does NOT block them. .claude/agents, .agents/agents, .opencode/agents were NOT loaded.",
+   "disable_per_run": "overlay task.disabledAgents:[names] (exact names, no glob) OR exclude `task` from tools via --tools read,bash,edit,... ",
+   "verified": "runtime: proj/.omp/agents/canary.md appeared in task description in base AND under ov_iso.yml (Y_agents_iso: still leaks). task.disabledAgents removed it (Z5). --tools list without task removed the task tool (Z1).",
+   "confidence": "high"
+  },
+  {
+   "source": "Memory: memory.backend (off|local|mnemopi|hindsight|sharpshooter), memories.enabled, mnemopi.autoRecall, hindsight mental models",
+   "discovery": "settings; hindsight injects developer instructions at boot, mnemopi recalls into first turn",
+   "disable_per_run": "user config currently memory.backend off, memories.enabled false; pin in overlay `memory: {backend: off}` so a future global change cannot leak in",
+   "verified": "config list values only; runtime prompt showed no memory section. mnemopi/hindsight injection path is code/config-desc only.",
+   "confidence": "medium"
+  },
+  {
+   "source": "Advisor",
+   "discovery": "advisor.enabled default false; --advisor CLI enables",
+   "disable_per_run": "overlay advisor.enabled:false (do not pass --advisor)",
+   "verified": "config list + flag help; not runtime-tested",
+   "confidence": "medium"
+  },
+  {
+   "source": "Other prompt/tool sources",
+   "discovery": "MAGIC keywords notice (magicKeywords.enabled true), personality override file (loadPersonalityOverride), env PI/OMP NULL_PROMPT=true returns empty system prompt (strings.txt:637433), skillful-notice, secrets, IDE/LSP tools.",
+   "disable_per_run": "magicKeywords.enabled:false; --no-lsp; env NULL_PROMPT=true only if fully custom prompt wanted (env accessor prefix unverified)",
+   "verified": "code/config only",
+   "confidence": "low"
+  },
+  {
+   "source": "--profile <name> (OMP_PROFILE/PI_PROFILE)",
+   "discovery": "moves agent dir to ~/.omp/profiles/<name>/agent incl. its own agent.db (auth), sessions, settings (strings.txt:275770-275800).",
+   "disable_per_run": "DO NOT USE for isolation: it drops the user's stored logins (OAuth in ~/.omp/agent/agent.db is not shared). PI_CODING_AGENT_DIR has the same effect. Use --config overlay instead (keeps agent dir + auth).",
+   "verified": "runtime: `omp --profile X config path` created a brand-new empty ~/.omp/profiles/X/agent/agent.db (I did not read it). Env-var API keys would still apply, stored OAuth would not.",
+   "confidence": "high"
+  }
+ ],
+ "recommended_overlay_yaml": {
+  "description": "Per-run isolation overlay; pass `--config <file>` (repeatable). Verified E_iso, R_repo_iso. Use together with --no-extensions.",
+  "yaml": "disabledProviders: [native, omp-managed, skillshare, agents-md, agents, claude-md, claude-plugins, claude, cline, codex, cursor, gemini, github, mcp-json, omp-plugins, opencode, ssh-json, vscode, windsurf, agent-plugins, builtin-defaults]\nskills:\n  enableClaudeProject: false\n  enablePiUser: false\n  enablePiProject: false\n  enableAgentsUser: false\n  enableAgentsProject: false\n  enableCodexUser: false\n  enableClaudeUser: false\n  customDirectories:\n    - <repo>/omp_bridge/skills\nmcp:\n  enableProjectConfig: false\nmemory:\n  backend: \"off\"\nadvisor:\n  enabled: false\nttsr:\n  builtinRules: false\n",
+  "cli_extra": [
+   "--no-extensions",
+   "--tools <list without task, or set task.disabledAgents>",
+   "--skills order-worker | --skills order-manager (role restriction)"
+  ],
+  "caveat": "`disabledProviders` is a shared setting: the same key also blocks MODEL provider ids; none of the ids above collides with a model provider id (cursor/github-copilot differ) but re-check if the user uses a model provider literally named cursor/github/codex/gemini/opencode. Overlay REPLACES the user's disabledProviders (currently [])."
+ },
+ "runtime_results": {
+  "E_iso (scratch, overlay)": "prompt 11226 chars, no context files, skills=order-manager,order-worker only, no MCP launch, canary-cmd gone",
+  "R_repo_iso (/home/dwchoo/ai-exp-assistant, overlay+--no-extensions)": "no context files, skill:order-* only, 46 slash commands (all builtin); task agents still scout/reviewer/security-reviewer/task/sonic (bundled) ",
+  "R_repo_base (same cwd, no flags)": "context file .claude/CLAUDE.md only (root AGENTS.md/CLAUDE.md lost to depth-dedupe), 14 skill commands incl. ambient ~/.agents + repo .claude/.agents skills, 61 commands"
+ },
+ "open_risks": [
+  "task subagents from project .omp/agents (and ~/.omp/agent/agents) are not blockable by disabledProviders; need task.disabledAgents by name or drop the task tool. Bundled agents (scout, reviewer, security-reviewer, task, sonic) always present.",
+  "disabledProviders overlay replaces the user's array; and shares a key with model-provider disabling (ids do not collide today).",
+  "OMP overlay/env semantics were verified only for rpc mode --no-session in 18.4.4; a minor upgrade can change provider ids or defaults (e.g. skills.enableAgentsUser default true). Workbench should assert via get_state.systemPrompt/get_available_commands at startup (zero-cost introspection) and fail if unexpected skill/context names appear.",
+  "Depth-dedupe of context files means Workbench cannot rely on repo AGENTS.md reaching the worker in base OMP; with isolation it gets none, so any needed instructions must be passed explicitly (--append-system-prompt / -e extension).",
+  "User-level mcp.json, hooks dirs, custom tools dir, managed/skillshare skills and hindsight/mnemopi injection are code-verified only (no such files/config on this machine).",
+  "Extensions (-e) explicitly passed are still loaded with --no-extensions; extension code itself can register tools/commands.",
+  "MCP servers configured in ~/.omp/agent/mcp.json / plugins would need disabledProviders native + omp-plugins (done in overlay).",
+  "--profile / PI_CODING_AGENT_DIR must not be used (drops auth)."
+ ],
+ "side_effects": [
+  "Accidentally created ~/.omp/profiles/zz_probe_nonexist (empty agent.db + logs) by `omp --profile ... config path`; removed it and the empty profiles dir (verified ls ~/.omp).",
+  "Probe runs wrote ~/.omp/logs/omp.*.log entries (normal), and used ~/.omp/agent/models.db/history.db as regular startup does; no sessions saved (--no-session). No credential/auth file was read. No repo or user config edited.",
+  "All spawned omp/python processes killed by process group; pgrep confirmed none left."
+ ],
+ "scratch": "/tmp/claude-1000/-home-dwchoo-ai-exp-assistant/dd5e2cee-e10d-41c4-8ebb-7c00b50dd465/scratchpad/omp-iso"
+}

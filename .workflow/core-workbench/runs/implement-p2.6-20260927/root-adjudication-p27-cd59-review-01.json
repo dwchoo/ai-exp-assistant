@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "id": "root-adjudication-p27-cd59-review-01",
+  "source": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd59-review-01-agent.json",
+  "decisions": {
+    "R2 (+ user mux requirement)": "fix now in UI (p27-mux-scroll-worker-01, Opus): stable tracking mode, live tmux + temporary herdr verification, emulator semantics; also R5 UI part (show isolation warning in the product UI header).",
+    "R1, R3": "fix next in launcher/overlay (p27-omp-iso-worker-02, Opus): --append-system-prompt \"\" (or equivalent) for APPEND_SYSTEM.md, personality isolation (personality: none or detect+warn), APPEND/PERSONALITY canaries in check_isolation and live probes; plus dev.autoqa: false (user-facing modal / external push).",
+    "R4, R6, R5 start-summary race": "fix together with R1/R3 in the launcher worker (union disabledAgents with user value; async/timeout-bounded config read with group cleanup; wait for check or print pending explicitly).",
+    "R6 lsp/dap": "record: language-server configs are tool configs, not prompt injection; keep unless the user asks (note in integration record).",
+    "R7": "record for CW-19."
+  }
+}

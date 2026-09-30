@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "unit": "V-CW-06-p2.7-urux",
+  "ticket": "CW-06 (UR-UX delta per C-D58)",
+  "status": "integrated",
+  "recorded_at": "2026-09-30",
+  "approved_bundle_digest": "bdda908bb7215ad5e98eb6b90c2b3f99f34f914e915f701c1f475e164775e6ba",
+  "integrated_candidate": "eb7703fca982aff3a8c2e56896b1d09a6730a76dc21916fc1ffcae1dfdcf93ab",
+  "integrated_candidate_manifest": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-urux-integrated.json (recovery: p27-snapshot-cw06-integrated-checkpoint.json milestone + p27-urux-*-delta-backup/)",
+  "integration_delta_vs_verified": {
+    "verified_candidate": "9598976b5753a7b4f3128989559393927ec8fb223505f30e867dba754f029554",
+    "delta": "graphify-out/** only",
+    "audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-urux-integrated.json"
+  },
+  "behaviour": "top row manager+worker OMP half width each, bottom host terminal full width; host terminal scrollback (5000 lines) via prefix [ / prefix PgUp scroll mode; OMP panes 1000 lines",
+  "verification_chain": [
+    "p27-urux-layout-worker-01",
+    "p27-urux-layout-test-01 (independent geometry adaptation + p27j + runtime stub OMP)",
+    "p27-urux-delta-review-01 (integrate)",
+    "p27-urux-snapshots-02 (real OMP, 0 model turns)"
+  ],
+  "gate_items_affected": {
+    "P-C-AC-06": "layout changed by user decision; three areas + focus/owner display re-verified at fixture/PTY/runtime(stub) level (p27j, adapted state/replay tests); real-OMP runtime evidence from rerun-test-08 remains valid for OMP key fidelity (panes unchanged except geometry)"
+  },
+  "carried_forward": {
+    "UI polish delta (CW-06, later)": [
+      "scroll2 review P3-F1 click focus only on plain left button",
+      "P3-F2 reset tracked mouse/alt modes on RIS/DECSTR",
+      "P3-F3 quiet refusals for wheel/arrow forwarded to non-focused host pane",
+      "P3-F4 ESC[5/ESC[6 0.5 s hold",
+      "P3-F5 help line: tracking panes need prefix 1/2/3",
+      "urux review P3-F1 history memory ~162 MB at 198 cols",
+      "earlier P3s from delta reviews 02-04"
+    ]
+  },
+  "follow_up_direct_scroll": {
+    "integrated_candidate": "eb7703fca982aff3a8c2e56896b1d09a6730a76dc21916fc1ffcae1dfdcf93ab",
+    "manifest": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-urux-scroll2-integrated.json",
+    "user_request": "스크롤 모드로 들어가서 하기 보다는 바로 되면 좋겠는데 -> 둘 다 (마우스 휠 + Shift+PgUp/PgDn)",
+    "behaviour": "wheel scrolls pane under pointer; Shift+PgUp/PgDn page-scroll focused pane; typing/paste returns scrolled pane to live and delivers once; click focuses non-tracking pane; prefix m toggles mouse capture (Shift+drag selects text while on); tracking apps receive translated events; alt-screen wheel -> arrows; ?1000h/?1006h restored on all exit paths; prefix [ mode kept",
+    "verification_chain": [
+      "p27-urux-scroll2-worker-01",
+      "p27-urux-scroll2-test-01 (independent adaptation of mouse assumptions + p27k 55 tests + runtime stub OMP)",
+      "p27-urux-scroll2-delta-review-01 (integrate)"
+    ],
+    "delta_vs_verified": "graphify-out/** and Root state.json only"
+  }
+}

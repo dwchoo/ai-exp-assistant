@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-omp-iso-worker-03",
+  "status": "candidate_ready",
+  "candidate_id": "045312110f0497e71b45551ea434a7dcf155dab0c506a776d02af641e67b8760",
+  "scope_audit": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-omp-iso3.json",
+  "delta_backup": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/p27-omp-iso3-delta-backup/",
+  "changed_paths": {
+    "omp_bridge/omp-isolation.yml": "c7ddf506b27443017b59a438a1baad5badeb0f4301e956b675a68c1987d34d13",
+    "src/workbench/backend/launcher.py": "c327849ad40a7074f240c438a3c55574dbe9ccf8cfda9b89a0bf29f966489cf0",
+    "src/workbench/backend/service.py": "38ba0e334c0ab225b81e1b21c8834e96af742d641e493ec335678309836e0e6b",
+    "tests/backend/test_paths_launcher.py": "349f9ef45776168b150000cd68e086582cebcf2d3ca6d01519c3d65e2a1d7673",
+    "tests/backend/test_omp_isolation.py": "b136f9f4b5b65ee6dc5ba842628360d15fae6e326fc9957224ff8939ee78af97",
+    "tests/backend/live_omp_isolation_probe.py": "482a2c0590d5424a932a5bb9edc5cb22b9a7937124e06bfcb529931d03fe509e"
+  },
+  "checks": [
+    [
+      "unit red (pre)",
+      1,
+      "6 failures 2 errors"
+    ],
+    [
+      "unit green",
+      0,
+      "38 OK"
+    ],
+    [
+      "live_omp_isolation_probe (OMP 18.4.4)",
+      0,
+      "8 OK"
+    ],
+    [
+      "tests/backend",
+      1,
+      "140 run, 5 fail = known p27m conflicts, 27 skip"
+    ],
+    [
+      "contracts",
+      0,
+      "43"
+    ]
+  ],
+  "design": "personality: none removed (OMP default Personality kept); PERSONALITY.md present -> state=warning (ok=True, leaks=[], warnings=[personality:<path>]) shown in status/UI header; --no-title after --append-system-prompt for both roles and check; TITLE_SYSTEM.md not a leak when --no-title present (leak again if user args drop it)",
+  "gaps": [
+    "cli.py summary for state=warning not verified (outside allowed paths)",
+    "p27m conflicts remain",
+    "worker's pkill killed its own shell twice (exit 144); Root verified the user's sandbox backend ended at 16:28:28 by a normal UI-confirmed shutdown, not by pkill"
+  ],
+  "residue": "none",
+  "observed_model": "sonnet (wb-worker definition; host metadata unverified)"
+}

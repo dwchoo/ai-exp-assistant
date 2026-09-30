@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cd59-test-02",
+  "ticket_id": "CW-06 mux scrolling + CW-17 isolation corrections (C-D59)",
+  "role": "test_designer",
+  "unit": "V-CW-06-p2.7-resize",
+  "approved_bundle_digest": "91fe05dc882d8c00ab0eb28c30e2b6cabcbfacb0f0fee3f0eaeecfaff5b7d3e8",
+  "routing": {
+    "planned_role": "test_designer",
+    "selected_role": "test_designer (wb-test-rerun, Sonnet high)",
+    "reason_codes": [
+      "correction_reverification"
+    ],
+    "evidence_refs": [
+      "review p27-cd59-review-01 findings, user requirements (herdr/tmux scrolling; personality keep+warn; --no-title)"
+    ]
+  },
+  "frozen_candidate": "045312110f0497e71b45551ea434a7dcf155dab0c506a776d02af641e67b8760",
+  "frozen_production_files": {
+    "src/workbench/ui/product/__init__.py": "8b250db57bcf1590be1ba6959cf059139155475f18d84ee4577e84e7ad1d536b",
+    "src/workbench/ui/product/app.py": "dd02b3f64c832e31b5032584db686658448712cbc9bb7f1fd7b0be21b42561e6",
+    "src/workbench/ui/product/input.py": "d95680d255a267ff5dcc5a9ad0773d8b956ec064b07145196026d2536b6b36f1",
+    "src/workbench/ui/product/layout.py": "f7be43692d595ca172c3fca666be3d4f89272615dd3dd8ea0017ca95a685b0e3",
+    "src/workbench/ui/product/model.py": "7782c788a8ca5e8e274cb83bb9a307650a69b1d47de4e26240b2169b26367119",
+    "src/workbench/ui/product/view.py": "96be174cceed6e806a02d0d1a46b1f01e108f077506939d8cab99be955932b7b",
+    "src/workbench/backend/launcher.py": "c327849ad40a7074f240c438a3c55574dbe9ccf8cfda9b89a0bf29f966489cf0",
+    "src/workbench/backend/service.py": "38ba0e334c0ab225b81e1b21c8834e96af742d641e493ec335678309836e0e6b",
+    "src/workbench/backend/cli.py": "03580f4bfeb792b5d97940d07bdb85fb690bba0ff524e0286e67fce251fcc0df",
+    "src/workbench/backend/ui_server.py": "e6aa3e0b12fc48c920ed901d8e3b8ec8e1063d9d1cb3a89bd5345066de533469",
+    "omp_bridge/omp-isolation.yml": "c7ddf506b27443017b59a438a1baad5badeb0f4301e956b675a68c1987d34d13"
+  },
+  "inputs": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd59-review-01-agent.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/root-adjudication-p27-cd59-review-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-mux-scroll-worker-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-omp-iso-worker-02.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-omp-iso-worker-03.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/ur-ux/ur-ux-request.json (follow_ups: mux requirement, personality/title answers)"
+  ],
+  "required": [
+    "Root-authorized adaptation of independent tests whose expectations encode superseded contracts (keep all other assertions and strength): tests/ui/test_product_resize_independent_p27l.py 4 PtyDragTests (new contract: mouse tracking ?1000h ?1002h ?1006h enabled once at start, no mode switching during drag, all modes off on exit/prefix m; assert terminal MODE semantics with a single-tracking-mode outer terminal model, not byte presence); tests/backend/test_omp_isolation_independent_p27m.py 5 tests (new contract: --append-system-prompt \"\" and --no-title are REQUIRED isolation args; task.disabledAgents lists only definitions OMP actually loads: nearest .omp/agents plus ~/.omp/agent/agents, frontmatter name+description, not main/sub, unioned with the user's value). Record before/after sha256.",
+    "New independent checks (tests/ui/test_product_mux_independent_p27n.py and tests/backend/test_omp_isolation_independent_p27n.py, plus live files opt-in): derived from the review findings before reading the fixes - after N divider drags and prefix m off/on the outer terminal (single-mode model) still reports wheel and clicks; in a live isolated tmux server (tmux -L unique, mouse off and on) and in an ISOLATED herdr server (XDG_CONFIG_HOME=<scratch>, as the worker did; never the user's herdr server) wheel scrolling works before/after drags and Shift+PgUp/prefix PgUp/prefix [ fallbacks work; OMP 18.4.4 live (zero model calls, rpc only): APPEND_SYSTEM.md canaries (4 project locations + fake-HOME user level) absent; fake-HOME PERSONALITY.md -> state warning (default personality block kept); TITLE_SYSTEM.md not a leak with --no-title; dev.autoqa off (xd://report_issue absent) incl. PI_AUTO_QA stripped; disabledAgents union with a fake user value; start summary prints the isolation state (cli summary for state=warning) through the real entrypoint.",
+    "Regression (pattern test_*.py): tests/ui x2, tests/backend (short TMPDIR), tests/contracts, tests/gates/g1_vt (src:.)."
+  ],
+  "allowed_write_paths": [
+    "tests/ui/test_product_resize_independent_p27l.py (superseded drag-mode expectations only)",
+    "tests/backend/test_omp_isolation_independent_p27m.py (5 superseded expectations only)",
+    "tests/ui/test_product_mux_independent_p27n.py",
+    "tests/ui/live_mux_independent_p27n.py",
+    "tests/backend/test_omp_isolation_independent_p27n.py",
+    "tests/backend/live_omp_isolation_independent_p27n.py",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd59-test-02-agent.json"
+  ],
+  "prohibited": "production frozen; other tests unchanged; zero model calls; never edit ~/.omp ~/.agents ~/.claude ~/.codex, ~/.tmux.conf, ~/.config/herdr; never use the user's herdr server or tmux default socket; never touch ~/wb-urux-sandbox/.state; NEVER use pkill/killall or pattern kills - terminate only processes you started, by pid + start time; venv python; short TMPDIR removed; no graphify update, commits.",
+  "result_format": "Write full JSON; reply <=20 lines: checks table, status, per-requirement verdicts with failure classification, adapted files before/after sha256, new files sha256, frozen hashes equal?, residue. Korean."
+}

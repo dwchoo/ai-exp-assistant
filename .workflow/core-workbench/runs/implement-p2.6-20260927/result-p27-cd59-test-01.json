@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cd59-test-01",
+  "status": "candidate_ready",
+  "frozen_candidate": "aa9ebdc9a19f7f5c03ad4578aa6db562d00795a5cac97199353999c73a6b9f21",
+  "candidate_after_tests": "bcda200e81e7078c98f858849d009acaf6f30a7f1403e13ac9a855d0500c6967",
+  "agent_result": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd59-test-01-agent.json",
+  "scope_audit": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-cd59-test.json",
+  "delta_backup": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/p27-cd59-test-delta-backup/",
+  "added_tests": {
+    "tests/ui/test_product_resize_independent_p27l.py": "52db5be0257a84b01a9b5efc507f7237b199eb4628fa9584e7e39fd45b983aeb",
+    "tests/backend/test_omp_isolation_independent_p27m.py": "e0004103613727980b617597e812dd844fc788fb951bf08b6cb4835328fe7749",
+    "tests/backend/live_omp_isolation_independent_p27m.py": "49da0258006ec05d5673b4c4adbb1852396f9b75865c05b6e1457eac2f5dc8ba"
+  },
+  "checks": [
+    [
+      "tests/ui x2",
+      0,
+      "357"
+    ],
+    [
+      "tests/backend",
+      0,
+      "129 (27 skipped live)"
+    ],
+    [
+      "contracts",
+      0,
+      "43"
+    ],
+    [
+      "g1_vt",
+      0,
+      "85"
+    ],
+    [
+      "live_omp_isolation_probe",
+      0,
+      "4"
+    ],
+    [
+      "live_omp_isolation_independent_p27m (OMP 18.4.4, 0 model calls)",
+      0,
+      "9"
+    ]
+  ],
+  "red": {
+    "resize": "59 new tests vs pre-change UI overlay: 55 FAIL, 28 ok are guard tests",
+    "isolation": "25 contract tests error on pre-change launcher; 4 hand mutants each caught"
+  },
+  "verdicts": "RESIZE all pass; ISOLATION non-live and live pass (raw canary grep; orca skills absent; Workbench skill + role filter visible; negative control shows all; model unchanged; ~/.agents ~/.claude ~/.codex ~/.omp metadata unchanged)",
+  "gaps": [
+    "UI SIGKILL cannot restore ?1002",
+    "no real terminal emulator check of ?1002",
+    "start summary line not verified with stub (status text verified)",
+    "G3 live gate pinned to OMP 18.2.10 -> CW-16"
+  ],
+  "frozen_hashes_equal": true,
+  "residue": "none",
+  "observed_model": "sonnet (wb-test-rerun definition; host metadata unverified)"
+}

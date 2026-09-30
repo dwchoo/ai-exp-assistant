@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-urux-scroll2-worker-01",
+  "status": "candidate_ready",
+  "candidate_id": "c8cf385a0ac03454137c1a88c41a90c0ce773dfc3b42650f0ac3b2bca6f65ceb",
+  "after_snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-urux-scroll2-after.json",
+  "scope_audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-urux-scroll2.json",
+  "delta_backup": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-urux-scroll2-delta-backup/ (pre in p27-urux-scroll2-pre/)",
+  "changed_paths": {"src/workbench/ui/product/__init__.py": "8b250db57bcf1590be1ba6959cf059139155475f18d84ee4577e84e7ad1d536b", "src/workbench/ui/product/app.py": "b40218946752976bd7a2929da698d337216b71f2ea4b7a4785ed28097d0f9ffe", "src/workbench/ui/product/input.py": "d95680d255a267ff5dcc5a9ad0773d8b956ec064b07145196026d2536b6b36f1", "src/workbench/ui/product/model.py": "7b676069ca7fefd009956d49939cad55d03c24ced12d9d2bea946199b28c4b4f", "src/workbench/ui/product/view.py": "d14269d7e4454e0c4ac061ab61743b418a4f992ec4bc1c6138edbf423fe20cd8", "tests/ui/test_product_model.py": "611a3e192526021e058066b0cb5a6c03f3da18830723a2a4fc47a98c0abaface", "tests/ui/test_product_pty.py": "15152adfe212dcafd080726550f92da3069c59e0f94cb5c8f583c6f5deb2e38e"},
+  "checks": [["tests/ui x2", 1, "208 run, 6 failures - all in independent tests asserting old semantics"], ["tests/contracts", 0, "43"], ["g1_vt", 0, "85"], ["test_product_model", 0, "105"], ["test_product_pty x3", 0, "23"], ["red: new tests on pre files", 1, "import errors (Mouse/PageScroll)"]],
+  "behaviour": "wheel scrolls pane under pointer 3 lines/notch (nothing sent); Shift+PgUp/PgDn page-scroll focused pane; typing/paste to a scrolled pane returns it to live then delivers once; panes with app mouse tracking (DECSET 1000/1002/1003 tracked at receive) get translated events (SGR if 1006 else X10), clicks forwarded without focus change, scrolled pane consumes wheel until live; alt-screen without tracking: wheel -> 3 Up/Down (DECCKM aware); left click on non-tracking pane focuses it; borders/header/footer/help ignored; prefix m toggles capture; ?1000h ?1006h after 2004h, finally writes ?1006l ?1000l ?2004l on all exit paths (PTY tested); split mouse sequences held 0.5 s; prefix [ mode kept; F2/F3/F4 fixed",
+  "independent_tests_needing_adaptation": ["tests/ui/test_product_keys_independent.py:24 OMP_KEYS['mouse_sgr'] (raw mouse sequence delivered unchanged) -> fails :41 test_each_original_key_reaches_every_focused_pane_unchanged (3 subtests) and :53 test_keys_split_byte_by_byte_still_arrive_in_order", "tests/ui/test_product_layout_scroll_independent_p27j.py:43 MOUSE regex asserting no ?1000h/?1006h -> :393 test_prefix_detach_works_in_scroll_mode_and_no_mouse_tracking_is_enabled (assert :408) and :567 test_host_shell_full_width_size_and_scrollback final assertIsNone(MOUSE.search)"],
+  "gaps": ["no manual check in a real terminal emulator (PTY/pyte only)", "Shift+PgUp may be intercepted by some terminals"],
+  "residue": "none",
+  "observed_model": "sonnet (wb-worker definition; host metadata unverified)"
+}

@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-urux-layout-worker-01",
+  "status": "candidate_ready",
+  "candidate_id": "3682a07dcd8e842087913d2e7f72c4b90d7df2b4c60725e602cb5bd0281b2f8b",
+  "after_snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-urux-layout-after.json",
+  "scope_audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-urux-layout.json (no outside-scope)",
+  "delta_backup": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-urux-layout-delta-backup/ (pre-change copies in p27-urux-delta-pre/)",
+  "changed_paths": {"src/workbench/ui/product/model.py": "f414c0b6eff795716cd092900cc72a5b23fd7adb69d1f18d2c0528c301839fe0", "src/workbench/ui/product/view.py": "a17b03d7427676e387141010457d05f8c571194d19ea2fc0a72b86dc503a0c32", "tests/ui/test_product_model.py": "d185262cc7b94fc35fb4f92e3ff9c664b767e6a0b4ccb8ea552d79599f166729", "tests/ui/test_product_pty.py": "90a558d7fd54fe0f996f815c73adf1f59df25e21ccbdaf813741fdea278d1e06"},
+  "checks": [["tests/ui x2", 1, "154 run, 41 failures both runs - all in two independent tests encoding the old 3-column geometry"], ["tests/contracts", 0, "43 OK"], ["g1_vt", 0, "85 OK"]],
+  "layout": "top row manager (left) + worker (right) half width each (odd width: right +1); bottom host shell full width; body height split half (odd: top +1); MIN_ROWS 8->11; 100x30: OMP inner 12x48, host 11x98; per-pane resize with actual inner sizes",
+  "scroll": "prefix [ enters scroll mode on focused pane (prefix PgUp enters + one page); PgUp/PgDn page, Up/Down (k/j) line, Home/g top, End/G bottom(live, mode kept); q/Esc exit; other keys and pastes not forwarded (paste notice); prefix d ? t c h still work; focus change exits; title shows [SCROLL live보다 N줄 위/총 M]; no mouse capture; history host 5000, OMP 1000 lines; PaneScreen counts pushed history lines so view stays put; live screen/cursor never mutated; exit returns to identical live view",
+  "independent_tests_needing_adaptation": ["tests/ui/test_product_state_independent.py:164 GeometryTests.test_reported_pane_sizes_match_drawn_areas (assertion line 177 assumes left-to-right 3 columns)", "tests/ui/test_product_replay_independent_p27h.py:106-107 geometry() finds 3 panes on one border row (helpers 55-59, 73-77)"],
+  "gaps": ["catch-up reset or generation change clears that pane's history", "alternate screen exits scroll mode; primary history not viewable while in alt screen", "(rest truncated in agent message)"],
+  "residue": "none; Root removed 3 leaked /tmp/cw06-indep-* dirs (02:12-02:24, from earlier test runs)",
+  "observed_model": "sonnet (wb-worker definition; host metadata unverified)"
+}

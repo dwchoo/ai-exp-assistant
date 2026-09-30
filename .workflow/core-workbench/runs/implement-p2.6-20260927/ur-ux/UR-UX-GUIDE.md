@@ -1,6 +1,7 @@
 # UR-UX 사용자 검토 안내 (CW-06 제품 UI)
 
-- 대상 후보: CW-06 통합 후보 `671b05d3…` ([통합 기록](../integration-p27-v-cw06.json))
+- 대상 후보: CW-06 통합 후보 `671b05d3…` ([통합 기록](../integration-p27-v-cw06.json)) → UR-UX 반영 후보 `0877c6df…` ([UR-UX delta 통합](../integration-p27-v-cw06-urux.json))
+- 1차 검토 결과: [C-D58](../../../../../docs/features/core-workbench/DECISIONS.md#C-D58) — 배치 변경·terminal 스크롤 반영, Q1 (a)는 CW-18, Q2는 CLI 유지.
 - 근거: PLAN `user_review_checkpoints` UR-UX, [C-D57](../../../../../docs/features/core-workbench/DECISIONS.md#C-D57)
 - UR-UX가 끝나기 전에는 CW-18을 시작하지 않는다.
 
@@ -30,13 +31,19 @@ PYTHONPATH=/home/dwchoo/ai-exp-assistant/src \
 | `Ctrl-]` 뒤 `t` / `c` | host shell 사용자 인수 요청 / 확인 |
 | `Ctrl-]` 뒤 `h` | host shell을 manager에게 되돌리기(handoff). 먼저 shell에서 `wb-handoff` 실행 |
 | `Ctrl-]` 뒤 `r` | focus pane 다시 그리기 |
+| 마우스 휠 | 포인터 아래 pane 바로 스크롤(한 칸 3줄). 텍스트 선택은 Shift+드래그 |
+| Shift+PgUp / Shift+PgDn | focus pane 한 페이지 스크롤(일부 terminal은 이 키를 자체 스크롤에 사용) |
+| 스크롤 중 아무 키·붙여넣기 | 자동으로 live 복귀 후 그대로 전달 |
+| pane 클릭 | 그 pane으로 focus |
+| `Ctrl-]` 뒤 `m` | 마우스 캡처 켜기/끄기 |
+| `Ctrl-]` 뒤 `[` (또는 `Ctrl-]` 뒤 `PgUp`) | 명시적 스크롤 모드(예비): PgUp/PgDn, ↑/↓(k/j), Home/End(g/G), q/Esc 종료. 모드 중 키는 전달되지 않음 |
 | `Ctrl-]` 뒤 `d` | detach |
 | `Ctrl-]` 뒤 `?` | 도움말 |
 | `Ctrl-]` 두 번 | `Ctrl-]` 문자 자체를 pane에 전송 |
 
 그 밖의 키는 focus된 pane으로 그대로 전달된다. OMP의 `/` 명령, `Esc`, `Ctrl-C`, `Alt-Enter`도 여기에 포함된다.
 
-## 3. 확인 목록 (UR-UX 범위)
+## 3. 확인 목록 (UR-UX 범위, 1차 답변 완료)
 
 항목마다 **좋음 / 바꾸고 싶음 / 모르겠음** 중 하나와 한 줄 의견을 남겨 주면 된다.
 
@@ -69,7 +76,7 @@ PYTHONPATH=/home/dwchoo/ai-exp-assistant/src \
 - **대량 출력 중 화면**: 출력이 매우 많으면 pane이 "출력 따라잡음"을 표시하고 오래된 화면 출력을 건너뛴다. backend 기록은 그대로 남는다. 출력이 이어지는 동안에는 화면이 반복해서 새로 그려질 수 있다(11, 12).
 - **자동화 연결 전**: Task 흐름, 60초 점검, 일시정지는 CW-18 전이라 연결되지 않았다. 상태는 `not_configured`로 보이고, 승인·진행·일시정지 조작도 아직 없다.
 - **재attach 뒤 인수 요청**: 재attach하면 대기 중인 인수 요청은 따로 표시되지 않는다. owner와 mode는 표시된다.
-- **좁은 화면**: 100열에서는 pane당 약 32열이라 host pane 제목이 잘린다(15).
+- **스크롤 기록**: host terminal 5000줄, OMP pane 1000줄을 보관한다. 대량 출력 따라잡기나 세션 교체 때는 그 pane의 기록이 지워진다. vim 같은 전체화면 프로그램(alternate screen)이 떠 있는 동안에는 스크롤 모드가 꺼진다.
 - **렌더링 한계**:
   - 색은 256색 근사다.
   - scrollback(위로 스크롤) UI는 없다.
@@ -77,6 +84,23 @@ PYTHONPATH=/home/dwchoo/ai-exp-assistant/src \
 - **승인 prompt**: 현재 OMP 설정에서는 shell tool을 실행할 때 승인 prompt가 뜨지 않아 승인 조작은 검증하지 못했다.
 
 ## 6. 화면 스냅샷
+
+### 새 배치(C-D58 반영, [snapshots-v2/](snapshots-v2/))
+
+위에 manager·worker OMP 두 pane, 아래에 전체 폭 host terminal이다.
+
+| 파일 | 상태 |
+|---|---|
+| 01-start-attach | 시작 직후 새 배치 |
+| 02-help-overlay | 도움말(스크롤 키 포함) |
+| 03-host-shell-seq-300 | `seq 1 300` 뒤 live 화면 |
+| 04-scroll-mode | `Ctrl-] [` + PgUp 3회: 제목에 `[SCROLL live보다 N줄 위/총 M]` |
+| 05-scroll-new-output | 스크롤 중 새 출력이 와도 보던 줄 유지 |
+| 06-scroll-exit-live | q 뒤 live 화면 |
+| 07-narrow-100x30 / 08-wide-200x50 | 좁은/넓은 화면 |
+| 09-flood-catchup | 대량 출력 중 따라잡음 표시 |
+
+### 이전 3열 배치(참고, [snapshots/](snapshots/))
 
 [snapshots/](snapshots/)에 실제 OMP 18.2.10으로 모델 호출 없이 찍은 text 화면 19장이 있다. 크기는 160x45이고, 15·16만 다르다.
 

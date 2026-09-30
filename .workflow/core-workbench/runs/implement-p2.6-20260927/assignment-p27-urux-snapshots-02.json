@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-urux-snapshots-02",
+  "ticket_id": "UR-UX (C-D58 follow-up)",
+  "role": "worker",
+  "unit": "V-CW-06-p2.7-urux",
+  "approved_bundle_digest": "bdda908bb7215ad5e98eb6b90c2b3f99f34f914e915f701c1f475e164775e6ba",
+  "routing": {"planned_role": "worker", "selected_role": "worker (wb-worker, Sonnet high)", "reason_codes": ["bounded_pattern"], "evidence_refs": ["refresh of p27-urux-snapshots-01 for the new layout"]},
+  "candidate": "9598976b5753a7b4f3128989559393927ec8fb223505f30e867dba754f029554",
+  "goal": "Plain-text screen snapshots of the NEW layout (two OMP panes on top, host terminal full width at the bottom) and the host terminal scroll mode, using the real entrypoint and the REAL OMP 18.2.10 with the user's configuration but ZERO model turns.",
+  "states": ["01 start/attach at 160x45", "02 help overlay (new keys)", "03 host shell after `seq 1 300` (live bottom)", "04 scroll mode after prefix [ and a few PgUp (indicator in title, earlier lines visible)", "05 scroll mode while new output arrives (view stays)", "06 after q (live screen again)", "07 narrow 100x30", "08 wide 200x50", "09 flood catch-up indicator in the bottom pane (optional)"],
+  "method": "Same as p27-urux-snapshots-01 (you may reuse its scratch approach): drive the product UI in a PTY you own, render with vt_g1 TerminalScreen, convert DEC line drawing only in your scratch rendering, save to .workflow/core-workbench/runs/implement-p2.6-20260927/ur-ux/snapshots-v2/NN-name.txt with a 3-line header. Mask account/token-like text. Short TMPDIR; `shutdown --yes`; zero residue by identity.",
+  "allowed_write_paths": [".workflow/core-workbench/runs/implement-p2.6-20260927/ur-ux/snapshots-v2/**", "your scratch dir"],
+  "prohibited": "Any repository source/test edit; model turns; reading ~/.omp; OMP setting changes; graphify update; commits; tmux/herdr.",
+  "resource_claims": [{"resource": "host:omp-runtime", "mode": "exclusive"}, {"resource": "host:interactive-terminal", "mode": "exclusive"}],
+  "result_format": "reply <=12 lines: files written with one-line description, anything not captured, residue. Korean."
+}

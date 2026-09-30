@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-resize-worker-01",
+  "status": "candidate_ready",
+  "candidate_id": "69cbf791d81dd1844fb1c99843e0b72e3205f15463aef80af71b539969e585e2",
+  "after_snapshot": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-resize-after.json",
+  "scope_audit": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-resize.json",
+  "delta_backup": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/p27-resize-delta-backup/ (pre in p27-resize-pre/)",
+  "changed_paths": {
+    "src/workbench/ui/product/__init__.py": "8b250db57bcf1590be1ba6959cf059139155475f18d84ee4577e84e7ad1d536b",
+    "src/workbench/ui/product/app.py": "256648a89bb33d4358f8dcf77a87c9baacd5c54b10d9db504bfcc2c2c5fb4a9a",
+    "src/workbench/ui/product/input.py": "d95680d255a267ff5dcc5a9ad0773d8b956ec064b07145196026d2536b6b36f1",
+    "src/workbench/ui/product/layout.py": "f7be43692d595ca172c3fca666be3d4f89272615dd3dd8ea0017ca95a685b0e3",
+    "src/workbench/ui/product/model.py": "773937a419c6c21e49a0a1eef8a4a0594b4a6d3b12e54ce2cb7ec8ec2f39b392",
+    "src/workbench/ui/product/view.py": "2d8267abe7cf186e20ff0bd7d208762af1a259a98751589b181d0d0e641c7ae8",
+    "tests/ui/test_product_model.py": "9a92d5bcfdfc041c9da3132b5fd644aa5035b75393bab9a4ba6e9eaf738ab342",
+    "tests/ui/test_product_pty.py": "4ca964d7446f16f1b141aa24f6f2d0d296b6470d92f8b4451c9a8413b180b29f"
+  },
+  "checks": [
+    [
+      "tests/ui x2",
+      0,
+      "OK (298 tests incl. 33 new)"
+    ],
+    [
+      "contracts",
+      0,
+      "43"
+    ],
+    [
+      "g1_vt",
+      0,
+      "85"
+    ],
+    [
+      "test_product_model",
+      0,
+      "133 (28 new)"
+    ],
+    [
+      "pty ProductLayoutPtyTests",
+      0,
+      "5"
+    ]
+  ],
+  "behaviour": "two ratio splits (manager|worker, top|host) with min inner 10 cols/3 rows; mouse drag on divider (?1002h only while dragging, 0.1 s debounced resize, final on release; divider clicks not forwarded); prefix Left/Right (2 cols) and Up/Down (1 row) with 1 s bare-arrow repeat; prefix z zoom focused pane; prefix = reset; persisted <data dir>/ui-layout.json {version, col_ratio, row_ratio, zoom} atomic 0600, defensive load",
+  "gaps": [
+    "red not shown (tests written after implementation)",
+    "SIGKILL may lose last layout change",
+    "no real terminal emulator check of ?1002 toggling",
+    "intersection grab prefers horizontal divider"
+  ],
+  "residue": "none",
+  "observed_model": "sonnet (wb-worker definition; host metadata unverified)"
+}

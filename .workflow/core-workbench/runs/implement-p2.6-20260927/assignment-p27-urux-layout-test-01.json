@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-urux-layout-test-01",
+  "ticket_id": "CW-06 (UR-UX delta, C-D58)",
+  "role": "test_designer",
+  "unit": "V-CW-06-p2.7-urux",
+  "approved_bundle_digest": "bdda908bb7215ad5e98eb6b90c2b3f99f34f914e915f701c1f475e164775e6ba",
+  "routing": {"planned_role": "test_designer", "selected_role": "test_designer (wb-test-rerun, Sonnet high)", "reason_codes": ["delta_verification"], "evidence_refs": ["C-D58 user request defines the expected layout and scroll behaviour"]},
+  "frozen_candidate": "3682a07dcd8e842087913d2e7f72c4b90d7df2b4c60725e602cb5bd0281b2f8b",
+  "frozen_production_files": {"src/workbench/ui/product/__init__.py": "8b250db57bcf1590be1ba6959cf059139155475f18d84ee4577e84e7ad1d536b", "src/workbench/ui/product/app.py": "4aad51ef500e1167624ff1a9aa521ff44e79bde66480562a32a7acae5f2faf52", "src/workbench/ui/product/input.py": "ee5a9e925c292a15cc60ba0e76e4c6f16cdbf46ffa6f3ccc2171b866967a8605", "src/workbench/ui/product/model.py": "f414c0b6eff795716cd092900cc72a5b23fd7adb69d1f18d2c0528c301839fe0", "src/workbench/ui/product/view.py": "a17b03d7427676e387141010457d05f8c571194d19ea2fc0a72b86dc503a0c32", "src/workbench/backend/cli.py": "9b44e4847275514ec27e7c9474dfe7ad0c5556d3803651f7fc292be0402a2b4e", "src/workbench/backend/ui_server.py": "e6aa3e0b12fc48c920ed901d8e3b8ec8e1063d9d1cb3a89bd5345066de533469", "src/workbench/terminal/vt_g1/screen.py": "2dcb887e25269aca54a7372e93fcef7d83a37471b465a56d936f7a9f53b97920"},
+  "derive_expectations_from": ["docs/features/core-workbench/DECISIONS.md#C-D58 (user quote)", "docs/features/core-workbench/tickets/CW-06.md (UR-UX result paragraph)", "src/workbench/contracts/ui_v1.py (resize semantics)"],
+  "worker_result": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-urux-layout-worker-01.json (read after deriving expectations)",
+  "required": [
+    "Root-authorized adaptation (layout changed by user decision C-D58): update ONLY the geometry assumptions in tests/ui/test_product_state_independent.py (GeometryTests around lines 164-177) and tests/ui/test_product_replay_independent_p27h.py (geometry() 55-59, pane_lines 73-77, assertion 106-107) so they check the NEW layout with the same strength: panes do not overlap, cover the body area without gaps (top row two panes spanning full width, bottom host full width), reported per-pane inner sizes equal drawn areas, and replay equality per pane. Do not weaken any other assertion. Record before/after sha256.",
+    "New independent test tests/ui/test_product_layout_scroll_independent_p27j.py derived from C-D58 before reading model.py/view.py: (a) layout at several sizes incl. odd and minimum sizes; host shell pane gets the full inner width and the backend receives matching resize sizes; (b) host terminal scrollback: after > 3 screens of output, the user can scroll back and see earlier lines in order, keys typed in scroll mode are not delivered to the pane, output arriving while scrolled does not move the viewed lines, leaving scroll mode shows exactly the live screen and typing works again; history retains >= 5000 lines; (c) prefix commands still work in scroll mode; no mouse tracking enabled on the outer terminal (no ?1000h/?1002h/?1006h).",
+    "Runtime (stub OMP / scripted provider, ZERO model turns): through the real entrypoint and product UI in a PTY, run a command producing ~300 lines in the host shell, scroll back with the keys, verify earlier lines visible and the pane size reported by stty size in the host shell equals the full-width bottom pane.",
+    "Regression (pattern test_*.py; never live_* with CW06_LIVE_MODEL=1): tests/ui x2, tests/backend (incl. independent, short TMPDIR), tests/contracts, tests/gates/g1_vt (src:.)."
+  ],
+  "allowed_write_paths": ["tests/ui/test_product_state_independent.py (geometry assumptions only)", "tests/ui/test_product_replay_independent_p27h.py (geometry assumptions only)", "tests/ui/test_product_layout_scroll_independent_p27j.py", ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-urux-layout-test-01-agent.json"],
+  "prohibited": "production frozen; other tests unchanged; no model turns; venv python only; short TMPDIR removed at end; no graphify update, commits, tmux/herdr; never read ~/.omp.",
+  "result_format": "Write full JSON; reply <=20 lines: checks table, status, per-requirement verdicts with failure classification, adapted files before/after sha256, new file sha256, frozen hashes equal?, residue. Korean."
+}

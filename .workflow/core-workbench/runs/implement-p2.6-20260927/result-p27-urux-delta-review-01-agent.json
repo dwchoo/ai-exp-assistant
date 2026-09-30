@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-urux-delta-review-01",
+  "role": "reviewer",
+  "frozen_candidate": "9598976b5753a7b4f3128989559393927ec8fb223505f30e867dba754f029554",
+  "verdict": "integrate",
+  "tests": "PYTHONPATH=src:tests/ui /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/ui -t tests/ui -p 'test_*.py' (TMPDIR=/tmp/urv1): 168 tests OK (live_* not run)",
+  "findings": [
+    {"id": "F1", "severity": "P3", "where": "model.py HOST_SCROLLBACK=5000 / PaneScreen", "what": "host history is bounded (5000 lines) but a probe at 198 cols full-width colored lines measured ~162 MB traced (pyte Char per cell); OMP panes 1000 lines each add tens of MB more.", "fix": "accept or lower to fewer lines / document; not a contract break (>=5000 lines required by root packet)."},
+    {"id": "F2", "severity": "P3", "where": "model.py:_command 'prefix PgUp' -> enter_scroll()", "what": "enter_scroll() unconditionally resets the anchor to live, so prefix PgUp (or prefix [) while already scrolled jumps back to live+1 page (probe: offset 394 -> 10).", "fix": "in the prefix PgUp branch call enter_scroll only when scroll_pane is None."},
+    {"id": "F3", "severity": "P3", "where": "model.py:_apply generation change / _catch_up (screen.reset())", "what": "pyte reset clears history: a session replacement or flood catch-up wipes the whole host scrollback and scroll mode stays on with an empty/clamped view (no notice). Probe: 390 history lines -> flood -> history = kept tail only. Consistent with catch-up semantics; no crash, view clamps, keys stay isolated.", "fix": "optional: exit_scroll() or notice on reset; document that catch-up drops older scrollback."},
+    {"id": "F4", "severity": "P3", "where": "model.py:apply_snapshot", "what": "backend focus adopted without exit_scroll(), so scroll_pane may differ from focus; harmless (keys still not forwarded, q exits) but title/cursor semantic is odd.", "fix": "call exit_scroll() when focus changes in apply_snapshot."}
+  ],
+  "focus_verdicts": {
+    "layout_geometry": "pass: pane_boxes tiles exactly (top halves sum to cols, host full width, bottom row = rows-1, header/footer constant); per-pane resize reports inner sizes = drawn areas; verified by parametrized model tests (p27j/state) and PTY tests; MIN_ROWS 11 consistent.",
+    "scroll_mode": "pass: view built from history deque copy + read-only buffer.get, cursor hidden in scroll, live pyte screen untouched; anchor via push counter (CountingDeque) is stable under new output, eviction clamps, alt-screen swap exits, exit exactly equals live screen (PTY test compares to sync pyte feed); keys/paste swallowed, prefix commands still work, replay/catch-up/generation change do not crash; history memory bounded by deque maxlen.",
+    "independent_tests": "pass: replay_p27h geometry() adapted to 3-box layout and gained tiling + reported==drawn assertions; state_independent geometry test gained tiling/header-footer checks; no assertion removed or weakened; p27j adds layout/scroll/PTY/real-entrypoint coverage.",
+    "no_regression": "pass: full tests/ui (168) green incl. flood (max key latency 0.073 s, Ctrl-C 0.051 s), replay equality, catch-up, 2004 tracking, signal paths."
+  }
+}

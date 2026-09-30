@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-urux-layout-test-01",
+  "status": "candidate_ready",
+  "frozen_candidate": "3682a07dcd8e842087913d2e7f72c4b90d7df2b4c60725e602cb5bd0281b2f8b",
+  "candidate_after_tests": "9598976b5753a7b4f3128989559393927ec8fb223505f30e867dba754f029554",
+  "agent_result": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-urux-layout-test-01-agent.json",
+  "scope_audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-urux-test.json",
+  "delta_backup": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-urux-test-delta-backup/",
+  "adapted_independent_tests": {"tests/ui/test_product_state_independent.py": "246d7a81... -> 60996ed5... (geometry assumptions only; strength kept + top-row/bottom-row coverage)", "tests/ui/test_product_replay_independent_p27h.py": "55b4c533... -> ed622f3f... (geometry only; also checks reported resize equals drawn area)"},
+  "new_test": "tests/ui/test_product_layout_scroll_independent_p27j.py (14 tests; old model/view -> 29 fail 9 error)",
+  "checks": [["p27j x8", 0, "14 OK x8"], ["tests/ui x3", 0, "168 OK"], ["tests/backend", "1->0", "first run test_detach_over_60s (legacy --plain raw-mode timing, env flake); standalone x2 OK; rerun 71 OK"], ["tests/contracts", 0, "43"], ["g1_vt", 0, "85"]],
+  "verdicts": {"geometry adaptation": "pass", "layout 9 sizes": "pass (host width cols-2; resize equals drawn)", "scrollback": "pass (1..400 in order, keys/paste not delivered, view stable when offset>0, exact live on exit, >=5000 lines)", "prefix/mouse": "pass", "runtime stub OMP": "pass (stty 16 138 at 40x140; 300 lines scrolled to LINE-1; resize to 44x160 -> 158 cols)"},
+  "model_turns": 0,
+  "frozen_hashes_equal": true,
+  "residue": "none",
+  "observed_model": "sonnet (wb-test-rerun definition; host metadata unverified)"
+}

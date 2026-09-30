@@ -1,0 +1,33 @@
+## 07-narrow-100x30: 좁은 터미널 100x30
+## size 100x30
+------------------------------------------------------------
+focus: HOST SHELL | host 입력 owner: user | shell mode: manual_prompt | 자동화: not_configured
+backend: ready | bridge manager=ok worker=ok | 마지막 확인 11:15:45 (0s 전) | Ctrl-] ? 도움말
+┌─ MANAGER OMP alive ────────────────────────────┐┌─ WORKER OMP alive ─────────────────────────────┐
+│ Tip: Try task isolation to create CoW          ││      project diagnostics and fixes them with   │
+│      worktrees                                 ││      parallel subagents — esc cancels          │
+│                                                ││                                                │
+│                                                ││                                                │
+│────────────────────────────────────────────────││────────────────────────────────────────────────│
+│ Update Available                               ││ Update Available                               │
+│ New version 18.4.4 is available. Run: omp      ││ New version 18.4.4 is available. Run: omp      │
+│ update                                         ││ update                                         │
+│────────────────────────────────────────────────││────────────────────────────────────────────────│
+│                                                ││                                                │
+│ π > ◒ GPT-5.5 > 🗑 project > (sub) ▶─7%──╎┃272K─││ π > ◒ GPT-5.5 > 🗑 project > (sub) ▶─7%──╎┃272K─│
+│╰─                                              ││╰─                                              │
+└────────────────────────────────────────────────┘└────────────────────────────────────────────────┘
+┌─ HOST SHELL *FOCUS* alive owner=user ────────────────────────────────────────────────────────────┐
+│$ (sleep 6; for i in 1 2 3 4 5 6 7 8; do echo NEWOUT-$i; sleep 0.4; done) &                       │
+│[1] 348835                                                                                        │
+│$ NEWOUT-1                                                                                        │
+│NEWOUT-2                                                                                          │
+│NEWOUT-3                                                                                          │
+│NEWOUT-4                                                                                          │
+│NEWOUT-5                                                                                          │
+│NEWOUT-6                                                                                          │
+│NEWOUT-7                                                                                          │
+│NEWOUT-8                                                                                          │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+원본 키는 focus pane으로 그대로 전달됩니다 · Ctrl-] d = detach

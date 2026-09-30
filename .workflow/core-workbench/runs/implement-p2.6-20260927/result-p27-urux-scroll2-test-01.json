@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-urux-scroll2-test-01",
+  "status": "candidate_ready",
+  "frozen_candidate": "c8cf385a0ac03454137c1a88c41a90c0ce773dfc3b42650f0ac3b2bca6f65ceb",
+  "candidate_after_tests": "eb21863b8b153005fb6eefd95389787fcfcb3529e51302b50ed615f87c3c5226",
+  "agent_result": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-urux-scroll2-test-01-agent.json",
+  "scope_audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-urux-scroll2-test.json",
+  "delta_backup": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-urux-scroll2-test-delta-backup/",
+  "adapted_independent_tests": {
+    "tests/ui/test_product_keys_independent.py": "279ac34f... -> 55ad4853... (mouse assumption replaced: no text leak to non-tracking panes; translated delivery to tracking panes)",
+    "tests/ui/test_product_layout_scroll_independent_p27j.py": "c4e7cceb... -> f5fcf0d9... (mouse tracking enabled at start and ?1000l/?1006l last on exit)"
+  },
+  "new_test": "tests/ui/test_product_direct_scroll_independent_p27k.py (55 tests; 5 mutants caught)",
+  "checks": [
+    [
+      "p27k",
+      0,
+      "55 OK"
+    ],
+    [
+      "tests/ui x3",
+      0,
+      "265 OK"
+    ],
+    [
+      "tests/backend",
+      0,
+      "71 OK"
+    ],
+    [
+      "tests/contracts",
+      0,
+      "43"
+    ],
+    [
+      "g1_vt",
+      0,
+      "85"
+    ]
+  ],
+  "runtime": "stub OMP, 0 model turns: seq 1 400, wheel, Shift+PgUp, typing returns live and reaches bash, click changes focus (status --json), detach emits ?1000l",
+  "note": "left press with Ctrl/Alt modifiers or extended buttons (128) also sends a focus frame - not asserted either way",
+  "frozen_hashes_equal": true,
+  "residue": "none",
+  "observed_model": "sonnet (wb-test-rerun definition; host metadata unverified)"
+}

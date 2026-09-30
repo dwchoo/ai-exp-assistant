@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-urux-scroll2-delta-review-01",
+  "ticket_id": "CW-06 (UR-UX follow-up: direct scroll)",
+  "role": "reviewer",
+  "unit": "V-CW-06-p2.7-urux",
+  "approved_bundle_digest": "bdda908bb7215ad5e98eb6b90c2b3f99f34f914e915f701c1f475e164775e6ba",
+  "routing": {
+    "planned_role": "reviewer",
+    "selected_role": "reviewer (wb-delta-reviewer, Sonnet high)",
+    "reason_codes": [
+      "bounded_delta_after_full_review"
+    ],
+    "evidence_refs": [
+      "prior delta review p27-urux-delta-review-01 integrate on 9598976b"
+    ]
+  },
+  "frozen_candidate": "eb21863b8b153005fb6eefd95389787fcfcb3529e51302b50ed615f87c3c5226",
+  "criteria": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/ur-ux/ur-ux-request.json follow_ups (user choice '둘 다')",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/assignment-p27-urux-scroll2-worker-01.json required_behavior",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-urux-delta-review-01-agent.json (P3 F2-F4 to be fixed)",
+    "prior invariants: replay equality, catch-up, 2004 tracking, flood responsiveness, signal restore, original OMP key fidelity (C-AC-14)"
+  ],
+  "delta": {
+    "production": {
+      "files": [
+        "src/workbench/ui/product/input.py",
+        "src/workbench/ui/product/model.py",
+        "src/workbench/ui/product/view.py",
+        "src/workbench/ui/product/app.py"
+      ],
+      "base": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-urux-scroll2-pre/src/workbench/ui/product/"
+    },
+    "tests": {
+      "files": [
+        "tests/ui/test_product_model.py",
+        "tests/ui/test_product_pty.py",
+        "tests/ui/test_product_keys_independent.py",
+        "tests/ui/test_product_layout_scroll_independent_p27j.py",
+        "tests/ui/test_product_direct_scroll_independent_p27k.py"
+      ],
+      "base": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-urux-scroll2-pre/tests/ui/ (own tests); .workflow/core-workbench/runs/implement-p2.6-20260927/p27-cw06-test-delta-backup/tests/ui/test_product_keys_independent.py and .workflow/core-workbench/runs/implement-p2.6-20260927/p27-urux-test-delta-backup/tests/ui/test_product_layout_scroll_independent_p27j.py (independent)"
+    },
+    "results": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-urux-scroll2-worker-01.json",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-urux-scroll2-test-01.json"
+    ]
+  },
+  "focus": [
+    "Mouse parsing never leaks sequences as text and never swallows legitimate keys (ESC timing, split sequences, Alt/Meta keys, other CSI keys such as Shift+arrows); SGR vs X10 translation correctness; coordinate translation for each pane; alt-screen alternate scroll.",
+    "Mouse modes enabled/disabled symmetrically on every exit path and on toggle; no leftover mode in the outer terminal.",
+    "Scroll state per pane: auto-return on typing/paste delivers exactly once; other panes unaffected; F2/F3/F4 fixed; interaction with catch-up and replay.",
+    "Original OMP key fidelity preserved for non-mouse keys; adapted independent tests keep strength for everything except the intentionally changed mouse behaviour.",
+    "Click-to-focus with modifier/extended buttons (note from tester): acceptable or should be limited to plain left button?"
+  ],
+  "scratch": "/tmp/claude-1000/-home-dwchoo-ai-exp-assistant/dd5e2cee-e10d-41c4-8ebb-7c00b50dd465/scratchpad/scroll2-review/",
+  "rules": "Read-only; write only .workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-urux-scroll2-delta-review-01-agent.json. Tests only with /tmp/cw02-g1-venv/bin/python, pattern test_*.py, short unique TMPDIR; never live_*.",
+  "result_format": "Findings P0..P3; verdict per focus; overall integrate/block. Write JSON; reply <=15 lines. Korean."
+}

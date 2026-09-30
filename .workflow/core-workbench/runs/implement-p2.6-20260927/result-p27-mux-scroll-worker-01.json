@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-mux-scroll-worker-01",
+  "status": "candidate_ready (4 independent p27l tests encode the old buggy contract -> Root routes adaptation)",
+  "candidate_id": "4aac3ead1267854b3dc54ed1d87c89c0eff0a159df9ad9738ea6e01adb182c29",
+  "after_snapshot": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-mux-after.json",
+  "scope_audit": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-mux.json",
+  "delta_backup": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/p27-mux-delta-backup/ (pre in p27-mux-pre/)",
+  "changed_paths": {
+    "src/workbench/ui/product/app.py": "dd02b3f64c832e31b5032584db686658448712cbc9bb7f1fd7b0be21b42561e6",
+    "src/workbench/ui/product/model.py": "7782c788a8ca5e8e274cb83bb9a307650a69b1d47de4e26240b2169b26367119",
+    "src/workbench/ui/product/view.py": "96be174cceed6e806a02d0d1a46b1f01e108f077506939d8cab99be955932b7b",
+    "tests/ui/support.py": "1b971fd3fac304f858ef98a544b845d024959f360c6752c3bd0040f3b9dfa450",
+    "tests/ui/test_product_model.py": "b61747433b1221362fd30d9835a877add24f6feec48488ed4fc38291d28bd8e5",
+    "tests/ui/test_product_pty.py": "6a0f87a37c1705a4c5170c0a215d11518d56b8237e04ee2da1d1addf5feedb51",
+    "tests/ui/live_mux_scroll_probe.py": "ff05e1dcf517c9e11bc2dd567a65938f1c6964918a86e24a9625f54330f9032e"
+  },
+  "checks": [
+    [
+      "OuterTerminalMouseTests (single tracking-mode outer terminal model)",
+      "red->green",
+      "old code fails right after first drag"
+    ],
+    [
+      "tests/ui x2",
+      1,
+      "360/364; 4 failures = p27l independent tests requiring ?1002h only during drag and ?1002l on release"
+    ],
+    [
+      "tests/backend",
+      0,
+      "129 (27 skip)"
+    ],
+    [
+      "contracts",
+      0,
+      "43"
+    ],
+    [
+      "g1_vt",
+      0,
+      "85"
+    ],
+    [
+      "live WB_LIVE_MUX=1",
+      0,
+      "before: bug reproduced in tmux off/on and herdr; after: 4 scenarios pass, 78 records 0 failures"
+    ]
+  ],
+  "root_cause_confirmed": "tmux 3.4 off: flags any/std/btn/all -> 0, outer tracking null, wheel not delivered; tmux on: wheel falls into tmux copy-mode (then Shift+PgUp/prefix PgUp too); herdr 0.9.2: wheel not delivered, 'failed to encode terminal attach mouse wheel event' in isolated server log",
+  "fix": "?1000h ?1002h ?1006h once at start (1000 first for fallback); no mode switching during drag; ?1006l ?1002l ?1000l on all exits and prefix m; re-assert on SIGWINCH and prefix r; pane app tracking modelled as single mode, motion only to 1002/1003 apps; isolation warning in header line 2 (bold reverse)",
+  "live": "tmux 3.4 mouse off/on: wheel, 2 drags, wheel after drags, prefix m off/on all work (flags any/std/btn/all/sgr=1 0 1 0 1); herdr 0.9.2 default and [ui] mouse_capture=false (temp config copy): same, outer mode 1003+SGR, 0 encode failures; keyboard fallbacks Shift+PgUp/PgDn, prefix PgUp, prefix [ work in all; no user-side multiplexer setting needed; Ctrl-] does not collide with default Ctrl-b",
+  "herdr_method": "separate herdr server with XDG_CONFIG_HOME=<scratch> (own socket/session/log; user config.toml copied read-only); user's herdr server and panes untouched",
+  "residue": "tmux -L servers killed and verified; temp herdr server stopped (rc 0) and config dir removed; backends shut down; temp dirs removed; Root verified herdr pane list unchanged and no stray processes",
+  "gaps": [
+    "p27l 4 tests conflict (old contract)",
+    "herdr verified on isolated server, not the user's server",
+    "mode re-assert only on SIGWINCH/prefix r"
+  ],
+  "observed_model": "opus (general-purpose inherited)"
+}

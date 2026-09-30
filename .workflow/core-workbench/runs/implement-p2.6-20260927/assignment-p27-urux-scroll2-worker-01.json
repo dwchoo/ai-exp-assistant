@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-urux-scroll2-worker-01",
+  "ticket_id": "CW-06 (UR-UX follow-up: direct scroll)",
+  "role": "worker",
+  "unit": "V-CW-06-p2.7-urux",
+  "approved_bundle_digest": "bdda908bb7215ad5e98eb6b90c2b3f99f34f914e915f701c1f475e164775e6ba",
+  "authority": "C-D57 feedback routing (keys/interaction -> CW-06 delta); user follow-up 2026-09-30 answer '둘 다' (ur-ux-request.json follow_ups)",
+  "routing": {"planned_role": "worker", "selected_role": "worker (wb-worker, Sonnet high)", "reason_codes": ["bounded_pattern"], "evidence_refs": ["UI input parsing and view state only"]},
+  "base_candidate": "645a72bac12675846ae117e77ec7beaa2020074ae8881d1b4e3f61423840d755",
+  "checkpoint_ref": [".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-cw06-integrated-checkpoint.json (milestone)", ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-urux-scroll2-pre/ (current UI files)"],
+  "user_request": "스크롤 모드로 들어가서 하기 보다는 바로 되면 좋겠는데 -> 마우스 휠과 Shift+PgUp/PgDn 둘 다",
+  "required_behavior": [
+    "Direct scrolling without entering a mode: (1) mouse wheel over any pane scrolls that pane's view (about 3 lines per notch); (2) Shift+PgUp / Shift+PgDn (CSI 5;2~ / 6;2~) scroll the focused pane by a page. Neither is forwarded to the pane in these cases. Keep the scroll-position indicator in the pane title.",
+    "Auto return: while a pane is scrolled back (offset > 0), any other key or paste destined for that pane first returns its view to live and is then delivered unchanged (no extra key needed). Other panes keep their scroll position.",
+    "Mouse capture: enable xterm mouse reporting with SGR encoding on the outer terminal (?1000h ?1006h) when the UI starts; disable it (?1000l ?1006l) on every exit path exactly like 2004 (normal, detach, signal, connection loss, exception) and when toggled off. Provide prefix m to toggle mouse capture on/off with a notice; help overlay/footer mention that text selection needs Shift+drag while capture is on.",
+    "Mouse event handling: parse SGR mouse sequences (CSI < b ; x ; y M/m) in the input parser so they never leak to panes as text. Wheel over a pane whose application has enabled its own mouse tracking (DECSET 1000/1002/1003 observed in that pane's output, with 1006 for SGR) is forwarded to that pane translated to pane-local coordinates; otherwise it scrolls the view. If the pane is in the alternate screen without app mouse tracking, translate wheel to Up/Down arrow keys (xterm alternate-scroll behaviour) instead of scrolling history. A left click on a pane that has not enabled mouse tracking focuses that pane (focus frame, as prefix 1/2/3); clicks on panes with mouse tracking are forwarded translated. Ignore events on borders/header/footer.",
+    "Keep the explicit prefix [ scroll mode as a fallback. Fix delta-review P3s: F2 (prefix [ / prefix PgUp while already scrolled must not reset the anchor), F3 (history cleared by catch-up/generation change while scrolled: return to live with a notice), F4 (backend focus change exits scroll mode for consistency).",
+    "No change to backend/contracts; bracketed paste, catch-up, replay, 2004 tracking and signal restore stay intact."
+  ],
+  "acceptance": [
+    "red->green tests in tests/ui/test_product_model.py / test_product_pty.py: SGR wheel up/down over each pane scrolls that pane and sends nothing to backend; Shift+PgUp/PgDn page scroll of focused pane; typing while scrolled returns to live and the key is delivered once; paste while scrolled same; mouse events never leak as text; pane with app mouse tracking receives translated events; alt-screen wheel -> arrow keys; click focuses; prefix m toggles and emits ?1000l/?1006l or h; every exit path (normal, SIGTERM, SIGHUP, connection loss) emits ?1000l and ?1006l after enabling; F2/F3/F4.",
+    "All tests/ui test_*.py incl. *_independent pass unmodified (if an independent test asserts the old 'keys are not forwarded while scrolled' semantics OUTSIDE prefix [ mode or the absence of mouse tracking (?1000h), do not edit it - list it with file:line for Root routing).",
+    "suites: tests/ui (test_*.py) x2, tests/contracts, tests/gates/g1_vt (PYTHONPATH=src:.). Never run live_* or set CW06_LIVE_MODEL=1. /tmp/cw02-g1-venv/bin/python only; short TMPDIR."
+  ],
+  "allowed_write_paths": ["src/workbench/ui/product/**", "tests/ui/test_product_model.py", "tests/ui/test_product_pty.py", "tests/ui/test_product_entrypoint.py", "tests/ui/support.py"],
+  "prohibited_paths": ["tests/**/*_independent*.py", "tests/ui/live_*.py", "tests/ui/independent_support_cw06.py", "src/workbench/backend/**", "src/workbench/contracts/**", "src/workbench/terminal/**", "docs/**", ".workflow/**"],
+  "stop_conditions": ["needs backend/contract change"],
+  "rules": "No graphify update, commits, tmux/herdr, credentials, real model; zero residue.",
+  "result_format": "checks table first, status, changed paths + sha256, new key/mouse map, independent tests needing adaptation (file:line), residue, gaps. Korean, concise."
+}

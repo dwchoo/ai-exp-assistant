@@ -1,0 +1,97 @@
+{
+ "schema_version": 1,
+ "invocation": "p27-urux-layout-test-01",
+ "role": "test_designer",
+ "status": "candidate_ready",
+ "checks": [
+  [
+   "tests/ui/test_product_layout_scroll_independent_p27j.py x8",
+   0,
+   "14 tests OK each",
+   "~8.9s"
+  ],
+  [
+   "tests/ui pattern test_*.py run1",
+   0,
+   "168 OK",
+   "65.3s"
+  ],
+  [
+   "tests/ui run2",
+   0,
+   "168 OK",
+   "65.9s"
+  ],
+  [
+   "tests/ui run3",
+   0,
+   "168 OK",
+   "65.9s"
+  ],
+  [
+   "tests/backend test_*.py run1",
+   1,
+   "71 run, 2 failures (one test_live_detach test: assertion + owned-leak follow-on)",
+   "294.5s"
+  ],
+  [
+   "tests/backend test_live_detach.py alone x2",
+   0,
+   "1 OK each",
+   "64s"
+  ],
+  [
+   "tests/backend test_*.py rerun",
+   0,
+   "71 OK",
+   "262.8s"
+  ],
+  [
+   "tests/contracts",
+   0,
+   "43 OK",
+   "0.3s"
+  ],
+  [
+   "tests/gates/g1_vt (PYTHONPATH=src:.)",
+   0,
+   "85 OK",
+   "1.7s"
+  ]
+ ],
+ "failure_classification": {
+  "test_live_detach 60s reattach": "environment/timing flake in the legacy --plain client path (^]d sent before raw mode, echoed as '^]d'); not touched by the delta; passes 2/2 alone and in full-suite rerun; the leak assertion was the follow-on of the failed step and no process/tmp residue remained",
+  "p27j first runs": "test-side: curses repaint caught half-way (asserted contiguity before the frame settled), zombie counted as leaked, PTY without controlling tty gave no SIGWINCH, view at offset 0 follows live by design; all fixed in the test, 8/8 pass afterwards"
+ },
+ "requirements": {
+  "adapted_geometry_tests": "pass (kept assertion strength: inner==drawn, >=1, no overlap/gap, plus tiling top row full width/host full width/host directly below, constant header/footer margins; replay geometry finds 3 boxes in PANES order and additionally checks reported resize == drawn area)",
+  "a_layout": "pass (9 sizes incl. odd and min; host cols==cols-2; OMP cols sum cols-4; last resize per pane == real inner size; pyte host screen wraps at cols-2; resize sequence incl. min)",
+  "b_scrollback": "pass (>3 screens, PgUp/Home/PgDn walk covers 1..400 contiguous, Up/Down exact 1 line, keys and paste not delivered, output/full repaint/burst while scrolled does not move view, q and Esc leave = exactly live screen, typing works, history >=5000 lines)",
+  "c_prefix_and_mouse": "pass (prefix t c h r ? d 1 2 Tab work in scroll mode without leaking text; no ?1000/1001/1002/1003/1005/1006/1015 h in PTY output for product UI and real entrypoint)",
+  "runtime": "pass (real `workbench attach` + real backend + stub OMP, zero model turns; stty size in host shell == drawn full-width bottom pane (16 138 at 40x140), 300-line loop scrollable to LINE-1 in order, typed key not delivered in scroll mode, ALIVE-42 after q, resize to 44x160 -> stty cols 158, detach rc 0, backend shut down, no leaked processes by pid+starttime)",
+  "regression": "pass (see checks; the one failure is a proven flake)"
+ },
+ "observations": [
+  "at scroll offset 0 (after End/PgDn to bottom, mode kept) the view follows live output; the 'does not move' guarantee holds for any offset > 0 (test uses offset>0)",
+  "transient half-painted curses frames are visible for a moment after big scroll jumps (settles within the wait)"
+ ],
+ "files_added": [
+  "tests/ui/test_product_layout_scroll_independent_p27j.py"
+ ],
+ "files_adapted": {
+  "tests/ui/test_product_state_independent.py": {
+   "before": "246d7a8124258692eb378fcce7fd75386d1cd2deb8f90175613b35ce016838a8",
+   "after": "60996ed526af4ee91cc8c3d16879a8dc7fa555e49a015e1c4f0685f1a46a34b0"
+  },
+  "tests/ui/test_product_replay_independent_p27h.py": {
+   "before": "55b4c533e10fc93099ca0e8451e7df1a1076ba0e5a29a251e6f639744a81a02b",
+   "after": "ed622f3fd0cd089cc14f8caf07c060d7c56fb0305e5e6df9b686115531956c0c"
+  }
+ },
+ "new_file_sha256": {
+  "tests/ui/test_product_layout_scroll_independent_p27j.py": "c4e7cceb8b365efc0dfbdc68e3d09a26660b687d7b914d6acf33d4a9c6901f36"
+ },
+ "frozen_production_hashes_equal_start_end": true,
+ "sensitivity_evidence": "p27j run against HEAD (old 3-column, no scroll) model/view: 29 failures + 9 errors in the model tests",
+ "residue": "none: TMPDIR /tmp/cw27j removed, no cw06-*/p27j dirs, no leftover processes (pid+starttime, zombie-aware)"
+}

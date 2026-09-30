@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-omp-iso-explore-01",
+  "status": "complete",
+  "agent_result": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-omp-iso-explore-01-agent.json",
+  "summary": {
+    "ambient_sources_observed": "AGENTS.md/CLAUDE.md walk-up (one per depth; repo loads .claude/CLAUDE.md), ~/.agents/skills (3 orca skills), project .claude/skills, .mcp.json, .omp/extensions, .claude/commands, .omp/rules, .omp/SYSTEM.md, .omp/agents; user ~/.claude|~/.codex|~/.cursor not loaded unless CLAUDE_CONFIG_DIR set",
+    "isolation": "--config overlay: disabledProviders (21 ids), skills.enable*=false (6), mcp.enableProjectConfig=false, memory.backend=off, advisor.enabled=false, ttsr.builtinRules=false, plus --no-extensions (explicit -e still loads); verified 0 context/rules/commands/MCP/extensions via rpc get_state/get_available_commands, 0 model calls",
+    "workbench_skills": "skills.customDirectories=[<repo>/omp_bridge/skills] with ambient enable*=false loads only that dir (<dir>/<name>/SKILL.md with name/description); --no-skills and skills.enabled=false also block custom dirs; per-role via separate overlay or --skills filter",
+    "do_not_use": "--profile / PI_CODING_AGENT_DIR (separate agent.db -> loses user auth); --system-prompt (does not remove injections)",
+    "residual": "subagent definitions from .omp/agents and ~/.omp/agent/agents leak via task tool description -> task.disabledAgents or exclude task via --tools; disabledProviders shares key with model providers and overlay replaces user array (currently []); code-only (not runtime-verified): user mcp.json, hooks, custom tools, skillshare/managed skills, hindsight/mnemopi; recommend startup self-check via get_state.systemPrompt and get_available_commands"
+  },
+  "side_effects": "probe created ~/.omp/profiles/zz_probe_nonexist, deleted immediately (Root verified ~/.omp/profiles absent); normal ~/.omp/logs entries",
+  "observed_model": "sonnet (wb-explorer definition; host metadata unverified)"
+}

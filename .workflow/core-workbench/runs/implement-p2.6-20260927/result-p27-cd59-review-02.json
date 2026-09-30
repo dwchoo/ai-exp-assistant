@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cd59-review-02",
+  "verdict": "integrate",
+  "frozen_candidate": "df0e5fa43a346d715de2016cd595716745fc0f973d0f325d3bccbab0d7a3197e",
+  "agent_result": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd59-review-02-agent.json",
+  "prior": {
+    "R1": "resolved (append '' skips bgp; 5 canaries absent live)",
+    "R2": "resolved (single mode once, re-assert, off only on prefix m/exit)",
+    "R3": "resolved per user choice (warning)",
+    "R4": "resolved (residual N1)",
+    "R5": "resolved (residual N2)",
+    "R6": "resolved (residual N3)",
+    "R7": "routed to CW-19"
+  },
+  "findings": {
+    "N1-P3": "launcher.py:230-287 mini-YAML misses multi-line plain description -> bundled-name override not disabled (narrow regression vs superset); fix conservative key-presence or join indented lines + test",
+    "N2-P3": "model.py:1068-1080/view.py:39 PERSONALITY warning prefixes header line 2 (268 chars measured) and truncates phase/bridge/help for the whole session; fix short marker in header, detail in status",
+    "N3-P3": "service.py:147 / launcher.py:366-431,674-697 read_user_config runs synchronously in _open (readiness up to 8 s; worst ~30 s on sequential timeout cleanup); C-D45 safe; fix comment or parallel cleanup"
+  },
+  "focus": {
+    "1": "PASS",
+    "2": "PASS",
+    "3": "PASS (N3)",
+    "4": "PASS (adaptations strengthen; minor: too-small test drag-end assertion dropped)"
+  },
+  "verification": "backend 165 OK (27 skip), ui 378 OK, live isolation p27n 10 OK, live mux p27n 4 OK; 14/14 hashes match; user herdr/tmux/~/.omp unchanged; no residue",
+  "observed_model": "opus (general-purpose inherited)"
+}

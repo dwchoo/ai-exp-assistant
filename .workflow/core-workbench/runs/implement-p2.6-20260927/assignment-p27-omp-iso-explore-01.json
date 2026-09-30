@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-omp-iso-explore-01",
+  "ticket_id": "CW-17 (C-D59 OMP isolation) - investigation",
+  "role": "code_explorer",
+  "unit": "V-CW-17-p2.7-isolation",
+  "approved_bundle_digest": "91fe05dc882d8c00ab0eb28c30e2b6cabcbfacb0f0fee3f0eaeecfaff5b7d3e8",
+  "routing": {
+    "planned_role": "code_explorer",
+    "selected_role": "code_explorer (wb-explorer, Sonnet high)",
+    "reason_codes": [
+      "unresolved_diagnosis"
+    ],
+    "evidence_refs": [
+      "C-D59: need every OMP 18.4.4 ambient prompt/tool injection path and how to disable it per run"
+    ]
+  },
+  "question": "For the installed OMP 18.4.4 (/home/dwchoo/.local/bin/omp), list every source that can inject content into the system prompt or tool set at startup besides the built-in default prompt and explicitly passed -e extensions: context/instruction files (AGENTS.md, CLAUDE.md, GEMINI.md, .omp/*, parent directories, user-global files such as ~/.omp/agent/AGENTS.md, ~/.claude/CLAUDE.md, ~/.codex/AGENTS.md), skills (all enable* sources incl. ~/.agents/skills), rules, slash commands, auto-discovered extensions/plugins/hooks, MCP (user and project), memories/mnemopi/hindsight, advisor, TTSR rules, anything else. For each: how it is discovered and the exact per-run way to disable it WITHOUT editing the user's global config (CLI flag, --config overlay key, environment variable). Also: does --system-prompt replace or merely prefix context files; does --profile isolate settings but also auth (must NOT be used if it drops the user's auth). ADDITIONAL (user request 2026-09-30: Workbench-internal skills such as 'order-worker'): determine how to load ONLY a Workbench-owned skills directory (e.g. a repo path like omp_bridge/skills/) while all ambient skill sources stay disabled - e.g. skills.customDirectories via --config overlay combined with skills.enable*=false, or --skills filters - and whether --no-skills would also block custom directories. Also how skills are exposed (slash command /skill:name, tool, prompt listing) and whether a skill can be restricted to one role (manager vs worker) by giving each OMP a different overlay.",
+  "method": [
+    "Read omp --help / subcommand help; inspect the installed package files read-only (resolve the omp binary/script location; grep bundled JS or docs for AGENTS.md, CLAUDE.md, contextFiles, loadSkills, rules, etc.). Check 'omp config list --json' keys and descriptions (do not print values of secrets; never read ~/.omp/agent/agent.db or any credential/auth files).",
+    "If a discriminating runtime check is needed, use ZERO model calls: e.g. start omp in --mode rpc or with a debug/introspection command in a scratch dir containing canary AGENTS.md/CLAUDE.md files and inspect what OMP reports as loaded context/skills (session/state introspection, logs in ~/.omp/logs only for that run). Use --no-session. Kill everything you start by exact identity."
+  ],
+  "writes": "Only your scratch dir /tmp/claude-1000/-home-dwchoo-ai-exp-assistant/dd5e2cee-e10d-41c4-8ebb-7c00b50dd465/scratchpad/omp-iso/ and the result file .workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-omp-iso-explore-01-agent.json. Do not edit the repository or any user/global config.",
+  "result_format": "Write full JSON (table: source, discovery, disable method, verified how, confidence); reply <=20 lines. Korean."
+}

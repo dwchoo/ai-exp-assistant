@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cd59-review-01",
+  "ticket_id": "CW-06 resize + CW-17 OMP isolation (C-D59)",
+  "role": "reviewer",
+  "unit": "V-CW-17-p2.7-isolation",
+  "approved_bundle_digest": "91fe05dc882d8c00ab0eb28c30e2b6cabcbfacb0f0fee3f0eaeecfaff5b7d3e8",
+  "routing": {
+    "planned_role": "reviewer",
+    "selected_role": "reviewer (Opus, general-purpose, fresh)",
+    "reason_codes": [
+      "process_lifetime_identity_in_delta"
+    ],
+    "evidence_refs": [
+      "isolation adds a startup probe process with session/group cleanup in the backend and an external-tool configuration contract"
+    ]
+  },
+  "frozen_candidate": "bcda200e81e7078c98f858849d009acaf6f30a7f1403e13ac9a855d0500c6967",
+  "criteria": [
+    "docs/features/core-workbench/DECISIONS.md#C-D59",
+    "docs/features/core-workbench/tickets/CW-17.md, CW-06.md",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-omp-iso-explore-01-agent.json (OMP injection sources)",
+    "C-D45 identity-safe signalling; CW-17 backend invariants (single instance, detach semantics, no global config edits)"
+  ],
+  "delta": {
+    "isolation": {
+      "files": [
+        "src/workbench/backend/launcher.py",
+        "src/workbench/backend/service.py",
+        "src/workbench/backend/cli.py",
+        "omp_bridge/omp-isolation.yml",
+        "omp_bridge/skills/README.md",
+        "tests/backend/test_paths_launcher.py",
+        "tests/backend/test_omp_isolation.py",
+        "tests/backend/live_omp_isolation_probe.py",
+        "tests/backend/test_omp_isolation_independent_p27m.py",
+        "tests/backend/live_omp_isolation_independent_p27m.py"
+      ],
+      "base": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-omp-iso-pre/"
+    },
+    "resize": {
+      "files": [
+        "src/workbench/ui/product/layout.py (new)",
+        "src/workbench/ui/product/model.py",
+        "src/workbench/ui/product/view.py",
+        "src/workbench/ui/product/app.py",
+        "tests/ui/test_product_model.py",
+        "tests/ui/test_product_pty.py",
+        "tests/ui/test_product_resize_independent_p27l.py"
+      ],
+      "base": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-resize-pre/"
+    },
+    "results": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-omp-iso-worker-01.json",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-resize-worker-01.json",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd59-test-01.json"
+    ]
+  },
+  "focus": [
+    "Isolation completeness vs the investigated source table (any ambient path left: context files, skills, rules, commands, MCP user/project, extensions/plugins/hooks, SYSTEM.md, subagents, memory, advisor, TTSR); overlay semantics (merge order, user --omp-arg override, disabledProviders union reading user config without writing); no --profile/PI_CODING_AGENT_DIR; auth/model preserved.",
+    "Startup check process: bounded, never blocks the backend loop, identity-safe cleanup (C-D45), no bridge connection side effects, no leaked fds/threads/zombies, failure/leak surfaced as warning; startup latency.",
+    "task.disabledAgents computation reads only names, handles missing/odd files, ancestors walk bounded; per-role overlay files 0600 and not written outside the data dir.",
+    "Resize: layout math, drag/?1002 lifecycle incl. all exit paths, debounce, persistence safety (atomic, 0600, symlink/size guards), interplay with scroll/zoom/focus/click; no regression of prior UI invariants.",
+    "Tests meaningful (not mocks of the behaviour under test); live tests opt-in and zero model calls."
+  ],
+  "scratch": "/tmp/claude-1000/-home-dwchoo-ai-exp-assistant/dd5e2cee-e10d-41c4-8ebb-7c00b50dd465/scratchpad/cd59-review/",
+  "rules": "Read-only; write only .workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd59-review-01-agent.json. Tests with /tmp/cw02-g1-venv/bin/python, pattern test_*.py, short unique TMPDIR; you may run the two isolation live probes once (WB_LIVE_OMP=1, zero model calls); never edit ~/.omp ~/.agents ~/.claude ~/.codex; never read credential stores.",
+  "result_format": "Findings P0..P3 (file:line, scenario, clause, fix direction); verdict per focus; overall integrate/block. Write JSON; reply <=20 lines. Korean."
+}

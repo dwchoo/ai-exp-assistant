@@ -1,0 +1,49 @@
+{
+ "schema_version": 1,
+ "invocation": "p27-cd59-test-02",
+ "role": "test_designer (wb-test-rerun)",
+ "unit": "V-CW-06-p2.7-resize",
+ "status": "candidate_ready",
+ "frozen_candidate": "045312110f0497e71b45551ea434a7dcf155dab0c506a776d02af641e67b8760",
+ "frozen_production_hashes_equal": true,
+ "frozen_note": "11 production files sha256 at start == end == packet values",
+ "checks": [
+  ["tests/ui test_*.py (run 1)", 0, "378 OK", "160 s"],
+  ["tests/ui test_*.py (run 2)", 0, "378 OK", "158 s"],
+  ["tests/backend test_*.py (short TMPDIR)", 0, "165 OK (skipped=27)", "198 s"],
+  ["tests/contracts test_*.py", 0, "43 OK", "0.3 s"],
+  ["tests/gates/g1_vt test_*.py (PYTHONPATH=src:.)", 0, "85 OK", "1.6 s"],
+  ["WB_LIVE_MUX=1 live_mux_independent_p27n (tmux -L mouse off/on, isolated herdr XDG_CONFIG_HOME)", 0, "4 OK, 66 records ok / 0 failed, residue none", "32 s"],
+  ["WB_LIVE_OMP=1 live_omp_isolation_independent_p27n (real OMP 18.4.4, fake HOME, rpc only)", 0, "10 OK", "84 s"],
+  ["red run: mutant app.py (?1002l on drag release) vs p27n ui + p27l PtyDragTests", 1, "9 failures (expected red)", "27 s"],
+  ["red run: mutant app.py vs live mux (tmux off/on, herdr)", 1, "3 failures (expected red); herdr 'failed to encode' warnings appear", "109 s"],
+  ["red run: mutant launcher.py (no --append-system-prompt / no --no-title / PI_AUTO_QA kept) vs unit p27n+p27m and live", 1, "all killed", "-"]
+ ],
+ "requirements": {
+  "adapt_p27l_4_PtyDragTests": {"verdict": "PASS", "detail": "4 failing tests (drag_moves_divider, drag_modes_off_outside_drag, no_drag_reporting_when_capture_off, closed_when_window_too_small) + 3 exit-path helpers now assert a single-tracking-mode OuterMouse model (?1000h ?1002h ?1006h once at start, no change during drags, off on all exits/prefix m); other assertions unchanged"},
+  "adapt_p27m_5_tests": {"verdict": "PASS", "detail": "--append-system-prompt \"\" and --no-title required (assert_required_isolation_args); disabledAgents: nearest .omp/agents + ~/.omp/agent/agents, name+description, not main/sub; huge-agent fixture gets a description; RealEntrypoint fixtures gain descriptions and the user value union. Note: the real-entrypoint test had a 2nd superseded expectation (agent fixtures without description) beyond the reported 5 causes; fixed in the same test"},
+  "new_ui_p27n": {"verdict": "PASS", "detail": "14 tests: model self-tests, N drags/all drag-end paths/resizes/prefix m x3 keep wheel+click (UI reaction verified), exit paths all off, Shift+PgUp/prefix PgUp/prefix [ fallbacks, isolation warning in header; mutant kills it"},
+  "new_backend_p27n": {"verdict": "PASS", "detail": "25 tests: required args, autoqa, PI_AUTO_QA strip, disabledAgents rules+union, PERSONALITY warning, APPEND leak/no-leak, TITLE no leak, start summary via the real entrypoint (stub OMP, second start on running backend)"},
+  "live_tmux": {"verdict": "PASS", "detail": "mouse off and on: wheel before/after 3 drags, prefix m off/on x1, keyboard fallbacks, pane mouse flags set after drags and cleared after exit"},
+  "live_herdr_isolated": {"verdict": "PASS", "detail": "own XDG_CONFIG_HOME server (stopped rc 0), 0 encode failures; user herdr server untouched (config.toml only read-copied)"},
+  "live_omp": {"verdict": "PASS", "detail": "APPEND canaries (4 project + user) injected by plain OMP but absent under isolation; PERSONALITY -> state warning, default '# Personality' kept; TITLE_SYSTEM no leak; xd://report_issue absent incl. PI_AUTO_QA=1/true; task_agent_names == set OMP really loads (OMP oracle), union with user sonic; invalid same-name agent does not disable bundled; real start prints 'omp isolation: warning' + WARNING, PI_AUTO_QA not in pane env, clean shutdown"}
+ },
+ "failure_classification": "no implementation failure found. Test-side corrections during authoring: pyte replay cannot follow window-size history (resize test judged via resize frames); agent-list parser had to skip blank separators; shell quoting of the boot command. Superseded-contract failures (p27l x4, p27m x5) classified 'contract'.",
+ "adapted_files": {
+  "tests/ui/test_product_resize_independent_p27l.py": {"before": "52db5be0257a84b01a9b5efc507f7237b199eb4628fa9584e7e39fd45b983aeb", "after": "7cfde43430076dab4c0a7c81d0e2a195d1d443c0cb6d6cbbc51f67329555b625"},
+  "tests/backend/test_omp_isolation_independent_p27m.py": {"before": "e0004103613727980b617597e812dd844fc788fb951bf08b6cb4835328fe7749", "after": "fb9b85e38eeb6f6052138aa3ac6e56b92495c3a77e26835d8b61ea22a004f7d3"}
+ },
+ "files_added": {
+  "tests/ui/test_product_mux_independent_p27n.py": "8d02c400aac101ef89ff015a16a7b7f70563ca6869bb1cf86b6f2b0bd992340d",
+  "tests/ui/live_mux_independent_p27n.py": "b7a9caa5b3910bae3f08d8a6be8866f8405b45b58cdb739f98ae81946a4bb08c",
+  "tests/backend/test_omp_isolation_independent_p27n.py": "80383260bf9d66766106d54694b380f0cf0406dfc7b9b7099edef34a3c66178e",
+  "tests/backend/live_omp_isolation_independent_p27n.py": "cbf2d81c886fc8454f216e6b0b75a357f52bd94b211cd4d945bec836db7885b0"
+ },
+ "notes": [
+  "p27n tests import helpers from p27l/p27m modules (OuterMouse, Harness, RealEntrypointBase)",
+  "start summary in the unit test uses the 'already running' path of cmd_start (stub OMP never joins the bridge); start against a ready backend covered live with real OMP",
+  "live OMP uses fake HOME + fake ANTHROPIC_API_KEY string (no provider contacted); model calls 0"
+ ],
+ "model_calls": 0,
+ "residue": "none: temp dirs removed, tmux -L servers killed and verified gone, isolated herdr server stopped, no process naming scratch roots; user's herdr server (pid 1874128) and default tmux session untouched; ~/.omp ~/.agents ~/.claude ~/.codex metadata unchanged (live check)"
+}

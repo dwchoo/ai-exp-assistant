@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "units": [
+    "V-CW-06-p2.7-resize",
+    "V-CW-17-p2.7-isolation"
+  ],
+  "status": "integrated",
+  "recorded_at": "2026-09-30",
+  "approved_bundle_digest": "91fe05dc882d8c00ab0eb28c30e2b6cabcbfacb0f0fee3f0eaeecfaff5b7d3e8",
+  "decision": "C-D59 + user follow-ups (herdr/tmux scrolling, personality keep+warn, --no-title)",
+  "integrated_candidate": "2d8e8c8c9f52cd73b3215b9132aa5503c656f6aab867ad97d78126f00d9670aa",
+  "manifest": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-cd59-integrated-checkpoint.json (milestone, full blobs)",
+  "delta_vs_verified": "graphify-out/** and Root state.json only (p27-snapshot-cd59-test2-after.json -> integrated)",
+  "behaviour": {
+    "ui": "resizable splits (drag divider, prefix+arrows with repeat, prefix z zoom, prefix = reset, persisted ui-layout.json); mouse tracking ?1000h?1002h?1006h once, no mode switching during drag, re-assert on SIGWINCH/prefix r, off on all exits and prefix m; works inside tmux (mouse off/on) and herdr; isolation warning in header",
+    "backend": "OMP launched with --config omp_bridge/omp-isolation.yml + per-role overlay, --no-extensions, --append-system-prompt \"\", --no-title, bridge -e; disabledProviders(21), skills ambient off, customDirectories omp_bridge/skills, disabledAgents union (OMP-loaded rules), dev.autoqa off + PI_AUTO_QA stripped, MCP project/memory/advisor/TTSR off; startup rpc isolation check (ok/warning/leak) in snapshot/status/UI; auth/model preserved; no --profile, no global config edits"
+  },
+  "verification_chain": [
+    "p27-resize-worker-01",
+    "p27-omp-iso-explore-01",
+    "p27-omp-iso-worker-01",
+    "p27-cd59-test-01",
+    "p27-cd59-review-01 (BLOCK R1/R2)",
+    "p27-mux-scroll-worker-01",
+    "p27-omp-iso-worker-02",
+    "p27-omp-iso-worker-03 (user choices)",
+    "p27-cd59-test-02 (adapted p27l/p27m, new p27n, live tmux/herdr/OMP)",
+    "p27-cd59-review-02 (integrate)"
+  ],
+  "carried_forward": {
+    "polish (CW-06/CW-17 later delta)": [
+      "N1 multi-line description in agent frontmatter",
+      "N2 header personality warning length",
+      "N3 readiness delay from synchronous config read"
+    ],
+    "CW-19": [
+      "R7 restart fork vs check thread"
+    ],
+    "CW-16": [
+      "OMP 18.4.4 vs 18.2.10 evidence drift (G3 live gate pinned)",
+      "lsp/dap configs outside isolation (tool configs)"
+    ],
+    "next UI delta": [
+      "IME-independent prefix commands (Ctrl+letter aliases, prefix Space command menu) - awaiting user confirmation of keys"
+    ]
+  }
+}

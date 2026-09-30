@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cd59-test-02",
+  "status": "candidate_ready",
+  "frozen_candidate": "045312110f0497e71b45551ea434a7dcf155dab0c506a776d02af641e67b8760",
+  "candidate_after_tests": "df0e5fa43a346d715de2016cd595716745fc0f973d0f325d3bccbab0d7a3197e",
+  "agent_result": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd59-test-02-agent.json",
+  "scope_audit": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-cd59-test2.json",
+  "delta_backup": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/p27-cd59-test2-delta-backup/",
+  "checks": [
+    [
+      "tests/ui x2",
+      0,
+      "378 OK x2"
+    ],
+    [
+      "tests/backend",
+      0,
+      "165 OK (27 skip)"
+    ],
+    [
+      "contracts",
+      0,
+      "43"
+    ],
+    [
+      "g1_vt",
+      0,
+      "85"
+    ],
+    [
+      "live mux tmux off/on + isolated herdr",
+      0,
+      "4 OK, 66 records ok"
+    ],
+    [
+      "live OMP 18.4.4 (fake HOME, rpc only)",
+      0,
+      "10 OK"
+    ],
+    [
+      "red: old ?1002l mutant",
+      1,
+      "mux 9 + live 3 fail as intended"
+    ],
+    [
+      "red: launcher without append/no-title, PI_AUTO_QA kept",
+      1,
+      "unit and live fail as intended"
+    ]
+  ],
+  "adaptations": {
+    "p27l": "52db5be0... -> 7cfde434... (4 PtyDragTests + 3 exit-path helpers to single-mode contract; other assertions unchanged; class contract)",
+    "p27m": "e0004103... -> fb9b85e3... (5 tests: required --append-system-prompt \"\" and --no-title; disabledAgents OMP-loaded rules; huge-agent fixture gets description; real-entrypoint fixture second old expectation fixed)"
+  },
+  "new_tests": [
+    "tests/ui/test_product_mux_independent_p27n.py (14)",
+    "tests/ui/live_mux_independent_p27n.py",
+    "tests/backend/test_omp_isolation_independent_p27n.py (25)",
+    "tests/backend/live_omp_isolation_independent_p27n.py"
+  ],
+  "model_calls": 0,
+  "frozen_hashes_equal": true,
+  "residue": "none (tmux -L and isolated herdr servers stopped; user herdr/tmux untouched)",
+  "observed_model": "sonnet (wb-test-rerun definition; host metadata unverified)"
+}

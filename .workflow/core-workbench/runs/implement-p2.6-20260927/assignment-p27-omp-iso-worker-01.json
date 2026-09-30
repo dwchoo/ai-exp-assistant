@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-omp-iso-worker-01",
+  "ticket_id": "CW-17 (C-D59 OMP ambient-configuration isolation)",
+  "role": "worker_senior",
+  "unit": "V-CW-17-p2.7-isolation",
+  "approved_bundle_digest": "91fe05dc882d8c00ab0eb28c30e2b6cabcbfacb0f0fee3f0eaeecfaff5b7d3e8",
+  "authority": "C-D59 (user request 2026-09-30), approval-amendment-c.json",
+  "routing": {
+    "planned_role": "worker",
+    "selected_role": "worker_senior (Opus, general-purpose)",
+    "reason_codes": [
+      "coupled_invariants"
+    ],
+    "evidence_refs": [
+      "launcher contract with external OMP 18.4.4 internals, auth preservation, bridge -e, version drift; must not touch user global config"
+    ]
+  },
+  "base_candidate": "69cbf791d81dd1844fb1c99843e0b72e3205f15463aef80af71b539969e585e2 (p27-snapshot-resize-after.json)",
+  "checkpoint_ref": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-cw06-integrated-checkpoint.json (milestone)",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-omp-iso-pre/ (current backend files)"
+  ],
+  "inputs": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-omp-iso-explore-01-agent.json (21-row source table, recommended overlay YAML, residual risks)",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-omp-iso-explore-01.json",
+    "docs/features/core-workbench/DECISIONS.md#C-D59",
+    "docs/features/core-workbench/tickets/CW-17.md"
+  ],
+  "required_behavior": [
+    "Both OMP processes launched by the backend run isolated from ambient configuration per C-D59, WITHOUT editing any user/global config and WITHOUT --profile / PI_CODING_AGENT_DIR (auth must remain the user's): pass a Workbench-owned --config overlay (static file in the repo, e.g. omp_bridge/omp-isolation.yml, or generated per data dir with 0600) implementing the investigated settings (disabledProviders ids, skills.enable*=false, mcp.enableProjectConfig=false, memory off, advisor off, ttsr builtin rules off) plus --no-extensions; keep the explicit bridge --extension; subagent-definition leakage via the task tool closed (task.disabledAgents computed from the actual definition files in <project>/.omp/agents and ~/.omp/agent/agents at launch, reading only names, or an equivalent documented approach).",
+    "Workbench-only skills: add skills.customDirectories pointing to a repo directory omp_bridge/skills/ (create it with a README only; actual skills such as order-worker are CW-18) so only Workbench skills can load; do not use --no-skills / skills.enabled=false (they block custom dirs). Support per-role skill filtering (manager vs worker) by role-specific overlay or --skills filter, wired but with empty/no skills for now.",
+    "User-supplied --omp-arg / WORKBENCH_OMP_ARGS still append after the isolation arguments; document that they can override isolation.",
+    "Startup isolation check: provide a function that runs the same OMP command in --mode rpc --no-session (zero model calls, bounded time, exact-identity cleanup) and returns the loaded context-file names, skill names, command names, rules, MCP servers and extension paths from get_state/get_available_commands; the backend runs it once at start (after spawn plan, before or alongside OMP launch) and records the result in the backend snapshot (e.g. snapshot['omp_isolation'] = {checked, ok, leaks, omp_version}); a leak or check failure is surfaced as a visible warning state (not silently ignored) but does not kill the session. Keep it off the UI hot path.",
+    "Record OMP version drift: the backend already records omp_version; ensure the snapshot shows it (18.4.4 now vs 18.2.10 evidence)."
+  ],
+  "acceptance": [
+    "red->green unit tests in tests/backend/test_paths_launcher.py (argv contains overlay/--no-extensions/bridge, order with user omp args, no --profile, per-role filters, disabledAgents computation from temp dirs).",
+    "Runtime with the REAL OMP 18.4.4 and ZERO model calls: in a scratch project tree containing canary AGENTS.md, CLAUDE.md, .claude/skills/<canary>/SKILL.md, .omp/rules, .mcp.json, .omp/agents/<canary>.md, the isolated command's rpc get_state/get_available_commands show none of the canaries and none of ~/.agents/skills (orca) while a Workbench skill placed in a temp custom dir IS listed; the same without isolation shows the canaries (negative control). Write it as tests/backend/live_omp_isolation_probe.py (runs only with WB_LIVE_OMP=1) plus a non-live predicate test.",
+    "Existing suites green: tests/backend (all, short TMPDIR), tests/contracts, tests/ui (test_*.py), tests/gates/g3_omp predicates (PYTHONPATH=src:.; no live)."
+  ],
+  "allowed_write_paths": [
+    "src/workbench/backend/launcher.py",
+    "src/workbench/backend/service.py (startup check + snapshot field only)",
+    "src/workbench/backend/cli.py (print isolation status in start/status summary only)",
+    "omp_bridge/omp-isolation.yml",
+    "omp_bridge/skills/README.md",
+    "tests/backend/test_paths_launcher.py",
+    "tests/backend/live_omp_isolation_probe.py",
+    "tests/backend/test_omp_isolation.py"
+  ],
+  "prohibited_paths": [
+    "tests/**/*_independent*.py",
+    "omp_bridge/g3/**",
+    "src/workbench/contracts/**",
+    "src/workbench/ui/**",
+    "src/workbench/terminal/**",
+    "docs/**",
+    ".workflow/**",
+    "any file outside the repository except your scratch dir (never edit ~/.omp, ~/.agents, ~/.claude, ~/.codex)"
+  ],
+  "stop_conditions": [
+    "an ambient injection path cannot be disabled per run -> stop and report (C-D59: tell the user)",
+    "isolation would lose user auth or require editing global config"
+  ],
+  "rules": "Never read credential stores (~/.omp/agent/agent.db, tokens). Zero model calls. /tmp/cw02-g1-venv/bin/python, short TMPDIR. No graphify update, commits, tmux/herdr. Zero residue by identity.",
+  "result_format": "checks table first, status, changed paths + sha256, overlay summary, startup check design, residual leaks (if any), residue, gaps. Korean, concise."
+}

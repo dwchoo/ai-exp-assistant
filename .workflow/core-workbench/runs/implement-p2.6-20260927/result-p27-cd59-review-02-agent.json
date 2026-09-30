@@ -1,0 +1,67 @@
+{
+ "schema_version": 1,
+ "invocation": "p27-cd59-review-02",
+ "role": "reviewer",
+ "reviewed_candidate": "df0e5fa43a346d715de2016cd595716745fc0f973d0f325d3bccbab0d7a3197e",
+ "candidate_hash_check": "mux-worker-01 / omp-iso-worker-02 / omp-iso-worker-03 changed_paths의 최신 sha256 14개 모두 현재 파일과 일치. diff 기준: p27-mux-pre(UI), p27-omp-iso2-pre(backend), p27-cd59-test-delta-backup(independent 적응).",
+ "overall": "integrate",
+ "overall_reason": "이전 P1 두 건(R1 APPEND_SYSTEM.md, R2 ?1002l mouse 소실)은 코드·OMP 소스·라이브로 해소 확인. R3~R6은 사용자 결정(personality 유지+경고, --no-title)과 adjudication대로 반영. 새 finding은 P3 3건뿐이며 통합을 막지 않는다.",
+ "findings": [
+  {
+   "id": "N1",
+   "severity": "P3",
+   "area": "isolation",
+   "file_line": "src/workbench/backend/launcher.py:230-246 (_scalar), 249-271 (_frontmatter_fields), 274-287 (_agent_definition_name)",
+   "scenario": "project .omp/agents/reviewer.md(또는 scout/task/sonic/security-reviewer 이름)의 frontmatter가 `description:` 다음 줄에 들여쓴 plain multi-line scalar를 쓰면 YAML상 유효한 문자열이라 OMP ERs()는 로드해 bundled agent를 교체한다. Workbench의 mini-parser는 value가 비어 description=None으로 보고 이름을 disabledAgents에 넣지 않는다. bundled 이름이라 check_isolation(task_agent leak은 BUNDLED_TASK_AGENTS 제외)도 감지하지 못한다. 재현: scratch에 해당 파일 → task_agent_names()가 'reviewer'를 빠뜨림(block scalar `>-`는 정상). OMP di()는 추가로 repair(WTi/zTi) 경로까지 있어 OMP가 더 관대하다. 이번 delta 이전(name만 읽는 superset)에는 disable됐으므로 정밀화로 생긴 좁은 회귀.",
+   "clause": "C-D59 (2) task subagent 정의 주입 차단; R4 fix 방향(OMP 로드 규칙과 일치)",
+   "fix_direction": "description 키가 존재하고 값이 비었으면 다음 들여쓴 줄을 plain continuation으로 합치거나, name이 유효하고 description 키가 '존재'하기만 하면 로드된다고 보수적으로 간주(bundled 이름 비활성화 쪽으로 오류). 테스트에 multi-line plain description 케이스 추가."
+  },
+  {
+   "id": "N2",
+   "severity": "P3",
+   "area": "ui",
+   "file_line": "src/workbench/ui/product/model.py:1068-1070 (status_lines), 1073-1080 (isolation_warning); view.py:39",
+   "scenario": "PERSONALITY.md가 있으면(사용자가 '유지+경고'를 택한 상시 상태) header 2행이 '경고 OMP 격리 warning: OMP keeps its default personality ... manager:personality:<path>, worker:personality:<path> | backend: ...' 형태로 268자가 된다(실측). 160열 터미널에서도 backend phase·bridge manager/worker 연결·'Ctrl-] ? 도움말'이 잘려 보이지 않고, 이 상태가 세션 내내 지속된다. leak 목록이 긴 경우도 동일.",
+   "clause": "R5 UI 표시(경고 노출)와 C-D58 header 상태 정보 유지의 균형; UX",
+   "fix_direction": "header에는 짧은 표식만(예: '경고 격리 warning(status 참고)' 또는 state + 개수) 두고 상세는 status/help로; 또는 경고를 line2 뒤쪽에 붙여 기존 상태 필드가 먼저 보이게."
+  },
+  {
+   "id": "N3",
+   "severity": "P3",
+   "area": "process",
+   "file_line": "src/workbench/backend/service.py:147-148; launcher.py:366-431 (_bounded_outputs finally), 674-697 (_stop_group)",
+   "scenario": "주석은 'never blocks readiness'라고 하지만 read_user_config는 _open()에서 동기 실행되어 readiness를 최대 CONFIG_READ_TIMEOUT 8 s 늦춘다. timeout 뒤 _stop_group가 job마다 순차로 TERM 3 s + KILL 3 s + wait 5 s까지 쓸 수 있어 이론상 최악 ~30 s(D-state 등 비정상 프로세스). START_TIMEOUT 120 s 안이고 정상 경로는 0.16 s라 실사용 영향은 작다. 동작 자체(각 group 전용 session, WNOWAIT로 leader 미회수 상태에서 killpg, 이후 reap, stdout close)는 C-D45 안전하고 zombie/fd 누수 없음.",
+   "clause": "focus 3 bounded / never blocks (문서·주석 정확성)",
+   "fix_direction": "주석을 '최대 N s 지연'으로 고치거나, timeout 시 모든 group에 먼저 TERM을 보내고 한 번에 대기(병렬 정리)해 최악을 8+6 s 수준으로 줄인다."
+  }
+ ],
+ "prior_findings": {
+  "R1": "RESOLVED. isolation_args가 항상 '--append-system-prompt', '' 전달(launcher.py isolation_args), user --omp-arg가 뒤에 와서 override 가능. OMP 18.4.4 소스 C6t `e.appendSystemPrompt ?? bgp()`에서 ''는 nullish가 아니어서 bgp()(cwd .omp/.claude/.codex/.gemini + user dir의 APPEND_SYSTEM.md)를 건너뜀; x6t는 falsy라 set하지 않지만 이후 fallback은 extension 자원뿐(ambient provider는 disabledProviders로 차단). 감지: ambient_prompt_files + prompt_file_leaks(probe 줄이 prompt에 모두 있으면 leak). 라이브 p27n(가짜 HOME): 4 project 위치 + user level canary 부재 OK.",
+  "R2": "RESOLVED. MOUSE_ON=?1000h?1002h?1006h를 시작 시 1회, drag 중 모드 전환 없음, MOUSE_OFF=?1006l?1002l?1000l은 prefix m off와 finally(모든 exit)에서만. SIGWINCH·prefix r에서 재assert. pane 앱 추적도 단일 모드로 모델링(set은 교체, 어떤 reset이든 off)하고 outer 1002 motion은 1002/1003 앱에만 전달(_wants_motion). 라이브(격리 tmux -L mouse on/off + 격리 herdr): 2회 drag 후 wheel/click/drag, prefix m off/on 후 모두 동작, exit 후 tmux flag 전부 0, herdr encode failure 0.",
+  "R3": "RESOLVED per user decision. personality: none 미설정(OMP 기본 Personality 유지), <agent dir>/PERSONALITY.md(PI_CODING_AGENT_DIR 또는 ~/<PI_CONFIG_DIR|.omp>/agent — OMP ps()/h$t()와 일치) 존재 시 state 'warning'(ok=True, leaks=[], warnings=[...]), status·start summary·UI header에 표시. 라이브 p27n: 가짜 HOME PERSONALITY.md → warning, 기본 블록 유지.",
+  "R4": "RESOLVED (N1 잔여). 사용자 task.disabledAgents union, includeSkills=<role 패턴|[]>·ignoredSkills=[] 명시 고정, 가장 가까운 .omp/agents + user agents만(OMP PA()와 일치: Mgn nearest per source, source .omp만, plugin agents는 omp-plugins/claude-plugins 차단), name+description 필수·main/sub 제외(ERs와 일치). 단 YAML 해석 차이로 N1.",
+  "R5": "RESOLVED (N2 UX 잔여). cmd_start가 ISOLATION_WAIT(50 s) 동안 pending이면 기다렸다 결과를 출력, 끝내 pending이면 명시 안내. UI header 2행에 leak/failed/warning 표시(bold reverse), ok/pending/미확인은 표시 안 함.",
+  "R6": "RESOLVED (N3 주석/최악치 잔여). read_user_config: 두 key 동시 실행, 공유 8 s deadline, 각자 새 session, 64 KiB 출력 한도, leader WNOWAIT 관찰 후 group TERM→KILL→reap, stdout close. pane fork 이전 main thread에서 실행되어 동시 fork 없음. lsp/dap는 adjudication대로 기록 사항.",
+  "R7": "ROUTED: adjudication대로 CW-19 기록 사항(이번 delta 범위 밖), 코드 변경 없음 확인."
+ },
+ "focus_verdicts": {
+  "1_prior_findings_and_user_choices": "PASS. 조사 표(context files, SYSTEM.md, skills 7종+skillshare/omp-managed, rules, TTSR, commands, extensions, MCP, subagents, memory, advisor)에 이번 delta의 APPEND_SYSTEM.md·PERSONALITY.md·TITLE_SYSTEM.md·dev.autoqa(+PI_AUTO_QA env 제거)를 추가로 대조. OMP 소스의 _xe() 호출은 TITLE_SYSTEM.md/APPEND_SYSTEM.md 두 종류뿐이고 PERSONALITY.md는 ps() 한 곳 — 모두 처리됨. 사용자 선택: personality 유지+경고, --no-title(두 role 및 check 명령) 적용 확인. 잔여 P3 N1.",
+  "2_mouse_tracking": "PASS. 시작(1000→1002→1006 순서로 fallback), drag/release(모드 전환 없음), prefix m(off 시 세 모드 모두 reset, on 시 재설정), SIGWINCH·prefix r 재assert(take_mouse_reassert는 소비형), 모든 exit finally에서 MOUSE_OFF+?2004l. drag·resize·scroll·click 회귀 없음(unit 378 OK, 라이브 tmux on/off·herdr 4/4 OK). 사용자 herdr server(pid 1874128)·tmux 세션 불변 확인.",
+  "3_process_handling_and_summary": "PASS with P3 N3. read_user_config/check_isolation 모두 bounded, 자기 session group만 killpg, leader 미회수 상태에서 신호라 PID 재사용 불가(C-D45), 이후 reap·pipe close, zombie/fd 누수 없음, backend loop 밖(main thread 시작 경로·check thread)에서만 실행. 라이브 후 rpc 잔여 0. start summary는 pending이면 bounded 대기 후 state/WARNING 출력(state=warning 경로도 _print_summary로 출력됨을 코드로 확인).",
+  "4_independent_tests": "PASS. p27l: '?1002는 drag 중만' 기대를 단일 추적 모드 모델(OuterMouse)로 대체해 오히려 강화(바이트 존재가 아닌 terminal 의미). too-small mid-drag 테스트는 drag 종료 자체 단언이 빠지고 reporting 유지만 봄(경미). p27m: FORBIDDEN_ARGS에서 --append-system-prompt 제외 + 필수 인자 단언 추가, disabledAgents 기대를 OMP 로드 규칙으로 교체(정확 집합 단언으로 강화). 신규 p27n(mux 14, isolation 25, live 2종)은 old ?1002l mutant·append/no-title 제거 mutant에서 red(테스터 기록)이며 의미 있음. 단 N1 케이스(multi-line plain description)는 미포함."
+ },
+ "checks": [
+  ["hash check of worker changed_paths", 0, "14/14 일치"],
+  ["tests/backend test_*.py", 0, "Ran 165, OK (skipped=27)"],
+  ["tests/ui test_*.py", 0, "Ran 378, OK"],
+  ["WB_LIVE_OMP=1 live_omp_isolation_independent_p27n (1회, 가짜 HOME, RPC only)", 0, "Ran 10, OK; ~/.omp/agent 목록 해시 전후 동일; rpc 잔여 0"],
+  ["WB_LIVE_MUX=1 live_mux_independent_p27n (1회, tmux -L 전용 소켓 + herdr 전용 XDG_CONFIG_HOME)", 0, "Ran 4, OK; residue 0; 사용자 herdr/tmux 프로세스·세션 불변"],
+  ["omp config get disabledProviders / task.disabledAgents --json (read-only)", 0, "둘 다 rc 0, value []"],
+  ["OMP 18.4.4 소스 대조(strings.txt): bgp/C6t/x6t, _xe 호출, X_l PERSONALITY, PA/Mgn/wyl/oLt/ERs agent 로딩", 0, "구현과 일치, N1 차이만"],
+  ["N1 재현: scratch .omp/agents/reviewer.md(multi-line plain description)", 0, "task_agent_names()가 reviewer 누락"],
+  ["N2 측정: warning 상태 header line2 길이", 0, "268자"]
+ ],
+ "model_calls": 0,
+ "side_effects": "scratch 파일은 session scratchpad와 mktemp TMPDIR에만 생성, TMPDIR는 삭제. tmux는 -L 전용 서버(probe가 kill-server), herdr는 전용 XDG_CONFIG_HOME 서버(probe가 server stop). repo·~/.omp·사용자 config 무편집, ~/wb-urux-sandbox/.state 미접근, pkill/패턴 kill 미사용, credential 미열람.",
+ "residue": "none"
+}

@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-mux-scroll-worker-01",
+  "ticket_id": "CW-06 (C-D59 follow-up: scrolling inside herdr/tmux) + CW-17 overlay (dev.autoqa)",
+  "role": "worker_senior",
+  "unit": "V-CW-06-p2.7-resize",
+  "approved_bundle_digest": "91fe05dc882d8c00ab0eb28c30e2b6cabcbfacb0f0fee3f0eaeecfaff5b7d3e8",
+  "authority": "user 2026-09-30: '나는 herdr나 tmux에서 띄워서 사용할 가능성이 높아. 스크롤이 가능해야해.'; herdr temporary-pane testing allowed ('임시 pane 허용'); ur-ux-request.json follow_ups",
+  "routing": {
+    "planned_role": "worker",
+    "selected_role": "worker_senior (Opus, general-purpose)",
+    "reason_codes": [
+      "unresolved_diagnosis",
+      "coupled_invariants"
+    ],
+    "evidence_refs": [
+      "real terminal mouse-mode semantics differ from the pyte test emulator; live multiplexer verification needed"
+    ]
+  },
+  "base_candidate": "bcda200e81e7078c98f858849d009acaf6f30a7f1403e13ac9a855d0500c6967 (p27-snapshot-mux-base.json)",
+  "checkpoint_ref": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-cw06-integrated-checkpoint.json (milestone)",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-mux-pre/ (current UI files)"
+  ],
+  "evidence": [
+    "~/.config/herdr/herdr-server.log: 126x 'failed to encode terminal attach mouse wheel event' for pane w1:p2 from 2026-09-30T04:36:33Z, right after a divider drag",
+    "UI emits ?1000h ?1006h at start, ?1002h on divider drag start and ?1002l on release (src/workbench/ui/product/app.py / model.py); xterm/VTE/tmux/herdr keep ONE mouse tracking mode for 1000/1002/1003 so ?1002l turns tracking off",
+    "manager OMP blocked by OMP dev.autoqa consent modal",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd59-review-01-agent.json P1-R2: tmux 3.4 shows std/btn/any mouse all 0 after ?1002l"
+  ],
+  "required_behavior": [
+    "Confirm the root cause with a live reproduction first (isolated tmux server via 'tmux -L wb-mux-<rand>' with its own config, and a temporary herdr pane), then fix: enable mouse tracking once at start with a mode that reports press/release, wheel and motion-while-pressed (e.g. ?1002h + ?1006h), never switch tracking modes during a drag, disable exactly what was enabled on every exit path and on prefix m toggle; re-assert the mode after attach/redraw if a multiplexer may have reset it.",
+    "Make the VT test emulator used by tests (tests/ui support or a small test helper, not src/workbench/terminal unless needed) model 1000/1002/1003 as a single tracking-mode state so the old bug is red in tests.",
+    "Scrolling must work inside tmux and herdr: wheel over a pane scrolls it; keyboard fallbacks that multiplexers do not intercept by default must exist and be documented in help (verify Shift+PgUp passes through tmux and herdr; if not, prefix PgUp / prefix [ must work there). If herdr or tmux needs a user-side setting for mouse passthrough, detect/document it instead of changing the user's config.",
+    "Review P3-R5 UI part: show the backend's omp_isolation warning (snapshot['omp_isolation'] state/warning) in the product UI header when not ok."
+  ],
+  "live_verification": [
+    "tmux: isolated server (-L unique socket, -f /dev/null or a temp config, default 'mouse off' and also 'mouse on'), product UI via the real entrypoint with a stub OMP (no model calls) or the real OMP without prompts; send wheel events through tmux (e.g. 'tmux send-keys -M' or by emulating the outer terminal with a PTY client attached to the tmux server) and verify the host pane scrolls, before and after a divider drag; Shift+PgUp passthrough. Kill the tmux server by its socket at the end.",
+    "herdr (user-authorized): create a temporary workspace or pane only (never input to existing panes w1:p1/w1:p2 or other sessions); run the product UI in it with a separate --data-dir under a scratch dir (NOT ~/wb-urux-sandbox/.state, the user's session is running there); inject wheel events if herdr's API allows (herdr pane send-keys / api), otherwise verify via herdr's pane state/logs that mouse reporting stays enabled after a drag and that no 'failed to encode' warnings appear; close the temporary pane/workspace and shut down its backend at the end. Read https://herdr.dev/llms.txt if needed for herdr debugging APIs."
+  ],
+  "acceptance": [
+    "red->green: emulator-level test showing the old ?1002l bug disables wheel delivery, fixed afterwards",
+    "live tmux and herdr verification results recorded (commands, observations)",
+    "suites: tests/ui (test_*.py) x2, tests/backend (short TMPDIR), tests/contracts, tests/gates/g1_vt (src:.) green; independent tests unmodified (list conflicts)"
+  ],
+  "allowed_write_paths": [
+    "src/workbench/ui/product/**",
+    "tests/ui/test_product_model.py",
+    "tests/ui/test_product_pty.py",
+    "tests/ui/support.py",
+    "tests/ui/live_mux_scroll_probe.py (new, opt-in WB_LIVE_MUX=1)"
+  ],
+  "prohibited_paths": [
+    "tests/**/*_independent*.py",
+    "src/workbench/backend/**",
+    "src/workbench/contracts/**",
+    "docs/**",
+    ".workflow/**",
+    "user configs (~/.tmux.conf, ~/.config/herdr/**, ~/.omp, ~/.agents)",
+    "the user's running Workbench data dir ~/wb-urux-sandbox/.state and its processes"
+  ],
+  "rules": "Zero model calls. /tmp/cw02-g1-venv/bin/python, short TMPDIR. No graphify update, commits. Clean up tmux server, herdr temporary pane/workspace, backends and temp dirs by exact identity.",
+  "result_format": "checks table first, status, root-cause confirmation evidence, changed paths + sha256, tmux/herdr live results, keyboard fallbacks that work in each, residue, gaps. Korean, concise.",
+  "note": "dev.autoqa overlay change moved to the following launcher worker (p27-omp-iso-worker-02)"
+}

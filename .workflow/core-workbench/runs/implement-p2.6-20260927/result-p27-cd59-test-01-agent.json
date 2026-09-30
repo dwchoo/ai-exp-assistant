@@ -1,0 +1,129 @@
+{
+ "schema_version": 1,
+ "invocation": "p27-cd59-test-01",
+ "role": "test_designer",
+ "status": "candidate_ready",
+ "units": [
+  "V-CW-06-p2.7-resize",
+  "V-CW-17-p2.7-isolation"
+ ],
+ "files_added": {
+  "tests/ui/test_product_resize_independent_p27l.py": "52db5be0257a84b01a9b5efc507f7237b199eb4628fa9584e7e39fd45b983aeb",
+  "tests/backend/test_omp_isolation_independent_p27m.py": "e0004103613727980b617597e812dd844fc788fb951bf08b6cb4835328fe7749",
+  "tests/backend/live_omp_isolation_independent_p27m.py": "49da0258006ec05d5673b4c4adbb1852396f9b75865c05b6e1457eac2f5dc8ba"
+ },
+ "frozen_production_hashes_equal": true,
+ "frozen_files_checked": 11,
+ "checks": [
+  {
+   "cmd": "unittest discover -s tests/ui -p test_*.py (run 1)",
+   "rc": 0,
+   "tests": 357,
+   "dur_s": 129.1
+  },
+  {
+   "cmd": "same (run 2)",
+   "rc": 0,
+   "tests": 357,
+   "dur_s": 127.3
+  },
+  {
+   "cmd": "unittest discover -s tests/backend -p test_*.py",
+   "rc": 0,
+   "tests": 129,
+   "skipped": 27,
+   "dur_s": 138.0
+  },
+  {
+   "cmd": "unittest discover -s tests/contracts",
+   "rc": 0,
+   "tests": 43,
+   "dur_s": 0.3
+  },
+  {
+   "cmd": "PYTHONPATH=src:. discover -s tests/gates/g1_vt",
+   "rc": 0,
+   "tests": 85,
+   "dur_s": 1.7
+  },
+  {
+   "cmd": "WB_LIVE_OMP=1 tests.backend.live_omp_isolation_probe (existing, once)",
+   "rc": 0,
+   "tests": 4,
+   "dur_s": 1.9
+  },
+  {
+   "cmd": "WB_LIVE_OMP=1 live_omp_isolation_independent_p27m.py (real OMP 18.4.4, final run)",
+   "rc": 0,
+   "tests": 9,
+   "dur_s": 35.2
+  },
+  {
+   "cmd": "new resize file alone x2 (before full regressions)",
+   "rc": 0,
+   "tests": 59,
+   "dur_s": 26
+  },
+  {
+   "cmd": "new isolation non-live file (full)",
+   "rc": 0,
+   "tests": 39,
+   "dur_s": 119.8
+  }
+ ],
+ "red_resize": {
+  "method": "scratch overlay (src copy with ui/product replaced by p27-resize-pre + omp_bridge copy; P27L_SRC knob), outside repo",
+  "result": "59 tests: 28 subtest/test results ok (behaviour-preserving guards: click isolation, key passthrough, lone Esc, corrupt file ignore, defaults), 55 FAIL, 0 ERROR",
+  "failing_areas": [
+   "divider drag (both axes, both borders)",
+   "?1002h/l on all 5 exit paths + capture-off + too-small",
+   "prefix arrows/repeat/clamp",
+   "zoom/reset/focus-visible",
+   "proportional window resize",
+   "ui-layout.json persistence/permissions/symlink/valid-file",
+   "real entrypoint reattach + host stty",
+   "help text"
+  ],
+  "note": "first overlay attempt lacked omp_bridge/ (real-entrypoint tests failed for env reasons); fixed and rerun, the reported numbers are from the corrected overlay"
+ },
+ "red_isolation": "25 launcher-contract tests error on the pre-change launcher (AttributeError: role_overlay/omp_command/check_isolation missing); 4 hand mutations of the current launcher (drop --no-extensions, empty task.disabledAgents, add --profile, drop 'agents' provider) each made 1+ tests fail",
+ "verdicts": {
+  "RESIZE-geometry/clamp/proportional": "pass",
+  "RESIZE-mouse drag+debounce+click isolation": "pass",
+  "RESIZE-keys prefix+arrows/repeat/termination": "pass",
+  "RESIZE-zoom/reset": "pass",
+  "RESIZE-?1002 lifecycle (release + detach/SIGTERM/SIGHUP/closing/drop/prefix m/too-small)": "pass",
+  "RESIZE-persistence + corrupt ignore (real entrypoint, stub OMP)": "pass",
+  "ISOLATION-argv/env/overlay contract (manager+worker, no --profile/PI_CODING_AGENT_DIR, user args appended)": "pass",
+  "ISOLATION-live real OMP 18.4.4 (no canary/orca skills leak, wb skill visible + role filter, negative control, model equal, ambient dirs unchanged, 0 model calls)": "pass",
+  "ISOLATION-snapshot/status via real entrypoint (ok/leak/failed/hung, version, session survives)": "pass"
+ },
+ "failures": [],
+ "failure_classification_during_development": [
+  "test bug: second-press test expected ?1002h although the whole sequence is processed in one read (fixed: need_on=False)",
+  "test bug: transient curses repaint read as final geometry (fixed: settled() with exact predicate)",
+  "test bug: status --json wraps the snapshot in {running, snapshot}; stub never joins the bridge so start stays 'starting' (start rc/summary not asserted)",
+  "environment (overlay only): red overlay without omp_bridge/ broke backend start"
+ ],
+ "live_check_facts": {
+  "omp": "18.4.4",
+  "rpc_requests": [
+   "get_state",
+   "get_available_commands"
+  ],
+  "flags": "--no-session --no-title --mode rpc",
+  "model_calls": 0,
+  "detector": "own raw-text canary grep (not the implementation's observe_isolation); implementation check_isolation only cross-checked",
+  "sensitivity": "a user --config re-enabling agents providers makes the same detector see canary-agents-skill and the user's orca skills, so clean results are not a blind detector",
+  "cleanup": "exact identity (pid+starttime, pidfd), survivors asserted empty; ~/.agents ~/.claude/skills ~/.codex/skills ~/.omp/agent skill/rule/agent dirs + config metadata unchanged; ~/.omp top-level names unchanged; no credential store opened"
+ },
+ "gaps": [
+  "SIGKILL of the UI mid-drag cannot restore ?1002 (not testable/contractual)",
+  "start summary line not exercised (stub never joins the bridge so start stays starting; status text exercised)",
+  "real ?1002 behaviour in an actual terminal emulator not covered (VT screen only)",
+  "intersection-of-dividers grab preference unspecified, not tested",
+  "G3 live gate pinning OMP 18.2.10 untouched (CW-16)"
+ ],
+ "residue": "none: TMPDIR /tmp/w27* removed, no /tmp/cw06-*, /tmp/p27m*, no omp/stub processes, ~/.omp top-level unchanged",
+ "red_verbose_copy": "/tmp/claude-1000/-home-dwchoo-ai-exp-assistant/6b00be03-7373-41be-bc76-b17aba09a648/scratchpad/red-verbose.txt"
+}

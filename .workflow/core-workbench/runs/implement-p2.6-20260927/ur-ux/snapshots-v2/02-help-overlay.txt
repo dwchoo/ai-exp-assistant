@@ -1,0 +1,47 @@
+## 02-help-overlay: 도움말 overlay (새 키: prefix [ scroll 모드 등)
+## size 160x45 | keys: Ctrl-] ?
+------------------------------------------------------------
+focus: MANAGER OMP | host 입력 owner: user | shell mode: manual_prompt | 자동화: not_configured
+backend: ready | bridge manager=ok worker=ok | 마지막 확인 11:15:25 (0s 전) | Ctrl-] ? 도움말
+┌─ MANAGER OMP *FOCUS* alive ──────────────────────────────────────────────────┐┌─ WORKER OMP alive ───────────────────────────────────────────────────────────┐
+││         ██  ██          │ ────────────────────────────────────────────── │  │││             ██          │ No LSP servers                                 │  │
+││         ▒▒  ██          │ LSP Servers                                    │  │││                         │                                                │  │
+││             ██          │ No LSP servers                                 │  │││         GPT-5.5         │                                                │  │
+││                         │                                                │  │││      openai-codex       │                                                │  │
+││         GPT-5.5         │                                                │  │││                         │ ────────────────────────────────────────────── │  │
+││      openai-codex       │                                                │  │││                         │ Recent sessions                                │  │
+││                         │ ────────────────────────────────────────────── │  │││                         │ No recent sessions                             │  │
+││                         │ Recent sessions                                │  │││                         │                                                │  │
+││                         │ No recent sessions                             │  │││                         │                                                │  │
+││                         │                                                                                                                                │  │
+││                         │             OMP Workbench 키 (임시 배치 — 사용자 UX 검토 대상)                                                                 │  │
+││                         │                                                                                            ────────────────────────────────────╯  │
+││                         │             prefix = Ctrl-]   (그 외 모든 키는 focus된 pane에 원본 그대로 전달)            cleanse` (or /cleanse right here)      │
+│╰─────────────────────────┴───────────    prefix prefix   prefix 바이트(0x1d)를 그대로 전송                            es them with parallel subagents — esc  │
+│ Tip: Try task isolation to create CoW    prefix 1/2/3    manager OMP / worker OMP / host shell로 focus                                                       │
+│                                          prefix Tab      다음 pane으로 focus                                                                                 │
+│                                          prefix t        host shell 사용자 인수 요청                                                                         │
+│ π > ◒ GPT-5.5 > 🗑 project > (sub) ▶──    prefix c        인수 확인 (요청 후)                                          %────────────────────────╎──┃─────272K─│
+│╰─                                        prefix h        host shell을 manager에게 되돌리기(handoff)                                                          │
+└──────────────────────────────────────    prefix r        focus pane 다시 그리기 요청                                  ───────────────────────────────────────┘
+┌─ HOST SHELL alive owner=user ────────    prefix [        scroll 모드: focus pane의 지나간 출력 보기 (prefix PgUp 도 진입+한 페이지 위)───────────────────────┐
+│$                                         prefix d        detach (backend와 PTY는 계속 실행)                                                                  │
+│                                          prefix ?        이 도움말 (아무 키로 닫기)                                                                          │
+│                                                                                                                                                              │
+│                                        scroll 모드 (키는 pane으로 전달되지 않음, 새 출력이 와도 보던 위치 유지):                                             │
+│                                          PgUp/PgDn 한 페이지   ↑/↓ (k/j) 한 줄   Home/g 맨 위   End/G 맨 아래(live)   q/Esc 종료                             │
+│                                                                                                                                                              │
+│                                        배치: 위 = manager OMP | worker OMP, 아래 = host shell 전체 폭.                                                       │
+│                                        focus 변경은 host 입력 owner를 바꾸지 않는다.                                                                         │
+│                                                                                                                                                              │
+│                                                                                                                                                              │
+│                                                                                                                                                              │
+│                                                                                                                                                              │
+│                                                                                                                                                              │
+│                                                                                                                                                              │
+│                                                                                                                                                              │
+│                                                                                                                                                              │
+│                                                                                                                                                              │
+│                                                                                                                                                              │
+│                                                                                                                                                              │
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘

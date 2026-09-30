@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cd59-review-01",
+  "verdict": "block",
+  "frozen_candidate": "bcda200e81e7078c98f858849d009acaf6f30a7f1403e13ac9a855d0500c6967",
+  "agent_result": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd59-review-01-agent.json",
+  "findings": {
+    "P1-R1": "launcher.py:167-169,321-377: APPEND_SYSTEM.md from cwd .omp/.claude/.codex/.gemini and ~/.omp/agent is appended to the system prompt despite isolation (OMP reads it without disabledProviders filter); live repro with canaries (RPC get_state only), check_isolation reported ok. Fix: --append-system-prompt \"\" in isolation args (verified), add APPEND canaries to check and live probe; CW-18 role prompt replaces the empty value later.",
+    "P1-R2": "app.py:31/191/214: ?1002l on drag end disables all mouse tracking in tmux/xterm (tmux 3.4: std/btn/any all 0); after first drag no click focus, wheel or next drag while UI shows capture on.",
+    "P2-R3": "~/.omp/agent/PERSONALITY.md replaces the '# Personality' block; not isolated or detected (code evidence). Fix: personality: none in overlay or warn in check.",
+    "P3-R4": "role overlay replaces user's task.disabledAgents instead of union; user includeSkills/ignoredSkills survive; name collision with bundled agents disables bundled ones.",
+    "P3-R5": "start summary may print pending (race); product UI does not show isolation warning.",
+    "P3-R6": "omp config get runs synchronously on start (0.16 s; no group kill on timeout); lsp.json/dap.json paths outside isolation.",
+    "P3-R7": "future risk: CW-19 restart fork concurrent with the check thread."
+  },
+  "focus_verdicts": {
+    "isolation_completeness": "FAIL (R1, R3)",
+    "startup_check": "conditional pass (bounded, threaded, C-D45 cleanup, 0 residue) but 'ok' untrustworthy until R1",
+    "disabledAgents_overlay": "conditional pass (R4)",
+    "resize": "FAIL (R2)",
+    "tests": "meaningful; missing APPEND/PERSONALITY canaries; ?1002 checked only by byte presence"
+  },
+  "verification": "19 candidate files hash-match; backend 129 OK (27 skip); ui 357 OK; live probes 13 OK; home config dirs unchanged; no residue",
+  "observed_model": "opus (general-purpose inherited)"
+}

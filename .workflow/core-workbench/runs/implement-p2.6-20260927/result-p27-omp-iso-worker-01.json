@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-omp-iso-worker-01",
+  "status": "candidate_ready",
+  "candidate_id": "aa9ebdc9a19f7f5c03ad4578aa6db562d00795a5cac97199353999c73a6b9f21",
+  "after_snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-omp-iso-after.json",
+  "scope_audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-omp-iso.json",
+  "delta_backup": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-omp-iso-delta-backup/ (pre in p27-omp-iso-pre/)",
+  "changed_paths": {
+    "src/workbench/backend/launcher.py": "27d032aa4be9054a148bd653356355f7f13908df128a9041e252a654648ea043",
+    "src/workbench/backend/service.py": "51b4a93e7c18fd206ce01cb72c856fbb0fa6368da21dbb4e90c569cb708312c1",
+    "src/workbench/backend/cli.py": "61f0bc9bd8704adc666e7b912df41de0492a39ba66b8bb76b42a884e299794e5",
+    "omp_bridge/omp-isolation.yml": "5680201c7ae3a401b70d6686e2c6f352a495f8761d11e087c767560c3cb98047",
+    "omp_bridge/skills/README.md": "b2673694f40298b9b898d631b5115d73c48b7e02673965fe2c87a9aacecabcfa",
+    "tests/backend/test_paths_launcher.py": "be9330d43ed3e8793fc9f1613d1b4895efe4802b49fa23969b2c9ec419486697",
+    "tests/backend/test_omp_isolation.py": "79798a7d443f68740f29ecb0cd65eae36040694e308ab60165c254168e2a1bdf",
+    "tests/backend/live_omp_isolation_probe.py": "bd1ad23da65e95b3da5544c03044ce0ebba83df8f95bf59751918d27a1c3c23a"
+  },
+  "checks": [
+    [
+      "test_paths_launcher + test_omp_isolation",
+      "red->green",
+      "17 errors -> 27 OK"
+    ],
+    [
+      "tests/backend",
+      0,
+      "90 OK (27 live skipped)"
+    ],
+    [
+      "tests/contracts",
+      0,
+      "43"
+    ],
+    [
+      "tests/ui",
+      0,
+      "298"
+    ],
+    [
+      "tests/gates/g3_omp test_*.py",
+      1,
+      "113 OK, 1 error: test_tui_extension_fault_integration setUpClass 'Unexpected OMP version' (requires 18.2.10; installed 18.4.4; not launcher-related)"
+    ],
+    [
+      "live probe WB_LIVE_OMP=1 (OMP 18.4.4)",
+      0,
+      "4/4"
+    ],
+    [
+      "isolated command in real repo cwd (manager, worker)",
+      0,
+      "0 leaks, 0.38 s each"
+    ]
+  ],
+  "overlay": "argv: omp --config omp_bridge/omp-isolation.yml --config <data>/omp-isolation-<role>.yml --no-extensions <user omp args> --extension bridge.ts; static: disabledProviders 21, skills.enable* false (7), commands claude/opencode project false, mcp project off, memory off, memories off, advisor off, ttsr builtin rules off; per-role (0600): skills.customDirectories=[omp_bridge/skills], includeSkills when role patterns set (empty now), task.disabledAgents from .omp/agents (project + ancestors) and ~/.omp/agent/agents names, disabledProviders union with user's existing value (read via omp config get)",
+  "startup_check": "launcher.check_isolation: same command + --mode rpc --no-session --no-title, bridge env pointed at a non-existent socket with isolation-check token, get_state/get_available_commands only, 20 s bound, own session/group cleanup (WNOWAIT, TERM->KILL, reap); snapshot records result",
+  "model_calls": 0,
+  "follow_up": "G3 live gate tests pin OMP 18.2.10 -> version drift to CW-16 I-COMPAT",
+  "residue": "none (Root verified no omp processes, ~/.omp unchanged set of entries)",
+  "observed_model": "opus (general-purpose inherited)"
+}

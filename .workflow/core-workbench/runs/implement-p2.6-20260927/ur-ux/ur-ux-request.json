@@ -2,13 +2,80 @@
   "schema_version": 1,
   "checkpoint": "UR-UX",
   "decision": "C-D57",
-  "status": "awaiting_user_review",
+  "status": "direct-scroll follow-up integrated; awaiting user confirmation to close",
   "requested_at": "2026-09-30",
   "candidate": "671b05d3085701f0111e6440955fa6f4b9edc5ddcdba9f54c6d5af27a7c7351b (CW-06 integrated)",
   "guide": ".workflow/core-workbench/runs/implement-p2.6-20260927/ur-ux/UR-UX-GUIDE.md",
   "snapshots": ".workflow/core-workbench/runs/implement-p2.6-20260927/ur-ux/snapshots/ (19)",
-  "questions_for_user": ["checklist items 1-6 (layout, focus vs owner, keys, paste, detach/reattach, wording)", "Q1 background-job handoff hold dead end (G2 open item): options a/b/c", "Q2 shutdown/confirm_boot controls inside the UI"],
-  "blocks": ["CW-18"],
+  "questions_for_user": [
+    "checklist items 1-6 (layout, focus vs owner, keys, paste, detach/reattach, wording)",
+    "Q1 background-job handoff hold dead end (G2 open item): options a/b/c",
+    "Q2 shutdown/confirm_boot controls inside the UI"
+  ],
+  "blocks": [
+    "CW-18"
+  ],
   "feedback_routing": "layout/keys/wording -> CW-06 delta + independent test/review; behaviour/acceptance -> new decision and plan change",
-  "record_on_answer": "user quote and outcome appended here"
+  "record_on_answer": "user quote and outcome appended here",
+  "user_answer": {
+    "date": "2026-09-30",
+    "quote": "1. 3열 배치 보다는 상단에 omp 2개, 하단에 터미널 이렇게 해줘. 터미널은 길게 가로로 길게 봐야 하거든. 터미널도 스크롤이 되어야해.\n2. (a)\n3. 아니 cli로만 되도 될거 같아.",
+    "outcome": {
+      "layout": "top: manager + worker OMP side by side; bottom: host terminal full width (CW-06 delta)",
+      "scroll": "host terminal scrollback viewable in UI (CW-06 delta)",
+      "Q1": "(a) user keeps/regains control while wb-handoff is held (C-D58, CW-18)",
+      "Q2": "CLI-only shutdown/confirm_boot is sufficient (C-D58, CW-19)",
+      "other_checklist_items": "no change requested"
+    },
+    "decision_record": "docs/features/core-workbench/DECISIONS.md#C-D58",
+    "approval": ".workflow/core-workbench/runs/planning-p2.7-20260929/approval-amendment-b.json"
+  },
+  "delta_integration": ".workflow/core-workbench/runs/implement-p2.6-20260927/integration-p27-v-cw06-urux.json",
+  "snapshots_v2": ".workflow/core-workbench/runs/implement-p2.6-20260927/ur-ux/snapshots-v2/ (9)",
+  "follow_ups": [
+    {
+      "date": "2026-09-30",
+      "user": "스크롤 모드로 들어가서 하기 보다는 바로 되면 좋겠는데 그건 안되나?",
+      "options_offered": [
+        "마우스 휠 (Shift+드래그로 선택, Ctrl-] m 토글)",
+        "Shift+PgUp/PgDn",
+        "둘 다"
+      ],
+      "answer": "둘 다",
+      "routing": "CW-06 delta (keys/interaction level per C-D57); no plan change"
+    },
+    {
+      "date": "2026-09-30",
+      "user": "그리고 내부에서만 쓸 skills도 필요할거 같아. worker를 호출해서 명령을 내리는. order-worker 이런 식이면 어때?",
+      "routing": "CW-18 design input (manager->worker instruction path) on top of C-D59 isolation; investigation p27-omp-iso-explore-01 checks Workbench-only skill loading; semantics to confirm with user (approval gate C-AC-29)"
+    },
+    {
+      "date": "2026-09-30",
+      "user": "현재 herdr의 오른쪽 pane을 봐봐. 지금 멈췄어. 스크롤도 안되고. / 지금 내부에서 화면 이동이 안돼.",
+      "root_analysis": "herdr-server.log: 126x 'failed to encode terminal attach mouse wheel event' for pane w1:p2 from 13:36:33, right after a divider drag; resize delta emits ?1002h on drag and ?1002l on release, and real terminals/multiplexers treat 1000/1002/1003 as one tracking mode -> ?1002l disables mouse reporting entirely; pyte-based tests tracked modes separately. Manager pane blocked by OMP dev.autoqa consent modal (not a freeze of the UI). Isolation check ok (no skills/context loaded; the model listed ~/.agents files via tools)."
+    },
+    {
+      "date": "2026-09-30",
+      "user": "나는 herdr나 tmux에서 띄워서 사용할 가능성이 높아. 스크롤이 가능해야해.",
+      "decision": "requirement: scrolling (wheel + keyboard fallback) must work inside herdr and tmux; verified live in an isolated tmux server (-L) and in a temporary herdr pane"
+    },
+    {
+      "date": "2026-09-30",
+      "question": "herdr 임시 pane 검증 허용?",
+      "answer": "임시 pane 허용 (Recommended)",
+      "scope": "create a temporary pane/workspace in the user's herdr server, run the product UI there, close it afterwards; never input to existing panes/sessions"
+    },
+    {
+      "date": "2026-09-30",
+      "questions": [
+        "PERSONALITY.md 차단 방식",
+        "TITLE_SYSTEM.md / --no-title"
+      ],
+      "answers": {
+        "personality": "OMP 기본 유지 + 경고 (Recommended)",
+        "title": "--no-title 적용 (Recommended)"
+      },
+      "routing": "C-D59 detail: do not set personality: none (keep OMP default Personality/Tone/Reasoning Format; check warns if PERSONALITY.md exists); add --no-title to isolation args"
+    }
+  ]
 }

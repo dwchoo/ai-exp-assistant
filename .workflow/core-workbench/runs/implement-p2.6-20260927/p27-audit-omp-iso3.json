@@ -1,0 +1,1 @@
+{"changed":["omp_bridge/omp-isolation.yml","src/workbench/backend/launcher.py","src/workbench/backend/service.py","tests/backend/live_omp_isolation_probe.py","tests/backend/test_omp_isolation.py","tests/backend/test_paths_launcher.py"],"comparable":true,"index_changed":[],"outside_scope":[]}
