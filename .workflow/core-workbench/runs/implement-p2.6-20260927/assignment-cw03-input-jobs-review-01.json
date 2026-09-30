@@ -1,0 +1,67 @@
+{
+  "feature_id": "core-workbench",
+  "ticket_id": "CW-03",
+  "attempt_id": "cw03-input-jobs-review-01",
+  "invocation": "cw03-input-jobs-review-01",
+  "approved_bundle_digest": "64bcf577a30e7c6bbff3e4e775f8e6c17ca212ce3bf79b5bc5be31196a792b07",
+  "actual_workspace": "/home/dwchoo/ai-exp-assistant",
+  "baseline_snapshot": "candidate 3c8ea538feb8752f5e3d913bb9efade1c872ccdb084a12f9cd3b9ff5ac08e13f",
+  "candidate_snapshot": "candidate 93763c65d189184706b0b9bc6e21fdc4bccb5067d70369fd101e9ae9da044182",
+  "effective_write_capability": "read-only review; no mutation lease",
+  "acceptance_ids": [
+    "C-AC-08",
+    "C-AC-26"
+  ],
+  "relevant_contracts": [
+    "PLAN p2.6 G2-INPUT-JOBS runtime",
+    "CW-03 input return and jobs matrix",
+    "ADR-0002 input-return barrier",
+    "C-D55 managed descendants only"
+  ],
+  "review_paths": [
+    "src/workbench/terminal/shell_g2/prototype.py",
+    "tests/gates/g2_shell/live_input_jobs_probe.py",
+    "tests/gates/g2_shell/test_live_input_jobs_predicates.py"
+  ],
+  "prohibited_write_paths": [
+    "**"
+  ],
+  "resource_claims": [],
+  "mutation_owner": "none",
+  "requirements_identity": "e0ea9ef4ea1457ea2b76df7b53a7ccb17f48555652a81886978ec1bc3fe6d0e6",
+  "requirements_path": ".workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw03.json",
+  "evidence_paths": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/check-input-jobs-fixture-final-observed.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/check-input-jobs-runtime-final-observed.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/gate-cw03-input-jobs-runtime-result.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/postworker-scope-audit.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/posttest-scope-audit.json"
+  ],
+  "known_context": "The focused predicate suite passes 4 tests and the live Bash/dash probe passes 24 cases. A broader legacy suite has 11 failures that reproduced against the HEAD version of prototype.py and was classified as baseline by the worker; independently challenge that classification only if relevant to this delta. The formal CW-03 gate remains incomplete for five unrelated gate items.",
+  "reserved_budget": {
+    "total": 1,
+    "role:reviewer": 1,
+    "unit:V-CW-03": 1
+  },
+  "stop_conditions": [
+    "Any write would be required",
+    "Candidate differs from 93763c65d189184706b0b9bc6e21fdc4bccb5067d70369fd101e9ae9da044182",
+    "Review scope requires an unresolved product decision"
+  ],
+  "configured_model": "gpt-6-sol",
+  "configured_effort": "high",
+  "host_observed_model": "unverified",
+  "host_observed_effort": "unverified",
+  "routing": {
+    "planned_role": "reviewer",
+    "selected_role": "reviewer",
+    "reason_codes": [
+      "mandatory_fresh_review"
+    ],
+    "evidence_refs": [
+      "workflow-contract section 7",
+      "change-verification skill"
+    ]
+  },
+  "task": "Perform a fresh, read-only, fault-finding review of the frozen G2-INPUT-JOBS candidate. Inspect the three review paths in the context of the approved CW-03 contract. Look for false admission, stale or spoofed readiness, ordering mistakes, shell-specific behavior, test/probe oracle weaknesses, cleanup leaks, and accidental scope expansion. Verify that the evidence actually supports only G2-INPUT-JOBS and does not overclaim CW-03. Report findings ordered by severity with exact file/line references. If there are no material findings, state that explicitly and list residual risks or coverage gaps. Do not edit any file."
+}

@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "invocation": "cw10-review-fix-test-01",
+  "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/workflow /tmp/cw02-g1-venv/bin/python tests/workflow/live_workflow_independent.py --actual-omp",
+  "exit_code": 0,
+  "status": "passed",
+  "omp_version": "omp/18.2.10",
+  "task_id": "a9fba8d8-4c2e-4c37-807b-b7a4d6891658",
+  "run_id": "a36ecf32-a936-46f8-bd82-69bc7e2c4f1c",
+  "omp_pids": {"manager": 83744, "worker": 83746},
+  "responses": [
+    {"stage": "execute", "decision": "execute", "task_id": "a9fba8d8-4c2e-4c37-807b-b7a4d6891658", "revision": 1, "run_id": "a36ecf32-a936-46f8-bd82-69bc7e2c4f1c", "message_id": "901e0b2a-f102-481d-a1b2-1d3912a8b511", "delivery_attempt_id": "66ae944f-9e68-4fd3-aae0-228c10f792e2", "session_id": "01a0e5c1-f0c9-712c-aadf-3974f2fe04a7", "session_generation": 1, "response_id": "8847d237-317e-42ba-90dc-2017c989cb7b", "assistant_event_sequence": 4, "delivery_event_sequence": 6, "source": "omp_assistant_response"},
+    {"stage": "analysis", "decision": "success", "task_id": "a9fba8d8-4c2e-4c37-807b-b7a4d6891658", "revision": 1, "run_id": "a36ecf32-a936-46f8-bd82-69bc7e2c4f1c", "message_id": "162f8861-ee7a-491c-a1db-b22012c00c36", "delivery_attempt_id": "ca0db4ef-ed22-4360-abf8-2d09a19278f1", "session_id": "01a0e5c1-f0c9-712c-aadf-3974f2fe04a7", "session_generation": 1, "response_id": "9e57155a-8e93-4d0f-bb79-e69259c863fb", "assistant_event_sequence": 10, "delivery_event_sequence": 12, "source": "omp_assistant_response"}
+  ],
+  "response_ids_distinct": true,
+  "exact_message_and_delivery_binding_checked_against_repository": true,
+  "shell_events": ["sent", "accepted", "started", "ended"],
+  "exit_status": 0,
+  "judgment": "success",
+  "commit_verified": true,
+  "source_status_unchanged": true,
+  "secret_absent_from_all_files": true,
+  "omp_children_remaining": 0,
+  "omp_cwd_processes_remaining": {"manager": [], "worker": []},
+  "provider_threads_remaining": 0,
+  "bridge_socket_removed": true
+}

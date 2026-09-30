@@ -1,0 +1,10 @@
+{
+  "requirements": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw03.json",
+  "candidate": "be8d060e1c2ac170a64c5f91adbbe88a61b4c53048092d30aca704a435b242f7",
+  "checks": [
+    "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/check-input-jobs-current-runtime-observed.json",
+    "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/check-takeover-current-runtime-observed.json",
+    "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/check-hook-env-current-runtime-observed.json",
+    "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/check-launch-current-runtime-observed.json"
+  ]
+}

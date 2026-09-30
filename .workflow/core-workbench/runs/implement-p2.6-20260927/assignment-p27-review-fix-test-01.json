@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-review-fix-test-01",
+  "role": "test_designer",
+  "unit": "V-CW-17-p2.7",
+  "candidate": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-review-fix-after.json",
+    "candidate_id": "37233705b980db4ee4a875fd826c0bca59c11a53c7304c1610876f05323e1088"
+  },
+  "checkpoint_ref": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-review-fix-test-checkpoint.json",
+  "objective": "Independently verify review fixes P2-1..P2-4 (result-p27-review-cw17-01.json) without trusting worker tests.",
+  "required_tests": [
+    "P2-1: long main (>60s) spawning many double-fork/setsid orphans over time: supervisor zombie count stays bounded throughout; descendants still tracked; lifecycle not complete until live descendants exit; no kill by elapsed time",
+    "P2-2: PID/session reuse after OMP exit (simulate foreign process whose pid==old OMP sid with different start time; and a foreign session member) -> close/shutdown sends zero signals to foreign processes, still cleans own orphaned session members; never killpg by bare number",
+    "P2-3: SigIgn/SigBlk of OMP, host shell, user-launched child, experiment and its descendants show default SIGPIPE/SIGXFSZ; `yes | head -1` terminates promptly in shell and in an experiment",
+    "P2-4: 2 MiB paste into raw user foreground program via real entrypoint/ui_v1: all bytes delivered in order, backend responsive (status/snapshot/OMP output) with bounded latency; foreground change mid-paste -> remaining input handled per existing contract with visible reason; many processes on host (spawn ~500 sleepers owned by test) do not reintroduce stalls",
+    "Regressions: all suites (terminal, g2_shell PYTHONPATH=src:., canonical, backend, contracts, lifecycle, g4 PYTHONPATH=src:., workflow, observation)"
+  ],
+  "allowed_write_paths": [
+    "tests/terminal/test_*_independent_p27c.py",
+    "tests/backend/test_*_independent_p27c.py"
+  ],
+  "constraints": [
+    "production frozen; no docs/workflow edits; no tmux/herdr; no credentials; exact-identity cleanup; leaks fail; do not weaken tests"
+  ],
+  "report": "checks table first; per-requirement verdicts; files added; frozen hashes start=end; residue."
+}

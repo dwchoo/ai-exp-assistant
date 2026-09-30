@@ -1,0 +1,30 @@
+{
+  "invocation": "cw15-admission-test-01",
+  "outcome": "complete",
+  "candidate_ready": true,
+  "base_candidate": "c3e42cd9d1f0bedd38cc35dfde7a9318644148e34837d11e95407bfb880f15a3",
+  "changed_paths": ["tests/lifecycle/test_lifecycle_runtime.py", "graphify-out/**"],
+  "focused": {
+    "ended_run": "tick held; pause dispatch 0, review 0, command send 0, lifecycle journal unchanged, durable delivery none",
+    "metadata_failure": "two ticks produced pause/review/send 0 and unchanged journal; explicit durable success allowed next tick pause/review 1 each, send 0",
+    "positive_delivery": "clean-Git G3/Pause/TaskMailbox exactly once; duplicate/reconnect additional delivery 0",
+    "shutdown": "completed and incomplete repeated calls remain at-most-once"
+  },
+  "checks": {
+    "lifecycle": "17 tests passed",
+    "pause": "122 tests passed",
+    "recovery": "26 tests passed",
+    "bridge": "22 tests passed",
+    "terminal": "10 tests passed",
+    "storage": "33 tests passed",
+    "observation": "95 tests passed",
+    "workflow": "44 tests passed",
+    "g4": "8 tests passed",
+    "graphify_update": "passed",
+    "residue": "none observed"
+  },
+  "production_hashes": "all five frozen production files match snapshot",
+  "test_sha256": "6847723566411ffaf6a3d63eebabbb5085d161d2ce8e685b4147e1c5aafd376e",
+  "pending_environment": "External actual OMP and real reboot remain unexecuted.",
+  "mutation_owner": "/root/cw12_post_review_test"
+}

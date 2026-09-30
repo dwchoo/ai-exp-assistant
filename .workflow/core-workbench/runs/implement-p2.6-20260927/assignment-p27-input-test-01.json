@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-input-test-01",
+  "role": "test_designer",
+  "unit": "V-CW-07-p2.7-input",
+  "authority": "p2.7a approval; F-CW17-INPUT-01 correction verification",
+  "candidate": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-input-fix-02-after.json",
+    "candidate_id": "04fb52ccf0e69c5a7d80a105fad474b79ce174c61b858d0bc50e5eb7f067292f"
+  },
+  "checkpoint_ref": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-input-test-checkpoint.json",
+  "objective": "Independently verify the manual-input boundary correction (attempts 01+02) against C-AC-08/C-AC-26/C-AC-32 and Root adjudication, and that automation holds were not weakened.",
+  "required_tests": [
+    "Manual input (user owner) through real PersistentShell and through the real backend/ui_v1 path: editing keys, ESC sequences, Ctrl-C/D/Z/U at the prompt and inside user-launched foreground programs (cat, python3 -q, sleep, a program that spawns its own child pgrp e.g. `sh -c 'sleep 30'`), then submitting further lines; bash and dash.",
+    "Automation holds NOT weakened: after any editing/control byte and while the line state is uncertain, automatic submit/can_dispatch and claim_manager must still be refused with reasons; wb-handoff typed with editing keys must not be accepted as a clean handoff; only the authenticated READY/CONTROL_READY paths clear state. No timer/output-based reset.",
+    "Unobservable/foreign target: foreground group outside the shell session or unobservable -> manual input held with visible reason; control channel loss -> held; parent identity drift -> held.",
+    "Gap1: wb-handoff rejected by incompatible hook/trap -> subsequent authenticated READY -> manual input to the live prompt works, automation still held.",
+    "Gap2: confirmed takeover of an automation-launched foreground run: editing/control bytes reach the experiment, lifecycle does not become unknown, confirmed_target persists; experiment keeps running; return path (input barrier -> control_returned -> manual prompt -> wb-handoff -> claim -> new submit) still works and old requests are never replayed.",
+    "Temp-dir residue: after a normal confirmed shutdown of backend and of PersistentShell, no /tmp/cw03-g2-* (shell-init) directory remains; report whether the per-run leftover observed by the worker comes from SIGKILL-ed backend tests only.",
+    "Regressions: tests/terminal, tests/gates/g2_shell (discover + canonical matrix), tests/backend, tests/contracts, tests/lifecycle, tests/gates/g4_lifetime."
+  ],
+  "allowed_write_paths": [
+    "tests/terminal/test_*_independent.py",
+    "tests/gates/g2_shell/test_*_independent_p27.py"
+  ],
+  "constraints": [
+    "Independent test-only owner; production frozen; no docs/workflow/ledger edits; no tmux/herdr; no credentials; exact-identity cleanup; leaks fail."
+  ],
+  "report": "candidate_ready or needs_reroute with evidence; added cases/counts; per-requirement verdict; frozen hashes of changed production files start=end; residue."
+}

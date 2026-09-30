@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "invocation": "cw15-worker-01",
+  "role": "worker_senior",
+  "unit": "V-CW-15-p2.6-current",
+  "authority": "User $implement docs/features/core-workbench request; approved PLAN p2.6 CW-15 and formally accepted dependencies CW-06/CW-08/CW-11/CW-12/CW-13/CW-14",
+  "objective": "Implement the minimal end-to-end runtime/application coordinator for detach/reconnect, restart reconciliation, model-error hold/recheck, takeover state, explicit full shutdown, and reboot confirmation without automatic replay.",
+  "candidate": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw15-base.json",
+    "candidate_id": "09d7bba0b277dd214fe6576173255ee099d83ba4387e24eefff6b4db13520dd3"
+  },
+  "dependencies": [
+    "CW-05 separated frontend/backend lifetime and src/workbench/runtime/g4.py ports",
+    "CW-06 three-area UI/direct OMP input contracts",
+    "CW-08 mailbox OMP session/unknown-state and no-replay boundary",
+    "CW-11 serialized review/check scheduling and last-check evidence",
+    "CW-12 PauseCoordinator durable pause/cancel/authority/run-permit semantics",
+    "CW-13 RecoveryCoordinator full-termination, retry, revision and exact target-liveness decisions",
+    "CW-14 RawLogStore and independent MetadataAdmissionGate"
+  ],
+  "required_behavior": [
+    "Detach releases only the frontend lease: both OMPs, backend, experiment process/PTY drain and raw observation remain alive; active automation checks may continue, paused automation schedules no new model check, and reconnect creates no duplicate run or command replay.",
+    "Backend/agent restart reconciles durable identity/session/owner/control/takeover/command-delivery/pause/cancel state against fresh process evidence. Unknown, drifted or unverifiable state is visible and cannot auto-replay or auto-start.",
+    "Model/auth/API error holds only model-dependent decisions, preserves experiment and raw observation, records last successful/failed check time, and requires an explicit successful recheck before automation resumes.",
+    "Takeover request, confirmation, current user owner, control mode and delivered-command state survive detach/reconnect. No command is transmitted until explicit current-session handoff confirmation; stale owner epoch/session requests never replay.",
+    "Explicit full shutdown is confirmation-gated, closes new admission, requests bounded normal stop before any allowed force path, drains observation, checks every managed target/descendant, preserves evidence, and reports unresolved survivors instead of claiming completion.",
+    "A boot marker change blocks new experiments until explicit user confirmation after reconciliation; no real host reboot is required for the fixture. Metadata durable failure blocks only new automatic runs and explicit durable success reopens; raw-log failure/cap never stops the run/drain.",
+    "Use trustworthy target identity/ownership/liveness rather than PID existence alone and never clear user pause/cancel/revocation during recovery."
+  ],
+  "runtime_tests": [
+    "Use process-backed bounded fixtures for detach/reconnect continuity, agent/backend restart with child alive/dead/unknown, no duplicate launch/replay, model error/recheck, takeover preservation, boot-marker confirmation, and full shutdown survivor reporting.",
+    "Exercise PTY/pipe draining and cleanup; all spawned processes must be accounted for and terminated by test teardown.",
+    "Cover all P-C-AC-15/16/17/18/22/23 at runtime level and run predecessor regressions in proportion to changed seams."
+  ],
+  "allowed_write_paths": [
+    "src/workbench/runtime/**",
+    "src/workbench/app/**",
+    "tests/lifecycle/**",
+    "graphify-out/**"
+  ],
+  "constraints": [
+    "One mutation owner. Preserve predecessor public contracts and do not edit their packages, docs, PLAN, state, workflow ledger or approval.",
+    "Prefer a small coordinator over duplicating policy logic; inject ports/adapters and keep Linux-specific process evidence isolated. No tmux dependency, real reboot, live external OMP mutation, Docker, delegation, commit, publish or deploy.",
+    "Use apply_patch and run graphify update after code changes."
+  ],
+  "report": "Return candidate_ready/needs_reroute, architecture/public API and dependency wiring, runtime evidence for each acceptance ID, exact suites/counts and residue check, changed paths/hashes, unsupported/pending cases and CW-16 obligations."
+}

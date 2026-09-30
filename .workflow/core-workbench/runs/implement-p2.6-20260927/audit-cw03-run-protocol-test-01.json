@@ -1,0 +1,5 @@
+{
+  "before": ".workflow/core-workbench/runs/implement-p2.6-20260927/cw03-run-protocol-candidate.json",
+  "after": ".workflow/core-workbench/runs/implement-p2.6-20260927/cw03-run-protocol-test-candidate.json",
+  "allowed": ["tests/gates/g2_shell/test_common_run_protocol_independent.py"]
+}

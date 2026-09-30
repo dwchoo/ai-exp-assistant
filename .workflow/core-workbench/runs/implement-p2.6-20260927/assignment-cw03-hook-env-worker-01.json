@@ -1,0 +1,25 @@
+{
+  "feature_id": "core-workbench", "ticket_id": "CW-03", "attempt_id": "cw03-hook-env-worker-01", "invocation": "cw03-hook-env-worker-01",
+  "approved_bundle_digest": "64bcf577a30e7c6bbff3e4e775f8e6c17ca212ce3bf79b5bc5be31196a792b07",
+  "actual_workspace": "/home/dwchoo/ai-exp-assistant", "baseline_snapshot": "candidate 3aea53b58b0c08dc2e7df4f1620264f85cc51afab7bbd06da18be3d9559feaec",
+  "effective_write_capability": "shared physical checkout; serial mutation lease", "acceptance_ids": ["C-AC-26", "C-AC-32"], "gate_item": "G2-HOOK-ENV", "required_evidence_level": "runtime",
+  "allowed_write_paths": ["src/workbench/terminal/shell_g2/**", "tests/gates/g2_shell/live_env_launch_probe.py", "tests/gates/g2_shell/test_live_env_launch_predicates.py", "tests/gates/g2_shell/test_live_hook_env_predicates.py", "tests/gates/g2_shell/live_hook_env_probe.py"],
+  "prohibited_paths": ["docs/**", ".workflow/**", ".codex/**", ".agents/**", "graphify-out/**"],
+  "resource_claims": ["host:shell-fixture exclusive"], "mutation_owner": "worker_senior cw03-hook-env-worker-01",
+  "checkpoint_ref": ".workflow/core-workbench/runs/implement-p2.6-20260927/prehook-env-checkpoint.json",
+  "requirements_identity": "e0ea9ef4ea1457ea2b76df7b53a7ccb17f48555652a81886978ec1bc3fe6d0e6", "requirements_path": ".workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw03.json",
+  "required_matrix": [
+    "user-prepared cwd, PATH and exported environment are inherited by the experiment while child changes do not propagate back",
+    "compatible prompt hook and trap state are preserved/restored; incompatible prompt hook or CHLD trap holds before experiment start",
+    "an attributable observable manual background job/residue holds automatic dispatch",
+    "a pre-supervisor daemon outside the supported observation boundary is reported unknown and never converted to complete or auto-killed",
+    "after user cleanup, the same parent can be rechecked and the normal supported case can proceed",
+    "conda-specific validation remains excluded by C-D55 and delegated cgroup is not required"
+  ],
+  "exact_checks": ["PYTHONDONTWRITEBYTECODE=1 python3 -m unittest tests.gates.g2_shell.test_live_env_launch_predicates -v", "Run any focused new G2-HOOK-ENV predicate suite and Bash/dash runtime probe", "PYTHONDONTWRITEBYTECODE=1 python3 tests/gates/g2_shell/live_env_launch_probe.py", "git diff --check -- src/workbench/terminal/shell_g2 tests/gates/g2_shell"],
+  "reserved_budget": {"total": 1, "role:worker_senior": 1, "unit:V-CW-03": 1},
+  "stop_conditions": ["A product decision beyond C-D55 is required", "The solution would claim discovery of every manual daemon", "The solution would auto-kill unattributed processes or turn user confirmation into completion evidence", "A write outside allowed paths is required", "A runtime probe cannot be bounded or cleaned up"],
+  "configured_model": "gpt-6-sol", "configured_effort": "high", "host_observed_model": "unverified", "host_observed_effort": "unverified",
+  "routing": {"planned_role": "worker_senior", "selected_role": "worker_senior", "reason_codes": ["manual_residue_unknown_boundary", "coupled_shell_environment"], "evidence_refs": ["docs/features/core-workbench/tickets/CW-03.md", "docs/features/core-workbench/DECISION-2026-09-26.md", "tests/gates/g2_shell/live_env_launch_probe.py"]},
+  "task": "Close only the G2-HOOK-ENV slice. Reuse the current env/launch matrix and first reproduce the missing observable-manual-residue/unknown behavior. Implement the smallest focused runtime/probe and control delta necessary. A known attributable manual background job or residue must hold dispatch; an escaped/pre-supervisor daemon outside the supported observation boundary must remain explicit unknown, must not be auto-killed, and must not be treated as complete from user confirmation. After explicit cleanup and recheck, the same parent should support normal handoff. Preserve cwd/PATH/export inheritance, child non-propagation, compatible hook/trap restoration, incompatible hook/trap hold, Bash/dash parity, no conda-specific requirement, and no cgroup requirement. Include negative controls that reject always-allow and always-deny candidates, bounded cleanup of only owned fixture processes, exact exits, and remaining unknowns. Do not update graphify; Root owns it."
+}

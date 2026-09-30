@@ -1,0 +1,9 @@
+{
+  "invocation":"cw11-positive-incarnation-test-01",
+  "outcome":"complete",
+  "candidate_ready":true,
+  "coverage":"Prior public-event positivity failures, None/active constructor, first activation, idempotent A, A-None-A monotonicity, old/new token exactness, late-first-bind, source activation, ticket/schedule/exit-incarnation, concurrency and retry.",
+  "checks":{"observation":"84/84 passed","workflow":"44/44 passed","bridge":"18/18 passed","contracts":"20/20 passed","actual_omp_18_2_10":"60.0-second review, 13 wakes, 15 provider requests, real exit in 0.09 seconds, secret absent, zero residue"},
+  "changed_files":["tests/observation/test_exit_incarnation_independent.py"],
+  "graphify_updated":true
+}

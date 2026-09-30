@@ -1,0 +1,27 @@
+{
+  "invocation": "cw12-fence-protocol-oracle-01",
+  "role": "oracle_senior",
+  "unit": "V-CW-12-p2.6-current",
+  "objective": "Give a read-only minimal protocol design that closes the remaining CW-12 fence generation, action latency, run binding, stale cancellation, and exact-peer transport races.",
+  "evidence": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-lockcycle-review-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-lockcycle-correction-01.json",
+    "src/workbench/policy/pause_automation/controller.py",
+    "src/workbench/observation/worker_review.py",
+    "src/workbench/ipc/bridge_g3/**"
+  ],
+  "questions": [
+    "Specify the smallest ReviewAdmissionFence state machine with monotonic generation/run identity so close never waits for an in-flight action and a stale resume/open cannot override any later pause/bind/cancel close.",
+    "Define admission linearization precisely: dispatch admitted before close may be in flight, but close must become visible immediately, permit manager abort, and block all later admissions without holding the fence lock through action.",
+    "Define how SerializedReviewAdmission must compare ticket/active run with the coordinator-bound fence run so bind_run(B) cannot authorize run A and stale A cancellation cannot close B.",
+    "Determine the minimal G3 bridge request API and locking/pinning needed to atomically validate expected sessionId/generation at the actual transport selection/enqueue boundary, eliminating sequential-probe TOCTOU.",
+    "Assess whether the current arbitrary dispatch_automatic(callback) API can ever guarantee exact-peer delivery; if not, state the minimal compatible API split/wrapper and migration needed.",
+    "List invariants and deterministic interleavings the worker/test/reviewer must verify."
+  ],
+  "constraints": [
+    "Read-only; do not edit files or run long live probes.",
+    "Stay within CW12 and existing G3 integration; do not broaden into CW15 recovery or Phase 2.",
+    "Prefer the smallest safe design and explicitly call out impossible guarantees."
+  ],
+  "report": ["recommended protocol", "lock/linearization table", "minimal API changes", "required tests", "risks/non-goals"]
+}

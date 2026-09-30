@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "id": "root-adjudication-p27-cw06-flood",
+  "source": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw06-rerun-test-03-agent.json",
+  "observation_root": "src/workbench/backend/ui_server.py:180-186 (CW-17): on outbound overflow `_send` clears the whole outbound buffer, which can contain the unsent tail of a partially written frame, then appends CLOSING -> the client decoder sees a corrupt stream (bad magic) and cannot read the slow_client reason. Also frames queued after closing=True are still appended while the socket is open.",
+  "decisions": {
+    "backend_fix": "Authorized bounded CW-17 defect fix (not a behaviour change: ui_v1 already specifies CLOSING slow_client and connection-only close): preserve the unsent remainder of the in-flight frame, drop only whole unsent frames, append CLOSING, and send nothing after CLOSING. Requires tests/backend + tests/contracts regression and delta review of the CW-17 change.",
+    "ui": "Diagnose UI intake vs backend output under flood with measurements (bytes/s produced by backend, bytes/s drained by UI, loop time split intake/feed/draw). Fix clear UI-side intake inefficiencies so draining is not starved by feeding/drawing (e.g. intake budget independent from feed budget, draw rate limit). P3-1: Esc-closing help must redraw immediately.",
+    "residual_policy": "If after these fixes a sustained flood still exceeds the UI's intake and the backend detaches the UI with slow_client (reason now visible, reattach works), record it as a known limitation for UR-UX; backend coalescing/backpressure instead of detach is a product-behaviour question to put to the user at UR-UX, not decided here."
+  },
+  "stop_if": "a ui_v1 contract change or backend policy change (coalescing/backpressure) is required to pass -> return with measurements and options"
+}

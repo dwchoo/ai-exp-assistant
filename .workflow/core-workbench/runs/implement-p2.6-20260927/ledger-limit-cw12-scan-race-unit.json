@@ -1,0 +1,23 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 887,
+  "event": {
+    "id": "limit-cw12-scan-race-unit-20260928",
+    "kind": "limit",
+    "data": {
+      "bucket": "unit:V-CW-12-p2.6-current",
+      "origin": "operating",
+      "value": 33,
+      "authority": "Approved PLAN p2.6 CW-12, fresh delta review findings, workflow-contract section 8, and current $implement authorization",
+      "reason": "One bounded pre-pause baseline/ignored-file/fd-scan correction, independent delta verification, and fresh delta review",
+      "decision_owner": "Root",
+      "remaining_work_estimate": 3,
+      "expected_previous": {
+        "value": 30,
+        "authority": "Approved PLAN p2.6 CW-12, fresh final review findings, workflow-contract section 8, and current $implement authorization",
+        "reason": "One bounded reconciliation correction, independent delta verification, and fresh delta review for remaining C-AC-33 findings"
+      },
+      "scope_basis": null
+    }
+  }
+}

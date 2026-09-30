@@ -1,0 +1,19 @@
+test_tui_extension_fault_integration (unittest.loader._FailedTest.test_tui_extension_fault_integration) ... ERROR
+
+======================================================================
+ERROR: test_tui_extension_fault_integration (unittest.loader._FailedTest.test_tui_extension_fault_integration)
+----------------------------------------------------------------------
+ImportError: Failed to import test module: test_tui_extension_fault_integration
+Traceback (most recent call last):
+  File "/usr/lib/python3.12/unittest/loader.py", line 137, in loadTestsFromName
+    module = __import__(module_name)
+             ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dwchoo/ai-exp-assistant/tests/gates/g3_omp/test_tui_extension_fault_integration.py", line 15, in <module>
+    import live_tui_extension_fault_probe as probe
+ModuleNotFoundError: No module named 'live_tui_extension_fault_probe'
+
+
+----------------------------------------------------------------------
+Ran 1 test in 0.000s
+
+FAILED (errors=1)

@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "invocation": "cw13-force-liveness-test-01",
+  "role": "test_designer",
+  "unit": "V-CW-13-p2.6-current",
+  "authority": "User $implement docs/features/core-workbench request; approved PLAN p2.6 CW-13",
+  "objective": "Independently verify the frozen coherent-lifecycle and TargetLiveness force correction.",
+  "candidate": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw13-force-liveness-correction.json",
+    "candidate_id": "c5eb7a731daf74f87ee38974c4171d946c22849f28a7ccce9213dff282db7f5b"
+  },
+  "required_tests": [
+    "Re-run all preserved no-stop, stale proof, inconsistent lifecycle and post-force cases; unknown/exited/exit_confirmed true or target_alive false/None must have no force step.",
+    "Validate TargetLiveness exact target and observation sequence binding, bool/None validation, target drift, stale cached sequence, ownership and delegated target changes.",
+    "Preserve the positive main-return case: exit_status known while managed execution remains running/exit_confirmed false with descendants and exact target freshly alive after ordinary stop may return force_requested.",
+    "Verify force cannot open any recovery/revision mutation/relaunch path until a strictly later full managed termination observation with descendants clear and input/control returned.",
+    "Run full recovery and predecessor suites; production must remain frozen."
+  ],
+  "allowed_write_paths": ["tests/policy/recovery_manager/**", "graphify-out/**"],
+  "constraints": [
+    "Independent test-only owner; no production or workflow/docs/PLAN/state edits.",
+    "Use apply_patch and update graphify after test edits; no delegation, commit, publish, deploy, Docker, or live signal actions."
+  ],
+  "report": "Return candidate_ready/needs_reroute, exact cases/counts, production hash, acceptance mapping and CW-15 physical observation risk."
+}

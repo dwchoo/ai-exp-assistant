@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "invocation": "CW03-P25-INPUT-SIGNAL-ORACLE-001",
+  "candidate_probe_sha256": "ba82ba186f9bffcd19595b0a7d55c681cbe96e71242dfbd9686dd11ed22d2f14",
+  "outcome": "actionable",
+  "findings": [
+    "Bash native SIGQUIT behavior permits the script tail; the probe incorrectly applied the approved Ctrl-C no-tail predicate to SIGQUIT.",
+    "dash timeout is explained by a probe circular wait: the generic waitpid path waits for the double-fork fixture SIGUSR2 release that simple_case never sends.",
+    "Keep the shared foreground process group for the minimum experiment; separate process groups only if observer stop or job-control conflict is reproduced.",
+    "Repeated waitpid drain must treat positive PIDs as successful reap, 0 as still active, and stopped/continued states separately; cleanup after a probe deadline does not imply natural completion."
+  ],
+  "user_decision_required": false,
+  "conditional_decision": "A user decision is required only if SIGQUIT is newly defined to force Bash script abort and no-tail behavior.",
+  "next_experiment": "Correct fixture release versus generic reap, align SIGQUIT predicates with native Bash/dash behavior, then add bounded TSTP/CONT and start/parent-WAIT signal observations."
+}

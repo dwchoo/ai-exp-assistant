@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw06-fix-worker-02",
+  "status": "candidate_ready",
+  "candidate_id": "a4115c98ca068759c9a8e25d344d4e491b927b22aad013fd182fadd582010cf2",
+  "after_snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-cw06-fix-after.json",
+  "scope_audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-cw06-fix.json (no outside-scope)",
+  "delta_backup": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-cw06-fix-delta-backup/",
+  "changed_paths": {"src/workbench/ui/product/input.py": "e3b87b1c40772f5705ebb45456d5af41cbd7d00a1e7b6de8f4cf725c62efad61", "src/workbench/ui/product/model.py": "2892ae20a5baf0330ae506abaff5dd67d0ebcda63c96b95d3aff335d53857659", "tests/ui/test_product_model.py": "65cca5f3c04468649ece0b9f38b89f439b08f17cc0c9c4f245f189214e256ead"},
+  "root_follow_up": "Same invocation, Root message: F1 completeness for sh (dash) host shell (strip unless 2004h observed in current generation).",
+  "checks": [["tests/ui first run after follow-up", 1, "89 run, 1 fail, failure text not captured (14.3s)"], ["tests/ui x3 reruns", 0, "89 OK"], ["tests/contracts", 0, "43 OK"], ["tests/gates/g1_vt", 0, "63 OK"]],
+  "fixes": {"F1": "per-pane last DECSET/DECRST 2004 tri-state (chunk-boundary safe); strip on observed l; host_shell with backend shell kind sh strips unless 2004h observed; reset on generation change", "F2": "prefix + paste introducer cancels prefix; paste parsed normally", "F3": "prefix + UTF-8 lead consumes whole sequence", "F4": "Paste/PasteRejected handled before help close; notice always", "F5": "notice derived from takeover_requested/input_owner", "F6-ui": "refusal notice appends (held: ...) from result/current shell state"},
+  "gaps": ["one unidentified tests/ui failure on first run (timing suspected, unconfirmed)", "no real sh backend integration test", "no live re-verification"],
+  "observed_model": "sonnet (wb-worker definition; host metadata unverified)"
+}

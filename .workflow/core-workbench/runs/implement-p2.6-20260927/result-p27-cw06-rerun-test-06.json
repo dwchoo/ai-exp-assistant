@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw06-rerun-test-06",
+  "status": "needs_reroute",
+  "frozen_candidate": "3a0c54ac14368a54c4cc9ae473c1d8fa1639ffed2173f89f4dfa6fcba3491782",
+  "candidate_after_tests": "53f3870c997a4f55132269a2a25c08bd5ce991e23aebdfb0f495033c9e2128fe",
+  "agent_result": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw06-rerun-test-06-agent.json",
+  "scope_audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-cw06-rerun6.json",
+  "added_tests": {"tests/ui/test_product_replay_independent_p27h.py": "55b4c533e10fc93099ca0e8451e7df1a1076ba0e5a29a251e6f639744a81a02b"},
+  "verdicts": {"replay independent": "pass (>=272 KiB replay per pane incl. alt-screen/scroll region equals synchronous feed; later 8 MiB live flood catches up with clean tail; mutation without replay exemption fails)", "real OMP live (2 turns)": "pass S0-S16; S15 ratios manager 0.93, worker 1.0, host 0.94", "stub flood p27f": "FAIL 3/3: F2 coloured Korean flood -> backend slow_client closes UI within 20 s (reason shown, exit 1); passed 5/5 on previous candidate -> regression", "regressions": "tests/ui 125 x2, backend 71, contracts 43, g1 63, g4 8"},
+  "model_turns": 2,
+  "frozen_hashes_equal": true,
+  "residue": "none of its own; pre-existing /tmp/cw06-indep-*, cw06-p27f-* (21, 00:40-00:42) left",
+  "observed_model": "sonnet (wb-test-rerun definition; host metadata unverified)"
+}

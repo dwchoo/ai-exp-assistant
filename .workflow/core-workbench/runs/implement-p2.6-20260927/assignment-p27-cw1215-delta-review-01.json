@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw1215-delta-review-01",
+  "ticket_id": "CW-12, CW-15 (CW-06-dependent items)",
+  "role": "reviewer",
+  "unit": "V-CW-12-15-p2.7-cw06-delta",
+  "approved_bundle_digest": "a521acdc3838b43a26e277afc233bab695c8b02ce0d42392c3678931b2e3f027",
+  "routing": {"planned_role": "reviewer", "selected_role": "reviewer (wb-delta-reviewer, Sonnet high)", "reason_codes": ["bounded_delta_after_full_review"], "evidence_refs": ["CW-12/15 had full reviews in p2.6; this unit re-checks CW-06-dependent items after CW-06 integration"]},
+  "frozen_candidate": "c47835913e65051c2382081a52f311d840f0c25ec734b12e82b161709b976fe2",
+  "under_review": [".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw1215-delta-test-01-agent.json (item classification and evidence)", "tests/ui/live_product_state_independent_p27i.py (new independent runtime test)"],
+  "criteria": ["docs/features/core-workbench/PLAN.json gate_items P-C-AC-15..18, 22, 23, 25, 30, 33 (check, requires_tickets, p2_7_note)", "SPEC 'Production 조합' (CW-18/19 responsibilities)", "tickets CW-06, CW-12, CW-15, CW-18, CW-19"],
+  "focus": ["Is each item's split between CW-06-supplied UI part and remaining supplier (CW-18/19/16) correct and complete - no required behaviour silently dropped and no premature pass claimed?", "Does the new test exercise real behaviour through the real entrypoint and product UI (not mocks), clean up by identity, and avoid model turns?", "Are the four UX/later findings routed sensibly (UR-UX vs CW-18 vs CW-16)?"],
+  "scratch": "/tmp/claude-1000/-home-dwchoo-ai-exp-assistant/dd5e2cee-e10d-41c4-8ebb-7c00b50dd465/scratchpad/cw1215-review/",
+  "rules": "Read-only; write only .workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw1215-delta-review-01-agent.json. Do NOT run live tests (a concurrent job uses the real OMP runtime); unit tests only with /tmp/cw02-g1-venv/bin/python, pattern test_*.py, unique temp dirs.",
+  "result_format": "Findings P0..P3; per-item verdict agree/disagree; overall accept/rework. Write JSON; reply <=15 lines. Korean."
+}

@@ -1,0 +1,21 @@
+{
+  "invocation":"cw11-atomic-test-01",
+  "role":"test_designer",
+  "unit":"V-CW-11-p2.6-current",
+  "objective":"Independently test the linearizable CW-11 admission owner and real WorkflowRun exit binding on the frozen candidate.",
+  "candidate_manifest":".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw11-atomic-recovery.json",
+  "candidate":"8c728dd78f4fb2f44f8bc4a6a483f44a5ab6578f7fbb1ba9549c1d5aee85a7a8",
+  "requirements":".workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw11.json",
+  "review_evidence":".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw11-final-review-03.json",
+  "oracle_evidence":".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw11-atomic-oracle-01.json",
+  "write_scope":["tests/observation/**"],
+  "must_test":[
+    "Use barriers to prove writer-wins yields zero dispatch and dispatch-wins yields exactly one already-started dispatch for pause/cancel/revoke/run replacement/confirmed exit.",
+    "Attack A-B-A epochs, stale request/token, malformed state, admission exception, unknown/no replay, concurrent tick, and reentrant dispatch without deadlock or duplicate side effects.",
+    "Prove callback hints cannot mutate or override the authoritative owner; no unchecked dispatch fallback exists.",
+    "Construct binding from an actual TaskWorkflow.start WorkflowRun and persisted TASK, then prove immediate confirmed exit without a 60-second tick, old-session identity stability after peer replacement, and rejection of wrong message ID/role/kind/task/revision/run/bool generation/different WorkflowRun/unconfirmed or incomplete exit.",
+    "Run the current candidate's actual OMP 18.2.10 probe with PI_CONFIG_DIR in disposable storage and verify 60-second review, 13th wake, immediate real WorkflowRun exit, privacy, and cleanup."
+  ],
+  "constraints":["Tests only; apply_patch only; no product/workflow edits; no uv/local env/package artifacts; graphify update after edits; no commit/push/merge/stash/reset/clean."],
+  "report":["independent tests and adversarial schedules","exact regressions/live result","qualifications","candidate_ready or needs_reroute"]
+}

@@ -1,0 +1,39 @@
+{
+  "after": "308debdd963312700a0fccf7f034fcd3b091b7c5a5aaff52dd53a58187542e07",
+  "argv": [
+    "/usr/bin/env",
+    "PYTHONDONTWRITEBYTECODE=1",
+    "PYTHONPATH=src",
+    "/usr/bin/timeout",
+    "--signal=TERM",
+    "--kill-after=10s",
+    "180s",
+    "/tmp/cw02-g1-venv/bin/python",
+    "tests/policy/pause_automation/live_pause_runtime_probe.py"
+  ],
+  "before": "308debdd963312700a0fccf7f034fcd3b091b7c5a5aaff52dd53a58187542e07",
+  "check_id": "cw12-live-final-01",
+  "cwd": "/home/dwchoo/ai-exp-assistant",
+  "environment": {
+    "description": "Linux; frozen CW-12 candidate; actual omp/18.2.10 manager peer and persistent host shell; directory chmod and out-of-scope mutation reject-cleanup-reconcile-resume lifecycle"
+  },
+  "exit_code": 0,
+  "finished_at": "2026-09-28T16:17:03.104618+00:00",
+  "items": [
+    {
+      "id": "P-C-AC-33",
+      "acceptance_ids": ["C-AC-33"],
+      "result": "passed",
+      "observed_evidence_level": "runtime",
+      "evidence": "Actual omp/18.2.10 rejected explicit resume after an out-of-scope file mutation and a manager-cwd directory mode change, preserved the paused automatic hold, then reconciled and resumed only after cleanup and mode restoration; fresh delivery was admitted without replay and all child, process, thread, and socket residue was zero.",
+      "unknowns": []
+    }
+  ],
+  "log": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/check-cw12-live-final.log",
+  "log_sha256": "fdef335d10aa911841f0ca5163e01283b9b08712b029748a789196cd168dc666",
+  "requirements_identity": "da136b87ade890c26034bbeca435d472d23ee836c85348a3cf60c8ac276fbaff",
+  "schema_version": 1,
+  "stable": true,
+  "started_at": "2026-09-28T16:16:54.973803+00:00",
+  "timed_out": false
+}

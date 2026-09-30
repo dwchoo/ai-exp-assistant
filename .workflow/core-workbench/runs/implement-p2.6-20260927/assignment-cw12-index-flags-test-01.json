@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "invocation": "cw12-index-flags-test-01",
+  "role": "test_designer",
+  "unit": "V-CW-12-p2.6-current",
+  "authority": "User $implement docs/features/core-workbench request; approved PLAN p2.6 CW-12",
+  "objective": "Independently verify the Git index-flag reconciliation correction and final CW-12 runtime candidate.",
+  "candidate": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw12-index-flags-correction.json",
+    "candidate_id": "6a7ebe2f471464d2d140685eb3b6b9acfb3b95fc550e9a30181e8816ab022046"
+  },
+  "must_verify": [
+    "the preserved assume-unchanged reproduction now rejects resume",
+    "skip-worktree missing/existing states, flag additions/removals, and any parsed fsmonitor-related tags cannot hide actual changes while stable cases remain live",
+    "large clean Git repo, normal tracked/untracked/ignored detection, fd safety, and non-Git fallback remain green",
+    "full pause regressions and actual omp/18.2.10 reject-cleanup-reconcile path pass with zero residue"
+  ],
+  "allowed_write_paths": ["tests/policy/pause_automation/**", "graphify-out/**"],
+  "constraints": [
+    "Independent test-only mutation owner; do not edit production/.workflow/docs/PLAN/state.",
+    "Use apply_patch for tests; do not delegate, commit, publish, deploy, or use Docker.",
+    "Return needs_reroute for product defects; do not fix production."
+  ],
+  "report": "Return candidate_ready/needs_reroute, exact checks/counts, actual OMP cleanup, test-only changes, acceptance assessment, and residual risks."
+}

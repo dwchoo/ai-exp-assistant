@@ -1,0 +1,10 @@
+test_lost_and_delayed_ack_do_not_replay_the_request (tests.gates.g2_shell.test_live_takeover_predicates.TakeoverPredicatesTest.test_lost_and_delayed_ack_do_not_replay_the_request) ... ok
+test_missing_input_flush_exposes_a_stale_marker_at_the_parent_prompt (tests.gates.g2_shell.test_live_takeover_predicates.TakeoverPredicatesTest.test_missing_input_flush_exposes_a_stale_marker_at_the_parent_prompt) ... ok
+test_missing_per_chunk_revalidation_leaks_tail_at_the_parent_prompt (tests.gates.g2_shell.test_live_takeover_predicates.TakeoverPredicatesTest.test_missing_per_chunk_revalidation_leaks_tail_at_the_parent_prompt) ... ok
+test_partial_write_withholds_tail_after_observed_foreground_exit (tests.gates.g2_shell.test_live_takeover_predicates.TakeoverPredicatesTest.test_partial_write_withholds_tail_after_observed_foreground_exit) ... ok
+test_ready_without_ack_is_rejected_as_a_confirmation (tests.gates.g2_shell.test_live_takeover_predicates.TakeoverPredicatesTest.test_ready_without_ack_is_rejected_as_a_confirmation) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 1.525s
+
+OK

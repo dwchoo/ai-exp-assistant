@@ -1,0 +1,22 @@
+{
+  "invocation": "cw05-g4-01",
+  "decision": "bounded_scope_reroute",
+  "authority": "User-authorized $implement for the full core-workbench bundle; approved CW-03 and CW-05 PLAN scopes; workflow-contract dependency correction",
+  "observed_blocker": "The canonical CW-03 supervisor hard-codes both main and descendant return deadlines to 5 seconds in src/workbench/terminal/shell_g2/lifecycle.py, making CW-05's required >60-second host experiment deterministically UNKNOWN:SUPERVISOR_FAILURE.",
+  "allowed_additions": [
+    "src/workbench/terminal/shell_g2/lifecycle.py",
+    "tests/gates/g2_shell/**"
+  ],
+  "constraints": [
+    "Expose only the bounded return deadline needed by the existing supervisor protocol; preserve the current 5-second default for every existing caller.",
+    "Have the CW-05 runtime/probe opt into a >60-second bound explicitly.",
+    "Add focused G2 regression coverage for default compatibility, explicit long-running main work, and deadline expiry/unknown behavior.",
+    "Do not create a replacement supervisor, rewrite source at runtime, broaden production semantics, or modify CW-03 documentation/PLAN/tickets."
+  ],
+  "evidence_refs": [
+    "src/workbench/terminal/shell_g2/lifecycle.py:678-727",
+    "docs/features/core-workbench/tickets/CW-05.md:28",
+    "docs/features/core-workbench/PLAN.json CW-03.write_scope_hint",
+    "worker observation: second 62.06-second OMP wake passed but host lifecycle ended UNKNOWN:SUPERVISOR_FAILURE"
+  ]
+}

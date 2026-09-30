@@ -1,0 +1,7 @@
+{
+  "schema_version": 1,
+  "id": "root-adjudication-p27-cw06-replay-regression",
+  "source": ".workflow/core-workbench/runs/implement-p2.6-20260927/check-p27-cw06-integration-live-01.json",
+  "decision": "Integration of CW-06 held. UI-only correction (wb-worker): replay frames (header replay=true) are never subject to catch-up and are fed completely (they are already bounded by the backend retained tail); catch-up applies only to live backlog, with its tail aligned to a safe boundary (no mid CSI/OSC start; delta review P3-a) and feed without per-chunk re-slicing (P3-b). No backend/contract change.",
+  "verification": "independent re-verification with the real-OMP live probe (CW06_LIVE_MODEL=1, 2 turns) S15 ratios >= 0.8 for all panes, plus fixture test for replay > CATCHUP_BACKLOG_BYTES restoring full screen, then delta review."
+}

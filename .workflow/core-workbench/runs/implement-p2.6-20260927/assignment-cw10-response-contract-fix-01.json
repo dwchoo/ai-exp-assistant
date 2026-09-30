@@ -1,0 +1,40 @@
+{
+  "invocation": "cw10-response-contract-fix-01",
+  "role": "worker_senior",
+  "unit": "V-CW-10-p2.6-current",
+  "objective": "Deliver an exact machine-readable worker response contract in every production execute/analysis message and make actual probes derive their public response solely from that contract.",
+  "candidate_manifest": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw10-public-response-final2.json",
+  "requirements": ".workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw10.json",
+  "finding": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw10-public-response-review-01.json",
+  "allowed_write_scope": [
+    "omp_bridge/g3/bridge.ts",
+    "tests/gates/g3_omp/bridge.test.ts",
+    "tests/gates/g3_omp/bridge_public_response_independent.test.ts",
+    "tests/workflow/live_workflow_probe.py",
+    "tests/workflow/live_workflow_independent.py",
+    "tests/workflow/test_worker_port.py",
+    "tests/workflow/test_worker_port_independent.py"
+  ],
+  "required_behavior": [
+    "For worker TASK/execute and QUESTION/analysis only, inject an explicit response contract alongside the normal payload. It must state the exact WB_WORKER_RESPONSE marker, exact 12-field compact flat JSON shape/order, immutable identity values, stage/kind/revision/session values, allowed decisions, response_id canonical UUID requirement, and instruction to emit only that frame with no prose/tool/thinking.",
+    "The bridge parser and injected contract must be generated from one source of truth so schema/field order/allowed decisions cannot drift.",
+    "The actual OMP scripted provider must read and obey the delivered response contract; remove hardcoded marker/schema/identity construction assumptions. A missing/malformed contract must not produce a valid response.",
+    "Do not put secret environment values, raw experiment evidence beyond the already approved payload, or mutable host authority into the contract. Preserve exact delivery identity and all public-event/privacy/replay guards."
+  ],
+  "required_tests": [
+    "Assert production injected execute and analysis messages contain complete, self-consistent contracts with exact identity and decision set; non-worker/non-control messages do not gain the contract.",
+    "Mutate marker, field order/schema, immutable identity, allowed decisions, response ID requirement, or prose-only instruction and prove provider does not accidentally pass via hardcoding.",
+    "Run actual OMP 18.2.10 worker and independent probes using contract-derived responses, all public-response independent tests, Node bridge, workflow, bridge, G3, tasks, terminal suites, privacy/residue/git diff checks."
+  ],
+  "constraints": [
+    "Use apply_patch only. Do not edit production workflow/task/storage code, docs, workflow artifacts, graphify, dependencies, or unrelated files.",
+    "Do not claim arbitrary model compliance; prove that the production message makes the protocol fully specified and that actual OMP carries a response derived from it.",
+    "No commit/push/merge/stash/reset/clean. Run graphify update . after code/test changes and report generated drift separately."
+  ],
+  "report": [
+    "contract design and changed paths",
+    "proof probes derive responses from delivered contract",
+    "commands/results",
+    "snapshot/scope audit and candidate_ready or needs_reroute"
+  ]
+}

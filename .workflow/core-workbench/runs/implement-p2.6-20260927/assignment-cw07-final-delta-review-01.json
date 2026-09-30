@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "invocation": "cw07-final-delta-review-01",
+  "role": "reviewer",
+  "unit": "V-CW-07-p2.6-current",
+  "workspace": "/home/dwchoo/ai-exp-assistant",
+  "writer": false,
+  "candidate_manifest": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw07-final-delta-review-candidate.json",
+  "candidate": "c42a2834893090b89faf94f37236b99061dcc5cdd165050ca57f0b065c4b2bb1",
+  "requirements": ".workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw07.json",
+  "prior_review": ".workflow/core-workbench/runs/implement-p2.6-20260927/review-cw07-delta-01.json",
+  "independent_regression": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw07-partial-regression-test-01.json",
+  "correction": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw07-partial-correction-01.json",
+  "instructions": "Final read-only delta/impact review of the frozen CW-07 candidate. Do not modify files. Verify manual-parent partial writes revalidate boundary/lifecycle/parent PID-start-session/live state/foreground before every low-level attempt; a state transition after a prefix prevents all remaining bytes; InterruptedError/BlockingIOError/zero progress are bounded; valid stable partial writes complete; live experiment-foreground path and no-replay remain intact. Confirm both accepted P2 findings are closed, independent tests are not weakened, manifest product/test hashes match, and no new P0-P3 issue exists. Preserve the documented C-D55 detached-manual-daemon limitation as outside guarantee. Return explicit approval or exact findings."
+}

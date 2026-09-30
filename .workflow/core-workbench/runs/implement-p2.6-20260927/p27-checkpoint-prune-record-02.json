@@ -1,0 +1,55 @@
+{
+ "schema_version": 1,
+ "keep": [
+  ".workflow/core-workbench/runs/decisions-cd55-20260926/before.json",
+  ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-cw17-base.json",
+  ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-cw17-integrated-checkpoint.json",
+  ".workflow/core-workbench/runs/implement-p2.6-20260927/preaccounting-checkpoint.json",
+  ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-resume-20260928-checkpoint.json"
+ ],
+ "entries": [
+  {
+   "path": ".workflow/core-workbench/runs/decisions-cd55-20260926/before.json",
+   "action": "kept_milestone",
+   "bytes": 284098008
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-cw17-base.json",
+   "action": "kept_milestone",
+   "bytes": 711934114
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-cw17-integrated-checkpoint.json",
+   "action": "kept_milestone",
+   "bytes": 726538163
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-p22fix-checkpoint.json",
+   "action": "pruned",
+   "bytes_before": 713137139,
+   "sha256_before": "9a44eb266985276d24f14b39203bd1c52d3bc70187396e51ae4f548aad63556e",
+   "candidate": "0757379de031b584d8832cd6864996d697e1295fe9e3e6ac824dbe6bfd58cb66",
+   "blob_count": 1286,
+   "bytes_after": 365945
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-review-fix-test-checkpoint.json",
+   "action": "pruned",
+   "bytes_before": 712554712,
+   "sha256_before": "8d7d2e0e6e39390ec94a663a383ed47e4fdcdd026c389e6bd3f836ea3b29a7e6",
+   "candidate": "37233705b980db4ee4a875fd826c0bca59c11a53c7304c1610876f05323e1088",
+   "blob_count": 1277,
+   "bytes_after": 364521
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/preaccounting-checkpoint.json",
+   "action": "kept_milestone",
+   "bytes": 664067256
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-resume-20260928-checkpoint.json",
+   "action": "kept_milestone",
+   "bytes": 727409668
+  }
+ ]
+}

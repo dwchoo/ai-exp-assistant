@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "invocation": "cw10-missing-log-test-01",
+  "before": "ae6c8c4189ee2fa342f28b8de3257562775e3e90b5e34bc9b0e9e7f20796c645",
+  "after": "a8b845bf0575d68290d81824f706cc8ad1547b5d465b8b0489d0c9f588626fd0",
+  "allowed": ["tests/workflow/test_run_independent.py"],
+  "changed": ["tests/workflow/test_run_independent.py"],
+  "outside_scope": [],
+  "head_unchanged": true,
+  "index_changed": [],
+  "baseline_file_count": 1211,
+  "unchanged_baseline_file_count": 1210,
+  "baseline_candidate_digest_verified": true,
+  "workflow_artifacts_excluded_by_assigned_baseline": true,
+  "comparable": true,
+  "snapshot_format": "compact identity delta; replace files_changed in base_manifest identity before canonical digest"
+}

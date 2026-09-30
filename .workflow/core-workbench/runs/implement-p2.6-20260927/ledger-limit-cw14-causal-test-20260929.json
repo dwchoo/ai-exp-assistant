@@ -1,0 +1,23 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 1086,
+  "event": {
+    "id": "limit-cw14-causal-test-20260929",
+    "kind": "limit",
+    "data": {
+      "bucket": "role:test_designer",
+      "origin": "operating",
+      "value": 141,
+      "authority": "C-D55 plus workflow-contract section 8 and current $implement authorization",
+      "reason": "Final CW-14 causal regression plus mandatory CW-15 and CW-16 independent verification",
+      "decision_owner": "Root",
+      "remaining_work_estimate": 3,
+      "expected_previous": {
+        "value": 139,
+        "authority": "C-D55 plus workflow-contract section 8 and current $implement authorization",
+        "reason": "Mandatory independent CW-14 through CW-16 verification and two bounded correction tests"
+      },
+      "scope_basis": null
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "unit": "V-CW-03-P25-CONTROL-WAIT",
+  "decision_owner": "Root",
+  "reason": "Fresh review confirmed a valid parent control-WAIT SIGINT escape with an exact correction inside the approved A architecture. The preceding five-call unit is exhausted.",
+  "remaining_work_estimate": 4,
+  "planned_roles": ["worker_senior", "test_designer", "reviewer"],
+  "correction_reserve": 1,
+  "hard_total_cap": 220,
+  "used_before_unit": 199,
+  "available_before_unit": 21,
+  "scope": [
+    "enter parent control wait through actual wb-handoff",
+    "protect control-owned FD8 read from Ctrl-C prompt escape",
+    "restore prior signal behavior at explicit TAKEOVER",
+    "recheck child-running Ctrl-C and input-return ordering"
+  ]
+}

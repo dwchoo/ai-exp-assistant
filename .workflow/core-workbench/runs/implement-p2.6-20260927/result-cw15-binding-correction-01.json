@@ -1,0 +1,39 @@
+{
+  "invocation": "cw15-binding-correction-01",
+  "outcome": "complete",
+  "candidate_ready": true,
+  "base_candidate": "4252bf102166d0f01f6df33a6c4c4530791ac4bc8c2e884e1dcf095e9552b8fa",
+  "changed_paths": [
+    "src/workbench/app/production.py",
+    "src/workbench/app/lifecycle.py",
+    "src/workbench/app/__init__.py",
+    "tests/lifecycle/test_production_binding.py",
+    "tests/lifecycle/test_lifecycle_runtime.py",
+    "graphify-out/**"
+  ],
+  "binding": "bind_production adapts real G3 exact peer/request plus TaskMailbox delivery, PersistentShell snapshot/poll/takeover/handoff, PauseCoordinator bound dispatch, WorkerReviewScheduler, RecoveryCoordinator stop/force decisions, RawLogStore, MetadataAdmissionGate and G4 FrontendLease.",
+  "shutdown": "Durable shutdown_confirmed and target/incarnation stop-attempt fences prevent completed and incomplete repeated shutdown calls from re-emitting normal_stop actions.",
+  "checks": {
+    "lifecycle": "14 tests passed",
+    "bridge": "22 tests passed",
+    "recovery": "26 tests passed",
+    "pause_core": "122 tests passed",
+    "observation": "95 tests passed",
+    "storage": "33 tests passed",
+    "persistent_shell": "10 tests passed",
+    "g4_ports": "2 tests passed",
+    "compileall": "passed",
+    "diff_check": "passed",
+    "graphify_update": "exit 0; 5032 nodes, 10858 edges, 463 communities",
+    "residual_processes": "none observed"
+  },
+  "sha256": {
+    "src/workbench/app/production.py": "956b07ce96e62167909ab72bdc63f0034213533f016f3201ad69ff202390ca9b",
+    "src/workbench/app/lifecycle.py": "e2a7d8b2d5676fc9002d94aef67f1f35cc54791a27a9cad24de5713a51be5853",
+    "src/workbench/app/__init__.py": "61d58c78f87cf032242a76e59d8291dfdfcafc406d5d1fb68a559ec5de13e8e8",
+    "tests/lifecycle/test_production_binding.py": "76febc3eee38e217681e4824571b6c99d1d70610b6b4f2cc8d1bd2342c7b9938",
+    "tests/lifecycle/test_lifecycle_runtime.py": "b08a7060689c20063ce3abd59b425cfe110a051a929b0abbd753e0e02aad3bfb"
+  },
+  "pending_environment": "Actual external OMP positive delivery and real reboot remain unverified; pyte 0.8.2 is unavailable for two live predicate imports. G4 exposes FrontendLease but no separate production scheduler.",
+  "mutation_owner": "/root/cw12_post_review_correction"
+}

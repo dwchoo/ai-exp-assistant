@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "feature_id": "core-workbench",
+  "ticket_id": "CW-07 (delta, found in CW-17 unit)",
+  "attempt_id": "input-fix-attempt-01",
+  "invocation": "p27-input-fix-worker-01",
+  "approved_bundle_digest": "a521acdc3838b43a26e277afc233bab695c8b02ce0d42392c3678931b2e3f027",
+  "authority": "p2.7a approval; finding F-CW17-INPUT-01; Root adjudication",
+  "actual_workspace": "/home/dwchoo/ai-exp-assistant",
+  "checkpoint_ref": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-input-fix-checkpoint.json",
+  "finding": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw17-test-01.json#finding",
+  "required_behavior_root_adjudication": [
+    "Separate automation safety from manual input. The dirty/uncertain line latch (InputBoundary.uncertain, needs_review) must keep blocking AUTOMATIC dispatch (submit/can_dispatch) and manager return (claim_manager) exactly as today (C-AC-26), but must NOT block manual input while the user owns host input.",
+    "Manual input target (C-AC-08 '수동 입력은 확인된 현재 대상에 전달'): while owner=='user', the current target is the PTY's observed foreground process group (e.g. tcgetpgrp on the slave / tpgid of the parent shell in /proc), provided it is a live process group in the parent shell's session. Deliver bytes (including ESC sequences, Backspace, Ctrl-C, Ctrl-D, Ctrl-Z, Ctrl-U) to the PTY for that target. The line discipline delivers signals; Workbench does not translate them.",
+    "If the foreground process group cannot be observed or is outside the shell session, keep holding manual input with a visible reason (C-AC-08 '현재 입력 대상도 불명' clause preserved). Automation-launched foreground run under confirmed takeover keeps its existing confirmed_target path.",
+    "Uncertainty must be recoverable: after a trustworthy shell control event (fresh prompt READY for the submitted line with the shell back at its prompt, or the shell-side wb-handoff CONTROL_READY verification with hook/jobs checks) the line-edit uncertainty resets, so a user who used editing keys can still return control via wb-handoff. Do not reset on timers or output heuristics (C-AC-26: no marker/prompt/no-output lifecycle inference) — only on the existing authenticated control-channel events.",
+    "ShellPane._accepts_manual_input in src/workbench/backend/panes.py must follow the adapter decision (no separate stricter phase=='unknown' block for manual input when the user owns input and the target is observable). Snapshot/state must still show uncertainty/unknown for automation."
+  ],
+  "acceptance_tests": [
+    "tests/backend/test_live_input_independent.py must pass unmodified (it is the independent acceptance)",
+    "All previously passing suites must still pass: tests/terminal, tests/gates/g2_shell (non-live and canonical live matrix: tests.gates.g2_shell.test_canonical_matrix_integration), tests/backend (worker + independent), tests/contracts, tests/lifecycle, tests/gates/g4_lifetime non-live"
+  ],
+  "allowed_write_paths": [
+    "src/workbench/terminal/shell_g2/**",
+    "src/workbench/terminal/shell_persistent/**",
+    "src/workbench/backend/panes.py",
+    "tests/terminal/**",
+    "tests/gates/g2_shell/** (only to add regression cases; modifying an existing assertion requires listing it with justification in the result)"
+  ],
+  "prohibited_paths": [
+    "tests/backend/test_*_independent.py",
+    "tests/backend/independent_support.py",
+    "tests/contracts/**",
+    "docs/**",
+    ".workflow/**",
+    "all other src/**"
+  ],
+  "stop_conditions": [
+    "an existing G2/CW-07 test encodes rejecting manual input to an observable user foreground target: do not delete it; list it with the conflicting spec clause and return needs_oracle if unsure",
+    "fix would require weakening automation holds, replay protection, or exact identity",
+    "need tmux or credentials"
+  ],
+  "routing": {
+    "planned_role": "worker_senior",
+    "selected_role": "worker_senior",
+    "reason_codes": [
+      "coupled_invariants"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw17-test-01.json"
+    ]
+  }
+}

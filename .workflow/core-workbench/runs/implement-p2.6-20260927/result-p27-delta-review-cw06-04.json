@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-delta-review-cw06-04",
+  "verdict": "integrate",
+  "frozen_candidate": "01cee2da36f84822ab5a5dc24fed01667ad9a50f77e1ca46efce77fb58c6650e",
+  "agent_result": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-delta-review-cw06-04-agent.json",
+  "focus_verdicts": {"app.py 2004 guard": "pass (all exit paths restore; test wait is a legitimate race fix, assertions not weakened)", "screen.py SU/SD": "pass (region-only, cursor unchanged, clamp, BCE, alt isolation, subclass stream, no G1 regression; g1_vt 85 OK)", "tests": "pass (absolute expectations, independent IND/RI oracle; signal 5/5, last-chunk 3/3)"},
+  "findings": {"P3-1": "pyte parser drops '>' prefix so ESC[>4T (xterm title-mode reset) executes as SD 4; rare", "P3-2": "history push for top>0 regions and SD (pyte parity) vs xterm top==0 SU only", "P3-3": "blank fill uses full cursor.attrs (pyte erase parity) vs xterm BCE bg only", "P3-4": "check_signal_restore should also assert ?2004h precedes ?2004l"},
+  "root_disposition": "all P3 non-blocking; recorded for a later VT/UI polish delta (UR-UX feedback cycle or CW-16)",
+  "observed_model": "sonnet (wb-delta-reviewer definition; host metadata unverified)"
+}

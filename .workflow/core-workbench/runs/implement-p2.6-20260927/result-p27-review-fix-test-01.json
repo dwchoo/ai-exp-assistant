@@ -1,0 +1,82 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-review-fix-test-01",
+  "status": "needs_reroute",
+  "candidate_id": "37233705b980db4ee4a875fd826c0bca59c11a53c7304c1610876f05323e1088",
+  "after_snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-review-fix-test-after.json",
+  "scope_audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-review-fix-test.json",
+  "added_tests": [
+    "tests/backend/test_pane_identity_independent_p27c.py (4, 1 FAIL)",
+    "tests/backend/test_live_review_fixes_independent_p27c.py (3)",
+    "tests/terminal/test_review_fixes_independent_p27c.py (2)"
+  ],
+  "checks": [
+    [
+      "pane identity independent",
+      1,
+      "4 ran F1 (P2-2)"
+    ],
+    [
+      "live review fixes independent",
+      0,
+      "3 OK"
+    ],
+    [
+      "terminal review fixes independent",
+      0,
+      "2 OK"
+    ],
+    [
+      "terminal",
+      0,
+      "70 OK"
+    ],
+    [
+      "g2_shell",
+      0,
+      "142 OK skip=1"
+    ],
+    [
+      "canonical",
+      0,
+      "3 OK"
+    ],
+    [
+      "backend",
+      1,
+      "58 ran F1 (P2-2 only) after rerun; 1st run also E1 connection_cap EAGAIN flake, 3x standalone OK"
+    ],
+    [
+      "contracts",
+      0,
+      "43 OK"
+    ],
+    [
+      "lifecycle",
+      0,
+      "38 OK"
+    ],
+    [
+      "g4",
+      0,
+      "10+8 OK"
+    ],
+    [
+      "workflow",
+      0,
+      "46 OK"
+    ],
+    [
+      "observation",
+      0,
+      "95 OK"
+    ]
+  ],
+  "verdicts": {
+    "P2-1": "PASS (992 orphans/63s, max zombie 1, DESCENDANT_REAPED exact)",
+    "P2-2": "FAIL implementation: _owned_session_members treats members of a session whose number equals reaped OMP pid as own when that session's leader has exited -> SIGKILL foreign members (C-D45). Repro tests/backend/test_pane_identity_independent_p27c.py::test_reaped_omp_session_number_now_names_a_foreign_session_whose_leader_exited. Suggested fix: keep OMP unreaped (waitid WNOWAIT) until close to pin pid/sid",
+    "P2-3": "PASS (negative control validated)",
+    "P2-4": "PASS (500 sleepers, 2MiB 0.45-0.51s, snapshot max 41ms; mid-paste target change handled per contract)"
+  },
+  "frozen_hashes_equal": true
+}

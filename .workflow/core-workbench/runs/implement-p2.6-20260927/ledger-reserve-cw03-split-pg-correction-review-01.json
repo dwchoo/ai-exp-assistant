@@ -1,0 +1,20 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 123,
+  "event": {
+    "id": "reserve-cw03-split-pg-correction-review-01",
+    "kind": "reserve",
+    "data": {
+      "invocation": "cw03-split-pg-correction-review-01",
+      "role": "reviewer",
+      "unit": "V-CW-03",
+      "incident": "",
+      "purpose": "Fresh read-only delta review of split-PG review corrections and independent tests",
+      "model": "gpt-6-sol",
+      "effort": "high",
+      "buckets": ["total", "role:reviewer", "unit:V-CW-03"],
+      "writer": false,
+      "workspace": "/home/dwchoo/ai-exp-assistant"
+    }
+  }
+}

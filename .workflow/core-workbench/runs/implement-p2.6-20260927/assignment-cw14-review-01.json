@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "invocation": "cw14-review-01",
+  "role": "reviewer",
+  "unit": "V-CW-14-p2.6-current",
+  "authority": "User $implement docs/features/core-workbench request; approved PLAN p2.6 CW-14",
+  "objective": "Perform a fresh read-only final acceptance review of the complete CW-14 candidate after independent adversarial tests.",
+  "candidate": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw14-test.json",
+    "candidate_id": "ba9c7658c840770789ee1bf19d649d6b04ab1a7887aa07ff588c2f3aa347eadf"
+  },
+  "acceptance_ids": ["C-AC-24", "C-AC-28"],
+  "review_focus": [
+    "Default 64 MiB/run and 512 MiB/project caps, exact-prefix retention, whichever-cap-first semantics, durable concurrency and reopen accounting.",
+    "Immutable status completeness for stored/observed/dropped/truncated/missing, cap source, timestamps and errors; raw-log failures/caps must never stop observation.",
+    "Fail-closed openat/O_NOFOLLOW path handling under symlink, special file, inode/directory replacement and TOCTOU without hangs or root escape.",
+    "Strict separation between raw-log health and metadata-admission latch; only explicit durable metadata success may reopen new automatic runs.",
+    "No deletion or inclusion of result artifacts in raw quotas, sentinel preservation, package-only scope, and independent test evidence adequacy.",
+    "Identify only genuine CW-14 defects; list PTY/metadata/UI integration obligations that correctly remain for CW-15."
+  ],
+  "constraints": [
+    "Read-only; do not edit files or run mutating graphify commands.",
+    "No delegation, test writes, commit, publish, deploy, Docker, or process signals."
+  ],
+  "report": "Return candidate_ready true/false, findings with paths/lines and severity, judgments for C-AC-24/C-AC-28, evidence adequacy, and bounded CW-15 integration risks."
+}

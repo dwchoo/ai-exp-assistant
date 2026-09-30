@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "candidate_before": "8adea0d9cf5ecc815b36b3a525c468742e92bc9b69b6193a3847ddc8ec7eb5d2",
+  "cwd": "/home/dwchoo/ai-exp-assistant",
+  "commands": [
+    "timeout 45s python -m unittest tests.gates.g2_shell.test_live_combined_boundary_predicates tests.gates.g2_shell.test_subreaper_lifetime_predicates tests.gates.g2_shell.test_control_boundaries",
+    "timeout 25s python tests/gates/g2_shell/live_combined_boundary_probe.py",
+    "git diff --check -- tests/gates/g2_shell/live_combined_boundary_probe.py tests/gates/g2_shell/test_live_combined_boundary_predicates.py",
+    "graphify update ."
+  ],
+  "result": "passed",
+  "evidence": [
+    "15 unittest cases passed in 1.629s",
+    "live probe exited 0 for Bash/dash positive, negative, return and interrupt cases",
+    "git diff --check exited 0",
+    "graphify update exited 0 and rebuilt 1712 nodes, 3687 edges and 101 communities"
+  ],
+  "docker_runtime_validation": "skipped_by_user_decision",
+  "unknowns": [
+    "This bounded check does not complete CW-03 or G2."
+  ]
+}

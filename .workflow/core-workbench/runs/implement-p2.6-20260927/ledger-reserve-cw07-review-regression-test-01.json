@@ -1,0 +1,20 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 371,
+  "event": {
+    "id": "reserve-cw07-review-regression-test-01",
+    "kind": "reserve",
+    "data": {
+      "invocation": "cw07-review-regression-test-01",
+      "role": "test_designer",
+      "unit": "V-CW-07-p2.6-current",
+      "incident": "",
+      "purpose": "Add independent regression for CW-07 send_user after control-boundary unknown",
+      "model": "gpt-6-sol",
+      "effort": "high",
+      "buckets": ["total", "role:test_designer", "unit:V-CW-07-p2.6-current"],
+      "writer": true,
+      "workspace": "/home/dwchoo/ai-exp-assistant"
+    }
+  }
+}

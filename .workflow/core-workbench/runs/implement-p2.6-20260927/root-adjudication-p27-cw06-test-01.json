@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "id": "root-adjudication-p27-cw06-test-01",
+  "source": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw06-test-01-agent.json",
+  "dispositions": {
+    "F1": "accept, CW-06 fix: per-pane DECSET 2004 tracking; strip markers when the pane has not enabled bracketed paste; keep whole-frame and size rules",
+    "F2": "accept, CW-06 fix: prefix followed by ESC/paste introducer cancels prefix and parses the paste normally",
+    "F3": "accept, CW-06 fix: consume whole UTF-8 sequence after prefix",
+    "F4": "accept, CW-06 fix: paste/rejection handled before help-close; visible reason always",
+    "F5": "accept, CW-06 fix: notice derived from returned shell state",
+    "F6": "not CW-06. Backend shell boundary (CW-07/G2 open item 'REPL·여러 줄 paste 뒤 clean 경계 복귀', gates/G2.md:290). Holding handoff when the boundary is unproven is the specified fail-safe, so no product behaviour change now. Route: CW-18 (handoff flow composition) must address or record it; surface to user at UR-UX as a known limitation. CW-06 part: the refusal notice must show backend held_reasons so the user knows why handoff is held (UI-only).",
+    "F7": "test issue, resolved by tester",
+    "F8": "test issue, resolved by tester",
+    "O1": "non-blocking; same level as G1 partial (256-colour)",
+    "O2": "backend semantics (owner switches at takeover request); record for UR-UX/CW-18 review, no change"
+  },
+  "open_evidence": {"P-C-AC-14": "approval prompt interaction unverified; Esc turn cancel partial -> rerun test attempts with <=2 tiny model turns"}
+}

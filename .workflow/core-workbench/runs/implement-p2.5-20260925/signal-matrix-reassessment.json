@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "unit": "V-CW-03-P25-SIGNAL-MATRIX",
+  "decision_owner": "Root",
+  "reason": "Parent-WAIT TSTP now has an accepted explicit-unknown classification, but the approved minimum signal synthesis still lacks same-candidate start and return-barrier coverage for INT/QUIT/TSTP/CONT.",
+  "remaining_work_estimate": 4,
+  "planned_roles": ["worker_senior", "test_designer", "reviewer"],
+  "correction_reserve": 1,
+  "hard_total_cap": 220,
+  "used_before_unit": 206,
+  "available_before_unit": 14
+}

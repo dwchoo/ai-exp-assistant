@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "candidate_probe_sha256": "30c10b437f9d0aa9e8bc9a271810de09fb6e71ec272a41fe896019935430a798",
+  "candidate_test_sha256": "1429f362545525982e6ffd67352f663c34e30dc6a576ac488b43d092ab079911",
+  "cwd": "/home/dwchoo/ai-exp-assistant",
+  "results": [
+    "20 focused unittest cases passed",
+    "live aggregate returned exit 2 with result inconclusive, 28 observed cases and exactly two parent_wait_suspend unknowns for Bash and dash",
+    "git diff --check passed",
+    "graphify update rebuilt 1745 nodes, 3736 edges and 97 communities"
+  ],
+  "bounded_verdict": "Parent-WAIT TSTP satisfies explicit-unknown classification and remains unsupported as actual suspend behavior. Other untested stage-signal combinations remain before the minimum combined discriminator is complete.",
+  "docker_runtime_validation": "skipped_by_user_decision"
+}

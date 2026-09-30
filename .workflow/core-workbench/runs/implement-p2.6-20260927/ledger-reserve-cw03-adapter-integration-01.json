@@ -1,0 +1,20 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 133,
+  "event": {
+    "id": "reserve-cw03-adapter-integration-01",
+    "kind": "reserve",
+    "data": {
+      "invocation": "cw03-adapter-integration-01",
+      "role": "worker_senior",
+      "unit": "V-CW-03",
+      "incident": "",
+      "purpose": "Integrate the validated split-PG design across the coherent CW-03 G2 adapter matrix",
+      "model": "gpt-6-sol",
+      "effort": "high",
+      "buckets": ["total", "role:worker_senior", "unit:V-CW-03"],
+      "writer": true,
+      "workspace": "/home/dwchoo/ai-exp-assistant"
+    }
+  }
+}

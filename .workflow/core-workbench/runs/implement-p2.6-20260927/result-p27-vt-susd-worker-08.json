@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-vt-susd-worker-08",
+  "status": "candidate_ready",
+  "candidate_id": "01cee2da36f84822ab5a5dc24fed01667ad9a50f77e1ca46efce77fb58c6650e",
+  "after_snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-vt-susd-after.json",
+  "scope_audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-vt-susd.json",
+  "delta_backup": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-vt-susd-delta-backup/ (pre-change screen.py in p27-vt-susd-pre/)",
+  "changed_paths": {"src/workbench/terminal/vt_g1/screen.py": "e36dcf08b941c940a4b6afdad16e2db054d334eea42194b7d0d019a85e4a252b -> 2dcb887e25269aca54a7372e93fcef7d83a37471b465a56d936f7a9f53b97920 (additions only)", "tests/gates/g1_vt/test_vt_su_sd.py": "ec7a4d3089b85dd04bc7da93aad475e4024abf6eb200843e7ebca6f6f35b5e89 (new)"},
+  "checks": [["test_vt_su_sd before impl", 1, "22 run, 18 fail"], ["test_vt_su_sd after", 0, "22 OK"], ["p27h unmodified x30", 0, "30/30"], ["g1_vt", 0, "85 OK"], ["tests/terminal", 0, "70 OK"], ["tests/ui x2", 0, "129 OK x2"], ["contracts", 0, "43 OK"]],
+  "design": "SU/SD within DECSTBM margins, cursor unchanged, Ps default/0->1, clamp to region; blank lines use cursor.attrs when non-default; SU pushes to history.top, SD to history.bottom (pyte index/reverse_index parity); dirty rows in region; active screen only (alt-aware); private or 5-param CSI T ignored; TerminalByteStream(pyte.ByteStream) adds S/T to csi table; make_stream returns it.",
+  "gaps": ["history push also for partial margins (pyte style) whereas xterm saves scrollback only for full-screen region", "BCE uses whole cursor.attrs per pyte erase convention"],
+  "observed_model": "sonnet (wb-worker definition; host metadata unverified)"
+}

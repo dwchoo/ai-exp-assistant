@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "check_id": "cw10-workflow-contract-final-01",
+  "requirements_identity": "0ed26ff87bdd69efb27d6e252a0a05a7f831b37ca5cffdf249bf7f9222a55b72",
+  "argv": ["/usr/bin/env", "PYTHONDONTWRITEBYTECODE=1", "PYTHONPATH=src:tests/workflow:tests/bridge:tests/gates/g3_omp", "/tmp/cw02-g1-venv/bin/python", "-m", "unittest", "discover", "-s", "tests/workflow", "-v"],
+  "cwd": "/home/dwchoo/ai-exp-assistant",
+  "environment": {"description": "Linux; final frozen CW-10 candidate; worker plus independent public-response/contract tests; real Git worktree and host-shell fixtures"},
+  "started_at": "2026-09-28T03:35:23.333285+00:00",
+  "finished_at": "2026-09-28T03:35:35.292130+00:00",
+  "exit_code": 0,
+  "timed_out": false,
+  "log": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/check-cw10-workflow-contract-final.log",
+  "log_sha256": "124a789f13e19fd1dd3401bedb043d645a3ccc6c5b4c35303e7773cd448ad0e0",
+  "before": "679237e11f9f4cfd73c780f9ed7a431c0812437bcd006ace428207c8a37bc0a0",
+  "after": "679237e11f9f4cfd73c780f9ed7a431c0812437bcd006ace428207c8a37bc0a0",
+  "stable": true,
+  "items": [
+    {
+      "id": "P-C-AC-09",
+      "acceptance_ids": ["C-AC-09"],
+      "result": "passed",
+      "observed_evidence_level": "runtime",
+      "evidence": "The 44-test runtime uses real Git repositories and detached worktrees to verify full explicit commit OIDs, canonical external empty targets, exact cwd/HEAD, preserved dirty and untracked source state, retained worktrees, and fail-closed manager reporting for invalid commit/target/preparation without development-directory fallback. The actual OMP run independently verified the prepared commit and retained worktree.",
+      "unknowns": []
+    },
+    {
+      "id": "P-C-AC-11",
+      "acceptance_ids": ["C-AC-11"],
+      "result": "passed",
+      "observed_evidence_level": "runtime",
+      "evidence": "Real Git runtime tests verify the workflow only prepares a detached worktree from the manager-supplied local commit and never invokes commit, push, merge, stash, reset, or clean; unrelated dirty/untracked source files remain preserved. WORKTREE-GUIDE assigns selective local commit preparation to Manager and explicitly excludes push/merge authority.",
+      "unknowns": []
+    }
+  ]
+}

@@ -1,0 +1,347 @@
+{
+  "run_id": "core-workbench-p2.6-20260927",
+  "revision": 857,
+  "buckets": {
+    "role:code_explorer": {
+      "limits_by_origin": {
+        "operating": {
+          "authority": "workflow-contract section 8 and current implementation authorization",
+          "reason": "Historical usage only; no new allocation",
+          "value": 2
+        }
+      },
+      "effective_limit": 2,
+      "binding_origins": [
+        "operating"
+      ],
+      "used": 2,
+      "reserved": 0,
+      "available": 0,
+      "usage_known": true
+    },
+    "role:oracle": {
+      "limits_by_origin": {
+        "operating": {
+          "value": 11,
+          "authority": "C-D55 plus workflow-contract section 8 and current implementation authorization",
+          "reason": "One concrete CW-12 first-write durability and restart fail-closed design consultation"
+        }
+      },
+      "effective_limit": 11,
+      "binding_origins": [
+        "operating"
+      ],
+      "used": 11,
+      "reserved": 0,
+      "available": 0,
+      "usage_known": true
+    },
+    "role:oracle_senior": {
+      "limits_by_origin": {
+        "operating": {
+          "value": 8,
+          "authority": "C-D55 plus workflow-contract section 8 and current implementation authorization",
+          "reason": "One deep read-only protocol consultation for generation/run-bound nonblocking fence and exact-peer transport atomicity"
+        }
+      },
+      "effective_limit": 8,
+      "binding_origins": [
+        "operating"
+      ],
+      "used": 8,
+      "reserved": 0,
+      "available": 0,
+      "usage_known": true
+    },
+    "role:reviewer": {
+      "limits_by_origin": {
+        "operating": {
+          "value": 93,
+          "authority": "C-D55 plus workflow-contract section 8 and current $implement authorization",
+          "reason": "Fresh reviews for CW-13 through CW-16 and two bounded delta reviews"
+        }
+      },
+      "effective_limit": 93,
+      "binding_origins": [
+        "operating"
+      ],
+      "used": 87,
+      "reserved": 0,
+      "available": 6,
+      "usage_known": true
+    },
+    "role:test_designer": {
+      "limits_by_origin": {
+        "operating": {
+          "value": 127,
+          "authority": "C-D55 plus workflow-contract section 8 and current $implement authorization",
+          "reason": "Independent tests for CW-13 through CW-16 and two bounded delta verifications"
+        }
+      },
+      "effective_limit": 127,
+      "binding_origins": [
+        "operating"
+      ],
+      "used": 121,
+      "reserved": 0,
+      "available": 6,
+      "usage_known": true
+    },
+    "role:worker": {
+      "limits_by_origin": {
+        "operating": {
+          "value": 20,
+          "authority": "C-D55 plus workflow-contract section 8 and current $implement authorization",
+          "reason": "CW-14 bounded implementation and one correction reserve"
+        }
+      },
+      "effective_limit": 20,
+      "binding_origins": [
+        "operating"
+      ],
+      "used": 18,
+      "reserved": 0,
+      "available": 2,
+      "usage_known": true
+    },
+    "role:worker_senior": {
+      "limits_by_origin": {
+        "operating": {
+          "value": 132,
+          "authority": "C-D55 plus workflow-contract section 8 and current $implement authorization",
+          "reason": "Coupled recovery/integration work for CW-13 and CW-15 with bounded correction reserve"
+        }
+      },
+      "effective_limit": 132,
+      "binding_origins": [
+        "operating"
+      ],
+      "used": 127,
+      "reserved": 0,
+      "available": 5,
+      "usage_known": true
+    },
+    "total": {
+      "limits_by_origin": {
+        "operating": {
+          "value": 392,
+          "authority": "C-D55 plus workflow-contract section 8 and current $implement authorization",
+          "reason": "CW-13 through CW-16 implementation, independent tests, fresh reviews, and bounded correction reserve"
+        }
+      },
+      "effective_limit": 392,
+      "binding_origins": [
+        "operating"
+      ],
+      "used": 374,
+      "reserved": 0,
+      "available": 18,
+      "usage_known": true
+    },
+    "unit:V-CW-03": {
+      "limits_by_origin": {
+        "operating": {
+          "value": 42,
+          "authority": "Approved PLAN p2.6, C-D55, workflow-contract section 8, and current implementation authorization",
+          "reason": "Remaining canonical input/jobs, hook/env, and takeover matrix migration with independent verification and bounded correction reserve"
+        }
+      },
+      "effective_limit": 42,
+      "binding_origins": [
+        "operating"
+      ],
+      "used": 41,
+      "reserved": 0,
+      "available": 1,
+      "usage_known": true
+    },
+    "unit:V-CW-04-p2.6-current": {
+      "limits_by_origin": {
+        "operating": {
+          "value": 5,
+          "authority": "Approved PLAN p2.6 CW-04, workflow-contract section 8, and current implementation authorization",
+          "reason": "Current-run CW-04 extension-fault closure and integrated independent verification; historical CW-04 calls remain accounted only in opening aggregate totals"
+        }
+      },
+      "effective_limit": 5,
+      "binding_origins": [
+        "operating"
+      ],
+      "used": 3,
+      "reserved": 0,
+      "available": 2,
+      "usage_known": true
+    },
+    "unit:V-CW-02-p2.6-current": {
+      "limits_by_origin": {
+        "operating": {
+          "value": 8,
+          "authority": "Approved PLAN p2.6 CW-02, workflow-contract section 8, current implementation authorization, and two formal tmux inconclusive records",
+          "reason": "Bounded tmux diagnosis/correction plus fresh delta review"
+        }
+      },
+      "effective_limit": 8,
+      "binding_origins": [
+        "operating"
+      ],
+      "used": 8,
+      "reserved": 0,
+      "available": 0,
+      "usage_known": true
+    },
+    "unit:V-CW-05-p2.6-current": {
+      "limits_by_origin": {
+        "operating": {
+          "value": 6,
+          "authority": "Approved PLAN p2.6 CW-05, workflow-contract section 8, current implementation authorization, and fresh-review P2 evidence",
+          "reason": "One bounded cross-language contract correction and one delta review"
+        }
+      },
+      "effective_limit": 6,
+      "binding_origins": [
+        "operating"
+      ],
+      "used": 6,
+      "reserved": 0,
+      "available": 0,
+      "usage_known": true
+    },
+    "unit:V-CW-09-p2.6-current": {
+      "limits_by_origin": {
+        "operating": {
+          "value": 7,
+          "authority": "Approved PLAN p2.6 CW-09, workflow-contract section 8, current implementation authorization, and fresh-review evidence",
+          "reason": "Independent regression, correction, and delta-review cycle for immutable revision and migration validation"
+        }
+      },
+      "effective_limit": 7,
+      "binding_origins": [
+        "operating"
+      ],
+      "used": 7,
+      "reserved": 0,
+      "available": 0,
+      "usage_known": true
+    },
+    "unit:V-CW-07-p2.6-current": {
+      "limits_by_origin": {
+        "operating": {
+          "value": 9,
+          "authority": "Approved PLAN p2.6 CW-07, workflow-contract section 8, current implementation authorization, and delta-review evidence",
+          "reason": "Independent regression, correction, and review for boundary transition during partial PTY writes"
+        }
+      },
+      "effective_limit": 9,
+      "binding_origins": [
+        "operating"
+      ],
+      "used": 9,
+      "reserved": 0,
+      "available": 0,
+      "usage_known": true
+    },
+    "unit:V-CW-08-p2.6-current": {
+      "limits_by_origin": {
+        "operating": {
+          "value": 10,
+          "authority": "Approved PLAN p2.6 CW-08, workflow-contract section 8, current implementation authorization, and delta-review evidence",
+          "reason": "Close-race correction and independent verification"
+        }
+      },
+      "effective_limit": 10,
+      "binding_origins": [
+        "operating"
+      ],
+      "used": 10,
+      "reserved": 0,
+      "available": 0,
+      "usage_known": true
+    },
+    "unit:V-CW-10-p2.6-current": {
+      "limits_by_origin": {
+        "operating": {
+          "value": 17,
+          "authority": "Approved PLAN p2.6 CW-10, workflow-contract section 8, current authorization, and final-review evidence",
+          "reason": "Deliver the exact public response contract to general Worker OMP and independently verify it"
+        }
+      },
+      "effective_limit": 17,
+      "binding_origins": [
+        "operating"
+      ],
+      "used": 17,
+      "reserved": 0,
+      "available": 0,
+      "usage_known": true
+    },
+    "unit:V-CW-11-p2.6-current": {
+      "limits_by_origin": {
+        "operating": {
+          "value": 29,
+          "authority": "Approved PLAN p2.6 CW-11, workflow-contract section 8, current authorization, and token-retention review evidence",
+          "reason": "Bound internal/external exit token ownership and independently close CW-11"
+        }
+      },
+      "effective_limit": 29,
+      "binding_origins": [
+        "operating"
+      ],
+      "used": 29,
+      "reserved": 0,
+      "available": 0,
+      "usage_known": true
+    },
+    "unit:V-CW-12-p2.6-current": {
+      "limits_by_origin": {
+        "operating": {
+          "value": 24,
+          "authority": "Approved PLAN p2.6 CW-12, workflow-contract section 8, current implementation authorization, and final-review run-bound permit evidence",
+          "reason": "Require active/fence/coordinator run and incarnation equality for all automatic dispatch with independent verification"
+        }
+      },
+      "effective_limit": 24,
+      "binding_origins": [
+        "operating"
+      ],
+      "used": 24,
+      "reserved": 0,
+      "available": 0,
+      "usage_known": true
+    },
+    "unit:V-CW-13-p2.6-current": {
+      "limits_by_origin": {
+        "operating": {
+          "value": 5,
+          "authority": "Approved PLAN p2.6 CW-13, workflow-contract section 8, and current $implement authorization",
+          "reason": "Restart recovery implementation, independent fixture verification, fresh review, and bounded correction reserve"
+        }
+      },
+      "effective_limit": 5,
+      "binding_origins": [
+        "operating"
+      ],
+      "used": 0,
+      "reserved": 0,
+      "available": 5,
+      "usage_known": true
+    }
+  },
+  "active_calls": {
+    "cw12-run-permit-review-01": {
+      "state": "running",
+      "started": true,
+      "buckets": [
+        "total",
+        "role:reviewer",
+        "unit:V-CW-12-p2.6-current"
+      ]
+    }
+  },
+  "unresolved": [],
+  "usage_known": true,
+  "next_action": "review_limits",
+  "mutation": {
+    "ledger": "committed",
+    "artifacts": "created"
+  }
+}

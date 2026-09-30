@@ -1,0 +1,27 @@
+{
+  "invocation": "cw04-extension-test-01",
+  "role": "test_designer",
+  "unit": "V-CW-04-p2.6-current",
+  "candidate": "37c8e782c804fe41901c7c5047042bb8302f8c3e179dbcc1d88aa465808c7163",
+  "objective": "Independently verify the approved G3-EXTENSION outage-delivery and internal handler-fault behavior against false success, replay, and diagnostic activation leakage.",
+  "requirements": [
+    "A real host request attempted during outage is unavailable/unknown, never provider-processed, and never auto-replayed after same-process reconnect; a distinct fresh request succeeds once.",
+    "Internal handler fault activates only when both the opt-in environment and explicit diagnostic frame are present, occurs before public API enqueue, produces no success ACK/provider/agent_start, and the same message remains unknown_no_replay across reconnect.",
+    "Normal operation and malformed frames do not accidentally activate the fault path; original TUI/composer and role/session/generation identity remain valid.",
+    "Tests must contain a discriminating negative mutation/control that would fail if an outage/fault message were ACKed, provider-processed, or replayed."
+  ],
+  "allowed_files": [
+    "tests/gates/g3_omp/test_tui_extension_fault_integration.py"
+  ],
+  "constraints": [
+    "Do not modify product code or existing tests/probes.",
+    "Use bounded runtime and cleanup; do not rely only on source-string assertions.",
+    "Do not modify workflow/docs/graphify or commit/reset/clean/stash."
+  ],
+  "checks": [
+    "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g3_omp /tmp/cw02-g1-venv/bin/python -m unittest -v tests/gates/g3_omp/test_tui_extension_fault_integration.py",
+    "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g3_omp /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/gates/g3_omp -p 'test_*.py' -v",
+    "node --experimental-strip-types --test tests/gates/g3_omp/bridge.test.ts",
+    "git diff --check"
+  ]
+}

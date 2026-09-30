@@ -1,0 +1,56 @@
+{
+  "after": "6a8e898b72447c96aadd45e2494da9f84a8bbbfba5723bfde2dd9829e655104d",
+  "argv": [
+    "/usr/bin/env",
+    "PYTHONDONTWRITEBYTECODE=1",
+    "PYTHONPATH=src:tests/observation:tests/bridge:tests/gates/g3_omp:tests/workflow",
+    "/tmp/cw02-g1-venv/bin/python",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tests/observation",
+    "-v"
+  ],
+  "before": "6a8e898b72447c96aadd45e2494da9f84a8bbbfba5723bfde2dd9829e655104d",
+  "check_id": "cw11-observation-final-01",
+  "cwd": "/home/dwchoo/ai-exp-assistant",
+  "environment": {
+    "description": "Linux; frozen CW-11 candidate; worker and independent observation suites with deterministic clock/concurrency seams and real WorkflowRun fixtures"
+  },
+  "exit_code": 0,
+  "finished_at": "2026-09-28T08:11:42.692346+00:00",
+  "items": [
+    {
+      "id": "P-C-AC-12",
+      "acceptance_ids": ["C-AC-12"],
+      "result": "passed",
+      "observed_evidence_level": "runtime",
+      "evidence": "The 91-test observation runtime verifies exact recurring 60-second scheduling, pause without model dispatch while non-model collection continues, silence-only unknown classification, process-plus-lifecycle hang evidence, and observed/estimated/unknown usage provenance.",
+      "unknowns": []
+    },
+    {
+      "id": "P-C-AC-21",
+      "acceptance_ids": ["C-AC-21"],
+      "result": "passed",
+      "observed_evidence_level": "runtime",
+      "evidence": "The 91-test runtime reaches the 121st recurring review without a fixed cap, preserves explicit unknown usage, bounds indefinite token ownership, and covers positive incarnation identity across repeated operation.",
+      "unknowns": []
+    },
+    {
+      "id": "P-C-AC-27",
+      "acceptance_ids": ["C-AC-27"],
+      "result": "passed",
+      "observed_evidence_level": "runtime",
+      "evidence": "The concurrency runtime verifies latest-one busy coalescing, user priority, pause-held pending work, ReviewTicket A-B-A rejection, serialized dispatch admission, exact source/incarnation exit fencing, immediate UI exit state, stale-source rejection, and bounded weak source registration.",
+      "unknowns": []
+    }
+  ],
+  "log": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/check-cw11-observation-final.log",
+  "log_sha256": "5871d00a06eb1a00c8f9c33fcb2bba826ac75e1f23bd28603a11dcace950851d",
+  "requirements_identity": "e2b46bf9d2b853e107bcd70e0151c230e6ee48593d240686c5fdc692ff5a8e98",
+  "schema_version": 1,
+  "stable": true,
+  "started_at": "2026-09-28T08:11:38.529797+00:00",
+  "timed_out": false
+}

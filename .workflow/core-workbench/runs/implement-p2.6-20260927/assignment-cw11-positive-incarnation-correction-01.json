@@ -1,0 +1,17 @@
+{
+  "invocation":"cw11-positive-incarnation-correction-01",
+  "role":"worker_senior",
+  "unit":"V-CW-11-p2.6-current",
+  "objective":"Make every active run incarnation positive from owner construction onward without changing established incarnation semantics.",
+  "base_candidate":"78439281e59354f10e4c3a0b527d4879adb4059a49e1dfa8efd233353d7a6ab5",
+  "test_evidence":".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw11-source-activation-test-01.json",
+  "write_scope":["src/workbench/observation/**","tests/observation/**"],
+  "required_change":[
+    "Initialize run_incarnation to 1 when SerializedReviewAdmission is constructed with an active run, and 0 only when no run is active. The first later activation from None must become 1.",
+    "Preserve idempotent set_active_run behavior, A->None->A monotonic increments, ticket/source token validation, public callback incarnation, and all existing scheduling semantics.",
+    "Make the two independent positive-incarnation assertions pass and add constructor-none/constructor-run/first-activation/ABA monotonic tests."
+  ],
+  "verification":["Run full observation and related regressions.","Actual OMP may reuse the immediately prior explicit activation result if production probe constructor path is unchanged; otherwise rerun.","Run graphify update ."],
+  "constraints":["apply_patch only; no workflow records, uv/local env/package artifacts, destructive git actions, or graphify restore."],
+  "report":["change","checks/runtime evidence","candidate_ready or needs_reroute"]
+}

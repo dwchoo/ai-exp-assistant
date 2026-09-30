@@ -1,0 +1,33 @@
+{
+  "invocation": "cw10-missing-log-fix-01",
+  "unit": "V-CW-10-p2.6-current",
+  "status": "candidate_ready",
+  "changed_paths": ["src/workbench/workflow/run.py"],
+  "candidate_before": "b445f8dd2570503ee3f46c83a9f6194531cf108231c9f3fad188bad1c0d82626",
+  "candidate_after": "7be63be93f6417f2dae2af1925655d0e450e5fb921d722ba2bfa0d1fea7d1980",
+  "fix": "At confirmed exit, persist raw-log and result-file size/hash or collection error. At judgment, missing, unreadable, escaped or changed post-collection evidence yields durable indeterminate with explicit source/path/error and linked REPORT; no exit-0 success inference or automatic replay. Existing report delivery_unknown and no-replay protocol remains unchanged.",
+  "pre_fix_reproduction": {
+    "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest -v tests.workflow.test_run_independent.WorkflowIndependentTests.test_missing_raw_log_after_confirmed_exit_is_indeterminate",
+    "exit_code": 1,
+    "observation": "WorkflowRun.judge raised FileNotFoundError at run.py:184 after raw.log unlink; no REPORT."
+  },
+  "post_fix_checks": [
+    {"command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest -v tests.workflow.test_run_independent.WorkflowIndependentTests.test_missing_raw_log_after_confirmed_exit_is_indeterminate", "exit_code": 0, "result": "failing independent discriminator now passes"},
+    {"command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/workflow -v", "exit_code": 0, "result": "16 passed, including all 9 independent tests"},
+    {"command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/terminal -v", "exit_code": 0, "result": "10 passed"},
+    {"command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/bridge -v", "exit_code": 0, "result": "18 passed"},
+    {"command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/tasks -v", "exit_code": 0, "result": "22 passed"},
+    {"command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/workflow /tmp/cw02-g1-venv/bin/python tests/workflow/live_workflow_independent.py", "exit_code": 0, "result": "four real Bash/sh cases passed"},
+    {"command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python tests/workflow/live_workflow_probe.py", "exit_code": 0, "result": "actual two-OMP 18.2.10 vertical passed"},
+    {"command": "ad hoc post-exit raw-log/result truncation and unreadable-log discriminators", "exit_code": 0, "result": "all indeterminate with source/path/error and REPORT"},
+    {"command": "git diff --check", "exit_code": 0, "result": "no whitespace errors"}
+  ],
+  "runtime_evidence": ".workflow/core-workbench/runs/implement-p2.6-20260927/raw-cw10-missing-log-runtime.json",
+  "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw10-missing-log-after.json",
+  "snapshot_stable": true,
+  "scope_audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/scope-audit-cw10-missing-log.json",
+  "scope_attribution": ".workflow/core-workbench/runs/implement-p2.6-20260927/scope-attribution-cw10-missing-log.json",
+  "scope_note": "Standard audit against the older pre-independent-test checkpoint reports those two pre-existing test files outside_scope; reconstructing the assignment's compact candidate manifest confirms only run.py changed in this correction.",
+  "cleanup": {"owned_process_residue": [], "temporary_directory_residue": [], "stopped_or_unknown_subprocesses": []},
+  "remaining_unknowns": ["Root-owned fresh independent review/final integration remains outstanding; candidate_ready is not overall acceptance."]
+}

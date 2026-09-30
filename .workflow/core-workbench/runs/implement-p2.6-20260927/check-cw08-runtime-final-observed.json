@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "check_id": "cw08-runtime-final-01",
+  "requirements_identity": "49b5ac8bd1ac3e6b18afc4809d512f1ed0e3210dfc86a63b4d055109db8e6ab7",
+  "argv": [
+    "/usr/bin/env",
+    "PYTHONDONTWRITEBYTECODE=1",
+    "PYTHONPATH=src:tests/gates/g3_omp:tests/bridge",
+    "/tmp/cw02-g1-venv/bin/python",
+    "tests/bridge/live_mailbox_independent.py"
+  ],
+  "cwd": "/home/dwchoo/ai-exp-assistant",
+  "environment": {
+    "description": "Linux actual OMP 18.2.10 manager and worker TUI processes with authenticated Unix-socket G3 bridge"
+  },
+  "started_at": "2026-09-28T00:40:58.873045+00:00",
+  "finished_at": "2026-09-28T00:41:03.727542+00:00",
+  "exit_code": 0,
+  "timed_out": false,
+  "log": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/check-cw08-runtime-final.log",
+  "log_sha256": "626af900248c5e0645f013d709e374cf510da4aad0a32b48f278bc1d2b749b0d",
+  "before": "3d8c0864214d6a5d78fc53a7b54243f525e51c1190922b4271261f6b01aa12b4",
+  "after": "3d8c0864214d6a5d78fc53a7b54243f525e51c1190922b4271261f6b01aa12b4",
+  "stable": true,
+  "items": [
+    {
+      "id": "P-C-AC-02",
+      "acceptance_ids": ["C-AC-02"],
+      "result": "passed",
+      "observed_evidence_level": "runtime",
+      "evidence": "check-cw08-runtime-final.log: actual OMP 18.2.10 manager and worker TUI processes accepted task, question, answer and report logical messages in the correct target role. Each exact message ID was observed once by the target provider and zero times by the other role; answer/report reply linkage was preserved; delivery history separated attempted, api_returned and omp_processed; same-handle duplicate delivery returned the same receipt; task_completed remained false; child, cwd-process, provider-thread, drain-thread and Unix-socket residue were empty. The probe validates host-authored mailbox delivery and OMP processing, not autonomous model-authored question/answer/report generation.",
+      "unknowns": []
+    }
+  ]
+}

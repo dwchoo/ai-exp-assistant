@@ -1,0 +1,116 @@
+{
+  "schema_version": 1,
+  "invocation": "cw09-test-01",
+  "unit": "V-CW-09-p2.6-current",
+  "task_result": "needs_reroute",
+  "candidate_before": "5783d513fbeed47b7dced4a397dc8a4c49fcda8a34146c566df240ff9c28cb55",
+  "candidate_after": "e9b341493efcb3c27bb64b4d34c8b3032e4c1465c84bd3ea053c5ac40ee608fe",
+  "baseline": ".workflow/core-workbench/runs/implement-p2.6-20260927/cw09-test-checkpoint.json",
+  "requirements_sha256": "ce80ee1ddd377af0e1234b4f61f957b86136ab3cc97d2cd908186eea3f612db3",
+  "after_snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw09-test-after.json",
+  "scope_audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/scope-audit-cw09-test.json",
+  "changed_files": [
+    "tests/tasks/test_repository_independent.py"
+  ],
+  "new_independent_test_methods": 9,
+  "checks": [
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/tasks -v",
+      "exit_code": 1,
+      "tests": 18,
+      "failures": 1,
+      "duration_seconds": 1.531
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest -v tests/tasks/test_repository_independent.py",
+      "exit_code": 1,
+      "tests": 9,
+      "failures": 1,
+      "duration_seconds": 0.855
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g4_lifetime /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/gates/g4_lifetime -v",
+      "exit_code": 0,
+      "tests": 8,
+      "duration_seconds": 0.141
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g4_evidence /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/gates/g4_evidence -v",
+      "exit_code": 0,
+      "tests": 10,
+      "duration_seconds": 0.057
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/contracts -v",
+      "exit_code": 0,
+      "tests": 20,
+      "duration_seconds": 0.25
+    },
+    {
+      "command": "node --experimental-strip-types --test tests/gates/harness/contracts.test.ts tests/gates/harness/ports-v2.test.ts",
+      "exit_code": 0,
+      "tests": 15,
+      "duration_seconds": 0.101
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0
+    },
+    {
+      "command": "find /tmp -maxdepth 1 -type d -name 'cw09-independent-*'",
+      "exit_code": 0,
+      "remaining_paths": []
+    }
+  ],
+  "defects": [
+    {
+      "id": "CW09-CROSS-TASK-INVALIDATION-LINK",
+      "path": "src/workbench/storage/metadata_sqlite/schema.py",
+      "boundary": "invalidated_revisions -> task_decisions foreign-key relation",
+      "test": "RepositoryInvariantTests.test_database_invalidation_cannot_reference_another_tasks_authority_decision",
+      "observation": "Create Task A and Task B, persist a scope approval decision for B, then INSERT invalidated_revisions(A, revision1, B decision). SQLite accepts the wrong Task authority link instead of rejecting it. The decision is unused, so no preexisting UNIQUE constraint masks the missing link.",
+      "expected": "Invalidation must reference the authority decision belonging to the same Task/revision; invalid cross-Task links must be rejected.",
+      "qualification": "Database integrity adversary using the test-owned SQLite connection. No public repository method cross-Task bypass was claimed."
+    }
+  ],
+  "settings_finding_resolution": {
+    "current_run": "Settings/spec change preserves the current run's immutable revision/settings/retry snapshot; subsequent retry decision links new settings and records count3; old run/decision retain count3 through reopen.",
+    "distinct_new_run": "A separate normal run may start at count0; this was confirmed and is NOT reported as a reset defect.",
+    "prior_test_expectation": "The initial independent expectation disallowed a distinct new normal run at0. Root clarified the ticket boundary; only the new test expectation was corrected and rerun. Existing worker tests were not modified."
+  },
+  "coverage": {
+    "authorization": "Proceed before persisted approval, approval/revision mismatch, invalid revision, consumed proceed replay after reopen, cancellation/revocation replay rejection.",
+    "transactions": "SQL authorizer denies INSERT runs, authorization_consumption, active_runs and COMMIT; all effects roll back and the same proceed remains usable after reopen. Denied active-pointer deletion during cancel/revoke preserves the current run and all prior history.",
+    "identity_history": "Stable Task/revision/current-run linkage, reopen, foreign_key_check and update/delete rejection across all13 append-only fact tables.",
+    "settings": "Current-run snapshot isolated from new spec/settings, new decisions link new settings, within-run retry decrease rejects, distinct normal-run count0 keeps prior count3 history intact.",
+    "messages": "Cross-Task/run message and decision linkage rejects, duplicate logical message/attempt IDs cannot overwrite either run; separate attempts keep separate histories; api_returned is never relabeled omp_processed.",
+    "shell_takeover": "Ordered sent/accepted/started/ended append facts survive reopen; request->confirmation link persists, duplicate confirmation rejects, confirmation-of-confirmation rejects; no current-run overwrite.",
+    "closed_error": "Closed valid read/write operations fail explicitly and cannot add delivery/shell/takeover/run history.",
+    "relevant_regressions": "G4 lifetime8, G4 evidence10, Python contracts20, Node contracts15 all pass on current frozen product bytes."
+  },
+  "cleanup": {
+    "test_database_connections": "Closed in test cleanup, including failures; reopened connections closed before temporary directory removal.",
+    "owned_temp_directories_remaining": [],
+    "active_owned_checks": 0,
+    "task_tests_spawned_processes": 0,
+    "g4_test_owned_processes": "Existing regression subprocesses terminate/wait in their test finally blocks."
+  },
+  "scope": {
+    "all_1149_baseline_files_unchanged": true,
+    "head_unchanged": true,
+    "index_changed": [],
+    "outside_scope": [],
+    "product_source_modified": false,
+    "docs_modified": false,
+    "worker_tests_modified": false,
+    "graphify_modified": false,
+    "workflow_ledger_modified": false
+  },
+  "unknowns": [
+    "The cross-Task finding is a schema foreign-key integrity gap. Repository public APIs otherwise passed cross-Task/run negative controls.",
+    "Metadata transaction tests verify SQLite rollback and reopen persistence, not power-loss/crash recovery or concurrent writers.",
+    "New tests do not implement policy-budget decisions or production runtime execution; Root owns final ticket acceptance."
+  ],
+  "needs_oracle": false,
+  "commit_created": false
+}

@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "invocation": "cw08-test-01",
+  "before": "b92674291216820e59b9fcbb3faf3db44a61e20130ef0b7bbd9bb2b8ab700a13",
+  "after": "e519878ceb9880617bec7a67c9f83e7376c8cbc801f436739bdff47d794eac77",
+  "allowed": [
+    "tests/bridge/live_mailbox_independent.py",
+    "tests/bridge/test_mailbox_independent.py"
+  ],
+  "named_workflow_artifacts": [
+    "raw-cw08-independent-runtime.json",
+    "result-cw08-test-01.json",
+    "snapshot-cw08-test-after.json",
+    "scope-audit-cw08-test.json"
+  ],
+  "changed": [
+    "tests/bridge/live_mailbox_independent.py",
+    "tests/bridge/test_mailbox_independent.py"
+  ],
+  "outside_scope": [],
+  "head_unchanged": true,
+  "index_changed": [],
+  "baseline_file_count": 1184,
+  "unchanged_baseline_file_count": 1184,
+  "baseline_candidate_digest_verified": true,
+  "workflow_artifacts_excluded_by_assigned_baseline": true,
+  "comparable": true
+}

@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-review-cw17-01",
+  "role": "reviewer",
+  "unit": "V-CW-17-p2.7",
+  "mode": "read-only frozen final review",
+  "frozen_candidate": "cd921059f0a9b2d916a9a5dc817367532ac5f728e52da43f093ca28f57b39674",
+  "scope": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-review-cw17-scope.json",
+  "units_covered": [
+    "CW-17 (backend lifetime, entrypoint, ui_v1)",
+    "F-CW17-INPUT-01 manual input boundary (attempts 01,02)",
+    "F-P27-DEADLINE experiment runtime (deadline-fix 01)"
+  ],
+  "criteria": [
+    "docs/features/core-workbench/tickets/CW-17.md",
+    "SPEC.md s2.7 Production 조합; 공개 계약과 불변식",
+    "BRIEF C-AC-03, 07, 08, 15, 18, 19, 20, 26, 32; 실험 실행 시간 상한 없음",
+    "OPERATING-CONTRACT §2-3, §5",
+    "ADR-0001 (no internal multiplexer), ADR-0002",
+    "Root adjudications: root-adjudication-p27-hook-rejected.json, root-adjudication-p27-return-deadline-test.json; assignment required_behavior_root_adjudication in assignment-p27-input-fix-worker-01/02.json and assignment-p27-deadline-fix-worker-01.json"
+  ],
+  "evidence": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw17-worker-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw17-test-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-input-fix-worker-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-input-fix-worker-02.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-input-test-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-deadline-fix-worker-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-deadline-test-01.json"
+  ],
+  "report": "Findings ranked P0-P3 with file:line, concrete failure scenario, violated clause; explicit verdict on: automation holds not weakened; no elapsed-time termination; exact identity/no replay; process/socket/fd leaks; ui_v1 contract soundness; security of UDS/data dir; test adequacy vs gate items. P0/P1 block integration."
+}

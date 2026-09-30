@@ -1,0 +1,31 @@
+{
+  "invocation": "cw16-final-test-01",
+  "outcome": "needs_reroute",
+  "candidate_ready": false,
+  "candidate_id": "063fb009043310ded3e39ccfdb50ec1f3e5385cd859d3c05605b5b8956f1b673",
+  "product_mutation": false,
+  "test_mutation": false,
+  "checks": {
+    "cw16_runtime_matrix": "3 tests passed",
+    "bash_dash_canonical_inner": "3 tests passed",
+    "plain_outer": "passed",
+    "tmux_outer": "observed",
+    "herdr_outer": "passed",
+    "key_hashes": "86/86 matched",
+    "owned_process_residue": "none",
+    "isolated_temp_residue": "none"
+  },
+  "finding": {
+    "severity": "documentation evidence-boundary correction",
+    "path": "docs/features/core-workbench/COMPATIBILITY.md",
+    "summary": "The support sentence can be read as a Bash/dash by plain/tmux/Herdr cross-product, but all three outer probes use Bash for the host pane; dash was exercised only in the separate G2 canonical matrix."
+  },
+  "confirmed_pending": [
+    "final manager-worker-host product flow",
+    "final UI/backend shell composition",
+    "combined policy runtime",
+    "backend-preserving detach/reconnect",
+    "real reboot"
+  ],
+  "mutation_owner": null
+}

@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "invocation": "cw15-admission-correction-01",
+  "role": "worker_senior",
+  "unit": "V-CW-15-p2.6-current",
+  "authority": "User $implement docs/features/core-workbench request; approved PLAN p2.6 CW-15; fresh review findings",
+  "objective": "Correct the ended-run command admission and metadata-gated periodic review defects without changing the production binding architecture.",
+  "candidate": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw15-positive-test.json",
+    "candidate_id": "cddcbd40126c42d30de0956f98996fe50c74512159f36054fd952add5e1d600f"
+  },
+  "required_changes": [
+    "Use one shared automatic-admission predicate for command dispatch and periodic review. It must require a reconciled ready/running state for the current run, current boot/session/owner/control evidence, no problems, automation authorization and MetadataAdmissionGate.automatic_runs_allowed.",
+    "If reconcile reports state=ended/fully terminated, dispatch_command must not fence or deliver a bound message even when OMP/shell peers remain alive and problems is empty; return a clear held/ended outcome and preserve durable no-replay state.",
+    "tick must not call PauseCoordinator.dispatch_automatic or WorkerReviewScheduler.tick while metadata automatic admission is false, boot confirmation is pending, run is ended/unknown, or other shared admission conditions fail. Explicit durable metadata success may reopen later ticks.",
+    "Add focused regressions for ended-run command hold and metadata failure -> zero review calls -> explicit success -> one allowed tick, while preserving model-error, pause, positive delivery and shutdown behavior."
+  ],
+  "allowed_write_paths": ["src/workbench/runtime/**", "src/workbench/app/**", "tests/lifecycle/**", "graphify-out/**"],
+  "constraints": [
+    "Bounded correction only; do not modify predecessor packages, docs, PLAN, state or ledger. No new architecture, external OMP, reboot, delegation, commit, publish, deploy or Docker.",
+    "Use apply_patch; run lifecycle and relevant regressions, graphify update and residue check."
+  ],
+  "report": "Return candidate_ready/needs_reroute, shared admission invariant, exact command/delivery/review counts, suites/residue, hashes/scope and pending environment items."
+}

@@ -1,0 +1,100 @@
+{
+  "schema_version": 1,
+  "invocation": "cw09-review-correction-01",
+  "role": "worker",
+  "unit": "V-CW-09-p2.6-current",
+  "status": "candidate_ready",
+  "baseline_candidate": "420a44a10bfdc17f4467ab0829b36914085322b847a211a8a2e5684e999f3926",
+  "candidate": "643deaab6d738da217d71759bc2a6b2fa0433039f5c212c29d375ea083bf7ac7",
+  "requirements_sha256": "ce80ee1ddd377af0e1234b4f61f957b86136ab3cc97d2cd908186eea3f612db3",
+  "review": ".workflow/core-workbench/runs/implement-p2.6-20260927/review-cw09-01.json",
+  "regression_evidence": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw09-review-regression-test-01.json",
+  "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw09-review-correction-after.json",
+  "scope_audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/scope-audit-cw09-review-correction.json",
+  "changed_files": [
+    "src/workbench/storage/metadata_sqlite/schema.py",
+    "src/workbench/tasks/repository.py"
+  ],
+  "fixes": [
+    {
+      "finding": "CW09-REPLACE-IMMUTABLE-TASKSPEC",
+      "change": "Enabled SQLite recursive_triggers on repository connections so the append-only BEFORE DELETE guard rejects REPLACE's implicit delete.",
+      "independent_regression": "test_insert_or_replace_cannot_overwrite_existing_task_spec_revision passes with repository-default pragmas and preserves the original row after reopen."
+    },
+    {
+      "finding": "CW09-V1-WRONG-KIND-MIGRATION",
+      "change": "Installed the invalidation authority-kind trigger on the rebuilt table before copying schema-v1 rows, within the existing BEGIN IMMEDIATE migration transaction.",
+      "independent_regression": "test_v1_migration_rejects_scope_approval_invalidation_atomically passes; user_version remains 1 and legacy schema/rows are unchanged after rejection."
+    }
+  ],
+  "checks": [
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest -v tests.tasks.test_repository_independent.RepositoryInvariantTests.test_insert_or_replace_cannot_overwrite_existing_task_spec_revision tests.tasks.test_repository_independent.RepositoryInvariantTests.test_v1_migration_rejects_scope_approval_invalidation_atomically tests.tasks.test_repository.TaskRepositoryTests.test_schema_v1_migration_preserves_cancellation_invalidation_history tests.tasks.test_repository.TaskRepositoryTests.test_invalidation_requires_its_own_task_revision_and_a_terminal_authority_decision",
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "exit_code": 0,
+      "result": "passed",
+      "summary": "4 focused regressions, including both previously failing independent cases and valid migration/cross-Task kind controls."
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/tasks -v",
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "exit_code": 0,
+      "result": "passed",
+      "summary": "22 tests."
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g3_omp /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/gates/g4_lifetime -v",
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "exit_code": 0,
+      "result": "passed",
+      "summary": "8 tests."
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/gates/g4_evidence -v",
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "exit_code": 0,
+      "result": "passed",
+      "summary": "10 tests."
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/contracts -v",
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "exit_code": 0,
+      "result": "passed",
+      "summary": "20 Python contract tests."
+    },
+    {
+      "command": "node --experimental-strip-types --test tests/gates/harness/contracts.test.ts tests/gates/harness/ports-v2.test.ts",
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "exit_code": 0,
+      "result": "passed",
+      "summary": "15 Node contract tests."
+    },
+    {
+      "command": "git diff --check",
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "exit_code": 0,
+      "result": "passed"
+    }
+  ],
+  "scope": {
+    "allowed_write_scope": [
+      "src/workbench/storage/metadata_sqlite/schema.py",
+      "src/workbench/tasks/repository.py",
+      "tests/tasks/test_repository.py"
+    ],
+    "independent_test_file_modified": false,
+    "changed_paths": [
+      "src/workbench/storage/metadata_sqlite/schema.py",
+      "src/workbench/tasks/repository.py"
+    ],
+    "outside_scope": [],
+    "index_changed": [],
+    "audit_comparable": true
+  },
+  "remaining_gaps": [
+    "Root will perform the instructed graphify update and own final candidate verification/review integration."
+  ],
+  "needs_oracle": false,
+  "commit_created": false
+}

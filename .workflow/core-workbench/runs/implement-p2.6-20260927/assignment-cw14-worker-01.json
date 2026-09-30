@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "invocation": "cw14-worker-01",
+  "role": "worker",
+  "unit": "V-CW-14-p2.6-current",
+  "authority": "User $implement docs/features/core-workbench request; approved bundle 64bcf577a30e7c6bbff3e4e775f8e6c17ca212ce3bf79b5bc5be31196a792b07; approved PLAN p2.6 CW-14; passed CW-07 and CW-09 dependencies",
+  "objective": "Implement bounded raw-log storage and separate metadata/raw-log fault policy for C-AC-24 and C-AC-28.",
+  "base": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw14-base.json",
+    "candidate_id": "de9a70c06346201c826da82df1dc154e4d1f3c80de2e5623582697a0b39a7a4e",
+    "requirements": ".workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw14.json"
+  },
+  "dependency_contracts": [
+    "Consume CW-07 PTY/lifecycle bytes as observations without controlling or terminating the experiment.",
+    "Expose a CW-09-compatible metadata health gate: durable metadata failure blocks new automatic runs until explicit successful recovery, while existing experiment observation continues."
+  ],
+  "required_behavior": [
+    "Create one small storage/log_* package with explicit defaults of 64 MiB per run and 512 MiB per project; limits are byte-exact and configurable only through constructor arguments for small fixtures.",
+    "Append only the prefix that fits the first reached run/project cap, then stop further raw-log persistence while continuing to accept observations. Report cap source, stored/observed/dropped byte totals, truncation/missing state, first/last observation time, last persisted time and storage error without raising into the experiment loop.",
+    "Keep project accounting correct for multiple runs and concurrent processes/threads using a durable lock and on-disk truth. Reject symlink/special/path traversal and quota corruption fail closed; do not follow replaced paths.",
+    "Distinguish raw-log write/open/fsync/quota failure from metadata failure. Raw-log failure or cap never blocks the running experiment, display, result files or other observation, but marks missing bytes and the last observed timestamp. Metadata failure blocks only new automatic run admission and does not stop an existing run; recovery requires an explicit later successful durable metadata observation.",
+    "Do not delete or rotate prior raw logs to regain quota. Provide no automatic deletion of TaskSpec, metadata, result summary, execution worktree or experiment-produced result files; the raw-log cap applies only inside the owned raw-log root.",
+    "Persist enough bounded status or expose an immutable status snapshot so CW-15 can connect it to run status without storing raw content in metadata. Package-only integration is expected here; do not modify workflow/run.py or TaskRepository in this ticket."
+  ],
+  "verification_matrix": [
+    "per-run and project limits immediately before, exactly at and one/many bytes over; whichever cap arrives first",
+    "several runs and concurrent writers cannot exceed project cap; restart/reopen uses on-disk sizes rather than resetting counters",
+    "partial write, open/write/fsync/quota scan/lock errors, symlink/special replacement and timestamp/status behavior",
+    "raw-log failure/cap keeps observation/experiment continuation true; metadata failure blocks new automatic admission but preserves current observation",
+    "recovery transition requires explicit durable success; raw-log health must not clear metadata failure",
+    "sentinel TaskSpec/summary/worktree/result files remain untouched and experiment result files are not counted"
+  ],
+  "allowed_write_paths": ["src/workbench/storage/log_*/**", "tests/storage/**", "graphify-out/**"],
+  "resource_claims": ["host:shell-fixture exclusive"],
+  "constraints": [
+    "Sole writer; preserve unrelated changes and existing production modules.",
+    "Use apply_patch; Python/Linux only; standard library only; no Phase 2, multiplexer, Docker, delegation, commit, publish or deploy.",
+    "Run focused storage fixtures, all tests/storage tests, relevant CW-07/CW-09 regressions and graphify update ."
+  ],
+  "report": "Return changed paths, public API and safety/accounting invariants, exact checks/counts, C-AC mapping, candidate_ready/blocker, and CW-15 integration risks."
+}

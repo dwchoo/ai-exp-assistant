@@ -1,0 +1,27 @@
+{
+  "invocation": "cw12-lockcycle-test-01",
+  "outcome": "complete",
+  "candidate_ready": true,
+  "manifest": "candidate 735bd668c817fd8c6741b7da448ab694c3489a89902736d5ff2a32eef6237a46 matched; unknowns=[]",
+  "independent_reproductions": [
+    "Stale unpaused publisher entered the setter while the mirror remained unpaused; the authoritative fence prevented the review callback.",
+    "A real CW11-lock callback performed cancellation/status while a publisher waited; both completed without deadlock and mirror/fence converged cancelled.",
+    "Manager replacement immediately before the first CW11 callback produced reconciliation_needed and no stale-bound dispatch."
+  ],
+  "checks": {
+    "focused": "three tests passed in five repeated runs",
+    "pause": "45/45 passed",
+    "atomic_admission": "26/26 passed",
+    "observation": "91/91 passed",
+    "workflow": "44/44 passed",
+    "tasks": "22/22 passed",
+    "contracts": "20/20 passed",
+    "bridge": "18/18 passed",
+    "status": "2/2 passed",
+    "g3_python": "117/117 passed with independent temporary PI_CONFIG_DIR",
+    "g3_typescript": "30/30 passed",
+    "actual_omp_18_2_10": "passed with real file/process/unknown/manual evidence and zero_residue true",
+    "graphify": "update succeeded"
+  },
+  "scope_audit": "outside_scope=[]; production unchanged"
+}

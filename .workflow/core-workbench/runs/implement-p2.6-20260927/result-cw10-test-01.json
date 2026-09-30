@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "invocation": "cw10-test-01",
+  "unit": "V-CW-10-p2.6-current",
+  "task_result": "needs_reroute",
+  "candidate_before": "73e5935017ed580d153183995bde7219d2f7db7374f8e17e772c75699a292dea",
+  "candidate_after": "b445f8dd2570503ee3f46c83a9f6194531cf108231c9f3fad188bad1c0d82626",
+  "requirements_sha256": "6c6296b8ab37529d6488b23d2f498dcac20b6cffc6e167dc9395c402702cfdbf",
+  "changed_paths": ["tests/workflow/test_run_independent.py", "tests/workflow/live_workflow_independent.py"],
+  "new_unittest_methods": 9,
+  "new_live_cases": 4,
+  "checks": [
+    {"command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest -v tests/workflow/test_run_independent.py", "exit_code": 1, "tests": 9, "passed": 8, "errors": 1},
+    {"command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/workflow -v", "exit_code": 1, "tests": 16, "passed": 15, "errors": 1},
+    {"command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/terminal -v", "exit_code": 0, "tests": 10},
+    {"command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/bridge -v", "exit_code": 0, "tests": 18},
+    {"command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/tasks -v", "exit_code": 0, "tests": 22},
+    {"command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/workflow /tmp/cw02-g1-venv/bin/python tests/workflow/live_workflow_independent.py", "exit_code": 0, "cases": 4, "evidence": "raw-cw10-independent-runtime.json"},
+    {"command": "git diff --check", "exit_code": 0}
+  ],
+  "implementation_defects": [
+    {
+      "id": "CW10-MISSING-RAW-LOG-UNHANDLED",
+      "test": "test_missing_raw_log_after_confirmed_exit_is_indeterminate",
+      "observed": "After a real Bash command has confirmed exit 0, removal of its temporary raw.log artifact causes WorkflowRun.judge() to raise FileNotFoundError at src/workbench/workflow/run.py:184; no indeterminate judgment or linked REPORT is produced.",
+      "expected": "Missing raw execution evidence must not become success or an uncaught exception; record an explicit indeterminate judgment with insufficient_raw_log and continue the durable report path.",
+      "reproduction": "tests/workflow/test_run_independent.py:261"
+    }
+  ],
+  "cleanup": {"temporary_directory_residue": [], "owned_process_residue": [], "source_repository_unchanged": true},
+  "needs_oracle": false,
+  "overall_completion_claimed": false
+}

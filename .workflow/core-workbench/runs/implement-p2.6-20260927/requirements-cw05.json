@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "revision": "core-workbench-p2.6-CW-05",
+  "authority": "User $implement docs/features/core-workbench request; approved bundle 64bcf577a30e7c6bbff3e4e775f8e6c17ca212ce3bf79b5bc5be31196a792b07; C-D55 approval .workflow/core-workbench/runs/decisions-cd55-20260926/approval.json",
+  "acceptance_ids": ["C-AC-08", "C-AC-12", "C-AC-15", "C-AC-18", "C-AC-25", "C-AC-26", "C-AC-28", "C-AC-29", "C-AC-30", "C-AC-33"],
+  "gate_items": [
+    {"id": "G4-LIFETIME", "acceptance_ids": ["C-AC-15", "C-AC-18"], "required_evidence_level": "runtime"},
+    {"id": "G4-WAKE", "acceptance_ids": ["C-AC-12", "C-AC-15", "C-AC-30"], "required_evidence_level": "runtime"},
+    {"id": "G4-STORE-PORT", "acceptance_ids": ["C-AC-28", "C-AC-29"], "required_evidence_level": "fixture"},
+    {"id": "G4-CONTRACT", "acceptance_ids": ["C-AC-08", "C-AC-25", "C-AC-26", "C-AC-33"], "required_evidence_level": "fixture"},
+    {"id": "G4-EVIDENCE", "acceptance_ids": ["C-AC-08", "C-AC-12", "C-AC-15", "C-AC-18", "C-AC-25", "C-AC-26", "C-AC-28", "C-AC-29", "C-AC-30", "C-AC-33"], "required_evidence_level": "fixture"}
+  ]
+}

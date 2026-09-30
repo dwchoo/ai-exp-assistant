@@ -1,0 +1,16 @@
+{
+  "invocation":"cw03-control-lifecycle-worker-02",
+  "role":"worker_senior",
+  "unit":"V-CW-03",
+  "base_candidate":"0969258347cf5b0f3839643afc573cbf3090bdccd8416b41ae64d198e6e92135 plus partial lifecycle.py",
+  "purpose":"Complete or safely discard the partial G2-CONTROL/G2-LIFECYCLE runtime integration",
+  "write_scope":["src/workbench/terminal/shell_g2/**","tests/gates/g2_shell/live_control_lifecycle_probe.py","tests/gates/g2_shell/live_combined_boundary_probe.py"],
+  "requirements":[
+    "Inspect the partial lifecycle.py and either connect it to actual ControlWaitProbe/ShellProcess runtime semantics or remove it if the simpler existing state machine should be extended; do not leave dead code.",
+    "Provide actual runtime observation separating ACCEPT, supervisor start, experiment start, main return, descendants ended-or-unknown, input return, and control return.",
+    "Connect unknown to follow-up/input-release/replay hold and exercise FD loss, flush failure, and supervisor death without false completion.",
+    "Preserve native TSTP as unknown if it cannot be proved, and preserve managed-descendant/manual-daemon/C-D55 boundaries.",
+    "Do not modify test_*.py. Run existing suites and a bounded Bash/dash live probe; report hard failures separately from approved unknowns and existing negative controls."
+  ],
+  "constraints":["No dead unintegrated file","No Docker/commit/push","One writer","No acceptance claim without runtime evidence"]
+}

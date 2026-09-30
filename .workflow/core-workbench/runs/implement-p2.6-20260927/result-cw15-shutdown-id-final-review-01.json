@@ -1,0 +1,29 @@
+{
+  "invocation": "cw15-shutdown-id-final-review-01",
+  "outcome": "complete",
+  "candidate_ready": true,
+  "candidate_id": "865fc473ddae3f49ed15ebc9e99e6a8bbe4f41a66aa9cf187557dca0fd840a3c",
+  "snapshot_hashes_match": true,
+  "findings": [],
+  "acceptance": {
+    "C-AC-15": "accepted with in-repository evidence",
+    "C-AC-16": "accepted with in-repository evidence",
+    "C-AC-17": "accepted with in-repository evidence",
+    "C-AC-18": "accepted with in-repository evidence",
+    "C-AC-22": "accepted with in-repository evidence",
+    "C-AC-23": "accepted with in-repository evidence"
+  },
+  "verified": {
+    "non_live_tests": 398,
+    "production_hashes": "matched frozen snapshot",
+    "process_residue": "none observed",
+    "temporary_residue": "none observed"
+  },
+  "pending": [
+    "external OMP execution",
+    "real reboot verification",
+    "pyte live verification"
+  ],
+  "needs_oracle": false,
+  "mutation_owner": null
+}

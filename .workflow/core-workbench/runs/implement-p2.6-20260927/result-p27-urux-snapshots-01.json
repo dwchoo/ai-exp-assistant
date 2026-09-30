@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-urux-snapshots-01",
+  "status": "complete",
+  "candidate": "bd8c8b8c45bebe3eacd7fa552a6871581f8520889eaee90d1a7aef4ce4fd11b4 (CW-06 integrated + p27i test + state.json); repo changes by agent: none besides snapshots",
+  "outputs": ".workflow/core-workbench/runs/implement-p2.6-20260927/ur-ux/snapshots/ (19 files, 160x45 unless noted)",
+  "model_turns": 0,
+  "observations": ["after flood + Ctrl-C, wb-handoff was refused with unknown_or_manual_residue (UX data point)", "vt_g1 TerminalScreen ignores DEC special graphics (ESC(0) in UTF-8 mode; agent converted line drawing only in its scratch rendering) -> pane fidelity gap for apps using ACS line drawing", "narrow 100x30: host pane title truncated", "13-after-detach shows temporary data dir path"],
+  "residue": "none (shutdown verified; /tmp/ux* removed)",
+  "observed_model": "sonnet (wb-worker definition; host metadata unverified)"
+}

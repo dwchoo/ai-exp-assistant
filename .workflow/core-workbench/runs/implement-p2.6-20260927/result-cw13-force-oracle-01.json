@@ -1,0 +1,24 @@
+{
+  "invocation": "cw13-force-oracle-01",
+  "outcome": "complete",
+  "verdict": "All three failing force subcases must be blocked under the current CW-10 supplier semantics.",
+  "confidence": {
+    "supplier_state_semantics": "high",
+    "runtime_adapter_signal_behavior": "unknown until CW-15"
+  },
+  "observations": [
+    "CW-10 records shell_state exited and exit_confirmed true only after lifetime ended and input/control returned.",
+    "Main exit while descendants remain is represented as shell_state running and exit_confirmed false.",
+    "owned_target_confirmed currently proves only a boolean claim without an explicit fresh liveness contract."
+  ],
+  "required_invariant": [
+    "Force requires shell_state running, exit_confirmed false, lifetime running and descendants_clear false.",
+    "Separate exact target identity/ownership from fresh target liveness; require target_alive true for the same exact target in the current observation sequence.",
+    "Keep ordinary-stop proof and observation.sequence greater than stop request sequence; cached repackaging is not a fresh observation.",
+    "After force, retain the full lifetime/input/control termination barrier before mutation or relaunch."
+  ],
+  "positive_regression": "Main exit status may be present while the managed execution remains running/exit_confirmed false with descendants and exact target alive; this may still authorize force after ordinary stop.",
+  "acceptance_impact": "C-AC-34 remains open until the invariant and tests are added; C-AC-10 full termination barrier remains unchanged.",
+  "mutation": "none",
+  "oracle": "/root/cw13_force_semantics_oracle"
+}

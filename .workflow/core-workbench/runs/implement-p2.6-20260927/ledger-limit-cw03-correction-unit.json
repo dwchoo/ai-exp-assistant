@@ -1,0 +1,23 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 113,
+  "event": {
+    "id": "limit-cw03-split-pg-correction-unit-20260928",
+    "kind": "limit",
+    "data": {
+      "bucket": "unit:V-CW-03",
+      "origin": "operating",
+      "value": 29,
+      "authority": "Approved PLAN p2.6, C-D55, workflow-contract section 8, and current implementation authorization",
+      "reason": "One reviewer-required split-PG correction, one independent delta test, and one fresh delta review",
+      "decision_owner": "Root",
+      "remaining_work_estimate": 3,
+      "expected_previous": {
+        "value": 26,
+        "authority": "Approved PLAN p2.6, C-D55, workflow-contract section 8, and current implementation authorization",
+        "reason": "Remaining coupled G2-CONTROL/G2-LIFECYCLE implementation, independent tests, fresh review, and bounded correction contingency"
+      },
+      "scope_basis": null
+    }
+  }
+}

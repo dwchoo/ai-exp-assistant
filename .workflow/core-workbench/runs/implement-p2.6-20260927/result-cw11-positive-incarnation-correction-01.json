@@ -1,0 +1,8 @@
+{
+  "invocation":"cw11-positive-incarnation-correction-01",
+  "outcome":"complete",
+  "candidate_ready":true,
+  "correction":"SerializedReviewAdmission starts at run_incarnation 1 when constructed with an active run, otherwise 0; first activation becomes 1 and idempotent/A-None-A semantics remain monotonic.",
+  "checks":{"observation":"83/83 passed","workflow":"44/44 passed","bridge":"18/18 passed","contracts":"20/20 passed","actual_omp_18_2_10":"60.0-second review, 13th wake, exit notification in 0.085 seconds, zero residue"},
+  "graphify_updated":true
+}

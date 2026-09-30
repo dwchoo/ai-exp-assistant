@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "format": "baseline-plus-delta-v1",
+  "workspace": "/home/dwchoo/ai-exp-assistant",
+  "candidate": "9d9d884d70c5b511def88915acde152df79dc0dca52d329235ac36893e6d3862",
+  "baseline": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw02-g1-worker-after.json",
+  "base_candidate": "41d508cb7a017906e42e03f75e5b6f55a28ce894990f5f62dfd08c48c01fbe42",
+  "observed_at": "2026-09-27T18:53:55.266109+00:00",
+  "identity_reconstruction": "Load baseline.identity, add identity_delta.files; all other identity fields are unchanged. candidate is SHA256 of sorted compact ensure_ascii=false identity JSON plus LF, matching the baseline digest encoding.",
+  "identity_delta": {
+    "files": {
+      "tests/gates/g1_vt/test_closure_independent.py": {
+        "kind": "file",
+        "mode": 436,
+        "sha256": "e3904f7318380c18ae3aaf25baa83d42a4a1c8cbc19ff26b2666822112b6afbe"
+      }
+    }
+  },
+  "unchanged_baseline_file_count": 1095,
+  "head_unchanged": true,
+  "index_unchanged": true,
+  "watch_unchanged": true,
+  "exclude_unchanged": true,
+  "unknowns": []
+}

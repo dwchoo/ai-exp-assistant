@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "invocation": "cw12-directory-mode-review-01",
+  "role": "reviewer",
+  "unit": "V-CW-12-p2.6-current",
+  "authority": "User $implement docs/features/core-workbench request; approved PLAN p2.6 CW-12",
+  "objective": "Perform a fresh read-only final acceptance review of the complete CW-12 candidate after directory-mode correction and mode-specific actual OMP verification.",
+  "candidate": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw12-directory-mode-test.json",
+    "candidate_id": "308debdd963312700a0fccf7f034fcd3b091b7c5a5aaff52dd53a58187542e07"
+  },
+  "acceptance_ids": ["C-AC-25", "C-AC-30", "C-AC-33"],
+  "review_focus": [
+    "Complete prior findings: persisted active-run/identity fences, late callback attribution, production resume observations, file/index/flag/mode and directory-mode reconciliation.",
+    "Directory root, ancestor, nested and empty directory mode/identity capture for Git and non-Git scopes; exact approved path behavior; fd-relative no-follow race handling.",
+    "Bounded failure semantics and large clean repository liveness without clean-content full hashing.",
+    "Independent fixture and actual omp/18.2.10 directory chmod reject-restore-reconcile-resume evidence, replay safety, and zero residue.",
+    "Any remaining correctness, security, compatibility or evidence gap against C-AC-25/C-AC-30/C-AC-33."
+  ],
+  "constraints": [
+    "Read-only reviewer: do not edit any file or run mutating graphify commands.",
+    "No delegation, commit, publish, deploy, or Docker."
+  ],
+  "report": "Return candidate_ready true/false, findings by severity with paths/lines, acceptance judgment per ID, evidence adequacy, and bounded residual risks."
+}

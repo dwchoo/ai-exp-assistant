@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "revision": "core-workbench-p2.6-CW-02",
+  "authority": "User $implement docs/features/core-workbench request; approved bundle 64bcf577a30e7c6bbff3e4e775f8e6c17ca212ce3bf79b5bc5be31196a792b07; C-D55 approval .workflow/core-workbench/runs/decisions-cd55-20260926/approval.json",
+  "acceptance_ids": ["C-AC-06", "C-AC-14", "C-AC-19", "C-AC-20"],
+  "gate_items": [
+    {"id": "G1-RESIZE", "acceptance_ids": ["C-AC-06", "C-AC-14", "C-AC-19"], "required_evidence_level": "runtime"},
+    {"id": "G1-THREE-PANE", "acceptance_ids": ["C-AC-06", "C-AC-14", "C-AC-19"], "required_evidence_level": "runtime"},
+    {"id": "G1-TEXT-TOOLS", "acceptance_ids": ["C-AC-14", "C-AC-19", "C-AC-20"], "required_evidence_level": "runtime"},
+    {"id": "G1-PASTE", "acceptance_ids": ["C-AC-19"], "required_evidence_level": "runtime"},
+    {"id": "G1-VT-QUERY", "acceptance_ids": ["C-AC-14", "C-AC-19"], "required_evidence_level": "fixture"},
+    {"id": "G1-COLOR", "acceptance_ids": ["C-AC-14", "C-AC-20"], "required_evidence_level": "runtime"},
+    {"id": "G1-OUTER", "acceptance_ids": ["C-AC-19", "C-AC-20"], "required_evidence_level": "runtime"}
+  ]
+}

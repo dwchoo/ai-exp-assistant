@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "invocation": "cw10-test-01",
+  "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/workflow /tmp/cw02-g1-venv/bin/python tests/workflow/live_workflow_independent.py",
+  "exit_code": 0,
+  "status": "passed",
+  "cases": [
+    {"case": "success", "shell": "bash", "exit_confirmed": true, "exit_status": 0, "judgment": "success", "reason_codes": ["criteria_met"], "shell_event_order": ["sent", "accepted", "started", "ended"], "explicit_commit_matched": true, "source_status_unchanged": true, "raw_log_location_recorded": true, "result_location_recorded": true, "parent_pid_residue": false},
+    {"case": "nonzero", "shell": "bash", "exit_confirmed": true, "exit_status": 9, "judgment": "failure", "reason_codes": ["nonzero_exit"], "shell_event_order": ["sent", "accepted", "started", "ended"], "explicit_commit_matched": true, "source_status_unchanged": true, "raw_log_location_recorded": true, "result_location_recorded": true, "parent_pid_residue": false},
+    {"case": "exit_zero_wrong_result", "shell": "sh", "exit_confirmed": true, "exit_status": 0, "judgment": "failure", "reason_codes": ["exit_zero_criteria_failed"], "shell_event_order": ["sent", "accepted", "started", "ended"], "explicit_commit_matched": true, "source_status_unchanged": true, "raw_log_location_recorded": true, "result_location_recorded": true, "parent_pid_residue": false},
+    {"case": "no_log", "shell": "sh", "exit_confirmed": true, "exit_status": 0, "judgment": "indeterminate", "reason_codes": ["insufficient_raw_log"], "shell_event_order": ["sent", "accepted", "started", "ended"], "explicit_commit_matched": true, "source_status_unchanged": true, "raw_log_location_recorded": true, "result_location_recorded": true, "parent_pid_residue": false}
+  ],
+  "temporary_directory_residue": [],
+  "owned_process_residue": []
+}

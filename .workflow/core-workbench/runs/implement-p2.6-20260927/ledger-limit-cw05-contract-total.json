@@ -1,0 +1,12 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 291,
+  "event": {"id": "limit-cw05-contract-total-20260928", "kind": "limit", "data": {
+    "bucket": "total", "origin": "operating", "value": 279,
+    "authority": "C-D55 plus workflow-contract section 8 and current implementation authorization",
+    "reason": "Fresh-review TypeScript exact-key collision correction plus delta review",
+    "decision_owner": "Root", "remaining_work_estimate": 2,
+    "expected_previous": {"value": 277, "authority": "C-D55 plus workflow-contract section 8 and current implementation authorization", "reason": "Independent CW-05 false-pass correction plus fresh delta review"},
+    "scope_basis": null
+  }}
+}

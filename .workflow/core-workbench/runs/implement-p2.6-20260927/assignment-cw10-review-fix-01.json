@@ -1,0 +1,21 @@
+{
+  "invocation":"cw10-review-fix-01","role":"worker_senior","unit":"V-CW-10-p2.6-current","objective":"Correct all four confirmed CW-10 fresh-review findings while preserving the validated worktree/shell/evidence behavior.",
+  "candidate_manifest":".workflow/core-workbench/runs/implement-p2.6-20260927/cw10-frozen-candidate.json","requirements":".workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw10.json",
+  "findings":[
+    "P1 worker-role bypass: OMP_PROCESSED is not a worker execution decision or evidence judgment. Introduce an explicit public worker-role decision/report port bound to exact Task/revision/run/message/session evidence; host orchestration must not fabricate worker acceptance or judgment. Actual runtime must observe a real OMP assistant response identity before executing and before manager REPORT.",
+    "P1 TOCTOU: re-read current automation, cancel/revoke/proceed authority immediately before every new shell dispatch and automated worker-analysis/report step; stale caller booleans/snapshots must fail closed.",
+    "P2 direct worker request: connect existing-scope, bounded-small-new-spec, and scope-expansion requests to concrete durable Task/revision/approval/proceed routing. Expansion cannot execute before manager authority; classification-only is insufficient.",
+    "P2 credential privacy: never persist environment values. Durable records may contain only approved variable names and non-secret execution-context metadata; secrets/credentials must be absent from run JSON, SQLite events, reports, and logs."
+  ],
+  "allowed_files":["src/workbench/workflow/**","tests/workflow/test_run.py","tests/workflow/live_workflow_probe.py","docs/features/core-workbench/WORKTREE-GUIDE.md"],
+  "constraints":[
+    "Do not change CW07/CW08/CW09 product code or independent tests.",
+    "Use public dependency APIs and explicit injected ports; do not read private bridge state or forward/store model text/credentials.",
+    "Do not overclaim assistant content: bind decisions to exact identity and verified response evidence, with unknown/no replay on ambiguity.",
+    "Preserve missing/changed evidence indeterminate logic and worktree safety.",
+    "C-AC-28 metadata-after-dispatch failure remains CW-14 integration ownership; document the residual without worsening it.",
+    "No shared repo commit/push/merge/stash/reset/clean, no Docker."
+  ],
+  "verification":["Pre/post focused cases for all four findings.","Actual OMP 18.2.10 worker response identity and manager report path, real temp Git worktree and host shell.","Pause/cancel/revoke interleavings at worktree and pre-dispatch/pre-analysis barriers.","Secret sentinel absent by recursive scan of durable files and SQLite payloads.","All workflow and dependency regressions, bounded cleanup, snapshot/audit/result."],
+  "report":["design/public port and per-finding closure","actual runtime evidence","checks/results","snapshot/scope audit","candidate_ready or needs_reroute"]
+}

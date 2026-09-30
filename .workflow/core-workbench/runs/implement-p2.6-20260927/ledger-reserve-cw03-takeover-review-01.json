@@ -1,0 +1,5 @@
+{
+  "path": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 33,
+  "event": {"id": "reserve-cw03-takeover-review-01", "kind": "reserve", "data": {"invocation": "cw03-takeover-review-01", "role": "reviewer", "unit": "V-CW-03", "incident": "", "purpose": "Fresh independent review of final G2-TAKEOVER candidate", "model": "gpt-6-sol", "effort": "high", "buckets": ["total", "role:reviewer", "unit:V-CW-03"], "writer": false, "workspace": "/home/dwchoo/ai-exp-assistant"}}
+}

@@ -1,0 +1,26 @@
+{
+  "invocation": "cw02-g1-test-01",
+  "ticket": "CW-02",
+  "unit": "V-CW-02-p2.6-current",
+  "role": "test_designer",
+  "workspace": "/home/dwchoo/ai-exp-assistant",
+  "baseline": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw02-g1-worker-after.json",
+  "candidate": "41d508cb7a017906e42e03f75e5b6f55a28ce894990f5f62dfd08c48c01fbe42",
+  "authority": "User $implement docs/features/core-workbench; independent testing required by implement workflow",
+  "objective": "Independently test the frozen CW-02 G1 closure candidate without modifying product source.",
+  "requirements": [
+    "Read CW-02, G1, requirements-cw02.json, worker result, and the five changed files. Derive tests from the approved gate requirements, not from worker assertions.",
+    "Add independent test-only coverage under tests/gates/g1_vt/** where it materially detects false positives. Source files under src/** are read-only.",
+    "Challenge exact RGB and emphasis preservation: palette approximation, missing SGR, data/style mismatches, geometry mismatch, static/parser-only evidence, and redraw/cursor regressions must not pass.",
+    "Challenge private DSR handling: DEC private CPR may reply, unsupported private DSR 996 must not crash or invent a reply, and FIFO/query behavior must remain stable.",
+    "Challenge plain/Herdr outer predicates for stale markers, cross-routing, incomplete paste, wrong PID/geometry, missing alternate restore/cleanup, isolation/default-state drift, and inherited HERDR context leakage.",
+    "Run the focused/full G1 suite and independently execute the actual color, plain, and isolated non-nested Herdr runtime probes on the current candidate. Do not use or mutate user default Herdr sessions/configuration; verify cleanup and state preservation.",
+    "Use apply_patch only. Touch only tests/gates/g1_vt/** plus the named workflow result/snapshot/audit artifacts. Do not edit product source, docs, PLAN, ledger, graphify, or commit/push.",
+    "Return candidate_ready, needs_reroute, or blocked with exact commands/results/unknowns in result-cw02-g1-test-01.json, plus a compact after snapshot and scope audit."
+  ],
+  "deliverables": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw02-g1-test-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw02-g1-test-after.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/scope-audit-cw02-g1-test.json"
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "invocation": "cw03-decision-oracle-01",
+  "candidate": "7b2048c50e0794da847ad8674d4dc0433d643c33",
+  "status": "advice_complete",
+  "mutated_product_files": false,
+  "runtime_experiments_run": false,
+  "findings": [
+    "Separate child interpreter/executable execution and removal of parent-shell eval fallback are already approved by C-D54/SPEC; no new user decision is required.",
+    "Fail-closed handling for incompatible hook/trap or unverifiable job state is already approved, while intentional same-user helper/event forgery remains outside the security boundary.",
+    "Retaining Bash-first and the selected actual sh/dash fallback is consistent with existing approval; dropping dash would not remove the core ownership races.",
+    "The proposed Ctrl-Z-to-pause/takeover change should not be approved on the current evidence. The live probe TSTP handler records SIGNAL_TSTP but does not actually stop, while four start/return cells expect a T process state.",
+    "The two parent-WAIT TSTP unknowns also need signal disposition and process-group/session discrimination before assigning a cause.",
+    "Existing pause/takeover leaves the current host experiment running, so describing Ctrl-Z remapping as suspend or prompt recovery would conflict with C-D49/C-D52.",
+    "The 11 broad-suite failures should be preserved and split into removed-path negative controls and equivalent new-path regression tests rather than deleted or treated as eleven production defects.",
+    "The six native TSTP unknowns must be re-probed after fixing the fixture/expectation mismatch; they cannot be relabeled passed or unsupported yet.",
+    "The six delegated-cgroup skips remain environment-limited evidence consistent with cgroup being non-required."
+  ],
+  "recommended_next_step": "Run a narrow corrected TSTP discrimination before asking the user to change Ctrl-Z product semantics; retain the already-approved child-exec, fail-closed hook, and Bash/sh boundaries.",
+  "evidence_notes": [
+    "The 105 tests / 11 failures / 6 skips observation came from Root host stdout and was not saved as a formal check record.",
+    "Oracle performed static read-only review and did not independently rerun runtime checks."
+  ]
+}

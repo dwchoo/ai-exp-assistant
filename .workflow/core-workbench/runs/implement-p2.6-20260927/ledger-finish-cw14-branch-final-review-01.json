@@ -1,0 +1,17 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 1084,
+  "event": {
+    "id": "finish-cw14-branch-final-review-01",
+    "kind": "transition",
+    "data": {
+      "invocation": "cw14-branch-final-review-01",
+      "state": "finished",
+      "evidence": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw14-branch-final-review-01.json",
+      "outcome": "complete",
+      "observed_model": "gpt-6-sol",
+      "observed_effort": "high",
+      "not_started_evidence": null
+    }
+  }
+}

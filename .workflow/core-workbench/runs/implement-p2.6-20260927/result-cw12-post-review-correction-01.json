@@ -1,0 +1,28 @@
+{
+  "invocation": "cw12-post-review-correction-01",
+  "outcome": "complete",
+  "candidate_ready": true,
+  "changed_paths": [
+    "src/workbench/policy/pause_automation/controller.py",
+    "src/workbench/tasks/repository.py",
+    "src/workbench/observation/worker_review.py",
+    "tests/policy/pause_automation/test_pause_policy.py",
+    "tests/observation/test_atomic_admission_independent.py",
+    "graphify-out/**"
+  ],
+  "fixes": [
+    "Persisted active-run terminal/revocation transitions and local/bound automatic dispatch share a run guard; exact Task/revision/run is checked before opening dispatch.",
+    "Production live resume derives file, process, tool, task, and approval match evidence from observations, including bounded manifests of actual G3 peer cwd paths; unavailable observations fail closed.",
+    "Late CW-11 callback results preserve historical outcome but do not count as the current tick after authority changes."
+  ],
+  "checks": {
+    "policy": "66 tests passed",
+    "focused": "89 tests passed",
+    "observation": "95 tests passed",
+    "tasks": "22 tests passed",
+    "bridge": "22 tests passed",
+    "graphify": "graphify update . exit 0; topology unchanged"
+  },
+  "residual_risk": "OMP peer cwd manifests prove bounded stable observations but do not directly map each individual file change to approved scope; unavailable peer/cwd/scan observations reject resume.",
+  "mutation_owner": "/root/cw12_post_review_correction"
+}

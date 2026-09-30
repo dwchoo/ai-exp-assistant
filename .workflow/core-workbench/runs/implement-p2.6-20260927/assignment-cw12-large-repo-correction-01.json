@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "invocation": "cw12-large-repo-correction-01",
+  "role": "worker_senior",
+  "unit": "V-CW-12-p2.6-current",
+  "authority": "User $implement docs/features/core-workbench request; approved PLAN p2.6 CW-12 and fresh liveness review evidence",
+  "objective": "Preserve bounded reconciliation while allowing normal large Git repository peer cwd binding.",
+  "base_candidate": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw12-scan-race-test.json",
+    "candidate_id": "515a8428abf0502170f2d581991a58ff7232bfd936b134854020b7ad7f8c4cdb",
+    "review": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-scan-race-review-01.json"
+  },
+  "required_corrections": [
+    "For a peer cwd inside a Git worktree, build the early durable baseline from bounded Git identity plus tracked modifications, untracked files, and ignored untracked files, hashing only the bounded changed set; do not full-scan every clean tracked file.",
+    "Keep filename-output, changed-file count, per-file and total-byte limits, privacy, O_NOFOLLOW/escape protections, and fail-closed behavior for Git errors or mutation.",
+    "Retain the bounded fd-relative full-directory fallback for non-Git peer cwd.",
+    "Prove a clean Git repository exceeding 2048 entries and 64 MiB can bind/open authority, while a bounded changed set still detects post-bind out-of-scope tracked, untracked, and ignored changes.",
+    "Add focused liveness and negative tests without weakening prior scan-race coverage."
+  ],
+  "allowed_write_paths": ["src/workbench/policy/pause_automation/**", "tests/policy/pause_automation/**", "graphify-out/**"],
+  "constraints": [
+    "Sole product mutation owner; preserve all prior fixes and unrelated changes.",
+    "Use apply_patch; no new dependency or user-facing configuration.",
+    "Do not edit .workflow/docs/PLAN/state or other product areas; do not delegate, commit, publish, deploy, or use Docker.",
+    "Run focused/policy tests, a representative large-repo fixture, graphify update ., and report exact evidence."
+  ],
+  "report": "Return changed paths, exact Git/non-Git semantics, checks/counts, large-repo evidence, candidate_ready/blocker, and residual risks."
+}

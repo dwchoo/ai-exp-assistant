@@ -1,0 +1,36 @@
+{
+  "invocation": "cw15-intent-final-review-01",
+  "outcome": "complete",
+  "candidate_ready": false,
+  "candidate_id": "d9ea1d5de9f371776d456f7d80d8f81a8f96eb77fca1ec158c2229a694f14e66",
+  "snapshot_hashes_match": true,
+  "findings": [
+    {
+      "severity": "P1",
+      "path": "src/workbench/app/lifecycle.py",
+      "lines": "530,577-590",
+      "summary": "The takeover intent Event is never cleared, so a successful same-coordinator handoff back to manager leaves all future automatic admission permanently held."
+    },
+    {
+      "severity": "P1",
+      "path": "src/workbench/ipc/bridge_g3/mailbox.py",
+      "lines": "368-388,415-435",
+      "summary": "Authority is checked before the actual socket write with no atomic submission claim. Takeover can win after current() but before _send_until and a new frame can still be transmitted."
+    },
+    {
+      "severity": "P2",
+      "path": "src/workbench/app/lifecycle.py",
+      "lines": "479-486",
+      "summary": "The legacy CommandPort fallback performs a one-time permit check and then invokes a token-unaware send; official production uses send_bound but generic coordinator safety is overstated."
+    }
+  ],
+  "acceptance": {
+    "C-AC-15": "met in-repo",
+    "C-AC-16": "met in-repo",
+    "C-AC-17": "met in-repo",
+    "C-AC-18": "not met due handoff and final check-to-send races; external OMP pending",
+    "C-AC-22": "met in-repo",
+    "C-AC-23": "met in-repo; real reboot pending"
+  },
+  "mutation_owner": null
+}

@@ -1,0 +1,24 @@
+{
+  "invocation": "cw12-review-01",
+  "role": "reviewer",
+  "unit": "V-CW-12-p2.6-current",
+  "objective": "Fresh independent review of the frozen CW-12 pause automation and status candidate after concurrency/cancellation corrections.",
+  "candidate_manifest": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw12-delta-test-after.json",
+  "candidate": "1c2f03de80c76421aa59b64606182fabfb1b6eac43a6f91e81cf1d22578c3cf0",
+  "requirements": ".workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw12.json",
+  "ticket": "docs/features/core-workbench/tickets/CW-12.md",
+  "worker_evidence": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-worker-01.json",
+  "test_evidence": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-test-01.json",
+  "correction_evidence": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-correction-01.json",
+  "delta_test_evidence": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-delta-test-01.json",
+  "must_review": [
+    "Validate candidate manifest/hash and map every C-AC-25/30/33 clause to production behavior and current runtime evidence.",
+    "Reproduce/refute all six prior findings: review admission gap, local dispatch gap, cancellation dispatch/status, rebind state leak, FIFO blocking, and cancellation without prior pause.",
+    "Audit coordinator/admission/repository lock order for deadlock, reentrancy, starvation, and the exact linearization meaning of already-started work versus work started after pause.",
+    "Audit durable journal atomicity, corruption/special-file handling, exact run/scope/session binding, cancellation exactly-once, privacy, persistence failure, restart, and partial resume compensation.",
+    "Audit status projection for confirmed vs unknown facts, manager/worker separation, pause/cancel/takeover independence, immutability, and no false completion/rollback claim.",
+    "Assess actual OMP evidence honestly: worker passed_abort_only probe vs test-designer startup inconclusive and no live resume; determine whether this is a qualification or gate-blocking gap under the ticket."
+  ],
+  "constraints": ["Review-only; no edits/mutations; report P0-P3 findings or explicit no findings; no destructive git actions."],
+  "report": ["candidate validation", "acceptance coverage", "prior-finding closure", "new findings", "evidence qualifications", "candidate_ready or needs_reroute"]
+}

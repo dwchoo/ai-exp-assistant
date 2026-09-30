@@ -1,0 +1,30 @@
+{
+  "invocation": "cw13-cas-correction-01",
+  "outcome": "complete",
+  "candidate_ready": true,
+  "changed_paths": [
+    "src/workbench/policy/recovery_manager/policy.py",
+    "tests/policy/recovery_manager/test_recovery_policy.py",
+    "graphify-out/**"
+  ],
+  "implementation": {
+    "reserve_result": "accept exactly bool True",
+    "post_read": "required immediately after successful reservation",
+    "history_rule": "post attempts must equal the complete pre-attempt tuple plus exactly RetryAttempt(task_id, decision_id, recovery)",
+    "fact_rule": "all decision-critical facts must equal the pre-CAS facts except for that exact appended attempt",
+    "failure_rule": "exception, malformed result, drift, missing/duplicate/skipped attempt, or read failure returns blocked_unresolved with no steps",
+    "success_report": "uses confirmed post-CAS attempt usage and ordinal"
+  },
+  "checks": {
+    "pre_correction_regression": "response 1 and True-without-ledger both failed by authorizing bounded_recovery_retry",
+    "recovery_manager": "17 tests passed",
+    "tasks": "22 tests passed",
+    "observation": "95 tests passed",
+    "workflow": "44 tests passed",
+    "pause_automation": "129 tests passed",
+    "graphify_update": "exit 0; 4728 nodes and 9991 edges",
+    "residual_processes": "none"
+  },
+  "residual_risk": "CW-15 adapter must implement a truly fresh durable read and task-wide atomic CAS; policy never executes or replays the retry action.",
+  "mutation_owner": "/root/cw12_post_review_correction"
+}

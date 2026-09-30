@@ -1,0 +1,106 @@
+{
+  "sources": [
+    {
+      "path": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.3-20260924/ledger.json",
+      "expected_sha256": "3d50d7eb4ad528368cfa8c5966767acba247de1e270568917176dcbf4c35a24f"
+    },
+    {
+      "path": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/oracle-review-20260924/ledger.json",
+      "expected_sha256": "a4fc766d8d476dfc68463cecccd469b2f20535eabd7b285b6597ae41eaf3d3c9"
+    },
+    {
+      "path": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/oracle-review-20260924/formal-plan-review-ledger.json",
+      "expected_sha256": "aee5ede080b656aa46ec4e6d84f064a06684f5411c2410697ca4fccf63b059a8"
+    },
+    {
+      "path": "/home/dwchoo/ai-exp-assistant/docs/features/core-workbench/PLAN.json",
+      "expected_sha256": "e0213ae577dc72c18021ec193fd351359519db303343d3368f3ea5b6172c8257"
+    }
+  ],
+  "destination": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.5-20260925/ledger.json",
+  "run_id": "core-workbench-p2.5-20260925",
+  "mode": "write",
+  "strategy": "opening",
+  "mapping": {
+    "actor": "Root",
+    "authority": "User approval and explicit $implement request on 2026-09-25",
+    "reason": "Continue cumulative feature accounting at 186 of the explicit 220 child-call cap while preserving legacy ledgers",
+    "quiescence": {
+      "status": "quiescent",
+      "evidence_refs": [
+        "collaboration.list_agents 2026-09-25: root only",
+        "legacy implementation ledger active_assignments empty and reserved zero"
+      ]
+    },
+    "field_mappings": [
+      {"source":"/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/oracle-review-20260924/formal-plan-review-ledger.json","source_pointer":"/budget/explicit_cap","target":"/limits/total/user","evidence_refs":["formal plan review ledger explicit_cap=220"]},
+      {"source":"/home/dwchoo/ai-exp-assistant/docs/features/core-workbench/PLAN.json","source_pointer":"/budget_policy","target":"/limits/role:worker_senior/operating","evidence_refs":["Root allocation under workflow-contract section 8"]},
+      {"source":"/home/dwchoo/ai-exp-assistant/docs/features/core-workbench/PLAN.json","source_pointer":"/budget_policy","target":"/limits/role:test_designer/operating","evidence_refs":["Root allocation under workflow-contract section 8"]},
+      {"source":"/home/dwchoo/ai-exp-assistant/docs/features/core-workbench/PLAN.json","source_pointer":"/budget_policy","target":"/limits/role:reviewer/operating","evidence_refs":["Root allocation under workflow-contract section 8"]},
+      {"source":"/home/dwchoo/ai-exp-assistant/docs/features/core-workbench/PLAN.json","source_pointer":"/budget_policy","target":"/limits/role:worker/operating","evidence_refs":["Root correction reserve under workflow-contract section 8"]},
+      {"source":"/home/dwchoo/ai-exp-assistant/docs/features/core-workbench/PLAN.json","source_pointer":"/budget_policy","target":"/limits/role:oracle/operating","evidence_refs":["Root hard-diagnosis reserve under workflow-contract section 8"]},
+      {"source":"/home/dwchoo/ai-exp-assistant/docs/features/core-workbench/PLAN.json","source_pointer":"/budget_policy","target":"/limits/role:oracle_senior/operating","evidence_refs":["Root deep-diagnosis reserve under workflow-contract section 8"]},
+      {"source":"/home/dwchoo/ai-exp-assistant/docs/features/core-workbench/PLAN.json","source_pointer":"/budget_policy","target":"/limits/role:code_explorer/operating","evidence_refs":["No further code_explorer capacity allocated"]},
+      {"source":"/home/dwchoo/ai-exp-assistant/docs/features/core-workbench/PLAN.json","source_pointer":"/verification_units/1/id","target":"/limits/unit:V-CW-03-P25/operating","evidence_refs":["New p2.5 CW-03 verification epoch; no calls started after approval"]},
+      {"source":"/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/oracle-review-20260924/formal-plan-review-ledger.json","source_pointer":"/budget/used_after_start","target":"/opening_used/total","evidence_refs":["formal plan review ledger used_after_start=186"]},
+      {"source":"/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.3-20260924/ledger.json","source_pointer":"/calls","target":"/opening_used/role:worker_senior","evidence_refs":["legacy ledger role count worker_senior=67"]},
+      {"source":"/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.3-20260924/ledger.json","source_pointer":"/calls","target":"/opening_used/role:test_designer","evidence_refs":["legacy ledger role count test_designer=64"]},
+      {"source":"/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.3-20260924/ledger.json","source_pointer":"/calls","target":"/opening_used/role:reviewer","evidence_refs":["legacy ledger role count reviewer=36"]},
+      {"source":"/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.3-20260924/ledger.json","source_pointer":"/calls","target":"/opening_used/role:worker","evidence_refs":["legacy ledger role count worker=5"]},
+      {"source":"/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/oracle-review-20260924/formal-plan-review-ledger.json","source_pointer":"/budget/used_after_start","target":"/opening_used/role:oracle","evidence_refs":["legacy oracle=5 plus formal-plan oracle=1"]},
+      {"source":"/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/oracle-review-20260924/ledger.json","source_pointer":"/total_child_calls_including_prior","target":"/opening_used/role:oracle_senior","evidence_refs":["legacy oracle_senior=5 plus unresolved-solutions oracle_senior=1"]},
+      {"source":"/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.3-20260924/ledger.json","source_pointer":"/calls","target":"/opening_used/role:code_explorer","evidence_refs":["legacy ledger role count code_explorer=2"]},
+      {"source":"/home/dwchoo/ai-exp-assistant/docs/features/core-workbench/PLAN.json","source_pointer":"/verification_units/1/id","target":"/opening_used/unit:V-CW-03-P25","evidence_refs":["No post-p2.5-approval child call started"]}
+    ],
+    "unmapped": [],
+    "source_relationships": [
+      {"sources":["/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.3-20260924/ledger.json","/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/oracle-review-20260924/ledger.json"],"relation":"independent","evidence_refs":["oracle review records prior_child_calls=184 then total=185"]},
+      {"sources":["/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.3-20260924/ledger.json","/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/oracle-review-20260924/formal-plan-review-ledger.json"],"relation":"overlap","evidence_refs":["formal ledger used_before=185 includes legacy 184"]},
+      {"sources":["/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.3-20260924/ledger.json","/home/dwchoo/ai-exp-assistant/docs/features/core-workbench/PLAN.json"],"relation":"independent","evidence_refs":["PLAN is requirements and allocation source, not an invocation ledger"]},
+      {"sources":["/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/oracle-review-20260924/ledger.json","/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/oracle-review-20260924/formal-plan-review-ledger.json"],"relation":"overlap","evidence_refs":["formal ledger used_before=185 includes unresolved-solutions call"]},
+      {"sources":["/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/oracle-review-20260924/ledger.json","/home/dwchoo/ai-exp-assistant/docs/features/core-workbench/PLAN.json"],"relation":"independent","evidence_refs":["PLAN is requirements and allocation source, not an invocation ledger"]},
+      {"sources":["/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/oracle-review-20260924/formal-plan-review-ledger.json","/home/dwchoo/ai-exp-assistant/docs/features/core-workbench/PLAN.json"],"relation":"independent","evidence_refs":["PLAN p2.5 is the reviewed bundle while ledger records the review call"]}
+    ],
+    "opening": {
+      "limits": {
+        "total": {"user":{"value":220,"authority":"User explicit cumulative child-call cap retained on 2026-09-25","reason":"Hard cumulative cap"}},
+        "role:worker_senior": {"operating":{"value":76,"authority":"workflow-contract section 8 and current implementation authorization","reason":"Nine additional senior implementation or correction calls"}},
+        "role:test_designer": {"operating":{"value":74,"authority":"workflow-contract section 8 and current implementation authorization","reason":"Ten additional independent test calls"}},
+        "role:reviewer": {"operating":{"value":45,"authority":"workflow-contract section 8 and current implementation authorization","reason":"Nine additional independent review calls"}},
+        "role:worker": {"operating":{"value":8,"authority":"workflow-contract section 8 and current implementation authorization","reason":"Three bounded routine implementation calls"}},
+        "role:oracle": {"operating":{"value":7,"authority":"workflow-contract section 8 and current implementation authorization","reason":"One hard-diagnosis reserve"}},
+        "role:oracle_senior": {"operating":{"value":7,"authority":"workflow-contract section 8 and current implementation authorization","reason":"One deep-diagnosis reserve"}},
+        "role:code_explorer": {"operating":{"value":2,"authority":"workflow-contract section 8 and current implementation authorization","reason":"Historical usage only; no new allocation"}},
+        "unit:V-CW-03-P25": {"operating":{"value":8,"authority":"Approved PLAN p2.5 and workflow-contract section 8","reason":"CW-03 synthesis worker, independent tests, review and bounded correction reserve"}}
+      },
+      "opening_used": {
+        "total": 186,
+        "role:worker_senior": 67,
+        "role:test_designer": 64,
+        "role:reviewer": 36,
+        "role:worker": 5,
+        "role:oracle": 6,
+        "role:oracle_senior": 6,
+        "role:code_explorer": 2,
+        "unit:V-CW-03-P25": 0
+      },
+      "calls": {},
+      "checks": {},
+      "provenance": null,
+      "unresolved": []
+    },
+    "accounting": {
+      "total":{"reported_used":186,"baseline_used":186,"materialized_started":0,"evidence_refs":["formal plan review ledger used_after_start=186"]},
+      "role:worker_senior":{"reported_used":67,"baseline_used":67,"materialized_started":0,"evidence_refs":["legacy calls grouped by role"]},
+      "role:test_designer":{"reported_used":64,"baseline_used":64,"materialized_started":0,"evidence_refs":["legacy calls grouped by role"]},
+      "role:reviewer":{"reported_used":36,"baseline_used":36,"materialized_started":0,"evidence_refs":["legacy calls grouped by role"]},
+      "role:worker":{"reported_used":5,"baseline_used":5,"materialized_started":0,"evidence_refs":["legacy calls grouped by role"]},
+      "role:oracle":{"reported_used":6,"baseline_used":6,"materialized_started":0,"evidence_refs":["legacy oracle=5 plus formal oracle=1"]},
+      "role:oracle_senior":{"reported_used":6,"baseline_used":6,"materialized_started":0,"evidence_refs":["legacy oracle_senior=5 plus plan-review oracle_senior=1"]},
+      "role:code_explorer":{"reported_used":2,"baseline_used":2,"materialized_started":0,"evidence_refs":["legacy calls grouped by role"]},
+      "unit:V-CW-03-P25":{"reported_used":0,"baseline_used":0,"materialized_started":0,"evidence_refs":["current approval precedes all p2.5 implementation calls"]}
+    },
+    "event_metadata": {}
+  },
+  "preservation_directory": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.5-20260925/ledger-sources-preserved"
+}

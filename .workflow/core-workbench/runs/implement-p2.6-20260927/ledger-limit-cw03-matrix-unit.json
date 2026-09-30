@@ -1,0 +1,12 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 172,
+  "event": {"id": "limit-cw03-matrix-unit-20260928", "kind": "limit", "data": {
+    "bucket": "unit:V-CW-03", "origin": "operating", "value": 42,
+    "authority": "Approved PLAN p2.6, C-D55, workflow-contract section 8, and current implementation authorization",
+    "reason": "Remaining canonical input/jobs, hook/env, and takeover matrix migration with independent verification and bounded correction reserve",
+    "decision_owner": "Root", "remaining_work_estimate": 5,
+    "expected_previous": {"value": 37, "authority": "Approved PLAN p2.6, C-D55, workflow-contract section 8, and current implementation authorization", "reason": "Reviewer-required FD inheritance correction, independent runtime test, and fresh delta review"},
+    "scope_basis": null
+  }}
+}

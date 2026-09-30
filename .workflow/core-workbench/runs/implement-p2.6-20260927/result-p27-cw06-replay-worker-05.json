@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw06-replay-worker-05",
+  "status": "candidate_ready",
+  "candidate_id": "3a0c54ac14368a54c4cc9ae473c1d8fa1639ffed2173f89f4dfa6fcba3491782",
+  "after_snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-cw06-replay-after.json",
+  "scope_audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-cw06-replay.json",
+  "delta_backup": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-cw06-replay-delta-backup/",
+  "changed_paths": {"src/workbench/ui/product/model.py": "f437afa1e2b52a4d9ce42ccb4d224feb2be5213180515506dc52c774bc1b154d", "tests/ui/test_product_model.py": "7104fb54689c3e142c0d82d402da10318c7af5198839c601ce979f3d567fca68"},
+  "checks": [["tests.ui.test_product_model", 0, "45 OK"], ["red check (partial revert)", 1, "replay-after-result test FAILS without fix"], ["tests/ui test_*.py", 0, "OK (count not captured)"], ["tests/contracts", 0, "43 OK"], ["g1_vt", 0, "63 OK"]],
+  "fixes": "replay=true frames excluded from backlog_bytes and never trimmed (fed in 1 KiB slices); catch-up not triggered while replay items remain at the head; _safe_tail starts after first newline or at first sequence-starting ESC (skips ST), else strips UTF-8 continuation bytes; backlog payload as memoryview (O(1) slicing; 1 MiB frame test).",
+  "residual": "live flood after replay still resets the screen on catch-up (resize nudge redraws) - within adjudication",
+  "gaps": ["real-OMP S15 not run by worker (by rule)", "3 of 4 new tests not shown red"],
+  "observed_model": "sonnet (wb-worker definition; host metadata unverified)"
+}

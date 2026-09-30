@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "invocation": "cw12-scan-race-test-01",
+  "role": "test_designer",
+  "unit": "V-CW-12-p2.6-current",
+  "authority": "User $implement docs/features/core-workbench request; approved PLAN p2.6 CW-12",
+  "objective": "Independently verify the bind-time baseline, ignored-output, and fd-safe traversal correction.",
+  "candidate": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw12-scan-race-correction.json",
+    "candidate_id": "421bdddb4b7ea4b06a3fb03614c659a5e6de9876579d4cabe5e8ba9ec9dc12da"
+  },
+  "inputs": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-final-scope-review-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-scan-race-correction-01.json",
+    "docs/features/core-workbench/tickets/CW-12.md"
+  ],
+  "must_verify": [
+    "peer baseline is durable before authority opens; an in-flight write after binding/pause request remains a delta and missing/restart-lost baseline fails closed",
+    "Git-ignored untracked out-of-scope outputs are detected under existing count/output/byte bounds",
+    "directory symlink swaps and file replacements cannot escape fd-relative O_NOFOLLOW traversal or hash outside the peer root, and every fd closes on success/failure",
+    "prior CW-12 policy, observation, tasks, bridge, and workflow regressions remain green",
+    "actual omp/18.2.10 live_pause_runtime_probe passes with zero residue"
+  ],
+  "allowed_write_paths": ["tests/policy/pause_automation/**", "graphify-out/**"],
+  "constraints": [
+    "Independent test-only mutation owner; do not edit production/.workflow/docs/PLAN/state.",
+    "Use apply_patch for tests; do not delegate, commit, publish, deploy, or use Docker.",
+    "Return needs_reroute with a minimal reproduction for product defects; do not repair production."
+  ],
+  "report": "Return candidate_ready/needs_reroute, exact checks/counts, test-only changes, fd/residue evidence, acceptance assessment, and residual risks."
+}

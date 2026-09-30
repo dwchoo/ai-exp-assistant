@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-delta-review-cw06-04",
+  "ticket_id": "CW-06 (+ vt_g1 SU/SD correction)",
+  "role": "reviewer",
+  "unit": "V-CW-06-p2.7",
+  "approved_bundle_digest": "a521acdc3838b43a26e277afc233bab695c8b02ce0d42392c3678931b2e3f027",
+  "routing": {"planned_role": "reviewer", "selected_role": "reviewer (wb-delta-reviewer, Sonnet high)", "reason_codes": ["bounded_delta_after_full_review"], "evidence_refs": ["delta review 3 integrate on 8ff079fd; changes since: app.py 2004h guard, test_product_pty signal tests, vt_g1 screen.py SU/SD + new test"]},
+  "frozen_candidate": "01cee2da36f84822ab5a5dc24fed01667ad9a50f77e1ca46efce77fb58c6650e",
+  "prior_review": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-delta-review-cw06-03-agent.json",
+  "delta_under_review": [
+    {"files": ["src/workbench/ui/product/app.py", "tests/ui/test_product_pty.py"], "base": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-cw06-flood-delta-backup/ (app.py, test_product_pty.py as of 8ff079fd - unchanged since flood worker)", "result": "result-p27-cw06-flake-worker-07.json"},
+    {"files": ["src/workbench/terminal/vt_g1/screen.py", "tests/gates/g1_vt/test_vt_su_sd.py"], "base": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-vt-susd-pre/src/workbench/terminal/vt_g1/screen.py", "result": "result-p27-vt-susd-worker-08.json", "adjudication": "root-adjudication-p27-vt-su-sd.json"}
+  ],
+  "focus": [
+    "app.py: every path after enabling 2004 restores it; handler/installation order; no new traceback paths; test waits correctly without weakening assertions.",
+    "screen.py SU/SD: xterm semantics within DECSTBM margins, cursor unchanged, clamp, blank attributes (BCE), alt-screen isolation, history behaviour (note gap vs xterm for partial margins - classify), no regression to G1 fidelity items (wide glyphs, alternate screen, scrollback, DSR/DA replies), pyte integration without monkey-patching globals.",
+    "Tests meaningful (not recomputing implementation)."
+  ],
+  "scratch": "/tmp/claude-1000/-home-dwchoo-ai-exp-assistant/dd5e2cee-e10d-41c4-8ebb-7c00b50dd465/scratchpad/cw06-delta4/",
+  "rules": "Read-only in repo except result JSON .workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-delta-review-cw06-04-agent.json. Tests only with /tmp/cw02-g1-venv/bin/python, pattern test_*.py, unique temp dirs; never live_*. Concurrent re-verification runs.",
+  "result_format": "Findings P0..P3; verdict per focus; overall integrate/block. Write JSON; reply <=15 lines. Korean."
+}

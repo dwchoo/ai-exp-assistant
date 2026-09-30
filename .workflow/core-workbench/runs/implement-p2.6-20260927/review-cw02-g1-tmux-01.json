@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "invocation": "cw02-g1-tmux-review-01",
+  "candidate": "5122497882ed757f33e4ae5171ac8908e7f02181f5fc2503d39f4aae9aef160a",
+  "verdict": "pass",
+  "severity_counts": {"P0": 0, "P1": 0, "P2": 0, "P3": 0},
+  "verified": [
+    "Changed tmux probe/test hashes matched the candidate manifest; no other source/test file changed in the delta.",
+    "The barrier waits up to three seconds at unchanged geometry for the pre-existing title, target-only marker, PID, and geometry contract without replaying input, paste, or resize.",
+    "Persistent missing title/target, cross-route, PID change, or wrong geometry cannot settle; freshness, paste, resize, alternate restore, cleanup, startup, and all-stage settled predicates remain required.",
+    "Stage-first and final settled observations are both retained; the initial incomplete observation is not erased."
+  ],
+  "findings": [],
+  "retained_unknowns": [
+    "The exact stage/cause of the two earlier aggregate-only formal failures cannot be reconstructed.",
+    "The barrier proves a complete required frame within the bound, not output quiescence or physical pixel completeness.",
+    "Concurrent plain, physical font/pixel, cross-version, and OMP query-semantic limitations remain."
+  ],
+  "runtime_reexecuted": false,
+  "source_or_test_files_modified": false,
+  "provenance": "Recorded by Root from fresh tmux delta reviewer final payload."
+}

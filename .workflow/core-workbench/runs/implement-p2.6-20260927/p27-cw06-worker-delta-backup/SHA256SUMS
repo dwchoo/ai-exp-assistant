@@ -1,0 +1,12 @@
+9b44e4847275514ec27e7c9474dfe7ad0c5556d3803651f7fc292be0402a2b4e  ./src/workbench/backend/cli.py
+8b250db57bcf1590be1ba6959cf059139155475f18d84ee4577e84e7ad1d536b  ./src/workbench/ui/product/__init__.py
+28eda32d93bee15e6df21a55f8a2d4a000318508a8d892501e0bcfe94a1e9ba2  ./src/workbench/ui/product/app.py
+c82a0b52b43c1e17ac333b1527bef19e277ecf887667059c1df1134b2832081f  ./src/workbench/ui/product/input.py
+d604e5531bb66d0f144514607206f02ae8ef3a34c2493c457d5a860202ba038b  ./src/workbench/ui/product/model.py
+c41b895574027ab5391066c4cf7b04ba5744f53bd94fc943a2d1bee7446514d0  ./src/workbench/ui/product/view.py
+fa5017ca0b55f277c6cd26fe33ef056e2138a06afd193eeedad5ed4efbd6658e  ./tests/backend/test_live_detach.py
+014e0f2be9c8a475d09720e2724a27872b81246c69964933f8abf49ea4f34877  ./tests/backend/test_live_start.py
+dbac3b9d5153fed3ffa9f8477477fb92ee8add94a0c1532dfa3448a82e03209a  ./tests/ui/support.py
+731b853133523cf35a982d68683047fb41ef81864ff59ae700b984b29357f3c5  ./tests/ui/test_product_entrypoint.py
+e8707b53921f83bea2e5a5dc5a82b25b9bc2c6fe8c5063c87047046d9df8a3eb  ./tests/ui/test_product_model.py
+eb52a67463db00c678c9a2aaf1f21eef0a59611089bff4ab54d07652f06a69d7  ./tests/ui/test_product_pty.py

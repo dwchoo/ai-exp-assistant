@@ -1,0 +1,2 @@
+{"before":"/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-cw17-base.json","after":"/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-cw17-worker-after.json",
+ "allowed":["src/workbench/backend/**","src/workbench/contracts/ui_v1.py","src/workbench/__main__.py","pyproject.toml","tests/backend/**","tests/contracts/test_ui_v1*.py"]}

@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "invocation": "cw15-test-01",
+  "role": "test_designer",
+  "unit": "V-CW-15-p2.6-current",
+  "authority": "User $implement docs/features/core-workbench request; approved PLAN p2.6 CW-15",
+  "objective": "Independently verify the frozen CW-15 runtime/application coordinator at runtime evidence level and identify any integration gap that prevents the six acceptance contracts.",
+  "candidate": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw15-worker.json",
+    "candidate_id": "37d9dec811b6f05be51491e91e9b03b1128c35e1fdef14bc37a841257f7016c2"
+  },
+  "required_tests": [
+    "Use real bounded subprocesses and pipes/PTY where available to verify detach leaves backend, two OMP stand-ins and experiment/drain alive; reconnect must neither duplicate a run nor replay commands, and paused automation must not schedule model work.",
+    "Recreate coordinator/backend with durable records and test PID reuse/start_ticks drift, child alive/dead/unknown, session/control/owner epoch drift, delivered/unknown command states, stale takeover, pause/cancel/revocation preservation and no automatic replay/start.",
+    "Test model/auth/API failure continuity, last check timestamps, explicit successful recheck, metadata admission failure/success versus raw-log failure, and boot-marker change plus explicit user confirmation.",
+    "Test confirmation-gated full shutdown, normal-stop ordering, drain completion, descendants/survivors, unresolved reporting, idempotence and teardown residue.",
+    "Attempt composition through the actual public G4, G3 mailbox/session, PersistentShell/lifecycle, PauseCoordinator, RecoveryCoordinator, RawLogStore/MetadataAdmissionGate seams as far as the frozen production exposes. Treat a missing mandatory binding as a material gap rather than assuming CW16 will implement it.",
+    "Run all lifecycle tests plus relevant predecessor regressions; production must remain frozen."
+  ],
+  "allowed_write_paths": ["tests/lifecycle/**", "graphify-out/**"],
+  "constraints": [
+    "Independent test-only owner; no production/workflow/docs/PLAN/state/ledger edits.",
+    "No real reboot, live external OMP mutation, tmux dependency, delegation, commit, publish, deploy, Docker, or unbounded signals. Account for every spawned process."
+  ],
+  "report": "Return candidate_ready/needs_reroute, per-acceptance runtime evidence, exact added cases/suites/counts/residue, frozen hashes, mandatory binding gaps versus legitimate CW16 verification work, and unsupported/pending environments."
+}

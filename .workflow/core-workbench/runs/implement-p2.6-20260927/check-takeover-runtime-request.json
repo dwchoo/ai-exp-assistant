@@ -1,0 +1,11 @@
+{
+  "root": "/home/dwchoo/ai-exp-assistant",
+  "requirements": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw03.json",
+  "argv": ["python3", "tests/gates/g2_shell/live_takeover_probe.py"],
+  "environment": {"PYTHONDONTWRITEBYTECODE": "1", "description": "Linux Python 3.12.3 with /usr/bin/bash and /usr/bin/dash; G2 takeover focused runtime; no conda or Docker validation"},
+  "log": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/check-takeover-runtime.log",
+  "check_id": "cw03-takeover-runtime-01",
+  "watch": [],
+  "exclude": [".workflow/core-workbench/runs/implement-p2.6-20260927/**"],
+  "timeout": 180
+}

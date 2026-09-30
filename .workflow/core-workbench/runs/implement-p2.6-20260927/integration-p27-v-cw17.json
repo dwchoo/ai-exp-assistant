@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "unit": "V-CW-17-p2.7",
+  "tickets": ["CW-17", "CW-07 corrections F-CW17-INPUT-01, F-P27-DEADLINE (units V-CW-07-p2.7-input, V-CW-07-p2.7-deadline)"],
+  "status": "integrated",
+  "recorded_at": "2026-09-29",
+  "approved_bundle_digest": "a521acdc3838b43a26e277afc233bab695c8b02ce0d42392c3678931b2e3f027",
+  "workspace": "/home/dwchoo/ai-exp-assistant (serial shared checkout; integration in place, one mutation owner at a time)",
+  "integrated_candidate": "c684c9a59912a063699bfd74e09a70ba935aa02bb449c16e9a4503d4901444ca",
+  "integrated_candidate_manifest": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-cw17-integrated-checkpoint.json (milestone: CW-06 base, full blobs retained)",
+  "integration_delta_vs_verified": {"verified_candidate": "89110a7fe46b0a7ca1ae331013fa427aabda6a1f6faa60ec8f6413e88f084a50", "delta": "graphify-out/** only (16 files, graphify update .)", "audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-cw17-integrated.json", "affects_checks": false},
+  "gate_items": {
+    "L-CW17-DETACH": {"result": "passed", "level": "runtime", "evidence": ["result-p27-cw17-test-01.json gate_verdicts (candidate 8ad024ff)", "tests/backend/test_live_detach_independent.py re-run green on 20440fcc (backend independent 26 OK, result-p27-p22-fix-worker-02.json) and in tests/backend 68 OK on 89110a7f (result-p27-p22-rerun-test-01.json)"], "unknowns": ["active supervisor identity across detach not exercised until CW-18 (delta verification after CW-18)"]},
+    "L-CW17-START": {"result": "passed", "level": "runtime", "evidence": ["result-p27-cw17-test-01.json", "tests/backend/test_live_start_independent.py green in same re-runs"], "unknowns": ["zsh as login shell exercised via fake sentinel (zsh not installed)"]},
+    "L-CW17-CONTRACT": {"result": "passed", "level": "fixture (runtime observed)", "evidence": ["result-p27-cw17-test-01.json", "tests/contracts 43 OK; test_live_contract_independent.py green"], "unknowns": []}
+  },
+  "verification_chain": [
+    "p27-cw17-worker-01 -> p27-cw17-test-01 (F-CW17-INPUT-01) -> input-fix-worker-01/02 -> input-test-01 (F-P27-DEADLINE) -> deadline-fix-worker-01 -> deadline-test-01",
+    "full frozen review p27-review-cw17-01 (Opus): integrate with P2-1..4 fix_before_integration",
+    "p27-review-fix-worker-01 -> p27-review-fix-test-01 (P2-2 FAIL) -> p27-p22-fix-worker-02 -> p27-p22-rerun-test-01 (PASS) -> p27-delta-review-cw17-01 (integrate)"
+  ],
+  "root_adjudications": ["root-adjudication-p27-hook-rejected.json", "root-adjudication-p27-return-deadline-test.json"],
+  "carried_forward": {
+    "CW-18": ["P3-2 backend must always release INPUT_BARRIER", "DETACH active supervisor identity delta"],
+    "UR-UX_or_CW-19": ["P3-1 paste remainder drop on mid-flush target change", "P3-3 hello timeout / SIGSTOPped client", "P3-4 ensure_private_dir chmod of user dir", "P3-5 shutdown verification covers backend-known refs only"],
+    "CW-19": ["delta P3-a poll() waitpid ChildProcessError guard", "delta P3-b pin-scan fork race residue (fail-safe)"],
+    "CW-16": ["G2 gate evidence stale after runtime-deadline semantics change -> re-collect in I-SHELL/I-FAULT"]
+  },
+  "evidence_gaps": ["P2-1/3/4 delta reviewed without byte diff (reviewed-candidate blobs pruned)"],
+  "next": "CW-06 (depends CW-05, CW-17: both integrated)"
+}

@@ -1,0 +1,38 @@
+{
+  "invocation": "cw03-native-tstp-oracle-01",
+  "ticket_id": "CW-03",
+  "status": "advice_complete",
+  "mutated_product_files": false,
+  "runtime_experiments_run": false,
+  "supported_observations": [
+    "Shared foreground process group causes parent shell job control to treat supervisor stop as foreground-job return.",
+    "Bash early READY and dash RETURN:148 are consistent with the outer controller consuming a stopped helper status, not supervisor-internal main completion.",
+    "The supervisor already distinguishes stop/continue through WUNTRACED and WCONTINUED; numeric 148 special-casing would conflate exit 148 with SIGTSTP.",
+    "Parent WAIT native SIGTSTP is ignored in the observed interactive PTY session and must be tested as no-op without prompt or stale-input escape rather than forced to stop."
+  ],
+  "minimal_fix_direction": [
+    "Keep the same persistent parent and same terminal session, but separate supervisor PG_S from experiment PG_E.",
+    "Keep the supervisor observable; make only PG_E the foreground process group and native TSTP target.",
+    "Before SIGCONT, the same-session supervisor blocks SIGTTOU, restores foreground ownership with tcsetpgrp, verifies tcgetpgrp, then continues PG_E.",
+    "Treat STOPPED and CONTINUED as live states that cannot emit MAIN_RETURN, lifetime completion, input release, or parent control return.",
+    "When no experiment target exists, record NO_TARGET; do not infer experiment suspension from a supervisor signal marker."
+  ],
+  "discriminating_experiment": "Run Bash/dash shared-PG negative control versus split-PG candidate with a prepared child barrier, real PTY Ctrl-Z, WIFSTOPPED and /proc T plus supervisor PING, foreground restore before SIGCONT, resumed acknowledgement, main-return with live setsid descendant, input barrier, stale writer, and same-parent prompt/new input. Bound and clean every owned PG/PID.",
+  "regression_test_ideas": [
+    "exit 148 versus native SIGTSTP stop",
+    "repeat stop/continue and failed foreground restoration",
+    "stale PG/generation and supervisor/FD loss",
+    "Ctrl-C no tail and Bash/dash SIGQUIT differences",
+    "return/exec/setsid descendants and input-return stale marker"
+  ],
+  "integration_risks": [
+    "Background helper launch can redirect stdin unless PTY ownership is explicit.",
+    "A child-handler installation race before foreground transfer can still expose parent job control.",
+    "setsid descendants remain a lifetime-tracking concern but cannot receive terminal Ctrl-Z as the former experiment PG."
+  ],
+  "plan_invalidated": false,
+  "remaining_unknowns": [
+    "Whether the split-PG candidate preserves the full Bash/dash input-return and descendant-lifetime sequence.",
+    "Whether parent control latch or another trap path still returns READY after process-group separation."
+  ]
+}

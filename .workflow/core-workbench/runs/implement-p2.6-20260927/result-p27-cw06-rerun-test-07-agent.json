@@ -1,0 +1,17 @@
+{"schema_version":1,"invocation":"p27-cw06-rerun-test-07","ticket_id":"CW-06","status":"needs_reroute",
+"checks":[
+{"cmd":"live_product_omp_independent.py CW06_LIVE_MODEL=1","rc":0,"counts":"1 ok","sec":74,"note":"S0-S16 pass; S15 ratios manager 1.0 worker 1.0 host_shell 0.94; S16 same; model_turns<=2; residue {}"},
+{"cmd":"live_product_flood_p27f x3","rc":"0,0,0","counts":"1 ok each","sec":"79/80/74","note":"slow_client_seen=false, slow_client_detach=false, residue empty (grep hit is the evidence key only)"},
+{"cmd":"p27h+p27f fixtures x3","rc":"1,0,0","counts":"13 tests; run1 1 fail","sec":"21/30/29","note":"p27h replay_over_256kib: row 003907 vs pyte 003908"},
+{"cmd":"p27h alone x6 (rerun evidence)","rc":"0,0,0,0,0,1","note":"same failure 1/6 => intermittent, total 2/9"},
+{"cmd":"tests/ui discover x2","rc":"1,0","counts":"128 tests; run1 1 fail test_product_pty.test_sigterm_restores_terminal","sec":"64/63"},
+{"cmd":"sigterm test alone x6","rc":"0,1,0,0,0,0","note":"fail after 0.07s: no ?2004l in raw, only signal message => intermittent"},
+{"cmd":"tests/backend","rc":"1 then 0","counts":"71 tests; first run 14 errors AF_UNIX path too long (my long TMPDIR = environment); rerun short TMPDIR: OK","sec":"263/265"},
+{"cmd":"tests/contracts","rc":0,"counts":"43 ok"},
+{"cmd":"gates g1_vt","rc":0,"counts":"63 ok"},
+{"cmd":"gates g4_lifetime","rc":0,"counts":"8 ok"}],
+"s15_ratios":{"manager_omp":1.0,"worker_omp":1.0,"host_shell":0.94},
+"model_turns":"live run only (<=2)",
+"failures_classification":{"p27h_replay_row_off_by_one":"unclassified: intermittent (2/9); rendered pane lags pyte by one row -> possible implementation snapshot race or test timing; root to adjudicate","sigterm_restore":"intermittent (2/8 incl ui1); SIGTERM apparently lands before UI raw-mode/2004h setup -> likely test race, needs adjudication","backend_af_unix":"environment, cleared on rerun"},
+"frozen_hashes_equal":true,
+"residue":"tests/backend leaves cw03-g2-* dirs (shell-init) in TMPDIR even on pass (test leak, no processes); my copies removed; /tmp/r07b removed; scratch dir r07 left for logs; no processes left"}

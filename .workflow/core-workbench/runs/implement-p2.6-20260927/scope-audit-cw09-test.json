@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "invocation": "cw09-test-01",
+  "before": ".workflow/core-workbench/runs/implement-p2.6-20260927/cw09-test-checkpoint.json",
+  "after": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw09-test-after.json",
+  "allowed": [
+    "tests/tasks/**",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw09-test-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw09-test-after.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/scope-audit-cw09-test.json"
+  ],
+  "changed": [
+    "tests/tasks/test_repository_independent.py"
+  ],
+  "index_changed": [],
+  "outside_scope": [],
+  "comparable": true,
+  "baseline_candidate_digest_verified": true,
+  "baseline_file_count": 1149,
+  "all_baseline_files_unchanged": true,
+  "head_unchanged": true,
+  "named_workflow_artifacts": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw09-test-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw09-test-after.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/scope-audit-cw09-test.json"
+  ],
+  "workflow_artifacts_excluded_by_assigned_baseline": true
+}

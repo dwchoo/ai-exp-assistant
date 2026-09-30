@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "invocation": "cw13-force-liveness-correction-01",
+  "role": "worker_senior",
+  "unit": "V-CW-13-p2.6-current",
+  "authority": "User $implement docs/features/core-workbench request; approved PLAN p2.6 CW-13; independent failing regression and Oracle verdict",
+  "objective": "Make forced termination require coherent CW-10 managed-lifecycle state and fresh exact-target liveness after ordinary stop.",
+  "base": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw13-force-oracle-base.json",
+    "candidate_id": "1770be050ee56c70a501a457dc84eb309e84894d15516b2ab8eee47710988a84",
+    "failing_test": "test_force_requires_confirmed_still_running_state_after_stop",
+    "oracle": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw13-force-oracle-01.json"
+  },
+  "required_corrections": [
+    "Document that RunObservation shell_state/exit_confirmed follow CW-10 managed-execution semantics: main return with remaining descendants stays running/false; exited/true means the full managed lifetime and input/control return completed.",
+    "Add a typed target liveness field (for example target_alive: bool | None) distinct from identity/ownership. It must represent a fresh liveness observation of the exact observed ForceTarget in the current observation sequence; missing/unknown/false cannot support force.",
+    "Force requires shell_state == running, exit_confirmed is false, lifetime == running, descendants_clear is false, exact delegated/observed owned target, target_alive is true, valid ordinary-stop proof, and a strictly later fresh observation.",
+    "Preserve a positive case where main exit_status is already known but managed execution remains running/exit_confirmed false because descendants and the exact target remain alive after stop.",
+    "Block unknown/exited/contradictory lifecycle states, stale/cached target observations and target_alive false/None with no force step. Do not introduce a time limit.",
+    "Keep post-force strictly-later full termination plus input/control return before mutation, worker instruction, or relaunch."
+  ],
+  "allowed_write_paths": ["src/workbench/policy/recovery_manager/**", "tests/policy/recovery_manager/**", "graphify-out/**"],
+  "constraints": [
+    "Sole writer; use apply_patch and preserve all independent tests/CAS fixes.",
+    "Do not modify predecessor production modules or workflow/docs/PLAN/state; no dependencies, delegation, commit, publish, deploy, Docker, or live kill.",
+    "Run the preserved failing test first, focused force/liveness tests, full recovery and predecessor regressions, and graphify update ."
+  ],
+  "report": "Return schema semantics, changed paths, before/after regression, counts, candidate_ready/blocker, and CW-15 supplier/executor obligations."
+}

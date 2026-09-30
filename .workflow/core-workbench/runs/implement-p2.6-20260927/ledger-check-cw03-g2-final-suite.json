@@ -1,0 +1,13 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 128,
+  "event": {
+    "id": "check-cw03-g2-final-suite-01",
+    "kind": "check",
+    "data": {
+      "check_id": "cw03-g2-final-suite-01",
+      "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/check-cw03-g2-final-suite-observed.json",
+      "sha256": "42f27ccb9f1bc1d6076e95e4419fa6d2d4f890b0bf65f18cb701f50825436408"
+    }
+  }
+}

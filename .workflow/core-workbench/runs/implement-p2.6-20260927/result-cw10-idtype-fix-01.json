@@ -1,0 +1,30 @@
+{
+  "invocation": "cw10-idtype-fix-01",
+  "unit": "V-CW-10-p2.6-current",
+  "status": "candidate_ready",
+  "candidate_before": "c6578c7ae2cb68c6855995cbb9998133747d9c9f0ff4ee69d8c62138b51a3895",
+  "candidate_after": "5a8930ddf10b192d733508768426fb93019d190e586e6175c86f6a1a766899d3",
+  "changed_paths": ["src/workbench/workflow/worker_port.py"],
+  "fix": "Validate exact canonical UUID string types for Task/run/message/delivery attempt/session/response IDs, exact positive JS-safe integer types for revision/session generation/assistant and delivery event sequences, and exact string types for stage/source/decision before comparing identity values. Boolean, float, negative, unsafe-size and malformed values fail closed.",
+  "pre_fix": {"command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest -v tests.workflow.test_run_independent.WorkflowIndependentTests.test_public_worker_response_identity_matrix_blocks_shell_dispatch", "exit_code": 1, "observation": "revision_boolean and generation_boolean subcases authorized real host shell dispatch"},
+  "post_fix_checks": [
+    {"command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest -v tests.workflow.test_run_independent.WorkflowIndependentTests.test_public_worker_response_identity_matrix_blocks_shell_dispatch", "exit_code": 0, "result": "all 13 identity matrix cases rejected as required"},
+    {"command": "ad hoc verified_worker_response typed-field matrix", "exit_code": 0, "result": "13 additional bool/float/negative/unsafe/non-UUID/wrong-string corruptions rejected; valid response accepted"},
+    {"command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/workflow -q", "exit_code": 0, "result": "33 passed"},
+    {"command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/terminal -q", "exit_code": 0, "result": "10 passed"},
+    {"command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/bridge -q", "exit_code": 0, "result": "18 passed"},
+    {"command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/tasks -q", "exit_code": 0, "result": "22 passed"},
+    {"command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/workflow /tmp/cw02-g1-venv/bin/python tests/workflow/live_workflow_independent.py", "exit_code": 0, "result": "four real Bash/sh outcomes passed"},
+    {"command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/workflow /tmp/cw02-g1-venv/bin/python tests/workflow/live_workflow_independent.py --actual-omp", "exit_code": 0, "result": "actual OMP 18.2.10 two-response identity, shell, worktree, secret scan and cleanup passed"},
+    {"command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python tests/workflow/live_workflow_probe.py", "exit_code": 0, "result": "second actual OMP 18.2.10 vertical passed"},
+    {"command": "git diff --check", "exit_code": 0, "result": "no whitespace error"}
+  ],
+  "runtime_evidence": ".workflow/core-workbench/runs/implement-p2.6-20260927/raw-cw10-idtype-independent-omp.json",
+  "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw10-idtype-after.json",
+  "snapshot_stable": true,
+  "scope_audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/scope-audit-cw10-idtype.json",
+  "scope_attribution": ".workflow/core-workbench/runs/implement-p2.6-20260927/scope-attribution-cw10-idtype.json",
+  "scope_note": "Standard audit against the older pre-independent-test checkpoint lists two pre-existing independent test changes outside_scope. Reconstructed assignment candidate confirms this correction changed only worker_port.py.",
+  "cleanup": {"owned_process_residue": [], "temporary_directory_residue": [], "bridge_socket_removed": true, "stopped_or_unknown_subprocesses": []},
+  "remaining_unknowns": ["Root-owned fresh review and final integration remain outstanding; candidate_ready is not overall acceptance."]
+}

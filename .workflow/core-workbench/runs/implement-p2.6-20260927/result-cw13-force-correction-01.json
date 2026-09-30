@@ -1,0 +1,32 @@
+{
+  "invocation": "cw13-force-correction-01",
+  "outcome": "complete",
+  "candidate_ready": true,
+  "changed_paths": [
+    "src/workbench/policy/recovery_manager/policy.py",
+    "src/workbench/policy/recovery_manager/__init__.py",
+    "tests/policy/recovery_manager/test_recovery_policy.py",
+    "graphify-out/**"
+  ],
+  "implementation": {
+    "proof": "OrdinaryStopProof binds run identity, exact ForceTarget, canonical request_id, positive request_sequence and owned_terminal_control source",
+    "no_stop": "termination_required with request_stop and observe_after_stop only",
+    "boolean_without_proof": "confirmation required; no force step",
+    "nonfresh_observation": "sequence less than or equal to stop sequence requires observe_after_stop",
+    "force_gate": "strictly later observation, running lifetime, descendants not clear, exact delegated/owned target, current authority/automation/owner",
+    "post_force": "strictly later full-termination observation still required"
+  },
+  "checks": {
+    "pre_correction_regression": "reversed no-stop fixture failed because force_requested was returned instead of termination_required",
+    "focused_force": "3 tests passed",
+    "recovery_manager": "20 tests passed",
+    "tasks": "22 tests passed",
+    "observation": "95 tests passed",
+    "workflow": "44 tests passed",
+    "pause_automation": "129 tests passed",
+    "graphify_update": "exit 0; 4735 nodes and 10011 edges",
+    "residual_processes": "none"
+  },
+  "residual_risk": "CW-15 must provide trustworthy stop request and fresh target/lifetime observation sequences and record a new observation after force; this policy executes no stop or kill.",
+  "mutation_owner": "/root/cw12_post_review_correction"
+}

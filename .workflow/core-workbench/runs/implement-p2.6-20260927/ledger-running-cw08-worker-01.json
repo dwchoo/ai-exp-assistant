@@ -1,0 +1,17 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 408,
+  "event": {
+    "id": "running-cw08-worker-01",
+    "kind": "transition",
+    "data": {
+      "invocation": "cw08-worker-01",
+      "state": "running",
+      "evidence": "collaboration.followup_task /root/cw09_worker started CW-08 implementation",
+      "outcome": null,
+      "observed_model": "unverified",
+      "observed_effort": "unverified",
+      "not_started_evidence": null
+    }
+  }
+}

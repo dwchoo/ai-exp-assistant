@@ -1,0 +1,139 @@
+{
+  "invocation": "cw11-worker-01",
+  "role": "worker",
+  "unit": "V-CW-11-p2.6-current",
+  "status": "candidate_ready",
+  "baseline_candidate": "ecdbd419ac5d470740f7b30b798f26c0dce06e70a66a335871c46401fa367290",
+  "requirements_sha256": "51d40ca6847cfd0ceb19f95452a602c54a98c794aaf4ede36f844e7dc632cfb4",
+  "candidate_digest": "e34800acc53f4494ffd5cc9ac81f2ef42de7c8c1900fbe7d9f6de8b47f0c61d9",
+  "candidate_snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw11-worker-final.json",
+  "implementation": {
+    "changed_paths": [
+      "src/workbench/observation/worker_review.py",
+      "tests/observation/test_worker_review.py",
+      "tests/observation/live_worker_review_probe.py"
+    ],
+    "behavior": [
+      "Injectable clock/tick scheduler makes reviews due at 60-second boundaries without a lifetime cap.",
+      "Busy transport, unsafe worker session state, and user priority retain only the newest due review and report delayed/coalesced state.",
+      "Pause continues non-model collection and retains one pending review; cancel, unapproved, unhealthy, or invalid authority clears pending work fail-closed.",
+      "Worker readiness enforces exact session generation and strict integer inFlightToolCount typing.",
+      "Only confirmed exits surface once; review facts are allowlisted and model text is never retained.",
+      "Hang classification requires explicit process and running-lifecycle evidence; elapsed silence is informational only.",
+      "Usage accounting separates observed, estimated, and unknown values without a fixed count cap."
+    ],
+    "public_boundaries": [
+      "CW-05 AutomationState parsed via ports_v2 dispatch_allowed",
+      "CW-10 active run/session/exit represented through injected narrow callables",
+      "Periodic review delivery supplied by the existing public TaskMailbox adapter; no workflow or bridge implementation changed"
+    ]
+  },
+  "runtime_evidence": {
+    "raw": ".workflow/core-workbench/runs/implement-p2.6-20260927/raw-cw11-live-worker-review-01.json",
+    "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python tests/observation/live_worker_review_probe.py",
+    "exit_code": 0,
+    "omp_version": "omp/18.2.10",
+    "facts": [
+      "The real worker OMP processed a scheduler-generated periodic review through a QUESTION mailbox delivery (omp_processed).",
+      "All 13 subsequent normal peer wake deliveries, including the 13th, were processed (omp_processed).",
+      "The scheduler reported one completed review; the local scripted provider handled 14 requests total.",
+      "PTY output was drained; after bounded cleanup no OMP child remained and the provider server stopped.",
+      "The probe retained no prompt/response bodies or credentials."
+    ],
+    "gate_mapping": {
+      "P-C-AC-12": "12 deterministic tests cover exact 60-second boundary, pause collection, silence-only unknown, explicit hang and confirmed exit behavior; actual OMP review processed.",
+      "P-C-AC-21": "121st deterministic periodic review and 13th actual normal peer wake processed; usage labels distinguish observed/estimated/unknown.",
+      "P-C-AC-27": "Deterministic busy latest-one coalescing, user priority, pause hold and immediate confirmed exit; actual OMP review processed."
+    }
+  },
+  "checks": [
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/observation -p 'test_worker_review.py' -q",
+      "exit_code": 0,
+      "result": "12 deterministic tests passed"
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python tests/observation/live_worker_review_probe.py",
+      "exit_code": 0,
+      "result": "OMP 18.2.10 periodic review and all 13 normal peer wakes processed; bounded cleanup passed"
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/workflow -p 'test*.py' -q",
+      "exit_code": 0,
+      "result": "44 CW-10 workflow tests passed"
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/bridge -p 'test*.py' -q",
+      "exit_code": 0,
+      "result": "18 bridge tests passed"
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/contracts -p 'test*.py' -q",
+      "exit_code": 0,
+      "result": "20 contract tests passed"
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/gates/g4_evidence -p 'test*.py' -q",
+      "exit_code": 0,
+      "result": "10 G4 evidence tests passed"
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/gates/g4_lifetime -p 'test*.py' -q",
+      "exit_code": 0,
+      "result": "8 G4 lifetime tests passed"
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0,
+      "result": "no whitespace errors; explicit trailing-whitespace scan of the three in-scope files was clean"
+    },
+    {
+      "command": "graphify update .",
+      "exit_code": 0,
+      "result": "AST graph update completed; a follow-up update found no topology change and left graph outputs untouched"
+    }
+  ],
+  "superseded_attempts": [
+    {
+      "command": "pytest -q tests/observation/test_worker_review.py",
+      "exit_code": 127,
+      "result": "pytest executable is not installed; switched to the repository's unittest harness."
+    },
+    {
+      "command": "uv run pytest -q tests/observation/test_worker_review.py",
+      "exit_code": 2,
+      "result": "uv could not spawn pytest and created a local environment/package-build artifacts; attributable generated artifacts were later removed and confirmed absent in the final audit."
+    },
+    {
+      "command": "PYTHONPATH=src python -m unittest discover -s tests/workflow -p 'test*.py' -q",
+      "exit_code": 1,
+      "result": "35 workflow tests passed but two test modules failed import because system Python lacked pyte; rerun with /tmp/cw02-g1-venv/bin/python passed all 44 tests."
+    }
+  ],
+  "cleanup": {
+    "temporary_uv_outputs": [
+      "uv.lock",
+      "src/omp_workbench.egg-info/**",
+      ".venv"
+    ],
+    "attribution": "Checkpoint lacked uv.lock and egg-info; the first uv run explicitly created .venv and built the local project. Exact generated files/directories were removed after confirmation; final audit no longer contains them.",
+    "python_bytecode": "New observation __pycache__ files created by early system-interpreter runs were removed; later checks used PYTHONDONTWRITEBYTECODE=1."
+  },
+  "scope_audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/scope-audit-cw11-worker-final.json",
+  "scope_audit_facts": {
+    "comparable": true,
+    "changed_in_scope": [
+      "src/workbench/observation/worker_review.py",
+      "tests/observation/test_worker_review.py",
+      "tests/observation/live_worker_review_probe.py"
+    ],
+    "outside_scope_count": 18,
+    "outside_scope_classification": "graphify-generated/query artifacts only; preserved per Root instruction, including graphify-out/.vocab.txt and graphify-out/cache/last_query_stamp",
+    "index_changed": []
+  },
+  "remaining_unknowns": [
+    "Independent test_designer evaluation, fresh reviewer review, and final integration remain with Root.",
+    "The OMP runtime probe used an active durable TaskRepository run and real worker OMP/G3 delivery; its process/lifecycle callback was a bounded fixture mapping. The CW-10 WorkflowRun lifecycle paths are separately covered by the 44 passing workflow regressions.",
+    "Graphify reported the community label set changed after update; no LLM label refresh was run because the required AST update completed and label generation is outside the product ticket."
+  ]
+}

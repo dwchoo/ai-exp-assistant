@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "unit": "V-CW-03-P25-LAUNCH-EXE",
+  "decision_owner": "Root",
+  "reason": "Fresh review found the bounded launch slice trusts a pre-Popen expected path and lacks live child executable identity. Three calls remain for correction, independent test and review within the user cap.",
+  "remaining_work_estimate": 3,
+  "planned_roles": ["worker_senior", "test_designer", "reviewer"],
+  "hard_total_cap": 220,
+  "used_before_unit": 216,
+  "available_before_unit": 4
+}

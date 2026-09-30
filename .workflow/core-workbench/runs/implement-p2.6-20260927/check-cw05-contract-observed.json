@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "check_id": "cw05-contracts-node-final-01",
+  "requirements_identity": "3f3ee9ba0cee2a99163a3285c07886467ae6930ce7ff1f973fba56e57378e2c0",
+  "argv": ["node", "--experimental-strip-types", "--test", "tests/gates/harness/contracts.test.ts", "tests/gates/harness/ports-v2.test.ts"],
+  "cwd": "/home/dwchoo/ai-exp-assistant",
+  "environment": {"description": "Linux, Node 22.23.2, frozen CW-05 TypeScript v1/v2 contract fixtures including comma-key collision"},
+  "started_at": "2026-09-27T20:40:11.771370+00:00",
+  "finished_at": "2026-09-27T20:40:14.568049+00:00",
+  "exit_code": 0,
+  "timed_out": false,
+  "log": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/check-cw05-contracts-node.log",
+  "log_sha256": "7084b89aeb69cfa73c98eb881819c432eabb9a3c295dd157e05156325111f2a9",
+  "before": "23f790d7098743fd5968c9e72e501ea2c6bb086f93ecdc48eb53586c523854a1",
+  "after": "23f790d7098743fd5968c9e72e501ea2c6bb086f93ecdc48eb53586c523854a1",
+  "stable": true,
+  "items": [{"id": "G4-CONTRACT", "acceptance_ids": ["C-AC-08", "C-AC-25", "C-AC-26", "C-AC-33"], "result": "passed", "observed_evidence_level": "fixture", "evidence": "check-cw05-contracts-python.log, check-cw05-contracts-node.log, and check-cw05-g2-deadline.log: 20 Python and 15 Node v1/v2 cross-language contract tests passed, including required/unknown/comma-collision/safe-integer/version negatives; explicit long supervisor deadline and preserved default/expiry semantics passed 2 tests", "unknowns": []}]
+}

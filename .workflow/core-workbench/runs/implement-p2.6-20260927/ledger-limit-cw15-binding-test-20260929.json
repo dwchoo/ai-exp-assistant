@@ -1,0 +1,23 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 1111,
+  "event": {
+    "id": "limit-cw15-binding-test-20260929",
+    "kind": "limit",
+    "data": {
+      "bucket": "role:test_designer",
+      "origin": "operating",
+      "value": 142,
+      "authority": "C-D55 plus workflow-contract section 8 and current $implement authorization",
+      "reason": "Independent CW-15 production-binding regression plus mandatory CW-16 final verification",
+      "decision_owner": "Root",
+      "remaining_work_estimate": 2,
+      "expected_previous": {
+        "value": 141,
+        "authority": "C-D55 plus workflow-contract section 8 and current $implement authorization",
+        "reason": "Final CW-14 causal regression plus mandatory CW-15 and CW-16 independent verification"
+      },
+      "scope_basis": null
+    }
+  }
+}

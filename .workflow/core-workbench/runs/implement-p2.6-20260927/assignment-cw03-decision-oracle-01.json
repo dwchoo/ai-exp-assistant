@@ -1,0 +1,33 @@
+{
+  "invocation": "cw03-decision-oracle-01",
+  "role": "oracle",
+  "unit": "V-CW-03",
+  "candidate": "HEAD 7b2048c50e0794da847ad8674d4dc0433d643c33; scoped G2 source/test paths clean; unrelated preserved dirty files remain outside this review",
+  "purpose": "Review the proposed CW-03 simplification before asking the user for a product decision",
+  "observations": [
+    "Current full G2 unittest discovery: 105 tests, 11 failures, 6 delegated-cgroup skips, exit 1.",
+    "Four failures exercise parent-shell eval escape or Ctrl-C tail execution across Bash/dash.",
+    "Seven failures exercise hidden/post-snapshot jobs or READY-before-hook-completion races.",
+    "The combined live probe retains six native SIGTSTP cases as unknown: Bash/dash at parent wait and at experiment start/return.",
+    "Focused new supervisor/control-lifecycle runtime previously passed 14 Bash/dash cases, but independent test_designer and fresh reviewer evidence are still pending."
+  ],
+  "proposal_to_review": [
+    "Remove and never fall back to parent-shell direct eval for automatic experiments; use only a separate child interpreter or executable.",
+    "Fail closed at handoff for incompatible hooks/traps, reserved-helper changes, or unverifiable job state rather than promising arbitrary shell customization compatibility.",
+    "While automation owns the terminal, treat Ctrl-Z as a Workbench pause/takeover request instead of native shell suspend; after confirmed manual control, native Ctrl-Z remains available and suspended jobs block the next handoff.",
+    "Retain Bash-first plus actual sh/dash fallback."
+  ],
+  "questions": [
+    "Which parts are already required by approved C-D54/C-D55 versus a material new user-facing decision?",
+    "Is the Ctrl-Z reinterpretation technically coherent and safer, or does it create a misleading or unimplementable terminal contract?",
+    "Would any simpler boundary preserve the core user experience with less implementation risk?",
+    "Which of the 11 failures should remain required negative controls, be migrated to the new architecture, or be retired as tests of a removed path?",
+    "What acceptance/document changes and regression tests are required if the user approves the recommendation?"
+  ],
+  "constraints": [
+    "Read-only advice; do not modify files or execute mutating commands.",
+    "Do not waive required runtime evidence or declare CW-03 complete.",
+    "C-D55 keeps cgroup non-required, managed-descendant tracking, unknown hold, no replay, and user-prepared environment boundaries.",
+    "Separate supported behavior, fail-closed unsupported behavior, intentional same-user tampering, and unresolved implementation defects."
+  ]
+}

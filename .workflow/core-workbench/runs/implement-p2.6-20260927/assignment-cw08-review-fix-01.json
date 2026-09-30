@@ -1,0 +1,14 @@
+{
+  "invocation":"cw08-review-fix-01","role":"worker","unit":"V-CW-08-p2.6-current",
+  "objective":"Correct all three confirmed CW-08 fresh-review findings without expanding scope.",
+  "candidate_manifest":".workflow/core-workbench/runs/implement-p2.6-20260927/cw08-frozen-candidate.json",
+  "requirements":".workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw08.json",
+  "findings":[
+    "P1: request holds the condition lock during unbounded blocking sendall and starts timeout only afterward; bound connect/send/ack under the supplied timeout and keep close/unregister live.",
+    "P2: require exact integer generation consistently in state/event parsing and readiness; reject bool and malformed values fail-closed.",
+    "P3: ignore unmatched/late ACKs and bound any retained ACK state to pending request IDs."
+  ],
+  "allowed_files":["src/workbench/ipc/bridge_g3/mailbox.py"],
+  "constraints":["Do not edit tests, docs, workflow, graphify, or other product files.","Preserve request correlation, no replay, socket cleanup and current public API.","Run existing and independent bridge tests plus focused pre/post repros and adjacent regressions.","No commit/reset/clean/stash/push/deploy and no Docker."],
+  "report":["per-finding fix and evidence","commands/results","snapshot/scope audit","candidate_ready or needs_reroute"]
+}

@@ -1,0 +1,48 @@
+{
+  "invocation": "cw03-matrix-migration-01",
+  "role": "worker_senior",
+  "unit": "V-CW-03",
+  "base_candidate": "3a920441f1487dce849ce85c8432658ae73e5b546412d02a15d6d77f6ddfefaf",
+  "objective": "Migrate the remaining G2 input/jobs, hook/env, and takeover live matrices from their legacy direct-eval or untagged base64 RUN paths onto the validated canonical ManagedLifecycleProbe RUN protocol and split process-group supervisor.",
+  "required_behavior": [
+    "Each accepted experiment must traverse canonical RUN, emit/validate CHILD_PREPARED and EXEC_READY, use supervisor PG distinct from experiment PG in the same session, and preserve parent control wait.",
+    "Preserve existing input/jobs admission refusals and positive recovery, prompt re-entry, marker-negative/known-leak-negative controls; an always-deny candidate must still fail.",
+    "Preserve hook/env cwd/PATH/export inheritance, child-only state changes, incompatible hook/trap holds, manual residue unknown/hold behavior, and C-D55 exclusions.",
+    "Preserve takeover request/confirmation separation, immediate new-send block, before/after send/accept/start and lost/delayed ACK cases, confirmed foreground input only, unknown/no replay, and input-return ordering.",
+    "Reuse one canonical transport implementation. Do not create a fourth RUN encoding or fall back to parent eval.",
+    "Keep bounded deadlines, PTY/pipe drain, owned-process cleanup, and residue checks."
+  ],
+  "allowed_files": [
+    "src/workbench/terminal/shell_g2/lifecycle.py",
+    "src/workbench/terminal/shell_g2/control_probe.py",
+    "tests/gates/g2_shell/live_input_jobs_probe.py",
+    "tests/gates/g2_shell/live_hook_env_probe.py",
+    "tests/gates/g2_shell/live_takeover_probe.py",
+    "tests/gates/g2_shell/test_live_input_jobs_predicates.py",
+    "tests/gates/g2_shell/test_live_hook_env_predicates.py",
+    "tests/gates/g2_shell/test_live_takeover_predicates.py",
+    "tests/gates/g2_shell/test_common_run_protocol.py"
+  ],
+  "constraints": [
+    "Do not edit prototype.py's legacy negative-control templates unless a concrete canonical adapter need is demonstrated; report reroute instead of mixing protocols.",
+    "Do not weaken or delete existing assertions/skips to make the matrix pass.",
+    "Do not modify docs, workflow records, graphify output, or unrelated files.",
+    "Do not commit, reset, clean, or stash."
+  ],
+  "checks": [
+    "python3 tests/gates/g2_shell/live_input_jobs_probe.py",
+    "python3 tests/gates/g2_shell/live_hook_env_probe.py",
+    "python3 tests/gates/g2_shell/live_takeover_probe.py",
+    "python3 -m unittest tests.gates.g2_shell.test_live_input_jobs_predicates tests.gates.g2_shell.test_live_hook_env_predicates tests.gates.g2_shell.test_live_takeover_predicates tests.gates.g2_shell.test_common_run_protocol tests.gates.g2_shell.test_common_run_protocol_independent tests.gates.g2_shell.test_split_pg_control -v",
+    "python3 -m unittest discover -s tests/gates/g2_shell -p 'test_*.py' -v",
+    "git diff --check"
+  ],
+  "report": [
+    "changed files and why",
+    "legacy-to-canonical mapping for each matrix",
+    "exact commands/results and observed case counts",
+    "process residue check",
+    "remaining unknowns or incompatibilities",
+    "candidate_ready, needs_reroute, or needs_oracle"
+  ]
+}

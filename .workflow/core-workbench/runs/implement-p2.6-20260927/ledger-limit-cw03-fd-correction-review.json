@@ -1,0 +1,12 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 158,
+  "event": {"id": "limit-cw03-fd-correction-review-20260928", "kind": "limit", "data": {
+    "bucket": "role:reviewer", "origin": "operating", "value": 55,
+    "authority": "C-D55 plus workflow-contract section 8 and current implementation authorization",
+    "reason": "One fresh delta review after reviewer-required FD correction and independent test",
+    "decision_owner": "Root", "remaining_work_estimate": 1,
+    "expected_previous": {"value": 54, "authority": "C-D55 plus workflow-contract section 8 and current implementation authorization", "reason": "One fresh review turn for the integrated CW-03 split-PG adapter candidate"},
+    "scope_basis": null
+  }}
+}

@@ -1,0 +1,54 @@
+{
+  "invocation": "cw10-response-contract-fix-01",
+  "unit": "V-CW-10-p2.6-current",
+  "status": "candidate_ready",
+  "candidate_before": "75469017afe9b029fe07810497fc12a66494acc7208485001c4a34fd21e9c6c7",
+  "candidate_after": "28edcfae307926a81aa384a54a2774a09c26c716c3d4071f0fd00b0c9e312cdc",
+  "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw10-response-contract-verified.json",
+  "scope_audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/scope-audit-cw10-response-contract-verified.json",
+  "changed_paths": [
+    "omp_bridge/g3/bridge.ts",
+    "tests/gates/g3_omp/bridge.test.ts",
+    "tests/workflow/live_workflow_probe.py",
+    "tests/workflow/test_worker_port.py"
+  ],
+  "contract_design": {
+    "single_source": "workerResponseFields(delivery) is the ordered 12-field descriptor list used both by parseWorkerResponse and by workerResponseContract. The parser requires the exact descriptor order, types, immutable values and stage-specific decision enum; marker is the same constant used in the injected contract.",
+    "injection": "Only worker task/execute or question/analysis with positive safe revision receives response_contract beside the original payload. It includes marker, compact-frame format, ordered fields, immutable task/revision/run/message/attempt/session values, decision enum, canonical UUID response_id generation, and explicit one-frame/no-prose/no-tools/no-thinking/no-extra-content instructions.",
+    "provider": "The one scripted worker provider shared by both actual OMP probes reads response_contract from the delivered user message, validates its machine rules and descriptor grammar, and builds the frame in contract field_order using descriptor values. It has no hardcoded marker, 12-field response literal, or outer-message identity construction. Missing/malformed contract yields invalid rather than valid control output."
+  },
+  "mutation_evidence": [
+    "Node injection tests assert complete execute/analysis contracts and no contract on non-control worker or manager messages.",
+    "Python provider tests mutate marker, field order/schema, immutable identity, allowed decisions, response-ID generation, natural instruction and machine output rules; they show contract-derived altered output or no valid frame.",
+    "Node strict parser tests reject wrong output field order and retain all prior public-response negative controls."
+  ],
+  "checks": [
+    {"command": "node --experimental-strip-types --test tests/gates/g3_omp/bridge.test.ts tests/gates/g3_omp/bridge_public_response_independent.test.ts", "result": "28 passed, 0 failed"},
+    {"command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/workflow -p 'test_*.py'", "result": "43 passed"},
+    {"command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/bridge -p 'test_*.py'", "result": "18 passed"},
+    {"command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/gates/g3_omp -p 'test_*.py'", "result": "117 passed"},
+    {"command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/tasks -p 'test_*.py'", "result": "22 passed"},
+    {"command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/terminal -p 'test_*.py'", "result": "10 passed"},
+    {"command": "graphify update .", "result": "exit 0 after final code/test change"},
+    {"command": "git diff --check", "result": "exit 0"}
+  ],
+  "actual_omp_18_2_10": {
+    "worker_probe": "passed; execute and success public responses; child 0, provider threads 0, bridge socket removed, secret sentinel absent from durable files",
+    "independent_probe": "passed; execute and success public responses; child 0, provider threads 0, bridge socket removed, secret sentinel absent from durable files",
+    "commands": [
+      "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python tests/workflow/live_workflow_probe.py",
+      "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python tests/workflow/live_workflow_independent.py --actual-omp"
+    ]
+  },
+  "scope_attribution": {
+    "comparable": true,
+    "product_test_changed_paths": 4,
+    "outside_scope_count": 13,
+    "outside_scope": "Only graphify-out generated graph/cache/backup drift from the required graphify update; no unrelated product/test path changed relative to the assigned checkpoint."
+  },
+  "cleanup": "Both actual probes report zero owned OMP child, cwd process and provider-thread residue and removed bridge sockets; final ps pattern check found no owned runtime process.",
+  "remaining_unknowns": [
+    "The real OMP 18.2.10 path used a scripted local provider that obeyed the delivered contract; arbitrary external model compliance remains unproven.",
+    "Root independent review and combined-candidate verification remain pending."
+  ]
+}

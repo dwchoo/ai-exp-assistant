@@ -1,0 +1,30 @@
+{
+  "invocation": "cw04-extension-closure-01",
+  "unit": "V-CW-04-p2.6-current",
+  "status": "candidate_ready",
+  "candidate": "37c8e782c804fe41901c7c5047042bb8302f8c3e179dbcc1d88aa465808c7163",
+  "changed_files": [
+    "omp_bridge/g3/bridge.ts",
+    "tests/gates/g3_omp/bridge.test.ts",
+    "tests/gates/g3_omp/live_tui_extension_fault_probe.py",
+    "tests/gates/g3_omp/test_tui_extension_fault_predicates.py"
+  ],
+  "scope_audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/scope-audit-cw04-extension-worker.json",
+  "behavior": [
+    "Outage-delivery performs a real host request while listener/socket is absent; it times out unavailable, does not reach provider/agent_start, and does not replay after same-process reconnect.",
+    "A diagnostic handler fault requires both WORKBENCH_G3_HANDLER_FAULT_PROBE=1 and an explicit diagnostic frame, throws once before public API invocation, preserves message identity as unknown, emits no success ACK, and retries as unknown_no_replay.",
+    "Default, malformed-frame, same PID/session/generation reconnect, composer usability, role isolation, fresh exactly-once delivery, and cleanup remain."
+  ],
+  "checks": [
+    {"name": "Node bridge tests", "result": "passed", "tests": 19},
+    {"name": "extension fault predicates", "result": "passed", "tests": 17, "elapsed_seconds": 18.383},
+    {"name": "actual OMP extension fault modes", "result": "passed", "modes": ["default", "malformed-frame", "outage-delivery", "handler-fault"]},
+    {"name": "full G3 unittest discovery", "result": "passed", "tests": 114, "elapsed_seconds": 26.128},
+    {"name": "git diff --check", "result": "passed"}
+  ],
+  "cleanup": "All observed OMP children were zero after shutdown; owned PIDs, fixture cwd processes, and temporary directories were absent.",
+  "limits": [
+    "The injected handler fault is bounded before the public API call.",
+    "Arbitrary post-enqueue faults and production transport generalization are not claimed."
+  ]
+}

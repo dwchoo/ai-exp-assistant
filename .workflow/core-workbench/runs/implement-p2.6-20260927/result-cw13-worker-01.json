@@ -1,0 +1,41 @@
+{
+  "invocation": "cw13-worker-01",
+  "outcome": "complete",
+  "candidate_ready": true,
+  "changed_paths": [
+    "src/workbench/policy/recovery_manager/__init__.py",
+    "src/workbench/policy/recovery_manager/policy.py",
+    "tests/policy/recovery_manager/test_recovery_policy.py",
+    "graphify-out/**"
+  ],
+  "public_contracts": [
+    "RunIdentity, CompletionCriteria, Artifact, WorkerJudgment.from_cw11_report, RunObservation",
+    "RetryAttempt, RecoveryFacts, RecoveryRequest, Decision, EvidenceReport",
+    "RecoveryPort.read plus task-wide atomic reserve_recovery",
+    "RecoveryCoordinator.decide"
+  ],
+  "outcomes": [
+    "confirmed_completion", "confirmed_failure", "additional_investigation",
+    "bounded_recovery_retry", "blocked_unresolved", "termination_required",
+    "deferred_next_run", "revision_relaunch", "force_confirmation_required", "force_requested"
+  ],
+  "checks": {
+    "recovery_manager": "10 tests passed",
+    "tasks": "22 tests passed",
+    "observation": "95 tests passed",
+    "pause_automation": "129 tests passed",
+    "workflow": "44 tests passed",
+    "graphify_update": "exit 0; 4709 nodes and 9938 edges",
+    "residual_processes": "none"
+  },
+  "acceptance": {
+    "C-AC-04": "criteria and evidence second-level judgment fixture",
+    "C-AC-07": "task-wide bounded retry and evidence report fixture",
+    "C-AC-10": "confirmed full termination before mutation fixture",
+    "C-AC-13": "scope, retry and unresolved report fixture",
+    "C-AC-31": "next-run revision, current-run relaunch and immediate revocation fixture",
+    "C-AC-34": "delegated exact target force plus fresh post-force observation fixture"
+  },
+  "residual_integration_risk": "CW-15 must provide authenticated persisted CW-10/11/12 facts, a durable task-wide CAS retry ledger, stop/force/mutation/OMP execution, and authority revalidation before each action.",
+  "mutation_owner": "/root/cw12_post_review_correction"
+}

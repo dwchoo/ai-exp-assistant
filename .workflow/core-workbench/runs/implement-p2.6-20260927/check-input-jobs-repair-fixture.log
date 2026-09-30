@@ -1,0 +1,13 @@
+test_all_deny_candidate_fails_normal_admission_control (tests.gates.g2_shell.test_live_input_jobs_predicates.InputJobsPredicatesTest.test_all_deny_candidate_fails_normal_admission_control) ... ok
+test_control_ready_cannot_clear_jobs_or_pasted_and_partial_input (tests.gates.g2_shell.test_live_input_jobs_predicates.InputJobsPredicatesTest.test_control_ready_cannot_clear_jobs_or_pasted_and_partial_input) ... ok
+test_control_ready_requires_completed_job_probe_and_current_parent (tests.gates.g2_shell.test_live_input_jobs_predicates.InputJobsPredicatesTest.test_control_ready_requires_completed_job_probe_and_current_parent) ... ok
+test_invalid_or_incomplete_completion_cannot_clear_the_active_command (tests.gates.g2_shell.test_live_input_jobs_predicates.InputJobsPredicatesTest.test_invalid_or_incomplete_completion_cannot_clear_the_active_command) ... ok
+test_missing_flush_exposes_the_rejected_handoff_trailing_line (tests.gates.g2_shell.test_live_input_jobs_predicates.InputJobsPredicatesTest.test_missing_flush_exposes_the_rejected_handoff_trailing_line) ... ok
+test_missing_or_reordered_completion_stays_closed_after_fresh_handoff (tests.gates.g2_shell.test_live_input_jobs_predicates.InputJobsPredicatesTest.test_missing_or_reordered_completion_stays_closed_after_fresh_handoff) ... ok
+test_second_dispatch_cannot_bypass_a_rejected_guard (tests.gates.g2_shell.test_live_input_jobs_predicates.InputJobsPredicatesTest.test_second_dispatch_cannot_bypass_a_rejected_guard) ... ok
+test_second_handoff_and_dispatch_use_the_same_parent_after_input_return (tests.gates.g2_shell.test_live_input_jobs_predicates.InputJobsPredicatesTest.test_second_handoff_and_dispatch_use_the_same_parent_after_input_return) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.960s
+
+OK

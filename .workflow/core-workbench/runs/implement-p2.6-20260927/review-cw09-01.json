@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "invocation": "cw09-review-01",
+  "candidate": "9a33af1e38649fe49ad32cb9e2006f650946c7968dc4d7bd0195fa2f1032cd11",
+  "verdict": "findings",
+  "approval": false,
+  "counts": {"P0": 0, "P1": 0, "P2": 2, "P3": 0},
+  "findings": [
+    {
+      "severity": "P2",
+      "path": "src/workbench/tasks/repository.py",
+      "line": 119,
+      "summary": "INSERT OR REPLACE can overwrite an immutable TaskSpec revision when SQLite recursive_triggers is disabled by default.",
+      "evidence": "Reviewer reproduced replacement of an existing (task_id, revision) in an in-memory TaskRepository; existing independent coverage rejected only explicit UPDATE and DELETE."
+    },
+    {
+      "severity": "P2",
+      "path": "src/workbench/storage/metadata_sqlite/schema.py",
+      "line": 216,
+      "summary": "The v1 to v2 migration copies invalidated_revisions before the decision-kind trigger exists.",
+      "evidence": "Reviewer migrated a v1 row whose invalidation authority was same-Task scope_approved; migration reached user_version=2 and foreign_key_check returned no violations."
+    }
+  ],
+  "candidate_observation": {
+    "product_and_test_files_match_manifest": true,
+    "generated_delta": "graphify-out/cache/last_query_stamp",
+    "attribution": "Root graphify query after review dispatch",
+    "reviewer_mutated_files": false
+  },
+  "required_followup": "Add independent regressions, correct both findings, freeze a new candidate, and perform delta review.",
+  "needs_oracle": false
+}

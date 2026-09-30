@@ -1,0 +1,36 @@
+{
+  "invocation": "cw12-worker-01",
+  "role": "worker",
+  "unit": "V-CW-12-p2.6-current",
+  "objective": "Implement CW-12 pause automation policy and status projection against the existing CW-09/CW-11/CW-06 and G3 pause contracts.",
+  "ticket": "docs/features/core-workbench/tickets/CW-12.md",
+  "requirements": ".workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw12.json",
+  "candidate_before": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw11-token-retention-final.json",
+  "write_scope": [
+    "src/workbench/policy/pause_*/**",
+    "tests/policy/pause_*/**",
+    "omp_bridge/policy_*/**",
+    "src/workbench/ui/status_*/**",
+    "tests/ui/status_*/**",
+    "graphify-out/**"
+  ],
+  "must_deliver": [
+    "Pause immediately closes new automatic manager/worker dispatch and periodic review admission, requests manager-turn abort, but keeps existing host experiment plus non-model log/process collection alive.",
+    "Durable/inspectable pause state binds approved scope plus exact Task/revision/run and cancellation/abort request, acknowledgement, stop observation, and unknown tool outcomes without claiming rollback or tool completion.",
+    "Status projection exposes last action, confirmed file changes, running processes, pause/abort state, unknown tool results, and relevant timestamps for the existing three-area UI boundary.",
+    "Explicit resume requires current file/tool/process/task/approval reconciliation and user intent; held abort/wait/delivery commands are never replayed, while manual user activity remains independent and cannot implicitly resume automation.",
+    "Cancellation preserves records/results and is distinguished from pause; terminal takeover remains independent."
+  ],
+  "verification": [
+    "Add focused worker tests only inside the assigned test scopes, including races/fail-closed cases and replay prevention.",
+    "Use existing actual OMP 18.2.10 pause/reconcile probes read-only where useful; do not modify their G3 files.",
+    "Run focused new tests plus relevant contracts, workflow, observation, bridge/G3 regressions; run graphify update . after code/test changes."
+  ],
+  "constraints": [
+    "One writer in the shared workspace; apply_patch only for edits.",
+    "Do not modify existing G3 bridge, workflow, observation, contract, ticket, PLAN, or workflow ledger files.",
+    "Do not use uv or create local environments/caches; use /tmp/cw02-g1-venv/bin/python and current Node tooling.",
+    "No commit/push/deploy or destructive git operations."
+  ],
+  "report": ["files changed", "contract design", "exact checks and runtime evidence", "qualifications", "candidate_ready or needs_reroute"]
+}

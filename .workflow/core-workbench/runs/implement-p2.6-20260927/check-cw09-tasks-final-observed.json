@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "check_id": "cw09-tasks-final-01",
+  "requirements_identity": "37e6344ccffb1c89e26bc30d405a8034f2926cb46e68d4857c8d3c12de2f5f92",
+  "argv": [
+    "/usr/bin/env",
+    "PYTHONDONTWRITEBYTECODE=1",
+    "PYTHONPATH=src",
+    "/tmp/cw02-g1-venv/bin/python",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tests/tasks",
+    "-v"
+  ],
+  "cwd": "/home/dwchoo/ai-exp-assistant",
+  "environment": {
+    "description": "Linux, frozen CW-09 SQLite repository candidate with worker and independent regression coverage"
+  },
+  "started_at": "2026-09-27T21:44:40.736081+00:00",
+  "finished_at": "2026-09-27T21:44:45.327207+00:00",
+  "exit_code": 0,
+  "timed_out": false,
+  "log": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/check-cw09-tasks-final.log",
+  "log_sha256": "5980e4fa8930f0f5610648bace35484729bd2fbf3f82e3fb872b84435485327d",
+  "before": "6ba379e6e9c13af19a66b27245822e392c2c763f8d0716892d3c915eca7493c3",
+  "after": "6ba379e6e9c13af19a66b27245822e392c2c763f8d0716892d3c915eca7493c3",
+  "stable": true,
+  "items": [
+    {
+      "id": "P-C-AC-29",
+      "acceptance_ids": ["C-AC-29"],
+      "result": "passed",
+      "observed_evidence_level": "fixture",
+      "evidence": "check-cw09-tasks-final.log: 22 SQLite repository tests passed. Coverage proves no run starts without both durable scope approval and proceed authority; authority consumption and run creation roll back together on failure; TaskSpec revisions remain immutable including direct INSERT OR REPLACE; invalidation authority is same-Task terminal-only; valid v1 migration succeeds and invalid legacy authority rolls back atomically; reopen preserves run, settings, message/delivery, shell, and takeover history.",
+      "unknowns": []
+    }
+  ]
+}

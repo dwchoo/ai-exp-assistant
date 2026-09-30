@@ -1,0 +1,28 @@
+{
+  "invocation": "cw13-force-test-01",
+  "outcome": "needs_reroute",
+  "candidate_ready": false,
+  "product_mutation": false,
+  "test_only_changed_paths": ["tests/policy/recovery_manager/test_recovery_policy.py", "graphify-out/**"],
+  "candidate": "047353c3a55e85d8666672fdea6f09fea7dff8f5bc0cd6c383973f2efcf884cb",
+  "production_snapshot_match": {
+    "path": "src/workbench/policy/recovery_manager/policy.py",
+    "sha256": "094bd24883d5e4a392bb5390dc716d892d4cf88180fa0582f3068eba80ec9d67"
+  },
+  "finding": {
+    "severity": "P1 candidate requiring semantic adjudication",
+    "acceptance_ids": ["C-AC-34"],
+    "summary": "The force branch admits exact-target force when lifetime is running and descendants are not clear even if shell_state is unknown/exited or the main exit is confirmed; the test assignment expected force only when shell_state is running and exit_confirmed is false.",
+    "reproduction": "test_force_requires_confirmed_still_running_state_after_stop",
+    "observed": "force_requested in three subcases",
+    "unknown": "Whether shell_state/exit_confirmed describe the exact ForceTarget or only the main experiment lifecycle; exact observed_target may still be an owned supervisor/descendant after main exit."
+  },
+  "checks": {
+    "recovery_manager": "23 tests; 22 passed and 1 test failed in three subcases",
+    "workflow": "44 tests passed",
+    "observation": "95 tests passed",
+    "pause_automation": "129 tests passed",
+    "graphify_update": "exit 0"
+  },
+  "mutation_owner": "/root/cw12_post_review_test"
+}

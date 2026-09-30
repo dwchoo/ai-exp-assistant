@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-delta-review-cw06-04",
+  "role": "reviewer",
+  "frozen_candidate": "01cee2da36f84822ab5a5dc24fed01667ad9a50f77e1ca46efce77fb58c6650e",
+  "verdict": "integrate",
+  "findings": [
+    {"severity": "P3", "where": "src/workbench/terminal/vt_g1/screen.py:_scroll_region/scroll_up/scroll_down", "note": "pyte parser drops the '>' prefix, so 'CSI > Ps T' (xterm title-mode reset) is executed as SD Ps (verified: ESC[>4T scrolls 4 rows down). Rare; fix direction: none needed now, or handle via a pre-filter. Ps S/T with intermediates ('CSI Ps SP S') likewise treated as SU/SD."},
+    {"severity": "P3", "where": "screen.py:_scroll_region history handling", "note": "history.top/bottom appended for any margin (also top>0 and SD), identical to pyte index/reverse_index but xterm keeps scrollback only for top==0 primary-screen SU and never for SD. Consistent with G1 pyte behaviour; classified as accepted gap."},
+    {"severity": "P3", "where": "screen.py:_blank_scrolled_line", "note": "blank fill uses full cursor.attrs (incl. reverse/fg), same as pyte erase_*; xterm BCE uses only background. Consistent with existing G1 erase behaviour."},
+    {"severity": "P3", "where": "tests/ui/test_product_pty.py:check_signal_restore", "note": "assertIn ?2004l does not prove ?2004h came before it; add ordering assert. Wait for 'MANAGER OMP' does guarantee 2004h was written before the signal (h written before first draw), so the wait is a legitimate race fix and assertions were not weakened."}
+  ],
+  "focus_verdicts": {
+    "app.py_2004": "pass - 2004h now inside try; every exit (Terminate, ConnectionLost, exceptions, normal) runs finally ?2004l + SIGWINCH restore; handlers installed before curses.wrapper unchanged; no new traceback path.",
+    "screen.py_SU_SD": "pass - region-bounded, cursor unchanged (also outside margins), count 0/absent=1, clamp to region height, BCE blanks, no row aliasing, dirty marked, alt-screen isolated (margins do not leak), no global monkey-patching (subclass stream with csi/events overrides), private/multi-param ignored. G1 wide glyph/alt/scrollback/DSR-DA suites green (tests/gates/g1_vt test_*.py: 85 OK).",
+    "tests": "pass - absolute expected rows, independent oracle via pyte IND/RI for history, ncurses pattern, chunked feed, alt-screen isolation; signal tests 5/5 stable, last-chunk test 3/3."
+  },
+  "notes": "Base backup p27-cw06-flood-delta-backup/tests/ui/test_product_pty.py lacks test_last_fed_chunk_is_drawn_promptly (catchup delta, model.py); it passes 3/3 and is outside this delta.",
+  "tests_run": "/tmp/cw02-g1-venv/bin/python unittest: g1_vt discover test_*.py (85 OK); product_pty sigterm/sighup x5; last_fed_chunk x3"
+}

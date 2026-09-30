@@ -1,0 +1,23 @@
+{
+  "invocation":"cw11-atomic-recovery-01",
+  "outcome":"complete",
+  "candidate_ready":true,
+  "production_api":[
+    "SerializedReviewAdmission serializes six-field run identity, AutomationState, epoch, exit fence, consumed review, and synchronous admission+dispatch under one RLock.",
+    "WorkflowObservationBinding.attach freezes revision/session identity from the actual persisted TASK; collect_and_notify accepts only the same WorkflowRun's confirmed lifetime/control/input exit, fences admission, and surfaces it immediately."
+  ],
+  "changed_files":[
+    "src/workbench/observation/worker_review.py",
+    "src/workbench/observation/workflow_binding.py",
+    "tests/observation/test_worker_review.py",
+    "tests/observation/test_worker_review_independent.py",
+    "tests/observation/test_atomic_admission.py",
+    "tests/observation/test_workflow_binding.py",
+    "tests/observation/live_worker_review_probe.py",
+    "tests/observation/live_worker_review_independent.py"
+  ],
+  "checks":{"observation":"46/46 passed","workflow":"44/44 passed","bridge":"18/18 passed","contracts":"20/20 passed","g4":"18/18 passed","existing_omp":"14 requests and 13 wakes passed","independent_omp":"OMP 18.2.10: 60.0-second review, 13 wakes, 15 requests, real WorkflowRun exit surfaced in 0.084 seconds, secret absent, zero residue"},
+  "environment_note":"Managed sandbox initially caused EROFS under the default OMP daemon directory; the probe sets PI_CONFIG_DIR to its disposable directory.",
+  "qualifications":["Arbitrary external model compliance and a positive live persistent-shell hang classification remain evidence limitations."],
+  "graphify_updated":true
+}

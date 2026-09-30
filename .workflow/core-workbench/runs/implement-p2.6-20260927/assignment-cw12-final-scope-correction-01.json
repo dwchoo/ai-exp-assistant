@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "invocation": "cw12-final-scope-correction-01",
+  "role": "worker_senior",
+  "unit": "V-CW-12-p2.6-current",
+  "authority": "User $implement docs/features/core-workbench request; approved PLAN p2.6 CW-12 and fresh final review evidence",
+  "objective": "Close the remaining three C-AC-33 reconciliation findings without expanding behavior.",
+  "base_candidate": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw12-post-review-test.json",
+    "candidate_id": "c31bc816c10ae08dd29a5a625ad83336c7584bccc4ae5497d5369aef8e3d7639",
+    "review": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-post-review-final-review-01.json",
+    "note": "A required reviewer graphify query changed only graphify-out/cache/last_query_stamp after the snapshot."
+  },
+  "required_corrections": [
+    "Reconcile actual manager and worker peer cwd file state against a production-owned pause baseline/current approval boundary, not merely two-read stability. Stable changes introduced after pause outside the reconciled boundary must block resume. Do not store or expose file contents.",
+    "Allow a live child process cwd that is the resolved worktree root or a resolved descendant, while rejecting escapes, unrelated paths, unreadable state, and symlink-based ambiguity.",
+    "Bound worktree and peer file observation by file count and byte budget, hash by bounded streaming rather than whole-file read, and fail closed on limits, mutation, special files, or observation errors.",
+    "Add deterministic positive and negative tests for peer changes after pause, descendant child cwd, escape cwd, oversized/count-exceeded files, and normal bounded liveness."
+  ],
+  "allowed_write_paths": [
+    "src/workbench/policy/pause_automation/**",
+    "tests/policy/pause_automation/**",
+    "graphify-out/**"
+  ],
+  "constraints": [
+    "You are the sole product mutation owner. Preserve prior fixes and all unrelated changes.",
+    "Do not edit repository.py, worker_review.py, .workflow, docs, PLAN/state, or other paths unless you stop and report a concrete scope obstacle.",
+    "Use apply_patch; run focused/proportional tests and graphify update .; do not commit, publish, deploy, use Docker, or delegate.",
+    "Keep observations privacy-preserving and bounded; unknown evidence must reject resume rather than fabricate a match."
+  ],
+  "report": "Return changed paths, exact semantics, tests/results, candidate_ready/blocker, and residual risks."
+}

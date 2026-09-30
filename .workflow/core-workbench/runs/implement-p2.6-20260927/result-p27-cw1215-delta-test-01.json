@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw1215-delta-test-01",
+  "status": "candidate_ready",
+  "frozen_candidate": "671b05d3085701f0111e6440955fa6f4b9edc5ddcdba9f54c6d5af27a7c7351b",
+  "candidate_after_tests": "c47835913e65051c2382081a52f311d840f0c25ec734b12e82b161709b976fe2",
+  "agent_result": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw1215-delta-test-01-agent.json",
+  "scope_audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-cw1215-delta.json",
+  "added_tests": {"tests/ui/live_product_state_independent_p27i.py": "d816f5ac218e62859e0c5bc22deb5f5fc3cc595ec8900162821b524f6c94ea1e"},
+  "checks": [["tests/policy/pause_automation", 0, "129 OK (= p2.6)"], ["tests/lifecycle", 0, "38 OK (= p2.6)"], ["live_pause_runtime_probe (actual OMP, scripted local provider)", 0, "passed, zero residue, 61 result keys identical to p2.6"], ["live_product_state_independent_p27i (stub provider, 0 model requests)", 0, "3 OK x3"], ["tests/ui/status_workbench", 0, "2 OK"]],
+  "item_verdicts": {"P-C-AC-15": "local+UI delta verified (UI exit = detach; both OMP, host shell, experiment identities kept); pending CW-18 (check only while active), CW-16", "P-C-AC-18": "local+UI delta verified (owner/mode/takeover request survive detach, idle, UI SIGKILL, reattach; no automatic send/replay); pending CW-18 (delivered command state), CW-16", "P-C-AC-30": "local+UI delta verified at fixture level (automation text independent of focus/owner/manual input); pending CW-18 real pause wiring, CW-16", "P-C-AC-16": "local evidence re-confirmed; UI n/a; pending CW-19, CW-16", "P-C-AC-17": "local re-confirmed; UI n/a; pending CW-18, CW-16", "P-C-AC-22": "local re-confirmed; UI has no shutdown control (CLI shutdown closes UI, terminal restored); pending CW-18/19/16", "P-C-AC-23": "local re-confirmed; UI n/a; pending CW-19, CW-16", "P-C-AC-25": "local re-confirmed; UI n/a; pending CW-18", "P-C-AC-33": "local re-confirmed; UI n/a; pending CW-18"},
+  "findings_for_ux_and_later": ["product UI does not use status_workbench projection; ui_v1 carries only automation.state (backend reports not_configured until CW-18) -> CW-12 pause details not yet displayed (CW-18 wiring)", "no shutdown_request/shutdown_confirm/confirm_boot controls in the product UI (CLI only) -> UR-UX question", "pending takeover request not shown after reattach (only owner/mode) -> UR-UX candidate", "wb-handoff held by a user background job leaves shell in control_wait rejecting input and takeover_confirm with no in-UI recovery (G2 open item) -> CW-18/UR-UX/CW-16"],
+  "frozen_hashes_equal": true,
+  "residue": "none (/tmp/r12 removed); /tmp/x (0 bytes, 03:42) not created by tests, left",
+  "observed_model": "sonnet (wb-test-rerun definition; host metadata unverified)"
+}

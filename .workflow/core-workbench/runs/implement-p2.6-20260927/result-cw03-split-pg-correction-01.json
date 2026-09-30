@@ -1,0 +1,25 @@
+{
+  "invocation": "cw03-split-pg-correction-01",
+  "status": "candidate_ready",
+  "candidate": "e2093d55150a433fc19319e25708ad5ce0a177bc43c038dd1da06aae1b3ce562",
+  "changed_paths": [
+    "tests/gates/g2_shell/live_combined_boundary_probe.py",
+    "tests/gates/g2_shell/test_live_combined_boundary_predicates.py"
+  ],
+  "corrections": [
+    "Foreground SIGINT/SIGQUIT preserves the split supervisor observer in Bash/dash start and return stages; actual signal status -2/-3 remains distinct from numeric exit 130/131.",
+    "Failure after setsid and before host identity registration emits UNKNOWN and performs bounded repeated child discovery, kill, and reap through CLEANUP_EMPTY:ECHILD."
+  ],
+  "checks": [
+    {"command": "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest tests.gates.g2_shell.test_live_combined_boundary_predicates -v", "exit_code": 0, "summary": "21 tests passed in 43.215s"},
+    {"command": "PYTHONDONTWRITEBYTECODE=1 python3 tests/gates/g2_shell/live_combined_boundary_probe.py", "exit_code": 0, "summary": "30 cases observed"},
+    {"command": "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/gates/g2_shell -p 'test_*.py' -v", "exit_code": 0, "summary": "113 tests passed in 85.008s; 6 delegated-cgroup skips"},
+    {"command": "git diff --check", "exit_code": 0, "summary": "clean"}
+  ],
+  "file_sha256": {
+    "tests/gates/g2_shell/live_combined_boundary_probe.py": "89e0af929251679c7a4ac1a68f9f7e67a38f4ca46c6e4e247b4a2f7a29dc1564",
+    "tests/gates/g2_shell/test_live_combined_boundary_predicates.py": "2adfdf44ccc7a8257bee2d68e7ed2da5ac70841da850d9cdd59a29e9c9544bfe"
+  },
+  "remaining_unknowns": ["Broader CW-03 production adapter integration and independent delta verification remain."],
+  "owned_processes_remaining": false
+}

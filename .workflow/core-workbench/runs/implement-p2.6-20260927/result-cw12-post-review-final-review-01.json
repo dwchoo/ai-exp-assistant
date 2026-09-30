@@ -1,0 +1,33 @@
+{
+  "invocation": "cw12-post-review-final-review-01",
+  "outcome": "needs_correction",
+  "candidate_ready": false,
+  "candidate": "c31bc816c10ae08dd29a5a625ad83336c7584bccc4ae5497d5369aef8e3d7639",
+  "findings": [
+    {
+      "severity": "P1",
+      "confidence": "high",
+      "summary": "Peer cwd manifests are checked only for two-read stability, not reconciled with the paused baseline/current approval boundary; stable out-of-scope changes can resume.",
+      "evidence": ["src/workbench/policy/pause_automation/controller.py:1062", "src/workbench/policy/pause_automation/controller.py:1115"],
+      "acceptance_ids": ["C-AC-33"]
+    },
+    {
+      "severity": "P2",
+      "confidence": "high",
+      "summary": "A legitimate running child whose cwd is a descendant of the approved worktree is rejected because exact root equality is required.",
+      "evidence": ["src/workbench/policy/pause_automation/controller.py:1100"],
+      "acceptance_ids": ["C-AC-33"]
+    },
+    {
+      "severity": "P2",
+      "confidence": "high",
+      "summary": "Git worktree changed-file observation reads every changed file wholly with no count or byte bound.",
+      "evidence": ["src/workbench/policy/pause_automation/controller.py:1024"],
+      "acceptance_ids": ["C-AC-33"]
+    }
+  ],
+  "closed_prior_findings": ["persisted run terminal/dispatch race", "late CW-11 result attribution"],
+  "requirement_assessment": {"C-AC-25": "met", "C-AC-30": "met", "C-AC-33": "not_met"},
+  "tests_run": false,
+  "graphify_stamp_drift": "review-required graphify query updated graphify-out/cache/last_query_stamp only"
+}

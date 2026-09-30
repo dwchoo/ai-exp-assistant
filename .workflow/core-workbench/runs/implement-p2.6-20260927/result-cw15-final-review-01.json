@@ -1,0 +1,32 @@
+{
+  "invocation": "cw15-final-review-01",
+  "outcome": "complete",
+  "candidate_ready": false,
+  "candidate_id": "cddcbd40126c42d30de0956f98996fe50c74512159f36054fd952add5e1d600f",
+  "snapshot_hashes_match": true,
+  "findings": [
+    {
+      "severity": "P1",
+      "path": "src/workbench/app/lifecycle.py",
+      "lines": "358-365,385,389-415",
+      "summary": "automatic_admission checks problems but not state=ended, allowing a bound command for an already fully terminated run while OMP/shell peers remain alive."
+    },
+    {
+      "severity": "P2",
+      "path": "src/workbench/app/lifecycle.py",
+      "lines": "430-435",
+      "summary": "Periodic review tick bypasses MetadataAdmissionGate and may run model work while metadata automatic admission is closed."
+    }
+  ],
+  "closed": "shutdown action idempotence and clean-baseline positive G3/Pause/TaskMailbox delivery/no-replay findings are closed",
+  "acceptance": {
+    "C-AC-15": "partially met",
+    "C-AC-16": "not met due ended-run command admission",
+    "C-AC-17": "runtime fixture met",
+    "C-AC-18": "in-repo binding met; external OMP pending",
+    "C-AC-22": "runtime fixture met",
+    "C-AC-23": "not met because periodic model work bypasses metadata admission"
+  },
+  "pending_environment": "External actual OMP positive delivery and isolated real reboot remain pending.",
+  "mutation_owner": null
+}

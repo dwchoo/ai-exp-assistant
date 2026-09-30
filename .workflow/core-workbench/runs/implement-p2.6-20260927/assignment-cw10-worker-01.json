@@ -1,0 +1,20 @@
+{
+  "invocation":"cw10-worker-01","role":"worker_senior","unit":"V-CW-10-p2.6-current","ticket":"CW-10",
+  "objective":"Implement the approved Task→manager preparation→safe worktree→host shell run→durable outcome→worker evidence judgment vertical workflow.",
+  "checkpoint":".workflow/core-workbench/runs/implement-p2.6-20260927/cw10-worker-checkpoint.json",
+  "requirements":".workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw10.json",
+  "dependencies":["CW-07 persistent shell public boundary","CW-08 TaskMailbox public boundary","CW-09 TaskRepository public boundary"],
+  "allowed_write_scope":["src/workbench/workflow/**","tests/workflow/**","docs/features/core-workbench/WORKTREE-GUIDE.md"],
+  "required_behavior":[
+    "Consume only public dependency APIs; preserve stable Task/revision/run linkage and approved scope/proceed authority.",
+    "Prepare an execution worktree from an explicit commit using ordinary Git tools without deleting/stashing user changes, bypassing into the development directory, or auto push/merge.",
+    "Record cwd, commit, environment, shell acceptance/start/exit-or-unknown, exit status, raw log and result locations durably.",
+    "After confirmed exit, produce evidence-backed success/failure/indeterminate judgment covering normal success, nonzero failure, exit-0 criteria failure, and insufficient logs; exit 0 alone is not success.",
+    "A worker report requesting code modification ends that instruction; no automatic return after modification without a new manager instruction.",
+    "During pause keep exit/log collection but do not start new automated worker analysis.",
+    "Classify direct worker requests as existing Task scope, bounded small new spec, or scope expansion; require manager confirmation before expansion execution."
+  ],
+  "verification":["Actual temporary Git repository/worktree and real host shell runtime for all four gate items.","Preparation failures and dirty/untracked source preservation.","Bounded cleanup and no PTY/pipe/process/worktree residue beyond deliberately retained fixture paths.","Relevant dependency regressions and git diff --check."],
+  "constraints":["Do not commit the shared repository; temporary fixture commits are allowed.","Do not implement automatic worktree lifecycle management beyond the approved guide/preparation seam.","No Phase 2, Docker, push, merge, deploy, reset, clean or stash.","Preserve unrelated dirty/untracked user changes and graphify generated deltas."],
+  "report":["implementation and public API boundaries","actual runtime evidence mapped to P-C-AC-03/05/09/11","checks/results","snapshot/scope audit","candidate_ready or needs_reroute"]
+}

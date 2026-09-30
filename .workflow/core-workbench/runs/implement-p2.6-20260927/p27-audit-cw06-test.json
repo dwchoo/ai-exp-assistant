@@ -1,0 +1,1 @@
+{"changed":["tests/backend/test_live_detach_independent.py","tests/ui/independent_support_cw06.py","tests/ui/live_product_omp_independent.py","tests/ui/test_product_keys_independent.py","tests/ui/test_product_paste_independent.py","tests/ui/test_product_pty_independent.py","tests/ui/test_product_state_independent.py"],"comparable":true,"index_changed":[],"outside_scope":[]}

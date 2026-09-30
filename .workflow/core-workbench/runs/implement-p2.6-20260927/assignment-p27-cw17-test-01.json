@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw17-test-01",
+  "role": "test_designer",
+  "unit": "V-CW-17-p2.7",
+  "authority": "User approval of p2.7 bundle ('진행해', 2026-09-29); .workflow/core-workbench/runs/planning-p2.7-20260929/approval.json",
+  "objective": "Independently verify the frozen CW-17 candidate (production backend lifetime, entrypoint, ui_v1) against L-CW17-DETACH/START/CONTRACT, deriving expected outcomes from CW-17.md and SPEC s2.7 before reading the implementation.",
+  "required_tests": [
+    "L-CW17-DETACH runtime: start via the real entrypoint (not internal constructors) with two real OMP 18.2.10 (scripted provider, bridge loaded) and the persistent shell; attach, detach, wait more than 60 s, reattach; assert identical backend/OMP/shell/supervisor identities (pid + start time), preserved input owner and control mode, no new run, no duplicate delivery. Also: frontend process killed with SIGKILL while attached must leave the backend alive.",
+    "Negative cases: second concurrent start on the same data dir attaches instead of spawning; data dir and socket permissions (0700/0600); stale socket or lock from a dead backend is handled without killing a live foreign process.",
+    "L-CW17-START runtime: real Bash and dash selection; SHELL=zsh default does not change the choice; PATH without bash and sh prints start requirements, exits non-zero and leaves no backend.",
+    "L-CW17-CONTRACT fixture: version mismatch rejection, framing and size limits, 2 MiB paste and queue-full paste rejected all-or-nothing with a reason visible to the client, malformed frames, client disconnect mid-stream keeps the backend and PTYs.",
+    "Regression: run existing tests/contracts, tests/lifecycle and tests/gates/g4_lifetime non-live suites to confirm unchanged v1/ports_v2 behavior.",
+    "Characterize (runtime, real bash) host-shell user input through ui_v1 after a confirmed takeover: plain text, arrow keys/ESC sequences, Ctrl-C, and a user-launched foreground program (e.g. `cat` or `python3 -q` REPL). Report which inputs are delivered vs rejected (reason) against C-AC-08 ('수동 입력은 확인된 현재 대상에 전달한다'). Do not change production; report rejection of ordinary interactive input as a material finding."
+  ],
+  "allowed_write_paths": [
+    "tests/backend/**",
+    "tests/contracts/test_ui_v1*.py"
+  ],
+  "constraints": [
+    "Independent test-only owner; no production/workflow/docs/PLAN/state/ledger edits.",
+    "No tmux/herdr, no reboot, no credential access beyond running the installed OMP, no delegation, commit or publication. Own and account for every spawned process; exact-identity cleanup only; leaks on the normal path are failures."
+  ],
+  "report": "Return candidate_ready or needs_reroute with failing evidence, per-gate-item evidence level, added cases and counts, frozen production hashes, residue check, and unsupported environments.",
+  "candidate": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-cw17-worker-after.json",
+    "candidate_id": "8ad024ff4820404513cdf223e2ad1e7eaccc202b6beddc43855c5f287ac13242"
+  },
+  "checkpoint_ref": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-cw17-test-checkpoint.json"
+}

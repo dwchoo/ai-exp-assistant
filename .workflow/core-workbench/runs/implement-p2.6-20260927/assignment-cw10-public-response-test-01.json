@@ -1,0 +1,34 @@
+{
+  "invocation": "cw10-public-response-test-01",
+  "role": "test_designer",
+  "unit": "V-CW-10-p2.6-current",
+  "objective": "Independently attack the new production public OMP worker-response boundary and prove actual CW-10 probes no longer rely on provider private state.",
+  "candidate_manifest": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw10-public-response-verified.json",
+  "candidate": "a52be4dcbfe224ec5e0aa0565c0e77a5189acec2c4c625327e181ce0e0cb8716",
+  "requirements": ".workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw10.json",
+  "oracle_advice": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw10-public-response-oracle-01.json",
+  "allowed_write_scope": [
+    "tests/workflow/test_worker_port_independent.py",
+    "tests/gates/g3_omp/bridge_public_response_independent.test.ts"
+  ],
+  "required_attacks": [
+    "Strict full-frame parsing: missing/multiple marker, prose prefix/suffix, two JSON values, truncated JSON, duplicate/unknown key, wrong stage/kind/decision/identity, bool/float/negative/unsafe integer, malformed UUID.",
+    "Terminal causality: response without processed, processed without response, mismatched response ID, wrong role/session/generation, cursor-old event, inverse sequence, duplicate/replayed arm/observe, continuation, retry/additional provider request, tool/error/abort/session switch/pause/disconnect.",
+    "Privacy: malformed/prose/thinking/error secret sentinels never appear in public frames or durable artifacts.",
+    "Actual OMP 18.2.10 two-stage flow uses exported production G3WorkerResponsePort only; static and runtime proof that workflow probes do not read provider private response dictionaries."
+  ],
+  "constraints": [
+    "Do not modify product code, existing tests, docs, workflow artifacts, dependencies, or unrelated files.",
+    "Use apply_patch for any independent test files. If a product defect appears, preserve failing evidence and report needs_reroute; do not fix it.",
+    "No commit/push/merge/stash/reset/clean. Run graphify update . only if test files are added/changed and report generated drift separately."
+  ],
+  "checks": [
+    "New independent tests plus full Node bridge, workflow, bridge, G3, tasks, terminal suites; actual OMP probes; git diff --check; residue/privacy scans."
+  ],
+  "report": [
+    "new tests and independent findings",
+    "commands and exact results",
+    "actual public-only response evidence",
+    "snapshot/scope audit and candidate_ready or needs_reroute"
+  ]
+}

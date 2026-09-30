@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw06-flood-worker-04",
+  "status": "candidate_ready (agent: done_with_test_defect in live probe F2 post-assertion)",
+  "candidate_id": "183c15f93d8afedf2ccfd7a8c0d4afbb9a02461a146cba4a43f5a6fc9be5e8f5",
+  "after_snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-cw06-flood-after.json",
+  "scope_audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-cw06-flood.json (no outside-scope)",
+  "delta_backup": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-cw06-flood-delta-backup/ (pre-change ui_server.py in p27-cw06-flood-pre-backup/)",
+  "changed_paths": {"src/workbench/backend/ui_server.py": "e6aa3e0b12fc48c920ed901d8e3b8ec8e1063d9d1cb3a89bd5345066de533469", "src/workbench/ui/product/app.py": "b604cb6f687a9c62b93bc3ed055636405a5dbbffb6858bfcf927d6b63e8cb28e", "src/workbench/ui/product/model.py": "75f29f3d5bac58cfb40414e1b2ebe2cc82d305f76a6d557abb731a8ffebbf6d5", "tests/backend/test_ui_server.py": "a1f16d147fc8a8d885b631b3a70e1e490bda0ae83f1dc41c0be04f87fab6741b", "tests/ui/test_product_model.py": "2a645fd0f8befd78f999f3e47086b2dc48400247f3811448364d67e325ebf361", "tests/ui/test_product_pty.py": "1572721357624c2a7064b0cfa2ab940ea03ee7122cb042d35cea8501441b6d74"},
+  "checks": [["tests/ui test_*.py x3", 0, "120 OK x3 (incl. p27f help-Esc)"], ["tests/backend", 0, "69 OK 264s"], ["tests/contracts", 0, "43 OK"], ["g1_vt", 0, "63 OK"], ["g4_lifetime", 0, "8 OK"], ["new red->green backend overflow framing", "red->green", "CLOSING-after-queue and framing corruption each red before"], ["new red->green UI feed budget/flush redraw/PTY intake", "red->green", "3/3"], ["live_product_flood_independent_p27f x3 (stub OMP)", 1, "F0/F1 pass, F2 Ctrl-C pass; F2 post token assertion fails 3/3 (probe defect)"]],
+  "measurements": {"F0 200MB": "before: UI detached at 7.1s, no reason; after: attached 22-25s, 0 detaches", "backend output": "F0 ~15 MB/s, F2 ~66 MB/s (1.35 GB/20s) all received by UI", "UI loop F0": "before intake 0.54/feed 6.37/draw 0.22 s of 7.3 s, feed step ~187 ms; after intake 2.07/feed 17.7/draw 2.2 s of 22 s, feed step ~26 ms, draw ~15.5 fps", "fixture yes intake": "6.3 -> 335.6 MB/s", "F2 Ctrl-C stops flood": "0.02-0.07 s", "after Ctrl-C": "^C and prompt redrawn within 0.57 s; new command round-trip 0.06 s"},
+  "fixes": {"backend": "per-frame length deque + head_sent (amortized O(1)); overflow keeps in-flight frame remainder, drops whole unsent frames, appends CLOSING slow_client; nothing queued after closing", "ui_intake": "root cause pyte ~0.1 MB/s on yes with 16 KiB chunks (~170 ms per chunk) broke the 20 ms budget; FEED_CHUNK_BYTES=1 KiB, draw <=20 fps while backlog, separate socket intake budget, ProtocolError shown as reason", "help_esc": "handle_input/flush_input return bool; loop redraws when true"},
+  "probe_defect": "live p27f F2 waits for 'F2_DONE_42' from `timeout 45 yes ...; echo F2_DONE_$((6*7))` after Ctrl-C; interactive bash aborts the rest of the list on SIGINT, so the token never prints (worker reproduced in a plain bash PTY without UI). Needs test_designer fix of the post-assertion (e.g. ^C + prompt + usable round-trip).",
+  "residual_policy_triggered": false,
+  "gaps": ["average feed step ~26 ms (one 1 KiB chunk over 20 ms budget), no behavioural impact", "CW-17 ui_server change needs delta review"],
+  "observed_model": "opus (general-purpose inherited)"
+}

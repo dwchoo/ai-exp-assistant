@@ -1,0 +1,43 @@
+{
+  "invocation": "cw10-public-response-fix-01",
+  "role": "worker_senior",
+  "unit": "V-CW-10-p2.6-current",
+  "objective": "Close the CW-10 production worker-response boundary so TaskWorkflow obtains decisions only from strict public OMP events, never test provider private state.",
+  "checkpoint": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw10-public-response-worker-checkpoint.json",
+  "requirements": ".workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw10.json",
+  "review_finding": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw10-final-review-01.json",
+  "oracle_advice": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw10-public-response-oracle-01.json",
+  "allowed_write_scope": [
+    "omp_bridge/g3/bridge.ts",
+    "src/workbench/workflow/**",
+    "tests/bridge/**",
+    "tests/gates/g3_omp/**",
+    "tests/workflow/**"
+  ],
+  "required_behavior": [
+    "Inject a production response contract for worker TASK stage=execute and QUESTION stage=analysis using exact delivery identities; do not depend on WORKBENCH_G3_EXPECTED_RESPONSE_MARKER.",
+    "At public OMP message_end parse exactly one full marker-framed flat JSON object with exact allowlisted keys, canonical UUIDs, positive safe revision, matching stage/kind/identity, allowed decision, stopReason=stop, no error or tool content; never publish raw text.",
+    "Reject malformed, unknown/duplicate keys, prefix/suffix prose, multiple markers/objects, duplicate/conflicting responses, retry/additional provider round, error/abort/tool/continuation/session switch/pause/disconnect with fixed reason codes only.",
+    "Settle the validated candidate only at terminal agent_end where willContinue is not true and current delivery/session/generation/provider evidence still matches; publish assistant_message_end with allowlisted workerResponse, then delivery_omp_processed linked by response ID.",
+    "Implement and export a production G3WorkerResponsePort in worker_port.py that uses only G3BridgeServer public events, exact receipt/message correlation, strict types, common deadline, one arm/observe, and no replay/private provider object.",
+    "Replace actual OMP workflow probes' test-only provider response adapters/private response dictionary reads with G3WorkerResponsePort. Preserve privacy and all existing authority/identity guards."
+  ],
+  "required_tests": [
+    "Node and Python unit tests for all strict parsing/correlation/fail-closed invariants and no raw content leakage.",
+    "Actual OMP 18.2.10 two-response vertical probe using production adapter only and no provider private state.",
+    "Full workflow, bridge, G3, task, terminal regressions; secret/residue and git diff checks."
+  ],
+  "constraints": [
+    "Use apply_patch for edits. Do not edit docs, requirements, PLAN/state, workflow artifacts, graphify, dependencies, or unrelated files.",
+    "Do not weaken general delivery_omp_processed semantics; malformed decision may coexist with processed delivery but must never authorize workflow execution/report.",
+    "No raw model/user content in public events or durable artifacts.",
+    "No commit/push/merge/stash/reset/clean. Run graphify update . after code/test changes and report generated drift separately."
+  ],
+  "report": [
+    "design and exact changed paths",
+    "pre/post proof that no private provider state is used",
+    "commands and exact results",
+    "snapshot/scope audit and candidate hash",
+    "candidate_ready or needs_reroute"
+  ]
+}

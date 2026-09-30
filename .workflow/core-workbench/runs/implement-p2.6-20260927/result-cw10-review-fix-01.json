@@ -1,0 +1,31 @@
+{
+  "invocation": "cw10-review-fix-01",
+  "unit": "V-CW-10-p2.6-current",
+  "status": "candidate_ready",
+  "candidate_before": "79bf9a188cd00de763ae03d150bb6e91a701a8f8564f671cd87cfaa5c17899bd",
+  "candidate_after": "db5fa4c3f19e2df086e58a4eae3f63def614200168c55844de8bded03c885916",
+  "changed_paths": ["src/workbench/workflow/__init__.py", "src/workbench/workflow/run.py", "src/workbench/workflow/worker_port.py", "tests/workflow/test_run.py", "tests/workflow/live_workflow_probe.py", "docs/features/core-workbench/WORKTREE-GUIDE.md"],
+  "finding_closure": {
+    "worker_role": "Production TaskMailbox requires explicit WorkerRolePort. Exact Task/revision/run/message/delivery attempt/session/generation, assistant response ID and ordered public assistant/delivery events are validated before host dispatch and before worker judgment REPORT. OMP_PROCESSED alone is never a worker decision. A separate manager QUESTION asks worker to judge exit/evidence facts; unsafe success is rejected.",
+    "current_authority": "Public repository active run, latest approved scope, revocation and current AutomationState are re-read before worktree preparation, after preparation, immediately before shell.submit, and before worker analysis/question/report. Pause, cancel and revoke interleavings hold without new dispatch/report.",
+    "direct_request": "route_worker_request binds existing-scope, bounded-small-new-spec and scope-expansion requests to durable TaskSpec revisions; each requires manager scope approval and fresh proceed before dispatch. No request grants execution authority.",
+    "credential_privacy": "Production TaskSpec accepts environment names only; transient values are passed to PersistentShell but durable run JSON and SQLite shell events contain names only. Actual runtime recursively scanned all regular files of the isolated fixture, including SQLite and logs, for a unique secret sentinel and found none."
+  },
+  "checks": [
+    {"command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/workflow -q", "exit_code": 0, "result": "26 passed, including unchanged independent tests and new worker identity/authority/routing/privacy cases"},
+    {"command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/terminal -q", "exit_code": 0, "result": "10 passed"},
+    {"command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/bridge -q", "exit_code": 0, "result": "18 passed"},
+    {"command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/tasks -q", "exit_code": 0, "result": "22 passed"},
+    {"command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/workflow /tmp/cw02-g1-venv/bin/python tests/workflow/live_workflow_independent.py", "exit_code": 0, "result": "four real Bash/sh outcome cases passed"},
+    {"command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python tests/workflow/live_workflow_probe.py", "exit_code": 0, "result": "actual OMP 18.2.10 two-session Task/QUESTION/REPORT, Git worktree and host shell passed; two distinct worker assistant responses tied to exact delivery events; secret scan and cleanup passed"},
+    {"command": "git diff --check", "exit_code": 0, "result": "no whitespace errors"}
+  ],
+  "raw_runtime_evidence": ".workflow/core-workbench/runs/implement-p2.6-20260927/raw-cw10-review-fix-live.json",
+  "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw10-review-fix-after-final.json",
+  "snapshot_stable": true,
+  "scope_audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/scope-audit-cw10-review-fix-final.json",
+  "scope_audit_facts": {"comparable": true, "outside_scope": ["graphify-out/cache/last_query_stamp"], "index_changed": []},
+  "outside_scope_attribution": "graphify-out/cache/last_query_stamp is generated cache. This worker did not edit or restore it; exact writer attribution is unknown and Root will reconcile graphify update/snapshot.",
+  "cleanup": {"owned_process_residue": [], "temporary_directory_residue": [], "stopped_or_unknown_subprocesses": []},
+  "remaining_unknowns": ["The injected worker-role response observer is a caller integration boundary; production must provide an implementation using public OMP response evidence. The actual test adapter used public G3 events plus a scripted OMP model response without forwarding model text.", "Complete atomicity across metadata recheck and subsequent PTY dispatch is not available in public CW-09/CW-07 APIs; post-dispatch metadata failure remains CW-14 integration ownership.", "A command that explicitly prints its injected secret may place it in raw terminal output; this candidate prevents workflow metadata serialization of environment values, not arbitrary command exfiltration."]
+}

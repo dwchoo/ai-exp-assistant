@@ -1,0 +1,9 @@
+{
+  "invocation":"cw11-incarnation-correction-01",
+  "outcome":"complete",
+  "candidate_ready":true,
+  "correction":"SerializedReviewAdmission maintains a run-incarnation counter that changes only on actual active-run changes. Tickets bind the incarnation, and the scheduler detects changes before and after scheduling to reset pending/coalesced work, due baseline, and review_count for same-six-field identity reentry while preserving idempotent A and authority-only pause/resume.",
+  "changed_files":["src/workbench/observation/worker_review.py","tests/observation/test_atomic_admission.py","tests/observation/test_atomic_admission_independent.py"],
+  "checks":{"observation":"66/66 passed","workflow":"44/44 passed","bridge":"18/18 passed","contracts":"20/20 passed","g4_evidence":"10/10 passed","g4_lifetime":"8/8 passed","actual_omp_18_2_10":"60.0-second review, 13/13 wakes, 15 requests, real WorkflowRun exit in 0.058 seconds, secret absent, zero residue"},
+  "graphify_updated":true
+}

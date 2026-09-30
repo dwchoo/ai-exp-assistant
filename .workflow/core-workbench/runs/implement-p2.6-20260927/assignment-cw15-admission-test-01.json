@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "invocation": "cw15-admission-test-01",
+  "role": "test_designer",
+  "unit": "V-CW-15-p2.6-current",
+  "authority": "User $implement docs/features/core-workbench request; approved PLAN p2.6 CW-15; admission correction",
+  "objective": "Independently validate the frozen shared automatic-admission correction and final CW-15 runtime behavior.",
+  "candidate": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw15-admission-correction.json",
+    "candidate_id": "c3e42cd9d1f0bedd38cc35dfde7a9318644148e34837d11e95407bfb880f15a3"
+  },
+  "required_tests": [
+    "Reproduce ended run with fully_terminated true, OMP/shell alive and no problems; command delivery, durable attempt/fence mutation, pause dispatch and review tick must all remain zero/none.",
+    "With a ready running current run, set metadata admission false and assert periodic pause/review calls zero; explicit durable success must permit exactly one later tick without replaying commands.",
+    "Re-run clean-baseline positive G3/Pause/TaskMailbox delivery exactly once, duplicate/reconnect no replay, completed/incomplete shutdown at-most-once, detach/restart/model/takeover/boot paths and residue cleanup.",
+    "Run lifecycle and relevant predecessor suites and verify frozen production hashes."
+  ],
+  "allowed_write_paths": ["tests/lifecycle/**", "graphify-out/**"],
+  "constraints": [
+    "Independent test-only owner; no production/workflow/docs/PLAN/state/ledger edits.",
+    "No external OMP, real reboot, tmux, delegation, commit, publish, deploy or Docker; clean all local resources."
+  ],
+  "report": "Return candidate_ready/needs_reroute, exact command/durable/pause/review/delivery counts, per-acceptance runtime verdict, suites/residue/hashes, pending environment and CW16 obligations."
+}

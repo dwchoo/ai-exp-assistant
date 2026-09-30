@@ -1,0 +1,14 @@
+{
+  "invocation": "cw12-durability-oracle-01",
+  "outcome": "complete",
+  "requirement_interpretation": "CW-12 requires immediate fail-close on metadata persistence failure, error visibility, and no implicit resume. It does not require reconstructing a first pause after the persistence operation explicitly failed and a crash leaves no durable evidence; whole-restart reconciliation/unknown hold is CW-15-owned.",
+  "recommended_contract": [
+    "Pause closes local and CW-11 admission before persistence.",
+    "Append succeeds only after file and parent-directory fsync.",
+    "Any persistence failure keeps the current process paused, exposes persistence_error, blocks resume/automatic dispatch, and preserves observation.",
+    "Readable, corrupt, mismatched, or resume_failed evidence restores fail-closed.",
+    "Namespace loss after an explicitly failed first persistence operation is recorded as a recovery boundary, not claimed as recovered by CW-12; CW-15 must hold missing/unknown recovery state."
+  ],
+  "event_correlation": "turn_stop_observed requires manager role, after-cursor event, exact non-empty abortRequestId, exact known bound manager sessionId and generation, and unchanged pause/run binding; it proves stop observation only.",
+  "writer": false
+}

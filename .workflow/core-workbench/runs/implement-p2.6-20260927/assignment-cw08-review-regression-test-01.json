@@ -1,0 +1,10 @@
+{
+  "invocation":"cw08-review-regression-test-01","role":"test_designer","unit":"V-CW-08-p2.6-current",
+  "objective":"Add and run independent regressions for all three corrected CW-08 fresh-review findings.",
+  "candidate_manifest":".workflow/core-workbench/runs/implement-p2.6-20260927/cw08-regression-checkpoint.json",
+  "requirements":".workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw08.json",
+  "findings":["deadline-bounded backpressured send without condition/close deadlock","strict integer generation across hello/state/event/readiness","unmatched and late ACKs never retained"],
+  "allowed_files":["tests/bridge/test_mailbox_independent.py"],
+  "constraints":["Do not modify product code, worker tests, docs, workflow, graphify, or live probe.","Tests must be deterministic and bounded; explicitly clean socket/thread resources.","Run all bridge and relevant adjacent regressions.","No commit/reset/clean/stash/push/deploy and no Docker."],
+  "report":["new regressions and outcomes","commands/results","snapshot/scope audit","candidate_ready or needs_reroute"]
+}

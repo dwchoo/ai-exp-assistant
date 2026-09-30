@@ -1,0 +1,4 @@
+{
+  "path": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json", "expected_revision": 56,
+  "event": {"id": "running-cw03-hook-env-test-01", "kind": "transition", "data": {"invocation": "cw03-hook-env-test-01", "state": "running", "evidence": "collaboration.followup_task /root/cw03_input_jobs_test started G2-HOOK-ENV independent test turn", "outcome": null, "observed_model": "unverified", "observed_effort": "unverified", "not_started_evidence": null}}
+}

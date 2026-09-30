@@ -1,0 +1,28 @@
+{
+  "invocation": "cw03-fd-correction-01",
+  "unit": "V-CW-03",
+  "status": "candidate_ready",
+  "candidate": "cac1bf9fcfd2298704a7c1c93ca95470595a95647874d7a8bde2131902c687ac",
+  "source_sha256": "a4af203b4fe9e8a5f090b5c8bcc057ea16385cc2785c279638fb314cd29c7e03",
+  "changed_files": [
+    "src/workbench/terminal/shell_g2/lifecycle.py"
+  ],
+  "scope_audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/scope-audit-cw03-fd-correction-01.json",
+  "checks": [
+    {"name": "targeted independent/common/split", "result": "passed", "tests": 13, "elapsed_seconds": 16.653},
+    {"name": "lifecycle live probe", "result": "passed", "observed_cells": 14},
+    {"name": "env/launch live probe", "result": "passed"},
+    {"name": "full G2 discovery", "result": "passed", "tests": 125, "skipped": 6, "elapsed_seconds": 103.058},
+    {"name": "git diff --check", "result": "passed"}
+  ],
+  "observations": [
+    "Bash and sh payload FD inventory was limited to 0,1,2, the explicit WB_RELEASE_FD, and explicit fixture FD9.",
+    "Injected aliases for shell control FD8 and recovery FD7 were EBADF in the payload.",
+    "Queued TAKEOVER and recovery frames remained available to the parent after payload exit.",
+    "No tracked session, supervisor, fixture, or unittest process remained."
+  ],
+  "unknowns": [
+    "The bounded fixture FD9/WB_RELEASE_FD contract remains; this is not a general custom-FD passing API or process sandbox.",
+    "The remaining input/jobs, manual hook, takeover, and six-matrix migration is outside this correction."
+  ]
+}

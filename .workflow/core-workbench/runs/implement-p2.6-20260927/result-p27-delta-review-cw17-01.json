@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-delta-review-cw17-01",
+  "verdict": "integrate",
+  "frozen_candidate": "89110a7fe46b0a7ca1ae331013fa427aabda6a1f6faa60ec8f6413e88f084a50",
+  "candidate_after_review": "89110a7fe46b0a7ca1ae331013fa427aabda6a1f6faa60ec8f6413e88f084a50 (p27-snapshot-delta-review-after.json; unchanged)",
+  "findings": {
+    "P3-a": "panes.py poll(): waitpid(self.pid, 0) after _leader_exited() is not guarded against ChildProcessError if some other code reaped the child; not a regression (no other reaper of this pid in the backend process). Fix direction: try/except ChildProcessError.",
+    "P3-b": "_pin_session may miss a child forked between scan and reap or just before the last anchor kill; fail-safe (no unproven signal), may leave residue."
+  },
+  "prior_finding_verdicts": {"P2-1": "fixed", "P2-2": "fixed (diffed against pre-p22fix base)", "P2-3": "fixed (OmpPane, ShellProcess, supervisor child)", "P2-4": "fixed (20ms slice, all-or-nothing admission, per-write target revalidation, 2 MiB live ~3s)", "P3 handoff notes": "unchanged"},
+  "evidence_gap": "Reviewed-candidate (cd921059) base bytes for P2-1/3/4 unavailable (checkpoint blobs pruned); reviewer checked current code at each named site against the finding instead of a byte diff.",
+  "checks_run_by_reviewer": "22 tests OK incl. test_panes, test_pane_pin_independent_p27d, test_review_p2_fixes; test_live_paste_responsive import error due to reviewer PYTHONPATH (method)",
+  "root_disposition": {"P3-a": "record for CW-19 (restart/fault) hardening; non-blocking", "P3-b": "record for CW-19; non-blocking (C-D45 fail-safe)"},
+  "observed_model": "sonnet (wb-delta-reviewer definition; host metadata unverified)"
+}

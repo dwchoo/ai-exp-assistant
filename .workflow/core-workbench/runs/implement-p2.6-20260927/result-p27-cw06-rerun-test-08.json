@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw06-rerun-test-08",
+  "status": "candidate_ready after Root classification (agent: needs_reroute for two intermittent test races)",
+  "frozen_candidate": "01cee2da36f84822ab5a5dc24fed01667ad9a50f77e1ca46efce77fb58c6650e",
+  "agent_result": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw06-rerun-test-08-agent.json",
+  "checks": [["live OMP CW06_LIVE_MODEL=1 x1", 0, "S0-S16 pass; S15/S16 manager 1.0 worker 1.0 host 0.94"], ["flood p27f x3", 0, "3/3, no slow_client"], ["replay p27h x10", 0, "10/10"], ["test_product_pty x5 (+10, +40 standalone send_failure)", 1, "4/5 then 10/10 and 40/40"], ["tests/ui x2", 0, "129 OK x2"], ["tests/backend", "1->0", "1 error first run (connection_cap EAGAIN), rerun 71 OK; connection_cap standalone 7/10"], ["tests/contracts", 0, "43"], ["tests/terminal", 0, "70"], ["g1_vt/g4/g2_shell", 0, "85/8/142 (skip 1)"]],
+  "model_turns": 2,
+  "root_classification": {"test_send_failure_shows_reason_and_no_traceback": "test race: server closes right after attach, UI exits in after_attach before curses loop, 2004h never written, test asserts 2004l -> test defect (same family as earlier signal test race); carry to test maintenance", "test_connection_cap_and_exclusive_attach": "pre-existing CW-17 test flake (recorded in handoff as load flake): listen(8) backlog vs 20 rapid non-blocking connects -> EAGAIN; not touched by CW-06/ui_server overflow change; carry to CW-16 test hygiene"},
+  "frozen_hashes_equal": true,
+  "residue": "none (/tmp/r08 removed)",
+  "observed_model": "sonnet (wb-test-rerun definition; host metadata unverified)"
+}

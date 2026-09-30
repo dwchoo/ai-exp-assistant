@@ -1,0 +1,19 @@
+{
+  "invocation": "cw10-public-response-review-01",
+  "role": "reviewer",
+  "candidate": "75469017afe9b029fe07810497fc12a66494acc7208485001c4a34fd21e9c6c7",
+  "manifest": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw10-public-response-final2.json",
+  "outcome": "needs_reroute",
+  "findings": [
+    {
+      "severity": "P1",
+      "title": "Production delivery does not instruct a general Worker OMP how to emit the required control response",
+      "evidence": "bridge.ts strictly accepts WB_WORKER_RESPONSE plus one exact 12-field compact JSON object, but the injected delivery body and execute/analysis instructions contain no marker, fields, or decision contract. Actual probes pass only because the scripted provider hardcodes the format.",
+      "impact": "A normal worker responds naturally or uses tools, the bridge rejects the response, and C-AC-03/C-AC-05 production execution/reporting remains held."
+    }
+  ],
+  "resolved_prior_finding": "Private provider response-store dependence is closed by production G3WorkerResponsePort and public events.",
+  "qualification": "Synthetic willContinue handling does not match the installed OMP event type and is not counted as a separate defect; terminal agent_end plus additional-provider-round rejection remain the current supported boundary.",
+  "needs_oracle": false,
+  "needs_reroute": true
+}

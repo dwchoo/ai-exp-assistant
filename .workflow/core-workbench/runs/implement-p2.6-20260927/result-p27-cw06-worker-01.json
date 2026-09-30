@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw06-worker-01",
+  "ticket_id": "CW-06",
+  "status": "candidate_ready",
+  "candidate_id": "158a6a6ca10f43fcaa42f6c52615c3316efea8e1a391a28c57cfc905c2b52297",
+  "after_snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-cw06-worker-after.json",
+  "scope_audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-cw06-worker.json (no outside-scope; cli.py diff limited to --plain dispatch)",
+  "delta_backup": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-cw06-worker-delta-backup/",
+  "changed_paths": ["src/workbench/ui/product/{__init__,app,input,model,view}.py (new)", "tests/ui/{support,test_product_model,test_product_pty,test_product_entrypoint}.py (new)", "src/workbench/backend/cli.py", "tests/backend/test_live_detach.py", "tests/backend/test_live_start.py"],
+  "checks": [["tests/ui", 0, "30 OK"], ["tests/contracts", 0, "43 OK"], ["tests/gates/g1_vt", 0, "63 OK"], ["tests/gates/g4_lifetime", 0, "8 OK"], ["tests/backend", 1, "68 run, 1 fail: test_live_detach_independent (expects minimal-client text from start; needs --plain adaptation per root-adjudication-p27-cw06-entry-wiring)"]],
+  "key_map_provisional": {"prefix": "Ctrl-]", "prefix prefix": "literal 0x1d", "prefix 1/2/3": "focus manager/worker/host shell", "prefix Tab": "next pane", "prefix t/c/h": "takeover request/confirm, handoff", "prefix r": "redraw nudge", "prefix d": "detach", "prefix ?": "help overlay"},
+  "design": "ui_v1 client on UiClient; no PTY ownership/signals; own input parser (prefix, bracketed paste whole, lone Esc passed after 50ms; G1 InputRouter not reused because it holds Esc indefinitely); model.py pure (pyte per pane, state, commands); 2-line status header (focus, host input owner, shell mode, automation, backend phase, bridge, last confirmed time; snapshot every 5s); 3 columns reusing G1 _ColorPairs/_attributes (256-color only, no truecolor overlay); per-pane resize on SIGWINCH and after attach nudge; replay DSR/DA answers suppressed; rejection reasons in footer; terminal restored on all exits.",
+  "gaps": ["no real OMP runtime evidence (stub OMP; backend stays 'starting' without bridge)", "G1 truecolor RGB overlay not carried -> fidelity vs G1 fixed combination to verify", "3 columns ~32 cols/pane at 100 cols (UR-UX item)", "no scrollback UI", "<30x8 shows 'terminal too small'"],
+  "residue": "none reported; Root pgrep clean",
+  "observed_model": "sonnet (wb-worker definition; host metadata unverified)"
+}

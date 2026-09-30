@@ -1,0 +1,23 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 416,
+  "event": {
+    "id": "limit-cw08-correction-worker-20260928",
+    "kind": "limit",
+    "data": {
+      "bucket": "role:worker",
+      "origin": "operating",
+      "value": 10,
+      "authority": "C-D55 plus workflow-contract section 8 and current implementation authorization",
+      "reason": "One bounded CW-08 readiness type-validation correction",
+      "decision_owner": "Root",
+      "remaining_work_estimate": 1,
+      "expected_previous": {
+        "value": 9,
+        "authority": "C-D55 plus workflow-contract section 8 and current implementation authorization",
+        "reason": "One routine CW-08 mailbox implementation turn"
+      },
+      "scope_basis": null
+    }
+  }
+}

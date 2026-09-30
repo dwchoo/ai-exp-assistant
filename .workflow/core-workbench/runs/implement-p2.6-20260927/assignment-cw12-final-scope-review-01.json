@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "invocation": "cw12-final-scope-review-01",
+  "role": "reviewer",
+  "unit": "V-CW-12-p2.6-current",
+  "authority": "User $implement docs/features/core-workbench request; approved PLAN p2.6 CW-12",
+  "purpose": "Fresh independent delta review of the final C-AC-33 reconciliation correction.",
+  "candidate": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw12-final-scope-test.json",
+    "candidate_id": "2f04f7410a07ae2340f42fc68b18cb930cba5d181052fd023933306ea8cab2e2"
+  },
+  "inputs": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-post-review-final-review-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-final-scope-correction-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-final-scope-test-01.json",
+    "docs/features/core-workbench/tickets/CW-12.md",
+    "docs/features/core-workbench/BRIEF.md",
+    "docs/features/core-workbench/SPEC.md"
+  ],
+  "review_scope": [
+    "Confirm peer cwd file state is reconciled against a production-owned pause baseline/current approval boundary and stable post-pause out-of-scope changes cannot resume.",
+    "Confirm resolved descendant child cwd is accepted without enabling sibling, symlink, or other escape paths.",
+    "Confirm Git/worktree and peer observations are strictly bounded, privacy-preserving, streaming, mutation-aware, and fail closed on uncertainty.",
+    "Check normal resume liveness, prior persisted-run and late-result fixes, and whether the remaining filesystem TOCTOU risk blocks C-AC-33."
+  ],
+  "constraints": {
+    "read_only": true,
+    "allowed_write_paths": [],
+    "run_tests": false,
+    "no_commit": true,
+    "no_publish": true,
+    "report_format": "State candidate_ready, severity-ordered findings with file:line evidence, acceptance assessment, and residual risks."
+  }
+}

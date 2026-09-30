@@ -1,0 +1,9 @@
+{
+  "invocation":"cw11-exit-incarnation-test-01",
+  "outcome":"complete",
+  "candidate_ready":true,
+  "coverage":"Forged/foreign/rebound/stale ExitSourceToken, idempotent A, old successful callback racing replacement, failed old UI retry exactly once, independent fresh-incarnation exit, old WorkflowObservationBinding rebind rejection, and exit->A->None->same-A scheduling.",
+  "checks":{"observation":"79/79 passed","workflow":"44/44 passed","bridge":"18/18 passed","contracts":"20/20 passed","actual_omp_18_2_10":"60.0-second review, 13 wakes, 15 provider requests, WorkflowRun exit in 0.056 seconds, secret absent, zero residue"},
+  "changed_files":["tests/observation/test_exit_incarnation_independent.py"],
+  "graphify_updated":true
+}

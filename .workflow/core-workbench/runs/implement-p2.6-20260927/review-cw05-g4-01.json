@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "invocation": "cw05-g4-review-01",
+  "candidate": "237cec5bdb645f1b93becd550471845f50f9210c160fd13f8948dfbf978ced51",
+  "verdict": "findings",
+  "findings": [
+    {
+      "severity": "P2",
+      "path": "omp_bridge/contract/ports_v2.ts",
+      "line": 20,
+      "summary": "exact() compares comma-joined sorted key lists, allowing a comma-containing unknown key to collide with two required keys.",
+      "consequence": "A ShellControl payload can omit generation and ownerEpoch, add a single generation,ownerEpoch boolean key, and be accepted by TypeScript while Python rejects it, violating strict required-field and cross-language equivalence."
+    }
+  ],
+  "other_scope": "No additional P0-P3 finding. PID/attach/residue and empty/schema-only evidence corrections were confirmed in code and independent tests.",
+  "runtime_reexecuted": false,
+  "limitations": [
+    "Normal/paused runtime evidence was inspected but not rerun by reviewer.",
+    "Aggregate fixture remains provenance-only and is not a G1-G4 runtime authorization or downstream production completion certificate."
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "invocation": "cw12-tracked-mode-review-01",
+  "outcome": "needs_reroute",
+  "candidate_ready": false,
+  "candidate": "d94a041b433e8fb9ebf617dd5657d5d2cb70ee67f42946b9064ca3de7f584a73",
+  "findings": [
+    {
+      "severity": "P2",
+      "confidence": "high",
+      "acceptance_ids": ["C-AC-33"],
+      "summary": "Directory mode-only changes are absent from both non-Git manifests and Git tracked-mode baselines, allowing an out-of-scope 0755-to-0555 permission change to pass explicit resume reconciliation.",
+      "paths": [
+        "src/workbench/policy/pause_automation/controller.py:1269",
+        "src/workbench/policy/pause_automation/controller.py:1331"
+      ]
+    }
+  ],
+  "acceptance": {
+    "C-AC-25": "passed",
+    "C-AC-30": "passed",
+    "C-AC-33": "failed"
+  },
+  "evidence_reviewed": "120 pause tests and actual OMP reject-cleanup-reconcile-resume with zero residue",
+  "mutation": "none",
+  "reviewer": "/root/cw12_post_review_final_reviewer"
+}

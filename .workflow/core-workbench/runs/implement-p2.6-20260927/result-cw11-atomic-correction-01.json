@@ -1,0 +1,9 @@
+{
+  "invocation":"cw11-atomic-correction-01",
+  "outcome":"partial",
+  "candidate_ready":false,
+  "reason":"The delegated worker disappeared during an interrupted turn before applying the atomic correction.",
+  "workspace_observation":"No SerializedReviewAdmission, WorkflowObservationBinding, admit_and_dispatch, or collect_and_notify implementation is present; the previous frozen candidate remains the effective source state.",
+  "files_attributed_to_invocation":[],
+  "reroute":"Dispatch the same bounded correction to a new worker_senior because the remaining work is a coupled concurrency and integration invariant."
+}

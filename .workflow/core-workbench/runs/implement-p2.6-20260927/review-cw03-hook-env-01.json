@@ -1,0 +1,30 @@
+{
+  "invocation": "cw03-hook-env-review-01",
+  "candidate": "e60988ba2aaf9d2b5ed1ea18e242a9cbbbbead2df023115d50757ec64cc544b5",
+  "disposition": "changes_required",
+  "needs_oracle": false,
+  "findings": [
+    {
+      "severity": "P2",
+      "file": "tests/gates/g2_shell/live_hook_env_probe.py",
+      "line": 54,
+      "summary": "own_orphans cleanup exceptions can bypass subreaper restoration",
+      "evidence": "A mock reproducer injected OSError from waitpid after prior subreaper state 0; PR_SET_CHILD_SUBREAPER was called with [1] only and never restored to 0.",
+      "required_fix": "Restore the prior subreaper state from a separate finally path even when proc_fields, kill, or waitpid cleanup raises, and add regression coverage."
+    }
+  ],
+  "other_material_findings": [],
+  "scope_notes": [
+    "Escaped daemon identity is grounded by an explicit external fixture oracle and does not claim arbitrary daemon discovery.",
+    "User confirmation does not clear a live unknown; a fresh recheck after owned cleanup is required.",
+    "Cleanup targets only fixture-owned PID/start-time identities.",
+    "Mutation controls and the existing env/launch matrix were materially discriminating."
+  ],
+  "manifest_reconciliation": {
+    "original_candidate": "f4d5b1beb17e60570a7442986ae1b72349c5bca6e3f5f65acb3a79f2b3bd2111",
+    "review_candidate": "e60988ba2aaf9d2b5ed1ea18e242a9cbbbbead2df023115d50757ec64cc544b5",
+    "only_difference": "graphify-out/cache/last_query_stamp",
+    "product_and_test_files_match": true
+  },
+  "residue": "none observed"
+}

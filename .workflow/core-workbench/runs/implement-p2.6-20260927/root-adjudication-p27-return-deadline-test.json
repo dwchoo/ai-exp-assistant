@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "decision_id": "RA-P27-RETURN-DEADLINE-TEST",
+  "owner": "Root",
+  "recorded_at": "2026-09-29T07:05:33.538245+00:00",
+  "subject": "tests/gates/g2_shell/test_return_deadline.py expectation reversed by p27-deadline-fix-worker-01",
+  "ruling": "accepted: prior assertion (elapsed-time main-return deadline -> unknown) contradicts BRIEF '실험 실행 시간 상한 없음' and C-AC-07; the CW-05 reroute design 'keep 5 s default for existing callers' is superseded. G2 gate evidence depending on the old return-deadline semantics is stale and must be re-collected in final CW-16 I-SHELL/I-FAULT.",
+  "refs": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-deadline-fix-worker-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-input-test-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/reroute-cw05-g2-deadline-01.json"
+  ]
+}

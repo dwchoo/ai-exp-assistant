@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "invocation": "cw15-linear-correction-01",
+  "role": "worker_senior",
+  "unit": "V-CW-15-p2.6-current",
+  "authority": "User $implement docs/features/core-workbench request; approved PLAN p2.6 CW-15; fresh shutdown race review",
+  "objective": "Linearize automatic command/review side effects with user-confirmed shutdown so no automatic side effect can occur after shutdown is durably closed.",
+  "candidate": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw15-admission-test.json",
+    "candidate_id": "b3ed52eaec0b1fb9c200659ac9a4719c2845f4556a7295626703828857ed02b2"
+  },
+  "required_changes": [
+    "Add one coordinator-local linearization boundary covering fresh automatic admission, pending/no-replay journal transition, external command send or review tick, final journal update, and shutdown admission_closed persistence/action start. The observable order must be either action fully before shutdown close or shutdown close before action denial; never a side effect after the close record.",
+    "Use a reentrant/appropriate lock without changing durable owner/session/authority checks. Do not deadlock adapter calls or prevent explicit user shutdown from eventually progressing; document the ordering invariant in code.",
+    "Concurrent regression A: block command send after admission while shutdown starts; shutdown must not be durably closed until the in-flight send linearizes, then later sends are zero. Concurrent regression B: shutdown closes first, then blocked command/tick resumes and produces send/review/pause action zero with journal unchanged.",
+    "Cover tick versus shutdown similarly, preserve ended/metadata gates, positive delivery, no replay and at-most-once shutdown."
+  ],
+  "allowed_write_paths": ["src/workbench/runtime/**", "src/workbench/app/**", "tests/lifecycle/**", "graphify-out/**"],
+  "constraints": [
+    "Bounded concurrency correction only; do not modify predecessor packages, docs, PLAN, state or ledger. No external OMP, reboot, delegation, commit, publish, deploy or Docker.",
+    "Use apply_patch; run focused threaded tests, lifecycle/predecessor regressions, graphify update and residue check."
+  ],
+  "report": "Return candidate_ready/needs_reroute, linearization point/invariant, exact thread event order and action counts, deadlock timeout evidence, suites/residue, hashes/scope and pending environments."
+}

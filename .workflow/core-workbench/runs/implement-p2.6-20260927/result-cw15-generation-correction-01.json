@@ -1,0 +1,27 @@
+{
+  "invocation": "cw15-generation-correction-01",
+  "outcome": "complete",
+  "candidate_ready": true,
+  "base_candidate": "575be7c7da45f1ae4584b6c1940f5f4a3c8153e1e83c7c8998e1605c3b8ba15d",
+  "candidate_id": "2eb436bdfd173a6172b7c2d7fc908132507b312204405a6fd99bd5aa8df2c11f",
+  "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw15-generation-correction.json",
+  "changed_paths": ["src/workbench/app/lifecycle.py", "tests/lifecycle/test_lifecycle_runtime.py", "tests/lifecycle/test_production_binding.py", "graphify-out/**"],
+  "generation_race": {
+    "red": "unconditional old handoff reopen allowed tick dispatched once after the newer request",
+    "green": "first intent generation 1, newer intent generation 2, old handoff conditional reopen no-op at generation 2; command/review action 0 and durable command none",
+    "new_request": "later acquired the lifecycle lock and durably recorded user/takeover_requested at lifecycle generation 7",
+    "final_handoff": "the new request's confirm/handoff reopened fence generation 3, then one tick dispatched"
+  },
+  "checks": {
+    "non_live_total": "391 passed",
+    "suites": "lifecycle 32, pause 122, G3 protocol 7, G4 2, bridge 22, observation 95, storage 33, recovery 26, tasks 22, contracts 20, terminal 10",
+    "compile_graphify_scope_residue": "passed; 15 changed paths, zero missing/outside-scope, no test subprocess residue"
+  },
+  "sha256": {
+    "src/workbench/app/lifecycle.py": "deb046e7ace7c031729bcfb6c8dda2577173232a4ee2cf1d009ed373dcd86c29",
+    "tests/lifecycle/test_lifecycle_runtime.py": "7456e79843b80eb6b8b84a0582fb96fd3d7e209d8ecb90d8f145f24d15f980ef",
+    "tests/lifecycle/test_production_binding.py": "5612c69c6267f4ce396ed9bbc577a935e19bae8d4ae6ef7ce1ae8c57e4d211d2"
+  },
+  "pending": ["live external OMP", "real reboot", "pyte live suite"],
+  "mutation_owner": "/root/cw12_post_review_correction"
+}

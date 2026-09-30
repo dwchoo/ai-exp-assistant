@@ -1,0 +1,20 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 905,
+  "event": {
+    "id": "reserve-cw12-large-repo-test-01",
+    "kind": "reserve",
+    "data": {
+      "invocation": "cw12-large-repo-test-01",
+      "role": "test_designer",
+      "unit": "V-CW-12-p2.6-current",
+      "incident": "",
+      "purpose": "Independent large-Git-repo liveness, reconciliation, and actual OMP verification",
+      "model": "gpt-6-sol",
+      "effort": "high",
+      "buckets": ["total", "role:test_designer", "unit:V-CW-12-p2.6-current"],
+      "writer": true,
+      "workspace": "/home/dwchoo/ai-exp-assistant"
+    }
+  }
+}

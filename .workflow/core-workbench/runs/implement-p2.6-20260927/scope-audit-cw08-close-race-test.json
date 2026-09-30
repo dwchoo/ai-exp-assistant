@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "invocation": "cw08-close-race-test-01",
+  "before": "39f998a9db246a448fed8609263c7f3e82637f17ade5875d3e2e5a63384aa56a",
+  "after": "02404c943fc53bfcab51097fbcc69cbbb8c58e1101d4ffa6fe4409de14ac25ee",
+  "allowed": [
+    "tests/bridge/test_mailbox_independent.py"
+  ],
+  "named_workflow_artifacts": [
+    "result-cw08-close-race-test-01.json",
+    "snapshot-cw08-close-race-test-after.json",
+    "scope-audit-cw08-close-race-test.json"
+  ],
+  "changed": [
+    "tests/bridge/test_mailbox_independent.py"
+  ],
+  "outside_scope": [],
+  "head_unchanged": true,
+  "index_changed": [],
+  "baseline_file_count": 1192,
+  "unchanged_baseline_file_count": 1191,
+  "baseline_candidate_digest_verified": true,
+  "workflow_artifacts_excluded_by_assigned_baseline": true,
+  "comparable": true
+}

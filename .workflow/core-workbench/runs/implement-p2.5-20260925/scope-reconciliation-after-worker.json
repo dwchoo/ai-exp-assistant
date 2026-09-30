@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "worker_candidate": "e87b276fa6f1ff681886a9c9167031ab5714bb6734b49e5dd3dbdf0e4ed160a6",
+  "audit": ".workflow/core-workbench/runs/implement-p2.5-20260925/postworker-audit.json",
+  "attributable_worker_paths": [
+    "tests/gates/g2_shell/live_combined_boundary_probe.py"
+  ],
+  "preserved_concurrent_paths": [
+    ".codex/handoffs/2026-09-25-124059-graphify-codex-upstream-contribution.md",
+    "graphify-out/cache/last_query_stamp"
+  ],
+  "decision": "Preserve non-overlapping concurrent changes, refresh the whole-workspace checkpoint, and continue serial verification without attributing them to CW-03",
+  "owner": "Root"
+}

@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "invocation": "cw15-shutdown-id-test-01",
+  "role": "test_designer",
+  "unit": "V-CW-15-p2.6-current",
+  "authority": "User $implement request; approved CW-15/C-AC-22; independent shutdown identity verification",
+  "objective": "Independently verify shutdown completes only from exact current RunIdentity while preserving all final CW-15 behavior.",
+  "candidate": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw15-shutdown-id-correction.json",
+    "candidate_id": "5b5abb6f5d088fd6138da72bf480d5a2c49388c82fab13dfd9c6f799d6122434"
+  },
+  "requirements": [
+    "Independently vary task UUID, revision and run UUID one at a time with all managed PIDs dead and fully_terminated true; each must remain incomplete/full_termination_unconfirmed. Cover malformed, None, exception and correct identity.",
+    "Exercise observations that change between polling iterations and repeated shutdown; no wrong/stale observation may complete current run, stops remain at most once, survivors and problems remain exact.",
+    "Run all lifecycle generation/claim/handoff/command/review/shutdown races and allowed non-live predecessors. Do not launch scripted/external OMP or full/live G3.",
+    "Verify frozen production hashes, stable candidate, graph and residue; test-only edits only for material gaps."
+  ],
+  "allowed_write_paths": ["tests/lifecycle/**", "tests/integration/**", "graphify-out/**"],
+  "constraints": ["Production frozen. No production/docs/workflow/PLAN/state edits, external/scripted OMP, reboot, full/live G3, install, delegation, commit, publish, deploy or Docker. Use apply_patch for tests."],
+  "report": "Return candidate_ready/needs_reroute, observation sequence/identity/complete/survivor/problem/stop counts, full regression totals/hashes/test changes/residue/pending."
+}

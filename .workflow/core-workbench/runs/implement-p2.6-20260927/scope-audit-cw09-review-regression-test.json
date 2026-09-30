@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "invocation": "cw09-review-regression-test-01",
+  "before": "eaf34b612ed53f12df03fc13ea0e599f28222eb7d8a57b707a402649427f0a17",
+  "after": "420a44a10bfdc17f4467ab0829b36914085322b847a211a8a2e5684e999f3926",
+  "allowed": [
+    "tests/tasks/test_repository_independent.py"
+  ],
+  "named_workflow_artifacts": [
+    "result-cw09-review-regression-test-01.json",
+    "snapshot-cw09-review-regression-test-after.json",
+    "scope-audit-cw09-review-regression-test.json"
+  ],
+  "changed": [
+    "tests/tasks/test_repository_independent.py"
+  ],
+  "outside_scope": [],
+  "head_unchanged": true,
+  "index_changed": [],
+  "baseline_file_count": 1154,
+  "unchanged_baseline_file_count": 1153,
+  "baseline_candidate_digest_verified": true,
+  "workflow_artifacts_excluded_by_assigned_baseline": true,
+  "comparable": true
+}

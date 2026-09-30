@@ -1,0 +1,35 @@
+{
+  "invocation": "cw15-test-01",
+  "outcome": "complete",
+  "candidate_ready": false,
+  "base_candidate": "37d9dec811b6f05be51491e91e9b03b1128c35e1fdef14bc37a841257f7016c2",
+  "production_hashes_match": true,
+  "findings": [
+    {
+      "severity": "P1",
+      "acceptance": "C-AC-22",
+      "summary": "A second call after confirmed complete shutdown emits four new normal_stop actions (4 -> 8) instead of returning/reobserving the terminal result."
+    },
+    {
+      "severity": "P1",
+      "acceptance": "C-AC-15/C-AC-16/C-AC-17/C-AC-18/C-AC-22/C-AC-23",
+      "summary": "LifecycleCoordinator has no production composition or adapters for G3BridgeServer/TaskMailbox, PersistentShell, PauseCoordinator, RecoveryCoordinator or WorkerReviewScheduler, so the runtime contracts are only exercised through fakes."
+    }
+  ],
+  "checks": {
+    "lifecycle": "10 of 11 tests passed; shutdown idempotence failed",
+    "standin_processes": "45 spawned and all reaped; zero observed residue",
+    "bridge": "22 tests passed",
+    "terminal": "10 tests passed",
+    "pause": "129 tests passed",
+    "recovery": "26 tests passed",
+    "storage": "33 tests passed",
+    "observation": "95 tests passed",
+    "g4_legacy": "8 tests passed",
+    "ui": "2 tests passed",
+    "workflow": "44 tests passed on isolated rerun after one transient parallel cwd error"
+  },
+  "test_sha256": "b635d5c2e99b5c3c85a12b0bc49bd631dd588da158d4f76ec916266072c7f36f",
+  "pending_environment": "Actual external OMP and host reboot were not attempted; reboot remains environment-pending, but missing production bindings are a product defect.",
+  "mutation_owner": "/root/cw12_post_review_test"
+}

@@ -1,0 +1,26 @@
+{
+  "invocation": "cw12-final-race-correction-01",
+  "outcome": "complete",
+  "candidate_ready": true,
+  "corrections": [
+    "Versioned serialized admission publication prevents stale unpaused state from overriding a newer paused state.",
+    "bind_run, pause, and resume transitions are serialized and revalidate exact run, pause, session, and generation identity.",
+    "Resume validates exact ACK state and fresh post-ACK probes, checks again after publication, and repauses both peers with resume_failed on mismatch.",
+    "Actual OMP probe projects real file hash, host process PID, manager/worker/host unknown-result rows, and verifies a direct paused manual worker TUI turn without automatic dispatch or implicit resume.",
+    "qualifies rejects missing or altered file, process, unknown-result, and manual-activity evidence."
+  ],
+  "checks": {
+    "policy_and_predicate": "38/38 passed, including three repeated runs",
+    "status": "2/2 passed",
+    "observation": "91/91 passed",
+    "workflow": "44/44 passed",
+    "tasks": "22/22 passed",
+    "contracts": "20/20 passed",
+    "bridge": "18/18 passed",
+    "g3_python": "117/117 passed",
+    "g3_typescript": "30/30 passed",
+    "actual_omp_18_2_10": "passed with real file/process/unknown rows, paused manual provider delta 1, automatic dispatch held, no replay, and zero residue"
+  },
+  "scope": "controller.py, allowed pause policy tests/live probe, and graphify-out only",
+  "graphify_updated": "4405 nodes, 9079 edges"
+}

@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw06-rerun-test-03",
+  "status": "needs_reroute",
+  "frozen_candidate": "92889e2443a458d14a701354e635be77b0a1d5b762ede9372a1fcca7c54f2a25",
+  "candidate_after_tests": "9ef7df68c17b9d9ea6cbad08d0117cc0c1757fe9391be5dc13610dc49c5735d5",
+  "agent_result": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw06-rerun-test-03-agent.json",
+  "scope_audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-cw06-rerun3.json (no outside-scope)",
+  "delta_backup": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-cw06-rerun3-delta-backup/",
+  "verdicts": {"P2-1 fixture": "pass (0.05-0.12s)", "P2-1 runtime": "FAIL: real backend flood -> UI exits after 4-10s 'backend 연결이 끊김', no slow_client reason", "P2-1c": "pass", "P3-1": "partial FAIL: Esc-closed help lingers ~4s (dirty not set)", "P3-2": "pass", "P3-3": "pass", "P3-4": "pass", "P3-5": "done (hash pin removed; live probes opt-in CW06_LIVE_MODEL=1)"},
+  "flakes": {"test_product_pty connection_lost": "1/5 full-run fail, 15/15 standalone (test timing)", "backend connection_cap": "EAGAIN under load; rerun OK (environment)"},
+  "model_turns": 0,
+  "frozen_hashes_equal": true,
+  "residue": "none",
+  "observed_model": "sonnet (wb-test-rerun definition; host metadata unverified)"
+}

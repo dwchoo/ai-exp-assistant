@@ -1,0 +1,18 @@
+{
+  "invocation":"cw11-incarnation-correction-01",
+  "role":"worker_senior",
+  "unit":"V-CW-11-p2.6-current",
+  "objective":"Prevent pause-held or scheduled review state from crossing a new run incarnation that reuses the same six-field identity.",
+  "base_candidate":"e2d467490e24040ef685899be809e2aeae908b919bdfa2f3565c081403021868",
+  "test_evidence":".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw11-aba-test-01.json",
+  "write_scope":["src/workbench/observation/**","tests/observation/**"],
+  "required_change":[
+    "Add an admission owner run-incarnation epoch distinct from the general authority/ticket epoch. It changes when active run changes away and back, including A->None->the same six-field A, but ordinary pause/resume authority changes do not create a new run incarnation.",
+    "Expose the incarnation in the authoritative snapshot/ticket. WorkerReviewScheduler must detect incarnation change before `_advance_schedule`, coalescing, or ticket issuance; discard old pending/ticket state and start the 60-second due baseline at the first observation of the new incarnation.",
+    "Do not reset the cadence on repeated idempotent set_active_run(A) observations. Preserve review count semantics and same-incarnation pause-held latest-one behavior.",
+    "Make the independent t=60 pause, t=61 A->None->A, t=120 tick test wait until the new incarnation's own 60-second boundary. Add before/exact/after boundary, A-B-A, authority-only pause/resume, and repeated-A tests."
+  ],
+  "verification":["Run observation and relevant regressions.","Rerun actual OMP if probe-visible scheduling code changes; otherwise explain evidence reuse.","Run graphify update ."],
+  "constraints":["apply_patch only; no workflow records, uv/local env/package artifacts, commit/push/merge/stash/reset/clean, or graphify restore."],
+  "report":["incarnation invariant","changed files","checks/runtime","candidate_ready or needs_reroute"]
+}

@@ -1,0 +1,5 @@
+{
+  "before": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw03-hook-correction-candidate.json",
+  "after": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw03-matrix-frozen-candidate.json",
+  "allowed": ["graphify-out/**"]
+}

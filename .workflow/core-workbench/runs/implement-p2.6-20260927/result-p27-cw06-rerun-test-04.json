@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw06-rerun-test-04",
+  "status": "candidate_ready_with_open_flake (agent: needs_reroute for Root decision)",
+  "frozen_candidate": "183c15f93d8afedf2ccfd7a8c0d4afbb9a02461a146cba4a43f5a6fc9be5e8f5",
+  "candidate_after_tests": "660411cd47a7ce8d11f619e21740a933c80e0e1b4b37a597c4ddf73add6e2dc5",
+  "agent_result": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw06-rerun-test-04-agent.json",
+  "scope_audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-cw06-rerun4.json",
+  "delta_backup": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-cw06-rerun4-delta-backup/",
+  "verdicts": {"probe_defect_claim": "confirmed in plain bash PTY", "live F0/F1/F2 final form": "5/5 pass (flood stop 0.01-0.09s, ^C+prompt 0.39-0.63s, new command 0.065-0.07s), no detach/traceback", "open": "1 of ~13 F2 runs (pre-edit form, identical Ctrl-C path) Ctrl-C did not stop flood within 5 s; no evidence retained; not reproduced in 10 later runs", "p27g overflow independent": "pass x5; mutation check (disable partial-frame preservation) fails as expected", "regressions": "tests/ui 120 x3, backend 71 (after fixing own fixture starvation), contracts 43, g1 63, g4 8"},
+  "model_turns": 0,
+  "frozen_hashes_equal": true,
+  "residue": "none",
+  "observed_model": "sonnet (wb-test-rerun definition; host metadata unverified)"
+}

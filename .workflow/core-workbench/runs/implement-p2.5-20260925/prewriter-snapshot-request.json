@@ -1,0 +1,8 @@
+{
+  "root": "/home/dwchoo/ai-exp-assistant",
+  "watch": [],
+  "exclude": [
+    ".workflow/core-workbench/runs/implement-p2.5-20260925/**"
+  ],
+  "checkpoint": true
+}

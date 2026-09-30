@@ -1,0 +1,111 @@
+{
+  "schema_version": 1,
+  "invocation": "cw07-partial-correction-01",
+  "unit": "V-CW-07-p2.6-current",
+  "task_result": "candidate_ready",
+  "baseline_candidate": "37b0d24b46b625492bdf71e15d992eba85eaa65fd39f71fd26a75f0141e780f5",
+  "candidate": "add6c0460e932a8f8ef0c9210d33fbc762131b367a83f8f1111c9b7c1df973d0",
+  "assignment_ref": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/assignment-cw07-partial-correction-01.json",
+  "review_ref": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/review-cw07-delta-01.json",
+  "regression_ref": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/result-cw07-partial-regression-test-01.json",
+  "snapshot_ref": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw07-partial-correction-after.json",
+  "scope_audit_ref": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/scope-audit-cw07-partial-correction.json",
+  "raw_runtime_ref": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/raw-cw07-partial-correction-bash-sh.json",
+  "cwd": "/home/dwchoo/ai-exp-assistant",
+  "changed_paths": [
+    "src/workbench/terminal/shell_persistent/adapter.py",
+    "tests/terminal/test_persistent_shell.py"
+  ],
+  "protected_independent_test_unchanged": "tests/terminal/test_persistent_shell_independent.py",
+  "attributable_delta": [
+    "Manual-parent PTY input now uses one bounded writer that drains control and verifies boundary, lifecycle, original parent PID/start/session/live state, and current PTY foreground before each low-level write.",
+    "Each successful short write records only emitted bytes; a transition to unknown/needs_review/uncertain or stale parent/foreground after any prefix rejects remaining bytes before another os.write.",
+    "InterruptedError and BlockingIOError retry only inside a 0.25-second deadline; no progress or expiry fails closed. The separate verified experiment-foreground writer is unchanged.",
+    "Worker-owned deterministic unit coverage verifies valid short writes, interrupted retry, bounded no-progress refusal, and existing late-loss/identity checks."
+  ],
+  "before_regression": {
+    "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest -v tests.terminal.test_persistent_shell_independent.PersistentShellIndependentRuntimeTests.test_partial_manual_write_rechecks_unknown_before_remaining_bytes",
+    "observed": "Bash and /bin/sh both failed: first write accepted a one-byte prefix, boundary became unknown, then a second low-level write was attempted with remaining bytes.",
+    "classification": "accepted review P2 reproduced before implementation"
+  },
+  "checks": [
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest -v tests.terminal.test_persistent_shell_independent.PersistentShellIndependentRuntimeTests.test_partial_manual_write_rechecks_unknown_before_remaining_bytes",
+      "result": "passed",
+      "observed": "1 method OK; Bash and /bin/sh partial-prefix unknown transitions both refused before a second write"
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/terminal -q",
+      "result": "passed",
+      "observed": "10 tests OK, including independent tests"
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/gates/g2_shell -q",
+      "result": "passed",
+      "observed": "132 tests in 112.769s; OK (skipped=6)"
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g4_lifetime /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/gates/g4_lifetime -q",
+      "result": "passed",
+      "observed": "8 tests OK"
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g4_evidence /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/gates/g4_evidence -q",
+      "result": "passed",
+      "observed": "10 tests OK"
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/terminal /tmp/cw02-g1-venv/bin/python tests/terminal/live_persistent_shell.py",
+      "result": "passed",
+      "observed": "Bash and /bin/sh each passed 8 bounded real-runtime cases, owned PID residue empty"
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python tests/terminal/live_persistent_shell_independent.py",
+      "result": "passed",
+      "observed": "Bash and /bin/sh each passed 6 independent real-runtime cases, owned PID residue empty"
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python tests/terminal/live_persistent_shell_independent.py --unknown bash sh",
+      "result": "passed",
+      "observed": "Both shells refused unknown-state input, marker_seen=false, residue empty"
+    },
+    {
+      "command": "git diff --check",
+      "result": "passed",
+      "observed": "exit 0"
+    },
+    {
+      "command": "pgrep -af '[/]tmp/cw07-(runtime|independent)-'",
+      "result": "passed",
+      "observed": "exit 1, no matching owned process"
+    },
+    {
+      "command": "pgrep -af '[/]tmp/cw03-g2-'",
+      "result": "passed",
+      "observed": "exit 1, no matching G2 shell process"
+    },
+    {
+      "command": "find /tmp -maxdepth 1 -type d \\( -name 'cw07-runtime-*' -o -name 'cw07-independent-*' \\) -print",
+      "result": "passed",
+      "observed": "empty output, no owned fixture directory"
+    }
+  ],
+  "runtime_observations": {
+    "partial_prefix": "Independent Bash/sh regression observed only the unavoidable one-byte prefix, no second os.write and UnsafeShellState after boundary became unknown.",
+    "normal_input": "Existing actual Bash/sh user-prepared environment, live foreground input before exit/prompt, clean parent input, input barrier, handoff/no-replay and negative controls all remained passing.",
+    "owned_pid_residue": [],
+    "stopped_or_unknown_owned_subprocesses": []
+  },
+  "scope": {
+    "comparable": true,
+    "outside_scope": [],
+    "index_changed": []
+  },
+  "remaining_unknowns": [
+    "Root still owns graphify update, independent delta review and final combined-candidate verification; this is not overall approval.",
+    "Detached daemon/cgroup-wide discovery remains the adjudicated out-of-scope P1 and was not changed.",
+    "G2 privileged/ptrace-denied execution support and downstream Task-success policy remain outside this correction."
+  ],
+  "writer_lease": "returned",
+  "commit_or_push": false
+}

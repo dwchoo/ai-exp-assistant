@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "revision": "core-workbench-p2.6-CW-15",
+  "authority": "User $implement docs/features/core-workbench request; approved bundle 64bcf577a30e7c6bbff3e4e775f8e6c17ca212ce3bf79b5bc5be31196a792b07; approved PLAN p2.6 dependencies CW-06/CW-08/CW-11/CW-12/CW-13/CW-14",
+  "acceptance_ids": ["C-AC-15", "C-AC-16", "C-AC-17", "C-AC-18", "C-AC-22", "C-AC-23"],
+  "gate_items": [
+    {"id": "P-C-AC-15", "acceptance_ids": ["C-AC-15"], "required_evidence_level": "runtime"},
+    {"id": "P-C-AC-16", "acceptance_ids": ["C-AC-16"], "required_evidence_level": "runtime"},
+    {"id": "P-C-AC-17", "acceptance_ids": ["C-AC-17"], "required_evidence_level": "runtime"},
+    {"id": "P-C-AC-18", "acceptance_ids": ["C-AC-18"], "required_evidence_level": "runtime"},
+    {"id": "P-C-AC-22", "acceptance_ids": ["C-AC-22"], "required_evidence_level": "runtime"},
+    {"id": "P-C-AC-23", "acceptance_ids": ["C-AC-23"], "required_evidence_level": "runtime"}
+  ]
+}

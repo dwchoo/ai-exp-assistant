@@ -1,0 +1,31 @@
+{
+  "feature_id": "core-workbench",
+  "ticket_id": "CW-03",
+  "attempt_id": "common-run-exec-ack-correction-01",
+  "invocation": "cw03-run-ack-correction-01",
+  "approved_bundle_digest": "64bcf577a30e7c6bbff3e4e775f8e6c17ca212ce3bf79b5bc5be31196a792b07",
+  "actual_workspace": "/home/dwchoo/ai-exp-assistant",
+  "baseline_snapshot": "fa53bd6c59bec51a0c65c767d7a815aa38cf5b7f6eb67f11514253d7b31b03c3",
+  "effective_write_capability": "shared workspace; sole mutation owner while dispatched",
+  "allowed_write_paths": ["src/workbench/terminal/shell_g2/lifecycle.py"],
+  "prohibited_paths": ["tests/**", "docs/**", ".workflow/**", ".codex/**", "graphify-out/**"],
+  "resource_claims": [{"resource": "host:shell-fixture", "mode": "exclusive"}],
+  "mutation_owner": "cw03-run-ack-correction-01",
+  "implementation_result_ref": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw03-run-protocol-01.json",
+  "independent_test_result_ref": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw03-run-protocol-test-01.json",
+  "required_correction": "A CLOEXEC status pipe EOF is not sufficient exec success evidence because normal pre-exec exit also closes it. Accept exec only when the supervisor can distinguish actual exec transition from every normal or signaled pre-exec child status. A pre-exec exit must emit explicit EXEC_ERROR/UNKNOWN, must not emit EXEC_READY, EXPERIMENT_START, MAIN_RETURN as payload, LIFETIME_DONE, or INPUT_BARRIER, and must not start replacement execution.",
+  "exact_checks": [
+    "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest tests.gates.g2_shell.test_common_run_protocol_independent -v",
+    "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest tests.gates.g2_shell.test_common_run_protocol tests.gates.g2_shell.test_split_pg_control -v",
+    "PYTHONDONTWRITEBYTECODE=1 python3 tests/gates/g2_shell/live_control_lifecycle_probe.py",
+    "PYTHONDONTWRITEBYTECODE=1 python3 tests/gates/g2_shell/live_env_launch_probe.py",
+    "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/gates/g2_shell -p 'test_*.py' -v",
+    "git diff --check"
+  ],
+  "reserved_budget": 1,
+  "stop_conditions": ["Correction would require weakening the independent test or changing approved behavior", "Owned process cleanup cannot be proven"],
+  "configured_model": "gpt-6-sol",
+  "configured_effort": "high",
+  "host_observed_model": "unverified",
+  "host_observed_effort": "unverified"
+}

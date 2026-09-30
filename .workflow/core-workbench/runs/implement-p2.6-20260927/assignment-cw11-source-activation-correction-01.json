@@ -1,0 +1,20 @@
+{
+  "invocation":"cw11-source-activation-correction-01",
+  "role":"worker_senior",
+  "unit":"V-CW-11-p2.6-current",
+  "objective":"Eliminate late first binding of old WorkflowRun exit sources and expose run incarnation on every public exit callback.",
+  "base_candidate":"7401c2b0f4efc6a5894dd82b57ee36bb127dce9473da67348cccd93fae21f825",
+  "review_evidence":".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw11-final-review-05.json",
+  "write_scope":["src/workbench/observation/**","tests/observation/**"],
+  "required_change":[
+    "Remove the WorkflowObservationBinding API that asks admission to issue its first token at an arbitrary later bind call. A binding must only accept a source token that the coordinator already issued atomically at authoritative run activation.",
+    "Add an explicit admission/scheduler state-writer operation that atomically activates the ActiveRunRef and registers the exact WorkflowRun source object, returning an ExitSourceToken for that incarnation. This is the only external-source issuance path. Repeated/idempotent activation must not silently rebind a different or previously retired source.",
+    "WorkflowObservationBinding may expose a pure persisted-identity resolver before activation. Its final attach/bind step must require the pre-issued token, verify owner/source/run/incarnation, and never issue or refresh a token itself. Delayed use of an old token after A->None->same A must fail.",
+    "Update production probe composition to resolve identity, atomically activate/register the WorkflowRun source, then construct the bound binding before collection. No unbound collection or implicit current-incarnation bind fallback.",
+    "Include `run_incarnation` from the validated token/key in every public on_exit event, including pending retry after callback failure. Preserve it unchanged across retry so UI consumers can reject old-incarnation updates.",
+    "Add tests for attach-old/delay-first-bind after replacement, activation with old/foreign/retired source, delayed old token, public retry incarnation, and correct new source activation/exit."
+  ],
+  "verification":["Run observation and relevant regressions.","Rerun actual OMP 18.2.10 using explicit source activation and bound binding.","Run graphify update ."],
+  "constraints":["apply_patch only; no workflow records, uv/local env/package artifacts, destructive git actions, or graphify restore."],
+  "report":["activation/binding API invariant","changed files","checks/runtime","candidate_ready or needs_reroute"]
+}

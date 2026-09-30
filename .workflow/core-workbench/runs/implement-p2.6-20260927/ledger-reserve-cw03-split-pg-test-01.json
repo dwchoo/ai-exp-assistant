@@ -1,0 +1,20 @@
+{
+  "path": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 105,
+  "event": {
+    "id": "reserve-cw03-split-pg-test-01",
+    "kind": "reserve",
+    "data": {
+      "invocation": "cw03-split-pg-test-01",
+      "role": "test_designer",
+      "unit": "V-CW-03",
+      "incident": "",
+      "purpose": "Independently derive and test split-PG CW-03 control/lifecycle behavior",
+      "model": "gpt-6-sol",
+      "effort": "high",
+      "buckets": ["total", "role:test_designer", "unit:V-CW-03"],
+      "writer": true,
+      "workspace": "/home/dwchoo/ai-exp-assistant"
+    }
+  }
+}

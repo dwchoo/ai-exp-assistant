@@ -1,0 +1,34 @@
+{
+  "invocation": "cw15-linear-correction-01",
+  "outcome": "complete",
+  "candidate_ready": true,
+  "base_candidate": "b3ed52eaec0b1fb9c200659ac9a4719c2845f4556a7295626703828857ed02b2",
+  "changed_paths": ["src/workbench/app/lifecycle.py", "tests/lifecycle/test_lifecycle_runtime.py", "graphify-out/**"],
+  "linearization": "Coordinator-local RLock serializes automatic admission, pending/final journal and external send/review with shutdown admission_closed persistence and normal-stop start.",
+  "focused": {
+    "before": "three threaded race regressions failed",
+    "action_first": "one command or review completes before shutdown close; all later actions 0",
+    "shutdown_first": "waiting command/tick sends 0, review 0, pause dispatch 0 and journal command none",
+    "deadlock": "all threads joined within 3 seconds and reentrant callback passed"
+  },
+  "checks": {
+    "focused": "3 tests passed",
+    "lifecycle": "20 tests passed",
+    "pause": "122 tests passed",
+    "observation": "95 tests passed",
+    "bridge": "22 tests passed",
+    "storage": "33 tests passed",
+    "recovery": "26 tests passed",
+    "g4_ports": "2 tests passed",
+    "graphify_update": "passed",
+    "compileall": "passed",
+    "diff_check": "passed",
+    "residual_processes": "none observed"
+  },
+  "sha256": {
+    "src/workbench/app/lifecycle.py": "88e2bc651c50213dd6bf17f9f7f75e43b69bdbfcb306b6b1ab770190a1fc3c9d",
+    "tests/lifecycle/test_lifecycle_runtime.py": "41ff46e86dcf2d5bd73ed9aadb85abf4b81412d349473d8f19484376070a92b1"
+  },
+  "scope_limit": "Linearization is per LifecycleCoordinator instance; multiple simultaneous coordinator instances are excluded by the single runtime owner contract.",
+  "mutation_owner": "/root/cw12_post_review_correction"
+}

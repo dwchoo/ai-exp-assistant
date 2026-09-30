@@ -1,0 +1,21 @@
+{
+  "root": "/home/dwchoo/ai-exp-assistant",
+  "requirements": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw14.json",
+  "argv": [
+    "/usr/bin/env",
+    "PYTHONDONTWRITEBYTECODE=1",
+    "PYTHONPATH=src",
+    "/tmp/cw02-g1-venv/bin/python",
+    "-m", "unittest", "discover", "-s", "tests/storage", "-p", "test_*.py", "-q"
+  ],
+  "environment": {
+    "description": "Linux; frozen CW-14 causal pending-delta candidate; raw-log caps, accounting, concurrency, failures, path safety and metadata-admission separation fixtures"
+  },
+  "log": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/check-cw14-fixture-final.log",
+  "check_id": "cw14-fixture-final-01",
+  "watch": [],
+  "exclude": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/**"
+  ],
+  "timeout": 180
+}

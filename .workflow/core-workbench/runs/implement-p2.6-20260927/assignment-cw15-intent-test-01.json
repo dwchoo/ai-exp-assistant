@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "invocation": "cw15-intent-test-01",
+  "role": "test_designer",
+  "unit": "V-CW-15-p2.6-current",
+  "authority": "User $implement request; approved CW-15/C-D52; change-verification independent test stage",
+  "objective": "Independently verify takeover invocation immediately revokes a pending production G3 submission and preserves no-replay evidence without regressing pause/lifecycle authority.",
+  "candidate": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw15-intent-correction.json",
+    "candidate_id": "910f6638552602afbb5676a624ef52b9c97a9cdd62254370e769419e982db7c3",
+    "production_hashes": {
+      "lifecycle": "6ccd47cdb557d703a77098d2cd84bbf50d04de3f801f7154c060fc5f97159c02",
+      "production": "f0cb3e572302a0a977b4db24ddc6a68a24311f757a1680b1d35aa0953359c3c4",
+      "pause": "5dd01e798f41045aaa0130774b0c7c198d135e7920139d2d1f9c184ec32dffa3"
+    }
+  },
+  "requirements": [
+    "Use the actual G3BridgeServer, TaskMailbox and PauseCoordinator path to block after preflight/before socket submission, invoke takeover, and prove no deliver frame or API call occurs after invocation while durable takeover eventually records.",
+    "Prove receipt/history distinguish rejected-before-submission from submitted/unknown, command delivery remains unknown with zero replay, and timestamp order is invocation <= intent observation < transport return < durable takeover.",
+    "Exercise missing/malformed/throwing external authority tokens in PauseCoordinator fail closed without weakening its existing permit or fake compatibility.",
+    "Re-run all prior takeover/shutdown/action races, production binding and predecessor suites; verify frozen production hashes, graph/residue and add only test-only coverage for a material gap."
+  ],
+  "allowed_write_paths": ["tests/lifecycle/**", "tests/policy/pause_automation/**", "tests/integration/**", "graphify-out/**"],
+  "constraints": ["Production is frozen. No production/docs/workflow/PLAN/state edits, external OMP/reboot, delegation, commit, publish, deploy or Docker. Use apply_patch for test-only changes."],
+  "report": "Return candidate_ready/needs_reroute, exact timestamps/send counts/receipt+journal history, token-negative cases, suite totals, production hash comparison, changed tests, residue and pending environments."
+}

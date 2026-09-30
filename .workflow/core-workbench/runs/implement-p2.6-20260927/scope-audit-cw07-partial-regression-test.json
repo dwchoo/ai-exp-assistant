@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "invocation": "cw07-partial-regression-test-01",
+  "before": "5d50853a90d2bd12eb7c828f2a4defe6c51e0281ee0231326d387e46456c15af",
+  "after": "319dbd7c87fa1e1508e1cf5df5ab140ea57ea2129a85c617b38e4ed5fd2c1179",
+  "allowed": [
+    "tests/terminal/test_persistent_shell_independent.py"
+  ],
+  "named_workflow_artifacts": [
+    "result-cw07-partial-regression-test-01.json",
+    "snapshot-cw07-partial-regression-test-after.json",
+    "scope-audit-cw07-partial-regression-test.json"
+  ],
+  "changed": [
+    "tests/terminal/test_persistent_shell_independent.py"
+  ],
+  "outside_scope": [],
+  "head_unchanged": true,
+  "index_changed": [],
+  "baseline_file_count": 1174,
+  "unchanged_baseline_file_count": 1173,
+  "baseline_candidate_digest_verified": true,
+  "workflow_artifacts_excluded_by_assigned_baseline": true,
+  "comparable": true
+}

@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-review-cw06-01",
+  "verdict": "block",
+  "frozen_candidate": "101b87f58fef043e9707b5ac6de1eaed15cfd0711447f8686bfc432b450e571b",
+  "agent_result": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-review-cw06-01-agent.json",
+  "findings_summary": {"P2-1": "high-volume output blocks UI input for seconds, backend detaches UI as slow_client, UI exits with BrokenPipeError traceback (acceptance-affecting)", "P3-1": "cursor hidden forever after help overlay", "P3-2": "SIGTERM leaves 2004 on, SIGHUP leaves raw/alt screen (no handlers)", "P3-3": "prefix + Up/F-key/Alt leaks sequence tail to pane", "P3-4": "50ms Esc hold releases a partial paste introducer", "P3-5": "p27e test pins production hashes in required suite; live probes spend model turns by default; start_independent:143 assert meaningless", "P3-6": "wording/comments/fd nits"},
+  "item_verdicts": {"1": "pass_with_findings (P3-2)", "2": "pass_with_findings (P3-3, P3-4)", "3": "pass", "4": "pass", "5": "fail (P2-1)", "6": "pass", "7": "pass_with_findings (P3-5)", "8": "pass_with_note (carry-forward not yet recorded)"},
+  "candidate_unchanged": true,
+  "residue": "none (/tmp/cw06rv cleaned; shutdown verified)",
+  "observed_model": "opus (general-purpose inherited)"
+}

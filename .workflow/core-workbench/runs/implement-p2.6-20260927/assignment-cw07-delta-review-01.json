@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "invocation": "cw07-delta-review-01",
+  "role": "reviewer",
+  "unit": "V-CW-07-p2.6-current",
+  "workspace": "/home/dwchoo/ai-exp-assistant",
+  "writer": false,
+  "candidate_manifest": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw07-delta-review-candidate.json",
+  "candidate": "5d50853a90d2bd12eb7c828f2a4defe6c51e0281ee0231326d387e46456c15af",
+  "requirements": ".workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw07.json",
+  "original_review": ".workflow/core-workbench/runs/implement-p2.6-20260927/review-cw07-01.json",
+  "independent_regression": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw07-review-regression-test-01.json",
+  "correction": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw07-review-correction-01.json",
+  "instructions": "Read-only delta/impact review of the frozen corrected CW-07 candidate. Do not modify files. Verify the accepted P2 is closed: cached manual prompt or foreground confirmation cannot authorize input after control loss/unknown; all PTY writes, including partial writes, revalidate current boundary/lifecycle/parent identity/foreground; valid live foreground and clean parent manual input remain available. Review PID identity/reuse, stopped parent, foreground changes, control event ordering, and no-replay impact. Confirm independent tests were not weakened and manifest matches. The prior detached manual-daemon P1 was adjudicated outside the approved guarantee under C-D55/SPEC/ADR-0002 (no universal discovery, no cgroup); do not require that scope expansion absent a concrete contradiction. Report new P0-P3 findings or explicit approval with residual limitations."
+}

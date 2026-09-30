@@ -1,0 +1,30 @@
+{
+  "invocation": "cw10-final-review-01",
+  "role": "reviewer",
+  "unit": "V-CW-10-p2.6-current",
+  "objective": "Fresh independent fault-finding review of the final frozen CW-10 candidate against every approved requirement and prior defect class.",
+  "candidate_manifest": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw10-final-review.json",
+  "candidate": "df72dbb2a2f2c7bf80370a0ddf301f175a8661b0336b147a0bfd67b5124c96c0",
+  "requirements": ".workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw10.json",
+  "ticket": "docs/features/core-workbench/tickets/CW-10.md",
+  "prior_findings": [
+    "worker execution/judgment must be bound to exact public OMP response identity, not OMP_PROCESSED alone",
+    "current pause/cancel/revocation authority must be re-read before dispatch and analysis/report",
+    "direct worker requests must create durable Task/revision/approval/proceed boundaries",
+    "environment values must remain transient and never be persisted",
+    "missing/unreadable/truncated/changed evidence must remain indeterminate",
+    "bool, float, negative, unsafe integer, malformed UUID, stale and replayed response identities must fail closed"
+  ],
+  "constraints": [
+    "Review-only: do not edit or execute mutating actions.",
+    "Inspect the frozen candidate itself and independently validate exact source/test/guide hashes where relevant.",
+    "Report findings in severity order with file/line evidence; explicitly say no findings if clean.",
+    "No commit/push/merge/stash/reset/clean."
+  ],
+  "report": [
+    "candidate hash validation",
+    "findings with severity and evidence",
+    "coverage gaps or runtime qualifications",
+    "candidate_ready or needs_reroute"
+  ]
+}

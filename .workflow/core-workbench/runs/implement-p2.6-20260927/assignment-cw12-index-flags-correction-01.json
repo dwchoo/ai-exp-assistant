@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "invocation": "cw12-index-flags-correction-01",
+  "role": "worker_senior",
+  "unit": "V-CW-12-p2.6-current",
+  "authority": "User $implement docs/features/core-workbench request; approved PLAN p2.6 CW-12 and independent failing regression",
+  "objective": "Prevent Git index flags from hiding actual peer cwd changes while preserving large-repository liveness.",
+  "base": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw12-large-repo-correction.json",
+    "candidate_id": "23e70e74867ac37222e553b79839a52f1ad35ccd8aba9c47cc6c862a7b5d895b",
+    "failing_test": "tests/policy/pause_automation/test_pause_policy.py::test_git_peer_assume_unchanged_cannot_hide_out_of_scope_tracked_edit",
+    "evidence": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-large-repo-test-01.json"
+  },
+  "required_corrections": [
+    "Boundedly enumerate Git tracked paths carrying assume-unchanged, skip-worktree, or other status-affecting index flags at bind and resume; bind their flag identity plus safe file/missing state to the peer baseline.",
+    "Hash only flagged/changed paths with fd-relative O_NOFOLLOW and existing byte/count/output budgets; a flag-set change, hidden content change, unreadable/special path, or command/output overflow must fail closed.",
+    "Preserve normal sparse/index liveness where a flagged missing path is unchanged, the 2050-file/64MiB clean repo path, ignored/untracked detection, and non-Git fallback.",
+    "Make the preserved independent assume-unchanged regression pass and add skip-worktree/flag-change cases if not already covered."
+  ],
+  "allowed_write_paths": ["src/workbench/policy/pause_automation/**", "tests/policy/pause_automation/**", "graphify-out/**"],
+  "constraints": [
+    "Sole product mutation owner; preserve prior fixes and test-designer changes.",
+    "Use apply_patch; no new dependency or user-facing configuration.",
+    "Do not edit .workflow/docs/PLAN/state or other product areas; do not delegate, commit, publish, deploy, or use Docker.",
+    "Run the failing test first, focused flag/large-repo cases, full policy, graphify update ., and report exact evidence."
+  ],
+  "report": "Return changed paths, flag semantics, exact test results, candidate_ready/blocker, and residual risks."
+}

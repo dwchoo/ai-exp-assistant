@@ -1,0 +1,20 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 1153,
+  "event": {
+    "id": "reserve-cw15-linear-correction-01",
+    "kind": "reserve",
+    "data": {
+      "invocation": "cw15-linear-correction-01",
+      "role": "worker_senior",
+      "unit": "V-CW-15-p2.6-current",
+      "incident": "",
+      "purpose": "Bounded automatic-action and shutdown linearization correction",
+      "model": "gpt-6-sol",
+      "effort": "high",
+      "buckets": ["total", "role:worker_senior", "unit:V-CW-15-p2.6-current"],
+      "writer": true,
+      "workspace": "/home/dwchoo/ai-exp-assistant"
+    }
+  }
+}

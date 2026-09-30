@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "invocation": "cw16-final-review-01",
+  "role": "reviewer",
+  "unit": "V-CW-16-p2.6-current",
+  "authority": "User $implement request; approved PLAN p2.6 CW-16; mandatory fresh final review",
+  "objective": "Fresh read-only review of the corrected CW-16 integration candidate, including the exact boundary between demonstrated compatibility and pending product acceptance.",
+  "candidate": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw16-post-test-correction.json",
+    "candidate_id": "315df4d67702f432f1a83324497edaabbaba9e7e20ff2296e07ed2bd03cea93b"
+  },
+  "requirements": [
+    "Audit tests/integration/test_cw16_runtime_matrix.py for discriminating assertions, bounded external state, cleanup and truthful coverage of Bash/dash versus outer plain/tmux/Herdr.",
+    "Audit VERIFICATION.md and COMPATIBILITY.md against BRIEF C-AC-01~34, especially C-AC-19/20, and PLAN I-FLOW/I-SHELL/I-POLICY/I-FAULT/I-COMPAT.",
+    "Confirm the corrected document does not imply a dash by outer-environment cross-product and does not claim backend-preserving detach/reconnect, real reboot or a final manager-worker-host entrypoint.",
+    "Verify frozen candidate hashes and prior independent result. Classify P0/P1/P2 findings, candidate_ready only for the scoped compatibility/documentation candidate, and separately state whether CW-16/whole Core is done_verified."
+  ],
+  "allowed_write_paths": [],
+  "constraints": [
+    "Read-only: no file edits, tests authored, graph update, workflow/PLAN/state changes, external OMP probes, reboot, delegation, commit, publish, deploy or Docker.",
+    "You may run non-mutating focused checks if needed, but reuse the independent actual runtime result and do not run full/live G3 or create new external sessions."
+  ],
+  "report": "Return candidate_ready, P0/P1/P2 findings, exact demonstrated/pending matrix, hash/evidence assessment, done_verified assessment and needs_oracle."
+}

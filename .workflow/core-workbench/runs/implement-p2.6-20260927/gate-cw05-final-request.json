@@ -1,0 +1,11 @@
+{
+  "requirements": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw05.json",
+  "candidate": "23f790d7098743fd5968c9e72e501ea2c6bb086f93ecdc48eb53586c523854a1",
+  "checks": [
+    "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/check-cw05-lifetime-observed.json",
+    "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/check-cw05-wake-observed.json",
+    "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/check-cw05-store-observed.json",
+    "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/check-cw05-contract-observed.json",
+    "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/check-cw05-evidence-observed.json"
+  ]
+}

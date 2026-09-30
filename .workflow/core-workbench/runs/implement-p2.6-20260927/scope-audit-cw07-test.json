@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "invocation": "cw07-test-01",
+  "before": "c0e000a2e06773dd973f8e7d7fb1113f9dbe62a73fbf792cf3721225b2397362",
+  "after": "826e53c0c28b213c25e2e40ff442f6d7970f631ddbb7aec62ea6529efb861971",
+  "allowed": [
+    "tests/terminal/live_persistent_shell_independent.py",
+    "tests/terminal/test_persistent_shell_independent.py"
+  ],
+  "named_workflow_artifacts": [
+    "raw-cw07-independent-runtime.json",
+    "result-cw07-test-01.json",
+    "snapshot-cw07-test-after.json",
+    "scope-audit-cw07-test.json"
+  ],
+  "changed": [
+    "tests/terminal/live_persistent_shell_independent.py",
+    "tests/terminal/test_persistent_shell_independent.py"
+  ],
+  "outside_scope": [],
+  "head_unchanged": true,
+  "index_changed": [],
+  "baseline_file_count": 1166,
+  "unchanged_baseline_file_count": 1166,
+  "baseline_candidate_digest_verified": true,
+  "workflow_artifacts_excluded_by_assigned_baseline": true,
+  "comparable": true
+}

@@ -1,0 +1,82 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-input-test-01",
+  "status": "needs_reroute",
+  "candidate_id": "04fb52ccf0e69c5a7d80a105fad474b79ce174c61b858d0bc50e5eb7f067292f",
+  "after_snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-input-test-after.json",
+  "scope_audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-input-test.json",
+  "added_tests": [
+    "tests/terminal/test_manual_input_boundary_independent.py (18)",
+    "tests/terminal/test_manual_input_backend_independent.py (2)",
+    "tests/gates/g2_shell/test_input_boundary_independent_p27.py (10)"
+  ],
+  "checks": [
+    [
+      "g2 input boundary independent",
+      0,
+      "10 OK"
+    ],
+    [
+      "terminal independent",
+      1,
+      "20 tests, 2 failures F-P27-DEADLINE"
+    ],
+    [
+      "tests/terminal",
+      1,
+      "49, 2 failures same"
+    ],
+    [
+      "g2_shell discover",
+      0,
+      "142 OK skip=1"
+    ],
+    [
+      "canonical matrix",
+      0,
+      "3 OK"
+    ],
+    [
+      "tests/backend",
+      0,
+      "47 OK"
+    ],
+    [
+      "contracts",
+      0,
+      "43 OK"
+    ],
+    [
+      "lifecycle",
+      0,
+      "38 OK"
+    ],
+    [
+      "g4",
+      0,
+      "8 OK"
+    ]
+  ],
+  "verdicts": {
+    "manual input both paths bash/dash": "pass",
+    "automation holds not weakened": "pass",
+    "unobservable/foreign target held": "pass",
+    "gap1": "pass",
+    "gap2": "fail only via F-P27-DEADLINE (passes with return_timeout=120)",
+    "temp dir residue": "pass: only SIGKILL-ed owners leave /tmp/cw03-g2-* (test_dead_backend_stale_socket_and_lock_restart...)",
+    "regressions": "pass (1 env flake EAGAIN connection-cap, passed on rerun x2)"
+  },
+  "finding": {
+    "id": "F-P27-DEADLINE",
+    "class": "implementation (pre-existing; CW-05 reroute design, CW-07/CW-10 callers)",
+    "severity": "blocking: violates BRIEF 실험 실행 시간 상한 없음, C-AC-07, OPERATING-CONTRACT §3, C-AC-08",
+    "summary": "PersistentShell.submit return_timeout=5.0 (max 300) becomes supervisor main-return deadline (lifecycle.py:704-719); TimeoutError -> UNKNOWN:SUPERVISOR_FAILURE -> _cleanup_children SIGKILL. TaskWorkflow.start (workflow/run.py:541) uses default. Descendant wait also fixed 5.0s (lifecycle.py:727/749).",
+    "repro": "tests/terminal/test_manual_input_boundary_independent.py::ConfirmedRunTakeoverTests::test_production_default_submit_keeps_taken_over_experiment_running_past_5s"
+  },
+  "non_blocking": [
+    "hook removed (PROMPT_COMMAND= / PS1='$ ') -> rejected wb-handoff never gets READY -> manual input permanently held",
+    "dash exports ENV=/tmp/cw03-g2-.../shell-init into user/experiment env (C-AC-32)",
+    "connection-cap EAGAIN flake"
+  ],
+  "frozen_hashes_equal": true
+}

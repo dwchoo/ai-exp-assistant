@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "unit": "V-CW-03-P25-INPUT-SIGNAL",
+  "decision_owner": "Root",
+  "reason": "The initial eight-call synthesis unit is fully consumed and its bounded combined boundary slice passed. CW-03 still requires a same-candidate input queue and signal timing synthesis before broader matrix expansion.",
+  "remaining_work_estimate": 5,
+  "planned_roles": ["worker_senior", "test_designer", "reviewer"],
+  "correction_reserve": 2,
+  "hard_total_cap": 220,
+  "used_before_unit": 194,
+  "available_before_unit": 26,
+  "scope": [
+    "wb-handoff and following line in one write/paste",
+    "prior writer queue closure",
+    "SIGQUIT and TSTP/resume",
+    "signals at start and parent WAIT barriers"
+  ],
+  "excluded": [
+    "full hook/environment/takeover/launch matrix",
+    "Docker runtime validation"
+  ]
+}

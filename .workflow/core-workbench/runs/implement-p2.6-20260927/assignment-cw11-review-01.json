@@ -1,0 +1,28 @@
+{
+  "invocation": "cw11-review-01",
+  "role": "reviewer",
+  "unit": "V-CW-11-p2.6-current",
+  "objective": "Fresh independent review of the complete CW-11 periodic Worker review, hang-investigation, and priority/coalescing candidate.",
+  "candidate_manifest": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw11-final-review.json",
+  "candidate": "d5c3b8127b60f5d32df5eae21514a26faaf8516ab4ba6ebaa4346c87bd92a11c",
+  "requirements": ".workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw11.json",
+  "ticket": "docs/features/core-workbench/tickets/CW-11.md",
+  "must_review": [
+    "All CW-11 acceptance criteria P-C-AC-12, P-C-AC-21, and P-C-AC-27 against product code and both worker-authored and independent tests.",
+    "Exact recurring 60-second cadence without a fixed cap; no model review while paused; 121st review and 13th peer wake remain possible.",
+    "Latest-only review coalescing, user priority, pause retention, authority-loss cleanup, and confirmed-exit once-only behavior.",
+    "Hang classification requires explicit process plus lifecycle evidence; silence alone remains unknown; usage observed/estimated/unknown labels do not blur provenance.",
+    "The actual OMP live probes are meaningful and do not leak secrets or leave process/socket/thread/temp residue."
+  ],
+  "constraints": [
+    "Review-only: do not edit files or perform mutating actions.",
+    "Inspect code and tests directly; report severity-ordered P0-P3 findings with file/line evidence, or explicitly report no findings.",
+    "Do not commit, push, merge, stash, reset, clean, or restore generated graphify files."
+  ],
+  "report": [
+    "candidate hash validation",
+    "findings",
+    "runtime qualifications",
+    "candidate_ready or needs_reroute"
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "invocation": "cw09-review-correction-01",
+  "role": "worker",
+  "unit": "V-CW-09-p2.6-current",
+  "workspace": "/home/dwchoo/ai-exp-assistant",
+  "writer": true,
+  "baseline_candidate": "420a44a10bfdc17f4467ab0829b36914085322b847a211a8a2e5684e999f3926",
+  "requirements": ".workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw09.json",
+  "ticket": "docs/features/core-workbench/tickets/CW-09.md",
+  "review": ".workflow/core-workbench/runs/implement-p2.6-20260927/review-cw09-01.json",
+  "regression_evidence": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw09-review-regression-test-01.json",
+  "allowed_write_scope": [
+    "src/workbench/storage/metadata_sqlite/schema.py",
+    "src/workbench/tasks/repository.py",
+    "tests/tasks/test_repository.py"
+  ],
+  "protected_independent_test": "tests/tasks/test_repository_independent.py",
+  "instructions": "Correct both accepted P2 findings with the smallest robust production changes. Existing TaskSpec revisions must reject INSERT OR REPLACE under the repository's real connection pragmas, not merely explicit UPDATE/DELETE. Schema v1 to v2 migration must validate invalidation decision kinds while still inside the migration transaction and fail closed/roll back byte-equivalent logical schema and rows when legacy invalidation authority is non-terminal. Do not modify, skip, or weaken independent tests. Preserve valid cancellation migration, cross-Task composite FK, and kind guard. Add worker-owned focused coverage only if useful. Run all tests/tasks (22 expected), G4 lifetime/evidence, Python and Node contracts, and git diff --check. Run graphify update only if instructed by Root; Root will update the graph after your code changes. Produce result, snapshot, and scope-audit artifacts, then return writer lease."
+}

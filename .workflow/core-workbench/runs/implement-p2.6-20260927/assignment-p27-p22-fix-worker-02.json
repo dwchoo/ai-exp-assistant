@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-p22-fix-worker-02",
+  "attempt_id": "review-fix-attempt-02-p2-2",
+  "role": "worker_senior",
+  "unit": "V-CW-17-p2.7",
+  "approved_bundle_digest": "a521acdc3838b43a26e277afc233bab695c8b02ce0d42392c3678931b2e3f027",
+  "authority": "p2.7a approval-amendment-a; review p27-review-cw17-01 Root disposition fix_before_integration P2-2; user resume instruction 2026-09-29",
+  "prior_assignment_ref": ".workflow/core-workbench/runs/implement-p2.6-20260927/assignment-p27-review-fix-worker-01.json",
+  "prior_results": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-review-fix-worker-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-review-fix-test-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-review-cw17-01.json"
+  ],
+  "routing": {"planned_role": "worker_senior", "selected_role": "worker_senior", "reason_codes": ["coupled_invariants", "stalled_implementation"], "evidence_refs": ["P2-2 is process identity/signal safety (C-D45); first attempt failed independent test"]},
+  "configured_model": "claude-opus-5-5 (general-purpose, inherits)", "host_observed_model": "unverified",
+  "actual_workspace": "/home/dwchoo/ai-exp-assistant (shared checkout, serial; sole mutation owner)",
+  "base_candidate": "0757379de031b584d8832cd6864996d697e1295fe9e3e6ac824dbe6bfd58cb66",
+  "checkpoint_ref": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-p22fix-checkpoint.json",
+  "problem": "P2-2 still FAILS: tests/backend/test_pane_identity_independent_p27c.py::PaneCloseAfterReuseTests::test_reaped_omp_session_number_now_names_a_foreign_session_whose_leader_exited. After OmpPane.poll() reaps the OMP child, close() -> _kill_owned_session -> _owned_session_members(self.pid, ...) assumes the session number is still ours whenever no *different live leader* holds that PID. If the number now names a foreign session whose leader already exited, its members are SIGKILLed (C-D45 violation).",
+  "required_behavior": [
+    "OmpPane must never signal a process unless its membership in this OMP's own session is proven at signal time (C-D45, C-AC-34). A bare session/pid number is not proof once the OMP child has been reaped.",
+    "The pane must still clean members of its own session that outlive the OMP leader (orphans in the leader's group and in separate groups).",
+    "killpg only on the proven, unreaped child (ppid == backend, start_ticks equal)."
+  ],
+  "root_design_note": "The handoff's hint 'keep OMP unreaped until close (waitid WNOWAIT)' CONFLICTS with the frozen independent test: reaped_pane() asserts stat(pane.pid) is None after poll() reports the exit ('pane did not reap its own child'). So poll() must still reap. A direction consistent with the tests (worker decides; must justify): detect exit with os.waitid(P_PID, pid, WEXITED|WNOHANG|WNOWAIT); while the zombie still pins the pid/sid number, pin every current session member with pidfds (identity re-read after pidfd_open), then reap. At close, signal only via those pinned pidfds; re-scanning /proc for sid==number is safe only while at least one pinned member is still alive and still in that session (a live member keeps the sid number from being reallocated); when none is, skip the scan. Close the pinned fds on close. Keep the live-OMP path (killpg while unreaped, then scan while zombie) proven. Only OmpPane reaps its pid in the backend process (no waitpid(-1) there; lifecycle.py waitpid(-1) runs in the separate supervisor) - verify this yourself.",
+  "acceptance": [
+    "tests/backend/test_pane_identity_independent_p27c.py passes UNMODIFIED (all 4)",
+    "red->green non-independent test(s) of your own in tests/backend/test_panes.py for the pinned-member design (e.g. orphan survives OMP reap and is killed at close; foreign session with exited leader untouched)",
+    "required suites green (cmd prefix: /usr/bin/env PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover; for tests/gates use PYTHONPATH=src:. and never -t .): tests/terminal, tests/gates/g2_shell, canonical matrix (as run in result-p27-review-fix-worker-01), tests/backend (incl. *_independent*), tests/contracts, tests/lifecycle, tests/gates/g4_lifetime, tests/workflow, tests/observation. Known flakes: backend connection_cap EAGAIN under load, g2 test_ctrl_c_hold 1 s wait - classify only with standalone rerun evidence."
+  ],
+  "allowed_write_paths": ["src/workbench/backend/panes.py", "tests/backend/test_panes.py"],
+  "prohibited_paths": ["tests/**/test_*_independent*.py", "tests/backend/independent_support.py", "docs/**", ".workflow/**", "all other src/** and tests/**"],
+  "resource_claims": [{"resource": "host:omp-runtime", "mode": "exclusive"}],
+  "stop_conditions": [
+    "fix requires a contract change, modification of an independent test, or weakening identity/automation holds -> return blocked with evidence",
+    "cannot keep own-orphan cleanup and foreign safety simultaneously -> return needs_oracle with the precise question"
+  ],
+  "rules": "No commits/push, no tmux/herdr, no credentials, no Docker. Own and clean every process/temp dir you start (exact identity). Do not touch /tmp/cw03-g2-* dirs.",
+  "result_format": "Final message: checks table first (command, exit code, counts, duration), then status candidate_ready/needs_reroute/needs_oracle/blocked, changed paths, design summary (<=10 lines), sha256 of changed files, residue. Korean prose, identifiers as-is, concise."
+}

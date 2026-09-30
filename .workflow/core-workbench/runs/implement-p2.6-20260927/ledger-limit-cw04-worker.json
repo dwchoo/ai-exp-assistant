@@ -1,0 +1,12 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 195,
+  "event": {"id": "limit-cw04-current-worker-20260928", "kind": "limit", "data": {
+    "bucket": "role:worker_senior", "origin": "operating", "value": 99,
+    "authority": "C-D55 plus workflow-contract section 8 and current implementation authorization",
+    "reason": "One CW-04 extension-fault implementation turn and one bounded correction reserve",
+    "decision_owner": "Root", "remaining_work_estimate": 2,
+    "expected_previous": {"value": 97, "authority": "C-D55 plus workflow-contract section 8 and current implementation authorization", "reason": "One primary remaining-matrix migration and one bounded correction reserve"},
+    "scope_basis": null
+  }}
+}

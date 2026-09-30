@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "check_id": "cw05-runtime-normal-final-01",
+  "requirements_identity": "3f3ee9ba0cee2a99163a3285c07886467ae6930ce7ff1f973fba56e57378e2c0",
+  "argv": ["/usr/bin/env", "PYTHONDONTWRITEBYTECODE=1", "PYTHONPATH=src:tests/gates/g4_lifetime:tests/gates/g3_omp", "/tmp/cw02-g1-venv/bin/python", "tests/gates/g4_lifetime/live_detach_probe.py"],
+  "cwd": "/home/dwchoo/ai-exp-assistant",
+  "environment": {"description": "Linux, actual OMP 18.2.10, normal >60-second detach/wake/reattach with private UDS and local provider"},
+  "started_at": "2026-09-27T20:40:28.297334+00:00",
+  "finished_at": "2026-09-27T20:41:34.929201+00:00",
+  "exit_code": 0,
+  "timed_out": false,
+  "log": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/check-cw05-runtime-normal.log",
+  "log_sha256": "15aef5f21d017cf5d072e92d2e369d6d45350960c201688f82630bb244868931",
+  "before": "23f790d7098743fd5968c9e72e501ea2c6bb086f93ecdc48eb53586c523854a1",
+  "after": "23f790d7098743fd5968c9e72e501ea2c6bb086f93ecdc48eb53586c523854a1",
+  "stable": true,
+  "items": [{"id": "G4-LIFETIME", "acceptance_ids": ["C-AC-15", "C-AC-18"], "result": "passed", "observed_evidence_level": "runtime", "evidence": "check-cw05-runtime-normal.log and check-cw05-runtime-paused.log: actual OMP 18.2.10 backend retained six distinct positive backend/parent/supervisor/experiment/manager/worker PIDs, both OMP sessions, managed control mode, user owner epochs, and attach true-false-true across 62.058s normal and 62.066s paused detach; no duplicate launch, PID substitution, or process/temp residue", "unknowns": []}]
+}

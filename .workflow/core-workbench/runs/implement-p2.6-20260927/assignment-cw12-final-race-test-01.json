@@ -1,0 +1,42 @@
+{
+  "invocation": "cw12-final-race-test-01",
+  "role": "test_designer",
+  "unit": "V-CW-12-p2.6-current",
+  "objective": "Independently verify the frozen CW-12 final race/runtime candidate and add only requirement-derived tests needed to expose regressions.",
+  "candidate_manifest": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw12-final-race-test.json",
+  "candidate": "ce1cd03968188365c43d32c5eb1f3dcf6c5cf28b8f7246723c015aef16e0337c",
+  "evidence": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-final-review-02.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-final-race-correction-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-durability-oracle-01.json"
+  ],
+  "write_scope": [
+    "tests/policy/pause_*/**",
+    "tests/ui/status_*/**",
+    "graphify-out/**"
+  ],
+  "must_verify": [
+    "A barrier-controlled stale admission publisher cannot leave SerializedReviewAdmission unpaused after the coordinator has completed pause.",
+    "Concurrent pause(A) and bind_run(B) cannot contaminate B, lose pause identity, or deadlock.",
+    "Resume fails closed and repauses both peers if either exact session/generation changes in ACK state, after ACK, during final probe, or before/after unpaused publication.",
+    "Concurrent transition/publication stress completes without lock-order deadlock and final admission matches coordinator state.",
+    "qualifies rejects falsified or missing real file, process, manager/worker/host unknown-result, or paused manual-activity evidence.",
+    "Actual OMP 18.2.10 live probe independently observes real ConfirmedFileChange, RunningProcess, all unknown rows, a direct manual TUI turn during pause, automatic dispatch held, pause preserved, no held replay, and clean teardown.",
+    "Oracle-confirmed zero-evidence durability boundary remains assigned to CW15; do not claim it as CW12 recovery success."
+  ],
+  "verification": [
+    "Verify the frozen manifest before editing tests.",
+    "Run focused race/predicate tests repeatedly, all pause/status tests, actual live probe, and relevant regressions.",
+    "Run graphify update . if test files change."
+  ],
+  "constraints": [
+    "Do not edit production, contracts, workflow/observation artifacts, tickets, PLAN, or ledger records.",
+    "Use apply_patch for test edits; preserve unrelated changes; no destructive git, uv, local .venv, commit, publish, or deploy."
+  ],
+  "report": [
+    "manifest result",
+    "independent tests added or reused",
+    "exact command/results including actual OMP evidence",
+    "candidate_ready or needs_reroute"
+  ]
+}

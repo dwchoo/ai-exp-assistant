@@ -1,0 +1,31 @@
+{
+  "invocation": "cw15-admission-correction-01",
+  "outcome": "complete",
+  "candidate_ready": true,
+  "base_candidate": "cddcbd40126c42d30de0956f98996fe50c74512159f36054fd952add5e1d600f",
+  "changed_paths": ["src/workbench/app/lifecycle.py", "tests/lifecycle/test_lifecycle_runtime.py", "graphify-out/**"],
+  "invariant": "Command dispatch and periodic review share the same current run/boot/session/control/authority/metadata admission fence; command adds durable no-replay checks.",
+  "focused": {
+    "before": "ended-run command and metadata-failed review both reproduced as failures",
+    "ended_run": "command deliveries 0, durable delivery none, review calls 0",
+    "metadata_failure": "pause dispatch 0 and review 0; explicit durable success then pause dispatch 1 and review 1"
+  },
+  "checks": {
+    "lifecycle": "17 tests passed",
+    "pause": "122 tests passed",
+    "observation": "95 tests passed",
+    "storage": "33 tests passed",
+    "bridge": "22 tests passed",
+    "recovery": "26 tests passed",
+    "graphify_update": "passed",
+    "compileall": "passed",
+    "diff_check": "passed",
+    "residual_processes": "none observed"
+  },
+  "sha256": {
+    "src/workbench/app/lifecycle.py": "dd229ab7e781c11a55b47f52b839ab22f8b3412e284ab740a385ed5cc5720234",
+    "tests/lifecycle/test_lifecycle_runtime.py": "eca5f609415e771d0db2d59aa29ec3882ebd92d70051dd6d85fb990c628a14f8"
+  },
+  "pending_environment": "External actual OMP, isolated real reboot and pyte-dependent live predicates remain unexecuted/unavailable.",
+  "mutation_owner": "/root/cw12_post_review_correction"
+}

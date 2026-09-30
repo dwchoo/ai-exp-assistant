@@ -1,0 +1,10 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 206,
+  "event": {"id": "reserve-cw04-extension-review-01", "kind": "reserve", "data": {
+    "invocation": "cw04-extension-review-01", "role": "reviewer", "unit": "V-CW-04-p2.6-current", "incident": "",
+    "purpose": "Fresh review of CW-04 extension outage/fault no-success/no-replay closure",
+    "model": "gpt-6-sol", "effort": "high", "buckets": ["total", "role:reviewer", "unit:V-CW-04-p2.6-current"],
+    "writer": false, "workspace": "/home/dwchoo/ai-exp-assistant"
+  }}
+}

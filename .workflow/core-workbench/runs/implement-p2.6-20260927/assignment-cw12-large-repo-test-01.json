@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "invocation": "cw12-large-repo-test-01",
+  "role": "test_designer",
+  "unit": "V-CW-12-p2.6-current",
+  "authority": "User $implement docs/features/core-workbench request; approved PLAN p2.6 CW-12",
+  "objective": "Independently verify Git-aware large-repository liveness without weakening reconciliation.",
+  "candidate": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw12-large-repo-correction.json",
+    "candidate_id": "23e70e74867ac37222e553b79839a52f1ad35ccd8aba9c47cc6c862a7b5d895b"
+  },
+  "inputs": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-scan-race-review-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-large-repo-correction-01.json",
+    "docs/features/core-workbench/tickets/CW-12.md"
+  ],
+  "must_verify": [
+    "a clean Git peer repo exceeding 2048 entries and 64 MiB binds and resumes without scanning all clean contents",
+    "root/git-dir inode and HEAD changes, tracked changes, untracked and ignored files remain bounded and reject out-of-scope resume",
+    "Git changed-path symlink/file replacement cannot escape fd-relative O_NOFOLLOW reads and fds close",
+    "non-Git fallback and all prior CW-12 regressions remain green",
+    "actual omp/18.2.10 negative out-of-scope then explicit cleanup/reconcile path passes with zero residue"
+  ],
+  "allowed_write_paths": ["tests/policy/pause_automation/**", "graphify-out/**"],
+  "constraints": [
+    "Independent test-only mutation owner; do not edit production/.workflow/docs/PLAN/state.",
+    "Use apply_patch for tests; do not delegate, commit, publish, deploy, or use Docker.",
+    "Return needs_reroute for product defects; do not fix production."
+  ],
+  "report": "Return candidate_ready/needs_reroute, exact large-repo and actual-OMP results, test-only changes, cleanup evidence, acceptance assessment, and residual risks."
+}

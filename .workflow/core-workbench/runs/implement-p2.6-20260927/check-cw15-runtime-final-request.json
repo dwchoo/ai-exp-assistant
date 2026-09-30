@@ -1,0 +1,21 @@
+{
+  "root": "/home/dwchoo/ai-exp-assistant",
+  "requirements": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw15.json",
+  "argv": [
+    "/usr/bin/env",
+    "PYTHONDONTWRITEBYTECODE=1",
+    "PYTHONPATH=src",
+    "/tmp/cw02-g1-venv/bin/python",
+    "-m", "unittest", "discover", "-s", "tests/lifecycle", "-p", "test_*.py", "-q"
+  ],
+  "environment": {
+    "description": "Linux; frozen CW-15 lifecycle candidate; in-repository production composition and deterministic runtime boundary fixtures; no external OMP or reboot claims"
+  },
+  "log": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/check-cw15-runtime-final.log",
+  "check_id": "cw15-runtime-final-01",
+  "watch": [],
+  "exclude": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/**"
+  ],
+  "timeout": 240
+}

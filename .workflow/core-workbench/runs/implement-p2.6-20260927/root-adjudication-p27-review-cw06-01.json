@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "id": "root-adjudication-p27-review-cw06-01",
+  "source": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-review-cw06-01-agent.json",
+  "decisions": {
+    "P2-1": "Fix in CW-06 (UI-local, no backend/contract change). (a) Decouple socket intake from VT feeding: drain the socket promptly into per-pane pending buffers; feed pyte in bounded slices (about 64 KiB or 20 ms per loop) and service stdin between slices so key latency stays bounded (< ~100 ms under flood). (b) UI catch-up: when a pane's unfed backlog exceeds a bound (e.g. 256 KiB, same order as backend replay tail), drop the older backlog, reset that pane's screen, feed only the most recent tail, show a visible per-pane indicator (e.g. '출력 따라잡음: N bytes 건너뜀'), and send the existing per-pane resize nudge so full-screen apps (OMP) redraw. Display is a view; backend state/retained tail are unchanged, so this is not a product behaviour change. (c) Send failures (EPIPE/ECONNRESET/timeout) = connection loss: drain received frames, show CLOSING reason (e.g. slow_client) and exit with a user-facing message, never a traceback. No backend backpressure change now; if flood still causes slow_client after (a)+(b), record as known limitation for UR-UX/CW-19.",
+    "P3-1": "fix now (cursor visibility follows focused pane / restored after help)",
+    "P3-2": "fix now (SIGTERM/SIGHUP handlers restore terminal: 2004l, alt screen, termios) - UI process only",
+    "P3-3": "fix now (prefix + CSI/SS3/Alt sequence consumed whole)",
+    "P3-4": "fix now if bounded: never release a partial CSI/paste introducer on the Esc-hold timeout as separate keys when it is an incomplete known introducer; otherwise record",
+    "P3-5": "test maintenance by test_designer in the re-verification: p27e must not pin production hashes (record hashes in results instead); live probes must be opt-in for model turns (e.g. require CW06_LIVE_MODEL=1); start_independent:143 recorded, not changed unless trivially argv-related",
+    "P3-6": "fix wording nits if touched; non-blocking",
+    "item_8": "carry-forward recorded in the CW-06 integration record and state (F6 -> CW-18; approval prompt unknown -> CW-16 I-COMPAT; live probe gating); approved ticket docs are not edited (bundle digest)."
+  },
+  "next": "p27-cw06-fix-worker-03 (wb-worker) -> p27-cw06-rerun-test-03 (wb-test-rerun) -> p27-delta-review-cw06-02 (wb-delta-reviewer)"
+}

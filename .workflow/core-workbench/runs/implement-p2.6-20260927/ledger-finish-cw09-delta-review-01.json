@@ -1,0 +1,17 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 347,
+  "event": {
+    "id": "finish-cw09-delta-review-01",
+    "kind": "transition",
+    "data": {
+      "invocation": "cw09-delta-review-01",
+      "state": "finished",
+      "evidence": ".workflow/core-workbench/runs/implement-p2.6-20260927/review-cw09-delta-01.json",
+      "outcome": "complete",
+      "observed_model": "unverified",
+      "observed_effort": "unverified",
+      "not_started_evidence": null
+    }
+  }
+}

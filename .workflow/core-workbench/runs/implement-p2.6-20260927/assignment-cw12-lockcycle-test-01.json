@@ -1,0 +1,35 @@
+{
+  "invocation": "cw12-lockcycle-test-01",
+  "role": "test_designer",
+  "unit": "V-CW-12-p2.6-current",
+  "objective": "Independently attack the frozen CW-12 authoritative-fence and peer-bound admission correction.",
+  "candidate_manifest": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw12-lockcycle-test.json",
+  "candidate": "735bd668c817fd8c6741b7da448ab694c3489a89902736d5ff2a32eef6237a46",
+  "evidence": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-final-review-03.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-lockcycle-correction-01.json"
+  ],
+  "write_scope": [
+    "tests/policy/pause_*/**",
+    "tests/observation/test_atomic_admission*.py",
+    "tests/ui/status_*/**",
+    "graphify-out/**"
+  ],
+  "must_verify": [
+    "Reproduce the exact stale publisher barrier and prove that, once pause pending closes the authoritative fence, admit_and_dispatch cannot call its callback even while mirrored state is stale unpaused.",
+    "Reproduce the exact CW11-lock/coordinator-status/publication path with real locks and prove bounded completion without timeouts, lock inversion, or unknown admission result.",
+    "Replace manager during worker final probe, after final probe, and immediately before automatic dispatch; no stale-bound dispatch may run and the fence must close held/reconciliation-needed.",
+    "Stress concurrent pause/resume/bind/status/admission cycles and assert no deadlock, no admitted work while fenced, and mirror convergence.",
+    "Preserve all previously closed durability, exact event, no-replay, real status/manual evidence, and actual OMP behavior."
+  ],
+  "verification": [
+    "Verify manifest before test edits.",
+    "Run focused tests repeatedly, full pause and atomic-admission suites, actual OMP probe, and relevant full regressions.",
+    "Run graphify update . if tests change."
+  ],
+  "constraints": [
+    "Do not edit production, contracts, workflow/observation evidence, tickets, PLAN, or ledger.",
+    "Apply test changes only with apply_patch; no destructive git, uv, local .venv, commit, publish, or deploy."
+  ],
+  "report": ["manifest/scope result", "independent reproductions", "runtime/regression results", "candidate_ready or needs_reroute"]
+}

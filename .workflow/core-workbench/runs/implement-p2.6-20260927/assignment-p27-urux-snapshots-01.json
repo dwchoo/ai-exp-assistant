@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-urux-snapshots-01",
+  "ticket_id": "UR-UX preparation (C-D57)",
+  "role": "worker",
+  "unit": "V-CW-06-p2.7",
+  "approved_bundle_digest": "a521acdc3838b43a26e277afc233bab695c8b02ce0d42392c3678931b2e3f027",
+  "routing": {"planned_role": "worker", "selected_role": "worker (wb-worker, Sonnet high)", "reason_codes": ["bounded_pattern"], "evidence_refs": ["PLAN user_review_checkpoints UR-UX root_prepares: 실행 방법, 확인 목록, 주요 상태별 text 화면 스냅샷"]},
+  "candidate": "c47835913e65051c2382081a52f311d840f0c25ec734b12e82b161709b976fe2 (CW-06 integrated + one test file)",
+  "goal": "Produce plain-text screen snapshots of the product UI in key states for the user's UX review, using the real entrypoint and the REAL OMP 18.2.10 with the user's existing configuration but ZERO model turns (never submit a prompt to either OMP).",
+  "states": ["01 right after start/attach (three panes, header, footer)", "02 help overlay (prefix ?)", "03 focus switched to worker OMP (prefix 2) - header shows focus vs host input owner", "04 focus host shell with a couple of shell commands run", "05 takeover request (prefix t) and 06 confirm (prefix c) - owner/notice text", "07 wb-handoff then prefix h (handoff) - owner manager; 08 input refused notice while owner is manager", "09 paste over 2 MiB refused notice", "10 Korean multi-line paste in host shell", "11 flood in host shell (e.g. `yes | head -c 50000000`) showing the catch-up indicator mid-flood, and 12 after Ctrl-C", "13 after detach (prefix d) the outer terminal message, 14 after reattach (restored screen)", "15 terminal 100x30 (narrow) vs 16 200x50 (wide) layout"],
+  "method": "Drive the product UI inside a PTY you own (python pty; no tmux/herdr) at 160x45 unless stated; render the UI output with src/workbench/terminal/vt_g1/screen.py TerminalScreen (now SU/SD aware) and save each state's screen text to .workflow/core-workbench/runs/implement-p2.6-20260927/ur-ux/snapshots/NN-name.txt (plain text, rstrip lines). You may reuse helpers from tests/ui/live_product_omp_independent.py and tests/ui/live_product_state_independent_p27i.py by importing or copying into your scratch script. Use an isolated data dir and project dir under a short TMPDIR; at the end `shutdown --yes` and verify zero residue by identity. Do not include any credential or account text; if an OMP screen shows account/email/token-like strings, mask them as [redacted].",
+  "allowed_write_paths": [".workflow/core-workbench/runs/implement-p2.6-20260927/ur-ux/snapshots/**", "your scratch dir", "short TMPDIR removed at end"],
+  "prohibited": "Any repository source/test edit; model turns; reading ~/.omp; OMP setting changes; graphify update; commits; tmux/herdr.",
+  "resource_claims": [{"resource": "host:omp-runtime", "mode": "exclusive"}, {"resource": "host:interactive-terminal", "mode": "exclusive"}],
+  "result_format": "reply <=15 lines: list of files written with one-line description each, anything that could not be captured and why, residue. Korean."
+}

@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "invocation": "cw09-delta-review-01",
+  "role": "reviewer",
+  "unit": "V-CW-09-p2.6-current",
+  "workspace": "/home/dwchoo/ai-exp-assistant",
+  "writer": false,
+  "candidate_manifest": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw09-delta-review-candidate.json",
+  "candidate": "6ba379e6e9c13af19a66b27245822e392c2c763f8d0716892d3c915eca7493c3",
+  "requirements": ".workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw09.json",
+  "ticket": "docs/features/core-workbench/tickets/CW-09.md",
+  "original_review": ".workflow/core-workbench/runs/implement-p2.6-20260927/review-cw09-01.json",
+  "independent_regressions": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw09-review-regression-test-01.json",
+  "correction": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw09-review-correction-01.json",
+  "changed_product_files": [
+    "src/workbench/storage/metadata_sqlite/schema.py",
+    "src/workbench/tasks/repository.py"
+  ],
+  "instructions": "Read-only delta/impact review of the new frozen CW-09 candidate. Do not modify files. Verify both original P2 findings are actually closed under real SQLite semantics: INSERT OR REPLACE cannot mutate TaskSpec history; invalid v1 authority rows fail migration atomically while valid cancellation rows still migrate. Review the impact of recursive_triggers on every append-only table and repository operation, migration trigger ordering/rollback, composite foreign keys, and reopen behavior. Confirm independent tests were not weakened and candidate product/test files match the manifest. Report P0-P3 findings or explicit approval with residual limitations."
+}

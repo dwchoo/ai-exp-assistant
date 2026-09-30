@@ -1,0 +1,23 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 1149,
+  "event": {
+    "id": "limit-cw15-linear-worker-20260929",
+    "kind": "limit",
+    "data": {
+      "bucket": "role:worker_senior",
+      "origin": "operating",
+      "value": 145,
+      "authority": "C-D55 plus workflow-contract section 8 and current $implement authorization",
+      "reason": "One bounded CW-15 automatic-action/shutdown linearization correction",
+      "decision_owner": "Root",
+      "remaining_work_estimate": 1,
+      "expected_previous": {
+        "value": 144,
+        "authority": "C-D55 plus workflow-contract section 8 and current $implement authorization",
+        "reason": "One bounded CW-15 ended-run and metadata-tick admission correction"
+      },
+      "scope_basis": null
+    }
+  }
+}

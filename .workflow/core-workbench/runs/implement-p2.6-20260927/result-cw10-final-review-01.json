@@ -1,0 +1,16 @@
+{
+  "invocation": "cw10-final-review-01",
+  "role": "reviewer",
+  "candidate": "df72dbb2a2f2c7bf80370a0ddf301f175a8661b0336b147a0bfd67b5124c96c0",
+  "outcome": "needs_reroute",
+  "findings": [
+    {
+      "severity": "P1",
+      "title": "Production worker-response adapter and public decision surface are missing",
+      "evidence": "worker_port.py defines only WorkerRolePort and verified_worker_response; the actual adapter exists only in tests/workflow/live_workflow_probe.py and reads decision/response_id from the scripted provider's private responses dictionary. omp_bridge/g3/bridge.ts assistant_message_end publishes only responseMarkerMatched, so a production consumer cannot obtain the worker decision and exact response identity from the public G3 surface.",
+      "impact": "P-C-AC-03 and P-C-AC-05 runtime currently pass through a test-only private oracle; the public event is not causally bound to the worker decision supplied to TaskWorkflow."
+    }
+  ],
+  "needs_oracle": true,
+  "needs_reroute": true
+}

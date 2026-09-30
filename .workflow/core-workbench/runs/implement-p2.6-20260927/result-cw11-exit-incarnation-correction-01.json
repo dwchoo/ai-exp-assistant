@@ -1,0 +1,9 @@
+{
+  "invocation":"cw11-exit-incarnation-correction-01",
+  "outcome":"complete",
+  "candidate_ready":true,
+  "correction":"Exit fence and scheduler UI state are keyed by run incarnation plus six-field identity. Owner-issued ExitSourceToken is validated at fence linearization. WorkflowObservationBinding binds once to the current persisted WorkflowRun incarnation and cannot rebind an old instance; old-incarnation UI retry is isolated from new review state.",
+  "checks":{"observation":"75/75 passed","workflow":"44/44 passed","bridge":"18/18 passed","contracts":"20/20 passed","actual_omp_18_2_10":"bound production probe: 60.0-second review, 13th wake, WorkflowRun exit in 0.054 seconds, privacy and zero process/socket residue"},
+  "scope":"src/workbench/observation/** and tests/observation/** plus graphify-generated output",
+  "graphify_updated":true
+}

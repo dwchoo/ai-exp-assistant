@@ -1,0 +1,12 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 193,
+  "event": {"id": "limit-cw04-current-total-20260928", "kind": "limit", "data": {
+    "bucket": "total", "origin": "operating", "value": 266,
+    "authority": "C-D55 plus workflow-contract section 8 and current implementation authorization",
+    "reason": "Five-call bounded CW-04 completion batch: extension-fault gap, independent test, fresh review, and one correction/delta-review pair",
+    "decision_owner": "Root", "remaining_work_estimate": 5,
+    "expected_previous": {"value": 262, "authority": "C-D55 plus workflow-contract section 8 and current implementation authorization", "reason": "Five-call bounded batch for remaining CW-03 canonical matrix migration, independent test, fresh review, and one correction/delta-review pair"},
+    "scope_basis": null
+  }}
+}

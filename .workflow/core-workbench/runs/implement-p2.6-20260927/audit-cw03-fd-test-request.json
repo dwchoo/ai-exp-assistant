@@ -1,0 +1,7 @@
+{
+  "before": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw03-fd-test-checkpoint.json",
+  "after": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw03-fd-test-candidate.json",
+  "allowed": [
+    "tests/gates/g2_shell/test_common_run_protocol_independent.py"
+  ]
+}

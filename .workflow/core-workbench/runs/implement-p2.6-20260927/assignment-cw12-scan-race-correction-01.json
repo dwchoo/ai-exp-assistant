@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "invocation": "cw12-scan-race-correction-01",
+  "role": "worker_senior",
+  "unit": "V-CW-12-p2.6-current",
+  "authority": "User $implement docs/features/core-workbench request; approved PLAN p2.6 CW-12 and fresh delta review evidence",
+  "objective": "Close the remaining in-flight baseline, ignored-file, and scan-escape C-AC-33 findings.",
+  "base_candidate": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw12-final-scope-test.json",
+    "candidate_id": "2f04f7410a07ae2340f42fc68b18cb930cba5d181052fd023933306ea8cab2e2",
+    "review": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-final-scope-review-01.json"
+  },
+  "required_corrections": [
+    "Establish the production-owned peer cwd baseline before a bound run's manager tool can be absorbed by pause/abort waiting (prefer bind/run-entry baseline or an equivalently earlier owner boundary). An in-flight write completed after pause request must remain a delta requiring approval; unavailable early evidence fails closed.",
+    "Include Git-ignored untracked files in bounded worktree reconciliation without traversing .git internals or weakening count/output/byte limits.",
+    "Replace path-reopen directory traversal with Linux fd-relative O_NOFOLLOW traversal (or an equally race-safe primitive) so directory replacement cannot escape the peer cwd or hash private external files. Close every fd on success/failure.",
+    "Add deterministic regressions for in-flight write absorption, ignored out-of-scope outputs, directory symlink swap/escape, fd cleanup, and normal liveness."
+  ],
+  "allowed_write_paths": ["src/workbench/policy/pause_automation/**", "tests/policy/pause_automation/**", "graphify-out/**"],
+  "constraints": [
+    "Sole product mutation owner; preserve all prior CW-12 fixes and unrelated changes.",
+    "Use apply_patch; observations must remain bounded, privacy-preserving, Linux-first, and fail closed.",
+    "Do not edit .workflow/docs/PLAN/state or other product areas; do not delegate, commit, publish, deploy, or use Docker.",
+    "Run focused and policy regressions plus graphify update . and report exact evidence."
+  ],
+  "report": "Return changed paths, exact fixes, test commands/counts, candidate_ready/blocker, fd/residue evidence, and residual risks."
+}

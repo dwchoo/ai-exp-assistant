@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "invocation": "cw15-takeover-correction-01",
+  "role": "worker_senior",
+  "unit": "V-CW-15-p2.6-current",
+  "authority": "User $implement docs/features/core-workbench request; approved PLAN p2.6 CW-15; fresh takeover linearization review",
+  "objective": "Make a user takeover request an immediate durable automatic-admission fence, linearized with command/review actions while preserving unknown command-delivery evidence without replay.",
+  "candidate": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw15-linear-test.json",
+    "candidate_id": "86c0acd50a27f8ce9bc72326b167421d56e359500c7cba5e1d5e15a576a27966"
+  },
+  "required_changes": [
+    "Place request_takeover under the coordinator linearization boundary shared by dispatch_command, tick, and shutdown. Persist takeover_requested before the external control request; a later external failure remains fail-closed.",
+    "Do not use normal reconcile as a prerequisite that rejects command.delivery=unknown. Preserve the existing unknown/delivered command journal exactly, do not replay it, and validate current manager/control/process identity with the narrow checks needed for the current session.",
+    "Audit and serialize every lifecycle/control transition that changes automatic eligibility, especially request_takeover, confirm_takeover, handoff, detach, reconnect, model_failed, recheck_model, and confirm_boot where applicable. Preserve session_id/owner_epoch freshness and existing semantics.",
+    "Add deterministic threaded regressions proving the two legal orders for tick versus takeover: action completes before durable takeover, or durable takeover precedes and the action count is zero. Add in-flight unknown-command/takeover coverage proving takeover is durably requested without rejection or replay, and bounded reentrant/error-path coverage."
+  ],
+  "allowed_write_paths": ["src/workbench/runtime/**", "src/workbench/app/**", "tests/lifecycle/**", "graphify-out/**"],
+  "constraints": [
+    "Bounded CW-15 correction only; do not modify predecessor packages, docs, PLAN, state or ledger. No external OMP, reboot, delegation, commit, publish, deploy or Docker.",
+    "Use apply_patch; run focused threaded tests, full lifecycle and predecessor regressions, graphify update and residue check."
+  ],
+  "report": "Return candidate_ready/needs_reroute, exact linearization invariant, deterministic thread orders and action counts, unknown-command journal before/after, suites/residue, hashes/scope and pending external environments."
+}

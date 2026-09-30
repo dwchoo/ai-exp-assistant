@@ -1,0 +1,33 @@
+{
+  "invocation": "cw13-force-liveness-correction-01",
+  "outcome": "complete",
+  "candidate_ready": true,
+  "changed_paths": [
+    "src/workbench/policy/recovery_manager/policy.py",
+    "src/workbench/policy/recovery_manager/__init__.py",
+    "tests/policy/recovery_manager/test_recovery_policy.py",
+    "graphify-out/**"
+  ],
+  "implementation": {
+    "managed_lifecycle": "RunObservation documents CW-10 semantics: main return with descendants remains running/exit_confirmed false; exited/true follows full managed lifetime and input/control return.",
+    "target_liveness": "TargetLiveness binds exact ForceTarget and current observation sequence with alive true/false/unknown semantics.",
+    "force_gate": "ordinary stop proof plus later observation, coherent running lifecycle, descendants remaining, exact delegated owned target and fresh target alive true",
+    "positive_descendant_case": "known main exit status with running/exit_confirmed false and live exact descendant or supervisor target remains force-eligible",
+    "post_force": "full managed termination and later observation remain required before mutation/relaunch"
+  },
+  "checks": {
+    "pre_correction_regression": "three inconsistent lifecycle subcases failed by returning force_requested",
+    "focused_force": "6 tests passed",
+    "recovery_manager": "25 tests passed",
+    "tasks": "22 tests passed",
+    "observation": "95 tests passed",
+    "workflow": "44 tests passed",
+    "bridge": "22 tests passed",
+    "terminal": "10 tests passed",
+    "pause_automation": "129 tests passed",
+    "graphify_update": "exit 0; 4744 nodes and 10040 edges; community label drift warning",
+    "residual_processes": "none observed"
+  },
+  "residual_risk": "CW-15 supplier must physically re-observe the exact target for each TargetLiveness; policy verifies sequence/target binding but not the supplier's external observation process.",
+  "mutation_owner": "/root/cw12_post_review_correction"
+}

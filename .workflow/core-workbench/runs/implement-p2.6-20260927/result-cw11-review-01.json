@@ -1,0 +1,29 @@
+{
+  "invocation": "cw11-review-01",
+  "candidate": "d5c3b8127b60f5d32df5eae21514a26faaf8516ab4ba6ebaa4346c87bd92a11c",
+  "candidate_hash_validated": true,
+  "outcome": "needs_reroute",
+  "findings": [
+    {
+      "severity": "P1",
+      "summary": "Review dispatch lacks a final authority and active-run recheck after potentially blocking callbacks, allowing a new model review after pause, cancellation, or run replacement."
+    },
+    {
+      "severity": "P2",
+      "summary": "A confirmed exit is surfaced once but does not fence later reviews for the same run when upstream facts remain stale-running."
+    },
+    {
+      "severity": "P2",
+      "summary": "Hang investigation exists only as a standalone classifier and is not connected to the periodic scheduler's production path."
+    },
+    {
+      "severity": "P2",
+      "summary": "Usage provenance types exist without a production collection or TickResult display path, so runtime usage evidence is absent."
+    }
+  ],
+  "runtime_qualifications": [
+    "The existing OMP 18.2.10 probe supports the real 60-second review, 13th peer wake, and cleanup claims, but not a live persistent-shell hang investigation path."
+  ],
+  "writer": false,
+  "files_modified": []
+}

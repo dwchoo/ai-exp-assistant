@@ -1,0 +1,68 @@
+{
+  "changed": [
+    "graphify-out/.graphify_learning.json",
+    "graphify-out/cache/last_query_stamp",
+    "graphify-out/reflections/LESSONS.md",
+    "omp_bridge/g3/bridge.ts",
+    "src/workbench/ipc/bridge_g3/mailbox.py",
+    "tests/bridge/live_mailbox_probe.py",
+    "tests/bridge/test_mailbox.py"
+  ],
+  "comparable": true,
+  "index_changed": [],
+  "outside_scope": [
+    "graphify-out/.graphify_learning.json",
+    "graphify-out/cache/last_query_stamp",
+    "graphify-out/reflections/LESSONS.md"
+  ],
+  "allowed_write_scope": [
+    "src/workbench/ipc/**",
+    "omp_bridge/**",
+    "tests/bridge/**"
+  ],
+  "changed_product_paths": [
+    "omp_bridge/g3/bridge.ts",
+    "src/workbench/ipc/bridge_g3/mailbox.py",
+    "tests/bridge/live_mailbox_probe.py",
+    "tests/bridge/test_mailbox.py"
+  ],
+  "generated_operational_outside_scope": [
+    {
+      "path": "graphify-out/cache/last_query_stamp",
+      "before_sha256": "98695f0d6f2b490f42dbf3e68e87e17bf7a05ae1a7dea7eaf53ee2e7f7dc11c7",
+      "after_sha256": "4a12a1b98b8968ab017367ee54a3ecc532ee51ed390b96b455f603e5e6081e4a",
+      "before_size_bytes": 18,
+      "after_size_bytes": 18,
+      "before_content": "1790549433.6092665",
+      "after_content": "1790549639.9398782",
+      "before_mtime": "2026-09-28 07:50:33.609461509 +0900",
+      "after_mtime": "2026-09-28 07:53:59.940038584 +0900",
+      "attribution": "graphify query task mailbox message delivery repository bridge role session generation processing approval composer",
+      "restored_or_overwritten": false
+    },
+    {
+      "path": "graphify-out/reflections/LESSONS.md",
+      "before_sha256": "2a8a133a88e3740ceb4f23f4ddd40c90f0412c90e52a69db83f90899ed2ab0ee",
+      "after_sha256": "c4888cd7612fcdd2e2c258a29654241bf2fc9c5aba3517ccad76786ba543b293",
+      "before_size_bytes": 1193,
+      "after_size_bytes": 1385,
+      "before_mtime": "not recorded in the durable checkpoint; an earlier read reported 2026-09-26 without an exact timestamp",
+      "after_mtime": "2026-09-28 07:53:51.616935413 +0900",
+      "attribution": "graphify reflect --if-stale",
+      "restored_or_overwritten": false
+    },
+    {
+      "path": "graphify-out/.graphify_learning.json",
+      "before_sha256": "86a3f57c08c8cd8dd18360b32b1144e757c9b71e19995173d891447d1e614979",
+      "after_sha256": "7ca50e8ef84dfb833aa740e0cf7dcaa3cdd8329e8b7e7377048603212a00bcd3",
+      "before_size_bytes": 10321,
+      "after_size_bytes": 11680,
+      "before_mtime": "not recorded in the durable checkpoint",
+      "after_mtime": "2026-09-28 07:53:51.637878891 +0900",
+      "attribution": "graphify reflect --if-stale (inferred from command timing)",
+      "restored_or_overwritten": false
+    }
+  ],
+  "graphify_update_run_by_worker": false,
+  "scope_audit_comparable": true
+}

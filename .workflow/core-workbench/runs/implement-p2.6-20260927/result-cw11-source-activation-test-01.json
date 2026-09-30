@@ -1,0 +1,10 @@
+{
+  "invocation":"cw11-source-activation-test-01",
+  "outcome":"needs_reroute",
+  "candidate_ready":false,
+  "closed":"Delayed first bind, no/old/foreign/swapped token, retired WorkflowRun, and explicit replacement source paths are correctly enforced.",
+  "finding":{"severity":"P2","summary":"SerializedReviewAdmission initialized with an active run starts run_incarnation at 0, so successful and retried public exit events expose non-positive run_incarnation."},
+  "checks":{"observation":"80/82 passed; two positive-incarnation assertions failed","workflow":"44/44 passed","bridge":"18/18 passed","contracts":"20/20 passed","actual_omp_18_2_10":"60.0-second review, 13 wakes, 15 requests, real exit in 0.052 seconds, secret absent, zero residue"},
+  "changed_files":["tests/observation/test_exit_incarnation_independent.py"],
+  "graphify_updated":true
+}

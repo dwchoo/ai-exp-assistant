@@ -1,0 +1,20 @@
+{
+  "path": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 109,
+  "event": {
+    "id": "reserve-cw03-split-pg-review-01",
+    "kind": "reserve",
+    "data": {
+      "invocation": "cw03-split-pg-review-01",
+      "role": "reviewer",
+      "unit": "V-CW-03",
+      "incident": "",
+      "purpose": "Fresh read-only review of the frozen CW-03 split-PG candidate and independent tests",
+      "model": "gpt-6-sol",
+      "effort": "high",
+      "buckets": ["total", "role:reviewer", "unit:V-CW-03"],
+      "writer": false,
+      "workspace": "/home/dwchoo/ai-exp-assistant"
+    }
+  }
+}

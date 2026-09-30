@@ -1,0 +1,20 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 421,
+  "event": {
+    "id": "reserve-cw08-review-01",
+    "kind": "reserve",
+    "data": {
+      "invocation": "cw08-review-01",
+      "role": "reviewer",
+      "unit": "V-CW-08-p2.6-current",
+      "incident": "",
+      "purpose": "Fresh review of frozen CW-08 mailbox candidate and runtime evidence",
+      "model": "gpt-6-sol",
+      "effort": "high",
+      "buckets": ["total", "role:reviewer", "unit:V-CW-08-p2.6-current"],
+      "writer": false,
+      "workspace": "/home/dwchoo/ai-exp-assistant"
+    }
+  }
+}

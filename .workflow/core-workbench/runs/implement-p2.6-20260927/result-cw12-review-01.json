@@ -1,0 +1,15 @@
+{
+  "invocation": "cw12-review-01",
+  "candidate": "1c2f03de80c76421aa59b64606182fabfb1b6eac43a6f91e81cf1d22578c3cf0",
+  "candidate_hash_validated": true,
+  "outcome": "needs_reroute",
+  "prior_findings_closed": "All six earlier independent-test findings are closed.",
+  "findings": [
+    {"severity": "P1", "summary": "pause_requested -> resumed -> resume_failed restores unpaused because resume_failed is ignored by journal replay"},
+    {"severity": "P2", "summary": "refresh can attribute replacement manager session stop_observed to the current pause without session/generation/request correlation"},
+    {"severity": "P2", "summary": "first journal creation fsyncs the file but not its parent directory, risking loss of the pause fence after crash"}
+  ],
+  "gate_gap": "All three gate items require runtime evidence; actual OMP evidence covers abort-only while live resume, reconciliation, no replay, CW11 admission, host collection, and three-area projection integration remain unproven.",
+  "writer": false,
+  "files_modified": []
+}

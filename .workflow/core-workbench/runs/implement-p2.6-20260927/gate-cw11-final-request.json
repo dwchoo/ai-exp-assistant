@@ -1,0 +1,8 @@
+{
+  "requirements": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw11.json",
+  "candidate": "6a8e898b72447c96aadd45e2494da9f84a8bbbfba5723bfde2dd9829e655104d",
+  "checks": [
+    "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/check-cw11-live-final-observed.json",
+    "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/check-cw11-observation-final-observed.json"
+  ]
+}

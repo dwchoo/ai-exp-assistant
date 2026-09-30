@@ -1,0 +1,27 @@
+{
+  "invocation": "cw14-review-01",
+  "outcome": "complete",
+  "candidate_ready": false,
+  "candidate_id": "ba9c7658c840770789ee1bf19d649d6b04ab1a7887aa07ff588c2f3aa347eadf",
+  "snapshot_hashes_match": true,
+  "findings": [
+    {
+      "severity": "P1",
+      "path": "src/workbench/storage/log_raw/store.py",
+      "lines": "623,657-683",
+      "summary": "Repeated scan/status failures prefer stale durable status over newer volatile state, so observed/dropped/missing counters stop accumulating."
+    },
+    {
+      "severity": "P2",
+      "path": "src/workbench/storage/log_raw/store.py",
+      "lines": "90-96,517-520,675,834",
+      "summary": "Malformed .log entries raise uncaught ValueError through append/status instead of returning a failure snapshot and preserving observation."
+    }
+  ],
+  "acceptance": {
+    "C-AC-24": "fixture-level cap, exact-prefix, concurrency, reopen accounting, preservation and path-safety behavior accepted",
+    "C-AC-28": "not accepted until repeated-failure accounting and malformed-entry exception propagation are corrected"
+  },
+  "residual_integration_risk": "CW-15 still owns actual PTY stream wiring, independent drain/display continuity, durable metadata admission recovery, restart restoration and UI status exposure.",
+  "mutation_owner": null
+}

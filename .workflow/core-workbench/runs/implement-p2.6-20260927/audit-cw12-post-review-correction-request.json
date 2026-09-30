@@ -1,0 +1,12 @@
+{
+  "before": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-resume-20260928-checkpoint.json",
+  "after": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw12-post-review-correction.json",
+  "allowed": [
+    "src/workbench/policy/pause_automation/**",
+    "src/workbench/tasks/repository.py",
+    "src/workbench/observation/worker_review.py",
+    "tests/policy/pause_automation/**",
+    "tests/observation/test_atomic_admission_independent.py",
+    "graphify-out/**"
+  ]
+}

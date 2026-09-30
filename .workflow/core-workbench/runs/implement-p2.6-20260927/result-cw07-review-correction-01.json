@@ -1,0 +1,109 @@
+{
+  "schema_version": 1,
+  "invocation": "cw07-review-correction-01",
+  "unit": "V-CW-07-p2.6-current",
+  "task_result": "candidate_ready",
+  "baseline_candidate": "b8a3b0cb923620e8c42eccf3e47b556e923dba1364abc265f256241a548537b0",
+  "candidate": "ffb959cec03e668a45f8f82de2abf5aa0a15cf988a7c7bff5e519be9d78720b7",
+  "assignment_ref": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/assignment-cw07-review-correction-01.json",
+  "review_ref": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/review-cw07-01.json",
+  "regression_ref": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/result-cw07-review-regression-test-01.json",
+  "snapshot_ref": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw07-review-correction-after.json",
+  "scope_audit_ref": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/scope-audit-cw07-review-correction.json",
+  "raw_runtime_ref": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/raw-cw07-review-correction-bash-sh.json",
+  "cwd": "/home/dwchoo/ai-exp-assistant",
+  "changed_paths": [
+    "src/workbench/terminal/shell_persistent/adapter.py",
+    "tests/terminal/test_persistent_shell.py"
+  ],
+  "protected_independent_tests_unchanged": [
+    "tests/terminal/test_persistent_shell_independent.py",
+    "tests/terminal/live_persistent_shell_independent.py"
+  ],
+  "attributable_delta": [
+    "send_user now rejects before PTY write when the current input boundary is uncertain/needs_review, lifecycle is unknown, owner is not user, or control observation fails.",
+    "Manual input revalidates the original parent PID start identity, host parent, shell process group/session, live status, and PTY foreground against the parent immediately before write. Control-loss/hook events clear stale cached prompt and foreground confirmations.",
+    "A confirmed experiment foreground target is revalidated with current boundary state on every partial-write attempt through the existing G2 writer; normal live foreground input remains available before main exit or parent prompt.",
+    "One deterministic unit test covers PID reuse, stopped parent, changed foreground, late boundary loss before write, and valid manual input."
+  ],
+  "before_regression": {
+    "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest -v tests/terminal/test_persistent_shell_independent.py",
+    "observed": "3 methods, 4 Bash/sh subcase failures in the two new unknown-state methods; prior normal method passed",
+    "classification": "reproduced accepted P2 before product change"
+  },
+  "checks": [
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest -v tests/terminal/test_persistent_shell_independent.py",
+      "result": "passed",
+      "observed": "3 methods OK; both new methods pass for Bash and /bin/sh"
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/terminal -q",
+      "result": "passed",
+      "observed": "8 tests OK"
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/gates/g2_shell -q",
+      "result": "passed",
+      "observed": "132 tests in 113.678s; OK (skipped=6)"
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g4_lifetime /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/gates/g4_lifetime -q",
+      "result": "passed",
+      "observed": "8 tests OK"
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g4_evidence /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/gates/g4_evidence -q",
+      "result": "passed",
+      "observed": "10 tests OK"
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/terminal /tmp/cw02-g1-venv/bin/python tests/terminal/live_persistent_shell.py",
+      "result": "passed",
+      "observed": "Bash and /bin/sh each passed 8 real-runtime cases, residue empty"
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python tests/terminal/live_persistent_shell_independent.py",
+      "result": "passed",
+      "observed": "Bash and /bin/sh each passed 6 independent real-runtime cases, residue empty"
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python tests/terminal/live_persistent_shell_independent.py --unknown bash sh",
+      "result": "passed",
+      "observed": "Both shells refused unknown-state user input; marker_seen=false and residue empty"
+    },
+    {
+      "command": "git diff --check",
+      "result": "passed",
+      "observed": "exit 0"
+    },
+    {
+      "command": "pgrep -af '[/]tmp/cw07-(runtime|independent)-'",
+      "result": "passed",
+      "observed": "exit 1, no matching owned process"
+    },
+    {
+      "command": "find /tmp -maxdepth 1 -type d \\( -name 'cw07-runtime-*' -o -name 'cw07-independent-*' \\) -print",
+      "result": "passed",
+      "observed": "empty output, no owned fixture directory"
+    }
+  ],
+  "runtime_observations": {
+    "unknown_input": "After real Bash/sh control FD 9 loss, both shells reported phase=unknown; send_user raised UnsafeShellState, no shell marker appeared, and the PTY writer was not called in the independent unit regression.",
+    "normal_input": "Existing independent runtime accepted live foreground user input before child exit/prompt and clean parent manual input after return; user-prepared environment, input barrier, same-parent re-handoff, and no replay remained intact.",
+    "owned_pid_residue": [],
+    "stopped_or_unknown_owned_subprocesses": []
+  },
+  "scope": {
+    "comparable": true,
+    "outside_scope": [],
+    "index_changed": []
+  },
+  "remaining_unknowns": [
+    "Root still owns graphify update, fresh delta review, and final combined-candidate verification; candidate_ready is not overall approval.",
+    "Detached daemon/cgroup-wide discovery is intentionally outside this C-D55 correction; the adjudicated P1 finding was not changed.",
+    "The adapter does not infer Task success or expand G2 privileged/ptrace-denied execution support."
+  ],
+  "writer_lease": "returned",
+  "commit_or_push": false
+}

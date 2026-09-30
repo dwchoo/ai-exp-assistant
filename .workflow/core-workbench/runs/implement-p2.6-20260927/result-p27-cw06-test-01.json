@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw06-test-01",
+  "status": "needs_reroute",
+  "frozen_candidate": "158a6a6ca10f43fcaa42f6c52615c3316efea8e1a391a28c57cfc905c2b52297",
+  "candidate_after_tests": "9c98d79d7009e0144050bddef3a5fd1a32273b4eca25df22296d1231f26d9fc6",
+  "agent_result": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw06-test-01-agent.json (full detail, live steps S0-S16, findings F1-F8, O1-O2)",
+  "scope_audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-cw06-test.json (no outside-scope; test_live_detach_independent argv --plain only)",
+  "delta_backup": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-cw06-test-delta-backup/",
+  "gate_verdicts": {"P-C-AC-01": "pass runtime (real OMP 18.2.10, reply in manager pane only)", "P-C-AC-06": "pass runtime", "P-C-AC-14": "pass runtime with partial: Esc turn-cancel partially observed; approval prompt not triggered harmlessly (unverified)", "C-AC-19 via UI": "pass except F1/F2/F4", "L-CW17-DETACH": "pass after --plain", "L-CW17-START": "pass (unchanged)"},
+  "frozen_hashes_equal": true,
+  "residue": "none (shutdown --yes verified on every run)",
+  "observed_model": "opus (general-purpose inherited)"
+}

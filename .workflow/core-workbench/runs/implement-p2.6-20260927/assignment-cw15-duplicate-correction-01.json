@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "invocation": "cw15-duplicate-correction-01",
+  "role": "worker_senior",
+  "unit": "V-CW-15-p2.6-current",
+  "authority": "User $implement request; approved CW-15/C-D52; independent duplicate takeover generation finding",
+  "objective": "Attribute a duplicate takeover invocation's newer fence generation to the existing takeover without replay, so its later valid handoff can reopen exactly that newest generation.",
+  "candidate": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw15-generation-test.json",
+    "candidate_id": "c58b390ddeda38511b48e8005d9670ef23b408af71d8dd1e19d326288b580a81"
+  },
+  "required_changes": [
+    "When request_takeover has already synchronously created a newer fence generation and then observes the same durable takeover_requested state, update the coordinator's active takeover generation to that new value before returning LifecycleHeld. Do not call the external control port or change the durable journal.",
+    "Preserve concurrency: a duplicate that wins the lifecycle lock before handoff is included in that handoff's captured generation; a request that races after handoff capture continues to prevent the older reopen and becomes its own durable takeover after acquiring the lock.",
+    "Do not loosen stale session/process/owner checks, claim semantics, normal failure closure or no-replay. Add/retain deterministic tests for duplicate-before-handoff, duplicate-vs-handoff both orders, durable journal unchanged on duplicate, external call count zero, and eventual automatic resume only after the valid handoff."
+  ],
+  "allowed_write_paths": ["src/workbench/app/**", "tests/lifecycle/**", "graphify-out/**"],
+  "constraints": ["Minimal duplicate-generation correction only. No other production/docs/workflow/PLAN/state, G3/pause changes, external/scripted OMP, reboot, dependency install, delegation, commit, publish, deploy or Docker. Use apply_patch and non-live checks only."],
+  "report": "Return candidate_ready/needs_reroute; generation/durable/external/action counts for duplicate and racing schedules; test totals/hashes/scope/residue/pending."
+}

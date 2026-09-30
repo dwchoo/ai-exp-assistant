@@ -1,0 +1,80 @@
+{
+  "schema_version": 1,
+  "invocation": "cw08-readiness-correction-01",
+  "role": "worker",
+  "unit": "V-CW-08-p2.6-current",
+  "status": "candidate_ready",
+  "baseline_candidate": "e519878ceb9880617bec7a67c9f83e7376c8cbc801f436739bdff47d794eac77",
+  "candidate": "3860a6a21a1a1e5e2767541ffc2168bb03ff43ffbe57c6a247f438860d869da2",
+  "requirements_sha256": "2fa2a94f03fe18671123d25b355d193e6dc2f600c94eca061f588db699f91722",
+  "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw08-readiness-correction-after.json",
+  "scope_audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/scope-audit-cw08-readiness-correction.json",
+  "changed_files": [
+    "src/workbench/ipc/bridge_g3/mailbox.py"
+  ],
+  "fix": {
+    "location": "TaskMailbox._ready_state",
+    "change": "Require type(inFlightToolCount) is int before accepting its value as zero.",
+    "rationale": "Python bool is a subclass of int, so False == 0 previously admitted malformed public state. The strict exact-type guard accepts the bridge's JSON integer zero but rejects booleans and non-integer values before any delivery attempt is created.",
+    "independent_tests_modified": false
+  },
+  "checks": [
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/bridge -v",
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "before_fix_exit_code": 1,
+      "before_fix_summary": "14 tests; 13 passed and the independent inFlightToolCount=False malformed-state case incorrectly returned OMP_PROCESSED.",
+      "after_fix_exit_code": 0,
+      "result": "passed",
+      "after_fix_summary": "14 bridge tests, including all 4 independent regressions. Malformed state defers without creating an attempt; the same message can proceed after readiness recovers."
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g3_omp /tmp/cw02-g1-venv/bin/python -m unittest -v test_g3_protocol test_tui_message_kinds_predicates test_tui_session_predicates test_tui_session_inflight_predicates test_tui_event_surface_predicates",
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "exit_code": 0,
+      "result": "passed",
+      "summary": "54 G3 protocol, readiness, session and event-surface regression tests."
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/tasks -q",
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "exit_code": 0,
+      "result": "passed",
+      "summary": "22 Task repository tests."
+    },
+    {
+      "command": "node --experimental-strip-types --test tests/gates/g3_omp/bridge.test.ts",
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "exit_code": 0,
+      "result": "passed",
+      "summary": "19 G3 extension tests."
+    },
+    {
+      "command": "git diff --check",
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "exit_code": 0,
+      "result": "passed"
+    }
+  ],
+  "scope": {
+    "allowed_files": [
+      "src/workbench/ipc/bridge_g3/mailbox.py"
+    ],
+    "changed_paths": [
+      "src/workbench/ipc/bridge_g3/mailbox.py"
+    ],
+    "outside_scope": [],
+    "independent_tests_modified": false,
+    "graphify_modified": false,
+    "audit_comparable": true
+  },
+  "runtime": {
+    "rerun": false,
+    "reason": "The malformed boolean bridge-state case is deterministic and covered by the independent regression. The prior two-OMP runtime evidence is unchanged; no live OMP process was started for this exact-type readiness guard."
+  },
+  "remaining_gaps": [
+    "Root owns final integrated candidate verification/review."
+  ],
+  "needs_oracle": false,
+  "commit_created": false
+}

@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "invocation": "cw14-test-01",
+  "role": "test_designer",
+  "unit": "V-CW-14-p2.6-current",
+  "authority": "User $implement docs/features/core-workbench request; approved PLAN p2.6 CW-14",
+  "objective": "Independently verify the frozen CW-14 raw-log continuity, quota, status, path-safety, and metadata-admission separation candidate.",
+  "candidate": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw14-worker.json",
+    "candidate_id": "bf60033a4c627955b0df63084f921aaddd18cc6ff947210c541495a63cca7ae3"
+  },
+  "required_tests": [
+    "Verify before/at/over run and project caps, exact retained prefix, first-cap-wins semantics, immutable status fields, multi-run/project accounting, reopen, thread and process concurrency.",
+    "Attack traversal, symlink, FIFO/special-file, inode/directory replacement, lock/status replacement, and TOCTOU boundaries without blocking or escaping the project root.",
+    "Exercise short/partial write, open, lock, scan, fsync and directory-fsync failures; raw-log failure or cap must not stop the observed run and must preserve unrelated sentinel/result files.",
+    "Verify metadata-admission failure blocks only new automatic runs until explicit durable-success notification, remains independent from raw-log health, and does not mutate/delete raw/result data.",
+    "Run storage plus relevant CW-07/CW-09 regressions; production files must remain byte-for-byte frozen."
+  ],
+  "allowed_write_paths": [
+    "tests/storage/**",
+    "graphify-out/**"
+  ],
+  "constraints": [
+    "Independent test-only owner; no production, workflow docs, PLAN, state, or ledger edits.",
+    "Use apply_patch and run graphify update after test edits; no delegation, commit, publish, deploy, Docker, or live destructive actions."
+  ],
+  "report": "Return candidate_ready/needs_reroute, exact added cases and counts, frozen production hash confirmation, C-AC24/C-AC28 mapping, and CW-15 integration risks."
+}

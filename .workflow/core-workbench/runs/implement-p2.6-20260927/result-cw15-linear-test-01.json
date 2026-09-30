@@ -1,0 +1,25 @@
+{
+  "invocation": "cw15-linear-test-01",
+  "outcome": "complete",
+  "candidate_ready": true,
+  "base_candidate": "50af3f32cf4ada4b18e9be268e70a261a135aad75818c5523ac585a38605eba3",
+  "changed_paths": ["tests/lifecycle/test_lifecycle_runtime.py", "graphify-out/**"],
+  "focused": {
+    "command_first": "one callback timestamp precedes one durable close timestamp; later send 0",
+    "review_first": "one review callback timestamp precedes one durable close timestamp; later review 0",
+    "shutdown_first": "durable close precedes normal-stop callback; later auto send/review 0",
+    "reentrancy_failure": "reentrant callbacks and failing send/journal paths release lock; all threads join within 3 seconds; repeated stop 0"
+  },
+  "checks": {
+    "lifecycle": "22 tests passed",
+    "predecessor": "360 tests passed",
+    "total": "382 tests passed",
+    "graphify_update": "passed",
+    "production_hashes": "frozen snapshot match",
+    "residue": "no temporary directories or fixture processes"
+  },
+  "test_sha256": "8c7780156d181bab944e5074885b5cd54d4a8098f75e37907903b0cf67ce7076",
+  "scope_risk": "RLock is per LifecycleCoordinator instance; simultaneous distinct active coordinator instances are not verified or guaranteed and are outside the single active runtime owner assumption.",
+  "pending_environment": "External actual OMP and real reboot remain unexecuted.",
+  "mutation_owner": "/root/cw12_post_review_test"
+}

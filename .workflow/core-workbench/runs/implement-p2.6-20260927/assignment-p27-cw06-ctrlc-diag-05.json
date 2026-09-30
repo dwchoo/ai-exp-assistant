@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw06-ctrlc-diag-05",
+  "ticket_id": "CW-06",
+  "role": "test_designer",
+  "unit": "V-CW-06-p2.7",
+  "approved_bundle_digest": "a521acdc3838b43a26e277afc233bab695c8b02ce0d42392c3678931b2e3f027",
+  "routing": {"planned_role": "test_designer", "selected_role": "test_designer (wb-test-rerun, Sonnet high)", "reason_codes": ["discriminating_experiment"], "evidence_refs": ["result-p27-cw06-rerun-test-04: 1 of ~13 F2 runs Ctrl-C did not stop flood within 5 s, no evidence retained"]},
+  "frozen_candidate": "660411cd47a7ce8d11f619e21740a933c80e0e1b4b37a597c4ddf73add6e2dc5",
+  "question": "Under a sustained host-shell flood, does a Ctrl-C typed through the product UI ever fail to reach the shell PTY (lost/rejected/delayed > 1 s)? If so, at which hop: UI stdin read -> UI input frame send -> backend admission result (ok / reason) -> PTY write -> SIGINT delivery?",
+  "method": [
+    "Reuse tests/ui/live_product_flood_independent_p27f.py harness (stub OMP, real backend, product UI in a PTY you own; ZERO model turns; never CW06_LIVE_MODEL=1) in a scratch copy/script under the scratch dir; do NOT edit repo tests.",
+    "Repeat the F2 step (flood via `timeout 45 yes | head -c <large>` and at least one variant without timeout/head, e.g. `yes`) >= 30 times, varying the Ctrl-C delay (0.5-20 s).",
+    "Per trial record: time Ctrl-C written to UI PTY; UI footer/notice text around it; backend.log lines around it; `status --json` host shell state (input_owner, parent_mode, foreground/target state, last_input_problem, dropped_input_bytes) just before and after; whether the flood pid set disappears; time to stop. Keep evidence for every failing trial.",
+    "If a failure recurs, classify the hop with evidence and, if cheap, show a minimal reproducer. If 0 failures in >= 30 trials, report the bound (e.g. < 1/30 with 95% CI) and whether the earlier failure could be explained by harness timing (e.g. Ctrl-C sent while the UI was not yet focused on host_shell or before the flood started)."
+  ],
+  "writes": "Only the scratch dir /tmp/claude-1000/-home-dwchoo-ai-exp-assistant/dd5e2cee-e10d-41c4-8ebb-7c00b50dd465/scratchpad/ctrlc-diag/ and the result file .workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw06-ctrlc-diag-05-agent.json. Repository and production code read-only (record sha256 of the 6 frozen production files start/end).",
+  "rules": "No graphify update, commits, tmux/herdr, credentials; isolated dirs; `shutdown --yes` + exact-identity cleanup; zero residue; leave /tmp/cw03-g2-* alone. A concurrent read-only delta review may run tests at the same time: use your own unique temp/data dirs.",
+  "result_format": "Write full JSON; reply <=20 lines: trials count, failures with hop classification, timing distribution, conclusion (implementation defect / harness timing / environment / unexplained with bound), residue."
+}

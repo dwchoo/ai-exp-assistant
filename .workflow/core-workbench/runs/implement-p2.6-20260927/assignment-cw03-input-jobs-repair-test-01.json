@@ -1,0 +1,72 @@
+{
+  "feature_id": "core-workbench",
+  "ticket_id": "CW-03",
+  "attempt_id": "cw03-input-jobs-repair-test-01",
+  "invocation": "cw03-input-jobs-repair-test-01",
+  "approved_bundle_digest": "64bcf577a30e7c6bbff3e4e775f8e6c17ca212ce3bf79b5bc5be31196a792b07",
+  "actual_workspace": "/home/dwchoo/ai-exp-assistant",
+  "baseline_snapshot": "candidate 8481cd6703ff7925c15a07d642cdf08964b0a0066c602fb0f5b0c697e9394983",
+  "effective_write_capability": "shared physical checkout; serial test-only mutation lease",
+  "acceptance_ids": [
+    "C-AC-08",
+    "C-AC-26"
+  ],
+  "expected_outcomes": [
+    "A normal completed run must permit a second normal wb-handoff and automatic dispatch in the same parent shell",
+    "The second admission must work for both Bash and dash without changing the parent PID",
+    "Malformed, nonzero, incomplete, or misordered completion evidence must remain fail-closed",
+    "Existing unsafe input/job cases and stale identity controls must remain denied"
+  ],
+  "allowed_write_paths": [
+    "tests/gates/g2_shell/**"
+  ],
+  "prohibited_paths": [
+    "src/**",
+    "docs/**",
+    ".workflow/**",
+    ".codex/**",
+    ".agents/**",
+    "graphify-out/**"
+  ],
+  "resource_claims": [
+    "host:shell-fixture exclusive"
+  ],
+  "mutation_owner": "test_designer cw03-input-jobs-repair-test-01",
+  "checkpoint_ref": ".workflow/core-workbench/runs/implement-p2.6-20260927/pretest-repair-checkpoint.json",
+  "requirements_identity": "e0ea9ef4ea1457ea2b76df7b53a7ccb17f48555652a81886978ec1bc3fe6d0e6",
+  "requirements_path": ".workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw03.json",
+  "review_finding": ".workflow/core-workbench/runs/implement-p2.6-20260927/review-cw03-input-jobs-01.json",
+  "exact_checks": [
+    "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest tests.gates.g2_shell.test_live_input_jobs_predicates -v",
+    "PYTHONDONTWRITEBYTECODE=1 python3 tests/gates/g2_shell/live_input_jobs_probe.py",
+    "git diff --check -- tests/gates/g2_shell"
+  ],
+  "reserved_budget": {
+    "total": 1,
+    "role:test_designer": 1,
+    "unit:V-CW-03": 1
+  },
+  "stop_conditions": [
+    "Production correction is required",
+    "A product decision is ambiguous",
+    "A write outside tests/gates/g2_shell/** is required",
+    "A runtime probe cannot be bounded or cleaned up"
+  ],
+  "configured_model": "gpt-6-sol",
+  "configured_effort": "high",
+  "host_observed_model": "unverified",
+  "host_observed_effort": "unverified",
+  "routing": {
+    "planned_role": "test_designer",
+    "selected_role": "test_designer",
+    "reason_codes": [
+      "mandatory_independent_delta_tests"
+    ],
+    "evidence_refs": [
+      "workflow-contract section 7",
+      "change-verification skill",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/review-cw03-input-jobs-01.json"
+    ]
+  },
+  "task": "Independently validate the accepted P2 correction against the expected outcomes above. Inspect the correction only after using those outcomes as the oracle. Confirm the second handoff/dispatch is genuinely a second guarded admission in the same parent shell, not a direct FD bypass, and that the lifecycle bridge does not accept malformed/nonzero/incomplete/misordered evidence. Add or refine tests only if meaningful coverage is absent; do not modify production code or weaken negative controls. Run exact checks and report exits, changed test paths, coverage mapping, failure classification, scope, cleanup/process status, and whether a production correction is required."
+}

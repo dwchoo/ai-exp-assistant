@@ -1,0 +1,33 @@
+{
+  "invocation": "cw12-directory-mode-correction-01",
+  "outcome": "complete",
+  "candidate_ready": true,
+  "changed_paths": [
+    "src/workbench/policy/pause_automation/controller.py",
+    "tests/policy/pause_automation/test_pause_policy.py",
+    "graphify-out/**"
+  ],
+  "implementation": {
+    "directory_format": "v4:<full st_mode>:<device>:<inode>",
+    "root_key": "empty string",
+    "descendant_key": "path/",
+    "entry_limit": 10000,
+    "depth_limit": 128,
+    "sidecar_byte_limit": 1048576,
+    "traversal": "fd-relative O_NOFOLLOW bounded scan with double-snapshot resume comparison",
+    "approval": "directory deltas require the changed directory itself to be approved",
+    "excluded": "Git .git internals"
+  },
+  "checks": {
+    "pre_correction_reproduction": "empty non-Git peer root, Git execution root, and Git peer root 0755-to-0555 each failed with PausePolicyError not raised",
+    "focused": "10 tests passed",
+    "pause_automation": "129 tests passed in 31.483 seconds",
+    "graphify_update": "exit 0; 4639 nodes and 9770 edges",
+    "residual_processes": "none"
+  },
+  "residual_risks": [
+    "Directory count, depth, or sidecar overflow fails closed.",
+    "Clean Git file content remains outside full hashing unless already changed or flagged."
+  ],
+  "mutation_owner": "/root/cw12_post_review_correction"
+}

@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw06-flood-worker-04",
+  "ticket_id": "CW-06 (+ bounded CW-17 ui_server defect fix)",
+  "role": "worker_senior",
+  "unit": "V-CW-06-p2.7",
+  "approved_bundle_digest": "a521acdc3838b43a26e277afc233bab695c8b02ce0d42392c3678931b2e3f027",
+  "prior_assignment_ref": ".workflow/core-workbench/runs/implement-p2.6-20260927/assignment-p27-cw06-fix-worker-03.json",
+  "routing": {"planned_role": "worker", "selected_role": "worker_senior (Opus, general-purpose)", "reason_codes": ["unresolved_diagnosis", "coupled_invariants"], "evidence_refs": ["runtime flood still detaches after bounded UI fix; involves backend send path framing invariants and UI event-loop throughput"]},
+  "base_candidate": "9ef7df68c17b9d9ea6cbad08d0117cc0c1757fe9391be5dc13610dc49c5735d5",
+  "checkpoint_ref": [".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-cw17-integrated-checkpoint.json", "delta backups p27-cw06-*-delta-backup/ (worker, test, fix, rerun, fix3, rerun3)", ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-cw06-flood-pre-backup/ (ui_server.py)"],
+  "inputs": [".workflow/core-workbench/runs/implement-p2.6-20260927/root-adjudication-p27-cw06-flood.json", ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw06-rerun-test-03-agent.json", ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-review-cw06-01-agent.json", "tests/ui/live_product_flood_independent_p27f.py (runtime repro with stub OMP, no model)", "tests/ui/test_product_flood_independent_p27f.py (incl. failing help-Esc test)"],
+  "required_behavior": [
+    "Backend (src/workbench/backend/ui_server.py): on outbound overflow never corrupt framing - keep the unsent remainder of a partially written frame, drop only whole unsent frames, then queue CLOSING slow_client; nothing is queued after CLOSING. Frame-boundary bookkeeping must be O(1)/amortized, not a rescan per send.",
+    "UI: measure and report under the p27f runtime flood (stub OMP, real backend): backend produced bytes/s, UI drained bytes/s, UI loop time split (intake/feed/draw). Remove UI-side starvation of socket intake (e.g. separate intake budget, draw rate limit such as <= 30 fps while backlog exists). Goal: the UI stays attached under `yes` flood for >= 20 s and a mid-flood Ctrl-C reaches the shell within 1 s; if not achievable without contract/backend-policy change, stop at the residual-policy line in the adjudication and report numbers + options.",
+    "P3-1: Esc-closing help redraws immediately (dirty set on every input path)."
+  ],
+  "acceptance": [
+    "tests/ui/test_product_flood_independent_p27f.py (incl. help-Esc) passes unmodified; tests/ui/live_product_flood_independent_p27f.py passes (runtime, stub OMP, no model) - or, only under the residual policy, fails solely on staying attached while the slow_client reason is shown and reattach restores; report which.",
+    "red->green tests of your own: backend overflow keeps framing intact and delivers CLOSING slow_client to a client that resumes reading (tests/backend/test_ui_server.py); UI intake measurement test in tests/ui/test_product_pty.py or model tests.",
+    "suites (pattern 'test_*.py'; never run live_* with CW06_LIVE_MODEL=1): tests/ui, tests/backend (all incl. independent), tests/contracts, tests/gates/g1_vt (src:.), tests/gates/g4_lifetime (src:.)."
+  ],
+  "allowed_write_paths": ["src/workbench/ui/product/**", "src/workbench/backend/ui_server.py (overflow framing fix only)", "tests/ui/test_product_model.py", "tests/ui/test_product_pty.py", "tests/ui/support.py", "tests/backend/test_ui_server.py"],
+  "prohibited_paths": ["tests/**/*_independent*.py", "tests/ui/live_*.py", "tests/ui/independent_support_cw06.py", "src/workbench/contracts/**", "other src/workbench/backend/**", "src/workbench/terminal/**", "docs/**", ".workflow/**"],
+  "stop_conditions": ["ui_v1 contract change needed", "backend policy change (coalescing/backpressure instead of slow_client detach) needed"],
+  "rules": "Python /usr/bin/env PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python (src:. for tests/gates; never -t .). Zero real model turns. No graphify update, commits, tmux/herdr, credentials. Clean up everything by exact identity.",
+  "result_format": "checks table first; status; changed paths + sha256; measurements table (before/after); per-item result; residue; gaps. Korean, concise."
+}

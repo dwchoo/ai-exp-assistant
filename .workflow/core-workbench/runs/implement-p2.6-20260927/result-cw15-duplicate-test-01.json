@@ -1,0 +1,20 @@
+{
+  "invocation": "cw15-duplicate-test-01",
+  "outcome": "complete",
+  "candidate_ready": true,
+  "candidate_id": "4eb8da95d47761acb737ba4d627b67306eef988567b7e04cafde38db218a9cd8",
+  "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw15-duplicate-test.json",
+  "production_frozen": true,
+  "test_only_delta": "one journal byte-equality assertion in tests/lifecycle/test_lifecycle_runtime.py",
+  "duplicates": "two out-of-order duplicate requests each raise no-replay; journal commit 0, external takeover 0, journal bytes unchanged; fence and active generation 3; one valid handoff commits lifecycle generation 5 and reopens epoch 4, then review 1 and command send 1 at durable generation 7",
+  "races": "single duplicate and before/during/after three-thread schedules all pass",
+  "transport": "revoke/claim gives 0/1 frame; eight malformed token cases add zero; pending ACK empty; positive bound delivery/no-replay passes",
+  "checks": {
+    "non_live": "396 passed: lifecycle 36, bridge 22, terminal 10, storage 33, observation 95, recovery 26, G4 8, pause 122, workflow 44",
+    "production_hashes": "42/42 match frozen snapshot",
+    "graphify_residue": "updated; zero related process or temporary residue",
+    "excluded": "full/live G3, scripted/external OMP and reboot not run"
+  },
+  "sha256": {"tests/lifecycle/test_lifecycle_runtime.py": "27c30567c838584885d4e8efec9e1345ed8d5ceab850bac57b1a987f96f854da"},
+  "mutation_owner": "/root/cw12_post_review_test"
+}

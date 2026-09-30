@@ -1,0 +1,28 @@
+{
+  "invocation": "cw15-takeover-test-01",
+  "outcome": "complete",
+  "candidate_ready": true,
+  "candidate_id": "dccc1a3d2813ab121eca173d463cd541aa18eef293e2904ae38c20cb8eec473a",
+  "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw15-takeover-test.json",
+  "production_frozen": true,
+  "production_sha256": "ae94d6ce59805de0ba434bf61da30b40e08e00298207733f913c7dfd7e63646d",
+  "test_only_delta": "tests/lifecycle/test_lifecycle_runtime.py",
+  "test_sha256": "ef7d6583adc73482e2429b997ee92587e2a0595e934a39dd5885b91fd013b886",
+  "evidence": {
+    "review_first": "one review effect before the durable takeover fence; zero later effects",
+    "takeover_first": "zero review and zero send after durable fence",
+    "unknown_delivery": "one ambiguous send callback, command journal identity preserved, zero replay",
+    "successful_delivery": "one recorded send; same and new command attempts both held after takeover",
+    "freshness": "four stale manager/session/owner/process cases cause zero external takeover call and byte-identical journal",
+    "failure": "external takeover failure retains durable fence and unknown command evidence"
+  },
+  "checks": {
+    "total": "388/388 passed (28 lifecycle plus 360 predecessors)",
+    "positive_g3": "one delivery and zero replay",
+    "shutdown": "first call four stops; repeated call zero stops",
+    "candidate": "production hashes match and snapshot is stable",
+    "residue": "zero temporary directories or fixture processes"
+  },
+  "pending": ["live external OMP", "real reboot"],
+  "mutation_owner": "/root/cw12_post_review_test"
+}

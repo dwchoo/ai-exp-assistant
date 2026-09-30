@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "invocation": "cw14-causal-final-review-01",
+  "role": "reviewer",
+  "unit": "V-CW-14-p2.6-current",
+  "authority": "User $implement docs/features/core-workbench request; approved PLAN p2.6 CW-14; senior causal correction and independent tests",
+  "objective": "Perform the final fresh read-only acceptance review of the causal pending-delta CW-14 candidate.",
+  "candidate": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw14-causal-test.json",
+    "candidate_id": "26686fe852fb9e2099acac0f0fb2b6f37a9c0d1164ebe6da3a5193de48c54558"
+  },
+  "acceptance_ids": ["C-AC-24", "C-AC-28"],
+  "review_focus": [
+    "Confirm the old full-snapshot magnitude/branch merge is gone and local pending deltas are never lost, selected across branches, or applied more than once under repeated failures and same-run concurrent writers.",
+    "Audit durable-success clearing, post-rename uncertain state, zero quota/cap source, stored-byte/raw validation, reopen behavior and error/status immutability for new regressions.",
+    "Close every prior malformed entry, monotonicity, single-store recovery, same-run merge and repeated-branch finding with concrete code/test evidence.",
+    "Classify process-death loss of an unpersistable in-memory failure count against the actual CW-14 fixture contract, without silently expanding acceptance into crash recovery.",
+    "Assess storage 33 and related regression 197 evidence with frozen hashes; identify only concrete remaining material defects."
+  ],
+  "constraints": [
+    "Read-only; do not edit files or run mutating graphify commands.",
+    "No delegation, test writes, commit, publish, deploy, Docker, or process signals."
+  ],
+  "report": "Return candidate_ready true/false, disposition of all prior findings, any new concrete material finding with trace/path/line, C-AC-24/C-AC-28 verdict, process-local risk classification, evidence adequacy and CW-15 obligations."
+}

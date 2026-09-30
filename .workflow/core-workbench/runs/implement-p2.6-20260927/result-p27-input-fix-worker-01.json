@@ -1,0 +1,74 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-input-fix-worker-01",
+  "status": "candidate_ready",
+  "candidate_id": "d967bd34fb7ed5b6d98036878ee8477fc4fafcb548f610f0e3238367db9ae4e9",
+  "scope_audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-input-fix-01.json",
+  "outside_scope": [],
+  "checks": [
+    [
+      "independent input",
+      0,
+      "4 OK",
+      44
+    ],
+    [
+      "tests/backend",
+      0,
+      "47 OK",
+      234
+    ],
+    [
+      "tests/terminal",
+      0,
+      "27 OK",
+      2
+    ],
+    [
+      "tests/gates/g2_shell discover",
+      0,
+      "132 OK skipped=1 (delegated cgroup scope env skip; inferred pre-existing)",
+      119
+    ],
+    [
+      "canonical_matrix_integration",
+      0,
+      "3 OK",
+      4
+    ],
+    [
+      "tests/contracts",
+      0,
+      "43 OK",
+      1
+    ],
+    [
+      "tests/lifecycle",
+      0,
+      "38 OK",
+      4
+    ],
+    [
+      "tests/gates/g4_lifetime",
+      0,
+      "8 OK",
+      0
+    ]
+  ],
+  "red_green": "22 new regression cases fail on pre-fix code, pass after",
+  "existing_assertions_changed": [],
+  "test_wiring_change": "tests/terminal/test_persistent_shell.py: 1 mock wiring line for new _manual_foreground_group",
+  "root_adjudication": {
+    "fix_now": [
+      "gap1 HOOK_REJECTED leaves live prompt manual-input held (dead end)",
+      "gap2 confirmed takeover of automation run + editing bytes -> lifecycle unknown, target released (violates C-AC-08 foreground takeover example)"
+    ],
+    "accepted_conservative": [
+      "gap3 needs_review persists for automation",
+      "gap4 line-count over-estimate holds automation",
+      "gap5 ShellPane.error sticky (pre-existing)",
+      "gap6 extra line before wb-handoff after unterminated program input"
+    ]
+  },
+  "residue": "no test processes; 4 empty /tmp/cw03-g2-* dirs of unattributable origin left untouched"
+}

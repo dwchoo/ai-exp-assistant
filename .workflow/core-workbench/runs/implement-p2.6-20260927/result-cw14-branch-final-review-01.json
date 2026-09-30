@@ -1,0 +1,21 @@
+{
+  "invocation": "cw14-branch-final-review-01",
+  "outcome": "complete",
+  "candidate_ready": false,
+  "candidate_id": "40ba9f2cdde65f0e565e999480aa673c8203e509a0a64d194654b29b93062dd3",
+  "snapshot_hashes_match": true,
+  "prior_findings": "closed for the covered single-failure, malformed-entry, single-store recovery and one same-run merge traces",
+  "finding": {
+    "severity": "P1",
+    "path": "src/workbench/storage/log_raw/store.py",
+    "lines": "622-641,678-735,743",
+    "summary": "Choosing the larger snapshot across causal branches and later treating it as the local base delta loses local failed bytes and double-counts concurrent durable bytes.",
+    "trace": "cap3: A abc; A failed de; B durably drops 10B; A failed g -> returns 14/11/11 and later reconciles 24/21/21 instead of exact 16/13/13."
+  },
+  "acceptance": {
+    "C-AC-24": "accepted at fixture level",
+    "C-AC-28": "not accepted until causal local failure accounting prevents cross-branch loss and double count"
+  },
+  "risk_note": "A transient status-directory fsync failure may leave same-store recovery blocked; not classified as an acceptance finding in this review.",
+  "mutation_owner": null
+}

@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "invocation": "cw15-final-review-01",
+  "role": "reviewer",
+  "unit": "V-CW-15-p2.6-current",
+  "authority": "User $implement docs/features/core-workbench request; approved PLAN p2.6 CW-15; production binding and independent runtime evidence",
+  "objective": "Perform a fresh read-only final acceptance review of the complete CW-15 runtime/application candidate.",
+  "candidate": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw15-positive-test.json",
+    "candidate_id": "cddcbd40126c42d30de0956f98996fe50c74512159f36054fd952add5e1d600f"
+  },
+  "acceptance_ids": ["C-AC-15", "C-AC-16", "C-AC-17", "C-AC-18", "C-AC-22", "C-AC-23"],
+  "review_focus": [
+    "Verify bind_production maps actual predecessor public APIs without bypassing session/generation/PID/start_ticks/owner/authority, pause/cancel/revocation, recovery or metadata admission guards.",
+    "Review detach/reconnect/restart/model-error/takeover/boot-confirm/shutdown state transitions for auto replay, duplicate launch/action, unknown-to-success coercion, stale owner/session reuse and false termination claims.",
+    "Confirm completed and incomplete shutdown action fences are exact-target/incarnation safe and do not prevent necessary later observation while avoiding duplicate stop/force.",
+    "Assess the independent process-backed, actual in-repo composition and positive clean-baseline G3/Pause/TaskMailbox evidence, predecessor regressions, cleanup and frozen hashes per each acceptance ID.",
+    "Classify external actual OMP and real reboot as environment-pending only where the ticket permits; identify any concrete product defect or missing in-repo binding."
+  ],
+  "constraints": [
+    "Read-only; do not edit files, run mutating graphify, signal processes, or change external state.",
+    "No delegation, test writes, commit, publish, deploy or Docker."
+  ],
+  "report": "Return candidate_ready true/false, findings with severity/path/line/trace, per-acceptance runtime verdict, binding/evidence adequacy, pending environments and exact CW16 final integration obligations."
+}

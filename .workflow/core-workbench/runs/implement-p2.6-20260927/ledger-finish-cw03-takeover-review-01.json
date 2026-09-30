@@ -1,0 +1,5 @@
+{
+  "path": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 36,
+  "event": {"id": "finish-cw03-takeover-review-01", "kind": "transition", "data": {"invocation": "cw03-takeover-review-01", "state": "finished", "evidence": ".workflow/core-workbench/runs/implement-p2.6-20260927/review-cw03-takeover-01.json; collaboration /root/cw03_input_jobs_review P1/P2 changes_required; list_agents completed; no owned subprocesses remain", "outcome": "complete", "observed_model": "unverified", "observed_effort": "unverified", "not_started_evidence": null}}
+}

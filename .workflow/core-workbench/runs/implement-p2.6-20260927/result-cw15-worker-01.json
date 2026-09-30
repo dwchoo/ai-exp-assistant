@@ -1,0 +1,38 @@
+{
+  "invocation": "cw15-worker-01",
+  "outcome": "complete",
+  "candidate_ready": true,
+  "changed_paths": [
+    "src/workbench/runtime/process_evidence.py",
+    "src/workbench/app/__init__.py",
+    "src/workbench/app/lifecycle.py",
+    "tests/lifecycle/test_lifecycle_runtime.py",
+    "graphify-out/**"
+  ],
+  "architecture": "Minimal port-injected LifecycleCoordinator plus isolated Linux /proc PID+start_ticks evidence. Detach releases only FrontendLease; reconciliation compares durable identity/session/control state with fresh evidence and never auto-replays unknown or attempted commands.",
+  "acceptance": {
+    "C-AC-15": "process-backed detach/reconnect continuity and active-versus-paused review behavior fixture",
+    "C-AC-16": "durable/fresh process identity reconciliation with unknown/no replay fixture",
+    "C-AC-17": "model-error hold with continued observation and explicit successful recheck fixture",
+    "C-AC-18": "takeover/owner/control/delivered-command preservation and explicit current-session handoff fixture",
+    "C-AC-22": "confirmation-gated bounded normal-stop, drain and unresolved survivor report fixture",
+    "C-AC-23": "boot-marker change blocks new experiments until explicit post-reconcile confirmation fixture"
+  },
+  "checks": {
+    "lifecycle": "8 process-backed tests passed",
+    "storage": "33 tests passed",
+    "recovery": "26 tests passed",
+    "pause": "129 tests passed",
+    "g4_lifetime": "8 tests passed",
+    "graphify_update": "exit 0",
+    "residual_processes": "none observed"
+  },
+  "sha256": {
+    "src/workbench/runtime/process_evidence.py": "0e550489ac9c6894099b17fcc3e3b2737800f760303702ae12846b0547b0737b",
+    "src/workbench/app/__init__.py": "2e081c3da9a3ab2dbb6d6b8ad6aa192429ed8bf329a54f32c6f8645193b13847",
+    "src/workbench/app/lifecycle.py": "6c1320524b9468d8f49bc6d74265545eab0bfddbc07358a87bedb02725d44a43",
+    "tests/lifecycle/test_lifecycle_runtime.py": "1a0ee50061a5fd87f25d022bfc530ee02879fd76a07460d6c8edf2b1b3100f4e"
+  },
+  "evidence_limit": "OMP uses process stand-ins and backend restart uses coordinator recreation; actual G3 exact-session send, PersistentShell/PTY reconnect, CW11 scheduler and CW13 stop/force executor integration remain for CW16 live integration.",
+  "mutation_owner": "/root/cw12_post_review_correction"
+}

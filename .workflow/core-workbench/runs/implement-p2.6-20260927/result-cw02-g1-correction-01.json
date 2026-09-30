@@ -1,0 +1,874 @@
+{
+  "schema_version": 1,
+  "invocation": "cw02-g1-correction-01",
+  "ticket": "CW-02",
+  "unit": "V-CW-02-p2.6-current",
+  "task_result": "candidate_ready",
+  "candidate": "478ee41e7c8664ec0ad5089afa6a67a179cc90c66b82c2952062215b0b372ea8",
+  "base_candidate": "9d9d884d70c5b511def88915acde152df79dc0dca52d329235ac36893e6d3862",
+  "baseline": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw02-g1-test-after.json",
+  "after_snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw02-g1-correction-after.json",
+  "scope_audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/scope-audit-cw02-g1-correction.json",
+  "changed_files": [
+    "tests/gates/g1_vt/live_outer_compat_probe.py",
+    "tests/gates/g1_vt/test_closure_independent.py",
+    "tests/gates/g1_vt/test_closure_predicates.py"
+  ],
+  "changes": [
+    "Require exactly three distinct positive type(pid) is int values; reject bool, null, zero, negative, missing and extra PID observations.",
+    "Require plain outer==app and the configured Herdr hidden-sidebar one-row chrome relation at each resize stage; keep app/child pane geometry mapping.",
+    "Record initial outer/app kernel size; require complete initial outer/app/child geometry matching restored final stage.",
+    "Add valid outer/initial geometry to existing positive fixture and add missing/contradictory initial plus Herdr outer negative controls.",
+    "Independent test positive() only gains plain initial app and child_sizes fields. All six independently failing negative subcases and expected assertions remain unchanged."
+  ],
+  "checks": [
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g1_vt /tmp/cw02-g1-venv/bin/python -m unittest -v tests/gates/g1_vt/test_closure_independent.py",
+      "exit_code": 0,
+      "tests": 6,
+      "duration_seconds": 0.048,
+      "negative_subcases_preserved": 6
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g1_vt /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/gates/g1_vt -p 'test_*.py' -v",
+      "exit_code": 0,
+      "tests": 59,
+      "duration_seconds": 1.137
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g1_vt /tmp/cw02-g1-venv/bin/python tests/gates/g1_vt/live_color_probe.py",
+      "exit_code": 0,
+      "evidence_key": "color",
+      "execution": "serial, actual OMP18.2.10 native frame through real renderer; color source unchanged throughout correction"
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g1_vt /tmp/cw02-g1-venv/bin/python tests/gates/g1_vt/live_outer_compat_probe.py",
+      "exit_code": 0,
+      "evidence_key": "plain",
+      "execution": "serial final strict initial geometry predicate"
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g1_vt /tmp/cw02-g1-venv/bin/python tests/gates/g1_vt/live_outer_compat_probe.py --herdr",
+      "exit_code": 0,
+      "evidence_key": "herdr",
+      "execution": "serial final predicate, isolated Herdr0.9.1"
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0
+    },
+    {
+      "command": "pgrep -af '[/]tmp/cw02-g1-(color|outer-compat)-'",
+      "exit_code": 1,
+      "meaning": "Expected empty match"
+    }
+  ],
+  "runtime_evidence": {
+    "color": {
+      "COLORTERM": "truecolor",
+      "FORCE_COLOR": "3",
+      "NO_COLOR": "removed for original OMP",
+      "TERM": "xterm-256color",
+      "cleaned": true,
+      "diagnostic_text_styles": {
+        "G1_COLOR_BOLD": {
+          "bg": "default",
+          "bold": true,
+          "fg": "default",
+          "italics": false,
+          "underscore": false
+        },
+        "G1_COLOR_ITALIC": {
+          "bg": "default",
+          "bold": false,
+          "fg": "default",
+          "italics": true,
+          "underscore": false
+        },
+        "G1_COLOR_NORMAL": {
+          "bg": "default",
+          "bold": false,
+          "fg": "default",
+          "italics": false,
+          "underscore": false
+        }
+      },
+      "distinct_rgb_foregrounds": [
+        "00b4ff",
+        "0f1216",
+        "1f252d",
+        "2a3038",
+        "2cd7e9",
+        "3998bf",
+        "44d0eb",
+        "4a5058",
+        "4dc7ec",
+        "539ced",
+        "5d8fee",
+        "6b7280",
+        "747bf1",
+        "8170f2",
+        "9761f2",
+        "9ca3b0",
+        "a060ef",
+        "a35fee",
+        "ac5dea",
+        "ae5de9",
+        "b05ce8",
+        "b75be6",
+        "b95be5",
+        "bc5ae4",
+        "c059e2",
+        "c559e0",
+        "ca58de",
+        "d356db",
+        "d4c090",
+        "d556da",
+        "dc54d7",
+        "de54d6",
+        "e553d3",
+        "e5e5e7",
+        "e8ecf4",
+        "ee51d0",
+        "f74fcc",
+        "ffb347"
+      ],
+      "exact_rgb_and_emphasis": true,
+      "live_omp_ready": true,
+      "matched_geometry": true,
+      "mismatch_attributes": {
+        "bg": 0,
+        "bold": 0,
+        "data": 0,
+        "fg": 0,
+        "italics": 0,
+        "reverse": 0,
+        "underscore": 0
+      },
+      "mismatch_samples": [],
+      "mismatched_cells": 0,
+      "omp_version": "omp/18.2.10",
+      "original_output_bytes": 69363,
+      "original_output_sha256": "6aaa45c06fc106bc33f009722f2a1d65456258d4f3927ec35c35f3310962de64",
+      "pids": {
+        "original_omp": 3878733,
+        "replay_and_idle_children": [
+          3878803,
+          3878804,
+          3878805
+        ],
+        "workbench": 3878802
+      },
+      "provider_requests": 1,
+      "real_renderer_ready": true,
+      "result": "passed",
+      "rgb_emphasis_distinguishable": true,
+      "rgb_sgr_in_original_bytes": true,
+      "rgb_sgr_in_rendered_bytes": true,
+      "rgb_text_cells": 858,
+      "same_output_replayed": true,
+      "stale_herdr_context_removed": [
+        "HERDR_BIN_PATH",
+        "HERDR_ENV",
+        "HERDR_PANE_ID",
+        "HERDR_SOCKET_PATH",
+        "HERDR_TAB_ID",
+        "HERDR_WORKSPACE_ID"
+      ],
+      "theme": "same captured live OMP frame"
+    },
+    "plain": {
+      "alternate_before_exit": true,
+      "app_pid": 3879950,
+      "children_cleaned": true,
+      "fresh_after": [
+        true,
+        true,
+        true
+      ],
+      "fresh_before": [
+        true,
+        true,
+        true
+      ],
+      "fresh_input": true,
+      "initial": {
+        "app": [
+          240,
+          45
+        ],
+        "child_pids": [
+          3879951,
+          3879952,
+          3879953
+        ],
+        "child_sizes": [
+          [
+            78,
+            41
+          ],
+          [
+            78,
+            41
+          ],
+          [
+            78,
+            41
+          ]
+        ],
+        "cross_routed": [
+          false,
+          false,
+          false
+        ],
+        "outer": [
+          240,
+          45
+        ],
+        "target": [
+          true,
+          true,
+          true
+        ],
+        "titles": [
+          true,
+          true,
+          true
+        ]
+      },
+      "local_alternate_restored": true,
+      "mode": "plain",
+      "omp_version": "omp/18.2.10",
+      "outer_cleaned": true,
+      "owned_child_pids": [
+        3879951,
+        3879952,
+        3879953
+      ],
+      "paste_checks": [
+        true,
+        true,
+        true
+      ],
+      "paste_fresh_and_routed": true,
+      "private_dsr_queries": [],
+      "resize_propagated": true,
+      "result": "passed",
+      "sizes": [
+        {
+          "app": [
+            210,
+            39
+          ],
+          "children": [
+            [
+              68,
+              35
+            ],
+            [
+              68,
+              35
+            ],
+            [
+              68,
+              35
+            ]
+          ],
+          "cross_routed": false,
+          "outer": [
+            210,
+            39
+          ],
+          "propagated": true,
+          "stable_pids": true
+        },
+        {
+          "app": [
+            240,
+            45
+          ],
+          "children": [
+            [
+              78,
+              41
+            ],
+            [
+              78,
+              41
+            ],
+            [
+              78,
+              41
+            ]
+          ],
+          "cross_routed": false,
+          "outer": [
+            240,
+            45
+          ],
+          "propagated": true,
+          "stable_pids": true
+        }
+      ],
+      "stale_herdr_context_removed": [
+        "HERDR_BIN_PATH",
+        "HERDR_ENV",
+        "HERDR_PANE_ID",
+        "HERDR_SOCKET_PATH",
+        "HERDR_TAB_ID",
+        "HERDR_WORKSPACE_ID"
+      ],
+      "startup_ready": true,
+      "three_pane_routing": true
+    },
+    "herdr": {
+      "alternate_before_exit": true,
+      "app_pid": 3880328,
+      "children_cleaned": true,
+      "default_state_unchanged": true,
+      "fresh_after": [
+        true,
+        true,
+        true
+      ],
+      "fresh_before": [
+        true,
+        true,
+        true
+      ],
+      "fresh_input": true,
+      "herdr_version": "herdr 0.9.1",
+      "initial": {
+        "app": [
+          240,
+          44
+        ],
+        "child_pids": [
+          3880354,
+          3880355,
+          3880356
+        ],
+        "child_sizes": [
+          [
+            78,
+            40
+          ],
+          [
+            78,
+            40
+          ],
+          [
+            78,
+            40
+          ]
+        ],
+        "cross_routed": [
+          false,
+          false,
+          false
+        ],
+        "outer": [
+          240,
+          45
+        ],
+        "target": [
+          true,
+          true,
+          true
+        ],
+        "titles": [
+          true,
+          true,
+          true
+        ]
+      },
+      "isolated_session_paths": true,
+      "local_alternate_restored": true,
+      "mode": "herdr",
+      "non_nested_attach": true,
+      "omp_version": "omp/18.2.10",
+      "outer_cleaned": true,
+      "owned_child_pids": [
+        3880354,
+        3880355,
+        3880356
+      ],
+      "pane_list": {
+        "id": "cli:pane:list",
+        "result": {
+          "panes": [
+            {
+              "agent_status": "unknown",
+              "cwd": "/home/dwchoo/ai-exp-assistant",
+              "focused": true,
+              "foreground_cwd": "/home/dwchoo/ai-exp-assistant",
+              "pane_id": "w1:p1",
+              "revision": 1,
+              "scroll": {
+                "max_offset_from_bottom": 0,
+                "offset_from_bottom": 0,
+                "viewport_rows": 44
+              },
+              "tab_id": "w1:t1",
+              "terminal_id": "term_65c7b953fdd261",
+              "terminal_title": "dwchoo@dwchoo-mini-pc: ~/ai-exp-assistant",
+              "terminal_title_stripped": "dwchoo@dwchoo-mini-pc: ~/ai-exp-assistant",
+              "workspace_id": "w1"
+            }
+          ],
+          "type": "pane_list"
+        }
+      },
+      "pane_run_exit": 0,
+      "paste_checks": [
+        true,
+        true,
+        true
+      ],
+      "paste_fresh_and_routed": true,
+      "private_dsr_queries": [
+        996
+      ],
+      "resize_propagated": true,
+      "result": "passed",
+      "session_delete_exit": 0,
+      "session_deleted": true,
+      "session_stop_exit": 0,
+      "sizes": [
+        {
+          "app": [
+            210,
+            38
+          ],
+          "children": [
+            [
+              68,
+              34
+            ],
+            [
+              68,
+              34
+            ],
+            [
+              68,
+              34
+            ]
+          ],
+          "cross_routed": false,
+          "outer": [
+            210,
+            39
+          ],
+          "propagated": true,
+          "stable_pids": true
+        },
+        {
+          "app": [
+            240,
+            44
+          ],
+          "children": [
+            [
+              78,
+              40
+            ],
+            [
+              78,
+              40
+            ],
+            [
+              78,
+              40
+            ]
+          ],
+          "cross_routed": false,
+          "outer": [
+            240,
+            45
+          ],
+          "propagated": true,
+          "stable_pids": true
+        }
+      ],
+      "stale_herdr_context_removed": [
+        "HERDR_BIN_PATH",
+        "HERDR_ENV",
+        "HERDR_PANE_ID",
+        "HERDR_SOCKET_PATH",
+        "HERDR_TAB_ID",
+        "HERDR_WORKSPACE_ID"
+      ],
+      "startup_ready": true,
+      "three_pane_routing": true
+    }
+  },
+  "preliminary_runtime": {
+    "plain": {
+      "alternate_before_exit": true,
+      "app_pid": 3879088,
+      "children_cleaned": true,
+      "fresh_after": [
+        true,
+        true,
+        true
+      ],
+      "fresh_before": [
+        true,
+        true,
+        true
+      ],
+      "fresh_input": true,
+      "initial": {
+        "child_pids": [
+          3879089,
+          3879090,
+          3879091
+        ],
+        "child_sizes": [
+          [
+            78,
+            41
+          ],
+          [
+            78,
+            41
+          ],
+          [
+            78,
+            41
+          ]
+        ],
+        "cross_routed": [
+          false,
+          false,
+          false
+        ],
+        "target": [
+          true,
+          true,
+          true
+        ],
+        "titles": [
+          true,
+          true,
+          true
+        ]
+      },
+      "local_alternate_restored": true,
+      "mode": "plain",
+      "omp_version": "omp/18.2.10",
+      "outer_cleaned": true,
+      "owned_child_pids": [
+        3879089,
+        3879090,
+        3879091
+      ],
+      "paste_checks": [
+        true,
+        true,
+        true
+      ],
+      "paste_fresh_and_routed": true,
+      "private_dsr_queries": [],
+      "resize_propagated": true,
+      "result": "passed",
+      "sizes": [
+        {
+          "app": [
+            210,
+            39
+          ],
+          "children": [
+            [
+              68,
+              35
+            ],
+            [
+              68,
+              35
+            ],
+            [
+              68,
+              35
+            ]
+          ],
+          "cross_routed": false,
+          "outer": [
+            210,
+            39
+          ],
+          "propagated": true,
+          "stable_pids": true
+        },
+        {
+          "app": [
+            240,
+            45
+          ],
+          "children": [
+            [
+              78,
+              41
+            ],
+            [
+              78,
+              41
+            ],
+            [
+              78,
+              41
+            ]
+          ],
+          "cross_routed": false,
+          "outer": [
+            240,
+            45
+          ],
+          "propagated": true,
+          "stable_pids": true
+        }
+      ],
+      "stale_herdr_context_removed": [
+        "HERDR_BIN_PATH",
+        "HERDR_ENV",
+        "HERDR_PANE_ID",
+        "HERDR_SOCKET_PATH",
+        "HERDR_TAB_ID",
+        "HERDR_WORKSPACE_ID"
+      ],
+      "startup_ready": true,
+      "three_pane_routing": true
+    },
+    "herdr": {
+      "alternate_before_exit": true,
+      "app_pid": 3879342,
+      "children_cleaned": true,
+      "default_state_unchanged": true,
+      "fresh_after": [
+        true,
+        true,
+        true
+      ],
+      "fresh_before": [
+        true,
+        true,
+        true
+      ],
+      "fresh_input": true,
+      "herdr_version": "herdr 0.9.1",
+      "initial": {
+        "child_pids": [
+          3879368,
+          3879369,
+          3879370
+        ],
+        "child_sizes": [
+          [
+            78,
+            40
+          ],
+          [
+            78,
+            40
+          ],
+          [
+            78,
+            40
+          ]
+        ],
+        "cross_routed": [
+          false,
+          false,
+          false
+        ],
+        "target": [
+          true,
+          true,
+          true
+        ],
+        "titles": [
+          true,
+          true,
+          true
+        ]
+      },
+      "isolated_session_paths": true,
+      "local_alternate_restored": true,
+      "mode": "herdr",
+      "non_nested_attach": true,
+      "omp_version": "omp/18.2.10",
+      "outer_cleaned": true,
+      "owned_child_pids": [
+        3879368,
+        3879369,
+        3879370
+      ],
+      "pane_list": {
+        "id": "cli:pane:list",
+        "result": {
+          "panes": [
+            {
+              "agent_status": "unknown",
+              "cwd": "/home/dwchoo/ai-exp-assistant",
+              "focused": true,
+              "foreground_cwd": "/home/dwchoo/ai-exp-assistant",
+              "pane_id": "w1:p1",
+              "revision": 1,
+              "scroll": {
+                "max_offset_from_bottom": 0,
+                "offset_from_bottom": 0,
+                "viewport_rows": 44
+              },
+              "tab_id": "w1:t1",
+              "terminal_id": "term_65c7b90eb5e8d1",
+              "terminal_title": "dwchoo@dwchoo-mini-pc: ~/ai-exp-assistant",
+              "terminal_title_stripped": "dwchoo@dwchoo-mini-pc: ~/ai-exp-assistant",
+              "workspace_id": "w1"
+            }
+          ],
+          "type": "pane_list"
+        }
+      },
+      "pane_run_exit": 0,
+      "paste_checks": [
+        true,
+        true,
+        true
+      ],
+      "paste_fresh_and_routed": true,
+      "private_dsr_queries": [
+        996
+      ],
+      "resize_propagated": true,
+      "result": "passed",
+      "session_delete_exit": 0,
+      "session_deleted": true,
+      "session_stop_exit": 0,
+      "sizes": [
+        {
+          "app": [
+            210,
+            38
+          ],
+          "children": [
+            [
+              68,
+              34
+            ],
+            [
+              68,
+              34
+            ],
+            [
+              68,
+              34
+            ]
+          ],
+          "cross_routed": false,
+          "outer": [
+            210,
+            39
+          ],
+          "propagated": true,
+          "stable_pids": true
+        },
+        {
+          "app": [
+            240,
+            44
+          ],
+          "children": [
+            [
+              78,
+              40
+            ],
+            [
+              78,
+              40
+            ],
+            [
+              78,
+              40
+            ]
+          ],
+          "cross_routed": false,
+          "outer": [
+            240,
+            45
+          ],
+          "propagated": true,
+          "stable_pids": true
+        }
+      ],
+      "stale_herdr_context_removed": [
+        "HERDR_BIN_PATH",
+        "HERDR_ENV",
+        "HERDR_PANE_ID",
+        "HERDR_SOCKET_PATH",
+        "HERDR_TAB_ID",
+        "HERDR_WORKSPACE_ID"
+      ],
+      "startup_ready": true,
+      "three_pane_routing": true
+    },
+    "meaning": "Both completed with cleanup before final initial geometry tightening; final outer runs above supersede predicate verification, not historical evidence."
+  },
+  "historical_evidence": {
+    "reference": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw02-g1-test-01.json",
+    "plain_initial": "Concurrent tester run fresh_after manager=false, result unknown; preserved unchanged. Serial passes do not establish the load/timing cause."
+  },
+  "cleanup": {
+    "owned_pids_checked": [
+      3878733,
+      3878802,
+      3878803,
+      3878804,
+      3878805,
+      3879088,
+      3879089,
+      3879090,
+      3879091,
+      3879342,
+      3879368,
+      3879369,
+      3879370,
+      3879950,
+      3879951,
+      3879952,
+      3879953,
+      3880328,
+      3880354,
+      3880355,
+      3880356
+    ],
+    "owned_pids_remaining": [],
+    "temporary_directories_remaining": [],
+    "temporary_process_path_matches": 0,
+    "active_owned_checks_or_writers": 0,
+    "herdr_session_stop_exit": 0,
+    "herdr_session_delete_exit": 0,
+    "default_state_unchanged": true
+  },
+  "unknowns": [
+    "Tester initial concurrent plain freshness failure cause remains unknown; no timeout changes or historical overwrite.",
+    "Herdr geometry is bounded to version0.9.1 and configured hidden sidebar with one chrome row; other layouts/versions are unsupported by this probe.",
+    "Physical pixels/font calibration/arbitrary GUI terminal implementations are not verified.",
+    "Query reply byte routing does not prove OMP internal semantic consumption.",
+    "Overall G1 acceptance and final verification remain Root-owned."
+  ],
+  "product_source_modified": false,
+  "graphify_modified": false,
+  "commit_created": false,
+  "needs_oracle": false,
+  "scope_audit_summary": {
+    "changed": [
+      "tests/gates/g1_vt/live_outer_compat_probe.py",
+      "tests/gates/g1_vt/test_closure_independent.py",
+      "tests/gates/g1_vt/test_closure_predicates.py"
+    ],
+    "index_changed": [],
+    "outside_scope": [],
+    "comparable": true
+  },
+  "snapshot_note": "Reconstructed tester baseline-plus-delta identity against worker-after baseline, verified exact baseline candidate, then standard snapshot(checkpoint=False)/audit. Workflow run folder exclusion retained."
+}

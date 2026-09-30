@@ -1,0 +1,28 @@
+{
+  "invocation": "cw12-lockcycle-review-01",
+  "role": "reviewer",
+  "unit": "V-CW-12-p2.6-current",
+  "objective": "Perform a fresh final read-only review of the frozen CW-12 authoritative-fence and peer-bound admission candidate.",
+  "candidate_manifest": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw12-lockcycle-review.json",
+  "candidate": "d27a7716ca9cf35b50a2e2e4555fca419bded786a4bfd8bccfcc4ccc1397e8f6",
+  "evidence": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-final-review-03.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-lockcycle-correction-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-lockcycle-test-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-durability-oracle-01.json"
+  ],
+  "must_review": [
+    "Verify the complete frozen manifest and all file hashes.",
+    "Independently reproduce final-03 transient admission, lock-cycle, and late peer-switch cases; distinguish safety linearization from eventual mirror convergence.",
+    "Inspect ReviewAdmissionFence for races, reentrancy, lost close/open, cross-run reuse, callback exception, and callback-to-coordinator lock cycles.",
+    "Inspect peer-bound resume and every automatic dispatch for TOCTOU, including switches after either sequential probe and immediately before callback execution.",
+    "Review exact stop-event correlation, durability/recovery boundary, resume_failed, cancellation, no replay, manual TUI independence, real status evidence, and cleanup for regressions.",
+    "Report all P0/P1/P2 findings with reproduction and exact location; do not edit files."
+  ],
+  "requirements": ["C-AC-25", "C-AC-30", "C-AC-33", "CW-12 ticket and approved operating contract"],
+  "constraints": [
+    "Read-only review; no source, test, graph, workflow, or ledger writes.",
+    "Do not infer approval from passing tests and do not broaden CW12 into CW15."
+  ],
+  "report": ["manifest verification", "findings by severity", "requirement/evidence assessment", "approved or needs_reroute"]
+}

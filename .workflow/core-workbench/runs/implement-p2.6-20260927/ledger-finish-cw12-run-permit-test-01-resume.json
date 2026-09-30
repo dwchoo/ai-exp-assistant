@@ -1,0 +1,17 @@
+{
+  "path": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 847,
+  "event": {
+    "id": "finish-cw12-run-permit-test-01-resume",
+    "kind": "transition",
+    "data": {
+      "invocation": "cw12-run-permit-test-01",
+      "state": "finished",
+      "evidence": "read_thread 01a0e351-ba77-7c81-9a36-a7941cdd5310 turn 01a0e820-62e0-7ef0-9cf1-018bd211f483; candidate_ready and full/live regression completed; snapshot-cw12-run-permit-test.json",
+      "outcome": "complete",
+      "observed_model": "unverified",
+      "observed_effort": "unverified",
+      "not_started_evidence": null
+    }
+  }
+}

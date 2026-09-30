@@ -1,0 +1,23 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 415,
+  "event": {
+    "id": "limit-cw08-correction-unit-20260928",
+    "kind": "limit",
+    "data": {
+      "bucket": "unit:V-CW-08-p2.6-current",
+      "origin": "operating",
+      "value": 4,
+      "authority": "Approved PLAN p2.6 CW-08, workflow-contract section 8, current implementation authorization, and independent-test evidence",
+      "reason": "One bounded correction for bool-as-zero readiness admission",
+      "decision_owner": "Root",
+      "remaining_work_estimate": 1,
+      "expected_previous": {
+        "value": 3,
+        "authority": "Approved PLAN p2.6 CW-08, workflow-contract section 8, and current implementation authorization",
+        "reason": "Task-linked two-role mailbox implementation with actual OMP runtime verification and review"
+      },
+      "scope_basis": null
+    }
+  }
+}

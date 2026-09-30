@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "invocation": "cw02-g1-review-01",
+  "candidate": "c8c8d4c1dba9767e9fb941bdfec31fcf10516d5c5c07ee186593587fb1f0a722",
+  "verdict": "needs_fix",
+  "findings": [
+    {
+      "severity": "P2",
+      "confidence": "high",
+      "title": "Wide glyph at the last inner column can overwrite the pane border",
+      "path": "src/workbench/ui/terminal_g1/app.py",
+      "line": 207,
+      "evidence": "Memory-only fixture placed RGB '가' at source x=27 in 30 columns, resized the pyte screen to 28 columns, then called _draw on a 90x24 surface. The overlay emitted CUP 3;29 plus the width-2 glyph; its continuation occupied border column 30 and replaced '|'. pyte.resize removed only the clipped continuation and retained the lead, so redraw reproduced the defect.",
+      "required_fix": "Both curses and exact-RGB output paths must emit a cell only when the whole display-width glyph fits inside the pane inner boundary. Add a regression for a clipped wide-glyph lead after resize."
+    }
+  ],
+  "severity_counts": {"P0": 0, "P1": 0, "P2": 1, "P3": 0},
+  "verified": [
+    "All six relevant changed source/test file hashes matched frozen candidate c8c8d4c1dba9767e9fb941bdfec31fcf10516d5c5c07ee186593587fb1f0a722.",
+    "The six independent PID/geometry negative subcases remained meaningful and were not weakened.",
+    "No additional blocking finding was found in private DEC CPR, unsupported private DSR no-op, query FIFO, opt-in RGB, or palette fallback handling."
+  ],
+  "retained_unknowns": [
+    "The first concurrent plain run remains unknown; bounded serial runs passed.",
+    "Physical pixel/color calibration and font/glyph shape fidelity were not measured.",
+    "Cross-version and other terminal combinations are not claimed.",
+    "Query bytes reaching the TTY input queue do not prove OMP's private semantic interpretation."
+  ],
+  "runtime_reexecuted": false,
+  "source_or_test_files_modified": false,
+  "provenance": "Recorded by Root from fresh reviewer final payload because the reviewer remained read-only."
+}

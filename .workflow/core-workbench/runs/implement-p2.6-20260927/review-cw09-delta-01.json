@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "invocation": "cw09-delta-review-01",
+  "candidate": "6ba379e6e9c13af19a66b27245822e392c2c763f8d0716892d3c915eca7493c3",
+  "verdict": "pass",
+  "approval": true,
+  "findings": [],
+  "counts": {"P0": 0, "P1": 0, "P2": 0, "P3": 0},
+  "previous_findings_closed": 2,
+  "impact_review": {
+    "append_only_tables_checked": 13,
+    "replace_rejected": true,
+    "history_preserved": true,
+    "valid_cancellation_migration": "passed",
+    "wrong_kind_migration": "rejected and rolled back",
+    "independent_tests_weakened": false,
+    "manifest_product_and_test_files_match": true
+  },
+  "residual_limitations": [
+    "Power-loss and concurrent-writer recovery are outside CW-09 approval scope.",
+    "Downstream CW-08 behavior is not established by this review."
+  ],
+  "needs_oracle": false
+}

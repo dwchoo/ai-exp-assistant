@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "feature_id": "core-workbench",
+  "status": "implementation_authorized",
+  "authority": "User approved BRIEF r1.12, SPEC s2.5, PLAN p2.5 and Oracle fixes, and explicitly invoked $implement docs/features/core-workbench on 2026-09-25",
+  "approved_revisions": {
+    "brief": "r1.12",
+    "spec": "s2.5",
+    "plan": "p2.5",
+    "decision": "C-D54"
+  },
+  "candidate_files": {
+    "docs/features/core-workbench/BRIEF.md": "7a8127b0d9b434b6ebbff39cbbf19330b852c3c1486f823878ef8939bba56306",
+    "docs/features/core-workbench/SPEC.md": "c3f64b240454e9ca7095f454b42a2a038fdda5fe282ec5abb405a0c596256fae",
+    "docs/features/core-workbench/PLAN.json": "e0213ae577dc72c18021ec193fd351359519db303343d3368f3ea5b6172c8257",
+    "docs/features/core-workbench/DECISIONS.md": "e17879ca72358444372cc102477d4d81d2399560aa78c16c45a5b6cd6363828a",
+    "docs/features/core-workbench/OPERATING-CONTRACT.md": "e92421bdc2f14131a713df27a573d04a0bf7883e9028f92fe49df2294c6dc51b",
+    "docs/adr/0002-managed-shell-control-wait.md": "31879d1eb9d625dfb574aa2470bc8e0b457579ab9259161f1f7f49968888528a",
+    "docs/features/core-workbench/tickets/CW-02.md": "b2f0a9feacf92324a11945cd8b794d785a7f8c036a465d32d855263b34085d2c",
+    "docs/features/core-workbench/tickets/CW-03.md": "1361dc9a75164ba576b6196b162b385fc9650d18dc8d3e70cb0ee632429953a6",
+    "docs/features/core-workbench/tickets/CW-04.md": "d714cb109241809ebce9098b9a68673035e454b5d78b190258aabea67189df95",
+    "docs/features/core-workbench/tickets/CW-05.md": "9ed3a03448a071fc86343f11a31a32086a5f2ea2e00e98d5c339ef86c6bbb6fc",
+    "docs/features/core-workbench/tickets/CW-07.md": "9118ecb868ae6d9c6f13716796c82d70fc46e93e445e890a24a66a95f47bf520"
+  },
+  "bundle_digest": "815d4cbca1a675a4578dbc9cfe10596c90742dabcf8e3e3fbf2a07e004e54a92",
+  "budget": {
+    "limit": 220,
+    "limit_kind": "user_cap",
+    "used_at_authorization": 186,
+    "remaining": 34,
+    "ledger": ".workflow/core-workbench/runs/implement-p2.5-20260925/ledger.json"
+  },
+  "docker_runtime_validation": "skipped_by_user_decision_evidence_pending",
+  "publication_authorized": false
+}

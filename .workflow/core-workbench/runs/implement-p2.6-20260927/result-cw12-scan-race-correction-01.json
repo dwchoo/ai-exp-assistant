@@ -1,0 +1,28 @@
+{
+  "invocation": "cw12-scan-race-correction-01",
+  "outcome": "complete",
+  "candidate_ready": true,
+  "changed_paths": [
+    "src/workbench/policy/pause_automation/controller.py",
+    "src/workbench/policy/pause_automation/journal.py",
+    "tests/policy/pause_automation/test_pause_policy.py",
+    "graphify-out/**"
+  ],
+  "fixes": [
+    "bind_run durably records the peer cwd baseline before opening authority; pause/resume reuse it and missing early evidence fails closed",
+    "bounded worktree reconciliation includes Git-ignored untracked output",
+    "peer traversal uses fd-relative O_NOFOLLOW operations and closes descriptors on every path"
+  ],
+  "checks": {
+    "focused": "5 passed",
+    "policy": "82 passed in 15.087s",
+    "fd_cleanup": "descriptor counts equal before/after success and symlink-swap rejection",
+    "graphify": "graphify update . exit 0",
+    "diff_check": "exit 0"
+  },
+  "residual_risks": [
+    "Unavailable Linux /proc or fd observations and exceeded scan limits reject resume.",
+    "External activity before the bind baseline and concurrent changes after validation are not an atomic filesystem transaction."
+  ],
+  "mutation_owner": "/root/cw12_post_review_correction"
+}

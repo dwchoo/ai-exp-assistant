@@ -1,0 +1,12 @@
+{
+  "before": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw11-token-retention-final.json",
+  "after": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw12-worker-after.json",
+  "allowed": [
+    "src/workbench/policy/pause_*/**",
+    "tests/policy/pause_*/**",
+    "omp_bridge/policy_*/**",
+    "src/workbench/ui/status_*/**",
+    "tests/ui/status_*/**",
+    "graphify-out/**"
+  ]
+}

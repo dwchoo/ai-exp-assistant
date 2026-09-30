@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "invocation": "cw12-final-scope-test-01",
+  "role": "test_designer",
+  "unit": "V-CW-12-p2.6-current",
+  "authority": "User $implement docs/features/core-workbench request; approved PLAN p2.6 CW-12 and final-scope review correction",
+  "objective": "Independently delta-verify the final C-AC-33 reconciliation correction and actual OMP runtime.",
+  "candidate": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw12-final-scope-correction.json",
+    "candidate_id": "5135e4d92ce586b55f948b34d2264702f787c41e22c9a2e409f4c49e410a43d9"
+  },
+  "inputs": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-post-review-final-review-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-final-scope-correction-01.json",
+    "docs/features/core-workbench/tickets/CW-12.md"
+  ],
+  "must_verify": [
+    "peer cwd changes after pause are compared to the production-owned pause baseline/current approved paths; stable out-of-scope changes reject resume while allowed paths work",
+    "resolved descendant child cwd is accepted, while sibling/escape/symlink ambiguity and unavailable observation reject resume",
+    "file-count, total-byte, per-file/Git-output budgets, special files, mutation during scan, and base-commit drift fail closed without unbounded reads",
+    "prior persisted-run and late-result fixes remain green",
+    "actual omp/18.2.10 live_pause_runtime_probe passes with zero residue"
+  ],
+  "allowed_write_paths": ["tests/policy/pause_automation/**", "graphify-out/**"],
+  "constraints": [
+    "Independent test-only mutation owner; do not edit production, .workflow, docs, PLAN/state, or other tests.",
+    "Use apply_patch for test edits; do not delegate, commit, publish, deploy, or use Docker.",
+    "If defective, return needs_reroute with minimal reproduction; do not fix production."
+  ],
+  "report": "Return candidate_ready/needs_reroute, exact commands/counts, test-only changes, acceptance assessment, cleanup evidence, and residual risks."
+}

@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "check_id": "cw03-input-jobs-takeover-final-runtime-01",
+  "requirements_identity": "e0ea9ef4ea1457ea2b76df7b53a7ccb17f48555652a81886978ec1bc3fe6d0e6",
+  "argv": ["python3", "tests/gates/g2_shell/live_input_jobs_probe.py"],
+  "cwd": "/home/dwchoo/ai-exp-assistant",
+  "environment": {"PYTHONDONTWRITEBYTECODE": "1", "description": "Linux Python 3.12.3 with /usr/bin/bash and /usr/bin/dash; final input-jobs regression after takeover repair; no conda or Docker validation"},
+  "started_at": "2026-09-27T13:03:29.664794+00:00",
+  "finished_at": "2026-09-27T13:03:34.481810+00:00",
+  "exit_code": 0, "timed_out": false,
+  "log": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/check-input-jobs-takeover-final-runtime.log",
+  "log_sha256": "1e11806f6402635b7bede4b7767425a61ceed48e59c3dd7593d43e5deb5cf637",
+  "before": "3aea53b58b0c08dc2e7df4f1620264f85cc51afab7bbd06da18be3d9559feaec",
+  "after": "3aea53b58b0c08dc2e7df4f1620264f85cc51afab7bbd06da18be3d9559feaec",
+  "stable": true,
+  "items": [{"id": "G2-INPUT-JOBS", "acceptance_ids": ["C-AC-08", "C-AC-26"], "result": "passed", "observed_evidence_level": "runtime", "evidence": "check-input-jobs-takeover-final-runtime.log: final takeover repair retained all 24 Bash/dash input/job cases and repeated same-parent guarded dispatch", "unknowns": []}]
+}

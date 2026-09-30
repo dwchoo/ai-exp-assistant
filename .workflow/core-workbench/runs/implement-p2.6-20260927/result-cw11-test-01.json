@@ -1,0 +1,35 @@
+{
+  "invocation": "cw11-test-01",
+  "role": "test_designer",
+  "outcome": "candidate_ready",
+  "candidate_base": "e34800acc53f4494ffd5cc9ac81f2ef42de7c8c1900fbe7d9f6de8b47f0c61d9",
+  "new_files": [
+    "tests/observation/test_worker_review_independent.py",
+    "tests/observation/live_worker_review_independent.py"
+  ],
+  "independent_coverage": "Clock before/exact/after 60s, large jumps, invalid/non-monotonic time, 121st review, identity replacement, busy/user/coalescing, delivery deferred/unknown/exception no replay, pause/authority/exit, hang evidence/privacy, and usage labels.",
+  "checks": {
+    "independent_unit": "4/4 passed",
+    "observation_total": "16/16 passed",
+    "workflow": "44/44 passed",
+    "bridge": "18/18 passed",
+    "contracts": "20/20 passed",
+    "g4_evidence": "10/10 passed",
+    "g4_lifetime": "8/8 passed",
+    "node": "33/33 passed"
+  },
+  "runtime": {
+    "omp_version": "18.2.10",
+    "real_clock_review": "omp_processed at 60.0 seconds",
+    "peer_wakes": "13/13 processed",
+    "provider_requests": 14,
+    "secret_absent": true,
+    "residue": 0
+  },
+  "scope": {
+    "direct_changes_only_allowed_tests": true,
+    "graphify_generated_drift": "expected from required graphify update",
+    "head_unchanged": true
+  },
+  "needs_reroute": false
+}

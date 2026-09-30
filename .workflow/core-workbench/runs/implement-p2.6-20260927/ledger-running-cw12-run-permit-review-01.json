@@ -1,0 +1,17 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 850,
+  "event": {
+    "id": "running-cw12-run-permit-review-01",
+    "kind": "transition",
+    "data": {
+      "invocation": "cw12-run-permit-review-01",
+      "state": "running",
+      "evidence": "collaboration.spawn_agent /root/cw12_run_permit_review",
+      "outcome": null,
+      "observed_model": "gpt-6-sol",
+      "observed_effort": "high",
+      "not_started_evidence": null
+    }
+  }
+}

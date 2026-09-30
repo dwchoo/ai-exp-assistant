@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "invocation": "cw07-review-regression-test-01",
+  "role": "test_designer",
+  "unit": "V-CW-07-p2.6-current",
+  "workspace": "/home/dwchoo/ai-exp-assistant",
+  "writer": true,
+  "checkpoint": ".workflow/core-workbench/runs/implement-p2.6-20260927/cw07-review-regression-checkpoint.json",
+  "requirements": ".workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw07.json",
+  "review": ".workflow/core-workbench/runs/implement-p2.6-20260927/review-cw07-01.json",
+  "allowed_write_scope": [
+    "tests/terminal/test_persistent_shell_independent.py",
+    "tests/terminal/live_persistent_shell_independent.py"
+  ],
+  "instructions": "Add an independent focused regression for the accepted P2 only. Preserve all existing tests and do not modify production or worker-owned tests. Establish a user-owned manual prompt, then force control FD loss/HOOK_LOST so snapshot phase is unknown and held_reason is unknown_or_manual_residue; assert send_user refuses and no bytes reach the PTY writer. Prefer a real Bash/sh case if it is deterministic and bounded, plus a direct public-behavior unit regression. Confirm the new regression fails on the current candidate for the intended reason while existing tests remain otherwise green. The review's detached manual daemon P1 is explicitly outside the approved guarantee under C-D55/ADR-0002; do not add cgroup or universal daemon-discovery expectations. Produce result/snapshot/scope-audit evidence and return writer lease. Do not run graphify update."
+}

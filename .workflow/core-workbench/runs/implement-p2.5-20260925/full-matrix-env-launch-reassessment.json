@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "unit": "V-CW-03-P25-FULL-ENV-LAUNCH",
+  "decision_owner": "Root",
+  "reason": "The minimum combined discriminator is independently released. The next dependency-ordered full G2 slice covers inherited environment, hook/trap compatibility and pinned Bash/sh launch behavior.",
+  "remaining_work_estimate": 3,
+  "planned_roles": ["worker_senior", "test_designer", "reviewer"],
+  "hard_total_cap": 220,
+  "used_before_unit": 213,
+  "available_before_unit": 7
+}

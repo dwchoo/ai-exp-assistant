@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "check_id": "p27-cw06-integration-live-01",
+  "kind": "integration runtime check (Root-executed existing independent probe)",
+  "candidate": "4d00e101a3ea3eac269787f746859f12fdccd969ec839980de5235adad02f5f5",
+  "argv": "/usr/bin/env PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src CW06_LIVE_MODEL=1 CW06_LIVE_EVIDENCE=<run>/p27-cw06-integration-live/evidence.json timeout 420s /tmp/cw02-g1-venv/bin/python -m unittest tests.ui.live_product_omp_independent -v",
+  "cwd": "/home/dwchoo/ai-exp-assistant",
+  "environment": "Linux; real omp/18.2.10 user config (not read); 2 model turns",
+  "started": "2026-09-30T00:52:08+09:00",
+  "finished": "2026-09-30T00:53:40+09:00",
+  "exit_code": 1,
+  "log": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-cw06-integration-live/run.log",
+  "log_sha256": "66414bda1e3c997da3fa1cf79300227c311f8cd6032f2336faa6e672b1211d1c",
+  "evidence": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-cw06-integration-live/evidence.json",
+  "items": {"P-C-AC-01": "passed runtime (S10 WBOK42 in manager pane 3.3s, not in worker)", "P-C-AC-14": "passed runtime (S11 both panes keys/slash/Esc/Ctrl-C; S6 literal prefix)", "P-C-AC-06": "passed runtime (S8 owner/focus separation, held reasons shown)", "paste/resize/detach": "passed (S4,S5,S7,S9,S13,S14)", "S15 reattach restore": "FAILED: ratios manager 0.41 worker 0.44 host 0.94 (threshold 0.8); count once, identities same", "S12 Esc cancel": "partial (no abort marker in this probe form; accepted earlier via rerun-02 tool-abort evidence)"},
+  "result": "failed",
+  "diagnosis": "ui_server sends the attach result before replay; product app switches to enqueue_display right after the result, so replay frames (up to 256 KiB per pane) land in the loop backlog and exceed CATCHUP_BACKLOG_BYTES -> catch-up keeps only 64 KiB tail and resets the screen -> OMP full-screen state (alt screen etc.) not reconstructed. Regression introduced by p27-cw06-flood-worker-04."
+}

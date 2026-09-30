@@ -1,0 +1,77 @@
+{
+  "results": [
+    {
+      "shell": "bash",
+      "case": "background",
+      "initial_admission": "MANUAL_ACTIVE",
+      "same_parent_recheck_proceeded": true,
+      "prior_scope": "observed_job",
+      "prior_scope_completed": false,
+      "backend_auto_kills": 0,
+      "user_confirmation_completed": false,
+      "owned_pids": [
+        1400481,
+        1400482,
+        1400486,
+        1400487
+      ]
+    },
+    {
+      "shell": "bash",
+      "case": "escaped",
+      "initial_admission": "MANUAL_UNKNOWN",
+      "same_parent_recheck_proceeded": true,
+      "prior_scope": "unknown",
+      "prior_scope_completed": false,
+      "backend_auto_kills": 0,
+      "user_confirmation_completed": false,
+      "owned_pids": [
+        1400489,
+        1400491,
+        1400496,
+        1400498
+      ]
+    },
+    {
+      "shell": "dash",
+      "case": "background",
+      "initial_admission": "MANUAL_ACTIVE",
+      "same_parent_recheck_proceeded": true,
+      "prior_scope": "observed_job",
+      "prior_scope_completed": false,
+      "backend_auto_kills": 0,
+      "user_confirmation_completed": false,
+      "owned_pids": [
+        1400519,
+        1400528,
+        1400711,
+        1401069
+      ]
+    },
+    {
+      "shell": "dash",
+      "case": "escaped",
+      "initial_admission": "MANUAL_UNKNOWN",
+      "same_parent_recheck_proceeded": true,
+      "prior_scope": "unknown",
+      "prior_scope_completed": false,
+      "backend_auto_kills": 0,
+      "user_confirmation_completed": false,
+      "owned_pids": [
+        1401896,
+        1402238,
+        1402270,
+        1402351
+      ]
+    }
+  ],
+  "unknown": [
+    "arbitrary pre-supervisor daemon discovery",
+    "prior escaped manual scope lifetime",
+    "production adapter integration"
+  ],
+  "excluded": [
+    "conda-specific validation",
+    "delegated-cgroup prerequisite"
+  ]
+}

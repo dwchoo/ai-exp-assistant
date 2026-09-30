@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "invocation": "cw07-worker-01",
+  "role": "worker_senior",
+  "unit": "V-CW-07-p2.6-current",
+  "workspace": "/home/dwchoo/ai-exp-assistant",
+  "writer": true,
+  "checkpoint": ".workflow/core-workbench/runs/implement-p2.6-20260927/cw07-worker-checkpoint.json",
+  "baseline_candidate": "41c2b684d3ff4f2b1a463879de56646d768e4e454402b2c93a39d74d439e798f",
+  "requirements": ".workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw07.json",
+  "ticket": "docs/features/core-workbench/tickets/CW-07.md",
+  "dependencies": [
+    "docs/features/core-workbench/tickets/CW-05.md",
+    "src/workbench/terminal/shell_g2/**",
+    "src/workbench/contracts/ports_v2.py"
+  ],
+  "allowed_write_scope": [
+    "src/workbench/terminal/shell_*/**",
+    "src/workbench/terminal/pty_*/**",
+    "tests/terminal/**"
+  ],
+  "acceptance": [
+    "P-C-AC-08 runtime: takeover request immediately blocks new dispatch; request and confirmation remain distinct; already-sent command state and foreground manual input remain observable; direct wb-handoff returns to parent control wait; separate supervisor and input-return barrier; no replay.",
+    "P-C-AC-26 runtime: managed parent cwd/exported environment persist; experiment-local cd/export do not propagate; unsubmitted input, REPL, job/manual residue, incompatible hook/trap, and unknown ownership hold new automation with explicit lifecycle state.",
+    "P-C-AC-32 runtime: user-prepared cwd/PATH/exported environment are inherited by experiment child while application-only environment is separated; unsupported hook reason is reported and held. Conda-specific matrix is excluded."
+  ],
+  "instructions": "Implement the smallest production shell adapter that consumes the verified G2/CW-05 boundaries. Reuse existing shell_g2 mechanisms rather than copying probe logic into product code. Keep input owner, parent-shell mode, supervisor/experiment state, and Task success distinct. Preserve one outstanding automatic request, PTY/control separation, unknown/no-replay behavior, and do not require experiment exit or prompt return for takeover confirmation. Add deterministic unit/fixture tests plus bounded real Bash and /bin/sh runtime probes under tests/terminal that directly establish all three required runtime gate items, with cleanup/residue checks. Do not implement downstream CW-10/11/14 behavior, do not add dependencies, and do not touch files outside the allowed scope. Run focused tests, existing G2/G4 compatibility checks, and git diff --check. Produce result, snapshot, scope audit, and raw runtime evidence artifacts under the run directory; then return writer lease. Do not run graphify update; Root owns it after code changes."
+}

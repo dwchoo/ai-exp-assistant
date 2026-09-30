@@ -1,0 +1,24 @@
+{
+  "invocation": "cw12-scan-race-test-01",
+  "outcome": "complete",
+  "candidate_ready": true,
+  "test_only_changed_paths": [
+    "tests/policy/pause_automation/test_pause_policy.py",
+    "tests/policy/pause_automation/live_pause_runtime_probe.py",
+    "tests/policy/pause_automation/test_live_pause_runtime_predicates.py",
+    "graphify-out/**"
+  ],
+  "checks": {
+    "pause": "85 passed",
+    "observation": "95 passed",
+    "tasks": "22 passed",
+    "bridge": "22 passed",
+    "workflow": "44 passed",
+    "fd_cleanup": "descriptor counts equal after normal and symlink-swap rejection",
+    "actual_omp_negative": "initial out-of-scope peer file correctly rejected resume; exit 1; zero_residue=true",
+    "actual_omp_positive": "after explicit test-file cleanup and re-reconciliation, omp/18.2.10 exit 0; out_of_scope_rejected=true; zero_residue=true",
+    "graphify": "graphify update . succeeded"
+  },
+  "unknowns": [],
+  "mutation_owner": "/root/cw12_post_review_test"
+}

@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-review-cw06-01",
+  "ticket_id": "CW-06",
+  "role": "reviewer",
+  "unit": "V-CW-06-p2.7",
+  "approved_bundle_digest": "a521acdc3838b43a26e277afc233bab695c8b02ce0d42392c3678931b2e3f027",
+  "routing": {"planned_role": "reviewer", "selected_role": "reviewer (Opus, general-purpose, fresh)", "reason_codes": ["final_frozen_full_review"], "evidence_refs": ["user-approved routing: final frozen reviews stay Opus"]},
+  "frozen_candidate": "101b87f58fef043e9707b5ac6de1eaed15cfd0711447f8686bfc432b450e571b (manifest .workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-cw06-rerun-after.json)",
+  "base": "CW-17 integrated candidate c684c9a5...; base copies of modified files in .workflow/core-workbench/runs/implement-p2.6-20260927/p27-cw06-review-base/",
+  "unit_files": {
+    "new_production": ["src/workbench/ui/product/__init__.py", "src/workbench/ui/product/app.py", "src/workbench/ui/product/input.py", "src/workbench/ui/product/model.py", "src/workbench/ui/product/view.py"],
+    "modified_production": ["src/workbench/backend/cli.py (--plain dispatch)"],
+    "new_tests": ["tests/ui/support.py", "tests/ui/test_product_model.py", "tests/ui/test_product_pty.py", "tests/ui/test_product_entrypoint.py", "tests/ui/independent_support_cw06.py", "tests/ui/test_product_keys_independent.py", "tests/ui/test_product_paste_independent.py", "tests/ui/test_product_state_independent.py", "tests/ui/test_product_pty_independent.py", "tests/ui/live_product_omp_independent.py", "tests/ui/test_product_rerun_independent_p27e.py", "tests/ui/live_product_rerun_independent_p27e.py"],
+    "modified_tests": ["tests/backend/test_live_detach.py", "tests/backend/test_live_start.py", "tests/backend/test_live_detach_independent.py (argv --plain only)"]
+  },
+  "criteria": ["docs/features/core-workbench/tickets/CW-06.md", "BRIEF C-AC-01, C-AC-06, C-AC-14, C-AC-19 (paste), C-AC-15/18 detach semantics as consumed by UI", "SPEC 'Production 조합'", "PLAN gate_items P-C-AC-01/06/14", "src/workbench/contracts/ui_v1.py (consumed unchanged)", "docs/features/core-workbench/gates/G1.md (VT fidelity; 256-colour partial accepted)", "ADR-0001 no external multiplexer"],
+  "root_records": [".workflow/core-workbench/runs/implement-p2.6-20260927/root-adjudication-p27-cw06-entry-wiring.json", ".workflow/core-workbench/runs/implement-p2.6-20260927/root-adjudication-p27-cw06-test-01.json", ".workflow/core-workbench/runs/implement-p2.6-20260927/root-adjudication-p27-cw06-rerun-02.json"],
+  "evidence": [".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw06-test-01-agent.json", ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw06-rerun-test-02-agent.json"],
+  "review_items": [
+    "1 UI never owns PTYs/signals; exit/abrupt death = detach only; outer terminal restored on every path (exceptions, backend close, SIGTERM/SIGHUP to UI, curses init failure).",
+    "2 Input fidelity: every non-prefix byte reaches the focused pane unchanged and in order; ESC/alt/function keys/mouse sequences not mangled by the 50ms Esc hold; prefix parsing edge cases; UTF-8 handling.",
+    "3 Paste: whole-frame, <=2 MiB, visible rejection with reason, no partial send, bracketed-paste mode tracking (tri-state + sh) correctness incl. replay/generation/reattach.",
+    "4 Focus vs input owner separation; takeover/handoff notices faithful to backend state; last-confirmed time semantics.",
+    "5 Rendering: pyte per pane with replay; resize per-pane sizes; no DSR/DA replies during replay but live query replies still answered; performance with high-volume output (no unbounded buffers, UI loop responsive).",
+    "6 Entry wiring: --plain keeps CW-17 path; no change to backend/ui_v1/v1/ports_v2.",
+    "7 Tests: meaningful, not mocks of the behaviour under test; independent test edits argv-only; live probe gating hazard (see rerun adjudication).",
+    "8 Adjudication consistency (F6 routed to CW-18, O1/O2, P-C-AC-14 approval not applicable)."
+  ],
+  "scratch": "/tmp/claude-1000/-home-dwchoo-ai-exp-assistant/dd5e2cee-e10d-41c4-8ebb-7c00b50dd465/scratchpad/cw06-review/",
+  "rules": "Strictly read-only in the repo (scratch only under the scratch dir). You may run existing tests with PYTHONDONTWRITEBYTECODE=1 using pattern test_*.py; NEVER run tests/ui/live_*.py (real model turns). No real OMP use, no graphify update.",
+  "result_format": "Findings first P0..P3 (file:line, scenario, violated clause, fix direction); then per review item verdict; overall integrate (no P0/P1 and no unaddressed P2 affecting acceptance) or block. Write the full result JSON to .workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-review-cw06-01-agent.json (only file you may write in the repo) and reply <=25 lines. Korean."
+}

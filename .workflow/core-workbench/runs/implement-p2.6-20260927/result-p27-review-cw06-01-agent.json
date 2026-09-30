@@ -1,0 +1,185 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-review-cw06-01",
+  "ticket_id": "CW-06",
+  "unit": "V-CW-06-p2.7",
+  "role": "reviewer",
+  "reviewer": "Claude Opus 5.5 (fresh, independent, read-only)",
+  "recorded_at": "2026-09-29",
+  "approved_bundle_digest": "a521acdc3838b43a26e277afc233bab695c8b02ce0d42392c3678931b2e3f027",
+  "frozen_candidate": "101b87f58fef043e9707b5ac6de1eaed15cfd0711447f8686bfc432b450e571b",
+  "candidate_integrity": {
+    "check": "sha256 of every file in p27-snapshot-cw06-rerun-after.json identity.files (excluding __pycache__) against the working tree",
+    "result": "1388 files, 0 mismatch",
+    "scope_vs_cw17_checkpoint": "vs p27-snapshot-cw17-integrated-checkpoint.json (c684c9a5...): changed only src/workbench/backend/cli.py, tests/backend/test_live_detach.py, tests/backend/test_live_detach_independent.py, tests/backend/test_live_start.py (+ Root-owned .workflow/core-workbench/state.json); added only src/workbench/ui/product/* and tests/ui/*; nothing removed. ui_v1.py, v1.py, ports_v2.py and the rest of backend/ unchanged."
+  },
+  "overall": "block",
+  "overall_reason": "P2-1 affects acceptance: under high-volume pane output the product UI loop is unresponsive (Ctrl-C delivered after 13.2 s), the real backend detaches it as slow_client within about 2 s, and the UI then dies with a BrokenPipeError traceback instead of showing the reason. This violates review item 5 ('UI loop responsive') and the C-AC-19 / SPEC Paste-row expectation that input and hotkeys stay usable. The rest of the unit is sound: scope, detach semantics, paste rules, focus/owner separation, replay/query handling and entry wiring. The UI-local part of the fix is small. Sustained throughput needs a Root decision (backend backpressure is CW-17, or record it as a known limitation for UR-UX).",
+  "findings": [
+    {
+      "id": "P2-1",
+      "severity": "P2",
+      "affects_acceptance": true,
+      "title": "High-volume output: UI loop blocks input for seconds, gets detached as slow_client, then crashes with a BrokenPipeError traceback",
+      "locations": [
+        "src/workbench/ui/product/app.py:86 (client.pump(0) processes a whole recv before stdin is looked at)",
+        "src/workbench/backend/client.py:91 (recv(1 << 20): up to 1 MiB per pump, fed synchronously into pyte via on_display)",
+        "src/workbench/ui/product/model.py:121-136 (on_display feeds pyte inline)",
+        "src/workbench/ui/product/app.py:35-37,112 (ClientSender.send: OSError/EPIPE/socket.timeout not handled, so it falls into the generic 'ui error' path at app.py:149)"
+      ],
+      "evidence": [
+        "Measured pyte feed throughput through ProductModel.on_display: 'yes' output 0.08 MB/s, coloured log lines 0.30 MB/s, Korean lines 0.43 MB/s (scratch exp_perf.py).",
+        "Fixture flood of 2 MiB of 'y\\r\\n' display frames to host_shell, then Ctrl-C typed: \\x03 reached the server after 13.19 s (scratch exp_flood.py).",
+        "Real backend (python -m workbench start, fake stub omp, no model) + product UI in a PTY, host shell 'yes | head -c 200000000': backend.log shows 'ui attached' 22:49:51, 'ui detached' 22:49:53 (slow_client after the 16 MiB outbound cap). The UI exited 1 about 4.7 s later with '[workbench] ui error: ... BrokenPipeError: [Errno 32] Broken pipe' raised from model._send(ClientType.SNAPSHOT). The slow_client reason was never shown. Backend and PTYs were unaffected (detach semantics hold). Scratch: exp_real_flood.py."
+      ],
+      "failure_scenario": "The user runs a verbose command in the host shell (cat of a large log, build output, or yes). The UI freezes, Ctrl-C/prefix keys are not forwarded for many seconds, the backend drops the UI as slow_client, and the user sees a Python traceback. Reattaching while the output continues repeats this. The --plain client is the only way to interrupt.",
+      "violated": [
+        "assignment review item 5 ('performance with high-volume output ... UI loop responsive')",
+        "C-AC-19 (input verified in a normal terminal; CW-17 treated C-AC-19 as UI round trips < 1 s in test_live_paste_responsive.py)",
+        "SPEC 'Paste' row: '정상 paste·hotkey·query reply가 유지된다'",
+        "review item 1 in spirit: backend close should be reported as a reason, not as a UI crash"
+      ],
+      "fix_direction": [
+        "UI-local (CW-06 delta): bound the work per loop iteration, e.g. recv/feed at most about 64 KiB or about 20 ms of pyte time per slice. Service stdin (read, parse, send) between slices so keys have bounded latency (G1 parity was one 64 KiB slice).",
+        "UI-local: treat OSError/BrokenPipeError/socket.timeout from send as connection loss. Drain the already-received frames to surface a CLOSING reason (slow_client) and exit with a user-facing message ('backend 연결이 끊김: slow_client — 다시 attach'), not a traceback.",
+        "Root decision (not CW-06 alone): pyte cannot keep up with sustained PTY output, so either add backend backpressure/coalescing (CW-17 delta, e.g. pause reading the PTY or drop to a tail with a resync while UI outbound is high) or UI catch-up (reset the pane screen and feed only the tail when the backlog is large). Otherwise record 'sustained output > ~0.1-0.4 MB/s disconnects the UI' as a known limitation shown at UR-UX."
+      ]
+    },
+    {
+      "id": "P3-1",
+      "severity": "P3",
+      "title": "Cursor stays invisible for the rest of the session after the help overlay is opened once; cursor visibility never tracks the pane",
+      "locations": ["src/workbench/ui/product/view.py:102 (curses.curs_set(0) in _draw_help; nothing calls curs_set(1))", "src/workbench/ui/product/view.py:84 (when the pane app hides its cursor, the hardware cursor is left at the footer/last drawn cell)"],
+      "evidence": "PTY run: prefix ? then a key to close. The output contains one \\x1b[?25l and no \\x1b[?25h afterwards; pyte cursor.hidden stays True after typing (scratch exp_misc.py).",
+      "failure_scenario": "The user opens help (prefix ?) once. From then on the host-shell and OMP-composer caret is invisible until the UI restarts. The user will hit this at UR-UX.",
+      "violated": "C-AC-14 original TUI fidelity (the caret is part of the TUI); review item 5 rendering",
+      "fix_direction": "In draw(): curs_set(0) while the help overlay is open or the focused screen's cursor is hidden, otherwise curs_set(1) (guard curses.error)."
+    },
+    {
+      "id": "P3-2",
+      "severity": "P3",
+      "title": "No SIGTERM/SIGHUP handling: outer terminal is not fully restored",
+      "locations": ["src/workbench/ui/product/app.py:58-120 (loop), 123-168 (run_product): only SIGWINCH is handled"],
+      "evidence": "PTY runs (scratch exp_signals.py/exp_sigterm.py). SIGTERM: ncurses' own handler (SigCgt shows SIGTERM caught) runs endwin and exit(1), restoring termios and leaving the alternate screen, but the Python finally does not run, so \\x1b[?2004l is never written and bracketed paste stays on in the outer terminal. SIGHUP: exit -1, outer tty left raw (ICANON/ECHO off) and in the alternate screen. SIGINT: fully restored. In every case the backend only sees a disconnect (detach). Detach semantics hold.",
+      "failure_scenario": "The user or a tool runs 'kill <ui pid>' (or kill -HUP). The outer shell is left with bracketed paste on (SIGTERM), or raw with no echo (SIGHUP), until 'reset'.",
+      "violated": "assignment review item 1 ('outer terminal restored on every path ... SIGTERM/SIGHUP to UI')",
+      "fix_direction": "Install SIGTERM/SIGHUP handlers before curses.wrapper that raise SystemExit (or set model.quit) so the loop's finally, the wrapper's endwin and the termios restore all run. Add a PTY test that sends SIGTERM/SIGHUP and checks ICANON/ECHO, 1049l and 2004l."
+    },
+    {
+      "id": "P3-3",
+      "severity": "P3",
+      "title": "Prefix followed by an escape-sequence key leaks the sequence tail into the pane (same class as F3)",
+      "locations": ["src/workbench/ui/product/input.py:107-124"],
+      "evidence": "InputParser: prefix+Up -> [Command('\\x1b'), Passthrough(b'[A')]; prefix+F5 -> Passthrough(b'[15~'); prefix+F1 (SS3) -> Passthrough(b'OP'); prefix+Alt-x -> Passthrough(b'x') (scratch exp_misc.py).",
+      "failure_scenario": "The user presses Ctrl-] and then an arrow or function key (for example, trying to switch panes). '[A' or '[15~' is typed into the OMP composer or the shell line.",
+      "violated": "assignment review item 2 (prefix parsing edge cases; non-prefix bytes must not be mangled); F3 fix direction ('consume the whole sequence after prefix as one unknown command')",
+      "fix_direction": "After the prefix, when ESC starts a CSI/SS3/Alt sequence, consume the whole sequence (CSI up to its final byte 0x40-0x7E, SS3 plus one byte, ESC plus one byte) as one unknown command. Alternatively cancel the prefix and forward the whole sequence unchanged. Add parser tests."
+    },
+    {
+      "id": "P3-4",
+      "severity": "P3",
+      "title": "The 50 ms Esc hold also releases longer partial paste introducers, so a paste whose introducer is split across reads by more than 50 ms degrades to typed input",
+      "locations": ["src/workbench/ui/product/input.py:64-68 (flush force after PARTIAL_HOLD_SECONDS)", "src/workbench/ui/product/input.py:138-139"],
+      "evidence": "Code path: pending b'\\x1b[20' with a gap of more than 50 ms is flushed as literal, then '0~<content>\\x1b[201~' is passed through as typed bytes. The G1 router (terminal_g1/input_router.py:111-113) deliberately waited for the terminating byte of a partial introducer.",
+      "failure_scenario": "Rare. On a slow or remote link (ssh), a multi-line paste is executed line by line and the whole-frame and 2 MiB rules are bypassed.",
+      "violated": "C-AC-19 whole-frame paste (edge); review item 2/3",
+      "fix_direction": "Keep the short hold for a lone ESC or 'ESC [' (real Esc/Alt keys), but hold '\\x1b[2', '\\x1b[20' and '\\x1b[200' for longer (for example 0.5 s) before releasing them as literal."
+    },
+    {
+      "id": "P3-5",
+      "severity": "P3",
+      "title": "Test maintenance hazards in the required suite and in live probe gating",
+      "locations": [
+        "tests/ui/test_product_rerun_independent_p27e.py:18-30 (test_frozen_production_files_unchanged pins SHA-256 of 5 production files inside the required test_*.py suite)",
+        "tests/ui/live_product_omp_independent.py:50 (model turns on by default; the file matches '*_independent.py' discovery)",
+        "tests/backend/test_live_start_independent.py:143 (assertNotIn('attached to') is now vacuous because the product UI never prints that string; the other assertions still cover the case)"
+      ],
+      "failure_scenario": "Any legitimate correction (including the fixes above) or a UR-UX delta fails the required tests/ui suite until the pins are edited. A '*_independent.py' discovery spends real model turns (this already happened in rerun-02).",
+      "violated": "assignment review item 7 (tests meaningful and maintainable); root-adjudication-p27-cw06-rerun-02 live_probe_hazard",
+      "fix_direction": "Move the digest pin into the evidence record or manifest (not a regression test), or delete it at integration. Make live model turns opt-in (for example CW06_LIVE_MODEL=1) in a test-maintenance delta, as Root already noted."
+    },
+    {
+      "id": "P3-6",
+      "severity": "P3",
+      "title": "Minor accuracy and robustness nits",
+      "locations": [
+        "src/workbench/ui/product/app.py:126-128 (the no-TTY message suggests --plain, but run_attach also requires a TTY: backend/client.py:195-197)",
+        "src/workbench/ui/product/input.py:12 (comment says Ctrl-] is 'not used by ... bash line editing'; readline's emacs keymap binds C-] to character-search, still reachable via prefix prefix; relevant to UR-UX key choice)",
+        "src/workbench/ui/product/app.py:66,77,118 (hard-code fd 1 instead of run_product's stdout_fd)"
+      ],
+      "failure_scenario": "A misleading hint for scripted/no-TTY use; UR-UX gets an inaccurate key-conflict note; wrong fd if the entry is ever called with a non-default stdout_fd.",
+      "violated": "none of the acceptance criteria; accuracy",
+      "fix_direction": "Reword the message (for example, suggest 'status --json' for scripting). Correct the comment and list the C-] readline binding for UR-UX. Pass stdout_fd into loop."
+    }
+  ],
+  "observations_non_blocking": [
+    "O-a: The outer-terminal modes that pane apps request (DECCKM application cursor keys, mouse tracking, focus events, kitty keyboard protocol queries such as CSI ? u) are neither mirrored nor answered, so OMP runs in legacy key mode (live S11 confirmed that Alt+Enter, Esc and Ctrl-C work). This matches G1, where outer terminals xterm/Alacritty/WezTerm/Kitty are untested. Record for UR-UX / CW-16 I-COMPAT.",
+    "O-b: '마지막 확인' is the time of the last backend frame, refreshed by a 5 s snapshot poll, so it indicates backend liveness. The model-level last-check time of C-AC-17 / SPEC s168 needs automation state that CW-18 has not bound yet (backend automation.state='not_configured'). CW-18 should surface it.",
+    "O-c: The UI's 2 MiB paste bound counts the 12 marker bytes, so it is 12 bytes stricter than the backend when markers are stripped. This is negligible and still consistent with 'reject >2 MiB whole'.",
+    "O-d: An unterminated bracketed paste (no 201~) swallows later input, including prefix d, until 2 MiB. G1 has the same behaviour (no timeout by design), so this is not a regression.",
+    "O-e: The curses init failure (unknown TERM) is restored correctly (ICANON back, exit 1, connection close = detach), but it prints a raw traceback. TERM=dumb runs curses. --plain remains the path for dumb terminals."
+  ],
+  "review_items": {
+    "1_no_pty_ownership_detach_restore": {
+      "verdict": "pass_with_findings",
+      "basis": "The product package imports no PtySession/killpg/os.kill. The only exit request is DETACH (app.py:155-159), and abrupt exits only close the socket. Verified restore on detach, backend CLOSING, connection loss, UI exception (existing tests), SIGINT and curses init failure. The gaps are SIGTERM (2004h left) and SIGHUP (raw left): P3-2. The BrokenPipe crash path (P2-1) still restores the terminal but reports a traceback."
+    },
+    "2_input_fidelity": {
+      "verdict": "pass_with_findings",
+      "basis": "Bytes are forwarded raw with no decoding, in order, and with the explicit pane on every frame. Function keys, Alt, SGR/X10 mouse and 'ESC [ 2 ~' pass immediately because only prefixes of 'ESC [200~' are held. The lone Esc hold is 50-100 ms. The F2/F3 fixes are verified. Remaining edges: P3-3 (prefix plus escape-sequence leak) and P3-4 (split introducer)."
+    },
+    "3_paste": {
+      "verdict": "pass",
+      "basis": "Whole frame, max 2 MiB including markers, discard with a visible 'paste_too_large' and zero bytes sent. Backend refusals (queue_full, input_owner_manager, paste_too_large) are shown with pane and reason. DECSET/DECRST 2004 is tracked per pane with a split-sequence tail. It is tri-state (None keeps the markers, fail-safe for OMP whose 2004h may fall out of the 256 KiB replay), resets on session/generation change, and sh strips unless 2004h was observed. Paste and rejection are handled before help-close (F4)."
+    },
+    "4_focus_owner_notices_last_confirmed": {
+      "verdict": "pass",
+      "basis": "Focus is local plus a FOCUS request and never touches the owner. A stale state/snapshot does not override a pending focus change. The header shows focus and host input owner separately (unknown is not shown as user). The takeover-request notice is derived from the returned shell.takeover_requested/input_owner (F5), and refusals carry held_reasons (F6 UI part). The O2 backend semantics are noted. For 'last confirmed', see O-b."
+    },
+    "5_rendering_replay_resize_performance": {
+      "verdict": "fail",
+      "basis": "One pyte TerminalScreen per pane with 1000-line history, reset on identity change. DSR/DA are suppressed only for frames flagged replay, and live queries are answered to their own pane (quiet on refusal). Per-pane resize matches the drawn areas, and too-small is handled. Wide glyphs skip the placeholder. Memory is bounded. Responsiveness under high-volume output fails: P2-1. Cursor visibility: P3-1."
+    },
+    "6_entry_wiring": {
+      "verdict": "pass",
+      "basis": "cli.py: _attach dispatches to run_product unless --plain (on both start and attach). The NotRunning handling is kept. The manifest diff vs the CW-17 checkpoint confirms no change to backend (besides cli.py), ui_v1, v1 or ports_v2. The independent CW-17 test edits are argv-only ('--plain'), confirmed by diff against p27-cw06-review-base."
+    },
+    "7_tests": {
+      "verdict": "pass_with_findings",
+      "basis": "The tests drive the real InputParser/ProductModel and a real curses process on a PTY against a fixture ui_v1 server, plus a real-entrypoint smoke with a stub OMP. The behaviour under test is not mocked. 'discover -s tests/ui -p test_*.py': 91 tests OK in 9.4 s. There is no high-volume, SIGTERM/SIGHUP or cursor-visibility coverage. Hazards: P3-5."
+    },
+    "8_adjudication_consistency": {
+      "verdict": "pass_with_note",
+      "basis": "The F1-F5 fixes are present and tested. F6 is correctly outside CW-06 (G2 open item, fail-safe hold), and its UI part (held_reasons) is implemented. O1 is at the G1-partial level and O2 is a backend semantic. Marking the P-C-AC-14 approval prompt not applicable and carrying it as an unknown to CW-16 I-COMPAT is reasonable, because the UI forwards approval keys as plain bytes. Note: the carry-forwards (F6 to CW-18/UR-UX, the approval unknown to CW-16, live-probe opt-in) exist only in the root-adjudication records. They are not yet in the CW-18/CW-16 tickets or the ledger, and Root should record them at integration."
+    }
+  },
+  "gate_items_view": {
+    "P-C-AC-01": "no code-level objection; runtime evidence from test-01 S10 (not re-run: live probes excluded by the packet)",
+    "P-C-AC-06": "supported by code and tests (separate focus and owner fields, three areas)",
+    "P-C-AC-14": "key fidelity supported by code and the rerun-02 evidence; the approval prompt is an unknown carried to CW-16; the P3-1 cursor issue affects TUI fidelity cosmetically"
+  },
+  "checks": [
+    {"command": "/usr/bin/env PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/ui -p 'test_*.py'", "cwd": "/home/dwchoo/ai-exp-assistant", "exit": 0, "result": "Ran 91 tests in 9.394s OK"},
+    {"command": "sha256 verification of the frozen manifest", "exit": 0, "result": "1388 files, 0 mismatch"},
+    {"command": "scratch exp_signals.py / exp_sigterm.py (fixture server + product UI in a PTY, SIGTERM/SIGHUP/SIGINT)", "exit": 0, "result": "SIGTERM exit 1, ICANON restored, 1049l yes, 2004l no; SIGHUP exit -1, raw left; SIGINT fully restored"},
+    {"command": "scratch exp_misc.py (prefix edge cases, cursor after help)", "exit": 0, "result": "prefix+ESC-sequence tails leak; ?25l without ?25h after help"},
+    {"command": "scratch exp_perf.py (ProductModel.on_display throughput)", "exit": 0, "result": "0.08 / 0.30 / 0.43 MB/s"},
+    {"command": "scratch exp_flood.py 2 (fixture flood 2 MiB, Ctrl-C latency)", "exit": 0, "result": "13.19 s"},
+    {"command": "scratch exp_real_flood.py (real backend via python -m workbench start, stub omp script, product UI attach, 'yes | head -c 200000000' in the host shell)", "exit": 0, "result": "backend detached the UI after about 2 s (slow_client); the UI exited 1 with a BrokenPipeError traceback; shutdown clean ('verified': true)"},
+    {"command": "scratch exp_term.py (TERM=nonexistent-term / dumb)", "exit": 0, "result": "init failure restored (exit 1, traceback); dumb runs"}
+  ],
+  "not_run": [
+    "tests/ui/live_*.py (real model turns; prohibited by the packet)",
+    "tests/backend live suites (spend real OMP; L-CW17 results taken from test-01 evidence: 8 OK after --plain)",
+    "graphify update (prohibited)"
+  ],
+  "environment_notes": [
+    "Scratch scripts live in /tmp/claude-1000/-home-dwchoo-ai-exp-assistant/dd5e2cee-e10d-41c4-8ebb-7c00b50dd465/scratchpad/cw06-review/.",
+    "AF_UNIX path length forced short socket dirs. The fixture flood used a mkdtemp under /tmp (removed), and the real-backend experiment used /tmp/cw06rv (mode 0700; the backend refuses a symlinked data dir, O_NOFOLLOW). It was removed after 'shutdown --yes' reported verified: true. No leftover processes and no new .pyc files in the repo were verified after the runs.",
+    "The only repo write is this result file."
+  ],
+  "unknowns": [
+    "The exact sustained output rate the backend can push to a UI before slow_client depends on the machine; it was demonstrated with 'yes' only.",
+    "Outer terminals other than the test PTY (tmux/herdr/kitty) were not exercised by this review."
+  ]
+}

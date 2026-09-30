@@ -1,0 +1,616 @@
+{
+  "schema_version": 1,
+  "invocation": "cw02-g1-wide-correction-01",
+  "ticket": "CW-02",
+  "unit": "V-CW-02-p2.6-current",
+  "task_result": "candidate_ready",
+  "candidate": "a3eae7024ca8b9180d6d33281890de80ae688e90ae0214b991938b59419fd544",
+  "base_candidate": "c8c8d4c1dba9767e9fb941bdfec31fcf10516d5c5c07ee186593587fb1f0a722",
+  "baseline": ".workflow/core-workbench/runs/implement-p2.6-20260927/cw02-g1-frozen-candidate.json",
+  "after_snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw02-g1-wide-correction-after.json",
+  "scope_audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/scope-audit-cw02-g1-wide-correction.json",
+  "changed_files": [
+    "src/workbench/ui/terminal_g1/app.py",
+    "tests/gates/g1_vt/test_wide_boundary.py"
+  ],
+  "generated_files": [
+    "graphify-out/.graphify_labels.json",
+    "graphify-out/.graphify_labels.json.sig",
+    "graphify-out/2026-09-28/.graphify_labels.json",
+    "graphify-out/2026-09-28/GRAPH_REPORT.md",
+    "graphify-out/2026-09-28/graph.json",
+    "graphify-out/2026-09-28/manifest.json",
+    "graphify-out/GRAPH_REPORT.md",
+    "graphify-out/cache/ast/v0.9.67-s4/032b5a2762eac471b8ef56a9a5b2e55738c01ec9e47c1fcd1cf160c9411f0918.json",
+    "graphify-out/cache/ast/v0.9.67-s4/b8905ab64c2e982feaf546f339ea21396ebb1fee7292272cd2262a67dcef827f.json",
+    "graphify-out/cache/last_query_stamp",
+    "graphify-out/cache/stat-index.json",
+    "graphify-out/graph.html",
+    "graphify-out/graph.json",
+    "graphify-out/manifest.json"
+  ],
+  "changes": [
+    "Compute wcswidth(cell.data) once before either curses or RGB output; skip invalid width and any glyph whose full width exceeds the pane inner boundary.",
+    "RGB run end position includes display width rather than only lead-cell position; existing style grouping and DEC cursor save/restore remain.",
+    "No new dependency declaration: wcwidth is already pyte's installed width dependency; no configuration or product policy added.",
+    "New focused memory surface regression covers 30→28 resize leaving wide lead at x27, normal/RGB border protection, combined wide cell, fitting wide continuation, one-column combining sequence at last inner column, emitted bytes and cursor restoration."
+  ],
+  "reproduction": {
+    "before_edit_command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g1_vt /tmp/cw02-g1-venv/bin/python -m unittest -v tests/gates/g1_vt/test_wide_boundary.py",
+    "exit_code": 1,
+    "review_fixture_failures": 4,
+    "fixture_calibration": "Initial helper also produced two false failures when pyte stored a wide combining accent on the continuation. The final helper models combined source cells explicitly and concatenates pyte's continuation when inspecting the observed glyph; raw cell bytes and curses writes are asserted too.",
+    "frozen_final_fixture": {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g1_vt /tmp/cw02-g1-venv/bin/python - <<'PY' (memory-only frozen app reconstruction, SHA256 assertion, patch app._draw, run test_wide_boundary)",
+      "exit_code": 0,
+      "meaning": "Command asserts expected failure; final regression fails on exact frozen source in four clipped-glyph subcases while fitting glyph cases pass.",
+      "source_sha256": "82c650f6751939f4ce495993238c326329f6dd4685fba8e944d136a1f1b03ba5",
+      "tests": 2,
+      "failures": 4,
+      "errors": 0,
+      "output": "test_fitting_wide_continuation_and_combining_cell_are_preserved (test_wide_boundary.WideBoundaryTests.test_fitting_wide_continuation_and_combining_cell_are_preserved) ... ok\ntest_resize_clipped_wide_lead_never_overwrites_border (test_wide_boundary.WideBoundaryTests.test_resize_clipped_wide_lead_never_overwrites_border) ... \n  test_resize_clipped_wide_lead_never_overwrites_border (test_wide_boundary.WideBoundaryTests.test_resize_clipped_wide_lead_never_overwrites_border) (truecolor=False, text='가') ... FAIL\n  test_resize_clipped_wide_lead_never_overwrites_border (test_wide_boundary.WideBoundaryTests.test_resize_clipped_wide_lead_never_overwrites_border) (truecolor=False, text='가́') ... FAIL\n  test_resize_clipped_wide_lead_never_overwrites_border (test_wide_boundary.WideBoundaryTests.test_resize_clipped_wide_lead_never_overwrites_border) (truecolor=True, text='가') ... FAIL\n  test_resize_clipped_wide_lead_never_overwrites_border (test_wide_boundary.WideBoundaryTests.test_resize_clipped_wide_lead_never_overwrites_border) (truecolor=True, text='가́') ... FAIL\n\n======================================================================\nFAIL: test_resize_clipped_wide_lead_never_overwrites_border (test_wide_boundary.WideBoundaryTests.test_resize_clipped_wide_lead_never_overwrites_border) (truecolor=False, text='가')\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/dwchoo/ai-exp-assistant/tests/gates/g1_vt/test_wide_boundary.py\", line 75, in test_resize_clipped_wide_lead_never_overwrites_border\n    source, surface, output = self.draw(text, 27, truecolor)\n                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/dwchoo/ai-exp-assistant/tests/gates/g1_vt/test_wide_boundary.py\", line 68, in draw\n    self.assertEqual(surface.screen.buffer[2][29].data, \"|\")\nAssertionError: '' != '|'\n+ |\n\n\n======================================================================\nFAIL: test_resize_clipped_wide_lead_never_overwrites_border (test_wide_boundary.WideBoundaryTests.test_resize_clipped_wide_lead_never_overwrites_border) (truecolor=False, text='가́')\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/dwchoo/ai-exp-assistant/tests/gates/g1_vt/test_wide_boundary.py\", line 75, in test_resize_clipped_wide_lead_never_overwrites_border\n    source, surface, output = self.draw(text, 27, truecolor)\n                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/dwchoo/ai-exp-assistant/tests/gates/g1_vt/test_wide_boundary.py\", line 68, in draw\n    self.assertEqual(surface.screen.buffer[2][29].data, \"|\")\nAssertionError: '́' != '|'\n- ́\n+ |\n\n\n======================================================================\nFAIL: test_resize_clipped_wide_lead_never_overwrites_border (test_wide_boundary.WideBoundaryTests.test_resize_clipped_wide_lead_never_overwrites_border) (truecolor=True, text='가')\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/dwchoo/ai-exp-assistant/tests/gates/g1_vt/test_wide_boundary.py\", line 75, in test_resize_clipped_wide_lead_never_overwrites_border\n    source, surface, output = self.draw(text, 27, truecolor)\n                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/dwchoo/ai-exp-assistant/tests/gates/g1_vt/test_wide_boundary.py\", line 68, in draw\n    self.assertEqual(surface.screen.buffer[2][29].data, \"|\")\nAssertionError: '' != '|'\n+ |\n\n\n======================================================================\nFAIL: test_resize_clipped_wide_lead_never_overwrites_border (test_wide_boundary.WideBoundaryTests.test_resize_clipped_wide_lead_never_overwrites_border) (truecolor=True, text='가́')\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/dwchoo/ai-exp-assistant/tests/gates/g1_vt/test_wide_boundary.py\", line 75, in test_resize_clipped_wide_lead_never_overwrites_border\n    source, surface, output = self.draw(text, 27, truecolor)\n                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/dwchoo/ai-exp-assistant/tests/gates/g1_vt/test_wide_boundary.py\", line 68, in draw\n    self.assertEqual(surface.screen.buffer[2][29].data, \"|\")\nAssertionError: '́' != '|'\n- ́\n+ |\n\n\n----------------------------------------------------------------------\nRan 2 tests in 0.374s\n\nFAILED (failures=4)\n\n{\"frozen_source_sha256\": \"82c650f6751939f4ce495993238c326329f6dd4685fba8e944d136a1f1b03ba5\", \"tests\": 2, \"failures\": 4, \"errors\": 0}\n"
+    },
+    "initial_source_edit_after_reproduction": true
+  },
+  "checks": [
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g1_vt /tmp/cw02-g1-venv/bin/python -m unittest -v tests/gates/g1_vt/test_wide_boundary.py",
+      "exit_code": 0,
+      "tests": 2,
+      "duration_seconds": 0.386
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g1_vt /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/gates/g1_vt -p 'test_*.py' -v",
+      "exit_code": 0,
+      "tests": 61,
+      "duration_seconds": 1.502
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g1_vt /tmp/cw02-g1-venv/bin/python -m unittest -v tests/gates/g1_vt/test_closure_independent.py",
+      "exit_code": 0,
+      "tests": 6,
+      "duration_seconds": 0.049
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g1_vt /tmp/cw02-g1-venv/bin/python tests/gates/g1_vt/live_color_probe.py",
+      "exit_code": 0,
+      "evidence_key": "color",
+      "execution": "serial actual OMP18.2.10 source frame through real Workbench renderer"
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g1_vt /tmp/cw02-g1-venv/bin/python tests/gates/g1_vt/live_outer_compat_probe.py",
+      "exit_code": 0,
+      "evidence_key": "plain",
+      "execution": "serial"
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g1_vt /tmp/cw02-g1-venv/bin/python tests/gates/g1_vt/live_outer_compat_probe.py --herdr",
+      "exit_code": 0,
+      "evidence_key": "herdr",
+      "execution": "serial isolated non-nested Herdr0.9.1"
+    },
+    {
+      "command": "graphify update .",
+      "exit_code": 0,
+      "nodes": 3160,
+      "edges": 5725,
+      "communities": 377,
+      "LLM_used": false,
+      "warning": "374 saved labels vs 377 communities; 33 renamed by hub. No LLM relabel performed. Generated curated backup retained."
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0
+    },
+    {
+      "command": "pgrep -af '[/]tmp/cw02-g1-(color|outer-compat)-'",
+      "exit_code": 1,
+      "meaning": "Expected empty match"
+    },
+    {
+      "command": "SHA256 compare independent PID/geometry tests and predicates against frozen baseline",
+      "exit_code": 0,
+      "unchanged_paths": [
+        "tests/gates/g1_vt/test_closure_independent.py",
+        "tests/gates/g1_vt/live_outer_compat_probe.py",
+        "tests/gates/g1_vt/test_closure_predicates.py"
+      ]
+    }
+  ],
+  "runtime_evidence": {
+    "color": {
+      "COLORTERM": "truecolor",
+      "FORCE_COLOR": "3",
+      "NO_COLOR": "removed for original OMP",
+      "TERM": "xterm-256color",
+      "cleaned": true,
+      "diagnostic_text_styles": {
+        "G1_COLOR_BOLD": {
+          "bg": "default",
+          "bold": true,
+          "fg": "default",
+          "italics": false,
+          "underscore": false
+        },
+        "G1_COLOR_ITALIC": {
+          "bg": "default",
+          "bold": false,
+          "fg": "default",
+          "italics": true,
+          "underscore": false
+        },
+        "G1_COLOR_NORMAL": {
+          "bg": "default",
+          "bold": false,
+          "fg": "default",
+          "italics": false,
+          "underscore": false
+        }
+      },
+      "distinct_rgb_foregrounds": [
+        "00b4ff",
+        "0f1216",
+        "1f252d",
+        "20d6e7",
+        "2a3038",
+        "3998bf",
+        "39cfea",
+        "4a5058",
+        "5ab2ee",
+        "5ca3ee",
+        "6588ef",
+        "6b7280",
+        "737df0",
+        "8a69f3",
+        "9661f3",
+        "9861f2",
+        "9ca3b0",
+        "a15fee",
+        "a45fed",
+        "a65eec",
+        "ad5dea",
+        "af5de9",
+        "b15ce8",
+        "b65be6",
+        "bb5be4",
+        "bf5ae2",
+        "c858df",
+        "cb58de",
+        "d256db",
+        "d456da",
+        "d4c090",
+        "db54d8",
+        "e453d4",
+        "e5e5e7",
+        "e8ecf4",
+        "ed51d0",
+        "f64fcd",
+        "ffb347"
+      ],
+      "exact_rgb_and_emphasis": true,
+      "live_omp_ready": true,
+      "matched_geometry": true,
+      "mismatch_attributes": {
+        "bg": 0,
+        "bold": 0,
+        "data": 0,
+        "fg": 0,
+        "italics": 0,
+        "reverse": 0,
+        "underscore": 0
+      },
+      "mismatch_samples": [],
+      "mismatched_cells": 0,
+      "omp_version": "omp/18.2.10",
+      "original_output_bytes": 70057,
+      "original_output_sha256": "53f6f2bd9b99385e8a95b29691ccc5c3bf042275150daea1d2e449c7cc0923d8",
+      "pids": {
+        "original_omp": 3888225,
+        "replay_and_idle_children": [
+          3888291,
+          3888292,
+          3888293
+        ],
+        "workbench": 3888286
+      },
+      "provider_requests": 1,
+      "real_renderer_ready": true,
+      "result": "passed",
+      "rgb_emphasis_distinguishable": true,
+      "rgb_sgr_in_original_bytes": true,
+      "rgb_sgr_in_rendered_bytes": true,
+      "rgb_text_cells": 850,
+      "same_output_replayed": true,
+      "stale_herdr_context_removed": [
+        "HERDR_BIN_PATH",
+        "HERDR_ENV",
+        "HERDR_PANE_ID",
+        "HERDR_SOCKET_PATH",
+        "HERDR_TAB_ID",
+        "HERDR_WORKSPACE_ID"
+      ],
+      "theme": "same captured live OMP frame"
+    },
+    "plain": {
+      "alternate_before_exit": true,
+      "app_pid": 3888903,
+      "children_cleaned": true,
+      "fresh_after": [
+        true,
+        true,
+        true
+      ],
+      "fresh_before": [
+        true,
+        true,
+        true
+      ],
+      "fresh_input": true,
+      "initial": {
+        "app": [
+          240,
+          45
+        ],
+        "child_pids": [
+          3888904,
+          3888905,
+          3888906
+        ],
+        "child_sizes": [
+          [
+            78,
+            41
+          ],
+          [
+            78,
+            41
+          ],
+          [
+            78,
+            41
+          ]
+        ],
+        "cross_routed": [
+          false,
+          false,
+          false
+        ],
+        "outer": [
+          240,
+          45
+        ],
+        "target": [
+          true,
+          true,
+          true
+        ],
+        "titles": [
+          true,
+          true,
+          true
+        ]
+      },
+      "local_alternate_restored": true,
+      "mode": "plain",
+      "omp_version": "omp/18.2.10",
+      "outer_cleaned": true,
+      "owned_child_pids": [
+        3888904,
+        3888905,
+        3888906
+      ],
+      "paste_checks": [
+        true,
+        true,
+        true
+      ],
+      "paste_fresh_and_routed": true,
+      "private_dsr_queries": [],
+      "resize_propagated": true,
+      "result": "passed",
+      "sizes": [
+        {
+          "app": [
+            210,
+            39
+          ],
+          "children": [
+            [
+              68,
+              35
+            ],
+            [
+              68,
+              35
+            ],
+            [
+              68,
+              35
+            ]
+          ],
+          "cross_routed": false,
+          "outer": [
+            210,
+            39
+          ],
+          "propagated": true,
+          "stable_pids": true
+        },
+        {
+          "app": [
+            240,
+            45
+          ],
+          "children": [
+            [
+              78,
+              41
+            ],
+            [
+              78,
+              41
+            ],
+            [
+              78,
+              41
+            ]
+          ],
+          "cross_routed": false,
+          "outer": [
+            240,
+            45
+          ],
+          "propagated": true,
+          "stable_pids": true
+        }
+      ],
+      "stale_herdr_context_removed": [
+        "HERDR_BIN_PATH",
+        "HERDR_ENV",
+        "HERDR_PANE_ID",
+        "HERDR_SOCKET_PATH",
+        "HERDR_TAB_ID",
+        "HERDR_WORKSPACE_ID"
+      ],
+      "startup_ready": true,
+      "three_pane_routing": true
+    },
+    "herdr": {
+      "alternate_before_exit": true,
+      "app_pid": 3889359,
+      "children_cleaned": true,
+      "default_state_unchanged": true,
+      "fresh_after": [
+        true,
+        true,
+        true
+      ],
+      "fresh_before": [
+        true,
+        true,
+        true
+      ],
+      "fresh_input": true,
+      "herdr_version": "herdr 0.9.1",
+      "initial": {
+        "app": [
+          240,
+          44
+        ],
+        "child_pids": [
+          3889389,
+          3889390,
+          3889391
+        ],
+        "child_sizes": [
+          [
+            78,
+            40
+          ],
+          [
+            78,
+            40
+          ],
+          [
+            78,
+            40
+          ]
+        ],
+        "cross_routed": [
+          false,
+          false,
+          false
+        ],
+        "outer": [
+          240,
+          45
+        ],
+        "target": [
+          true,
+          true,
+          true
+        ],
+        "titles": [
+          true,
+          true,
+          true
+        ]
+      },
+      "isolated_session_paths": true,
+      "local_alternate_restored": true,
+      "mode": "herdr",
+      "non_nested_attach": true,
+      "omp_version": "omp/18.2.10",
+      "outer_cleaned": true,
+      "owned_child_pids": [
+        3889389,
+        3889390,
+        3889391
+      ],
+      "pane_list": {
+        "id": "cli:pane:list",
+        "result": {
+          "panes": [
+            {
+              "agent_status": "unknown",
+              "cwd": "/home/dwchoo/ai-exp-assistant",
+              "focused": true,
+              "foreground_cwd": "/home/dwchoo/ai-exp-assistant",
+              "pane_id": "w1:p1",
+              "revision": 1,
+              "scroll": {
+                "max_offset_from_bottom": 0,
+                "offset_from_bottom": 0,
+                "viewport_rows": 44
+              },
+              "tab_id": "w1:t1",
+              "terminal_id": "term_65c7bbbd66e951",
+              "terminal_title": "dwchoo@dwchoo-mini-pc: ~/ai-exp-assistant",
+              "terminal_title_stripped": "dwchoo@dwchoo-mini-pc: ~/ai-exp-assistant",
+              "workspace_id": "w1"
+            }
+          ],
+          "type": "pane_list"
+        }
+      },
+      "pane_run_exit": 0,
+      "paste_checks": [
+        true,
+        true,
+        true
+      ],
+      "paste_fresh_and_routed": true,
+      "private_dsr_queries": [
+        996
+      ],
+      "resize_propagated": true,
+      "result": "passed",
+      "session_delete_exit": 0,
+      "session_deleted": true,
+      "session_stop_exit": 0,
+      "sizes": [
+        {
+          "app": [
+            210,
+            38
+          ],
+          "children": [
+            [
+              68,
+              34
+            ],
+            [
+              68,
+              34
+            ],
+            [
+              68,
+              34
+            ]
+          ],
+          "cross_routed": false,
+          "outer": [
+            210,
+            39
+          ],
+          "propagated": true,
+          "stable_pids": true
+        },
+        {
+          "app": [
+            240,
+            44
+          ],
+          "children": [
+            [
+              78,
+              40
+            ],
+            [
+              78,
+              40
+            ],
+            [
+              78,
+              40
+            ]
+          ],
+          "cross_routed": false,
+          "outer": [
+            240,
+            45
+          ],
+          "propagated": true,
+          "stable_pids": true
+        }
+      ],
+      "stale_herdr_context_removed": [
+        "HERDR_BIN_PATH",
+        "HERDR_ENV",
+        "HERDR_PANE_ID",
+        "HERDR_SOCKET_PATH",
+        "HERDR_TAB_ID",
+        "HERDR_WORKSPACE_ID"
+      ],
+      "startup_ready": true,
+      "three_pane_routing": true
+    }
+  },
+  "cleanup": {
+    "owned_pids_checked": [
+      3888225,
+      3888286,
+      3888291,
+      3888292,
+      3888293,
+      3888903,
+      3888904,
+      3888905,
+      3888906,
+      3889359,
+      3889389,
+      3889390,
+      3889391
+    ],
+    "owned_pids_remaining": [],
+    "temporary_directories_remaining": [],
+    "temporary_process_path_matches": 0,
+    "active_owned_checks_or_writers": 0,
+    "default_herdr_state_unchanged": true,
+    "herdr_session_stop_exit": 0,
+    "herdr_session_delete_exit": 0
+  },
+  "historical_evidence": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw02-g1-test-01.json: first concurrent plain unknown preserved; cause unproven.",
+  "unknowns": [
+    "Physical pixels/fonts/color calibration and arbitrary terminal/Unicode-version width differences remain unverified.",
+    "pyte stores some wide combining marks on continuation cells; this correction preserves emitted cell data and does not change parser normalization.",
+    "Query byte routing does not establish OMP internal semantic consumption.",
+    "Graph community labels have the observed generated-update warning; semantic relabel is not part of this correction.",
+    "Overall G1 acceptance remains Root-owned."
+  ],
+  "scope_audit_summary": {
+    "changed": [
+      "graphify-out/.graphify_labels.json",
+      "graphify-out/.graphify_labels.json.sig",
+      "graphify-out/2026-09-28/.graphify_labels.json",
+      "graphify-out/2026-09-28/GRAPH_REPORT.md",
+      "graphify-out/2026-09-28/graph.json",
+      "graphify-out/2026-09-28/manifest.json",
+      "graphify-out/GRAPH_REPORT.md",
+      "graphify-out/cache/ast/v0.9.67-s4/032b5a2762eac471b8ef56a9a5b2e55738c01ec9e47c1fcd1cf160c9411f0918.json",
+      "graphify-out/cache/ast/v0.9.67-s4/b8905ab64c2e982feaf546f339ea21396ebb1fee7292272cd2262a67dcef827f.json",
+      "graphify-out/cache/last_query_stamp",
+      "graphify-out/cache/stat-index.json",
+      "graphify-out/graph.html",
+      "graphify-out/graph.json",
+      "graphify-out/manifest.json",
+      "src/workbench/ui/terminal_g1/app.py",
+      "tests/gates/g1_vt/test_wide_boundary.py"
+    ],
+    "index_changed": [],
+    "outside_scope": [],
+    "comparable": true
+  },
+  "commit_created": false,
+  "needs_oracle": false
+}

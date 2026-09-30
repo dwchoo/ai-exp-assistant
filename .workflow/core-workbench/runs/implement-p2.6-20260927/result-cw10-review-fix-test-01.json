@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "invocation": "cw10-review-fix-test-01",
+  "unit": "V-CW-10-p2.6-current",
+  "task_result": "needs_reroute",
+  "candidate_before": "449fbb4a6e9843e42f3ce909021727579429ff0af58dc9f3996ca8e6a2584a58",
+  "candidate_after": "c6578c7ae2cb68c6855995cbb9998133747d9c9f0ff4ee69d8c62138b51a3895",
+  "requirements_sha256": "6c6296b8ab37529d6488b23d2f498dcac20b6cffc6e167dc9395c402702cfdbf",
+  "changed_paths": ["tests/workflow/test_run_independent.py", "tests/workflow/live_workflow_independent.py"],
+  "new_unittest_methods": 7,
+  "identity_matrix_cases": 13,
+  "checks": [
+    {"command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest -v tests/workflow/test_run_independent.py", "exit_code": 1, "tests": 19, "passed": 18, "failed_subtests": 2},
+    {"command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/workflow -q", "exit_code": 1, "tests": 33, "failed_subtests": 2},
+    {"command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/terminal -q", "exit_code": 0, "tests": 10},
+    {"command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/bridge -q", "exit_code": 0, "tests": 18},
+    {"command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/tasks -q", "exit_code": 0, "tests": 22},
+    {"command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/workflow /tmp/cw02-g1-venv/bin/python tests/workflow/live_workflow_independent.py", "exit_code": 0, "cases": 4},
+    {"command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/workflow /tmp/cw02-g1-venv/bin/python tests/workflow/live_workflow_independent.py --actual-omp", "exit_code": 0, "evidence": "raw-cw10-review-fix-independent-omp.json"},
+    {"command": "git diff --check", "exit_code": 0}
+  ],
+  "implementation_defects": [
+    {"id": "CW10-WORKER-IDENTITY-BOOLEAN-COERCION", "test": "test_public_worker_response_identity_matrix_blocks_shell_dispatch", "observed": "WorkerRolePort response revision=True or session_generation=True compares equal to authoritative integer 1 in verified_worker_response(), so each forged response authorizes a real host shell dispatch.", "expected": "Reject wrong-typed revision and session generation before worktree preparation or shell dispatch; exact worker identity includes integer type, not Python boolean equality.", "location": "src/workbench/workflow/worker_port.py:42"}
+  ],
+  "accepted_behavior_coverage": ["other wrong/stale/missing worker response held before dispatch", "analysis response identity and conflicting success held without REPORT", "pause/cancel/revoke/approval replacement interleavings held", "durable direct request routing not self-authorizing", "transient secret reaches shell but is absent from recursive fixture files", "actual two-OMP distinct response identities match exact public events and durable messages"],
+  "cleanup": {"temporary_directory_residue": [], "owned_process_residue": [], "bridge_socket_removed": true},
+  "needs_oracle": false,
+  "overall_completion_claimed": false
+}

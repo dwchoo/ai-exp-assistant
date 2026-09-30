@@ -1,0 +1,25 @@
+{
+  "invocation": "cw15-claim-final-review-01",
+  "outcome": "complete",
+  "candidate_ready": false,
+  "candidate_id": "575be7c7da45f1ae4584b6c1940f5f4a3c8153e1e83c7c8998e1605c3b8ba15d",
+  "snapshot_hashes_match": true,
+  "finding": {
+    "severity": "P1",
+    "path": "src/workbench/app/lifecycle.py",
+    "lines": "567-569,615-629",
+    "summary": "A new request_takeover can set intent after handoff durably commits manager control but before handoff reopens the fence. The unconditional reopen erases the newer intent, allowing automatic dispatch after the user request.",
+    "required_behavior": "Bind handoff reopen to the intent generation observed at handoff start; a concurrent newer takeover generation must survive. Add a deterministic handoff/new-takeover/automatic-dispatch schedule."
+  },
+  "interpretation_note": "The existing transport design uses the write-locked atomic claim as the submission linearization point. A claim that wins before revoke is already in-flight even if socket bytes follow the invocation; it remains unknown/delivered and is never canceled or replayed.",
+  "scope_incident": "The excluded scripted-OMP suite is not credited; read-only process inspection found zero residue.",
+  "acceptance": {
+    "C-AC-15": "met in-repo",
+    "C-AC-16": "met in-repo",
+    "C-AC-17": "met in-repo",
+    "C-AC-18": "not met due lost-intent handoff race; external OMP pending",
+    "C-AC-22": "met in-repo",
+    "C-AC-23": "met in-repo; real reboot pending"
+  },
+  "mutation_owner": null
+}

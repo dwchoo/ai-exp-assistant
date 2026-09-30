@@ -1,0 +1,18 @@
+{
+  "invocation":"cw11-token-retention-correction-01",
+  "role":"worker_senior",
+  "unit":"V-CW-11-p2.6-current",
+  "objective":"Bound exit-source token retention for indefinite CW-11 observation without weakening incarnation or source identity guarantees.",
+  "base_candidate":"15cced80d156715b781a16c402c7be98be7563fe4fa13e47a834888dc884f67a",
+  "review_evidence":".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw11-final-review-06.json",
+  "write_scope":["src/workbench/observation/**","tests/observation/**"],
+  "required_change":[
+    "Reuse exactly one internal fact ExitSourceToken per current run incarnation instead of issuing a token on every tick. Reset it on actual run-incarnation change; idempotent observations and authority-only changes must not grow storage.",
+    "Keep `_exit_sources` bounded by current live sources and remove/discard tokens when no longer usable. Confirm exit, run replacement, stale source, and failed/retried UI behavior must remain correct.",
+    "Audit `_external_exit_sources`: do not keep every historical WorkflowRun strongly reachable forever. Use a safe weak registration/pruning mechanism (or equally bounded explicit retirement) while preventing object-id reuse and old-source late binding. The current external source may remain strongly owned only while active/bound.",
+    "Add deterministic 1000+ tick no-review and multi-run/source churn tests asserting bounded registry sizes, plus token reuse, GC/retirement, old binding rejection, exit race and current probe behavior."
+  ],
+  "verification":["Run full observation and related regressions.","Rerun actual OMP if token reuse affects probe path; otherwise explain evidence scope.","Run graphify update ."],
+  "constraints":["apply_patch only; no workflow records, uv/local env/package artifacts, destructive git actions, or graphify restore."],
+  "report":["bounded ownership invariant","changed files","checks/runtime","candidate_ready or needs_reroute"]
+}

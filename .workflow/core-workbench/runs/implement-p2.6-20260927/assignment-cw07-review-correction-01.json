@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "invocation": "cw07-review-correction-01",
+  "role": "worker_senior",
+  "unit": "V-CW-07-p2.6-current",
+  "workspace": "/home/dwchoo/ai-exp-assistant",
+  "writer": true,
+  "checkpoint": ".workflow/core-workbench/runs/implement-p2.6-20260927/cw07-review-correction-checkpoint.json",
+  "baseline_candidate": "b8a3b0cb923620e8c42eccf3e47b556e923dba1364abc265f256241a548537b0",
+  "requirements": ".workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw07.json",
+  "review": ".workflow/core-workbench/runs/implement-p2.6-20260927/review-cw07-01.json",
+  "regression_evidence": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw07-review-regression-test-01.json",
+  "allowed_write_scope": [
+    "src/workbench/terminal/shell_persistent/adapter.py",
+    "tests/terminal/test_persistent_shell.py",
+    "tests/terminal/live_persistent_shell.py"
+  ],
+  "protected_independent_tests": [
+    "tests/terminal/test_persistent_shell_independent.py",
+    "tests/terminal/live_persistent_shell_independent.py"
+  ],
+  "instructions": "Fix only the accepted P2. `send_user` must revalidate the current boundary/lifecycle/foreground target and refuse before any PTY write whenever control is lost, phase is unknown, needs_review/uncertain is set, or the prior manual-prompt confirmation is stale. Preserve valid live-foreground input before exit/prompt and clean manual-prompt input only while the parent identity and boundary remain verified. Consider clearing stale confirmation on relevant control events in addition to admission revalidation, but do not rely on a cached flag alone. Do not implement cgroup or universal detached-daemon discovery; the review P1 was adjudicated outside C-D55 scope. Do not modify or weaken independent tests. Run the two new regressions, all tests/terminal, full G2 and G4 compatibility, bounded Bash/sh probes, cleanup/residue, and git diff --check. Produce result/snapshot/scope audit then return writer lease. Root owns graphify update."
+}

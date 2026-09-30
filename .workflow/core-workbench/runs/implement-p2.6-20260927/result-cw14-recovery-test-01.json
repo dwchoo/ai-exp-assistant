@@ -1,0 +1,27 @@
+{
+  "invocation": "cw14-recovery-test-01",
+  "outcome": "complete",
+  "candidate_ready": true,
+  "candidate_id": "4b093e9b5f25e5f8aa84274d3756fc0085b9a766c165cc05988ee840d30caa00",
+  "files_modified": false,
+  "exact_recovery": "3B abc -> malformed status plus failed 2B append at (3,5,2,2) -> removal -> 1B append at (4,6,2,2), b'abcf', durable status match, no exception",
+  "checks": {
+    "exact_recovery": "1 test passed",
+    "storage": "27 tests passed",
+    "terminal": "10 tests passed",
+    "tasks": "22 tests passed",
+    "workflow": "44 tests passed",
+    "production_hashes": "frozen snapshot match"
+  },
+  "sha256": {
+    "src/workbench/storage/log_raw/__init__.py": "2c336e18a75ffc5dea247054094766f9e0aea9512c0ebbe5169012ba1531feb6",
+    "src/workbench/storage/log_raw/admission.py": "4ce23cbaa06c4a0b0d79f5e1081b16fb72cd381aeffc104c15985bdc2dd57345",
+    "src/workbench/storage/log_raw/store.py": "fd425516f29ec4a9ef97d1ec7e4b7af4196740d8e6c4657443aa59ca30fad68d",
+    "tests/storage/test_log_raw.py": "50811167bf0b50dffc98f39bdfd3412af17cd2c52ff7bd9a95752d5bca058831"
+  },
+  "acceptance": {
+    "C-AC-24": "candidate_ready at fixture level",
+    "C-AC-28": "candidate_ready at fixture level"
+  },
+  "mutation_owner": null
+}

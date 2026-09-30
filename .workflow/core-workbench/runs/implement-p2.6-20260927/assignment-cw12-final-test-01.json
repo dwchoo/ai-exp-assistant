@@ -1,0 +1,19 @@
+{
+  "invocation": "cw12-final-test-01",
+  "role": "test_designer",
+  "unit": "V-CW-12-p2.6-current",
+  "objective": "Independently calibrate CW-12 tests to the oracle-confirmed scope, validate exact event identity, and produce final runtime evidence.",
+  "candidate_manifest": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw12-event-correction.json",
+  "candidate": "fba4d17f0761e68609852c29bf9db50c827fc89b147cc7cc8ad73c1efaea820d",
+  "oracle_evidence": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-durability-oracle-01.json",
+  "correction_evidence": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-event-correction-01.json",
+  "write_scope": ["tests/policy/pause_*/**", "tests/ui/status_*/**", "graphify-out/**"],
+  "must_do": [
+    "Update only stale FakeBridge normal stop events so they faithfully include the production G3 manager role/name, exact sessionId/generation, bridgeSequence after cursor, and abortRequestId; retain negative replacement-session/generation/request tests.",
+    "Replace the out-of-scope zero-surviving-evidence restart assertion with the oracle-approved invariants: directory fsync failure never returns append success, current process stays paused with persistence_error, dispatch/review/resume remain held, observation continues, and readable/corrupt/mismatched/resume_failed evidence restores fail-closed. Keep the namespace-loss case explicitly documented as a CW15 recovery boundary, not silently deleted or reported as passed.",
+    "Run all policy/negative/status suites and the strengthened actual OMP 18.2.10 live probe independently; validate exact stop identity and all pause/reconcile/resume/no-replay/fresh-delivery/cleanup assertions.",
+    "Rerun relevant regressions with managed PI_CONFIG_DIR and graphify update ."
+  ],
+  "constraints": ["Tests only; no product/G3/workflow/observation/contracts/ticket/PLAN edits; apply_patch only; no destructive git/uv/local env."],
+  "report": ["candidate validation", "test calibration rationale", "exact event correlation", "durability boundary evidence", "actual runtime evidence", "candidate_ready or needs_reroute"]
+}

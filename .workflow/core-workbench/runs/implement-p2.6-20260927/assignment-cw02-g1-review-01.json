@@ -1,0 +1,21 @@
+{
+  "invocation": "cw02-g1-review-01",
+  "ticket": "CW-02",
+  "unit": "V-CW-02-p2.6-current",
+  "role": "reviewer",
+  "workspace": "/home/dwchoo/ai-exp-assistant",
+  "candidate_manifest": ".workflow/core-workbench/runs/implement-p2.6-20260927/cw02-g1-frozen-candidate.json",
+  "candidate": "c8c8d4c1dba9767e9fb941bdfec31fcf10516d5c5c07ee186593587fb1f0a722",
+  "authority": "User $implement docs/features/core-workbench; fresh review required by implement workflow",
+  "objective": "Fresh independent review of the frozen integrated CW-02/G1 candidate against approved requirements and evidence, with no product/test mutation.",
+  "requirements": [
+    "Read CW-02, G1, requirements-cw02.json, worker/test/correction results, scope audits, the frozen manifest, and the full relevant diff for the seven G1 gate items.",
+    "Verify manifest hashes for all changed source and test files before relying on them.",
+    "Review exact RGB rendering for curses refresh/cursor/SGR/redraw correctness, fallback behavior, run grouping, Unicode/wide-cell safety, clipping, and style leakage.",
+    "Review private DSR handling for valid DEC CPR, unsupported-query no-op, query FIFO/non-crash behavior, and avoidance of invented terminal capability claims.",
+    "Review plain/tmux/Herdr runtime probes and predicates for freshness, routing, paste atomicity, resize geometry, PID identity, isolation/default-state preservation, alternate restore, cleanup, and false-pass paths. Confirm independent six failures remain meaningfully fixed rather than weakened.",
+    "Treat physical pixel/font calibration, cross-version support, and the tester's first concurrent plain unknown as explicit bounded limitations; determine whether any prevents the approved CW-02 feasibility gate at this candidate.",
+    "Do not execute runtime tests and do not modify source/tests/docs/graph. Create only review-cw02-g1-01.json under the run directory, with verdict pass/needs_fix, P0-P3 findings with file/line evidence, retained unknowns, and evidence limitations."
+  ],
+  "deliverable": ".workflow/core-workbench/runs/implement-p2.6-20260927/review-cw02-g1-01.json"
+}

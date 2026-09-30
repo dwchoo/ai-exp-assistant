@@ -1,0 +1,21 @@
+{
+  "invocation": "cw12-index-flags-correction-01",
+  "outcome": "complete",
+  "candidate_ready": true,
+  "changed_paths": ["src/workbench/policy/pause_automation/controller.py", "tests/policy/pause_automation/test_pause_policy.py", "graphify-out/**"],
+  "fixes": [
+    "Bounded Git ls-files tag output binds assume-unchanged, skip-worktree, and fsmonitor-related flag identity to the peer baseline.",
+    "Flagged paths contribute actual regular-file hash or missing state under fd-relative O_NOFOLLOW and existing count/byte budgets.",
+    "Flag changes and hidden content changes fail closed while stable skip-worktree missing paths and large clean repositories remain live."
+  ],
+  "checks": {
+    "pre_fix_reproduction": "independent assume-unchanged regression failed once as expected",
+    "focused": "6 passed",
+    "policy": "94 passed in 19.616s",
+    "large_repo": "2050 clean files and clean file over 64 MiB passed",
+    "graphify": "graphify update . exit 0",
+    "diff_check": "exit 0"
+  },
+  "residual_risk": "Unrepresented Git metadata manipulation and post-observation concurrent change are not an atomic filesystem transaction; listing errors and limits reject resume.",
+  "mutation_owner": "/root/cw12_post_review_correction"
+}

@@ -1,0 +1,35 @@
+{
+  "invocation": "cw11-correction-test-01",
+  "role": "test_designer",
+  "unit": "V-CW-11-p2.6-current",
+  "objective": "Independently attack all four CW-11 review corrections on the frozen corrected candidate.",
+  "candidate_manifest": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw11-correction.json",
+  "candidate": "94fff36f61722cf51be3d4a0257d246ad4e3dacb151da6dde91414fec373f62c",
+  "review_evidence": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw11-review-01.json",
+  "requirements": ".workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw11.json",
+  "ticket": "docs/features/core-workbench/tickets/CW-11.md",
+  "write_scope": [
+    "tests/observation/test_worker_review_independent.py",
+    "tests/observation/live_worker_review_independent.py"
+  ],
+  "must_test": [
+    "Inject pause, cancellation, authority loss, and active-run replacement from priority/readiness/fact callbacks and prove no old-run review reaches dispatch.",
+    "Confirm an exit, keep upstream facts stale-running, advance past multiple due intervals, and prove no review for that identity; prove a genuinely new identity is independent.",
+    "Exercise scheduler-integrated hang investigation including silence-only unknown, explicit process+lifecycle confirmed hang, timeout/exception, single-flight behavior, and sanitization of private-looking raw evidence.",
+    "Exercise scheduler-integrated usage observed/estimated/unknown output and review facts; absence must be unknown and secrets/raw private fields must not escape.",
+    "Assess whether a bounded real persistent-shell fixture can materially exercise the hang callback. Add it only if reliable and inside the allowed files; otherwise state the exact runtime qualification.",
+    "Rerun the actual OMP 18.2.10 60-second/13-wake probe and relevant regression suites."
+  ],
+  "constraints": [
+    "Tests only; do not edit product code or workflow records.",
+    "Use apply_patch for edits. Do not use uv or create local environments/package artifacts.",
+    "Run graphify update . after test changes and preserve generated output.",
+    "No commit, push, merge, stash, reset, clean, or deletion of existing files."
+  ],
+  "report": [
+    "tests added and why independent",
+    "commands and exact results",
+    "runtime qualifications",
+    "candidate_ready or needs_reroute"
+  ]
+}

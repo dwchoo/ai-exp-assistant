@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "invocation": "cw15-linear-test-01",
+  "role": "test_designer",
+  "unit": "V-CW-15-p2.6-current",
+  "authority": "User $implement docs/features/core-workbench request; approved PLAN p2.6 CW-15; shutdown linearization correction",
+  "objective": "Independently verify the frozen automatic-action/shutdown linearization and final CW-15 runtime candidate.",
+  "candidate": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw15-linear-correction.json",
+    "candidate_id": "50af3f32cf4ada4b18e9be268e70a261a135aad75818c5523ac585a38605eba3"
+  },
+  "required_tests": [
+    "Use controlled threads/events to force command-send-first, review-first, shutdown-close-first versus command, and shutdown-close-first versus tick orders. Record journal close time and external side-effect times; no side effect may occur after close.",
+    "Verify admission/journal/external callback reentrancy and failure paths release the lock, all threads join within a bounded timeout, later actions remain held, and shutdown completes or reports survivors without deadlock.",
+    "Re-run ended-run/metadata gates, positive clean-Git production binding, duplicate/reconnect no replay, completed/incomplete shutdown at-most-once and all six acceptance paths.",
+    "Run lifecycle and relevant predecessor suites, verify production hashes and resource residue."
+  ],
+  "allowed_write_paths": ["tests/lifecycle/**", "graphify-out/**"],
+  "constraints": [
+    "Independent test-only owner; no production/workflow/docs/PLAN/state/ledger edits.",
+    "No external OMP, real reboot, tmux, delegation, commit, publish, deploy or Docker; bound all waits and clean resources."
+  ],
+  "report": "Return candidate_ready/needs_reroute, exact event order/timestamps/action counts/deadlock bounds, per-acceptance verdict, suites/residue/hashes, instance-scope risk and CW16 obligations."
+}

@@ -1,0 +1,97 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-deadline-fix-worker-01",
+  "status": "candidate_ready",
+  "candidate_id": "f0bbdabe6077900135904beeb67d0a554704a674afe89465f16d98bd54a26e2e",
+  "scope_audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-deadline-fix.json",
+  "outside_scope": [],
+  "checks": [
+    [
+      "acceptance independent past_5s",
+      0,
+      "1 OK"
+    ],
+    [
+      "tests/terminal",
+      1,
+      "54, 2 expected failures RejectedHandoffTests (RA-P27-HOOK-REJECTED)"
+    ],
+    [
+      "g2_shell",
+      0,
+      "142 OK skip=1"
+    ],
+    [
+      "canonical",
+      0,
+      "3 OK"
+    ],
+    [
+      "backend",
+      0,
+      "47 OK"
+    ],
+    [
+      "contracts",
+      0,
+      "43 OK"
+    ],
+    [
+      "lifecycle",
+      0,
+      "38 OK"
+    ],
+    [
+      "g4",
+      0,
+      "8 OK"
+    ],
+    [
+      "workflow",
+      0,
+      "44 OK"
+    ],
+    [
+      "observation",
+      0,
+      "95 OK"
+    ]
+  ],
+  "red_green": [
+    "default submit sleep 62 bash/dash survives and completes",
+    "main returns, descendant 11s: not ended until descendant exits",
+    "start_timeout only bounded; return_timeout not on wire",
+    "item4 hook removed rejected handoff -> manual input delivered, automation held",
+    "dash ENV restored/unset"
+  ],
+  "existing_test_changed": {
+    "file": "tests/gates/g2_shell/test_return_deadline.py",
+    "old": "asserted return_timeout wire/range and elapsed-time unknown for run_case(1,.1)",
+    "new": "asserts start_timeout wire/range, no return_timeout on wire, run_case(1,.1) completes without unknown",
+    "contradicted_clause": "BRIEF 실험 실행 시간 상한 없음; C-AC-07"
+  },
+  "audit_item3": {
+    "fixed": [
+      "main-return deadline",
+      "descendant 5s deadline",
+      "INPUT_BARRIER SIGUSR1 release 5s (collect-driven release)"
+    ],
+    "kept_bounded": [
+      "exec-transition/child ready/exec ack start_timeout",
+      "hold_start/hold_identity fixture handshakes",
+      "_cleanup_children 2s after explicit stop/failure"
+    ],
+    "no_change_needed": [
+      "_drain supervisor_disappeared (process facts)",
+      "workflow collect(timeout) window",
+      "observation worker_review investigation_timeout (budget, read-only)"
+    ]
+  },
+  "gaps": [
+    "expected failure: RejectedHandoffTests independent test to be updated by next test_designer",
+    "line-count backlog after hooks restored (accepted gap4 category)",
+    "unsupported_hook_or_trap display persists (UR-UX)",
+    "INPUT_BARRIER waits indefinitely if backend never releases; shown as input_barrier; close cleans"
+  ],
+  "residue": "no processes; 7 empty /tmp/cw03-g2-* from SIGKILL-owner pattern, unattributed, untouched"
+}

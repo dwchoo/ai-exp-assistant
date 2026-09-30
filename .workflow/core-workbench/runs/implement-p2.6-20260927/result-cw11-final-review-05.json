@@ -1,0 +1,13 @@
+{
+  "invocation":"cw11-final-review-05",
+  "candidate":"7401c2b0f4efc6a5894dd82b57ee36bb127dce9473da67348cccd93fae21f825",
+  "candidate_hash_validated":true,
+  "outcome":"needs_reroute",
+  "findings":[
+    {"severity":"P1","summary":"An old WorkflowObservationBinding can perform its first bind after A->None->same A and receive a new-incarnation token, allowing the old WorkflowRun exit to fence the new incarnation."},
+    {"severity":"P2","summary":"A retried old-incarnation on_exit public event lacks run_incarnation, so an identity-only UI consumer can mark the new same-identity incarnation exited."}
+  ],
+  "closed":"Already-issued old exit tokens and internal scheduler exit/UI state are correctly incarnation-isolated.",
+  "writer":false,
+  "files_modified":[]
+}

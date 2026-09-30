@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "invocation": "cw05-contract-correction-01",
+  "baseline_ref": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw05-review-candidate.json",
+  "after_ref": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw05-contract-correction-after.json",
+  "changed": [
+    "omp_bridge/contract/ports_v2.ts",
+    "tests/contracts/test_ports_v2.py",
+    "tests/gates/harness/ports-v2.test.ts"
+  ],
+  "index_changed": [],
+  "outside_scope": [],
+  "comparable": true
+}

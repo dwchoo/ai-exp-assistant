@@ -1,0 +1,22 @@
+{
+  "invocation": "cw03-input-jobs-repair-review-01",
+  "candidate": "b890f5a4748a1d9b87ca0428edd05009e40af43ef224742a28e1a038be2ba263",
+  "status": "passed",
+  "material_findings": [],
+  "adjudication": "The original stale active_command/second-handoff P2 is resolved for the bounded feasibility candidate. The bridge observes ordered START, LIFETIME_DONE, INPUT_BARRIER, INPUT_RELEASED, RETURN:0, and same-parent WAIT before translating to the existing DONE state. The second run passes the guard rather than bypassing it.",
+  "evidence": [
+    "Final manifest b890f5a... matched all 1,030 file SHA/mode entries",
+    "Four independently selected predicate checks passed in-memory",
+    "Submitted fixture log hash matched and records eight passed tests",
+    "Submitted runtime log hash matched and records 24 passed cases with two same-parent guarded dispatches for Bash and dash"
+  ],
+  "residual_gaps": [
+    "Production adapter integration",
+    "Trust and serialization assumptions for fixture events without command IDs",
+    "External writers and pre-supervisor manual daemons",
+    "Five unrelated CW-03 gate items remain missing"
+  ],
+  "needs_oracle": false,
+  "writes": [],
+  "owned_processes_remaining": false
+}

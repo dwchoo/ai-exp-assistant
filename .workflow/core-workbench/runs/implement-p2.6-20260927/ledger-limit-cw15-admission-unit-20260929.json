@@ -1,0 +1,23 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 1131,
+  "event": {
+    "id": "limit-cw15-admission-unit-20260929",
+    "kind": "limit",
+    "data": {
+      "bucket": "unit:V-CW-15-p2.6-current",
+      "origin": "operating",
+      "value": 9,
+      "authority": "Approved PLAN p2.6 CW-15, fresh ended-run and metadata-tick findings, workflow-contract section 8, and current $implement authorization",
+      "reason": "One bounded admission correction, independent regression, and fresh final review",
+      "decision_owner": "Root",
+      "remaining_work_estimate": 3,
+      "expected_previous": {
+        "value": 6,
+        "authority": "Approved PLAN p2.6 CW-15, independent positive-composition evidence gap, workflow-contract section 8, and current $implement authorization",
+        "reason": "One targeted valid-baseline positive runtime verification and fresh final review"
+      },
+      "scope_basis": null
+    }
+  }
+}

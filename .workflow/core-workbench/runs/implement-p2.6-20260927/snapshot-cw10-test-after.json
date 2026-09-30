@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "workspace": "/home/dwchoo/ai-exp-assistant",
+  "stable": true,
+  "compact": true,
+  "base_manifest": "cw10-test-checkpoint.json",
+  "base_candidate": "73e5935017ed580d153183995bde7219d2f7db7374f8e17e772c75699a292dea",
+  "identity_delta": {
+    "files_added": {
+      "tests/workflow/test_run_independent.py": {"kind": "file", "mode": 436, "sha256": "956c8856d517f4c167df6c4072b56a47ba2b3eaab7b84a996702b3dbf6de887c"},
+      "tests/workflow/live_workflow_independent.py": {"kind": "file", "mode": 436, "sha256": "58f38c3bbf0c981334b51c7b50f8f678661e0b044c05a66d405bee711ddfbcba"}
+    },
+    "files_changed": {},
+    "files_removed": [],
+    "head_unchanged": true,
+    "index_unchanged": true
+  },
+  "candidate": "b445f8dd2570503ee3f46c83a9f6194531cf108231c9f3fad188bad1c0d82626",
+  "unknowns": []
+}

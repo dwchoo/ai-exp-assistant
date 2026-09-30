@@ -1,0 +1,15 @@
+{
+  "invocation":"cw10-review-01","role":"reviewer","unit":"V-CW-10-p2.6-current","objective":"Fresh read-only review of the frozen CW-10 Task-to-host-run vertical workflow.",
+  "candidate_manifest":".workflow/core-workbench/runs/implement-p2.6-20260927/cw10-frozen-candidate.json","requirements":".workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw10.json",
+  "evidence":[".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw10-worker-01.json",".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw10-test-01.json",".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw10-missing-log-fix-01.json",".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw10-missing-log-test-01.json"],
+  "review_focus":[
+    "Approval/proceed/scope/revision/run linkage and direct-worker expansion authority.",
+    "Git full-commit/worktree path validation, preservation of dirty/untracked input, no forbidden shared-repo mutation, and preparation-failure reporting.",
+    "PersistentShell lifecycle, exit/unknown distinction, paths/environment recording, pause collection-vs-analysis behavior, and cleanup.",
+    "Evidence judgment for success/nonzero/exit0-criteria-failure/missing-unreadable-changed evidence; exit 0 alone never succeeds.",
+    "Modification-needed ends instruction, TASK/REPORT ambiguity is durable, and no automatic replay/return occurs.",
+    "Guide accurately matches implementation and runtime evidence supports P-C-AC-03/05/09/11."
+  ],
+  "constraints":["Read-only; modify no files.","Verify frozen hashes and distinguish downstream/residual limitations from blocking defects.","Report P0-P3 with exact file/line and pass or needs_reroute."],
+  "report":["verdict","findings","evidence gaps","candidate identity","needs_oracle"]
+}

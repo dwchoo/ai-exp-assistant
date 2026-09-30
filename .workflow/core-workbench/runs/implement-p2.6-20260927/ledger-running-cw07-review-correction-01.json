@@ -1,0 +1,17 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 377,
+  "event": {
+    "id": "running-cw07-review-correction-01",
+    "kind": "transition",
+    "data": {
+      "invocation": "cw07-review-correction-01",
+      "state": "running",
+      "evidence": "collaboration.followup_task /root/cw03_split_pg started CW-07 accepted P2 correction",
+      "outcome": null,
+      "observed_model": "unverified",
+      "observed_effort": "unverified",
+      "not_started_evidence": null
+    }
+  }
+}

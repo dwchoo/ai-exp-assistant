@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw06-ctrlc-diag-05",
+  "status": "complete (no failure reproduced)",
+  "frozen_candidate": "660411cd47a7ce8d11f619e21740a933c80e0e1b4b37a597c4ddf73add6e2dc5",
+  "agent_result": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw06-ctrlc-diag-05-agent.json",
+  "trials": "76 (64 during flood across timeout yes / timeout yes|head / yes / Korean colour; delays 0.5-20.4 s; 12 after F0/F1 preconditioning; 12 early Ctrl-C 0-0.4 s after Enter); stub OMP, 0 model turns",
+  "failures": 0,
+  "ctrl_c_to_flood_stop": "min 0.01 s, median 0.023 s, max 0.056 s",
+  "state": "every trial manual_foreground -> manual_prompt; dropped_input_bytes 0; last_input_problem null; ^C + prompt visible; no backend.log change; no detach",
+  "bound": "0/64 during-flood -> 95% upper bound ~4.7% per trial",
+  "conclusion": "earlier single failure unexplained (no retained evidence); possibly harness timing; no implementation defect evidenced",
+  "repo_writes": "none (scratch + result JSON only); frozen hashes equal",
+  "residue": "none",
+  "observed_model": "sonnet (wb-test-rerun definition; host metadata unverified)"
+}

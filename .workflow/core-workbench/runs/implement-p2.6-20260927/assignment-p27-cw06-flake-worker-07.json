@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw06-flake-worker-07",
+  "ticket_id": "CW-06",
+  "role": "worker",
+  "unit": "V-CW-06-p2.7",
+  "approved_bundle_digest": "a521acdc3838b43a26e277afc233bab695c8b02ce0d42392c3678931b2e3f027",
+  "prior_assignment_ref": ".workflow/core-workbench/runs/implement-p2.6-20260927/assignment-p27-cw06-catchup-worker-06.json",
+  "routing": {"planned_role": "worker", "selected_role": "worker (wb-worker, Sonnet high)", "reason_codes": ["bounded_pattern"], "evidence_refs": ["two intermittent failures localized by Root to UI draw scheduling and signal-guard ordering"]},
+  "base_candidate": "8ff079fdb724457a58015d786c314cc371ef94f3f18d2942bc563600b78e5dbd",
+  "checkpoint_ref": ["p27-snapshot-cw17-integrated-checkpoint.json + p27-cw06-*-delta-backup/ chain (latest p27-cw06-catchup-delta-backup/)"],
+  "inputs": [".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw06-rerun-test-07-agent.json"],
+  "root_hypotheses": {
+    "F-final-draw": "tests/ui/test_product_replay_independent_p27h.py intermittently shows the pane one row behind a synchronous pyte feed. Suspected: draw throttling while backlog exists (BACKLOG_FRAME_INTERVAL) can leave the last fed chunk undrawn when the backlog empties, until the next event/5 s snapshot. Required: whenever the backlog becomes empty (or on the first loop iteration after feeding the last byte), the screen is drawn promptly (<= one frame interval) - the displayed screen must never stay stale after output stops.",
+    "F-sigterm": "src/workbench/ui/product/app.py loop(): `?2004h` is written before the try/finally that writes `?2004l`; a SIGTERM/SIGHUP (Terminate) arriving in that window leaves bracketed paste enabled. Required: enabling 2004 happens inside the protected region (or the restore is unconditional in the outer finally) so every exit path after enabling it restores it; the signal handlers are installed before any terminal mode change. Also make tests/ui/test_product_pty.py check_signal_restore wait until the UI has drawn (e.g. header visible) before sending the signal - asserting 2004l when 2004h was never written is a test error."
+  },
+  "acceptance": [
+    "Reproduce each first (loop the tests, e.g. 20x) and show red; then green 30x: tests/ui/test_product_replay_independent_p27h.py (UNMODIFIED) and tests/ui/test_product_pty.py signal tests.",
+    "red->green test of your own: after a burst whose feeding ends during a throttled interval, the rendered screen equals the model screen within one frame interval with no further input.",
+    "suites: tests/ui (test_*.py) x2, tests/contracts, tests/gates/g1_vt (src:.). Never run live_* or set CW06_LIVE_MODEL=1. Use /tmp/cw02-g1-venv/bin/python only; use a short TMPDIR if you run backend tests (AF_UNIX path limit)."
+  ],
+  "allowed_write_paths": ["src/workbench/ui/product/**", "tests/ui/test_product_model.py", "tests/ui/test_product_pty.py", "tests/ui/support.py"],
+  "prohibited_paths": ["tests/**/*_independent*.py", "tests/ui/live_*.py", "src/workbench/backend/**", "src/workbench/contracts/**", "src/workbench/terminal/**", "docs/**", ".workflow/**"],
+  "stop_conditions": ["hypothesis F-final-draw disproved and cause is in the independent test -> report evidence, do not edit it", "needs backend/contract change"],
+  "rules": "No graphify update, commits, tmux/herdr, credentials, real model; zero residue.",
+  "result_format": "checks table first (incl. repeat counts before/after), status, changed paths + sha256, cause per failure with evidence, residue, gaps. Korean, concise."
+}

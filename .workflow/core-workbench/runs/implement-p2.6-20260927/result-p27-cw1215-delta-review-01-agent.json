@@ -1,0 +1,38 @@
+{
+ "schema_version": 1,
+ "invocation": "p27-cw1215-delta-review-01",
+ "unit": "V-CW-12-15-p2.7-cw06-delta",
+ "role": "reviewer",
+ "candidate_checked": "c47835913e65051c2382081a52f311d840f0c25ec734b12e82b161709b976fe2 (= 671b05d3... + tests/ui/live_product_state_independent_p27i.py sha d816f5ac...; consistent with test result candidate_after_tests)",
+ "read_only": true,
+ "tests_run": "none (live tests forbidden; p27i is live_* and not test_*.py; no unit suite affected)",
+ "findings": [
+  {"sev": "P2", "where": "tests/ui/live_product_state_independent_p27i.py:201-206", "issue": "After prefix t the test only asserts '거부' not in footer; it never asserts shell_view.takeover_requested is True (or notice '인수 요청됨'). model.py:321 emits '인수 요청이 기록되지 않음' (no '거부') when not recorded, so the check passes in that case and the later 'view_before == after' equalities become vacuous for the request part. The claim 'takeover request kept identical across detach/SIGKILL' in AC-18 is only indirectly supported by the later prefix-c confirm.", "clause": "PLAN P-C-AC-18 (인수 요청 보존)", "fix": "assert view_before['takeover_requested'] is True and '인수 요청됨' in request_footer before detach."},
+  {"sev": "P2", "where": "result-...-agent.json items P-C-AC-18 / P-C-AC-30 / P-C-AC-15 verdict labels", "issue": "P-C-AC-18 check includes '전달된 명령 상태' (not exercised, acknowledged as pending) and P-C-AC-30 UI part is fixture-only (backend still not_configured). Labelling them 'local+UI delta verified' reads as a partial pass. Same for AC-15 ('활성 때만 점검·일시정지 보존' is entirely CW-18). Caveats are present in the text but the leading verdict string can be mis-consumed as a pass by root/CW-16.", "clause": "PLAN p2_7_note / assignment 'never a final pass'", "fix": "record as 'partial: UI subset verified; remaining X' and keep evidence_status stale_pending for all 9; do not flip any status."},
+  {"sev": "P2", "where": "result findings_for_ux_and_later / per-item remaining", "issue": "Missing UI capability not listed: no product-UI control for scope approval / proceed / stop-cancel / pause (CW-18 says approval UI position+keys are decided together with CW-06; AC-25 check includes 취소, AC-30/33 need pause/stop operation). Result attributes AC-25/33 solely to 'status projection'.", "clause": "CW-18 '사용자 승인' + SPEC Production 조합 (Workbench-confirmed user approval)", "fix": "add to the UR-UX/CW-06-delta list (approve/proceed/stop/pause controls) so CW-18 start is not blocked by an unrecognised UI gap."},
+  {"sev": "P2", "where": "result observation on wb-handoff held by user background job (G2 open item)", "issue": "The state (input refused, takeover_confirm refused, no in-UI recovery) is a user-facing dead end affecting C-AC-18 (user must be able to take over). Routing to 'CW-18/UR-UX/CW-16' is vague and CW-18 explicitly may not change shell policy; owner is the G2 shell-control/CW-04 line (gates/G2.md open item).", "clause": "C-AC-18 / CW-18 '정책 부품 동작은 바꾸지 않고 연결만'", "fix": "Root records it as a G2/owner-ticket delta decision (or accepted limitation) before CW-16 I-FAULT, not as CW-18 work."},
+  {"sev": "P3", "where": "test:293", "issue": "assertEqual(parent_mode,'control_wait') hard-couples the test to the open G2 defect; if it is fixed the test fails for the wrong reason. Confirm branch (304-311) tolerates both outcomes, which is fine.", "fix": "make it conditional or comment as tracked-defect pin."},
+  {"sev": "P3", "where": "test:335-336", "issue": "assertIsNone(... if ==exp[1] else None) is redundant with the following assertNotEqual.", "fix": "drop line 335."},
+  {"sev": "P3", "where": "shutdown routing", "issue": "confirm_boot/shutdown UI controls: route also to CW-19 (real shutdown callback, boot confirm), not only UR-UX."}
+ ],
+ "test_assessment": {
+  "real_entrypoint": "yes: python -m workbench start/attach through LiveBackend, real OMP 18.2.10 + local 503 counting provider, real product UI in a PTY; provider.requests==0 asserted; no model turn.",
+  "cleanup": "by exact identity (pidfd+start_ticks, session_members of owned sid, stop_and_verify via real shutdown, residue()=={}, temp root removed, ticks compare for experiment); no pgid kill.",
+  "fixture_tests": "ScriptedServer/UiPty on real run_product loop; correctly labelled as not production-wiring evidence; owned temp dirs asserted removed.",
+  "gaps": "takeover_requested not asserted (P2 above); backend restart/reconcile not exercised (no CW-06 part, ok)."
+ },
+ "item_verdicts": {
+  "P-C-AC-15": "agree (split correct); relabel as partial",
+  "P-C-AC-16": "agree (no CW-06 part; CW-19/16 remaining)",
+  "P-C-AC-17": "agree",
+  "P-C-AC-18": "agree with split; disagree with 'verified' label (전달된 명령 상태 absent) and request-preservation evidence is weak (P2)",
+  "P-C-AC-22": "agree; add CW-19 routing for UI shutdown/unterminated display",
+  "P-C-AC-23": "agree",
+  "P-C-AC-25": "agree; but add missing approve/stop/cancel UI controls to remaining list",
+  "P-C-AC-30": "agree only as fixture-level partial; relabel",
+  "P-C-AC-33": "agree; add stop/resume control gap"
+ },
+ "routing_of_four_findings": "1 (no status projection in UI) -> CW-18: correct. 2 (no shutdown/confirm_boot control) -> UR-UX + CW-19: mostly correct. 3 (pending takeover not shown on reattach) -> UR-UX: correct. 4 (held handoff dead end) -> should be G2/owner-ticket decision, not CW-18: adjust.",
+ "overall": "accept_with_amendments",
+ "conditions": "keep all nine gate items stale_pending (no status flip); fix P2 test assertion (or record as accepted gap); record missing approve/stop/pause UI controls and re-route finding 4."
+}

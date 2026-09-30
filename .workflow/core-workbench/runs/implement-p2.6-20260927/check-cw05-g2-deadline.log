@@ -1,0 +1,7 @@
+test_default_wire_and_invalid_bounds (tests.gates.g2_shell.test_return_deadline.ReturnDeadlineTests.test_default_wire_and_invalid_bounds) ... ok
+test_explicit_long_main_and_expiry_unknown (tests.gates.g2_shell.test_return_deadline.ReturnDeadlineTests.test_explicit_long_main_and_expiry_unknown) ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 5.518s
+
+OK

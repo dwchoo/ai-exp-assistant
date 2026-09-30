@@ -1,0 +1,23 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 1070,
+  "event": {
+    "id": "limit-cw14-branch-worker-20260929",
+    "kind": "limit",
+    "data": {
+      "bucket": "role:worker",
+      "origin": "operating",
+      "value": 22,
+      "authority": "C-D55 plus workflow-contract section 8 and current $implement authorization",
+      "reason": "One bounded CW-14 branch-safe reconciliation and malformed-status correction",
+      "decision_owner": "Root",
+      "remaining_work_estimate": 1,
+      "expected_previous": {
+        "value": 21,
+        "authority": "C-D55 plus workflow-contract section 8 and current $implement authorization",
+        "reason": "One bounded CW-14 same-store recovery correction after independent failure evidence"
+      },
+      "scope_basis": null
+    }
+  }
+}

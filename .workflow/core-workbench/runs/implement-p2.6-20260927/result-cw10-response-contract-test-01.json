@@ -1,0 +1,34 @@
+{
+  "invocation": "cw10-response-contract-test-01",
+  "role": "test_designer",
+  "outcome": "candidate_ready",
+  "candidate_base": "28edcfae307926a81aa384a54a2774a09c26c716c3d4071f0fd00b0c9e312cdc",
+  "changed_test_files": [
+    "tests/workflow/test_worker_port_independent.py",
+    "tests/gates/g3_omp/bridge_public_response_independent.test.ts"
+  ],
+  "independent_tests": "Three tests added: exact execute/analysis injected contract and contract-derived frame, parser mutation matrix, HTTP scripted provider mutated-marker/identity/order propagation and invalid-contract no-fallback.",
+  "checks": {
+    "focused_python": "6/6 passed",
+    "focused_node": "7/7 passed",
+    "workflow": "44/44 passed",
+    "python_bridge": "18/18 passed",
+    "tasks": "22/22 passed",
+    "terminal": "10/10 passed",
+    "g3_python": "117/117 passed",
+    "node_bridge_g3": "30/30 passed"
+  },
+  "runtime": {
+    "omp_version": "18.2.10",
+    "worker_and_independent_two_stage_probes": "passed",
+    "contract_derived_only": true,
+    "secret_absent": true,
+    "residue": 0
+  },
+  "scope": {
+    "direct_changes_only_allowed_tests": true,
+    "graphify_generated_drift": "expected from required graphify update",
+    "head_unchanged": true
+  },
+  "needs_reroute": false
+}

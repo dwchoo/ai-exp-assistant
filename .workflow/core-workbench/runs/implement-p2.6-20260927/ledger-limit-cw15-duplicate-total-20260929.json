@@ -1,0 +1,23 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 1231,
+  "event": {
+    "id": "limit-cw15-duplicate-total-20260929",
+    "kind": "limit",
+    "data": {
+      "bucket": "total",
+      "origin": "operating",
+      "value": 452,
+      "authority": "C-D55 plus workflow-contract section 8 and current $implement authorization",
+      "reason": "Complete CW-15 duplicate-generation correction/test/review and retain CW-16 final verification/review",
+      "decision_owner": "Root",
+      "remaining_work_estimate": 5,
+      "expected_previous": {
+        "value": 450,
+        "authority": "C-D55 plus workflow-contract section 8 and current $implement authorization",
+        "reason": "Complete CW-15 generation-reopen correction/test/review and retain CW-16 final verification/review"
+      },
+      "scope_basis": null
+    }
+  }
+}

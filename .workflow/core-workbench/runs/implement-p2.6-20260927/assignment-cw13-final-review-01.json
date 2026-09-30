@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "invocation": "cw13-final-review-01",
+  "role": "reviewer",
+  "unit": "V-CW-13-p2.6-current",
+  "authority": "User $implement docs/features/core-workbench request; approved PLAN p2.6 CW-13",
+  "objective": "Perform a fresh read-only final acceptance review of the complete CW-13 candidate after CAS and force-liveness corrections.",
+  "candidate": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw13-force-liveness-test.json",
+    "candidate_id": "89b27e0f23d91d76a2d40fe0eb97aeed6ba4299ad51f12fbf35dcc675597970c"
+  },
+  "acceptance_ids": ["C-AC-04", "C-AC-07", "C-AC-10", "C-AC-13", "C-AC-31", "C-AC-34"],
+  "review_focus": [
+    "Manager second-level evidence judgment and investigation behavior with exact identity, criteria, approval, worker provenance and artifacts.",
+    "Task-wide three-retry policy, initial/improvement exclusion, durable exact CAS/post-read, concurrency, no reset across revision/settings/commit/name and no elapsed-time limit.",
+    "Full managed termination before mutation/new worker/relaunch, next-run revision default, current-run stop-confirm-relaunch and immediate revocation/pause/cancel gates.",
+    "C-AC-34 ordinary stop proof, later coherent CW-10 managed lifecycle, exact target identity/ownership plus TargetLiveness, force and post-force full termination barriers.",
+    "Oracle verdict and positive main-return-with-descendants case; no overconstraint that prevents cleanup after main return.",
+    "Fixture evidence completeness for package-only CW-13 and accurate deferral of durable adapter/side-effect execution to CW-15."
+  ],
+  "constraints": [
+    "Read-only; do not edit files or run mutating graphify commands.",
+    "No delegation, test writes, commit, publish, deploy, Docker or process signals."
+  ],
+  "report": "Return candidate_ready true/false, findings with paths/lines and severity, judgment for all six acceptance IDs, evidence adequacy, and bounded CW-15 integration risks."
+}

@@ -1,0 +1,27 @@
+{
+  "invocation": "cw03-hook-lifecycle-correction-01",
+  "role": "worker_senior",
+  "unit": "V-CW-03",
+  "base_candidate": "84338ecbfd0005bad6c554b976a88f18da54e3830db599515073c74d242aaf0e",
+  "finding": "The independent missing-EXEC_READY mutation leaves hook/env lifecycle exec_ready=false, returned=false, and unknown, but the probe reports same_parent_recheck_proceeded=true for Bash and dash.",
+  "required_fix": [
+    "Make hook/env accepted-run success and same-parent recheck fail closed unless the canonical lifecycle has complete causal evidence through verified return/lifetime/input-return/control-return.",
+    "Do not turn the pre-ACCEPT typed manual residue denial into an accepted/unknown replay or weaken the normal cleanup-and-fresh-retry success case.",
+    "Preserve cwd/PATH/export inheritance and child-only non-propagation assertions and the existing always-allow negative control.",
+    "Do not special-case the independent test or infer success from raw signal/control return alone."
+  ],
+  "allowed_files": [
+    "tests/gates/g2_shell/live_hook_env_probe.py"
+  ],
+  "constraints": [
+    "Do not modify the failing independent test or other production/test files.",
+    "Do not modify workflow, docs, graphify, or commit/reset/clean/stash."
+  ],
+  "checks": [
+    "python3 -m unittest tests.gates.g2_shell.test_canonical_matrix_integration -v",
+    "python3 tests/gates/g2_shell/live_hook_env_probe.py",
+    "python3 -m unittest tests.gates.g2_shell.test_live_hook_env_predicates tests.gates.g2_shell.test_common_run_protocol tests.gates.g2_shell.test_common_run_protocol_independent -v",
+    "python3 -m unittest discover -s tests/gates/g2_shell -p 'test_*.py' -v",
+    "git diff --check"
+  ]
+}

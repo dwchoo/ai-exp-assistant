@@ -1,0 +1,16 @@
+{
+  "invocation": "cw16-timeout-test-01",
+  "outcome": "needs_reroute",
+  "candidate_ready": false,
+  "candidate_id": "cc5c69ec642cc8f577f13aa11d5c6f28d107019eb70821ac78b21bdbb345089d",
+  "checks": {
+    "timeout_negative_control": "1 test passed",
+    "full_matrix": "not run after static safety finding"
+  },
+  "finding": {
+    "severity": "P1 safety",
+    "path": "tests/integration/test_cw16_runtime_matrix.py",
+    "summary": "Global /tmp prefix delta is not bound to the invocation owner token and could select an unrelated concurrently-created root for cleanup/deletion."
+  },
+  "mutation_owner": null
+}

@@ -1,0 +1,22 @@
+{
+  "invocation": "cw03-hook-lifecycle-correction-01",
+  "unit": "V-CW-03",
+  "status": "candidate_ready",
+  "candidate": "b61c5a3a927d995597a39ced8de6c1f213bdd17350592f912c1662fe92d516fb",
+  "changed_file": "tests/gates/g2_shell/live_hook_env_probe.py",
+  "sha256": "58894909d1dd91302ec0185363b483193ffb9298b1959b8ff6fc416910e48040",
+  "scope_audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/scope-audit-cw03-hook-correction.json",
+  "fix": "Accepted hook/env recheck now requires complete canonical prepared/foreground/exec/start/main/lifetime/input/control/ACK/prompt evidence and fails before release on missing EXEC_READY.",
+  "checks": [
+    {"name": "independent canonical matrix integration", "result": "passed", "tests": 3, "elapsed_seconds": 3.871},
+    {"name": "hook/env live matrix", "result": "passed", "cases": 4},
+    {"name": "targeted suites", "result": "passed", "tests": 17, "elapsed_seconds": 16.492},
+    {"name": "full G2 discovery", "result": "passed", "tests": 130, "skipped": 6, "elapsed_seconds": 108.262},
+    {"name": "git diff --check", "result": "passed"}
+  ],
+  "observations": [
+    "The independent missing-EXEC_READY counterexample is now rejected for Bash and dash.",
+    "Pre-ACCEPT manual denial, cleanup, fresh retry, and unknown/no-replay behavior remain.",
+    "No supervisor, fixture, unittest, sleep, or zombie process residue remained."
+  ]
+}

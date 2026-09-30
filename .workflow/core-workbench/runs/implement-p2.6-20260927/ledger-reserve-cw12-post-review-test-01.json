@@ -1,0 +1,20 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 866,
+  "event": {
+    "id": "reserve-cw12-post-review-test-01",
+    "kind": "reserve",
+    "data": {
+      "invocation": "cw12-post-review-test-01",
+      "role": "test_designer",
+      "unit": "V-CW-12-p2.6-current",
+      "incident": "",
+      "purpose": "Independent regression and actual OMP verification of corrected CW-12 candidate",
+      "model": "gpt-6-sol",
+      "effort": "high",
+      "buckets": ["total", "role:test_designer", "unit:V-CW-12-p2.6-current"],
+      "writer": true,
+      "workspace": "/home/dwchoo/ai-exp-assistant"
+    }
+  }
+}

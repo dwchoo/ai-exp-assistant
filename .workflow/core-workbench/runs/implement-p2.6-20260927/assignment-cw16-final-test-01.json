@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "invocation": "cw16-final-test-01",
+  "role": "test_designer",
+  "unit": "V-CW-16-p2.6-current",
+  "authority": "User $implement request; approved PLAN p2.6 CW-16; independent final integration verification",
+  "objective": "Independently verify the frozen CW-16 compatibility candidate and distinguish demonstrated runtime behavior from missing final product integration.",
+  "candidate": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw16-integration.json",
+    "candidate_id": "063fb009043310ded3e39ccfdb50ec1f3e5385cd859d3c05605b5b8956f1b673"
+  },
+  "requirements": [
+    "Run and critically inspect tests/integration/test_cw16_runtime_matrix.py with actual Bash, dash, OMP, tmux and isolated Herdr; verify cleanup and no user-state change.",
+    "Check that the tests discriminate plain/tmux/Herdr input, paste, resize, restore and process/session cleanup, plus Bash-first, sh fallback and missing-shell guidance.",
+    "Inspect VERIFICATION.md and COMPATIBILITY.md against BRIEF C-AC-19/20 and PLAN I-FLOW/I-SHELL/I-POLICY/I-FAULT/I-COMPAT. Do not upgrade partial runtime evidence to production acceptance.",
+    "Verify frozen hashes and residue. Add tests only if a material test gap can be closed inside tests/integration; do not edit production or docs."
+  ],
+  "allowed_write_paths": ["tests/integration/**", "graphify-out/**"],
+  "constraints": [
+    "Production and docs are frozen. No production/docs/workflow/PLAN/state edits, package installation, reboot, destructive external actions, delegation, commit, publish, deploy or Docker. Use apply_patch for any test edit.",
+    "External probes must remain bounded and use their isolated temp paths/sockets/sessions; do not run the full G3 scripted OMP suite."
+  ],
+  "report": "Return candidate_ready or precise reroute, test totals/results, demonstrated vs pending gate items, hash/residue checks and any test-only changes."
+}

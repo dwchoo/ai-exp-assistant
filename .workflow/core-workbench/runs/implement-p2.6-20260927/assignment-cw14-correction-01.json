@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "invocation": "cw14-correction-01",
+  "role": "worker",
+  "unit": "V-CW-14-p2.6-current",
+  "authority": "User $implement docs/features/core-workbench request; approved PLAN p2.6 CW-14; fresh review findings",
+  "objective": "Correct only the two material C-AC-28 defects found in the frozen CW-14 candidate and add focused regressions.",
+  "candidate": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw14-test.json",
+    "candidate_id": "ba9c7658c840770789ee1bf19d649d6b04ab1a7887aa07ff588c2f3aa347eadf"
+  },
+  "required_changes": [
+    "On repeated append/status-path failures, merge from the newest run state so observed/stored/dropped/missing counters and timestamps never regress merely because the durable status is older than the volatile snapshot.",
+    "Treat invalid or malformed .log entries encountered during project scan as a storage integrity/failure condition handled by append() and status(); return an immutable failure snapshot without propagating ValueError into the observation loop.",
+    "Add focused tests reproducing two consecutive scan failures after a successful write and malformed .log behavior through both append and status, including continuity and sentinel preservation.",
+    "Preserve all accepted C-AC-24 behavior, exact-prefix quotas, fail-closed paths, non-deletion and metadata-admission separation."
+  ],
+  "allowed_write_paths": [
+    "src/workbench/storage/log_raw/**",
+    "tests/storage/**",
+    "graphify-out/**"
+  ],
+  "constraints": [
+    "Bounded correction only; do not modify workflow/repository/runtime/docs/PLAN/state/ledger.",
+    "Use apply_patch; run focused and storage regressions plus graphify update; no delegation, commit, publish, deploy, Docker, or live destructive actions."
+  ],
+  "report": "Return candidate_ready/needs_reroute, exact semantic change, new regressions and counts, accepted behavior preservation, hashes/scope, and remaining CW-15 obligations."
+}

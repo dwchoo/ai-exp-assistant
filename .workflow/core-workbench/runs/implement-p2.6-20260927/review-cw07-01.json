@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "invocation": "cw07-review-01",
+  "candidate": "9868eff50a732257c8143a097e5a7ea37a33cf99224ada39ef387c5790eaf9e6",
+  "verdict": "findings",
+  "approval": false,
+  "reported_counts": {"P0": 0, "P1": 1, "P2": 1, "P3": 0},
+  "findings": [
+    {
+      "severity": "P1",
+      "path": "src/workbench/terminal/shell_persistent/adapter.py",
+      "line": 193,
+      "summary": "A manually detached setsid/double-fork daemon can escape job/descendant observation and later cleanup.",
+      "root_disposition": "not_actionable_outside_approved_guarantee",
+      "basis": "C-D55, SPEC lines 123 and 137, and ADR-0002 sections 4/50 explicitly make cgroup non-required and do not guarantee discovery or retroactive management of every manual daemon. The product must hold observed unknown residue, but cannot claim discovery of a process that has left all approved observation boundaries."
+    },
+    {
+      "severity": "P2",
+      "path": "src/workbench/terminal/shell_persistent/adapter.py",
+      "line": 188,
+      "summary": "A prior manual_prompt_confirmed flag permits send_user after control FD loss moves the boundary to unknown.",
+      "root_disposition": "accepted",
+      "basis": "CW-07 requires input to be held when target identity/lifecycle is unknown. Reviewer reproduced PTY write with phase=unknown and unknown_or_manual_residue."
+    }
+  ],
+  "candidate_manifest_match": true,
+  "required_followup": "Add an independent regression for unknown-state manual input, correct the accepted P2, and delta-review the new candidate.",
+  "needs_oracle": false
+}

@@ -1,0 +1,9 @@
+{
+  "candidate_before": "b445f8dd2570503ee3f46c83a9f6194531cf108231c9f3fad188bad1c0d82626",
+  "candidate_after": "7be63be93f6417f2dae2af1925655d0e450e5fb921d722ba2bfa0d1fea7d1980",
+  "method": "Reconstructed compact snapshot-cw10-test-after.json by applying its two files_added entries to cw10-test-checkpoint.json identity; recomputed digest matched candidate_before, then compared complete identity files/index/head against after snapshot.",
+  "delta_since_candidate_before": ["src/workbench/workflow/run.py"],
+  "index_unchanged": true,
+  "head_unchanged": true,
+  "standard_audit_note": "The standard audit uses the older cw10-test-checkpoint.json and therefore lists two pre-existing independent test files as outside_scope. Both were already present in the candidate_before manifest; this correction did not modify them."
+}

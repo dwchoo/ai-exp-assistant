@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "invocation": "cw15-linear-final-review-01",
+  "role": "reviewer",
+  "unit": "V-CW-15-p2.6-current",
+  "authority": "User $implement docs/features/core-workbench request; approved PLAN p2.6 CW-15; final linearized runtime candidate",
+  "objective": "Perform the final fresh read-only CW-15 acceptance review after shutdown concurrency correction.",
+  "candidate": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw15-linear-test.json",
+    "candidate_id": "86c0acd50a27f8ce9bc72326b167421d56e359500c7cba5e1d5e15a576a27966"
+  },
+  "acceptance_ids": ["C-AC-15", "C-AC-16", "C-AC-17", "C-AC-18", "C-AC-22", "C-AC-23"],
+  "review_focus": [
+    "Close the shutdown race by proving the RLock linearization covers admission, journal, external send/review, shutdown close and stop start on every relevant call path and releases safely on errors/reentrancy.",
+    "Determine whether the product contract has one active LifecycleCoordinator/backend owner; treat unsupported simultaneous instances as a material defect only if approved CW15 requirements require them.",
+    "Reconfirm all prior ended-run, metadata, production binding, no-replay, shutdown idempotence, detach/restart/model/takeover/boot findings remain closed.",
+    "Assess 382 test evidence, timestamps/action counts, hashes/residue and environment-pending external OMP/reboot per acceptance ID."
+  ],
+  "constraints": [
+    "Read-only; no file edits, mutating graphify, process signals or external-state changes.",
+    "No delegation, test writes, commit, publish, deploy or Docker."
+  ],
+  "report": "Return candidate_ready true/false, prior finding closure, any new concrete material finding, per-acceptance runtime verdict, instance-scope classification, environment pending and exact CW16 obligations."
+}

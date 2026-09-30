@@ -1,10 +1,11 @@
 # Core Workbench — 구현 명세
 
-Revision: s2.4; 상태: **r1.11/p2.4 정책 개정과 함께 구현 진행**. 작성일: 2026-09-24.
-입력: [BRIEF r1.11](BRIEF.md), [진단 d2](DIAGNOSIS.md), [결정 C-D50~53](DECISIONS.md), [ADR-0002](../../adr/0002-managed-shell-control-wait.md).
+Revision: s2.7; 상태: **s2.6 승인에 사용자 결정 C-D56의 후속 production 조합 계획 반영(승인 기록 전 초안).** 갱신일: 2026-09-29. s2.6은 [C-D55 승인 기록](../../../.workflow/core-workbench/runs/decisions-cd55-20260926/approval.json)을 따르고, s2.7 변경은 [C-D56](DECISIONS.md#C-D56)과 [p2.7 planning record](../../../.workflow/core-workbench/runs/planning-p2.7-20260929/)를 따른다. 제품 동작·수락 기준·BRIEF r1.13은 바꾸지 않는다.
+입력: [BRIEF r1.13](BRIEF.md), [진단 d2](DIAGNOSIS.md), [결정 C-D50~55](DECISIONS.md), [ADR-0002](../../adr/0002-managed-shell-control-wait.md), [Oracle 검토](../../../.workflow/core-workbench/runs/oracle-review-20260924/REVIEW.md).
 개별 C-D50~52 답변과 r1.10/s2.3/p2.3 묶음의 사용자 승인은
 [최초 구현 승인](../../../.workflow/core-workbench/runs/implement-p2.3-20260924/approval.json)에 보존한다.
 C-D53 개정 승인은 [정책 개정 기록](../../../.workflow/core-workbench/runs/implement-p2.3-20260924/cd53-policy-approval.json)에 별도로 보존한다.
+r1.12/s2.5/p2.5 및 Oracle 보완은 기존 구현 승인 범위다. r1.13/s2.6/p2.6은 [C-D55](DECISION-2026-09-26.md)의 사용자 결정만 반영하며 16개 ticket의 의존·소유·자원·write scope를 유지했다. s2.7/p2.7은 아래 "Production 조합"에 따라 CW-17~19를 추가하고 CW-06·CW-16의 의존을 바꾼다. 기존 ticket ID와 완료 근거는 보존한다.
 [기존 검토 후보](../../../.workflow/core-workbench/runs/planning-p2.3-20260924/manifest.json)와
 [승인된 후보](../../../.workflow/core-workbench/runs/implement-p2.3-20260924/approved-manifest.json)의 digest를 구분한다. 이전 s2.2/p2.2 승인과 원문은
 [승인 기록](../../../.workflow/core-workbench/runs/implement-p2-20260923/cd49-doc-final-approval.json)과
@@ -18,9 +19,10 @@ Python backend가 세 PTY·작업·승인·관측·저장을 소유하고, 별�
 연결한다. 모델 호출은 기존 두 OMP가 담당한다. 최소 공개 TS extension과 Python 로컬 bridge가
 메시지 전달·session 상태·turn 중단을 연결한다.
 
-이번 개정의 목적은 실패한 초기 게이트를 동일한 수정 반복으로 다루지 않고 판별 가능한 작업으로
-바꾸는 것이다. G2는 같은 interpreter의 control 대기, G1은 실제 resize 뒤 배치와 입력 보존,
-G3는 실제 TUI에서의 전달 의미와 session 경합을 먼저 검증한다. 가정이 실패하거나 미확인이면
+이번 개정의 목적은 A 방식과 실패한 초기 게이트를 판별 가능한 작업으로 정합화하는 것이다.
+G2는 부모 interpreter의 control 대기를 유지하되 실험 script 직접 eval을 제거하고, 고정 supervisor/subreaper가
+별도 interpreter 또는 executable을 실행한다. 입력 반환·signal/process group·전체 후손 수명을 하나의 합성 probe로 먼저 검증한다.
+G1은 실제 색상·화면·외부 terminal 차이, G3는 전달 오류·원래 session 출처·같은 process 재접속 상태를 보강한다. 가정이 실패하거나 미확인이면
 그 가정에 의존하는 production 확장을 보류한다. 사용자 행동을 바꿔야 하는 대안은 재합의한다.
 
 ## 관련 사용자 흐름
@@ -37,7 +39,7 @@ G3는 실제 TUI에서의 전달 의미와 session 경합을 먼저 검증한다
    최신 점검 한 건만 유지한다. Manager는 근거·권한·Task별 재시도 이력을 대조한다.
 4. Terminal 인수 요청은 즉시 새 자동 전송을 막는다. 확인된 현재 foreground에는 수동 입력을
    보낼 수 있고 실험을 인수만으로 종료하지 않는다. 수동 작업 뒤 직접 `wb-handoff`를 실행해
-   상태 확인을 거치면 같은 interpreter가 control 대기로 들어간다.
+   상태 확인을 거치면 부모 interpreter가 control 대기로 들어가고, 다음 자동 실험은 고정 supervisor 아래 별도 실행 단위로 시작한다.
 5. 자동화 일시정지는 manager turn 중단 요청과 manager/worker의 새 자동 모델 작업 보류다.
    기존 host 실험과 일반 관측은 유지한다. 사용자 수동 지시·조사·수정은 자동 재개가 아니다.
    재개 때 현재 상태와 승인 범위를 대조하며 오래된 명령·요청을 replay하지 않는다.
@@ -66,9 +68,9 @@ HEAD는 `0a67572834ddfd6888b534f8a85213f4b1a2e1ca`이며 기존 staged/unstaged/
 | 대상 | 관측한 구현·근거 | 재계획 처리 |
 |---|---|---|
 | CW-01 | Python/TS v1 envelope, UUID identity, DisplayChunk, contract fixture/harness 통합 | 원문 ticket와 완료 이력 보존. 다시 수행하지 않는다. 후속 확장은 CW-05 소유 |
-| CW-02 / G1 | pyte 0.8.2·curses 후보, 실제 승인/tool 왕복과 29 fixture의 기존 기록 | 같은 입력/항목의 partial 근거 유지. STOP/CONT redraw는 정상 resize 근거에서 제외 |
-| CW-03 / G2 | InputBoundary·PTY `__wb_run` 후보, Bash/dash 22/26와 4 실패의 기존 기록 | 실패별 C-D50 분류와 새로운 실행권 가정 검증. 범위 변경만으로 통과 처리하지 않음 |
-| CW-04 / G3 | 공개 bridge·process-local DeliveryLedger, RPC pause/왕복/단기 경합 근거 | 실제 TUI composer·API 복귀 이후 오류·session 전환 검증 추가 |
+| CW-02 / G1 | pyte/curses 후보, 실제 approval/tool·외부 tmux·resize 및 fixture 근거 | 동일 candidate/input의 유효 partial 근거 유지. RGB→256색 축소의 실제 화면 영향과 일반 terminal·비중첩 Herdr는 별도 검증 |
+| CW-03 / G2 | 직접 eval 후보의 recovery 일부 통과와 RUN 경계 실패, A/subreaper 단독 probe | Recovery 통과는 해당 후보에 한정해 보존. 직접 eval 실패를 유지하고 입력 반환·signal·subreaper 합성 판별 전 단독 probe를 합산하지 않음 |
+| CW-04 / G3 | 공개 bridge·DeliveryLedger, 실제 TUI/provider 및 pause/reconnect partial 근거 | 동일 mode·candidate의 유효 근거 유지. 일반 오류 보고·원 출처·연결 단절 상태 snapshot·report identity를 추가 검증 |
 | CW-05~16 | backend/task/policy/store의 production 산출물 없음 | 기존 ID와 범위 유지, 선행 결과 후 동적으로 진행 |
 | 도구·의존성 | pyproject는 Python >=3.12, dependencies 없음. unittest/Node harness 존재 | Textual/libvterm/CFFI·SQLite·Pydantic·uv는 후보. 새 lock/설치는 검증 후 결정 |
 
@@ -89,9 +91,9 @@ CW-03/04가 로컬 후보로 검증하고 CW-05가 공통 계약을 고정한다
 | Frontend ↔ backend | 세 PTY 화면·focus·입력 owner·takeover 요청/확인·자동화·shell mode·마지막 확인 시각을 구분한다. Attach는 기존 session과 연결하며 run을 새로 시작하지 않는다. |
 | Display ↔ control | 키/paste/resize/query reply와 PTY 출력은 terminal 경로다. 시작/종료·명령/전달 상태·권한은 별도 control 관측이다. ANSI/prompt/무출력으로 lifecycle을 판정하지 않는다. |
 | Paste | 2 MiB 초과 또는 현재 queue 공간 부족이면 frame 전체를 일부 전달 없이 거절하고 이유를 보인다. 정상 paste·hotkey·query reply가 유지된다. |
-| ShellControl | `request_id/command_id`, shell identity/generation, owner epoch, task 승인 참조, expected cwd, script를 연결한다. 전송·수락·시작·shell 평가 반환·관리 대상 프로그램의 종료 확인/unknown을 분리하고 한 outstanding 자동 요청만 허용한다. 확인 가능한 exit status와 로그·결과 위치를 기록한다. 실험 성공 판단은 맡지 않는다. 정확한 framing/FD/builtin은 G2가 결정한다. |
+| ShellControl | `request_id/command_id`, 부모 shell identity/generation, owner epoch, task 승인 참조, expected cwd, argv/script를 연결한다. 전송·수락·supervisor 시작·실험 시작·주 프로그램 반환·전체 후손 종료/unknown·입력 반환·부모 control 복귀를 분리하고 한 outstanding 자동 요청만 허용한다. 확인 가능한 exit status와 로그·결과 위치를 기록한다. 실험 성공 판단은 맡지 않는다. 정확한 framing/FD/signal/process group은 G2가 결정한다. |
 | Takeover | 요청 즉시 backend의 새 자동 전송을 닫고 owner epoch를 갱신한다. 이미 전달된 요청이 취소됐다고 표시하지 않는다. 확인된 현재 입력 대상·실행 상태를 반환하며 대상 불명일 때 수동 입력도 보류한다. |
-| DeliveryObservation | 로컬 접수 → API 호출 복귀 → 해당 message/session ID의 OMP 처리 관측 → 업무 결과를 구분한다. API 복귀만 확인했다면 그 수준으로 표시한다. ACK 손실·비동기 실패·연결/identity 불명은 unknown이며 자동 replay하지 않는다. |
+| DeliveryObservation | 로컬 접수 → API 호출 복귀 → 해당 message/session ID의 OMP 처리 관측 → structured report → 업무 결과를 구분한다. API 복귀만 확인했다면 그 수준으로 표시한다. Event의 원래 session/run/turn 출처를 callback 시점의 mutable current session으로 대체하지 않는다. ACK 손실·비동기 실패·연결/identity 불명은 unknown이며 자동 replay하지 않는다. 같은 process 재접속은 미해결 상태 snapshot을 재조회한다. |
 | AutomationState | 승인/진행·pause·cancel·API 오류·metadata 장애와 terminal owner는 별개다. 모든 새 자동 dispatch와 모델 wake는 현재 상태를 확인한다. 수동 요청의 origin은 명시하고 자동 재개로 취급하지 않는다. |
 | ResumeEvidence | 사용자 재개 지시, 실제 파일 변경·tool 결과·terminal process·task 상태·현재 승인 범위·확인 시각/unknown을 대조한다. 단순 `reconciled:true`는 production 대조의 근거가 아니다. |
 | Metadata port | TaskSpec/revision/run·취소·전달 시도·관측 근거의 durable 쓰기 성공/실패를 caller에 전달한다. 새 자동 실행은 저장 성공이 선행 조건. Raw log 저장과 분리한다. |
@@ -103,24 +105,36 @@ TaskSpec은 목표·완료 조건·허용 변경/실행/자원·중단 조건·�
 
 ### 관리된 shell과 인수
 
-- 같은 interpreter의 PID/cwd/export/검증한 conda·venv를 유지한다. 수동 개입 뒤 직접 실행한
-  `wb-handoff`가 지원 상태·입력·job·shell identity를 확인한 후 control 대기 안에 머문다.
+- 사용자가 terminal에서 환경을 직접 준비한다. 부모 interpreter의 PID/cwd/PATH/exported environment를 유지하고 자동 실험 자식에 상속한다. conda 전용 점검과 환경 관리자별 activation/deactivation 보장은 완료 조건에서 제외한다. 일반 환경 상속·비전파·app 환경 분리는 검증한다. 수동 개입 뒤 직접 실행한
+  `wb-handoff`가 지원 상태·입력·job·shell identity를 확인한 후 부모 control 대기 안에 머문다.
   자동 명령을 정상 prompt에 PTY로 타이핑하는 구조를 새 경계로 채택하지 않는다.
 - 최초 자동화는 승인 범위+진행 지시와 안전한 초기 shell 준비로 시작한다. 사용자에게 첫 시작부터
   별도 AUTO ON이나 수동 handoff를 의무화하지 않는다. 일시정지 중 handoff도 자동 재개가 아니다.
-- Control receiver는 request identity/generation과 현재 권한을 확인한다. Script는 같은 interpreter에서
-  실행하고 자식 프로그램의 stdin은 PTY 동작을 유지한다. Control frame이 프로그램 입력으로
+- Control receiver는 request identity/generation과 현재 권한을 확인하고 고정 supervisor helper만 시작한다.
+  단순 argv는 불필요한 shell 재해석 없이, 복잡한 script 전체는 별도 interpreter 안에서 실행한다.
+  Pipeline·명령 치환·redirection을 부모가 먼저 평가하지 않는다. 자식 프로그램의 stdin은 PTY 동작을 유지한다. Control frame이 프로그램 입력으로
   소비되거나 프로그램이 다음 자동 요청을 읽는 경로가 없어야 한다. FD 자체를 인증/격리라고 부르지 않는다.
-- Shell 평가 반환 `EVAL_RETURNED`, 관리 대상 local process의 종료 확인, 종료 여부 `unknown`을
-  별도 상태로 둔다. 비정상 exit도 종료가 확인됐다면 종료 사실과 확인 가능한 status를 기록한다.
-  Shell 응답만으로 남은 local 작업의 종료를 확정하지 않는다. G2는 로그·결과를 해석해 실험 성공을
-  판정하지 않는다. Writable delegated cgroup v2를 필수 환경 조건으로 확정하지 않았다.
+- Supervisor는 실험 전에 subreaper 설정 성공을 확인하고 한 실험만 생성한다. 후보별로 단일 reaper 권한, wait 범위,
+  SIGCHLD disposition, 자식 signal disposition의 상속·정규화, 추가 spawn 가능성의 폐쇄 조건을 기록한다. 정상 자식의
+  signal 반응, 빠른 fork/exit, 주 프로그램 종료와 후손 생성 경합을 대조하고 관측 범위 밖 생성은 완료로 숨기지 않는다. 주 프로그램 반환,
+  관리 대상 후손 전체의 종료·회수, 수명 `unknown`, 입력 반환 장벽, 부모 control 복귀를 별도 사실로 둔다.
+  `WNOHANG=0`이나 통제 조건 없는 `ECHILD`를 전체 종료로 해석하지 않는다. 비정상 exit도 종료가 확인됐다면
+  종료 사실과 확인 가능한 status를 기록한다. G2는 로그·결과를 해석해 실험 성공을 판정하지 않는다.
+  C-D55에 따라 delegated cgroup v2를 core 필수 조건으로 추가하지 않는다. 이번 결정으로 선택적 cgroup 기능도 추가하지 않는다.
+- 전체 실험 수명이 끝나도 supervisor는 입력 반환 장벽에 머무는 후보를 먼저 검증한다. Backend는
+  key·paste·부분 write·terminal query reply를 포함한 이전 owner/generation의 writer와 송신 queue를 회수·차단한 뒤
+  부모 PTY 읽기를 재개한다. 시험은 같은 부모 shell의 실제 읽기·prompt 복귀와 새 정상 입력 처리 뒤에도 이전 입력의
+  marker 부작용이 없음을 확인해야 끝난다. 알려진 유출 후보에서는 marker가 생기는 음성 대조를 둔다. `TCIFLUSH`, ACK 또는
+  fresh READY 하나만으로 parser·queue가 비었다고 판정하지 않는다.
+- Signal 합성 시험은 시작·실행·반환 장벽·부모 WAIT에서 SIGINT·SIGQUIT·SIGTSTP·SIGCONT를 다룬다.
+  공유 foreground process group 후보부터 검증하고 관측자 정지나 job-control 충돌이 확인될 때만 분리 PG를 비교한다.
 - 인수 요청 전에 이미 전달된 명령은 실행될 수 있다. 수락/시작을 확인 못하면 미확인으로 표시하고
   재전송하지 않는다. 이미 실행 중인 foreground 대상이 확인되면 shell prompt 복귀를 기다리지 않고
   수동 입력을 전달할 수 있어야 한다. Shell의 수동 prompt 복귀는 실제 안전한 시점에 확인한다.
 - Busy·미제출 입력·REPL·background/suspended job·stale owner/generation·cwd 불일치·비호환 hook/trap·
   control 손실은 자동 전송/수락을 보류한다. 내부 상태를 무조건 초기화하거나 새 shell로 우회하지 않는다.
-  Ctrl-C·loop 이탈·exec·shell 종료·daemon 경계를 completed로 추정하지 않는다.
+  Ctrl-C·loop 이탈·exec·shell 종료·supervisor 사망·daemon 경계를 completed로 추정하지 않는다.
+  Supervisor 이전 수동 작업의 daemon을 발견·소급 관리한다고 보장하지 않으며 불명 잔존은 사유를 표시하고 handoff를 보류한다. 사용자가 정리한 뒤 다시 확인한다. 사용자 확인만으로 unknown을 종료 완료로 바꾸거나 귀속이 불명확한 프로세스를 자동 종료하지 않는다.
 
 ### OMP 전달과 중단
 
@@ -134,7 +148,9 @@ idle/pending/approval/composer를 확인한다. 현재 `api_accepted` 이름은 
 `getEditorText()`는 빈 값을 반환한다. 이 정적 관측에서 mode별 runtime 검증 필요성을 도출했다.
 
 한 번의 method 반환이나 `agent_end`만으로 특정 메시지의 처리를 확정하지 않는다. 고유 ID의 public
-message/provider 관측과 연결해 표시하고 미확인은 남긴다. Business 완료는 manager가 승인된 완료
+message/provider 관측과 연결해 표시하고 미확인은 남긴다. 일반 경로의 후속 오류도 host에 알리되
+익명 오류를 특정 요청 실패로 단정하지 않는다. 원래 event 출처를 공개 API에서 확인할 수 없으면 unknown으로 유지한다.
+Structured report는 원 요청 identity·task/revision/run과 자체 report identity를 연결해 수신 측이 대조한다. Business 완료는 manager가 승인된 완료
 조건과 결과를 대조한다. 같은 process의 reconnect/session 전환은 G3, process 재시작 durable 대조는
 CW-09/15가 소유한다. Native approval을 우회하는 mutable tool wrapper는 다시 도입하지 않는다.
 
@@ -145,7 +161,7 @@ CW-09/15가 소유한다. Native approval을 우회하는 mutable tool wrapper�
 | 자동화 pause | 새 자동 지시를 즉시 보류하고 manager 진행 중 turn에 `ctx.abort()` 요청. 요청/turn 종료 관측/tool 결과 불명을 별도 표시. A 완료 대기나 B 별도 차단 보장은 없음 |
 | Paused | manager/worker 새 자동 모델 작업·60초 점검/pending 결과 설명 보류. 로그/process 관측과 기존 host 실험 유지. 직접 조사·수정·rollback·agent 수동 지시는 자동 재개가 아님 |
 | Resume/cancel | 명시적 사용자 재개 뒤 실제 상태·권한 대조; old requests/commands replay 금지. Cancel은 기록/worktree/결과 파일 삭제가 아님 |
-| Run | 접수→전송→수락→실제 시작→shell 평가 반환/관리 대상 종료 확인 또는 unknown→worker 1차 판단→manager 2차 확인. Exit 0만으로 실험 성공 아님. Unknown이면 NEEDS_REVIEW |
+| Run | 접수→전송→수락→supervisor/실험 시작→주 프로그램 반환→전체 후손 종료 또는 unknown→입력 반환→부모 control 복귀→worker 1차 판단→manager 2차 확인. Exit 0만으로 실험 성공 아님. Unknown이면 NEEDS_REVIEW |
 | Worker 지시 | 실행·관측·보고. 종료 확인 뒤 사전 기준에 따라 로그·결과 파일의 출처·내용·미확인을 제시하고 성공·실패·판단 보류를 1차 판단. 수정 필요 보고 뒤 해당 지시 종료. 같은 Task retry 이력은 유지하고 다시 맡기려면 새 manager 지시 |
 | 복구/명세 | Manager가 worker 근거를 승인 완료 조건에 대조해 2차 확인. 실패 복구 기본 3회, 최초/정상 개선 제외. 승인 범위 안에서 실제 종료 확인 뒤 수정·새 worker 지시·재실행; 해결 불가·범위 밖·한도 도달 시 자동 재시도 중단과 근거·시도·남은 문제 보고. Commit/revision/이름 변경으로 초기화 금지. 새 revision은 다음 run, 현재 적용 지시는 종료 확인 뒤 수정·재실행. 즉시 제한은 현재에도 적용 |
 | 중단/강제 종료 | 요청과 실제 종료 구분. 실제 종료 전 소스/설정 수정·재실행 금지. 강제 종료는 승인 범위와 확인된 대상에만 허용; 대상 불명 시 보류 |
@@ -158,8 +174,8 @@ CW-09/15가 소유한다. Native approval을 우회하는 mutable tool wrapper�
 
 - CW-02: 현재 pyte/curses의 유효 근거를 출발점으로 사용한다. 필요하면 기존 제약 안의 renderer
   후보를 비교한다. Textual/libvterm/CFFI 채택을 계획만으로 확정하지 않는다.
-- CW-03/07: G2의 최소 receiver/인수 실험과 production shell adapter를 분리한다. Linux PTY/job 관측은
-  OS adapter 경계로 두고 startup Bash→sh 선택 이후 같은 shell을 유지한다.
+- CW-03/07: G2의 입력 반환·signal·subreaper 최소 합성 판별과 production shell adapter를 분리한다. Linux PTY/job/subreaper 관측은
+  OS adapter 경계로 두고 startup Bash→sh 선택 이후 같은 부모 shell을 유지한다. 실험 실행 단위는 별도 interpreter/executable이다.
 - CW-04/08: mode별 extension 검증과 durable mailbox 통합을 분리한다. Python에 세 번째 판단 agent나
   provider credential 저장소를 만들지 않는다. UDS/framed control은 현재 후보의 출발점이다.
 - CW-05: 최소 backend/frontend 수명 분리, timer·metadata/approval port, versioned control 계약과
@@ -173,6 +189,43 @@ CW-09/15가 소유한다. Native approval을 우회하는 mutable tool wrapper�
 CW-15/16이다. G3의 gate harness 대조는 CW-04, 실제 UI의 마지막 작업/파일/process/unknown
 표시와 재개 대조는 CW-12이다. CW-11의 local pause 반응은 CW-05 port로 검증하며 CW-12를
 선행 요구로 만들지 않는다. CW-12는 실제 표시를 위해 CW-06에도 의존한다.
+
+## Production 조합 (s2.7, C-D56)
+
+p2.6 최종 gate는 local 부품 gate가 모두 통과했음에도 `passed: false`였다. 원인은 다음과 같다(`VERIFICATION.md`, `gate-cw16-final-result.json`).
+
+- 부품을 한 제품으로 실행하는 진입점이 없다.
+- UI와 수명이 분리된 production backend가 없다.
+- backend↔UI 계약이 없다.
+- manager OMP가 TaskSpec을 작성할 경로가 없다.
+- 시작 시 복구 대조가 없다.
+
+또한 CW-06은 구현·gate 기록이 없는데, CW-12·CW-15는 CW-06 산출물 없이 local gate 통과로 기록됐다(CW-15 assignment는 CW-06을 "formally accepted"로 적었으나 해당 gate 기록은 없다). s2.7은 제품 동작을 바꾸지 않고 이 조합 책임을 다음과 같이 나눈다.
+
+- **CW-17 backend 수명과 `ui_v1`:**
+  - 단일 진입점(`python -m workbench`/`[project.scripts]`)을 둔다.
+  - backend process는 `setsid`로 분리하고 data dir마다 하나만 실행한다.
+  - data dir은 CLI·환경 변수·XDG state 순으로 정하고 권한은 0700이다.
+  - bridge extension을 주입한 OMP launcher를 제공한다.
+  - backend가 `PersistentShell`을 소유한다.
+  - UDS 위의 versioned framed `ui_v1`을 둔다. 다룰 메시지는 attach/detach/snapshot, `DisplayChunk` stream, input/paste/resize, focus·입력 owner, 인수·handoff, 자동화 상태, 전체 종료, `confirm_boot`이다.
+  - 기존 v1/ports_v2는 바꾸지 않는다.
+- **CW-06 세 영역 UI:** `ui_v1` client다. UI 종료는 detach이며 세 PTY를 종료하지 않는다. 기존 `terminal_g1`의 `PtySession` 직접 소유는 제품 경로에서 쓰지 않는다.
+- **CW-18 흐름·정책 조합:**
+  - manager 전용 Task 초안·revision 작성 extension 도구를 추가한다.
+  - Workbench가 확인한 사용자 승인·진행 조작만 승인으로 인정한다.
+  - `TaskRepository` → `TaskWorkflow` → worker 응답 → `WorkflowRun.collect/judge` → manager 확인을 잇는다.
+  - backend 안에서 `LifecycleCoordinator.tick`·점검·pause loop를 구동한다.
+- **CW-19 재시작·재부팅 복구:**
+  - `/proc/sys/kernel/random/boot_id`를 boot marker로 쓴다.
+  - UI나 자동 동작을 받기 전에 `reconcile`을 먼저 실행한다.
+  - SQLite `RecoveryPort`를 제공한다.
+  - 실제 종료 callback과 장애 표시를 연결한다.
+  - 재부팅 뒤 backend 자동 시작(systemd 등)은 범위가 아니며, 사용자가 진입점을 다시 실행한다.
+
+사용자 검토 checkpoint([C-D57](DECISIONS.md#C-D57)): UR-UX는 CW-06 통합 뒤 CW-18 전에, UR-USABILITY는 CW-18 통합 뒤 CW-16 전에 사용자가 실제 진입점으로 수행한다. 배치·키·문구 피드백은 해당 ticket delta로, 동작 변경은 새 결정으로 처리한다. 자동 gate와 사용자 검토는 서로 대체하지 않는다.
+
+재부팅 runtime 근거는 C-D56의 격리 QEMU/KVM VM에서 실제 guest 재부팅으로 얻는다. 사용자 host는 재부팅하지 않는다. VM 안 repo는 복사본이므로 검증마다 candidate manifest와 대조한다. CW-12·CW-15의 CW-06 의존 item(P-C-AC-15~18, 22, 23, 25, 30, 33)은 CW-06 통합 뒤 영향 대조·delta 재검증 대상이다. 과거 통과 기록은 보존하지만 새 입력에 대한 통과로 재발급하지 않는다.
 
 ## 수락 기준과 검증 추적
 
@@ -193,7 +246,7 @@ Local fixture 검증으로 정책을 다루는 항목도 최종 runtime 통합�
 | C-AC-05 | CW-10 | manager 준비·worker 실행/관측과 종료 후 출처·내용·미확인 기반 1차 판단 보고, 수정 필요 보고 시 지시 종료·새 지시 전 자동 반환 금지 | I-FLOW |
 | C-AC-06 | CW-06 | 세 영역, focus와 입력 owner 별도 표시 | I-COMPAT |
 | C-AC-07 | CW-13 | 실제 종료 뒤 승인 범위 내 수정·새 worker 지시·재실행, 실패 복구 3회·설정 변경 뒤 사용 횟수 유지·해결 불가/한도 후 자동 중단·근거 보고·시간 상한 없음 | I-POLICY |
-| C-AC-08 | CW-07 | Shell adapter 인수 요청 즉시 새 전송 보류, 요청/확인 분리, 이미 전송된 명령 상태·foreground 수동 입력, 같은 interpreter wb-handoff/control 대기와 no replay | I-SHELL |
+| C-AC-08 | CW-07 | Shell adapter 인수 요청 즉시 새 전송 보류, 요청/확인 분리, 이미 전송된 명령 상태·foreground 수동 입력, 부모 interpreter wb-handoff/control 대기·별도 실험 supervisor와 no replay | I-SHELL |
 | C-AC-09 | CW-10 | commit 기준 실행용 worktree 가이드·준비 실패 처리 | I-FLOW |
 | C-AC-10 | CW-13 | 실행 종료 확인 뒤 소스·설정 수정 | I-POLICY |
 | C-AC-11 | CW-10 | 위임 변경만 local commit·push/merge 분리 | I-FLOW |
@@ -211,13 +264,13 @@ Local fixture 검증으로 정책을 다루는 항목도 최종 runtime 통합�
 | C-AC-23 | CW-15 | 재부팅 뒤 확인 전 새 실험 금지 | I-FAULT |
 | C-AC-24 | CW-14 | 명세/요약/worktree 보존·64/512 MiB raw log cap | I-FAULT |
 | C-AC-25 | CW-12 | 승인 범위·Task/revision/run·취소와 중단 요청/확인/불명 결과 연결 | I-POLICY |
-| C-AC-26 | CW-07 | 관리된 같은 shell의 cwd/환경 보존·미제출 입력/REPL/job/비호환 hook·trap/unknown 보류와 명시적 lifecycle | I-SHELL |
+| C-AC-26 | CW-07 | 관리된 부모 shell의 cwd/exported environment 보존·별도 실험 실행·미제출 입력/REPL/job/수동 잔존/비호환 hook·trap/unknown 보류와 명시적 lifecycle | I-SHELL |
 | C-AC-27 | CW-11 | 활성 중 busy 점검 최신 한 건·지연, 일시정지 중 자동 점검 보류·즉시 종료 표시 | I-POLICY |
 | C-AC-28 | CW-14 | metadata 장애 차단과 raw log 장애 관측 | I-FAULT |
 | C-AC-29 | CW-09 | 범위 승인+진행 지시로 자동화 시작 | I-POLICY |
 | C-AC-30 | CW-12 | 일시정지 중 새 자동 모델 작업 보류·로그/프로세스 수집과 기존 실험 유지·수동 조작 독립 | I-POLICY |
 | C-AC-31 | CW-13 | 새 revision은 다음 run에 적용하고 현재 실행 적용 지시는 종료 확인 뒤 재실행하며 즉시 제한은 우선 | I-POLICY |
-| C-AC-32 | CW-07 | 검증한 conda와 venv 전환을 같은 shell에서 재사용·app 환경 분리; 환경 hook 비호환이면 이유와 보류 | I-SHELL |
+| C-AC-32 | CW-07 | 사용자가 준비한 cwd·PATH·exported environment 상속·app 환경 분리; conda 전용 점검 제외, 환경 hook 비호환이면 이유와 보류 | I-SHELL |
 | C-AC-33 | CW-12 | manager turn 중단 요청/확인·불명 도구 결과 표시·명시적 재개 대조와 replay 금지 | I-POLICY |
 | C-AC-34 | CW-13 | 허용된 확인 대상만 강제 종료·실제 종료 검증 | I-POLICY |
 
@@ -229,13 +282,13 @@ Gate가 추가할 probe의 구체 CLI는 구현 시 기록하며 존재하지 �
 | 영역 | 기존 seam / 명령 | 필요한 검증 |
 |---|---|---|
 | 공통 계약 | `sh tests/gates/harness/run-contracts.sh` | v1 cross-language 계약·잘못된 identity 거절; 기존 완료 근거 재사용 |
-| G1 | pyte가 설치된 interpreter에서 `python -m unittest discover -s tests/gates/g1_vt -p 'test_*.py' -v`; `tests/gates/g1_vt/live_runtime_probe.py` | 승인/tool 근거 보존, signal 정지 없는 resize와 부정 대조, 3-pane 입력·외부 matrix. 기존 probe의 resize 항목은 미확인 |
-| G2 | `PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python -m unittest discover -s tests/gates/g2_shell -v` | 기존 실패 분류 + control 대기의 정상/경합/인수/runtime. Bash와 실제 dash 필수 |
-| G3 | `node --experimental-strip-types --test tests/gates/g3_omp/bridge.test.ts`; `PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python -m unittest discover -s tests/gates/g3_omp -p test_g3_protocol.py -v` | fixture는 현재 역할/전달/pause 경계. 실제 TUI 새 probe는 별도 작성·검증 |
+| G1 | pyte가 설치된 interpreter에서 `python -m unittest discover -s tests/gates/g1_vt -p 'test_*.py' -v`; 기존 live probe | approval/tool·외부 tmux·resize의 유효 근거를 영향 범위에서 재사용. 동일 rows/columns·theme·TERM/COLORTERM·font에서 RGB/한글/wide/긴 줄/composer/approval/tool 출력과 cursor·SGR·redraw를 원본 OMP와 대조. 일반 terminal·비중첩 Herdr는 runtime 근거 대기 |
+| G2 | 기존 `tests/gates/g2_shell` 회귀와 새 bounded 합성 probe | 부모 직접 eval 실패를 유지하고 별도 interpreter의 return·exec·pipeline·명령 치환, 입력 반환 유출 음성 대조, 시작/실행/반환/WAIT signal, double-fork/setsid, supervisor 장애·수동 daemon을 한 후보에서 검증. Bash와 실제 dash 필수 |
+| G3 | 기존 Node/Python fixture와 실제 TUI/provider probe | 유효한 pause/reconnect/provider 근거 보존. 일반 경로 오류 보고, 원래 session/run/turn 출처 또는 unknown, 연결 단절 중 unresolved snapshot, report/reply identity를 정상·오류·지연 중복 사례로 추가 검증 |
 | G3 RPC 재사용 | `PYTHONDONTWRITEBYTECODE=1 python tests/gates/g3_omp/live_rpc_pause_probe.py --pair`와 기존 contention/reconnect probe | 바뀌지 않은 mode/항목에 한정. 실제 TUI composer·session 검증으로 대체 불가 |
 | G4 이후 | 아직 구현되지 않은 tests/gates/g4, tasks/workflow/observation/policy/storage/lifecycle/integration seam | CW-05가 정확한 도구·명령을 고정. pytest/Ruff/mypy/uv가 이미 설정/통과됐다고 가정하지 않음 |
 
-Runtime probe는 PTY/child pipe를 계속 배출하고 전체 deadline·process group 정리·잔존 확인을 둔다.
+Runtime probe는 PTY/child pipe를 계속 배출하고 시험용 barrier, 전체 deadline·process group 정리·잔존 확인을 둔다.
 실험 자체의 timeout/입력 불능과 제품 결함을 구분한다. 무출력/실행 시간 상한을 제품 종료 정책으로
 추가하지 않는다. Scripted provider로 실제 OMP를 구동한 근거와 실제 provider 인증/품질 근거를 구분한다.
 
@@ -257,19 +310,21 @@ Machine-validated pass라고 표시하지 않는다. CW-05가 `G4-EVIDENCE`에�
 
 ## 호환성·통합과 미결정
 
-구체 shell builtin/FD/framing, VT backend, Python minor·dependency lock, UI 키·위치·최소 크기와
-signal 대기 간격은 합의된 동작 안에서 판별 실험으로 정한다. G2가 불성립하면 다른 shell로
+구체 shell builtin/FD/framing, 공유/분리 process group, VT backend, Python minor·dependency lock, UI 키·위치·최소 크기와
+signal 대기 간격은 합의된 동작 안에서 판별 실험으로 정한다. G2가 불성립하면 다른 부모 shell로
 우회하거나 sh 지원을 축소하지 않고 실패한 가정과 필요한 변경을 보고한다.
 
-일반 terminal/tmux/herdr·실제 conda/venv·TUI session·재부팅 환경을 구동할 수 없으면 해당 근거를
+일반 terminal/tmux/herdr·TUI session·재부팅 환경을 구동할 수 없으면 해당 근거를
 pending으로 둔다. OS 재부팅 검증을 위해 현재 사용자 host를 임의 재부팅하지 않으며 준비된 격리
 시험 환경의 존재와 실행 권한을 먼저 확인한다. 미시험 조합은 완료 조건을 충족한 것으로 표시하지 않는다.
 외부 설정 변경·시스템 package 설치·commit/push/게시/배포 권한은 계획으로 부여하지 않는다.
 
-구현 호출의 당시 시작값 98/128회와 초기 남은 작업 추정은 계획 이력이다. 사용자가 개발 child
-호출 상한을 160회로 확대했으며, 현행 사용량·예약·잔여는 구현 run의 ledger에서 확인한다.
-독립 검증을 줄이거나 사용자 상한을 우회하지 않는다. 제품의 모델 점검/peer wake 정책과 개발
-호출 예산은 별개다.
+이번 변경안과 다음 G2 합성 판별은 사용자가 준비한 host 환경을 사용하고 Docker runtime 검증을 생략한다.
+Container 호환성 목표와 추가 특권 비필수 원칙은 유지하며 Docker 조합은 runtime evidence pending으로 남긴다.
+
+개발 호출은 현재 누적 220회(opening 186 + 이후 34), 예약 0이다. C-D55에서 사용자가 후속 예산 산정·증액을 Root에게 위임했다.
+기존 journal의 user limit 220은 역사적 사실로 보존하고 실제 dispatch 전 명시적인 승인 기반 회계 전환을 수행한다. 사용량 초기화·기존 상한 우회는 금지한다.
+Root는 독립 검증·수정·최종 통합을 포함한 유한 operating budget을 산정·조정한다. 제품 모델 점검/peer wake 정책과 개발 예산은 별개다. 도구 제약과 재개 절차는 [C-D55](DECISION-2026-09-26.md)를 따른다.
 
 ## Ticket graph와 인계
 
@@ -282,12 +337,17 @@ G2와 어느 한 gate는 실제 격리 workspace·자원이 확인된 때 병행
 ```mermaid
 flowchart TD
   C01[CW-01 완료] --> C02[CW-02 G1]
-  C01 --> C03[CW-03 G2 control 대기]
+  C01 --> C03[CW-03 G2 입력 반환·signal·subreaper]
   C01 --> C04[CW-04 G3 TUI]
   C02 --> C05[CW-05 G4 및 계약]
   C03 --> C05
   C04 --> C05
-  C05 --> C06[CW-06 UI]
+  C05 --> C17[CW-17 backend·ui_v1]
+  C07 --> C17
+  C08 --> C17
+  C09 --> C17
+  C17 --> C06[CW-06 UI client]
+  C05 --> C06
   C05 --> C07[CW-07 shell]
   C05 --> C09[CW-09 Task 및 metadata]
   C05 --> C08[CW-08 mailbox]
@@ -310,10 +370,22 @@ flowchart TD
   C12 --> C15
   C13 --> C15
   C14 --> C15
+  C06 --> C18[CW-18 흐름·정책 조합]
+  C10 --> C18
+  C11 --> C18
+  C12 --> C18
+  C13 --> C18
+  C15 --> C18
+  C17 --> C18
+  C13 --> C19[CW-19 재시작·재부팅 복구]
+  C14 --> C19
+  C15 --> C19
+  C18 --> C19
   C15 --> C16[CW-16 최종 통합]
+  C19 --> C16
 ```
 
 위 graph는 PLAN에서 생성한 읽기용 그림이며 wave barrier가 아니다. 준비 조건은 선행 산출물의
 통합·검증, 현재 입력, 승인, workspace/자원·mutation lease와 남은 검증 예산이다.
-사용자의 명시적 `$implement docs/features/core-workbench` 요청을 승인·구현 재개 근거로 기록했다.
-구현 결과는 각 gate와 최종 C-AC 근거를 대조해 판정한다.
+기존 `$implement docs/features/core-workbench`의 r1.12/s2.5/p2.5 승인과 C-D55를 유지한다. p2.7의 논리 frontier는 CW-17이다. CW-06→CW-18→CW-19→CW-16 순으로 직렬이며 CW-12·CW-15의 delta 재검증은 CW-06 통합 뒤에 수행한다.
+현재 문서 개정은 제품 구현이나 gate 통과가 아니다. 구현 결과는 각 gate와 최종 C-AC 근거를 대조해 판정한다.

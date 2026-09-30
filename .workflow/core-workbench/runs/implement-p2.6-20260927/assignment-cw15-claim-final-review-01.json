@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "invocation": "cw15-claim-final-review-01",
+  "role": "reviewer",
+  "unit": "V-CW-15-p2.6-current",
+  "authority": "User $implement request; approved CW-15/C-D52; change-verification final review",
+  "objective": "Fresh read-only final review of the frozen atomic submission-claim/handoff candidate, including containment of the test scope incident.",
+  "candidate": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw15-claim-test.json",
+    "candidate_id": "575be7c7da45f1ae4584b6c1940f5f4a3c8153e1e83c7c8998e1605c3b8ba15d"
+  },
+  "review": [
+    "Independently audit _SubmissionFence revoke/epoch/claim, lifecycle permit, Pause combined authority, G3 write-lock/current/claim/_send_until ordering and receipt/journal mapping. Confirm both total orders satisfy C-D52 without false cancellation/replay.",
+    "Audit same-coordinator handoff reopening only after durable manager control commit, failure fail-closed behavior, epoch invalidation of old permits, and no token-unaware command fallback.",
+    "Check malformed token behavior, pending ACK cleanup, partial write/concurrent request compatibility, exact session/process authority, shutdown/review/model/metadata/boot/recovery invariants and production composition.",
+    "Verify hashes and accepted independent evidence. Treat the accidentally started scripted OMP suite as excluded; verify residue containment and do not credit it as live evidence. Map C-AC-15,16,17,18,22,23 and list external pending evidence."
+  ],
+  "constraints": ["Strictly read-only. No edits, tests that launch OMP, delegation, oracle, commit, publish, deploy, or inferred external success."],
+  "report": "Return candidate_ready true/false; P0/P1/P2 findings; acceptance matrix; hash/evidence/scope-incident assessment; pending external environments and exact reroute if needed."
+}

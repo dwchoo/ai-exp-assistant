@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "invocation": "cw12-tracked-mode-review-01",
+  "role": "reviewer",
+  "unit": "V-CW-12-p2.6-current",
+  "authority": "User $implement docs/features/core-workbench request; approved PLAN p2.6 CW-12",
+  "objective": "Perform a fresh read-only final review of the complete CW-12 candidate after tracked-mode correction and independent tests.",
+  "candidate": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw12-tracked-mode-test.json",
+    "candidate_id": "d94a041b433e8fb9ebf617dd5657d5d2cb70ee67f42946b9064ca3de7f584a73"
+  },
+  "acceptance_ids": ["C-AC-25", "C-AC-30", "C-AC-33"],
+  "review_focus": [
+    "Exact active/persisted/bound run and worker identity/incarnation fencing around automatic dispatch and late callbacks.",
+    "Durable early baseline plus production resume observation for Git peers/execution worktree, non-Git files, process/tool/task/approval state.",
+    "Tracked and untracked mode-only changes, index flags, ignored outputs, descendant cwd, symlink/special/removal and bounded scan failure behavior.",
+    "Large clean-repository liveness and actual OMP pause/reject/cleanup/reconcile semantics without replay or residue.",
+    "Whether the independent tests and frozen candidate together close prior P1/P2 findings without new correctness or security regressions."
+  ],
+  "constraints": [
+    "Read-only reviewer: do not edit code, tests, docs, workflow state, or graphify output.",
+    "Do not run mutating graphify commands; you may inspect the frozen snapshot and existing evidence.",
+    "No delegation, commit, publish, deploy, or Docker."
+  ],
+  "report": "Return candidate_ready true/false, findings by severity with paths/lines, acceptance judgment per ID, evidence adequacy, and residual risks."
+}

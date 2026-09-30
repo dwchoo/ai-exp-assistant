@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw06-replay-worker-05",
+  "ticket_id": "CW-06",
+  "role": "worker",
+  "unit": "V-CW-06-p2.7",
+  "approved_bundle_digest": "a521acdc3838b43a26e277afc233bab695c8b02ce0d42392c3678931b2e3f027",
+  "prior_assignment_ref": ".workflow/core-workbench/runs/implement-p2.6-20260927/assignment-p27-cw06-flood-worker-04.json",
+  "routing": {"planned_role": "worker", "selected_role": "worker (wb-worker, Sonnet high)", "reason_codes": ["bounded_pattern"], "evidence_refs": ["root cause identified with code locations; UI-only change"]},
+  "base_candidate": "4d00e101a3ea3eac269787f746859f12fdccd969ec839980de5235adad02f5f5",
+  "checkpoint_ref": ["p27-snapshot-cw17-integrated-checkpoint.json + p27-cw06-*-delta-backup/ chain (latest p27-cw06-flood-delta-backup/, p27-cw06-rerun4-delta-backup/)"],
+  "inputs": [".workflow/core-workbench/runs/implement-p2.6-20260927/check-p27-cw06-integration-live-01.json", ".workflow/core-workbench/runs/implement-p2.6-20260927/root-adjudication-p27-cw06-replay-regression.json", ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-delta-review-cw06-02-agent.json (P3-a, P3-b)"],
+  "required_behavior": [
+    "Replay frames (ui_v1 display header replay=true, sent by the backend right after the attach result) are never dropped by catch-up: feed them completely (may be sliced for responsiveness) and exclude them from the catch-up backlog accounting.",
+    "Catch-up (live backlog only) keeps a tail that starts at a safe boundary (after a newline or at an ESC that begins a sequence; never inside CSI/OSC/DCS), as in delta review P3-a.",
+    "feed_pending does not re-slice the head payload per 1 KiB (use an offset or memoryview; P3-b).",
+    "Keep all previous behaviour: flood responsiveness, catch-up indicator, 2004 tracking, no stale query replies during replay."
+  ],
+  "acceptance": [
+    "red->green fixture tests in tests/ui/test_product_model.py (or test_product_pty.py): after attach, three panes each receive ~256 KiB of replay (incl. an alt-screen full-screen app sequence early in the replay) arriving AFTER the attach result through the loop path -> the final screens equal those produced by feeding the same bytes synchronously; catch-up tail boundary test; no quadratic slicing (e.g. 1 MiB frame feed within a time bound).",
+    "All tests/ui test_*.py (incl. *_independent) pass unmodified; tests/contracts; tests/gates/g1_vt (src:.). Do NOT run live_* files and never set CW06_LIVE_MODEL=1."
+  ],
+  "allowed_write_paths": ["src/workbench/ui/product/**", "tests/ui/test_product_model.py", "tests/ui/test_product_pty.py", "tests/ui/support.py"],
+  "prohibited_paths": ["tests/**/*_independent*.py", "tests/ui/live_*.py", "src/workbench/backend/**", "src/workbench/contracts/**", "src/workbench/terminal/**", "docs/**", ".workflow/**"],
+  "stop_conditions": ["needs backend/contract change"],
+  "rules": "Python /usr/bin/env PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python; no graphify update, commits, tmux/herdr, credentials, real model; clean up.",
+  "result_format": "checks table first, status, changed paths + sha256, fix summary, residue, gaps. Korean, concise."
+}

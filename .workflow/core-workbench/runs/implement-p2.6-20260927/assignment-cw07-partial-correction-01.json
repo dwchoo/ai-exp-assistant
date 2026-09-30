@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "invocation": "cw07-partial-correction-01",
+  "role": "worker_senior",
+  "unit": "V-CW-07-p2.6-current",
+  "workspace": "/home/dwchoo/ai-exp-assistant",
+  "writer": true,
+  "checkpoint": ".workflow/core-workbench/runs/implement-p2.6-20260927/cw07-partial-correction-checkpoint.json",
+  "requirements": ".workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw07.json",
+  "review": ".workflow/core-workbench/runs/implement-p2.6-20260927/review-cw07-delta-01.json",
+  "regression_evidence": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw07-partial-regression-test-01.json",
+  "allowed_write_scope": [
+    "src/workbench/terminal/shell_persistent/adapter.py",
+    "tests/terminal/test_persistent_shell.py"
+  ],
+  "protected_independent_test": "tests/terminal/test_persistent_shell_independent.py",
+  "instructions": "Fix the accepted partial-write P2 with a bounded manual-parent writer that revalidates the current boundary, lifecycle, parent PID/start/session/live state, and PTY foreground before every low-level write attempt. After any partial prefix, a transition to unknown/needs_review/uncertain/stale identity must prevent a second write and surface refusal; no remaining bytes may be sent. Handle InterruptedError/BlockingIOError with an existing or explicit bounded deadline so manual writes cannot spin forever. Preserve normal complete and partial writes while state remains valid, as well as the already-correct live experiment-foreground path. Do not modify independent tests or expand cgroup/daemon scope. Run the new regression, all terminal tests, G2/G4, Bash/sh worker and independent probes, cleanup/residue, and git diff --check. Produce result/snapshot/scope audit and return writer lease. Root owns graphify update."
+}

@@ -1,0 +1,8 @@
+{
+  "before": ".workflow/core-workbench/runs/implement-p2.6-20260927/split-pg-prerepair-checkpoint.json",
+  "after": ".workflow/core-workbench/runs/implement-p2.6-20260927/split-pg-correction-candidate.json",
+  "allowed": [
+    "tests/gates/g2_shell/live_combined_boundary_probe.py",
+    "tests/gates/g2_shell/test_live_combined_boundary_predicates.py"
+  ]
+}

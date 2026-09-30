@@ -1,0 +1,24 @@
+{
+  "invocation": "cw02-g1-wide-correction-01",
+  "ticket": "CW-02",
+  "unit": "V-CW-02-p2.6-current",
+  "role": "worker_senior",
+  "workspace": "/home/dwchoo/ai-exp-assistant",
+  "baseline": ".workflow/core-workbench/runs/implement-p2.6-20260927/cw02-g1-frozen-candidate.json",
+  "candidate": "c8c8d4c1dba9767e9fb941bdfec31fcf10516d5c5c07ee186593587fb1f0a722",
+  "authority": "User $implement docs/features/core-workbench; fresh review P2 review-cw02-g1-01.json",
+  "objective": "Fix the reviewed wide-glyph clipping defect at pane boundaries without changing approved G1 behavior.",
+  "requirements": [
+    "Read review-cw02-g1-01.json and reproduce its memory fixture before editing.",
+    "In both ordinary curses drawing and exact RGB overlay, emit a cell only when the full terminal display width of the glyph fits within the pane inner boundary. Preserve combining marks, continuation cells, clipping, cursor position, style, RGB grouping, and fallback behavior.",
+    "Add a focused regression that fails on the frozen candidate: resize a screen so a wide glyph lead remains at the last inner column and assert neither normal nor RGB rendering overwrites the border. Include any nearby continuation/combining cases needed to prevent a superficial fix.",
+    "Run the regression, full G1 suite, and actual live color/plain/isolated Herdr probes. Keep the existing independent PID/geometry negative subcases intact. Verify cleanup and default Herdr state preservation.",
+    "Use apply_patch only. Touch only src/workbench/ui/terminal_g1/app.py, tests/gates/g1_vt/**, plus named result/snapshot/audit artifacts. Do not edit other source/docs/PLAN/ledger or commit/push.",
+    "Run graphify update . after code changes, return result-cw02-g1-wide-correction-01.json, compact after snapshot, and scope audit."
+  ],
+  "deliverables": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw02-g1-wide-correction-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw02-g1-wide-correction-after.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/scope-audit-cw02-g1-wide-correction.json"
+  ]
+}

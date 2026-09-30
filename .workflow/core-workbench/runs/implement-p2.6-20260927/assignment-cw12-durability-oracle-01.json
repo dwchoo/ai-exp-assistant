@@ -1,0 +1,24 @@
+{
+  "invocation": "cw12-durability-oracle-01",
+  "role": "oracle",
+  "unit": "V-CW-12-p2.6-current",
+  "objective": "Advise the minimal correct CW-12 durability/recovery contract for first journal directory-fsync failure plus crash namespace loss.",
+  "evidence": [
+    "docs/features/core-workbench/tickets/CW-12.md",
+    "docs/features/core-workbench/BRIEF.md",
+    "docs/features/core-workbench/OPERATING-CONTRACT.md",
+    "src/workbench/policy/pause_automation/controller.py",
+    "src/workbench/policy/pause_automation/journal.py",
+    "tests/policy/pause_automation/test_pause_policy.py",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-review-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-runtime-test-01.json"
+  ],
+  "questions": [
+    "Does C-AC-25/30/33 or the operating contract require restart to remember a pause after the very first durability operation reports parent-directory fsync failure and a crash loses the only directory entry, despite no durable evidence surviving?",
+    "If yes, what is the smallest in-scope design that can distinguish never-paused from lost-pause after restart without modifying TaskRepository/G3/contracts? Evaluate pre-created active marker, dual files, and fail-closed absent-journal binding.",
+    "If no, specify the defensible contract: pause returns/records persistence failure and stays closed in the current process, but no crash-recovery guarantee is claimed when the persistence substrate explicitly failed. State what test/gate evidence should replace the impossible modeled assertion.",
+    "Separately confirm the correct exact-session/generation/request correlation rule for turn_stop_observed events."
+  ],
+  "constraints": ["Read-only advice; no files or workflow state changes; distinguish spec requirement from robustness recommendation and avoid inventing authority."],
+  "report": ["requirement interpretation", "recommended minimal design", "rejected alternatives", "testable invariants"]
+}

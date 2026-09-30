@@ -1,0 +1,20 @@
+{
+  "invocation": "cw03-run-protocol-review-01",
+  "candidate": "84d6c56c3203edc6ba8129ca09594cfb1dd1e2dd2ef28220ce518f00fdd95f9d",
+  "status": "changes_required",
+  "findings": [
+    {
+      "severity": "P1",
+      "title": "Experiment child inherits persistent control and recovery read descriptors",
+      "evidence": "src/workbench/terminal/shell_g2/lifecycle.py child fork branch closes only local pipe ends before os.execvpe; inheritable shell FDs 8 and 7 remain open, so a payload can consume later TAKEOVER/RUN or recovery frames.",
+      "required_correction": "Close every persistent control/recovery/request descriptor not explicitly required by the payload before exec, and add an independent runtime FD-inventory/control-frame non-inheritance test."
+    }
+  ],
+  "other_findings": [],
+  "exec_ack_disposition": "PTRACE exec-event acknowledgement and fail-closed denial/pre-exec behavior had no additional P0-P2 finding.",
+  "scope_limit": "Review covers the common RUN seam only; input/jobs, manual hook, takeover migration and six-item matrix integration remain incomplete.",
+  "runtime_reexecuted": false,
+  "needs_oracle": false,
+  "writes": [],
+  "owned_processes_remaining": false
+}

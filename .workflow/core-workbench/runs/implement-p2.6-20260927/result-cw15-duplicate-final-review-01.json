@@ -1,0 +1,25 @@
+{
+  "invocation": "cw15-duplicate-final-review-01",
+  "outcome": "complete",
+  "candidate_ready": false,
+  "candidate_id": "4eb8da95d47761acb737ba4d627b67306eef988567b7e04cafde38db218a9cd8",
+  "snapshot_hashes_match": true,
+  "closed": "Prior takeover generation, submission-claim, handoff, no-replay and admission findings are closed in-repo.",
+  "finding": {
+    "severity": "P1",
+    "path": "src/workbench/app/lifecycle.py",
+    "lines": "687-699",
+    "summary": "shutdown accepts any RunObservation.fully_terminated without matching current task_id/revision/run_id. If all recorded PIDs are dead, another run's termination can incorrectly produce complete=true.",
+    "required_behavior": "Require exact current RunIdentity for shutdown termination; wrong, malformed, missing or exceptional observations remain full_termination_unconfirmed."
+  },
+  "acceptance": {
+    "C-AC-15": "met in-repo",
+    "C-AC-16": "met in-repo",
+    "C-AC-17": "met in-repo",
+    "C-AC-18": "met in-repo; external OMP pending",
+    "C-AC-22": "not met due wrong-run termination acceptance",
+    "C-AC-23": "met in-repo; real reboot pending"
+  },
+  "scope_incident": "Excluded scripted-OMP suite not credited; zero related residue observed.",
+  "mutation_owner": null
+}

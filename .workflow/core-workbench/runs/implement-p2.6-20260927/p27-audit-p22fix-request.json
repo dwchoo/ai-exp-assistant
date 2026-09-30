@@ -1,0 +1,1 @@
+{"before":"/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-p22fix-checkpoint.json","after":"/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-p22fix-after.json","allowed":["src/workbench/backend/panes.py","tests/backend/test_panes.py"]}

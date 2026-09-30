@@ -1,0 +1,16 @@
+{
+  "invocation": "cw12-final-review-02",
+  "candidate": "1f253e330255da939dbd5c78af8dfa3a96597f115b5dda4e66f8b1d2e264ff2d",
+  "candidate_hash_validated": true,
+  "outcome": "needs_reroute",
+  "prior_findings_closed": "All prior resume_failed, event-correlation, and durability-scope findings are closed.",
+  "findings": [
+    {"severity": "P1", "summary": "A stale unpaused admission publication can complete after pause and reopen CW-11 review admission"},
+    {"severity": "P1", "summary": "bind_run(B) can race an in-progress pause(A), contaminate B with A pause state, and abort pause with PausePolicyError"},
+    {"severity": "P1", "summary": "peer session can switch after resume validation; replacement peer is resumed and old binding is published unpaused without ack/post-probe identity checks"},
+    {"severity": "P1", "summary": "actual runtime probe passes without projecting confirmed file changes/running processes and does not exercise manual TUI activity independence during pause"}
+  ],
+  "runtime_false_pass": "Changing manager_files to invalid and host_process_count to zero did not make qualifies fail; projection was fed None for both fields.",
+  "writer": false,
+  "files_modified": []
+}

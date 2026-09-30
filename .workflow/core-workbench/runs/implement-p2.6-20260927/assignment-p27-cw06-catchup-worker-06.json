@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw06-catchup-worker-06",
+  "ticket_id": "CW-06",
+  "role": "worker_senior",
+  "unit": "V-CW-06-p2.7",
+  "approved_bundle_digest": "a521acdc3838b43a26e277afc233bab695c8b02ce0d42392c3678931b2e3f027",
+  "prior_assignment_ref": ".workflow/core-workbench/runs/implement-p2.6-20260927/assignment-p27-cw06-replay-worker-05.json",
+  "routing": {"planned_role": "worker", "selected_role": "worker_senior (Opus, general-purpose)", "reason_codes": ["coupled_invariants", "stalled_implementation"], "evidence_refs": ["two consecutive bounded UI fixes regressed each other (flood fix broke reattach replay; replay fix broke flood); replay / catch-up / query-suppression / intake-budget invariants interact"]},
+  "base_candidate": "53f3870c997a4f55132269a2a25c08bd5ce991e23aebdfb0f495033c9e2128fe",
+  "checkpoint_ref": ["p27-snapshot-cw17-integrated-checkpoint.json + p27-cw06-*-delta-backup/ chain (latest p27-cw06-replay-delta-backup/, p27-cw06-rerun6-delta-backup/)"],
+  "inputs": [".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw06-rerun-test-06-agent.json", ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw06-flood-worker-04.json", ".workflow/core-workbench/runs/implement-p2.6-20260927/root-adjudication-p27-cw06-flood.json", ".workflow/core-workbench/runs/implement-p2.6-20260927/root-adjudication-p27-cw06-replay-regression.json"],
+  "root_diagnosis_hypothesis": "src/workbench/ui/product/model.py feed_pending/_catch_up: the catch-up tail is re-queued as replay=True and catch-up is suppressed while any replay item is in the backlog (`any(item[1] for item in view.backlog)` scanned every loop, O(n)); while the tail feeds slowly (coloured Korean ~0.3 MB/s) the live backlog grows unbounded, and the next catch-up does b''.join over the whole backlog; loop stalls -> socket not drained -> backend slow_client. Verify by measurement before fixing.",
+  "required_behavior": [
+    "Keep three kinds distinct: attach replay (fed completely, never trimmed, blocks catch-up only while attach replay remains), catch-up tail (fed with terminal-query replies suppressed, but does NOT block further catch-up), live output.",
+    "O(1)/amortized bookkeeping per loop: counters for pending attach-replay bytes and live bytes; no full-deque scans or full joins; catch-up collects the tail by walking from the end until CATCHUP_KEEP_BYTES (plus boundary alignment), dropping older items without concatenating them; 2004 tracking over dropped bytes must stay correct without a full join (e.g. track per item on enqueue).",
+    "Preserve all verified behaviours: flood responsiveness (key latency < 0.3 s), UI stays attached under p27f F0/F1/F2 incl. coloured Korean, reattach S15 restore (replay equals synchronous feed), safe tail boundary, no stale query replies, indicator."
+  ],
+  "acceptance": [
+    "Unmodified independent tests pass: tests/ui/test_product_replay_independent_p27h.py, tests/ui/test_product_flood_independent_p27f.py and all other tests/ui/test_*.py.",
+    "Runtime (stub OMP, no model): tests/ui/live_product_flood_independent_p27f.py passes 3x (F2 coloured Korean included).",
+    "red->green tests of your own: catch-up while a previous catch-up tail is feeding; per-loop cost bounded with a 50k-frame backlog; 2004 state after dropping items.",
+    "suites: tests/ui (test_*.py), tests/backend, tests/contracts, tests/gates/g1_vt (src:.), tests/gates/g4_lifetime (src:.). Never run live_product_omp_independent / never set CW06_LIVE_MODEL=1."
+  ],
+  "allowed_write_paths": ["src/workbench/ui/product/**", "tests/ui/test_product_model.py", "tests/ui/test_product_pty.py", "tests/ui/support.py"],
+  "prohibited_paths": ["tests/**/*_independent*.py", "tests/ui/live_*.py", "src/workbench/backend/**", "src/workbench/contracts/**", "src/workbench/terminal/**", "docs/**", ".workflow/**"],
+  "stop_conditions": ["needs backend/contract change"],
+  "rules": "Python /usr/bin/env PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python (never system python3: pyte missing); no graphify update, commits, tmux/herdr, credentials, real model; clean up every temp dir/process.",
+  "result_format": "checks table first, status, changed paths + sha256, measurements (before/after loop cost, F2 outcome), design summary, residue, gaps. Korean, concise."
+}

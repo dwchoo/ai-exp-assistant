@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "invocation": "cw15-shutdown-id-correction-01",
+  "role": "worker_senior",
+  "unit": "V-CW-15-p2.6-current",
+  "authority": "User $implement request; approved CW-15/C-AC-22; fresh shutdown identity review",
+  "objective": "Require exact current RunIdentity before shutdown can report full termination complete, matching reconcile semantics.",
+  "candidate": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw15-duplicate-test.json",
+    "candidate_id": "4eb8da95d47761acb737ba4d627b67306eef988567b7e04cafde38db218a9cd8"
+  },
+  "required_changes": [
+    "In every shutdown observation iteration, set terminated=true only for a RunObservation whose identity equals RunIdentity(record.task_id, record.revision, record.run_id) and whose fully_terminated is true.",
+    "Wrong-run, malformed/non-RunObservation, None and exception observations remain unconfirmed even when every recorded PID is dead; result complete=false with full_termination_unconfirmed. Preserve survivors reporting and bounded polling.",
+    "Prefer one shared exact-current termination predicate used by reconcile and shutdown if it reduces semantic drift without broad refactoring. Preserve repeated-shutdown at-most-once stop attempts, shutdown/action lock ordering and all takeover changes.",
+    "Add RED/GREEN tests for wrong task, revision, run ID, malformed/None/exception and correct identity, including all PIDs dead and repeated shutdown."
+  ],
+  "allowed_write_paths": ["src/workbench/app/**", "tests/lifecycle/**", "graphify-out/**"],
+  "constraints": ["Surgical shutdown identity correction only. No other production/docs/workflow/PLAN/state, external/scripted OMP/reboot, full/live G3, dependency install, delegation, commit, publish, deploy or Docker. Use apply_patch/non-live tests."],
+  "report": "Return candidate_ready/needs_reroute; exact observation identities/survivors/complete/problems/stop counts; regression totals/hashes/scope/residue/pending."
+}

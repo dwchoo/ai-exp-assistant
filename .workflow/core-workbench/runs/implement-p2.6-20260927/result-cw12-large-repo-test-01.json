@@ -1,0 +1,26 @@
+{
+  "invocation": "cw12-large-repo-test-01",
+  "outcome": "needs_reroute",
+  "candidate_ready": false,
+  "product_mutation": false,
+  "test_only_changed_paths": ["tests/policy/pause_automation/test_pause_policy.py", "graphify-out/**"],
+  "finding": {
+    "severity": "P1",
+    "summary": "A peer Git tracked file marked assume-unchanged can change after bind while git diff stays empty, allowing resume outside approval.",
+    "reproduction": "test_git_peer_assume_unchanged_cannot_hide_out_of_scope_tracked_edit",
+    "result": "PausePolicyError not raised",
+    "acceptance_ids": ["C-AC-33"]
+  },
+  "checks": {
+    "single_reproduction": "1 failed as expected for product defect",
+    "pause": "90 run; 1 failure (the new reproduction only)",
+    "observation": "95 passed",
+    "tasks": "22 passed",
+    "bridge": "22 passed",
+    "workflow": "44 passed",
+    "large_repo_liveness": "2050 tracked files plus clean file over 64 MiB passed",
+    "actual_omp": "exit 0; out_of_scope_rejected=true; zero_residue=true"
+  },
+  "unknowns": [],
+  "mutation_owner": "/root/cw12_post_review_test"
+}

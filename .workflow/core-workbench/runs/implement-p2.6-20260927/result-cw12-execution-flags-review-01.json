@@ -1,0 +1,18 @@
+{
+  "invocation": "cw12-execution-flags-review-01",
+  "outcome": "needs_correction",
+  "candidate_ready": false,
+  "candidate": "69d2445690982c42ddb2b7cad34e449399a6e984ade7fc5925c183386321d155",
+  "findings": [
+    {
+      "severity": "P2",
+      "confidence": "high",
+      "summary": "Peer, non-Git, and execution-worktree snapshots compare content hashes without st_mode, so an out-of-scope chmod-only change can resume.",
+      "evidence": ["src/workbench/policy/pause_automation/controller.py:110", "src/workbench/policy/pause_automation/controller.py:135", "src/workbench/policy/pause_automation/controller.py:1509"],
+      "acceptance_ids": ["C-AC-33"]
+    }
+  ],
+  "closed_findings": ["execution worktree index flags", "peer index flags", "large Git repo liveness", "early durable baseline", "ignored files", "fd-safe traversal", "persisted-run dispatch", "late result attribution"],
+  "requirement_assessment": {"C-AC-25": "met", "C-AC-30": "met", "C-AC-33": "not_met"},
+  "tests_run": false
+}

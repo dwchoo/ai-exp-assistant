@@ -1,0 +1,19 @@
+{
+  "invocation": "cw12-event-correction-01",
+  "role": "worker_senior",
+  "unit": "V-CW-12-p2.6-current",
+  "objective": "Close the remaining CW-12 replacement-session stop-event correlation defect without changing the approved durability boundary.",
+  "evidence": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-runtime-test-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-durability-oracle-01.json"
+  ],
+  "write_scope": ["src/workbench/policy/pause_*/**", "src/workbench/ui/status_*/**", "graphify-out/**"],
+  "must_fix": [
+    "Accept turn_stop_observed only when manager role/event name, after-cursor ordering, exact non-empty abortRequestId, exact known bound manager sessionId and generation, and unchanged pause/run binding all match.",
+    "Reject same request ID from replacement session or generation, missing identities, old cursor, or changed pause binding; retain requested/unknown and unknown tool IDs without claiming stop confirmation.",
+    "Preserve the oracle-confirmed durability contract: file+directory fsync failure keeps current process paused/error/dispatch-held; do not invent impossible recovery after zero evidence survives or broaden into CW15."
+  ],
+  "verification": ["Run the independent replacement-session event regression plus all 31 policy/negative tests except the oracle-reclassified namespace-loss recovery assertion, which test_designer will revise independently.", "Rerun actual live probe and relevant regressions; graphify update ."],
+  "constraints": ["Production only; do not edit tests, G3/workflow/observation/contracts, tickets, PLAN, or workflow records; apply_patch only; no destructive git/uv/local env."],
+  "report": ["correlation fix", "exact checks", "durability boundary preserved", "candidate_ready or needs_reroute"]
+}

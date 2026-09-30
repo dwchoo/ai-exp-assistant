@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw17-test-01",
+  "ticket_id": "CW-17",
+  "status": "needs_reroute",
+  "candidate_id": "8ad024ff4820404513cdf223e2ad1e7eaccc202b6beddc43855c5f287ac13242",
+  "after_snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-cw17-test-after.json",
+  "scope_audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-cw17-test.json",
+  "outside_scope_attribution": {
+    "graphify-out/cache/last_query_stamp": "Root graphify explain (read-only tool side effect)"
+  },
+  "added_tests": [
+    "tests/backend/independent_support.py",
+    "tests/backend/test_live_detach_independent.py (1)",
+    "tests/backend/test_live_start_independent.py (7)",
+    "tests/backend/test_live_contract_independent.py (7)",
+    "tests/backend/test_live_input_independent.py (4 scenarios/28 steps)",
+    "tests/contracts/test_ui_v1_independent.py (11)"
+  ],
+  "checks": [
+    {
+      "cmd": "discover tests/backend -p test_*_independent.py",
+      "exit": 1,
+      "result": "19 tests, 14 input-characterization subtest failures, 194.8s"
+    },
+    {
+      "cmd": "worker backend suite",
+      "exit": 0,
+      "result": "28 OK"
+    },
+    {
+      "cmd": "tests/contracts",
+      "exit": 0,
+      "result": "43 OK"
+    },
+    {
+      "cmd": "tests/lifecycle",
+      "exit": 0,
+      "result": "38 OK"
+    },
+    {
+      "cmd": "tests/gates/g4_lifetime non-live",
+      "exit": 0,
+      "result": "8 OK"
+    }
+  ],
+  "gate_verdicts": {
+    "L-CW17-DETACH": "pass (runtime; supervisor only None pre-CW-18)",
+    "L-CW17-START": "pass (runtime; zsh via fake sentinel)",
+    "L-CW17-CONTRACT": "pass (runtime beyond required fixture)"
+  },
+  "finding": {
+    "id": "F-CW17-INPUT-01",
+    "class": "implementation",
+    "severity": "blocking (C-AC-08, C-AC-19, C-AC-03)",
+    "summary": "InputBoundary.observe_user_bytes latches uncertain=True on ESC/0x7F/0x08/0x15/0x17/control bytes and nothing resets it; PersistentShell.send_user and ShellPane._accepts_manual_input then reject all manual input permanently. User-launched foreground programs (cat, python3 -q, sleep) have no confirmed target, so data/Ctrl-C/Ctrl-D are rejected.",
+    "locations": [
+      "src/workbench/terminal/shell_g2/prototype.py:106 observe_user_bytes",
+      "src/workbench/terminal/shell_persistent/adapter.py:258 send_user",
+      "src/workbench/backend/panes.py ShellPane._accepts_manual_input"
+    ]
+  },
+  "non_blocking": [
+    "minimal client splits stdin into 64KiB INPUT frames (CW-06 paste handling)",
+    "START_TIMEOUT 120s with live foreign lock holder",
+    "backend SIGKILL hangs up all three PTYs (C-AC-16 allows; CW-19)",
+    "live_harness.cleanup leak-measure race avoided by waits"
+  ],
+  "frozen_hashes_equal": true,
+  "residue": "none"
+}

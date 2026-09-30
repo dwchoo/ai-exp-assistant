@@ -1,0 +1,22 @@
+{
+  "invocation": "cw12-delta-test-01",
+  "outcome": "complete",
+  "candidate_ready": true,
+  "candidate_validated": "f33f3347d29a2b0b2d0a05a8c192dbc529888b425dc921043cbd3da2fab0304b",
+  "prior_findings_closed": "All six prior failures pass in the expanded 20-test policy suite.",
+  "concurrency": "Two runs of a 20-cycle concurrent pause/review/local-dispatch/status/resume test completed without deadlock and with zero actions observing paused=true after start.",
+  "cancellation": "13 concurrent readers/dispatchers produced exactly one cancelled journal event bound to the exact Task/run and preserved the result artifact.",
+  "checks": {
+    "pause_policy": "20/20 passed",
+    "observation": "91/91 passed",
+    "workflow": "44/44 passed",
+    "tasks": "22/22 passed",
+    "contracts": "20/20 passed",
+    "bridge": "18/18 passed",
+    "g3_python": "13 passed",
+    "g3_typescript": "23/23 passed",
+    "status": "2/2 passed"
+  },
+  "qualification": "Concurrency tests use thread-local TaskRepository read connections because the production repository owns a thread-affine SQLite connection.",
+  "graphify_updated": true
+}

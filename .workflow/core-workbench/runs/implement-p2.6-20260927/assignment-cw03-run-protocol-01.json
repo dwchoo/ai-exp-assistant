@@ -1,0 +1,69 @@
+{
+  "feature_id": "core-workbench",
+  "ticket_id": "CW-03",
+  "attempt_id": "common-run-protocol-01",
+  "invocation": "cw03-run-protocol-01",
+  "approved_bundle_digest": "64bcf577a30e7c6bbff3e4e775f8e6c17ca212ce3bf79b5bc5be31196a792b07",
+  "actual_workspace": "/home/dwchoo/ai-exp-assistant",
+  "repository_identity": "git HEAD 7b2048c50e0794da847ad8674d4dc0433d643c33 on main",
+  "baseline_snapshot": "3e713a73d1191e1dfed0a02fb27445fb58afb27a3cf65e0a276671134f72c437",
+  "effective_write_capability": "shared workspace; sole mutation owner while dispatched",
+  "acceptance_ids": ["C-AC-03", "C-AC-10", "C-AC-20", "C-AC-26", "C-AC-34"],
+  "required_gate_items": ["G2-CONTROL", "G2-LIFECYCLE", "G2-LAUNCH"],
+  "relevant_contracts": ["CW-03", "SPEC s2.6", "ADR-0002", "C-D55"],
+  "allowed_write_paths": [
+    "src/workbench/terminal/shell_g2/prototype.py",
+    "src/workbench/terminal/shell_g2/control_probe.py",
+    "src/workbench/terminal/shell_g2/lifecycle.py",
+    "tests/gates/g2_shell/**"
+  ],
+  "prohibited_paths": [
+    "tests/gates/g2_shell/test_split_pg_control.py",
+    "docs/**",
+    ".workflow/**",
+    ".codex/**",
+    "graphify-out/**"
+  ],
+  "resource_claims": [{"resource": "host:shell-fixture", "mode": "exclusive"}],
+  "mutation_owner": "cw03-run-protocol-01",
+  "checkpoint_ref": ".workflow/core-workbench/runs/implement-p2.6-20260927/split-pg-correction-frozen-candidate.json",
+  "prior_result_ref": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw03-adapter-integration-01.json",
+  "objective": "Implement the smallest remaining adapter seam: one canonical RUN request protocol for script and argv that launches only through the validated split supervisor boundary, holds a prepared-child barrier until process-group and foreground verification, reports explicit exec-ready or exec-error acknowledgement, and maps these facts into ManagedLifecycle/host state without parent eval. Migrate focused lifecycle and launch runtime coverage to this common seam. Preserve existing public test APIs where practical and do not yet migrate unrelated input/jobs, hook, or takeover helpers unless required by the seam.",
+  "required_properties": [
+    "Literal argv avoids shell reinterpretation; complex script is evaluated only by a child interpreter.",
+    "Parent shell remains in control wait and never evaluates payload.",
+    "PG_S and PG_E are same-session and distinct; foreground is read-back verified before the prepared child executes.",
+    "Exec success/failure has an explicit acknowledgement and failed exec does not launch a replacement shell.",
+    "Host lifecycle distinguishes accepted, supervisor ready, child prepared, experiment start, main return, descendant drain/unknown, input return, and control return.",
+    "STOPPED/CONTINUED and signal-derived statuses retain the validated semantics.",
+    "Bash-preferred and sh fallback launch selection remain fixed per session."
+  ],
+  "exact_checks": [
+    "PYTHONDONTWRITEBYTECODE=1 python3 tests/gates/g2_shell/live_control_lifecycle_probe.py",
+    "PYTHONDONTWRITEBYTECODE=1 python3 tests/gates/g2_shell/live_env_launch_probe.py",
+    "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest tests.gates.g2_shell.test_control_lifecycle tests.gates.g2_shell.test_live_env_launch_predicates -v",
+    "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest tests.gates.g2_shell.test_split_pg_control -v",
+    "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/gates/g2_shell -p 'test_*.py' -v",
+    "git diff --check"
+  ],
+  "reserved_budget": 1,
+  "stop_conditions": [
+    "The common protocol requires a new user-visible behavior decision.",
+    "Parent direct eval, shell support removal, or mandatory cgroup/extra privilege would be required.",
+    "No bounded implementation can establish explicit prepared/exec acknowledgement and host mapping without broad unrelated rewrites.",
+    "Owned process cleanup cannot be proven."
+  ],
+  "configured_model": "gpt-6-sol",
+  "configured_effort": "high",
+  "host_observed_model": "unverified",
+  "host_observed_effort": "unverified",
+  "routing": {
+    "planned_role": "worker_senior",
+    "selected_role": "worker_senior",
+    "reason_codes": ["coupled_invariants", "rerouted_minimal_seam"],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw03-adapter-integration-01.json",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/oracle-cw03-native-tstp-01.json"
+    ]
+  }
+}

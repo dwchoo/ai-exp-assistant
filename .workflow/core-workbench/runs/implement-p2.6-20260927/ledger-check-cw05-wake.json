@@ -1,0 +1,1 @@
+{"path":".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json","expected_revision":304,"event":{"id":"check-cw05-wake-final-01","kind":"check","data":{"check_id":"cw05-runtime-paused-final-01","path":".workflow/core-workbench/runs/implement-p2.6-20260927/check-cw05-wake-observed.json","sha256":"74807b9d50ee06e648762729081ec4bb538f9a460bb6bb0acf6cb5a97fd4549a"}}}

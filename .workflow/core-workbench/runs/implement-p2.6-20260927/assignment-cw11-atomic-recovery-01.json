@@ -1,0 +1,21 @@
+{
+  "invocation":"cw11-atomic-recovery-01",
+  "role":"worker_senior",
+  "unit":"V-CW-11-p2.6-current",
+  "objective":"Implement the interrupted CW-11 atomic admission and real WorkflowRun exit-binding correction, preserving the frozen candidate and oracle contract.",
+  "source_assignment":".workflow/core-workbench/runs/implement-p2.6-20260927/assignment-cw11-atomic-correction-01.json",
+  "interrupted_result":".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw11-atomic-correction-01.json",
+  "oracle_evidence":".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw11-atomic-oracle-01.json",
+  "review_evidence":".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw11-final-review-03.json",
+  "base_candidate":"e4d18349adda351975340ab3a2bcf1b76919bf6df6cff7a0947272408578e409",
+  "requirements":".workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw11.json",
+  "write_scope":["src/workbench/observation/**","tests/observation/**"],
+  "instructions":[
+    "Read the full source assignment and oracle evidence; every required change and test there remains binding.",
+    "First verify that the interrupted worker left no attributable partial implementation, then implement the mandatory linearizable admission owner and WorkflowObservationBinding in the allowed scope.",
+    "Update the latest actual OMP 18.2.10 probe to use both production paths and run it on this candidate.",
+    "Run observation and relevant workflow/bridge/contracts/G4 regressions, then graphify update ."
+  ],
+  "constraints":["Use apply_patch only; no workflow records, uv/local env/package artifacts, commit/push/merge/stash/reset/clean, or graphify restore."],
+  "report":["API/invariants","changed files","exact checks/live probe","unknowns","candidate_ready or needs_reroute"]
+}

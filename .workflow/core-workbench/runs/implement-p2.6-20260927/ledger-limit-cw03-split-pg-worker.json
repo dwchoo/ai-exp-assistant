@@ -1,0 +1,23 @@
+{
+  "path": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 100,
+  "event": {
+    "id": "limit-cw03-split-pg-worker-20260928",
+    "kind": "limit",
+    "data": {
+      "bucket": "role:worker_senior",
+      "origin": "operating",
+      "value": 90,
+      "authority": "C-D55 plus workflow-contract section 8 and current implementation authorization",
+      "reason": "One bounded senior implementation experiment for the Oracle-derived split experiment process-group control state machine",
+      "decision_owner": "Root",
+      "expected_previous": {
+        "value": 89,
+        "authority": "C-D55 plus workflow-contract section 8 and current implementation authorization",
+        "reason": "One bounded correction call to reconcile the 11 broad-suite failures and repair the TSTP discrimination without changing approved Ctrl-Z semantics"
+      },
+      "remaining_work_estimate": 1,
+      "scope_basis": null
+    }
+  }
+}

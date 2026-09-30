@@ -1,0 +1,24 @@
+{
+  "invocation": "cw15-admission-final-review-01",
+  "outcome": "complete",
+  "candidate_ready": false,
+  "candidate_id": "b3ed52eaec0b1fb9c200659ac9a4719c2845f4556a7295626703828857ed02b2",
+  "snapshot_hashes_match": true,
+  "closed": "ended-run command and metadata periodic-review findings closed by shared automatic admission predicate",
+  "finding": {
+    "severity": "P1",
+    "path": "src/workbench/app/lifecycle.py",
+    "lines": "425-450,538-557",
+    "summary": "dispatch_command/tick can pass admission before another thread durably closes shutdown and then perform external send/review after shutdown confirmation because automatic actions and shutdown are not linearized.",
+    "adapter": "src/workbench/app/production.py:96-120 does not and cannot atomically recheck coordinator shutdown journal around external delivery"
+  },
+  "acceptance": {
+    "C-AC-15": "sequential/runtime fixture met",
+    "C-AC-16": "met after prior correction",
+    "C-AC-17": "met",
+    "C-AC-18": "met in-repo; external OMP pending",
+    "C-AC-22": "not met due shutdown concurrency race",
+    "C-AC-23": "met after prior correction; real reboot pending"
+  },
+  "mutation_owner": null
+}

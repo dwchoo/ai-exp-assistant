@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw06-fix-worker-03",
+  "status": "candidate_ready",
+  "candidate_id": "92889e2443a458d14a701354e635be77b0a1d5b762ede9372a1fcca7c54f2a25",
+  "after_snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-cw06-fix3-after.json",
+  "scope_audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-cw06-fix3.json (no outside-scope)",
+  "delta_backup": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-cw06-fix3-delta-backup/",
+  "changed_paths": {"src/workbench/ui/product/app.py": "ea85ff059cd6012b9d69bbb79fe00b8ce3ac8843a83447ee1aa4cca8f2469371", "src/workbench/ui/product/input.py": "ee5a9e925c292a15cc60ba0e76e4c6f16cdbf46ffa6f3ccc2171b866967a8605", "src/workbench/ui/product/model.py": "41e94c481527c22f79af51344249593b77f45d4c8d09eeb17bb4d09928c299a6", "src/workbench/ui/product/view.py": "2c6b21ff331e67e0075ad2e9256d187d279dacd2d3ac093a865e3c2ba1148159", "tests/ui/test_product_model.py": "8d6fa2caa73655bb208e939e08a5feab7a81e0ed563d66b464886ebd2f5f2a2c", "tests/ui/test_product_pty.py": "2775ea7ffaf66589fe2cab05cc25352045b992f6b20e57ae951df9f985b8b04c"},
+  "checks": [["tests/ui test_*.py", 1, "106 run, 1 expected fail (p27e hash pin)"], ["tests/contracts", 0, "43 OK"], ["g1_vt", 0, "63 OK"], ["test_product_model", 0, "39 OK"], ["test_product_pty", 0, "13 OK"]],
+  "fixes": {"P2-1a": "socket drained in <=20ms read loops into per-pane backlog; pyte fed <=64KiB/20ms per loop in 16KiB round-robin; stdin serviced between; client.py untouched", "P2-1b": ">256KiB backlog -> drop older, reset screen/stream, feed newest 64KiB as replay (no stale query replies), keep 2004 tracking, notice + pane title '따라잡음', per-pane resize nudge", "P2-1c": "send EPIPE/ECONNRESET/timeout -> ConnectionLost; read arrived frames <=1s for CLOSING reason; clean exit", "P3-1": "cursor follows focused pane", "P3-2": "SIGTERM/SIGHUP -> Terminate unwinds loop/curses/termios; PTY test verifies 2004l/1049l/ICANON/ECHO", "P3-3": "prefix + CSI/SS3/Alt consumed whole", "P3-4": "ESC [ 2 / 20 / 200 held up to 0.5s", "P3-6": "no-TTY hint uses status --json; comments; stdout_fd passed"},
+  "measurements": "8 MiB flood: mid-flood key latency 0.06-0.11s (limit 0.3); server SNDBUF 64KiB, 8 MiB sent in 3.1s; old sync feed: 0.47-0.55s latency, 28s send",
+  "gaps": ["only the flood test shown red on old behaviour", "catch-up discards that pane's scrollback", "send blocks up to 10s timeout without receiving", "startup SIGWINCH race in an existing pty test fixed by waiting for readiness (15 runs OK)"],
+  "residue": "none in repo; worker scratch files only",
+  "observed_model": "sonnet (wb-worker definition; host metadata unverified)"
+}

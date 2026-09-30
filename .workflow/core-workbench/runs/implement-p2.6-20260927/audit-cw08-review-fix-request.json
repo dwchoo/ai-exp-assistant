@@ -1,0 +1,7 @@
+{
+  "before": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw08-frozen-candidate.json",
+  "after": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw08-review-fix-after.json",
+  "allowed": [
+    "src/workbench/ipc/bridge_g3/mailbox.py"
+  ]
+}

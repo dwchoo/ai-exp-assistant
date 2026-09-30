@@ -1,0 +1,16 @@
+{
+  "invocation": "cw14-causal-final-review-01",
+  "outcome": "complete",
+  "candidate_ready": true,
+  "candidate_id": "26686fe852fb9e2099acac0f0fb2b6f37a9c0d1164ebe6da3a5193de48c54558",
+  "snapshot_hashes_match": true,
+  "findings": [],
+  "prior_findings": "all closed by local pending delta, malformed-entry normalization, verified durable/raw reconciliation, exactly-once clearing and post-rename uncertain-state handling",
+  "acceptance": {
+    "C-AC-24": "package fixture level passed",
+    "C-AC-28": "package fixture level passed"
+  },
+  "evidence": "Independent storage 33 and related regression 197 tests passed; reviewer performed read-only inspection.",
+  "risk": "Failure counts not persistable before process death remain unknown after a crash; this is not a CW-14 fixture blocker and is a CW-15 integration/UI unknown-state obligation.",
+  "mutation_owner": null
+}

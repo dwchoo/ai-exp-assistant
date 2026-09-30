@@ -1,0 +1,9 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 201,
+  "event": {"id": "finish-cw04-extension-closure-01", "kind": "transition", "data": {
+    "invocation": "cw04-extension-closure-01", "state": "finished",
+    "evidence": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw04-extension-closure-01.json",
+    "outcome": "complete", "observed_model": "unverified", "observed_effort": "unverified", "not_started_evidence": null
+  }}
+}

@@ -1,0 +1,24 @@
+{
+  "invocation": "cw12-index-flags-review-01",
+  "outcome": "needs_correction",
+  "candidate_ready": false,
+  "candidate": "be083b27ff5bea89d3931650705d4ddc81252a237a06d94a3a5017828300bdfb",
+  "findings": [
+    {
+      "severity": "P1",
+      "confidence": "high",
+      "summary": "Execution worktree resume reconciliation calls _changed_files without index flags, so assume-unchanged or skip-worktree can hide out-of-scope tracked changes when peer cwd differs.",
+      "evidence": ["src/workbench/policy/pause_automation/controller.py:1548", "src/workbench/policy/pause_automation/controller.py:1321", "tests/policy/pause_automation/live_pause_runtime_probe.py:195"],
+      "acceptance_ids": ["C-AC-33"]
+    },
+    {
+      "severity": "P2",
+      "confidence": "high",
+      "summary": "A Git peer cwd with more than 2048 ignored/untracked paths fails closed even when stable.",
+      "evidence": ["src/workbench/policy/pause_automation/controller.py:1203"],
+      "acceptance_ids": ["C-AC-33"]
+    }
+  ],
+  "requirement_assessment": {"C-AC-25": "met", "C-AC-30": "met", "C-AC-33": "not_met"},
+  "tests_run": false
+}

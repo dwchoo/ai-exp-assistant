@@ -1,0 +1,605 @@
+{
+ "schema_version": 1,
+ "keep": [
+  ".workflow/core-workbench/runs/decisions-cd55-20260926/before.json",
+  ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-cw17-base.json",
+  ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-review-fix-test-checkpoint.json",
+  ".workflow/core-workbench/runs/implement-p2.6-20260927/preaccounting-checkpoint.json",
+  ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-resume-20260928-checkpoint.json"
+ ],
+ "entries": [
+  {
+   "path": ".workflow/core-workbench/runs/decisions-cd55-20260926/before.json",
+   "action": "kept_milestone",
+   "bytes": 284098008
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/cw03-fd-test-checkpoint.json",
+   "action": "would_prune",
+   "bytes_before": 685497521,
+   "sha256_before": "c46c9a2aa8fd6e8e569623917dda69d1d928607a1f35e0f2e88e990261903569",
+   "candidate": "cac1bf9fcfd2298704a7c1c93ca95470595a95647874d7a8bde2131902c687ac",
+   "blob_count": 1052
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/cw03-hook-correction-checkpoint.json",
+   "action": "would_prune",
+   "bytes_before": 686033240,
+   "sha256_before": "e2a9f4ad4a83c9276c686443a196a7154dfacc9316c06814be49c012406405c1",
+   "candidate": "84338ecbfd0005bad6c554b976a88f18da54e3830db599515073c74d242aaf0e",
+   "blob_count": 1059
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/cw03-matrix-test-checkpoint.json",
+   "action": "would_prune",
+   "bytes_before": 686021611,
+   "sha256_before": "cf85dd2af247ae545f3800bd66e21e6be7c55425a744f9ab472be2628a9f360a",
+   "candidate": "9970d25c747b922a2efb40c27e2903697a6947b5d0511b8307503a10c47a685c",
+   "blob_count": 1058
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/cw03-matrix-worker-checkpoint.json",
+   "action": "would_prune",
+   "bytes_before": 685941831,
+   "sha256_before": "49ac8664cf56429c23b25eac6812c41981f6fa199ecd08a30d98237c4ba7e29b",
+   "candidate": "9b1f7a1c12e83caba914abc7497f3ddc65f6d59d20da07d5c1dfdc5010011cb9",
+   "blob_count": 1054
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/cw04-extension-test-checkpoint.json",
+   "action": "would_prune",
+   "bytes_before": 686913831,
+   "sha256_before": "44534c477647982da74c5e2ec92249f5c93d1140db0146daa8f1bbe0bd2d11fe",
+   "candidate": "37c8e782c804fe41901c7c5047042bb8302f8c3e179dbcc1d88aa465808c7163",
+   "blob_count": 1069
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/cw04-extension-worker-checkpoint.json",
+   "action": "would_prune",
+   "bytes_before": 686777855,
+   "sha256_before": "d083ea5f096ba4bd19754a0cc95f894adca2ccae083cff2bb04ced667ded0fcb",
+   "candidate": "d86c9e99761c81fae01af6e5952cf9763912fd7ff4d5fe5f45adb3531606ce39",
+   "blob_count": 1065
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/cw05-test-checkpoint.json",
+   "action": "would_prune",
+   "bytes_before": 689838191,
+   "sha256_before": "95b21b824e8cd8674b6f27ecab02a2589968e55c72d6ddb14ff9e2711741a2fc",
+   "candidate": "64966787656971b9d1c588358e30becdeaee4d52af523990bb1837c5c8658339",
+   "blob_count": 1122
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/cw05-worker-checkpoint.json",
+   "action": "would_prune",
+   "bytes_before": 689011876,
+   "sha256_before": "b72b5bf93bfb4356e146ca250eb99dd445dfc7edee5568b931195d5611287577",
+   "candidate": "7d4e8715da933281bae5721cb3620ae20140f2bae771e72f8522e80bf5ed96ee",
+   "blob_count": 1097
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/cw07-partial-correction-checkpoint.json",
+   "action": "would_prune",
+   "bytes_before": 693906460,
+   "sha256_before": "fb293ef21cda37b2832e950632961d1c70cf8953929e68871aac7b493bec7c2e",
+   "candidate": "37b0d24b46b625492bdf71e15d992eba85eaa65fd39f71fd26a75f0141e780f5",
+   "blob_count": 1166
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/cw07-partial-regression-checkpoint.json",
+   "action": "would_prune",
+   "bytes_before": 693828453,
+   "sha256_before": "69658378f4cf607dddbbafde904555dfd1771b24e5a70a9832b9cf0394566047",
+   "candidate": "5d50853a90d2bd12eb7c828f2a4defe6c51e0281ee0231326d387e46456c15af",
+   "blob_count": 1165
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/cw07-review-correction-checkpoint.json",
+   "action": "would_prune",
+   "bytes_before": 693662347,
+   "sha256_before": "4b2b6cb18a298e44f7a0854a0ac2cc8f52fe2dd98215a71aae82cc147da21474",
+   "candidate": "b8a3b0cb923620e8c42eccf3e47b556e923dba1364abc265f256241a548537b0",
+   "blob_count": 1163
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/cw07-review-regression-checkpoint.json",
+   "action": "would_prune",
+   "bytes_before": 693498241,
+   "sha256_before": "abe7e8780f06f002721965ac005c3105cf789e6ad6b5ef4c155c2d518be17b0b",
+   "candidate": "9868eff50a732257c8143a097e5a7ea37a33cf99224ada39ef387c5790eaf9e6",
+   "blob_count": 1161
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/cw07-test-checkpoint.json",
+   "action": "would_prune",
+   "bytes_before": 693252589,
+   "sha256_before": "04c2717642e9ea11ad465ab868d55065f056dd7db3131998451ce6a0b9bf8656",
+   "candidate": "c0e000a2e06773dd973f8e7d7fb1113f9dbe62a73fbf792cf3721225b2397362",
+   "blob_count": 1157
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/cw07-worker-checkpoint.json",
+   "action": "would_prune",
+   "bytes_before": 692558199,
+   "sha256_before": "0938897e15f5af7c8b2d9e888aaaa880abd6bfec88009d16830ca816eec1a9e7",
+   "candidate": "41c2b684d3ff4f2b1a463879de56646d768e4e454402b2c93a39d74d439e798f",
+   "blob_count": 1148
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/cw08-close-race-test-checkpoint.json",
+   "action": "would_prune",
+   "bytes_before": 696140136,
+   "sha256_before": "c48cf49da91df94c8a26f82d778dee8b4ed524be47cbebe8294d064d3dda228e",
+   "candidate": "39f998a9db246a448fed8609263c7f3e82637f17ade5875d3e2e5a63384aa56a",
+   "blob_count": 1183
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/cw08-final-frozen-candidate.json",
+   "action": "would_prune",
+   "bytes_before": 695964517,
+   "sha256_before": "58e8156251b5e6cd455b4856240e65c955a704fb88ec11d32ce4b33b4d209bac",
+   "candidate": "5dbd67a9c699b81beaa5f0dd8d6cecec5a078b0f8537c7ff1650289277122271",
+   "blob_count": 1182
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/cw08-final2-frozen-candidate.json",
+   "action": "would_prune",
+   "bytes_before": 696345847,
+   "sha256_before": "36ff2b236fc85f353157986f86783f2607c6dd8eebcc4cc29e041f7284c48da0",
+   "candidate": "3d8c0864214d6a5d78fc53a7b54243f525e51c1190922b4271261f6b01aa12b4",
+   "blob_count": 1184
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/cw08-frozen-candidate.json",
+   "action": "would_prune",
+   "bytes_before": 695558735,
+   "sha256_before": "4b1e78401c709543821157328023dbd329b6c9e20484fbefe5c102a7582dc39e",
+   "candidate": "46f9b307b7c85ab0524ed3fd6acec27265c319a03f96a8cfc639b9e302ffbec0",
+   "blob_count": 1180
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/cw08-regression-checkpoint.json",
+   "action": "would_prune",
+   "bytes_before": 695780818,
+   "sha256_before": "8b1412647523ddff46bdeb589970c94fdf1b132a800e1955d911c56ef9e27436",
+   "candidate": "511d183ec24dbfa098416e422fc5ffb03dccab4c535bb48e0eff68b80f59265b",
+   "blob_count": 1181
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/cw08-test-checkpoint.json",
+   "action": "would_prune",
+   "bytes_before": 694937234,
+   "sha256_before": "36bb1227225d673d0f56a4a626ed7a16040e0d7816fe9c1d3cbbaf7692d5014a",
+   "candidate": "b92674291216820e59b9fcbb3faf3db44a61e20130ef0b7bbd9bb2b8ab700a13",
+   "blob_count": 1175
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/cw08-worker-checkpoint.json",
+   "action": "would_prune",
+   "bytes_before": 694096710,
+   "sha256_before": "2abecd3fc99c1c5390b22ac58b6b82f0319127b153ec5cc870881b799f74520c",
+   "candidate": "cddee3c12dba1dcf610f88d49f4050d4ff7a3eb87385410594ced55f3838ec6c",
+   "blob_count": 1168
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/cw09-review-regression-checkpoint.json",
+   "action": "would_prune",
+   "bytes_before": 692152272,
+   "sha256_before": "0a15fd966bf558064fad008e1e917d5c37cc58a337a7c98df0415dcc80c332b6",
+   "candidate": "eaf34b612ed53f12df03fc13ea0e599f28222eb7d8a57b707a402649427f0a17",
+   "blob_count": 1146
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/cw09-test-checkpoint.json",
+   "action": "would_prune",
+   "bytes_before": 691391200,
+   "sha256_before": "2cc75496d09ab601695b0b82e1e4bf2561fca9a1accb850c28369eb7e6f6e30d",
+   "candidate": "5783d513fbeed47b7dced4a397dc8a4c49fcda8a34146c566df240ff9c28cb55",
+   "blob_count": 1142
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/cw09-worker-checkpoint.json",
+   "action": "would_prune",
+   "bytes_before": 690595791,
+   "sha256_before": "003d4f86fe2d259a7d08ece7f3a94b7743968d5c1f85fe00e3244d04ae4aaeae",
+   "candidate": "437efdf06af1ce5e5e17be8cbc3b2d528b1dfa2f23244babebce091a71c93245",
+   "blob_count": 1132
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/cw10-frozen-candidate.json",
+   "action": "would_prune",
+   "bytes_before": 697762315,
+   "sha256_before": "c65bbe0f6218aba31bfa3daa3805630f13641732a0f3926c78eb8fefafbd4ec0",
+   "candidate": "79bf9a188cd00de763ae03d150bb6e91a701a8f8564f671cd87cfaa5c17899bd",
+   "blob_count": 1203
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/cw10-missing-log-test-checkpoint.json",
+   "action": "would_prune",
+   "bytes_before": 697516100,
+   "sha256_before": "fea0b15fbdee670a661d8e19a6fa19ab92640e0707a27e9836024186bd843a15",
+   "candidate": "ae6c8c4189ee2fa342f28b8de3257562775e3e90b5e34bc9b0e9e7f20796c645",
+   "blob_count": 1202
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/cw10-review-fix-test-checkpoint.json",
+   "action": "would_prune",
+   "bytes_before": 698360562,
+   "sha256_before": "c593e568e85ad8676755fa67000f3c62f1f77fe673f26a35df95c5dfc714e3f4",
+   "candidate": "449fbb4a6e9843e42f3ce909021727579429ff0af58dc9f3996ca8e6a2584a58",
+   "blob_count": 1210
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/cw10-test-checkpoint.json",
+   "action": "would_prune",
+   "bytes_before": 696965274,
+   "sha256_before": "832e4522a8b5b926028289260c792f44122b2314a9f68092687f6d522b8fb5d4",
+   "candidate": "73e5935017ed580d153183995bde7219d2f7db7374f8e17e772c75699a292dea",
+   "blob_count": 1197
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/cw10-worker-checkpoint.json",
+   "action": "would_prune",
+   "bytes_before": 696345847,
+   "sha256_before": "5d606259bd9c2ef6d8751bd0e5396195989a392c1f6a421d058c08c663fbc8b4",
+   "candidate": "01a9e150bfa1f5cb99992a4784e43d0b17b08361bc9cf65966d7aecc8a4cc525",
+   "blob_count": 1184
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-cw17-base.json",
+   "action": "kept_milestone",
+   "bytes": 711934114
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-cw17-test-checkpoint.json",
+   "action": "would_prune",
+   "bytes_before": 712251882,
+   "sha256_before": "5bafa56bfd56f3820fd1d2192670dcdbf3e5bdf4efafe8fd9d0af532f644cae0",
+   "candidate": "8ad024ff4820404513cdf223e2ad1e7eaccc202b6beddc43855c5f287ac13242",
+   "blob_count": 1262
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-deadline-fix-checkpoint.json",
+   "action": "would_prune",
+   "bytes_before": 712465067,
+   "sha256_before": "b558e81107d2f138c0cb1bd9988ce4f6210576ab972307451f54a89f9222ef51",
+   "candidate": "54bca5bce00e09a3902429fc4df09f11438dc18d09d912b10356a0468d12351b",
+   "blob_count": 1272
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-deadline-test-checkpoint.json",
+   "action": "would_prune",
+   "bytes_before": 712479558,
+   "sha256_before": "b3ba9289f4177cc55817f4002d5b3818fdc02cb0dfe03f9ede59d1c615fe92bc",
+   "candidate": "f0bbdabe6077900135904beeb67d0a554704a674afe89465f16d98bd54a26e2e",
+   "blob_count": 1273
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-input-fix-02-checkpoint.json",
+   "action": "would_prune",
+   "bytes_before": 712378437,
+   "sha256_before": "68324913caf6d4bf417ed30f0953f7a314da15eebe5e2e7d67649fae992a2c0a",
+   "candidate": "d967bd34fb7ed5b6d98036878ee8477fc4fafcb548f610f0e3238367db9ae4e9",
+   "blob_count": 1269
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-input-fix-checkpoint.json",
+   "action": "would_prune",
+   "bytes_before": 712344031,
+   "sha256_before": "d72364316a38ce031749aa888363a4696ebadd52bd1b2217ec2ad90df4fbcdf0",
+   "candidate": "7aa3078776094a4a2755d0e696fec7164440e5073e3ab9e78675b20fdcd7c779",
+   "blob_count": 1268
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-input-test-checkpoint.json",
+   "action": "would_prune",
+   "bytes_before": 712385741,
+   "sha256_before": "e948a2cbbd79c1c809d55e1d6aff8c4b9e6d0b76a06b41584453663a3fda8a56",
+   "candidate": "04fb52ccf0e69c5a7d80a105fad474b79ce174c61b858d0bc50e5eb7f067292f",
+   "blob_count": 1269
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-review-fix-checkpoint.json",
+   "action": "would_prune",
+   "bytes_before": 712530635,
+   "sha256_before": "6f220edd02580288113cf4eb7ba1af6c766ce16a2efc64790f58d75978d76ec8",
+   "candidate": "cd921059f0a9b2d916a9a5dc817367532ac5f728e52da43f093ca28f57b39674",
+   "blob_count": 1275
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-review-fix-test-checkpoint.json",
+   "action": "kept_milestone",
+   "bytes": 712554712
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/posthook-env-checkpoint.json",
+   "action": "would_prune",
+   "bytes_before": 675263379,
+   "sha256_before": "07d3d0e0df249d44f271b666eb92b41ef166a91428d5e4dd4f80c10c11d2cc99",
+   "candidate": "5e1dfa9035712dbbbce21061f2279c5708d067c867035a8cd95b9f37a79d7667",
+   "blob_count": 1015
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/posttakeover-repair-checkpoint.json",
+   "action": "would_prune",
+   "bytes_before": 674883922,
+   "sha256_before": "c8867f8176b7a20485dd5834a9bd361c526c2f10a750e7e0d07c54dc92b8ac13",
+   "candidate": "55fc76031f87d0b4dcab9e4a5e7b1e17797cc93cb5e0fc26448fbfd1060b7a59",
+   "blob_count": 1010
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/preaccounting-checkpoint.json",
+   "action": "kept_milestone",
+   "bytes": 664067256
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/prehook-env-checkpoint.json",
+   "action": "would_prune",
+   "bytes_before": 675244851,
+   "sha256_before": "439ba234b2f52ef5f000e1bdb3fd4523303d2b32a3277ddec59cefb089607bd8",
+   "candidate": "3aea53b58b0c08dc2e7df4f1620264f85cc51afab7bbd06da18be3d9559feaec",
+   "blob_count": 1013
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/prerepair-checkpoint.json",
+   "action": "would_prune",
+   "bytes_before": 672614917,
+   "sha256_before": "1690af48b017048e97c3bc160f39a569f3b21c0b5ff3b7b5aa12d497b2c0cc68",
+   "candidate": "93763c65d189184706b0b9bc6e21fdc4bccb5067d70369fd101e9ae9da044182",
+   "blob_count": 1002
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/pretakeover-checkpoint.json",
+   "action": "would_prune",
+   "bytes_before": 674461031,
+   "sha256_before": "e7c62ed8bd4dca9b482c6e6c35a22d5becc155c738f2bc17cdad391bf4dc1b0c",
+   "candidate": "b890f5a4748a1d9b87ca0428edd05009e40af43ef224742a28e1a038be2ba263",
+   "blob_count": 1004
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/pretakeover-repair-checkpoint.json",
+   "action": "would_prune",
+   "bytes_before": 674881054,
+   "sha256_before": "ae16703807ce92757a289cc737de535b2f4b72e640fc679eb7c6de33486381e2",
+   "candidate": "21c6830d2cc380eb5c89c21501efadcc7fb79dd968f746ab6f2984b23f945884",
+   "blob_count": 1010
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/pretakeover-test-checkpoint.json",
+   "action": "would_prune",
+   "bytes_before": 674510941,
+   "sha256_before": "8d62612037cd0641832ab86fed5e7dcdb45693e330f7b2dd0c1f1d2c3bfa4048",
+   "candidate": "65c3b7a6f21ebdc8c4e3d613269e1880ec450fbe1b4ab36e204d5668b05d4afa",
+   "blob_count": 1007
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/pretest-checkpoint.json",
+   "action": "would_prune",
+   "bytes_before": 664124958,
+   "sha256_before": "26756b9ed022a2de494930da51131961e64e7746067df87b397f4b13caf7eb51",
+   "candidate": "a9f07f622640cc5a95044742ba5b1de337749c0b7d0af84780077c8b4af00f03",
+   "blob_count": 987
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/pretest-repair-checkpoint.json",
+   "action": "would_prune",
+   "bytes_before": 672621453,
+   "sha256_before": "9ae20264ae6050f9c05090e130740935aa49402fbf3b2e2cb0e8019513284157",
+   "candidate": "8481cd6703ff7925c15a07d642cdf08964b0a0066c602fb0f5b0c697e9394983",
+   "blob_count": 1002
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/resume-correction-checkpoint.json",
+   "action": "would_prune",
+   "bytes_before": 676249268,
+   "sha256_before": "f22e45fc5a9374492a036fb050ee1fdd008d6cd9d3ddc8af5e2d752d23a258b6",
+   "candidate": "58ddecdbbc44cad4810ef4aa4eebf02b8712fa8c09f7153664f867378fd32f04",
+   "blob_count": 1023
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw02-g1-worker-before.json",
+   "action": "would_prune",
+   "bytes_before": 687391514,
+   "sha256_before": "2d2cbae1c472cb1a1625a7847848ce8ec8e52f2bebddeed8c9554093d1787d82",
+   "candidate": "0948f6855366717b67eeb9bfa51f82c60412cc0da35889571406032aa14a73ed",
+   "blob_count": 1073
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw10-final-review.json",
+   "action": "would_prune",
+   "bytes_before": 698970043,
+   "sha256_before": "bda237247f86914bcc210072e75f7395d287715427c925d1fe3a2b3aee819ded",
+   "candidate": "df72dbb2a2f2c7bf80370a0ddf301f175a8661b0336b147a0bfd67b5124c96c0",
+   "blob_count": 1213
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw10-idtype-test-checkpoint.json",
+   "action": "would_prune",
+   "bytes_before": 698958891,
+   "sha256_before": "3e41e94df106d787d83a7a386b7b5cda1d0b27305b8180af9978643bae93e031",
+   "candidate": "9bce3816e82085a6b9066f32ed7c8f117a22d49dbfaa0ebd6455327561b23028",
+   "blob_count": 1213
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw10-public-response-final2.json",
+   "action": "would_prune",
+   "bytes_before": 699617636,
+   "sha256_before": "368a91211d576b6744260371e1b7bbcea88c66af5074e7d9f704ae60987c8bea",
+   "candidate": "75469017afe9b029fe07810497fc12a66494acc7208485001c4a34fd21e9c6c7",
+   "blob_count": 1221
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw10-public-response-worker-checkpoint.json",
+   "action": "would_prune",
+   "bytes_before": 698970043,
+   "sha256_before": "1aa178e3e60831fab7ff5fdbf9f7d4583729ff7d0395e700b2e98c84f42bbe7f",
+   "candidate": "82fe863b91eda2fe71258b54d1769f5fb686bb1882c9dc220733b76a91fb5cc8",
+   "blob_count": 1213
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw10-response-contract-final.json",
+   "action": "would_prune",
+   "bytes_before": 700106400,
+   "sha256_before": "ba5c8ce75c64cb681ebf6d481a23115f85288510e193535460a0ca27a889adc9",
+   "candidate": "679237e11f9f4cfd73c780f9ed7a431c0812437bcd006ace428207c8a37bc0a0",
+   "blob_count": 1225
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw11-aba-correction.json",
+   "action": "would_prune",
+   "bytes_before": 707611623,
+   "sha256_before": "d522de68cb054d583ec1ff741414d924668d13532efb70d60880b1ec3abd6912",
+   "candidate": "e2d467490e24040ef685899be809e2aeae908b919bdfa2f3565c081403021868",
+   "blob_count": 1278
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw11-atomic-recovery.json",
+   "action": "would_prune",
+   "bytes_before": 705961039,
+   "sha256_before": "eee2a5d937974fbaf36480d165840a55f4bbbed01e175c82dc591966b70da9fb",
+   "candidate": "8c728dd78f4fb2f44f8bc4a6a483f44a5ab6578f7fbb1ba9549c1d5aee85a7a8",
+   "blob_count": 1267
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw11-correction-final.json",
+   "action": "would_prune",
+   "bytes_before": 702079077,
+   "sha256_before": "6d903b252b0c79d45dc27714014fbefd1fab01768ee1d7b0eed2dc24b09debc5",
+   "candidate": "ae03421ba5ff20f37a7978f9ffd4af988e4e7c029d7a5f4238631b7aa4a09e5d",
+   "blob_count": 1241
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw11-correction.json",
+   "action": "would_prune",
+   "bytes_before": 701771485,
+   "sha256_before": "64e7d44f02055366407860161b641338ee528dba4b07c30c2df9b6a2aed6e503",
+   "candidate": "94fff36f61722cf51be3d4a0257d246ad4e3dacb151da6dde91414fec373f62c",
+   "blob_count": 1238
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw11-exit-incarnation.json",
+   "action": "would_prune",
+   "bytes_before": 710268146,
+   "sha256_before": "29766542ca71657d25ed6798212c7c083dc151301c0401a0e06c0ef17b7b3bfc",
+   "candidate": "f653c02234d185126b97a5b48a26eb52449f16ca691c98bc8c694d3a2acc5b2d",
+   "blob_count": 1295
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw11-final-atomic.json",
+   "action": "would_prune",
+   "bytes_before": 708496464,
+   "sha256_before": "57e1216d2b0c24e4a7d553b264cfdd9608e1f74a7d36d66d3bcf78ee5e41017f",
+   "candidate": "20c78e3e0558722ab91bd0879f9cc665512a09e54002331acfe1c45d34269948",
+   "blob_count": 1282
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw11-final-exit-incarnation.json",
+   "action": "would_prune",
+   "bytes_before": 710430887,
+   "sha256_before": "09151e374a8e387f5fd56e4c35efa3131211e2546f03d815ffe791bcd289f736",
+   "candidate": "7401c2b0f4efc6a5894dd82b57ee36bb127dce9473da67348cccd93fae21f825",
+   "blob_count": 1297
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw11-final-positive-incarnation.json",
+   "action": "would_prune",
+   "bytes_before": 711814755,
+   "sha256_before": "2c5ce68cd842db567d944a4f85a2b05e9cfbc414867e25ca011366e2d9481cd8",
+   "candidate": "15cced80d156715b781a16c402c7be98be7563fe4fa13e47a834888dc884f67a",
+   "blob_count": 1307
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw11-final-review.json",
+   "action": "would_prune",
+   "bytes_before": 701114954,
+   "sha256_before": "7f994b63b71c9cead2c4dc7402fbdd078d2fdd055ddccfb1e370eb70f5aa0966",
+   "candidate": "d5c3b8127b60f5d32df5eae21514a26faaf8516ab4ba6ebaa4346c87bd92a11c",
+   "blob_count": 1236
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw11-incarnation-correction.json",
+   "action": "would_prune",
+   "bytes_before": 708238309,
+   "sha256_before": "b1da5e9bd851fbb23d01cd78a171bbc7060361528673724cbe31a59072ecf9f9",
+   "candidate": "db831a34cb93850156e62de6cf6539561c574df3f1d424b955ba3298696825a5",
+   "blob_count": 1281
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw11-positive-incarnation.json",
+   "action": "would_prune",
+   "bytes_before": 711621550,
+   "sha256_before": "88a3aa84d245a33fd1f80fb10938c215cef9a920c8885288b9323f83616c132f",
+   "candidate": "335cc6e019a479cefd9da7b54ffe53dc40ee2c82d06b7838403fbd128248c5d5",
+   "blob_count": 1305
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw11-race2-correction.json",
+   "action": "would_prune",
+   "bytes_before": 703223511,
+   "sha256_before": "6b134b72558b2bee7ae9ba103304736c6c6ac0cddc03bebe621a15d9337f61bd",
+   "candidate": "0254f4054bc09bd0170d6d4c390c2ff768ca7e05f75760cc01403b864cf6cace",
+   "blob_count": 1247
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw11-race2-final.json",
+   "action": "would_prune",
+   "bytes_before": 703491318,
+   "sha256_before": "580b8928485798bc6a0144e394153c7a003e444529c05b1ce70816c2d529070d",
+   "candidate": "e4d18349adda351975340ab3a2bcf1b76919bf6df6cff7a0947272408578e409",
+   "blob_count": 1248
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw11-source-activation.json",
+   "action": "would_prune",
+   "bytes_before": 711209626,
+   "sha256_before": "7280403cebe40b313655a1ee929a8f3b34e1add16f95e0a2163539073b954dba",
+   "candidate": "78439281e59354f10e4c3a0b527d4879adb4059a49e1dfa8efd233353d7a6ab5",
+   "blob_count": 1303
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw11-token-retention-final.json",
+   "action": "would_prune",
+   "bytes_before": 712525139,
+   "sha256_before": "004ffa0a6f2f40f6db82ba5e5aa601d158bd9d05244ada3298fb1302d038f048",
+   "candidate": "6a8e898b72447c96aadd45e2494da9f84a8bbbfba5723bfde2dd9829e655104d",
+   "blob_count": 1313
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw11-token-retention.json",
+   "action": "would_prune",
+   "bytes_before": 712406819,
+   "sha256_before": "0cb01d1e31af2296f06e23bc6708ad69330edd10e7eee4d7ca1f20373a83a3ce",
+   "candidate": "6184e2fbbba4242ddca20efca3285f6f9f90389a39516d891075217a9a810acc",
+   "blob_count": 1311
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw11-worker-checkpoint.json",
+   "action": "would_prune",
+   "bytes_before": 700106400,
+   "sha256_before": "e20fa162fbe729868bfa935daac7516e1328576e0fa26285d6d2e4ccd3d1b14d",
+   "candidate": "ecdbd419ac5d470740f7b30b798f26c0dce06e70a66a335871c46401fa367290",
+   "blob_count": 1225
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-resume-20260928-checkpoint.json",
+   "action": "kept_milestone",
+   "bytes": 727409668
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/split-pg-pretest-checkpoint.json",
+   "action": "would_prune",
+   "bytes_before": 676472212,
+   "sha256_before": "6164a517838332dcbc96127c6d485c53f55aacf3249ce6f653bc220772a3ccb9",
+   "candidate": "347b6b832fabe2ca3d9ecbc97cc9bd4882a94f36ce1bde04590693f728f090e8",
+   "blob_count": 1027
+  },
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/split-pg-preworker-checkpoint.json",
+   "action": "would_prune",
+   "bytes_before": 676440680,
+   "sha256_before": "465653fad9671324af0bb0fd117e0bcc2ae1f88077b0db58ba9f63c5a84f46c1",
+   "candidate": "07522a4ba7a4d05218152eb2038771aba7217ee78046a52f792270f556c270e1",
+   "blob_count": 1027
+  }
+ ]
+}

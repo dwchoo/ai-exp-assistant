@@ -1,0 +1,1 @@
+{"before":"/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw10-worker-checkpoint.json","after":"/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw10-worker-after.json","allowed":["src/workbench/workflow/**","tests/workflow/**","docs/features/core-workbench/WORKTREE-GUIDE.md"]}

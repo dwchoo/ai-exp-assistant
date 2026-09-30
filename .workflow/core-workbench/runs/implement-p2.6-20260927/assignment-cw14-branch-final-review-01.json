@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "invocation": "cw14-branch-final-review-01",
+  "role": "reviewer",
+  "unit": "V-CW-14-p2.6-current",
+  "authority": "User $implement docs/features/core-workbench request; approved PLAN p2.6 CW-14; branch-safe correction and independent tests",
+  "objective": "Perform the final fresh read-only review of the complete CW-14 candidate and all accumulated C-AC-24/C-AC-28 invariants.",
+  "candidate": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw14-branch-test.json",
+    "candidate_id": "40ba9f2cdde65f0e565e999480aa673c8203e509a0a64d194654b29b93062dd3"
+  },
+  "acceptance_ids": ["C-AC-24", "C-AC-28"],
+  "prior_findings_to_close": [
+    "Repeated storage failures preserve monotonic observed/dropped/missing counters.",
+    "Malformed raw .log and status .json entries return failure snapshots rather than propagating ValueError.",
+    "Single-store recovery durably reconciles safe volatile state without erasing missing bytes.",
+    "Same-run concurrent durable observations survive stale volatile recovery through exact-base/raw-identity descendant validation and lossless additive merge."
+  ],
+  "review_focus": [
+    "Review the entire log_raw package, not just diffs, for remaining exception escapes, stale-state overwrite, unsafe recovery, cap/accounting errors, deletion, path traversal/symlink/special-file races, blocking behavior, and metadata-admission coupling.",
+    "Verify branch-base cleanup/lifetime and that additive deltas cannot double count or bless unverified stored bytes across repeated recovery, reopen, cap and concurrent same-run cases.",
+    "Assess all 29 storage fixtures and 76 predecessor regressions with frozen hashes; distinguish package fixture acceptance from CW-15 integration obligations."
+  ],
+  "constraints": [
+    "Read-only; do not edit files or run mutating graphify commands.",
+    "No delegation, test writes, commit, publish, deploy, Docker, or process signals."
+  ],
+  "report": "Return candidate_ready true/false, closure of all four prior findings, any new material finding with path/line and concrete trace, C-AC-24/C-AC-28 verdict, evidence adequacy and bounded CW-15 risks."
+}

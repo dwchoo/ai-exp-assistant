@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "invocation": "cw12-directory-mode-test-01",
+  "role": "test_designer",
+  "unit": "V-CW-12-p2.6-current",
+  "authority": "User $implement docs/features/core-workbench request; approved PLAN p2.6 CW-12",
+  "objective": "Independently verify the frozen directory-mode correction, including a mode-specific actual OMP lifecycle where feasible.",
+  "candidate": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw12-directory-mode-correction.json",
+    "candidate_id": "40c4ee06c2285b9b995214de16e2e3df4783a537212cf999aab092f034904888"
+  },
+  "required_tests": [
+    "Verify empty non-Git peer root, Git execution root, Git peer root, ancestor and nested directory 0755-to-0555 deltas outside scope block resume.",
+    "Verify an explicitly approved directory chmod can reconcile, while removal/replacement/symlink/special/unreadable/race/FD/bounds/version cases fail closed.",
+    "Verify root and descendant directory identities and modes are covered without reading all clean file content, preserving large clean Git liveness and previous tracked/untracked/file-mode regressions.",
+    "Run the complete pause_automation suite and actual omp/18.2.10 reject-cleanup-reconcile-resume probe. Add a safe mode-specific actual OMP directory mutation scenario if the existing harness supports deterministic cleanup; always verify zero residue."
+  ],
+  "allowed_write_paths": ["tests/policy/pause_automation/**", "graphify-out/**"],
+  "constraints": [
+    "Independent test-only owner; do not modify production code or workflow/docs/PLAN/state.",
+    "Use apply_patch for test edits; run graphify update . after test code changes.",
+    "No delegation, commit, publish, deploy, or Docker."
+  ],
+  "report": "Return candidate_ready or needs_reroute, changed test paths, exact test counts, actual OMP mode-specific result and zero-residue evidence, acceptance mapping, and residual risks."
+}

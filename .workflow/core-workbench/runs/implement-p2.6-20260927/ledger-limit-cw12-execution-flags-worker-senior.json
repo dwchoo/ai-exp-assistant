@@ -1,0 +1,23 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 923,
+  "event": {
+    "id": "limit-cw12-execution-flags-worker-senior-20260929",
+    "kind": "limit",
+    "data": {
+      "bucket": "role:worker_senior",
+      "origin": "operating",
+      "value": 133,
+      "authority": "C-D55 plus workflow-contract section 8 and current $implement authorization",
+      "reason": "One bounded execution-worktree Git flag correction for the final CW-12 blocker",
+      "decision_owner": "Root",
+      "remaining_work_estimate": 1,
+      "expected_previous": {
+        "value": 132,
+        "authority": "C-D55 plus workflow-contract section 8 and current $implement authorization",
+        "reason": "Coupled recovery/integration work for CW-13 and CW-15 with bounded correction reserve"
+      },
+      "scope_basis": null
+    }
+  }
+}

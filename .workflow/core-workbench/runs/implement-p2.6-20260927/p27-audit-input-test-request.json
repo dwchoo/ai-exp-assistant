@@ -1,0 +1,1 @@
+{"before":"/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-input-fix-02-after.json","after":"/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-input-test-after.json","allowed":["tests/terminal/test_*_independent.py","tests/gates/g2_shell/test_*_independent_p27.py"]}

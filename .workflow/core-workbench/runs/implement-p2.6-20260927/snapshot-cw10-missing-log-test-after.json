@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "workspace": "/home/dwchoo/ai-exp-assistant",
+  "stable": true,
+  "compact": true,
+  "base_manifest": "cw10-missing-log-test-checkpoint.json",
+  "base_candidate": "ae6c8c4189ee2fa342f28b8de3257562775e3e90b5e34bc9b0e9e7f20796c645",
+  "identity_delta": {
+    "files_changed": {
+      "tests/workflow/test_run_independent.py": {"kind": "file", "mode": 436, "sha256": "caaf0f7889c2f3f35ebfd7582f8b19f1ea872553ea5ecfff388e52951d836ba1"}
+    },
+    "files_added": {},
+    "files_removed": [],
+    "head_unchanged": true,
+    "index_unchanged": true
+  },
+  "candidate": "a8b845bf0575d68290d81824f706cc8ad1547b5d465b8b0489d0c9f588626fd0",
+  "unknowns": []
+}

@@ -1,0 +1,19 @@
+{
+  "invocation": "cw05-contract-delta-review-01",
+  "role": "reviewer",
+  "unit": "V-CW-05-p2.6-current",
+  "objective": "Read-only delta review of the CW-05 TypeScript exact-key collision correction and final combined candidate.",
+  "candidate_manifest": ".workflow/core-workbench/runs/implement-p2.6-20260927/cw05-delta-review-candidate.json",
+  "candidate_digest": "23f790d7098743fd5968c9e72e501ea2c6bb086f93ecdc48eb53586c523854a1",
+  "previous_review": ".workflow/core-workbench/runs/implement-p2.6-20260927/review-cw05-g4-01.json",
+  "correction": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw05-contract-correction-01.json",
+  "review_focus": [
+    "Confirm exact-key comparison is collision-free for comma-containing and other adversarial property names.",
+    "Confirm required fields and unknown-field rejection agree between Python and TypeScript and valid v1/v2 fixtures remain compatible.",
+    "Confirm correction did not alter runtime/evidence logic or independent tests and the combined candidate still has no other P0-P3 finding."
+  ],
+  "constraints": [
+    "Read-only; do not modify files or repository state.",
+    "Report only evidence-backed P0-P3 findings or pass and state limitations."
+  ]
+}

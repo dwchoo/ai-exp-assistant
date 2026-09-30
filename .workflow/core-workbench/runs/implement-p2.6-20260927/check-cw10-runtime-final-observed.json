@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "check_id": "cw10-runtime-final-01",
+  "requirements_identity": "0ed26ff87bdd69efb27d6e252a0a05a7f831b37ca5cffdf249bf7f9222a55b72",
+  "argv": [
+    "/usr/bin/env",
+    "PYTHONDONTWRITEBYTECODE=1",
+    "PYTHONPATH=src:tests/bridge:tests/gates/g3_omp",
+    "/tmp/cw02-g1-venv/bin/python",
+    "tests/workflow/live_workflow_probe.py"
+  ],
+  "cwd": "/home/dwchoo/ai-exp-assistant",
+  "environment": {
+    "description": "Linux; frozen CW-10 candidate; actual OMP 18.2.10 manager and worker TUI peers; real Git detached worktree and persistent host shell"
+  },
+  "started_at": "2026-09-28T02:20:51.517689+00:00",
+  "finished_at": "2026-09-28T02:20:56.772100+00:00",
+  "exit_code": 0,
+  "timed_out": false,
+  "log": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/check-cw10-runtime-final.log",
+  "log_sha256": "a2730690058fc274562e870edb16d7b650ca3394170e4cc5b4584daaaf27ff48",
+  "before": "df72dbb2a2f2c7bf80370a0ddf301f175a8661b0336b147a0bfd67b5124c96c0",
+  "after": "df72dbb2a2f2c7bf80370a0ddf301f175a8661b0336b147a0bfd67b5124c96c0",
+  "stable": true,
+  "items": [
+    {
+      "id": "P-C-AC-03",
+      "acceptance_ids": ["C-AC-03"],
+      "result": "passed",
+      "observed_evidence_level": "runtime",
+      "evidence": "Actual OMP 18.2.10 manager/worker TUI peers processed an approved Task. The exact public worker execute response preceded delivery_omp_processed, the persistent host shell recorded sent/accepted/started/ended, exit status 0 was confirmed, and durable raw-log/result locations plus hashes were recorded. Cleanup left no OMP child, provider thread, cwd process, or socket residue.",
+      "unknowns": []
+    },
+    {
+      "id": "P-C-AC-05",
+      "acceptance_ids": ["C-AC-05"],
+      "result": "passed",
+      "observed_evidence_level": "runtime",
+      "evidence": "Actual worker OMP produced separately bound execute and analysis responses with distinct response IDs and exact Task/revision/run/message/attempt/session/generation identities; analysis sequence 10 preceded processed sequence 12 and the worker reported success from exit/log/result evidence. Independent live host cases also exercised nonzero failure, exit-zero criterion failure, and missing-log indeterminate; the 33-test workflow runtime covers no automatic return after a modification-needed report and pause/authority holds.",
+      "unknowns": []
+    }
+  ]
+}

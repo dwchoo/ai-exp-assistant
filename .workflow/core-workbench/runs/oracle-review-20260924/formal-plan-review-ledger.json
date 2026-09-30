@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "purpose": "Read-only Oracle review of the formal r1.12/s2.5/p2.5 plan change bundle",
+  "status": "completed",
+  "authority": "User requested Oracle review on 2026-09-25",
+  "budget": {
+    "explicit_cap": 220,
+    "used_before": 185,
+    "used_after_start": 186,
+    "reserved": 0,
+    "remaining_after_start": 34
+  },
+  "call": {
+    "call_id": "FORMAL-PLAN-ORACLE-001",
+    "role": "oracle",
+    "assignment": "/root/formal_plan_oracle_review",
+    "state": "finished",
+    "outcome": "complete",
+    "verdict": "approve_with_required_doc_fixes",
+    "write_scope": "none",
+    "evidence_ref": ".workflow/core-workbench/runs/oracle-review-20260924/FORMAL-PLAN-ORACLE-REVIEW.md"
+  }
+}

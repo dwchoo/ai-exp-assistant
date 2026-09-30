@@ -1,0 +1,9 @@
+{
+  "schema_version": 1, "check_id": "cw03-env-launch-hook-final-runtime-01", "requirements_identity": "e0ea9ef4ea1457ea2b76df7b53a7ccb17f48555652a81886978ec1bc3fe6d0e6",
+  "argv": ["python3", "tests/gates/g2_shell/live_env_launch_probe.py"], "cwd": "/home/dwchoo/ai-exp-assistant",
+  "environment": {"PYTHONDONTWRITEBYTECODE": "1", "description": "Linux Python 3.12.3 with Bash and dash; final environment/hook and launch regression; conda-specific validation excluded by C-D55"},
+  "started_at": "2026-09-27T13:22:05.795895+00:00", "finished_at": "2026-09-27T13:22:11.761843+00:00", "exit_code": 0, "timed_out": false,
+  "log": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/check-env-launch-hook-final-runtime.log", "log_sha256": "6d91c4a37d05a39affd33dae61587a1fd6a7f9ccc109fe9c41b2782ebf0f325c",
+  "before": "f4d5b1beb17e60570a7442986ae1b72349c5bca6e3f5f65acb3a79f2b3bd2111", "after": "f4d5b1beb17e60570a7442986ae1b72349c5bca6e3f5f65acb3a79f2b3bd2111", "stable": true,
+  "items": [{"id": "G2-LAUNCH", "acceptance_ids": ["C-AC-20"], "result": "passed", "observed_evidence_level": "runtime", "evidence": "check-env-launch-hook-final-runtime.log: Bash preferred, actual sh fallback, missing-shell guidance, fixed selected executable/supervisor, literal argv/script launch, executable identity validation, and no replacement shell after failed exec", "unknowns": []}]
+}

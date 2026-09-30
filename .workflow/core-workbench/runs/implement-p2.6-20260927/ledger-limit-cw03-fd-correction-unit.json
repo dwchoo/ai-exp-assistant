@@ -1,0 +1,12 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 155,
+  "event": {"id": "limit-cw03-fd-correction-unit-20260928", "kind": "limit", "data": {
+    "bucket": "unit:V-CW-03", "origin": "operating", "value": 37,
+    "authority": "Approved PLAN p2.6, C-D55, workflow-contract section 8, and current implementation authorization",
+    "reason": "Reviewer-required FD inheritance correction, independent runtime test, and fresh delta review",
+    "decision_owner": "Root", "remaining_work_estimate": 3,
+    "expected_previous": {"value": 34, "authority": "Approved PLAN p2.6, C-D55, workflow-contract section 8, and current implementation authorization", "reason": "One independent-test-required exec-ack correction plus the already allocated fresh review"},
+    "scope_basis": null
+  }}
+}

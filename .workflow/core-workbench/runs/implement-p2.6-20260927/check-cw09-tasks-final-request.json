@@ -1,0 +1,26 @@
+{
+  "root": "/home/dwchoo/ai-exp-assistant",
+  "requirements": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw09.json",
+  "argv": [
+    "/usr/bin/env",
+    "PYTHONDONTWRITEBYTECODE=1",
+    "PYTHONPATH=src",
+    "/tmp/cw02-g1-venv/bin/python",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tests/tasks",
+    "-v"
+  ],
+  "environment": {
+    "description": "Linux, frozen CW-09 SQLite repository candidate with worker and independent regression coverage"
+  },
+  "log": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/check-cw09-tasks-final.log",
+  "check_id": "cw09-tasks-final-01",
+  "watch": [],
+  "exclude": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/**"
+  ],
+  "timeout": 120
+}

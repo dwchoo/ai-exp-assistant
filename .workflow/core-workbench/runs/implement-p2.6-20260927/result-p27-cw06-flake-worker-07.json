@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw06-flake-worker-07",
+  "status": "needs_reroute (F-sigterm fixed; F-final-draw hypothesis disproved, root cause in vt_g1 emulator)",
+  "candidate_id": "71f3edd4288e7a6f9fe2800a0cd3dba3cf575f1b0bbb75628bcc3c911510a689",
+  "after_snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-cw06-flake-after.json",
+  "scope_audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-cw06-flake.json (no outside-scope)",
+  "delta_backup": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-cw06-flake-delta-backup/",
+  "changed_paths": {"src/workbench/ui/product/app.py": "4aad51ef500e1167624ff1a9aa521ff44e79bde66480562a32a7acae5f2faf52", "tests/ui/test_product_pty.py": "44983a2833eb0e316f3d0568843c3cf153439d48826388b3ebe42bdf31058763"},
+  "checks": [["test_sigterm_restores_terminal x30", "1/30 red -> 30/30 green"], ["test_sighup_restores_terminal x30", "3/30 red -> 30/30 green"], ["new guard last chunk drawn promptly x30", "30/30 green (property already held)"], ["p27h unmodified x20", "2/20 red, unresolved (cause below)"], ["tests/ui x2", "129 OK (p27h passed by chance)"], ["contracts", "43 OK"], ["g1_vt", "63 OK"]],
+  "causes": {"F-sigterm": "?2004h written outside try; test signalled before first draw. Fixed: 2004h inside protected region; test waits for header before signalling.", "F-final-draw": "disproved: dirty stays True after last feed; mismatch persists >12 s. UI output contains ncurses hardware scroll (ESC[5;37r ... ESC[2S); pyte 0.8.2 and vt_g1 TerminalScreen lack CSI S/T (SU/SD); the saved raw streams mismatch in stock emulator and match exactly with SU added. UI bytes are correct; the test's outer-terminal emulator (and the product's pane emulator) ignore SU/SD."},
+  "observed_model": "sonnet (wb-worker definition; host metadata unverified)"
+}

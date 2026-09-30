@@ -1,0 +1,38 @@
+{
+  "invocation": "cw04-extension-closure-01",
+  "role": "worker_senior",
+  "unit": "V-CW-04-p2.6-current",
+  "objective": "Close the two remaining G3-EXTENSION feasibility gaps on the current OMP 18.2.10 candidate: a new delivery attempted during host bridge outage, and an internal extension frame-handler exception.",
+  "required_behavior": [
+    "During host listener/socket outage, actually attempt a new automatic delivery through the host harness. It must not reach provider processing or agent_start, must be classified deferred/unavailable/unknown rather than success, and must not auto-replay after reconnect.",
+    "After reconnect with the same live OMP PID/session/generation and new socket, the outage message remains non-success/no-replay while a distinct fresh message can process exactly once.",
+    "Inject one bounded internal frame-handler exception through an explicit opt-in diagnostic path. The exception must not become an ACK or false success; original TUI remains operable or state is explicitly unknown with delivery held, and no queued request replays after recovery.",
+    "Preserve the existing normal outage, malformed-frame, role/session identity, composer usability, provider isolation, and cleanup assertions.",
+    "Use public extension surfaces and test-only opt-in fault activation; do not reintroduce mutable native tool wrappers or bypass approval."
+  ],
+  "allowed_files": [
+    "omp_bridge/g3/bridge.ts",
+    "tests/gates/g3_omp/live_tui_extension_fault_probe.py",
+    "tests/gates/g3_omp/test_tui_extension_fault_predicates.py",
+    "tests/gates/g3_omp/bridge.test.ts"
+  ],
+  "constraints": [
+    "Keep the implementation minimal and diagnostic activation disabled by default.",
+    "Do not weaken existing assertions or convert failures into skips.",
+    "Do not modify docs, workflow records, graphify output, unrelated G3 probes, or commit/reset/clean/stash."
+  ],
+  "checks": [
+    "node --experimental-strip-types --test tests/gates/g3_omp/bridge.test.ts",
+    "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g3_omp /tmp/cw02-g1-venv/bin/python -m unittest -v tests/gates/g3_omp/test_tui_extension_fault_predicates.py",
+    "Run live_tui_extension_fault_probe.py default, --malformed-frame, and the new outage-delivery/internal-handler-fault modes against actual OMP 18.2.10",
+    "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g3_omp /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/gates/g3_omp -p 'test_*.py' -v",
+    "git diff --check"
+  ],
+  "report": [
+    "changed files and fault-injection boundary",
+    "exact live modes and observed PID/session/generation/provider counts",
+    "no-replay and recovery evidence",
+    "commands/results and process residue",
+    "candidate_ready, needs_reroute, or needs_oracle"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 882,
+  "event": {
+    "id": "finish-cw12-final-scope-test-01",
+    "kind": "transition",
+    "data": {
+      "invocation": "cw12-final-scope-test-01",
+      "state": "finished",
+      "evidence": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-final-scope-test-01.json",
+      "outcome": "complete",
+      "observed_model": "gpt-6-sol",
+      "observed_effort": "high",
+      "not_started_evidence": null
+    }
+  }
+}

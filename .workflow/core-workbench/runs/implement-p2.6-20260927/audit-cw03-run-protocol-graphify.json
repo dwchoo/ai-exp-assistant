@@ -1,0 +1,5 @@
+{
+  "before": ".workflow/core-workbench/runs/implement-p2.6-20260927/cw03-run-ack-corrected-candidate.json",
+  "after": ".workflow/core-workbench/runs/implement-p2.6-20260927/cw03-run-protocol-frozen-candidate.json",
+  "allowed": ["graphify-out/**"]
+}

@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "check_id": "cw03-split-pg-final-runtime-01",
+  "requirements_identity": "e0ea9ef4ea1457ea2b76df7b53a7ccb17f48555652a81886978ec1bc3fe6d0e6",
+  "argv": ["python3", "tests/gates/g2_shell/live_combined_boundary_probe.py"],
+  "cwd": "/home/dwchoo/ai-exp-assistant",
+  "environment": {
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "description": "Linux Python 3.12.3 with Bash and dash; frozen split-PG feasibility runtime; conda and Docker excluded"
+  },
+  "started_at": "2026-09-27T15:56:16.848402+00:00",
+  "finished_at": "2026-09-27T15:56:31.326708+00:00",
+  "exit_code": 0,
+  "timed_out": false,
+  "log": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/check-cw03-split-pg-final-runtime.log",
+  "log_sha256": "1899a39f2b01e250f4b0f8f780b0cf67b8ab5598c5bb89a4e77ae69f4285cc48",
+  "before": "3e713a73d1191e1dfed0a02fb27445fb58afb27a3cf65e0a276671134f72c437",
+  "after": "3e713a73d1191e1dfed0a02fb27445fb58afb27a3cf65e0a276671134f72c437",
+  "stable": true,
+  "items": [
+    {
+      "id": "G2-CONTROL",
+      "acceptance_ids": ["C-AC-03", "C-AC-08", "C-AC-26"],
+      "result": "passed",
+      "observed_evidence_level": "runtime",
+      "evidence": "check-cw03-split-pg-final-runtime.log: Bash/dash split-PG supervisor and experiment groups remained distinct and observable across start, native suspend/resume, return, parent WAIT, INT/QUIT, numeric exits, and explicit UNKNOWN cleanup; shared-PG negative controls reproduced parent escape",
+      "unknowns": ["This is bounded feasibility evidence; the production adapter and full environment/takeover/FD-failure matrix do not yet use this split path."]
+    },
+    {
+      "id": "G2-LIFECYCLE",
+      "acceptance_ids": ["C-AC-10", "C-AC-26", "C-AC-34"],
+      "result": "passed",
+      "observed_evidence_level": "runtime",
+      "evidence": "check-cw03-split-pg-final-runtime.log: native stop/continue remained nonterminal, signal-derived main statuses differed from numeric 130/131, long-lived setsid descendants blocked completion, and injected pre-registration failure stayed UNKNOWN until repeated discovery and ECHILD cleanup",
+      "unknowns": ["This does not establish production-adapter integration of every lifecycle and failure path."]
+    }
+  ]
+}

@@ -1,0 +1,50 @@
+{
+  "after": "26686fe852fb9e2099acac0f0fb2b6f37a9c0d1164ebe6da3a5193de48c54558",
+  "argv": [
+    "/usr/bin/env",
+    "PYTHONDONTWRITEBYTECODE=1",
+    "PYTHONPATH=src",
+    "/tmp/cw02-g1-venv/bin/python",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tests/storage",
+    "-p",
+    "test_*.py",
+    "-q"
+  ],
+  "before": "26686fe852fb9e2099acac0f0fb2b6f37a9c0d1164ebe6da3a5193de48c54558",
+  "check_id": "cw14-fixture-final-01",
+  "cwd": "/home/dwchoo/ai-exp-assistant",
+  "environment": {
+    "description": "Linux; frozen CW-14 causal pending-delta candidate; raw-log caps, accounting, concurrency, failures, path safety and metadata-admission separation fixtures"
+  },
+  "exit_code": 0,
+  "finished_at": "2026-09-28T18:57:15.081126+00:00",
+  "items": [
+    {
+      "id": "P-C-AC-24",
+      "acceptance_ids": ["C-AC-24"],
+      "result": "passed",
+      "observed_evidence_level": "fixture",
+      "evidence": "Fixtures verify default and overrideable 64 MiB/run and 512 MiB/project raw-log caps, exact retained prefixes at before/at/over boundaries, whichever-cap-first accounting, reopen and same-run/process concurrency, immutable status, path/TOCTOU failure closure, and preservation of unrelated result/sentinel files without deletion.",
+      "unknowns": []
+    },
+    {
+      "id": "P-C-AC-28",
+      "acceptance_ids": ["C-AC-28"],
+      "result": "passed",
+      "observed_evidence_level": "fixture",
+      "evidence": "Fixtures verify raw-log open/write/scan/lock/fsync and malformed-entry failures return observable status without stopping the run, causal pending deltas preserve exact missing counts across repeated failures and same-run concurrent writers, safe recovery applies each local delta once, and raw-log health remains separate from the metadata admission latch that reopens only on explicit durable success.",
+      "unknowns": []
+    }
+  ],
+  "log": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/check-cw14-fixture-final.log",
+  "log_sha256": "a11acef7bdb401360a96bfe64b176ad188a4aa153b9a22359ce53596acf1e78f",
+  "requirements_identity": "ea4a3b65c42a376d5d2ff5122ba1222d072f0f892e6f281959870a3b56419e8c",
+  "schema_version": 1,
+  "stable": true,
+  "started_at": "2026-09-28T18:57:11.856300+00:00",
+  "timed_out": false
+}

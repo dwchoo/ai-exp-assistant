@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "check_id": "cw03-g2-final-suite-01",
+  "requirements_identity": "e0ea9ef4ea1457ea2b76df7b53a7ccb17f48555652a81886978ec1bc3fe6d0e6",
+  "argv": ["python3", "-m", "unittest", "discover", "-s", "tests/gates/g2_shell", "-p", "test_*.py", "-v"],
+  "cwd": "/home/dwchoo/ai-exp-assistant",
+  "environment": {
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "description": "Linux Python 3.12.3 with Bash and dash; frozen integrated G2 suite; delegated cgroup unavailable; conda and Docker excluded"
+  },
+  "started_at": "2026-09-27T15:56:40.764926+00:00",
+  "finished_at": "2026-09-27T15:58:19.487797+00:00",
+  "exit_code": 0,
+  "timed_out": false,
+  "log": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/check-cw03-g2-final-suite.log",
+  "log_sha256": "259a4f5a79054a422ad20c8046adcb25ecb79e643662470ec3f158aabb4862a6",
+  "before": "3e713a73d1191e1dfed0a02fb27445fb58afb27a3cf65e0a276671134f72c437",
+  "after": "3e713a73d1191e1dfed0a02fb27445fb58afb27a3cf65e0a276671134f72c437",
+  "stable": true,
+  "items": [
+    {
+      "id": "G2-INPUT-JOBS",
+      "acceptance_ids": ["C-AC-08", "C-AC-26"],
+      "result": "passed",
+      "observed_evidence_level": "runtime",
+      "evidence": "check-cw03-g2-final-suite.log: current Bash/dash input/job runtime and its all-deny, stale lifecycle, flush, trailing-line, partial-write, and repeated same-parent negative controls passed within the 116-test suite",
+      "unknowns": ["The input/job runtime still uses its existing helper path rather than the split-PG production adapter."]
+    },
+    {
+      "id": "G2-HOOK-ENV",
+      "acceptance_ids": ["C-AC-26", "C-AC-32"],
+      "result": "passed",
+      "observed_evidence_level": "runtime",
+      "evidence": "check-cw03-g2-final-suite.log: current hook/environment runtime and incompatible residue, cleanup, user-confirmation, and mutation controls passed within the 116-test suite",
+      "unknowns": ["Conda-specific validation is excluded by C-D55; the runtime still uses its existing helper path rather than the split-PG production adapter."]
+    },
+    {
+      "id": "G2-TAKEOVER",
+      "acceptance_ids": ["C-AC-08"],
+      "result": "passed",
+      "observed_evidence_level": "runtime",
+      "evidence": "check-cw03-g2-final-suite.log: current Bash/dash takeover runtime and ACK, target-exit, EAGAIN/zero-write, flush, confirmation, and no-replay controls passed within the 116-test suite",
+      "unknowns": ["The takeover runtime still uses its existing helper path rather than the split-PG production adapter."]
+    },
+    {
+      "id": "G2-LAUNCH",
+      "acceptance_ids": ["C-AC-20"],
+      "result": "passed",
+      "observed_evidence_level": "runtime",
+      "evidence": "check-cw03-g2-final-suite.log: Bash-preferred launch, sh fallback, missing-shell guidance, fixed executable/supervisor, literal argv, and failed-exec controls passed within the 116-test suite",
+      "unknowns": ["The launch runtime still uses its existing helper path rather than the split-PG production adapter."]
+    }
+  ]
+}

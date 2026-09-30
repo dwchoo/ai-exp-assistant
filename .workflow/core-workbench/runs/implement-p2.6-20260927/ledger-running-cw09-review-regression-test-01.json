@@ -1,0 +1,17 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 338,
+  "event": {
+    "id": "running-cw09-review-regression-test-01",
+    "kind": "transition",
+    "data": {
+      "invocation": "cw09-review-regression-test-01",
+      "state": "running",
+      "evidence": "collaboration.followup_task /root/cw03_split_pg_tests started CW-09 review-regression test turn",
+      "outcome": null,
+      "observed_model": "unverified",
+      "observed_effort": "unverified",
+      "not_started_evidence": null
+    }
+  }
+}

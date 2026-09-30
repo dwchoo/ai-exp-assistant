@@ -1,0 +1,17 @@
+{
+  "invocation": "cw03-split-pg-correction-review-01",
+  "candidate": "3e713a73d1191e1dfed0a02fb27445fb58afb27a3cf65e0a276671134f72c437",
+  "status": "approved_with_scope_limit",
+  "findings": [],
+  "resolved_findings": [
+    "SIGINT/SIGQUIT handlers preserve the supervisor observer and distinguish signal-derived main status from numeric exit 130/131.",
+    "Cleanup repeatedly discovers, kills, and reaps adopted descendants within a deadline and confirms CLEANUP_EMPTY:ECHILD.",
+    "Independent live mutations discriminate default SIGQUIT and single-snapshot cleanup failures and safely reap negative-control residue."
+  ],
+  "runtime_reexecuted": false,
+  "test_method_limit": "The prior candidate itself was not executed; the independent tests inject the prior failure causes into the current candidate.",
+  "scope_limit": "Approval applies only to bounded split-PG feasibility. It does not establish split-path integration of the full environment, takeover, FD-failure matrix or production adapter completion.",
+  "needs_oracle": false,
+  "writes": [],
+  "owned_processes_remaining": false
+}

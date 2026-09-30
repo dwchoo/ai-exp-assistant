@@ -1,0 +1,10 @@
+test_live_outage_false_ack_control_is_rejected (tests.gates.g3_omp.test_tui_extension_fault_integration.ExtensionFaultIntegrationTests.test_live_outage_false_ack_control_is_rejected) ... /usr/lib/python3.12/pty.py:95: DeprecationWarning: This process (pid=3840094) is multi-threaded, use of forkpty() may lead to deadlocks in the child.
+  pid, fd = os.forkpty()
+ok
+test_opt_in_fault_before_enqueue_survives_real_reconnect_without_replay (tests.gates.g3_omp.test_tui_extension_fault_integration.ExtensionFaultIntegrationTests.test_opt_in_fault_before_enqueue_survives_real_reconnect_without_replay) ... ok
+test_outage_request_is_not_success_or_replayed_after_same_process_reconnect (tests.gates.g3_omp.test_tui_extension_fault_integration.ExtensionFaultIntegrationTests.test_outage_request_is_not_success_or_replayed_after_same_process_reconnect) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 27.720s
+
+OK

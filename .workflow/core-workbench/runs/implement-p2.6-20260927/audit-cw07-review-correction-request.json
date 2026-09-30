@@ -1,0 +1,9 @@
+{
+  "before": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw07-review-correction-checkpoint.json",
+  "after": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw07-review-correction-after.json",
+  "allowed": [
+    "src/workbench/terminal/shell_persistent/adapter.py",
+    "tests/terminal/test_persistent_shell.py",
+    "tests/terminal/live_persistent_shell.py"
+  ]
+}

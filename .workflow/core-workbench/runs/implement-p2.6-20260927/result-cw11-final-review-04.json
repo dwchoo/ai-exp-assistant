@@ -1,0 +1,11 @@
+{
+  "invocation":"cw11-final-review-04",
+  "candidate":"20c78e3e0558722ab91bd0879f9cc665512a09e54002331acfe1c45d34269948",
+  "candidate_hash_validated":true,
+  "outcome":"needs_reroute",
+  "finding":{"severity":"P1","summary":"Admission `_exited` and scheduler `_surfaced_exits` are keyed only by six-field identity. A confirmed exit followed by A->None->the same A leaves the new incarnation permanently exited; an old callback can also fence the new incarnation."},
+  "closed_prior_findings":["authority/run TOCTOU","owner-issued ticket A-B-A","exit callback retry","hang/usage integration","persisted TASK WorkflowRun binding","schedule/due reset across incarnation"],
+  "runtime_qualifications":["121st review remains unit evidence.","Positive live persistent-shell hang classification remains unexecuted."],
+  "writer":false,
+  "files_modified":[]
+}

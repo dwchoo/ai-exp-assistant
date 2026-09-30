@@ -1,0 +1,21 @@
+{
+  "invocation": "cw12-runtime-test-01",
+  "role": "test_designer",
+  "unit": "V-CW-12-p2.6-current",
+  "objective": "Independently verify CW-12 restart/session/durability corrections and the actual OMP pause→resume integration probe.",
+  "candidate_manifest": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw12-runtime-correction.json",
+  "candidate": "4e425c8e4c07322bd30bf2529df398afcbb9add78fbdd3de1127493f2840c282",
+  "review_evidence": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-review-01.json",
+  "correction_evidence": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-runtime-correction-01.json",
+  "write_scope": ["tests/policy/pause_*/**", "tests/ui/status_*/**", "graphify-out/**"],
+  "must_test": [
+    "Reproduce prior pause_requested→resumed→resume_failed restart ordering and prove rebind remains paused, automatic dispatch held, and OMP/coordinator states agree.",
+    "Inject replacement session/generation and unrelated stop snapshots/events; prove current pause abort status is not promoted without exact request/session correlation.",
+    "Prove first journal creation fsyncs file then parent directory, directory fsync failure leaves policy closed, and retry/restart cannot silently open automation.",
+    "Audit the live probe implementation for self-fulfilling assertions and run it independently against actual omp/18.2.10 with a managed PI_CONFIG_DIR. Verify actual peers, provider/agent counters, exact session/generation/Task/run/scope identities, host collection, status rows, reconciliation facts, no held replay, fresh post-resume turn, privacy, and zero residue.",
+    "Add bounded negative predicate tests for false pass modes in the live probe if its existing seams do not reject wrong session, missing stop, paused model activity, incomplete reconciliation, replay, missing fresh delivery, or cleanup residue.",
+    "Rerun all policy/status and relevant observation/workflow/tasks/contracts/bridge/G3 regressions."
+  ],
+  "constraints": ["Tests only; no product/G3/workflow/observation/contracts edits; apply_patch only; no destructive git/uv/local env; graphify update after test changes."],
+  "report": ["candidate validation", "prior-finding closure", "actual runtime observations", "negative-predicate coverage", "exact regressions", "candidate_ready or needs_reroute"]
+}

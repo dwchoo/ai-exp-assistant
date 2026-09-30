@@ -1,0 +1,37 @@
+{
+  "invocation": "cw12-final-review-03",
+  "role": "reviewer",
+  "unit": "V-CW-12-p2.6-current",
+  "objective": "Perform a fresh independent fault-finding review of the frozen CW-12 candidate against approved requirements and all prior findings.",
+  "candidate_manifest": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw12-final-review-03.json",
+  "candidate": "160d2f8f7a2877f6213bc9f98509e2d599a0d2ff451061b6b68775d9a1ffb5c9",
+  "evidence": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-final-review-02.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-final-race-correction-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-final-race-test-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-durability-oracle-01.json"
+  ],
+  "requirements": [
+    "C-AC-25, C-AC-30, C-AC-33 and CW-12 ticket scope",
+    "Immediate automatic admission fencing, exact manager/worker pause and abort observation semantics, current host collection, explicit exact-bound resume reconciliation, no held replay, and three-area status projection",
+    "Durable journal fail-closed behavior within the Oracle-confirmed CW12 boundary; zero-evidence whole-restart recovery remains CW15"
+  ],
+  "must_review": [
+    "Verify the entire frozen manifest identity before trusting evidence.",
+    "Actively seek stale publication ordering, pause/resume/bind cross-run races, lock-order deadlocks, reentrant admission problems, and final-state divergence.",
+    "Seek resume TOCTOU at validation, ACK state, post-ACK probe, publication, and final verification; confirm any mismatch repauses both peers and remains held without false resume journal state.",
+    "Check actual live evidence uses real file/process/unknown-result/manual TUI observations and that qualifies rejects falsified fields.",
+    "Check exact event correlation, durability/error recovery, no replay, cleanup, and test quality without relying on worker conclusions.",
+    "Report every P0/P1/P2 finding with reproduction and exact file location; do not edit files."
+  ],
+  "constraints": [
+    "Read-only review; no source, test, graph, workflow, or ledger writes.",
+    "Do not waive a defect because prior tests passed and do not broaden CW12 into CW15."
+  ],
+  "report": [
+    "manifest verification",
+    "findings ordered by severity",
+    "requirement/evidence assessment",
+    "approved or needs_reroute"
+  ]
+}

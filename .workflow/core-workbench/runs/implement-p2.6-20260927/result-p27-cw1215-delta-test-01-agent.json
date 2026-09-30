@@ -1,0 +1,171 @@
+{
+ "schema_version": 1,
+ "invocation": "p27-cw1215-delta-test-01",
+ "unit": "V-CW-12-15-p2.7-cw06-delta",
+ "role": "test_designer",
+ "approved_bundle_digest": "a521acdc3838b43a26e277afc233bab695c8b02ce0d42392c3678931b2e3f027",
+ "frozen_candidate": "671b05d3085701f0111e6440955fa6f4b9edc5ddcdba9f54c6d5af27a7c7351b",
+ "status": "candidate_ready",
+ "candidate_identity_check": "current src/ + omp_bridge/ (57 files) match p27-snapshot-cw06-integrated-checkpoint.json entries one-to-one; no extra files",
+ "frozen_production_hash": {
+  "method": "sha256sum over 57 files in src/ and omp_bridge/ (sorted), sha256 of the listing",
+  "start": "35e0fe8ea9ed08f1fac6a852b55c7934a841b5882ad905e84aa5a79bced2b4e2",
+  "end": "35e0fe8ea9ed08f1fac6a852b55c7934a841b5882ad905e84aa5a79bced2b4e2",
+  "match": true
+ },
+ "tests_tree": "diff of sha256 listing of tests/** start vs end: only the one added file",
+ "checks": [
+  {
+   "id": "a",
+   "cmd": "PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/policy/pause_automation -p 'test_*.py' -q (TMPDIR=/tmp/r12)",
+   "exit": 0,
+   "result": "Ran 129 tests OK",
+   "duration_s": 24.4,
+   "p26_recorded": "129 OK, 27.3s (check-cw12-pause-final)",
+   "same": true
+  },
+  {
+   "id": "b",
+   "cmd": "same, -s tests/lifecycle",
+   "exit": 0,
+   "result": "Ran 38 tests OK",
+   "duration_s": 4.1,
+   "p26_recorded": "38 OK, 4.1s (check-cw15-runtime-final)",
+   "same": true
+  },
+  {
+   "id": "c",
+   "cmd": "timeout 180 tests/policy/pause_automation/live_pause_runtime_probe.py",
+   "exit": 0,
+   "result": "result=passed, zero_residue=true, omp/18.2.10, paused_provider_delta {manager:0,worker:0}, fresh_provider_delta 1, resumed true, threads/children remaining 0",
+   "duration_s": 5.6,
+   "p26_recorded": "exit 0, passed, ~8s",
+   "same": "all 61 result keys present; every boolean/state field equal to the p2.6 record (only ids/pids/timestamps differ)",
+   "scripted_provider_check": "before running: probe starts local ThreadingHTTPServer providers (semantic_provider / _worker_provider) and writes models.yml baseUrl http://127.0.0.1:<port>/v1 auth none per role; no other URL in probe/helper modules; no real provider or credentials"
+  },
+  {
+   "id": "d",
+   "cmd": "PYTHONPATH=src ... -m unittest discover -s tests/ui -p live_product_state_independent_p27i.py -v",
+   "exit": 0,
+   "result": "3 tests OK (real OMP 18.2.10 + local 503 counting provider, provider.requests==0)",
+   "duration_s": [
+    32.7,
+    32.7,
+    32.8
+   ],
+   "reruns": "3 runs green; earlier 5 development runs failed only on wrong test assumptions (held handoff with manual job, UI exit code on backend close), fixed in the test file, not in production"
+  },
+  {
+   "id": "e",
+   "cmd": "discover -s tests/ui/status_workbench (CW-12 projection, extra)",
+   "exit": 0,
+   "result": "Ran 2 tests OK",
+   "duration_s": 0.07
+  }
+ ],
+ "impact_analysis": {
+  "method": "import closure of each suite (workbench.* modules loaded) intersected with the CW-06/CW-17-delta production changes (base->integrated: backend/cli.py, backend/ui_server.py, terminal/vt_g1/screen.py, ui/product/**)",
+  "tests/lifecycle": "closure has none of the changed modules -> local CW-15 gate unaffected by code path",
+  "tests/policy/pause_automation and live probe": "closure includes terminal.vt_g1.screen (SU/SD change) and ui.status_workbench.projection (not changed in delta) -> re-run green with identical live result; not affected",
+  "ui_server/backend cli/ui.product": "not imported by either local gate; CW-06 supplies only display/controls",
+  "finding": "the product UI does NOT consume ui.status_workbench projection; ui_v1 carries only automation.state, and the backend reports 'not_configured (CW-18)'. Pause status rows (last work, confirmed changes, processes, unknown tool results) are therefore not displayed by the real three-area UI yet",
+  "ui_controls_absent": "product UI has no shutdown_request/shutdown_confirm/confirm_boot control (ui_v1 defines them; backend ui_server handles them); CLI 'shutdown --yes' is the only user path today"
+ },
+ "items": {
+  "P-C-AC-15": {
+   "cw06_part": "UI exit = detach; both OMP + host shell (+ host experiment) keep identity; reattach restores panes/state text",
+   "remaining": "CW-18 (60s review only while automation active, pause preserved in backend loop); CW-16 I-FAULT",
+   "evidence": [
+    "p27i live: prefix d clean detach exit 0 + terminal restored; SIGKILL of UI process; pane/shell/experiment pid+start_ticks unchanged; provider.requests 0",
+    "tests/backend detach tests (63s window) unchanged",
+    "a/b/c re-run"
+   ],
+   "verdict": "local+UI delta verified (pending CW-18/CW-16: active-only 60s review loop, pause preservation in the backend loop, final I-FAULT)"
+  },
+  "P-C-AC-16": {
+   "cw06_part": "none (no reconcile/recovery display in the UI)",
+   "remaining": "CW-19 (boot_id/reconcile-before-UI, RecoveryPort), CW-16",
+   "evidence": [
+    "lifecycle 38 OK, closure independent of CW-06 code"
+   ],
+   "verdict": "unchanged local evidence re-confirmed; UI part not applicable (pending CW-19/CW-16)"
+  },
+  "P-C-AC-17": {
+   "cw06_part": "only the backend-provided automation.state text; no model-error/last-model-check display",
+   "remaining": "CW-18 (flow + status text), CW-16",
+   "evidence": [
+    "lifecycle 38 OK",
+    "fixture: automation text displayed unchanged by focus/owner/manual input"
+   ],
+   "verdict": "unchanged local evidence re-confirmed; UI part not applicable (pending CW-18/CW-16)"
+  },
+  "P-C-AC-18": {
+   "cw06_part": "owner/mode/takeover request/handoff state display and controls; held reasons on refusals",
+   "remaining": "CW-18 (delivered-command state 실행 중/종료/미확인 is not in ui_v1/UI; UI shows no pending-takeover indicator after reattach, only owner+mode); CW-16",
+   "evidence": [
+    "p27i live: manager-owned state + takeover request kept identical (shell_view, owner_epoch) across clean detach, 9s idle, reattach and across SIGKILL+reattach",
+    "refused input never reaches the shell and is not replayed (marker exact 'a'->'ab', no SHOULD-NOT-RUN)",
+    "explicit prefix c is the only path back to user; typed input then runs exactly once",
+    "fixture: UI sends no input/takeover/handoff/shutdown frame on attach/detach/reattach/focus"
+   ],
+   "verdict": "local+UI delta verified (pending CW-18 delivered-command state display/wiring, CW-16); observation for UR-UX: pending takeover request is not shown after reattach"
+  },
+  "P-C-AC-22": {
+   "cw06_part": "none as a control (no UI shutdown request/confirm); UI shows backend close and restores the terminal",
+   "remaining": "CW-18/19 wiring of the real shutdown callback + failure display (unterminated indicator), decision whether a UI control belongs to UR-UX/CW-06 delta; CW-16",
+   "evidence": [
+    "lifecycle 38 OK",
+    "p27i: CLI shutdown with UI attached -> UI exits (status 0 or 1, not specified), outer terminal restored, host experiment gone, residue {}"
+   ],
+   "verdict": "unchanged local evidence re-confirmed; UI part not applicable (no UI shutdown control; pending CW-18/CW-19/CW-16)"
+  },
+  "P-C-AC-23": {
+   "cw06_part": "none (no confirm_boot control/display)",
+   "remaining": "CW-19 (boot marker + confirm_boot in UI/backend), CW-16 reboot VM",
+   "evidence": [
+    "lifecycle 38 OK, closure independent of CW-06"
+   ],
+   "verdict": "unchanged local evidence re-confirmed; UI part not applicable (pending CW-19/CW-16)"
+  },
+  "P-C-AC-25": {
+   "cw06_part": "status port would show Task/revision/run and stop request/confirm/unknown; not connected",
+   "remaining": "CW-18 (project pause status rows into ui_v1 automation payload)",
+   "evidence": [
+    "pause suite 129 OK; live probe identical to p2.6"
+   ],
+   "verdict": "unchanged local evidence re-confirmed; UI part not applicable (pending CW-18)"
+  },
+  "P-C-AC-30": {
+   "cw06_part": "automation state text + manual input independence display",
+   "remaining": "CW-18 (real automation/pause status binding; backend still 'not_configured'), CW-16",
+   "evidence": [
+    "fixture on the real run_product loop: 자동화: paused shown, unchanged by focus, owner change, manual typed input (only to focus pane), survives detach/reattach; UI sends no unsolicited frame",
+    "pause suite + live probe: paused provider delta 0/0, host experiment kept, manual activity independent"
+   ],
+   "verdict": "local+UI delta verified (fixture-level UI display only; pending CW-18 wiring of real pause state/status rows, CW-16)"
+  },
+  "P-C-AC-33": {
+   "cw06_part": "unknown tool result rows are not displayed by the product UI",
+   "remaining": "CW-18 (status projection to UI)",
+   "evidence": [
+    "pause suite 129 OK; live probe abort/unknown_tools/reconcile/resume identical to p2.6"
+   ],
+   "verdict": "unchanged local evidence re-confirmed; UI part not applicable (pending CW-18)"
+  }
+ },
+ "observations": [
+  "G2 open item (gates/G2.md, user background job): with a manual background job, `wb-handoff` + prefix h is held (held: user_owner, unsubmitted_or_unconsumed_input, manual_jobs, unknown_or_manual_residue) but leaves parent_mode=control_wait with input_target_unknown; typed input is refused visibly and takeover confirm is refused (takeover_held: foreground target unknown). State is preserved across SIGKILL/reattach, nothing replayed. The user has no in-UI recovery path for that state -> route to CW-18/UR-UX/CW-16 (not a CW-12/15 local gate defect).",
+  "UI exit code when the backend closes the connection is 1 (not specified by contract); terminal restored.",
+  "'stub OMP': backend readiness needs two bridge peers, so the check uses real omp 18.2.10 against an owned local provider that answers 503 (request counter asserted 0), no model turns.",
+  "OMP/host shell PTYs are backend-owned; no ~/.omp read by this test (isolated PI_CODING_AGENT_DIR profile)."
+ ],
+ "files_added": [
+  "tests/ui/live_product_state_independent_p27i.py (sha256 d816f5ac218e62859e0c5bc22deb5f5fc3cc595ec8900162821b524f6c94ea1e)",
+  ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw1215-delta-test-01-agent.json"
+ ],
+ "residue": {
+  "processes": "none (ps for omp/workbench/sleep 300 empty; normal-path shutdown verified inside the test)",
+  "tmp": "/tmp/r12 removed; new test dirs removed by the test; one unattributed empty file /tmp/x (mtime 03:42) appeared during the session, not created by the new test (3 later reruns did not touch it) - left alone",
+  "untouched": "/tmp/cw03-g2-*, /tmp/cw06_*.txt, pre-existing /tmp/cw06-indep-* (3, present before start)"
+ }
+}

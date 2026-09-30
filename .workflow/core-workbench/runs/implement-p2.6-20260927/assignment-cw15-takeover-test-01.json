@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "invocation": "cw15-takeover-test-01",
+  "role": "test_designer",
+  "unit": "V-CW-15-p2.6-current",
+  "authority": "User $implement request; approved CW-15; change-verification independent test stage",
+  "objective": "Independently verify the frozen CW-15 candidate closes the takeover/automatic-action race without replay or regression.",
+  "candidate": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw15-takeover-correction.json",
+    "candidate_id": "9e28c562106ade67a6f7a4a03336d3727cd28d5f892dee48a85d11afc4e48cc4",
+    "production_sha256": "ae94d6ce59805de0ba434bf61da30b40e08e00298207733f913c7dfd7e63646d"
+  },
+  "requirements": [
+    "Independently exercise both deterministic orders of tick/review versus request_takeover and prove no automatic side effect occurs after the durable takeover fence.",
+    "Exercise takeover after command delivery becomes unknown and after successful delivery. Prove command journal identity is preserved, send count remains one and replay count is zero.",
+    "Verify current-session/owner freshness, external takeover failure fail-closed behavior, reentrant callbacks, shutdown/action serialization, ended-run/metadata/model gates and production binding.",
+    "Run lifecycle plus predecessor regressions and check candidate production hash and residue. Add test-only coverage only if a material gap exists; do not modify production."
+  ],
+  "allowed_write_paths": ["tests/lifecycle/**", "tests/integration/**", "graphify-out/**"],
+  "constraints": ["No production/docs/workflow/PLAN/state edits, external OMP, reboot, delegation, commit, publish, deploy or Docker. Use apply_patch for any test edit."],
+  "report": "Return candidate_ready/needs_reroute, exact checks/counts/concurrency order, candidate/hash comparison, changed test paths, residue and pending external environments."
+}

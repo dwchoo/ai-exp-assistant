@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "decision_id": "RA-P27-HOOK-REJECTED",
+  "owner": "Root",
+  "recorded_at": "2026-09-29T06:46:49.204917+00:00",
+  "question": "deadline-fix item 4 (HOOK_REJECTED outside control loop as authenticated manual prompt return) conflicts with independent test RejectedHandoffTests::test_rejected_handoff_without_any_prompt_ready_keeps_input_held_with_reason",
+  "ruling": "B: implement item 4; the independent test expectation is superseded by this adjudication and will be updated by the next independent test_designer (worker must not edit independent tests)",
+  "rationale": [
+    "HOOK_REJECTED is an authenticated control-channel event; the rejected handoff function deterministically returns to the prompt",
+    "manual target is still re-verified per write via observed foreground pgrp and parent identity",
+    "permanent hold of a live prompt the user owns is a dead end the test author itself flagged as a contract concern (C-AC-08 manual input to confirmed current target)",
+    "automation remains held"
+  ],
+  "refs": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/assignment-p27-deadline-fix-worker-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-input-test-01.json"
+  ]
+}

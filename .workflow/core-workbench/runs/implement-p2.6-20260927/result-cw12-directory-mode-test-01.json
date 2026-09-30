@@ -1,0 +1,31 @@
+{
+  "invocation": "cw12-directory-mode-test-01",
+  "outcome": "complete",
+  "candidate_ready": true,
+  "product_mutation": false,
+  "test_only_changed_paths": [
+    "tests/policy/pause_automation/live_pause_runtime_probe.py",
+    "tests/policy/pause_automation/test_live_pause_runtime_predicates.py",
+    "graphify-out/**"
+  ],
+  "candidate": "40c4ee06c2285b9b995214de16e2e3df4783a537212cf999aab092f034904888",
+  "production_snapshot_match": {
+    "path": "src/workbench/policy/pause_automation/controller.py",
+    "sha256": "fc8bc3a3e5b9445dfcd851e3eca0bcb99b3989c56d36d1976ca4f9626a7929af"
+  },
+  "checks": {
+    "directory_focused": "12 tests passed in 1.745 seconds",
+    "live_predicates": "7 tests passed",
+    "pause_automation": "129 tests passed in 27.699 seconds",
+    "actual_omp": "omp/18.2.10; manager cwd 0755-to-0555 blocked resume, mode restoration reconciled and resumed; zero_residue true",
+    "residual_resources": "no omp children, peer/host processes, provider/drain threads, bridge socket/thread, or /tmp/cw12-runtime-*",
+    "graphify_update": "exit 0"
+  },
+  "acceptance": {
+    "C-AC-25": "passed",
+    "C-AC-30": "passed",
+    "C-AC-33": "passed"
+  },
+  "residual_risk": "The actual OMP mode scenario used manager cwd with a scripted provider; Git execution-root mode remained covered by process-backed fixtures.",
+  "mutation_owner": "/root/cw12_post_review_test"
+}

@@ -1,0 +1,20 @@
+{
+  "invocation":"cw11-exit-incarnation-correction-01",
+  "role":"worker_senior",
+  "unit":"V-CW-11-p2.6-current",
+  "objective":"Bind confirmed-exit admission fences, UI surfacing, and WorkflowObservationBinding sources to the exact run incarnation.",
+  "base_candidate":"20c78e3e0558722ab91bd0879f9cc665512a09e54002331acfe1c45d34269948",
+  "review_evidence":".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw11-final-review-04.json",
+  "write_scope":["src/workbench/observation/**","tests/observation/**"],
+  "required_change":[
+    "Key admission exit fences and scheduler surfaced/pending/in-flight exit state by exact owner run incarnation plus six-field identity. A->None->the same A must start without the old exit fence or surfaced UI state.",
+    "Introduce an owner-issued exit-source token (or equivalent) bound under lock to identity+incarnation. Any external exit notification, including WorkflowObservationBinding, must present this token; fence_exit validates it under the same lock. An old token racing with or arriving after a new incarnation must fail without fencing or surfacing the new run.",
+    "WorkflowObservationBinding may attach to freeze the persisted WorkflowRun identity, but it must explicitly bind once to the scheduler/admission current incarnation before collect_and_notify. It must not silently rebind an old WorkflowRun instance to a later same-identity incarnation. Update the actual runtime composition accordingly.",
+    "Internal current-run fact exits must capture the current incarnation before any blocking callback and validate it at fence linearization.",
+    "Keep terminal fence separate from UI retry: old-incarnation callback retry may complete once, but never changes the new incarnation's review state; new incarnation may review at its own 60-second boundary.",
+    "Add tests for exit->A-None-A reset, old exit callback racing replacement, old binding/token after replacement, pending UI retry across replacement, idempotent A, and independent new-incarnation exit."
+  ],
+  "verification":["Run observation and relevant regressions.","Rerun current actual OMP 18.2.10 probe using the bound production WorkflowObservationBinding path.","Run graphify update ."],
+  "constraints":["apply_patch only; no workflow records, uv/local env/package artifacts, destructive git actions, or graphify restore."],
+  "report":["exit-incarnation API/invariant","changed files","checks/runtime","candidate_ready or needs_reroute"]
+}

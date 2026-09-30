@@ -1,0 +1,10 @@
+{
+  "invocation":"cw11-final-review-06",
+  "candidate":"15cced80d156715b781a16c402c7be98be7563fe4fa13e47a834888dc884f67a",
+  "candidate_hash_validated":true,
+  "outcome":"needs_reroute",
+  "finding":{"severity":"P2","summary":"Each active-run tick issues and retains a new internal ExitSourceToken in `_exit_sources`; 1,000 no-review ticks retain 1,000 tokens until run replacement, causing linear memory growth during indefinite observation."},
+  "closed":"Late first bind, explicit source activation, positive public incarnation, and all earlier atomic/schedule/exit findings are closed.",
+  "writer":false,
+  "files_modified":[]
+}

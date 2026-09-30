@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "invocation": "cw07-partial-regression-test-01",
+  "role": "test_designer",
+  "unit": "V-CW-07-p2.6-current",
+  "workspace": "/home/dwchoo/ai-exp-assistant",
+  "writer": true,
+  "checkpoint": ".workflow/core-workbench/runs/implement-p2.6-20260927/cw07-partial-regression-checkpoint.json",
+  "requirements": ".workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw07.json",
+  "review": ".workflow/core-workbench/runs/implement-p2.6-20260927/review-cw07-delta-01.json",
+  "allowed_write_scope": ["tests/terminal/test_persistent_shell_independent.py"],
+  "instructions": "Add one focused public-behavior regression for the accepted partial-write P2 without changing production or worker tests. Arrange a valid clean manual-parent input path whose first low-level PTY write accepts only a strict prefix, then transition the current boundary/lifecycle to unknown before the next write attempt. Assert send_user raises UnsafeShellState (or the public refusal), no second low-level write occurs, and only the unavoidable first prefix was emitted. Cover Bash and /bin/sh adapter state if practical through deterministic injected write behavior; do not require nondeterministic kernel partial writes. Confirm the test fails on the current candidate for the intended second-write reason and that all prior independent tests retain their classifications. Produce result/snapshot/scope audit and return writer lease. Do not run graphify update."
+}

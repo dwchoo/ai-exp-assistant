@@ -1,0 +1,16 @@
+{
+  "invocation": "cw12-final-test-01",
+  "outcome": "complete",
+  "candidate_ready": true,
+  "candidate_validated": "fba4d17f0761e68609852c29bf9db50c827fc89b147cc7cc8ad73c1efaea820d",
+  "test_calibration": "Normal FakeBridge stop events now carry production G3 role/name/sessionId/generation/bridgeSequence/abortRequestId. Replacement session/generation, unrelated request, and pre-cursor negatives remain and pass.",
+  "durability_boundary": "Current-process file/directory fsync failure remains paused with persistence_error, dispatch/review/resume held, observation active, and readable evidence restarts paused. Zero-surviving-evidence crash bootstrap is explicitly recorded as CW15 recovery boundary and not claimed as a CW12 pass.",
+  "checks": {
+    "policy_negative": "33/33 passed",
+    "status": "2/2 passed",
+    "actual_omp_18_2_10": "passed with exact stop identity, zero paused provider activity, fresh post-resume turn, no replay, reconciliation 5/5, zero residue",
+    "managed_regressions": "observation 91, workflow 44, tasks 22, contracts 20, bridge 18, G3 protocol 7, pause predicates 6, G3 TypeScript 23 passed"
+  },
+  "scope_audit": "13 changed test/graphify paths, outside_scope 0",
+  "graphify_updated": true
+}

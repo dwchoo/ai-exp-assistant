@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "check_id": "cw05-evidence-suite-final-01",
+  "requirements_identity": "3f3ee9ba0cee2a99163a3285c07886467ae6930ce7ff1f973fba56e57378e2c0",
+  "argv": ["/usr/bin/env", "PYTHONDONTWRITEBYTECODE=1", "PYTHONPATH=src:tests/gates/g4_evidence", "/tmp/cw02-g1-venv/bin/python", "-m", "unittest", "discover", "-s", "tests/gates/g4_evidence", "-v"],
+  "cwd": "/home/dwchoo/ai-exp-assistant",
+  "environment": {"description": "Linux, frozen CW-05 aggregate validator positive fixture and independent missing/stale/empty/schema-only negatives"},
+  "started_at": "2026-09-27T20:40:12.023528+00:00",
+  "finished_at": "2026-09-27T20:40:14.803224+00:00",
+  "exit_code": 0,
+  "timed_out": false,
+  "log": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/check-cw05-evidence-suite.log",
+  "log_sha256": "3a9a7df1e7cd28691d46c89225edb6d281279c99a8f9b40fd9cfd9125c83678f",
+  "before": "23f790d7098743fd5968c9e72e501ea2c6bb086f93ecdc48eb53586c523854a1",
+  "after": "23f790d7098743fd5968c9e72e501ea2c6bb086f93ecdc48eb53586c523854a1",
+  "stable": true,
+  "items": [{"id": "G4-EVIDENCE", "acceptance_ids": ["C-AC-08", "C-AC-12", "C-AC-15", "C-AC-18", "C-AC-25", "C-AC-26", "C-AC-28", "C-AC-29", "C-AC-30", "C-AC-33"], "result": "passed", "observed_evidence_level": "fixture", "evidence": "check-cw05-evidence-suite.log: 10 aggregate tests accepted only explicit provenance-only valid fixture context and rejected missing/extra/duplicate/stale source, requirements/approval/candidate identity mismatch, low evidence, failed checks, required unknowns, empty context, empty/null/schema-only evidence, boolean exit, and escaped evidence paths", "unknowns": []}]
+}

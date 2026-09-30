@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "invocation": "cw12-run-permit-review-01",
+  "role": "reviewer",
+  "unit": "V-CW-12-p2.6-current",
+  "authority": "User $implement docs/features/core-workbench request on 2026-09-28; approved bundle 64bcf577a30e7c6bbff3e4e775f8e6c17ca212ce3bf79b5bc5be31196a792b07",
+  "purpose": "Fresh independent review of the exact CW-12 run-bound permit candidate after independent verification.",
+  "candidate": {
+    "workspace": "/home/dwchoo/ai-exp-assistant",
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-resume-20260928-checkpoint.json",
+    "candidate_id": "6dfa6011d7c57b108749d8f8fe76a1722c998d702e7c2313d43390b1be3da957",
+    "tested_snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw12-run-permit-test.json",
+    "tested_candidate_id": "220a0d31b6b278bfbfc88a9d8a9902f2b58a2528dd907755a6a86a4d7118a624",
+    "equivalence_audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/audit-resume-vs-cw12-run-permit.json",
+    "equivalence_note": "The only change from the independently tested candidate is graphify-out/cache/last_query_stamp, produced by the required read-only graph query. Product code and tests are byte-identical."
+  },
+  "requirements": {
+    "ticket": "docs/features/core-workbench/tickets/CW-12.md",
+    "brief": "docs/features/core-workbench/BRIEF.md",
+    "spec": "docs/features/core-workbench/SPEC.md",
+    "operating_contract": "docs/features/core-workbench/OPERATING-CONTRACT.md",
+    "acceptance_ids": ["C-AC-25", "C-AC-30", "C-AC-33"],
+    "gate_items": ["P-C-AC-25", "P-C-AC-30", "P-C-AC-33"]
+  },
+  "evidence": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-run-permit-correction-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-final-test-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-final-review-03.json"
+  ],
+  "review_scope": [
+    "Inspect the current frozen product code and tests, especially workbench/controller.py, workbench/worker_review.py, and tests/test_pause_policy.py.",
+    "Verify the prior P1 finding is closed: automatic dispatch must require exact active/persisted/bound run, worker identity, and incarnation authority; late results must be discarded after authority changes.",
+    "Check for correctness, race safety, requirement coverage, regressions, and missing tests relevant to CW-12.",
+    "Return candidate_ready true only if there are no P0/P1/P2 findings that block CW-12 formal gate."
+  ],
+  "constraints": {
+    "read_only": true,
+    "allowed_write_paths": [],
+    "run_tests": false,
+    "no_commit": true,
+    "no_publish": true,
+    "report_format": "State candidate_ready, findings ordered by severity with file:line evidence, requirement assessment, and residual risks."
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "invocation": "cw16-timeout-test-01",
+  "role": "test_designer",
+  "unit": "V-CW-16-p2.6-current",
+  "authority": "User $implement request; approved PLAN p2.6 CW-16; P2 timeout-cleanup independent regression",
+  "objective": "Independently verify the corrected bounded probe runner kills detached descendants and cleans only invocation-owned tmux/Herdr resources on timeout without masking normal probe leaks.",
+  "candidate": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw16-timeout-correction.json",
+    "candidate_id": "cc5c69ec642cc8f577f13aa11d5c6f28d107019eb70821ac78b21bdbb345089d"
+  },
+  "requirements": [
+    "Run the timeout negative control and full CW-16 integration suite. Verify detached child cleanup by exact identity and no owner-token process remains.",
+    "Verify normal plain/tmux/Herdr runs must perform their own cleanup: wrapper-detected process/root/socket/session cleanup is a failure, not a silent pass.",
+    "Inspect target isolation and deletion guards for unrelated process/resource safety; verify no owned temp roots, sockets, sessions or processes remain.",
+    "Confirm frozen hashes and retain the documented Bash outer versus separate dash matrix boundary and all I-* pending states."
+  ],
+  "allowed_write_paths": [],
+  "constraints": [
+    "Read-only independent test: no file edits, package installation, reboot, full/live G3 suite, unrelated external actions, delegation, commit, publish, deploy or Docker."
+  ],
+  "report": "Return candidate_ready or precise reroute, test outcomes, timeout cleanup trace, isolation assessment, hash/residue checks and overall done_verified distinction."
+}

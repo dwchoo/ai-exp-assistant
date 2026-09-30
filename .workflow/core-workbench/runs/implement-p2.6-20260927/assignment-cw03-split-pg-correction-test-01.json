@@ -1,0 +1,35 @@
+{
+  "feature_id": "core-workbench",
+  "ticket_id": "CW-03",
+  "attempt_id": "split-pg-review-correction-test-01",
+  "invocation": "cw03-split-pg-correction-test-01",
+  "approved_bundle_digest": "64bcf577a30e7c6bbff3e4e775f8e6c17ca212ce3bf79b5bc5be31196a792b07",
+  "actual_workspace": "/home/dwchoo/ai-exp-assistant",
+  "repository_identity": "git HEAD 7b2048c50e0794da847ad8674d4dc0433d643c33 on main",
+  "baseline_snapshot": "e2093d55150a433fc19319e25708ad5ce0a177bc43c038dd1da06aae1b3ce562",
+  "effective_write_capability": "shared workspace; sole mutation owner while dispatched",
+  "acceptance_ids": ["C-AC-03", "C-AC-08", "C-AC-10", "C-AC-26", "C-AC-34"],
+  "relevant_contracts": ["G2-CONTROL", "G2-LIFECYCLE", "ADR-0002", "C-D55"],
+  "allowed_write_paths": ["tests/gates/g2_shell/test_split_pg_control.py"],
+  "prohibited_paths": ["src/**", "docs/**", ".workflow/**", ".codex/**", "graphify-out/**", "tests/gates/g2_shell/live_combined_boundary_probe.py", "tests/gates/g2_shell/test_live_combined_boundary_predicates.py"],
+  "generated_outputs": [],
+  "resource_claims": [{"resource": "host:shell-fixture", "mode": "exclusive"}],
+  "mutation_owner": "cw03-split-pg-correction-test-01",
+  "candidate_ref": ".workflow/core-workbench/runs/implement-p2.6-20260927/split-pg-correction-candidate.json",
+  "implementation_result_ref": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw03-split-pg-correction-01.json",
+  "review_ref": ".workflow/core-workbench/runs/implement-p2.6-20260927/review-cw03-split-pg-01.json",
+  "test_focus": [
+    "Derive an independent failing negative control for observer loss on foreground SIGQUIT with an active setsid descendant, and verify the corrected split path remains observable/held.",
+    "Derive an independent failure-cleanup test proving a descendant absent from the first direct-child snapshot is rediscovered/reaped and the state remains UNKNOWN rather than lifetime complete.",
+    "Verify signal-derived exits remain distinguishable from numeric exit 130/131."
+  ],
+  "exact_checks": [
+    "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest tests.gates.g2_shell.test_split_pg_control -v",
+    "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/gates/g2_shell -p 'test_*.py' -v"
+  ],
+  "reserved_budget": 1,
+  "configured_model": "gpt-6-sol",
+  "configured_effort": "high",
+  "host_observed_model": "unverified",
+  "host_observed_effort": "unverified"
+}

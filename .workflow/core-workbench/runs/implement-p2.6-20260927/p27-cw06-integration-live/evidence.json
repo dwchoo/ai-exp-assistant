@@ -1,0 +1,274 @@
+{
+  "model_turns_enabled": true,
+  "started": "2026-09-30T00:52:08+0900",
+  "omp": "omp/18.2.10",
+  "size": [
+    42,
+    213
+  ],
+  "steps": {
+    "S0_start": {
+      "seconds": 1.0,
+      "phase": "ready",
+      "backend_pid": 3769554,
+      "product_ui": true,
+      "minimal_client_text": false
+    },
+    "S1_three_areas": {
+      "titles": {
+        "MANAGER OMP": true,
+        "WORKER OMP": true,
+        "HOST SHELL": true
+      },
+      "header": "focus: MANAGER OMP | host 입력 owner: user | shell mode: manual_prompt | 자동화: not_configured",
+      "owner": [
+        "user",
+        2,
+        "manual_prompt"
+      ],
+      "focus": "manager_omp"
+    },
+    "S2_focus_vs_owner": {
+      "sequence": [
+        [
+          "worker_omp",
+          [
+            "user",
+            2,
+            "manual_prompt"
+          ],
+          true
+        ],
+        [
+          "host_shell",
+          [
+            "user",
+            2,
+            "manual_prompt"
+          ],
+          true
+        ],
+        [
+          "manager_omp",
+          [
+            "user",
+            2,
+            "manual_prompt"
+          ],
+          true
+        ],
+        [
+          "host_shell",
+          [
+            "user",
+            2,
+            "manual_prompt"
+          ],
+          true
+        ]
+      ],
+      "owner_unchanged": true
+    },
+    "S3_sizes": {
+      "shell": "37 69",
+      "want": {
+        "manager_omp": [
+          37,
+          69
+        ],
+        "worker_omp": [
+          37,
+          69
+        ],
+        "host_shell": [
+          37,
+          69
+        ]
+      },
+      "omp": {
+        "manager_omp": [
+          37,
+          69
+        ],
+        "worker_omp": [
+          37,
+          69
+        ]
+      }
+    },
+    "S8_owner": {
+      "before": [
+        "user",
+        2,
+        "manual_prompt"
+      ],
+      "early_handoff_footer": "handoff 거부: handoff_held: no clean direct same-parent handoff (held: user_owner, parent_not_control_wait)",
+      "early_owner": [
+        "user",
+        2,
+        "manual_prompt"
+      ],
+      "after_wb_handoff": [
+        "user",
+        2,
+        "control_wait"
+      ],
+      "after_handoff": [
+        "manager",
+        3,
+        "control_wait"
+      ],
+      "handoff_footer": "host shell을 manager에게 되돌림",
+      "header_manager": true,
+      "owner_refusal_visible": true,
+      "owner_refusal_footer": "입력 거부 [HOST SHELL]: input_owner_manager: manager owns shell input; request takeover first",
+      "paste_refusal_footer": "붙여넣기 거부 [HOST SHELL]: input_owner_manager: manager owns shell input; request takeover first",
+      "owner_after_focus_while_manager": [
+        "manager",
+        3,
+        "control_wait"
+      ],
+      "after_request": [
+        "user",
+        4,
+        "manual_prompt"
+      ],
+      "takeover_requested": true,
+      "request_footer": "인수 요청됨 — prefix c 로 확인",
+      "after_confirm": [
+        "user",
+        4,
+        "manual_prompt"
+      ],
+      "confirm_footer": "인수 확인됨: host 입력 owner 변경",
+      "header_user": true,
+      "last_confirmed": [
+        "00:52:17",
+        "00:52:24"
+      ],
+      "refused_bytes_not_run": true
+    },
+    "S4_korean_paste": {
+      "intact": true,
+      "needed_enter": true,
+      "observed": "한글 첫째 줄\n둘째 줄 🙂 tab\there\n"
+    },
+    "S5_paste_to_cat_without_2004": {
+      "bytes": "붙여 abc\n",
+      "markers_leaked": false
+    },
+    "S6_literal_prefix_esc_ctrlc": {
+      "catv": "^]^[x\n",
+      "shell_back_after_ctrl_c": true
+    },
+    "S7_big_paste": {
+      "visible_reason": true,
+      "footer": [
+        "붙여넣기 거부: paste_too_large: paste exceeds the 2 MiB limit"
+      ],
+      "queued": 0,
+      "clean_line_after": true
+    },
+    "S9_queue_full": {
+      "visible": true,
+      "footer": [
+        "붙여넣기 거부 [HOST SHELL]: queue_full: 800000 bytes exceeds free queue space 614560 (held: takeover_requested, user_owner, unsubmitted_or_unconsumed_input, unknown_o"
+      ],
+      "drained_and_prompt_back": true
+    },
+    "S10_manager_turn": {
+      "prompt_echoed_in_manager_pane": true,
+      "reply_seen": true,
+      "reply_lines": [
+        "WBOK42"
+      ],
+      "seconds": 3.3,
+      "in_worker_pane": false
+    },
+    "S11_tui_keys": {
+      "worker_omp": {
+        "backspace": true,
+        "alt_enter_newline": true,
+        "ctrl_c_cleared": true,
+        "slash_menu": [
+          "❯ ⌨  hotkeys         Show all keyboard shortcuts                    █"
+        ],
+        "esc_closed_menu": true,
+        "hotkeys_table": 5,
+        "alive": true
+      },
+      "manager_omp": {
+        "backspace": true,
+        "alt_enter_newline": true,
+        "ctrl_c_cleared": true,
+        "slash_menu": [
+          "❯ ⌨  hotkeys         Show all keyboard shortcuts                    █"
+        ],
+        "esc_closed_menu": true,
+        "hotkeys_table": 5,
+        "alive": true
+      }
+    },
+    "S12_esc_cancel": {
+      "streaming_seen": true,
+      "max_number_at_esc": 6,
+      "max_number_3s": 22,
+      "max_number_6s": 22,
+      "abort_marker": [],
+      "reached_400": false,
+      "worker_alive": true
+    },
+    "S13_resize": {
+      "shell": "31 57",
+      "omp": {
+        "manager_omp": [
+          31,
+          55
+        ],
+        "worker_omp": [
+          31,
+          55
+        ]
+      },
+      "want": {
+        "manager_omp": [
+          31,
+          55
+        ],
+        "worker_omp": [
+          31,
+          55
+        ],
+        "host_shell": [
+          31,
+          57
+        ]
+      }
+    },
+    "S14_detach": {
+      "exit": 0,
+      "message": true,
+      "identities_same": true,
+      "all_alive": true,
+      "outer_restored": true
+    },
+    "S15_reattach": {
+      "restored": false,
+      "restored_ratio": {
+        "manager_omp": 0.41,
+        "worker_omp": 0.44,
+        "host_shell": 0.94
+      },
+      "shell_tail": true,
+      "focus_kept": "host_shell",
+      "identities_same": true,
+      "count_file": "once\n"
+    }
+  },
+  "shutdown": {
+    "exit": 0,
+    "verified": true
+  },
+  "residue": {},
+  "finished": "2026-09-30T00:53:40+0900"
+}

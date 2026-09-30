@@ -1,0 +1,9 @@
+{
+  "invocation":"cw11-aba-correction-01",
+  "outcome":"complete",
+  "candidate_ready":true,
+  "correction":"SerializedReviewAdmission.issue_review constructs an owner-bound opaque nonce and issuance epoch; admit_and_dispatch accepts only that ticket. State/exit epoch changes invalidate tickets, coalescing discards older tickets, and pause-held work refreshes only for the same run incarnation.",
+  "changed_files":["src/workbench/observation/worker_review.py","tests/observation/test_atomic_admission.py","tests/observation/test_atomic_admission_independent.py","tests/observation/test_worker_review.py","tests/observation/test_worker_review_independent.py"],
+  "checks":{"observation":"58/58 passed","workflow":"44/44 passed","bridge":"18/18 passed","contracts":"20/20 passed","g4_evidence":"10/10 passed","g4_lifetime":"8/8 passed","actual_omp_18_2_10":"60.0-second review, 13 wakes, 15 requests, real exit in 0.054 seconds, zero residue"},
+  "graphify_updated":true
+}

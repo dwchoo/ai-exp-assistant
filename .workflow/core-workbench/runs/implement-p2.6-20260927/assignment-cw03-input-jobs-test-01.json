@@ -1,0 +1,31 @@
+{
+  "feature_id": "core-workbench",
+  "ticket_id": "CW-03",
+  "attempt_id": "cw03-input-jobs-test-01",
+  "invocation": "cw03-input-jobs-test-01",
+  "approved_bundle_digest": "64bcf577a30e7c6bbff3e4e775f8e6c17ca212ce3bf79b5bc5be31196a792b07",
+  "actual_workspace": "/home/dwchoo/ai-exp-assistant",
+  "baseline_snapshot": "candidate a9f07f622640cc5a95044742ba5b1de337749c0b7d0af84780077c8b4af00f03",
+  "effective_write_capability": "shared physical checkout; serial test-only mutation lease",
+  "acceptance_ids": ["C-AC-08", "C-AC-26"],
+  "relevant_contracts": ["PLAN p2.6 G2-INPUT-JOBS runtime", "CW-03 input return and jobs matrix", "ADR-0002 input-return barrier"],
+  "allowed_write_paths": ["tests/gates/g2_shell/**"],
+  "prohibited_paths": ["src/**", "docs/**", ".workflow/**", ".codex/**", ".agents/**", "graphify-out/**"],
+  "resource_claims": ["host:shell-fixture exclusive"],
+  "mutation_owner": "test_designer cw03-input-jobs-test-01",
+  "checkpoint_ref": ".workflow/core-workbench/runs/implement-p2.6-20260927/pretest-checkpoint.json",
+  "requirements_identity": "06e66cc0304db71918ae82cc0f61a2f8e3d9782466a1b32e4fcb52832bf1bba6",
+  "requirements_path": ".workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw03.json",
+  "exact_checks": [
+    "PYTHONDONTWRITEBYTECODE=1 python -m unittest tests.gates.g2_shell.test_live_input_jobs_predicates -v",
+    "PYTHONDONTWRITEBYTECODE=1 python tests/gates/g2_shell/live_input_jobs_probe.py"
+  ],
+  "reserved_budget": {"total": 1, "role:test_designer": 1, "unit:V-CW-03": 1},
+  "stop_conditions": ["Production change required", "Contract ambiguity", "Write outside tests/gates/g2_shell/**", "Unbounded or leaking runtime probe"],
+  "configured_model": "gpt-6-sol",
+  "configured_effort": "high",
+  "host_observed_model": "unverified",
+  "host_observed_effort": "unverified",
+  "routing": {"planned_role": "test_designer", "selected_role": "test_designer", "reason_codes": ["mandatory_independent_tests"], "evidence_refs": ["workflow-contract section 7", "change-verification skill"]},
+  "task": "Derive G2-INPUT-JOBS expected outcomes from the approved requirements before inspecting the worker delta. Independently assess candidate a9f07f... Add or refine meaningful tests only where coverage is missing; do not change production code and do not weaken negative controls. Exercise actual Bash/dash behavior for unsafe input/jobs admission and clean admission, including at least one failure/regression discriminator. Run focused checks with bounded cleanup and report exact exits, changed test paths, coverage mapping, subprocess status, scope audit, and whether production correction is required."
+}

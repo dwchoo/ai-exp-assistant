@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "invocation": "cw14-branch-test-01",
+  "role": "test_designer",
+  "unit": "V-CW-14-p2.6-current",
+  "authority": "User $implement docs/features/core-workbench request; approved PLAN p2.6 CW-14; branch-safe correction",
+  "objective": "Independently verify the frozen branch-safe reconciliation and malformed status-entry correction.",
+  "candidate": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw14-branch-correction.json",
+    "candidate_id": "86678925ab72e3a689a5d0dee78011547d192a02aba79504e4a838fa95de6719"
+  },
+  "required_tests": [
+    "Run the exact cap-3B same-run two-store sequence and assert every byte is counted: final observed 7, dropped/missing 4, stored 3; B's durable observation must survive A recovery.",
+    "Exercise malformed status .json through append and status, sentinel preservation, removal/recovery, and no ValueError propagation.",
+    "Re-run single-writer recovery, repeated failures, unsafe mismatch fail-closed, quotas, path/TOCTOU, concurrency and metadata-admission tests plus CW-07/CW-09 regressions.",
+    "Confirm production hashes match the frozen snapshot."
+  ],
+  "allowed_write_paths": ["tests/storage/**", "graphify-out/**"],
+  "constraints": [
+    "Independent test-only owner; no production/workflow/docs/PLAN/state/ledger edits.",
+    "No delegation, commit, publish, deploy, Docker, or destructive actions."
+  ],
+  "report": "Return candidate_ready/needs_reroute, exact same-run and malformed-status results, suite counts, hash confirmation, C-AC-24/C-AC-28 verdict and CW-15 risks."
+}

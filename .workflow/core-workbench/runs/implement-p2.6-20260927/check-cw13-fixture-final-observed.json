@@ -1,0 +1,82 @@
+{
+  "after": "89b27e0f23d91d76a2d40fe0eb97aeed6ba4299ad51f12fbf35dcc675597970c",
+  "argv": [
+    "/usr/bin/env",
+    "PYTHONDONTWRITEBYTECODE=1",
+    "PYTHONPATH=src",
+    "/tmp/cw02-g1-venv/bin/python",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tests/policy/recovery_manager",
+    "-p",
+    "test_*.py",
+    "-q"
+  ],
+  "before": "89b27e0f23d91d76a2d40fe0eb97aeed6ba4299ad51f12fbf35dcc675597970c",
+  "check_id": "cw13-fixture-final-01",
+  "cwd": "/home/dwchoo/ai-exp-assistant",
+  "environment": {
+    "description": "Linux; frozen CW-13 policy candidate; deterministic manager judgment, task-wide CAS retry, revision, stop/force and full-termination fixtures"
+  },
+  "exit_code": 0,
+  "finished_at": "2026-09-28T17:20:03.463059+00:00",
+  "items": [
+    {
+      "id": "P-C-AC-04",
+      "acceptance_ids": ["C-AC-04"],
+      "result": "passed",
+      "observed_evidence_level": "fixture",
+      "evidence": "Fixtures bind worker first-level judgment to the exact task/revision/run, completion criteria, immutable artifact paths and collected/current hashes; success, failure, exit-zero criteria failure and insufficient evidence produce distinct Manager outcomes.",
+      "unknowns": []
+    },
+    {
+      "id": "P-C-AC-07",
+      "acceptance_ids": ["C-AC-07"],
+      "result": "passed",
+      "observed_evidence_level": "fixture",
+      "evidence": "Fixtures admit recovery attempts one through three, block a fourth, exclude initial and normal-improvement attempts, preserve usage across revision/settings/commit/name changes, require exact durable CAS plus post-read, and impose no elapsed-time cutoff.",
+      "unknowns": []
+    },
+    {
+      "id": "P-C-AC-10",
+      "acceptance_ids": ["C-AC-10"],
+      "result": "passed",
+      "observed_evidence_level": "fixture",
+      "evidence": "Mutation, a new worker instruction and relaunch remain absent until the complete managed lifetime, descendants, input return and control return are confirmed ended; stop request or main return alone is insufficient.",
+      "unknowns": []
+    },
+    {
+      "id": "P-C-AC-13",
+      "acceptance_ids": ["C-AC-13"],
+      "result": "passed",
+      "observed_evidence_level": "fixture",
+      "evidence": "Manager plans reconcile worker evidence, approved scope, current authority, retry state, automation state and terminal ownership, and produce evidence-rich additional-investigation or blocked reports for malformed, unknown, out-of-scope or exhausted cases.",
+      "unknowns": []
+    },
+    {
+      "id": "P-C-AC-31",
+      "acceptance_ids": ["C-AC-31"],
+      "result": "passed",
+      "observed_evidence_level": "fixture",
+      "evidence": "A new revision is deferred to the next run by default; current-run application requires stop and full termination before approved mutation and relaunch, while revocation immediately closes authority and settings changes preserve the running experiment and retry usage.",
+      "unknowns": []
+    },
+    {
+      "id": "P-C-AC-34",
+      "acceptance_ids": ["C-AC-34"],
+      "result": "passed",
+      "observed_evidence_level": "fixture",
+      "evidence": "Force requires an owner-attested ordinary stop bound to the exact run and target, a strictly later coherent managed-running observation, delegated identity/ownership and fresh TargetLiveness=true; force is blocked for unknown/stale/drifted or terminated states and a later full-termination observation is required before follow-up actions.",
+      "unknowns": []
+    }
+  ],
+  "log": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/check-cw13-fixture-final.log",
+  "log_sha256": "2de38e8a92ac3da643af2ded32bb56ba07f3add9720044958deb21b337d4332f",
+  "requirements_identity": "f418aa7a741a7263307fa11fe9e158395cc40068b99dc7f3757d58a18f9ebbe4",
+  "schema_version": 1,
+  "stable": true,
+  "started_at": "2026-09-28T17:20:00.485906+00:00",
+  "timed_out": false
+}

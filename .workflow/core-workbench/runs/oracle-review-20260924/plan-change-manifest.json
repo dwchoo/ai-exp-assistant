@@ -1,0 +1,144 @@
+{
+  "schema_version": 1,
+  "feature_id": "core-workbench",
+  "change_revision": "p2.5",
+  "created_at": "2026-09-25",
+  "status": "review_pending",
+  "authority": {
+    "scope": "formal plan change only",
+    "implementation_authorized": false,
+    "product_code_changed": false,
+    "runtime_validation_run": false,
+    "commit_publish_deploy_authorized": false
+  },
+  "revision_bundle": {
+    "brief": "r1.12",
+    "spec": "s2.5",
+    "plan": "p2.5",
+    "last_approved": {
+      "brief": "r1.11",
+      "spec": "s2.4",
+      "plan": "p2.4",
+      "approval_record": ".workflow/core-workbench/runs/implement-p2.3-20260924/cd53-policy-approval.json",
+      "approved_manifest": ".workflow/core-workbench/runs/implement-p2.3-20260924/cd53-approved-manifest.json",
+      "base_p2_3_approval_record": ".workflow/core-workbench/runs/implement-p2.3-20260924/approval.json"
+    }
+  },
+  "decision": {
+    "id": "C-D54",
+    "name": "A method: persistent parent shell with separate experiment supervisor/subreaper",
+    "docker_runtime_validation": "skipped_by_user_decision_evidence_pending"
+  },
+  "source_records": [
+    {
+      "path": ".workflow/core-workbench/runs/oracle-review-20260924/IMPROVEMENT-PLAN.md",
+      "sha256": "59b67d916aded08a89d8b587b29dbfa836b43f23cb8d49288d3128d729d55ea3"
+    },
+    {
+      "path": ".workflow/core-workbench/runs/oracle-review-20260924/REVIEW.md",
+      "sha256": "c7bf8d10bf1e109a8a06bd93c7665bf5cf740383990d03d158730c1f3c1705e6"
+    },
+    {
+      "path": ".workflow/core-workbench/runs/oracle-review-20260924/ledger.json",
+      "sha256": "a4fc766d8d476dfc68463cecccd469b2f20535eabd7b285b6597ae41eaf3d3c9"
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.3-20260924/HANDOFF-2026-09-24-2110.md",
+      "sha256": "bc49c4ad49f658820d3c7766f08bd86924cfb3002094c0609cf8781e41a95893"
+    }
+  ],
+  "review_records": [
+    {
+      "path": ".workflow/core-workbench/runs/oracle-review-20260924/FORMAL-PLAN-ORACLE-REVIEW.md",
+      "sha256": "975e5c64055192b7822ec07bb016f044adae9e7a7dd3a4400d13bec10b3a90bf",
+      "verdict": "approve_with_required_doc_fixes",
+      "disposition": "required_doc_fixes_applied_by_root_pending_user_review"
+    },
+    {
+      "path": ".workflow/core-workbench/runs/oracle-review-20260924/formal-plan-review-ledger.json",
+      "sha256": "aee5ede080b656aa46ec4e6d84f064a06684f5411c2410697ca4fccf63b059a8"
+    }
+  ],
+  "candidate_files": [
+    {
+      "path": "docs/features/core-workbench/BRIEF.md",
+      "sha256": "7a8127b0d9b434b6ebbff39cbbf19330b852c3c1486f823878ef8939bba56306"
+    },
+    {
+      "path": "docs/features/core-workbench/SPEC.md",
+      "sha256": "c3f64b240454e9ca7095f454b42a2a038fdda5fe282ec5abb405a0c596256fae"
+    },
+    {
+      "path": "docs/features/core-workbench/DECISIONS.md",
+      "sha256": "e17879ca72358444372cc102477d4d81d2399560aa78c16c45a5b6cd6363828a"
+    },
+    {
+      "path": "docs/features/core-workbench/OPERATING-CONTRACT.md",
+      "sha256": "e92421bdc2f14131a713df27a573d04a0bf7883e9028f92fe49df2294c6dc51b"
+    },
+    {
+      "path": "docs/adr/0002-managed-shell-control-wait.md",
+      "sha256": "31879d1eb9d625dfb574aa2470bc8e0b457579ab9259161f1f7f49968888528a"
+    },
+    {
+      "path": "docs/features/core-workbench/PLAN.json",
+      "sha256": "e0213ae577dc72c18021ec193fd351359519db303343d3368f3ea5b6172c8257"
+    },
+    {
+      "path": "docs/features/core-workbench/tickets/CW-02.md",
+      "sha256": "b2f0a9feacf92324a11945cd8b794d785a7f8c036a465d32d855263b34085d2c"
+    },
+    {
+      "path": "docs/features/core-workbench/tickets/CW-03.md",
+      "sha256": "1361dc9a75164ba576b6196b162b385fc9650d18dc8d3e70cb0ee632429953a6"
+    },
+    {
+      "path": "docs/features/core-workbench/tickets/CW-04.md",
+      "sha256": "d714cb109241809ebce9098b9a68673035e454b5d78b190258aabea67189df95"
+    },
+    {
+      "path": "docs/features/core-workbench/tickets/CW-05.md",
+      "sha256": "9ed3a03448a071fc86343f11a31a32086a5f2ea2e00e98d5c339ef86c6bbb6fc"
+    },
+    {
+      "path": "docs/features/core-workbench/tickets/CW-07.md",
+      "sha256": "9118ecb868ae6d9c6f13716796c82d70fc46e93e445e890a24a66a95f47bf520"
+    },
+    {
+      "path": ".workflow/core-workbench/runs/oracle-review-20260924/FORMAL-PLAN-CHANGE.md",
+      "sha256": "02ceb6a443550edf1bb2e2a62167e9c8674a866d5f057131fccb95f71123de89"
+    }
+  ],
+  "preservation": {
+    "cw01_status": "integrated_preserved_not_rescheduled",
+    "cw01_ticket_sha256": "7dae35e6d1a4d2a3475609849178bb9ea05a6f790eb4931dc0139925ba75bcb2",
+    "canonical_ticket_ids": "CW-01..CW-16 unchanged",
+    "dependency_graph": "unchanged_from_p2.4",
+    "valid_evidence": "preserved with original candidate and observation scope",
+    "negative_evidence": "direct-eval escape, input leakage, and signal failures retained"
+  },
+  "budget": {
+    "explicit_cap": 220,
+    "used": 186,
+    "reserved": 0,
+    "remaining": 34,
+    "planning_child_calls": 1,
+    "initial_g2_batch_estimate": 8
+  },
+  "checkpoint": {
+    "path": ".workflow/core-workbench/runs/oracle-review-20260924/plan-change-before-checkpoint.json",
+    "sha256": "8739c2688b87912de79ce9c1fd3ca823d10acc4cfce3581b276bc0511586c52c"
+  },
+  "scope_verification": {
+    "after_snapshot": {
+      "path": ".workflow/core-workbench/runs/oracle-review-20260924/plan-change-final-snapshot.json",
+      "sha256": "4bbe81a686a95eae93b9aadaf682a6dcb8f74970ba231d05683a6d6d7adbf4be"
+    },
+    "audit": {
+      "path": ".workflow/core-workbench/runs/oracle-review-20260924/plan-change-final-audit.json",
+      "sha256": "b8d8dab48d23e9e6bdc29db61ea557f8d3ac362eb488fa957251396856fd294b",
+      "comparable": true,
+      "outside_scope": []
+    }
+  }
+}

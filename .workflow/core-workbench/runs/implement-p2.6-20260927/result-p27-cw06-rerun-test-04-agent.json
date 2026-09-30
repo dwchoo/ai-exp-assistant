@@ -1,0 +1,91 @@
+{
+ "schema_version": 1,
+ "invocation": "p27-cw06-rerun-test-04",
+ "status": "needs_reroute",
+ "frozen_hashes_equal": true,
+ "checks": [
+  [
+   "probe claim bash PTY",
+   0,
+   "TOKEN not printed after ^C; new cmd OK",
+   "1s"
+  ],
+  [
+   "p27g overflow x5 (final)",
+   0,
+   "2 tests OK",
+   "1.0s each"
+  ],
+  [
+   "p27g mutation (partial-frame keep disabled, temp copy)",
+   1,
+   "caught: 219187 leftover bytes mid-frame",
+   "1s"
+  ],
+  [
+   "live flood p27f final form x5",
+   0,
+   "5/5 OK; F2 gone 0.01-0.09s, ^C+prompt 0.39-0.63s, new cmd 0.065-0.07s",
+   "~73s each"
+  ],
+  [
+   "live flood earlier form (pre-edit assertion)",
+   1,
+   "1/6: F2 Ctrl-C did not stop flood within 5s (unexplained, not reproduced in 10 later runs); 2 runs errored in pyte IndexError in my first post-assertion draft (fixed)",
+   "~75s"
+  ],
+  [
+   "tests/ui x3",
+   0,
+   "120 OK each",
+   "29s"
+  ],
+  [
+   "tests/backend (2nd, final)",
+   0,
+   "71 OK",
+   "265s"
+  ],
+  [
+   "tests/backend (1st)",
+   1,
+   "4 fail = my p27g fixture starvation (lock unfairness) - test defect, fixed",
+   "282s"
+  ],
+  [
+   "contracts",
+   0,
+   "43 OK",
+   "0.3s"
+  ],
+  [
+   "g1_vt",
+   0,
+   "63 OK",
+   "1.5s"
+  ],
+  [
+   "g4_lifetime",
+   0,
+   "8 OK",
+   "0.2s"
+  ]
+ ],
+ "verdicts": {
+  "probe_claim": "confirmed (bash aborts list on ^C); F2 post-assertion replaced as specified",
+  "live_F0_F1_F2": "pass 5/5 final; UI never detached; no traceback; one earlier-form Ctrl-C-not-effective flake (1/13 F2 runs) unexplained -> Root to decide if input latency under flood needs a look",
+  "overflow_independent": "pass; mutation-verified for the partial-frame case",
+  "regressions": "pass"
+ },
+ "probe_sha256": {
+  "before": "31572f45b81f5fd049ecefbaa50cef03f14e6351ccaf3608ec41596cb04f5c3a",
+  "after": "b9401a3f33993f3bdc2203555504cf8f78c1aec050c80f4b2f6f3c5dd2d37748"
+ },
+ "files_added": [
+  "tests/backend/test_ui_server_overflow_independent_p27g.py"
+ ],
+ "files_edited": [
+  "tests/ui/live_product_flood_independent_p27f.py"
+ ],
+ "residue": "none"
+}

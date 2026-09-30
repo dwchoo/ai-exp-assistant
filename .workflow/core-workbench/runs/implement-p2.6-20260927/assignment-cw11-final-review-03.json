@@ -1,0 +1,20 @@
+{
+  "invocation":"cw11-final-review-03",
+  "role":"reviewer",
+  "unit":"V-CW-11-p2.6-current",
+  "objective":"Fresh final review of the complete CW-11 candidate after second race correction and independent tests.",
+  "candidate_manifest":".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw11-race2-final.json",
+  "candidate":"e4d18349adda351975340ab3a2bcf1b76919bf6df6cff7a0947272408578e409",
+  "requirements":".workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw11.json",
+  "ticket":"docs/features/core-workbench/tickets/CW-11.md",
+  "prior_review":".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw11-final-review-02.json",
+  "correction_evidence":[".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw11-race2-correction-01.json",".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw11-race2-test-01.json"],
+  "must_review":[
+    "Confirm every finding from both prior reviews is closed in production code.",
+    "Attack the exact final active_run callback authority race and ensure the last external-state callback precedes a fresh fail-closed authority read.",
+    "Attack full immutable exit identity validation, same-run-id cross-session delay, pending retry with no active run, callback failure, concurrency, and reentrancy.",
+    "Review indefinite cadence, pause/user priority/coalescing, hang investigation sanitization, usage provenance, and current independent/runtime evidence."
+  ],
+  "constraints":["Review-only; no edits or mutation; report P0-P3 findings with file/line evidence or explicit no findings; no commit/push/merge/stash/reset/clean."],
+  "report":["candidate validation","prior-finding closure","new findings","runtime qualifications","candidate_ready or needs_reroute"]
+}

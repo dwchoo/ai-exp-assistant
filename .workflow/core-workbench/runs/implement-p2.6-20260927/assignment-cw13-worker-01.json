@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "invocation": "cw13-worker-01",
+  "role": "worker_senior",
+  "unit": "V-CW-13-p2.6-current",
+  "authority": "User $implement docs/features/core-workbench request; approved bundle 64bcf577a30e7c6bbff3e4e775f8e6c17ca212ce3bf79b5bc5be31196a792b07; approved PLAN p2.6 CW-13; formally passed CW-10/CW-11/CW-12 dependencies",
+  "objective": "Implement the bounded Manager recovery, termination, and second-level completion-decision policy for C-AC-04/07/10/13/31/34.",
+  "base": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw13-base.json",
+    "candidate_id": "f8b16ed404875895fcdd2d37b7edeeb3df7e323e082c2a36b033824146d3b649",
+    "requirements": ".workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw13.json"
+  },
+  "dependency_contracts": [
+    "Consume CW-10 immutable TaskSpec/revision/run identity and confirmed terminal lifecycle facts; do not weaken repository authority or terminal ownership.",
+    "Consume CW-11 worker judgment sources, criteria, evidence errors and unknowns as first-level evidence; exit code 0 alone is never success.",
+    "Consume CW-12 automation/pause/cancel/revocation state as a hard gate on new automatic analysis, mutation, worker instruction, relaunch, or forced termination."
+  ],
+  "required_behavior": [
+    "Provide typed, fail-closed policy records and a small coordinator/port boundary under one new recovery_* package; keep policy deterministic and fixture-testable.",
+    "Bind every decision to exact task/revision/run, approved completion criteria, worker evidence provenance, current authority/scope, retry usage and current session settings revision. Reject identity mismatches and malformed or incomplete evidence.",
+    "Second-level outcomes must distinguish confirmed completion, confirmed failure, additional investigation, bounded recovery retry, blocked/unresolved report, and termination steps. Preserve sources, evidence, attempts, unknowns and remaining problems in the report.",
+    "Recovery retries are task-wide, default maximum three, exclude initial execution and normal improvement, never reset on commit/name/revision/session-setting changes, and stop automatically before a fourth recovery. Do not impose an elapsed-time experiment limit.",
+    "Require confirmed full termination before source/config mutation, new worker instruction, or relaunch. A stop request, main-process exit, or unknown lifetime is insufficient.",
+    "New TaskSpec revisions apply to the next run by default. A current-run apply request must request stop and wait for confirmed termination before mutation/relaunch. Immediate stop or authority revocation applies to the current run without waiting for the next revision.",
+    "Session settings changes apply to subsequent decisions, do not terminate the current run, and preserve retry usage.",
+    "Forced termination is allowed only when explicitly delegated and the exact owned target identity is confirmed; otherwise return a confirmation-required/blocked result. After force action, require a fresh observation proving full termination before mutation/relaunch.",
+    "Never bypass terminal input owner, replay an uncertain command, or treat pause/resume/restart as authority."
+  ],
+  "verification_matrix": [
+    "success log/result with exit 0; nonzero failure; exit 0 criteria failure; missing/changed log or result; unknown termination",
+    "retry attempts one through three and fourth blocked; retry count retained across new commit, revision and settings changes; initial and normal improvement excluded",
+    "termination-before-mutation/relaunch, stop request without exit, main exit with descendants/return barrier unknown, no elapsed-time cutoff",
+    "next-run revision default, current-run apply stop-confirm-mutate-relaunch, immediate revocation",
+    "forced termination delegated/undelegated, exact/ambiguous/wrong target, post-force exit unknown/confirmed",
+    "pause/cancel/revocation/metadata failure gates, user terminal owner preserved, and evidence-rich unresolved reports"
+  ],
+  "allowed_write_paths": ["src/workbench/policy/recovery_*/**", "tests/policy/recovery_*/**", "graphify-out/**"],
+  "resource_claims": ["host:omp-runtime exclusive", "host:shell-fixture exclusive"],
+  "constraints": [
+    "Sole writer; preserve unrelated dirty changes and do not modify existing CW-10/CW-11/CW-12 production modules.",
+    "Use apply_patch; Python/Linux only; no new dependency, Phase 2, multiplexer dependency, Docker, delegation, commit, publish, or deploy.",
+    "Run focused fixture tests, all tests in the new recovery package, relevant predecessor regressions, and graphify update ."
+  ],
+  "report": "Return changed paths, public contracts and invariants, exact checks/counts, acceptance mapping, candidate_ready/blocker, and residual integration risks for CW-15."
+}

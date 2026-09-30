@@ -1,0 +1,25 @@
+test_comma_key_cannot_replace_two_required_shell_fields (test_ports_v2.PortTests.test_comma_key_cannot_replace_two_required_shell_fields) ... ok
+test_cross_language_roundtrip_and_v1_adapter (test_ports_v2.PortTests.test_cross_language_roundtrip_and_v1_adapter) ... ok
+test_old_versions_extra_fields_and_unknown_evidence_rejected_or_held (test_ports_v2.PortTests.test_old_versions_extra_fields_and_unknown_evidence_rejected_or_held) ... ok
+test_all_required_fields_versions_and_malformed_states_reject_in_both_languages (test_ports_v2_independent.IndependentPortContractTests.test_all_required_fields_versions_and_malformed_states_reject_in_both_languages) ... ok
+test_json_safe_integer_boundary_has_identical_rejection_semantics (test_ports_v2_independent.IndependentPortContractTests.test_json_safe_integer_boundary_has_identical_rejection_semantics) ... ok
+test_v1_adapter_preserves_envelope_and_rejects_incomplete_or_new_versions (test_ports_v2_independent.IndependentPortContractTests.test_v1_adapter_preserves_envelope_and_rejects_incomplete_or_new_versions) ... ok
+test_all_command_states_remain_distinct (test_v1.ContractV1Tests.test_all_command_states_remain_distinct) ... ok
+test_command_exit_code_fits_shared_safe_integer_range (test_v1.ContractV1Tests.test_command_exit_code_fits_shared_safe_integer_range) ... ok
+test_display_bytes_are_a_distinct_raw_byte_type (test_v1.ContractV1Tests.test_display_bytes_are_a_distinct_raw_byte_type) ... ok
+test_display_counters_fit_shared_safe_integer_range (test_v1.ContractV1Tests.test_display_counters_fit_shared_safe_integer_range) ... ok
+test_exit_code_is_only_valid_after_completion (test_v1.ContractV1Tests.test_exit_code_is_only_valid_after_completion) ... ok
+test_golden_envelope_round_trips_and_checks_session_generation (test_v1.ContractV1Tests.test_golden_envelope_round_trips_and_checks_session_generation) ... ok
+test_message_id_is_logical_and_attempt_ids_are_per_delivery (test_v1.ContractV1Tests.test_message_id_is_logical_and_attempt_ids_are_per_delivery) ... ok
+test_message_payload_and_reply_reference_round_trip (test_v1.ContractV1Tests.test_message_payload_and_reply_reference_round_trip) ... ok
+test_nested_payload_numbers_preserve_shared_numeric_boundary (test_v1.ContractV1Tests.test_nested_payload_numbers_preserve_shared_numeric_boundary) ... ok
+test_rejects_explicit_null_for_optional_wire_fields (test_v1.ContractV1Tests.test_rejects_explicit_null_for_optional_wire_fields) ... ok
+test_rejects_invalid_identifiers_unknown_fields_and_invalid_state_data (test_v1.ContractV1Tests.test_rejects_invalid_identifiers_unknown_fields_and_invalid_state_data) ... ok
+test_rejects_non_json_values_nested_inside_a_message_payload (test_v1.ContractV1Tests.test_rejects_non_json_values_nested_inside_a_message_payload) ... ok
+test_rejects_unsupported_version_role_and_session_generation (test_v1.ContractV1Tests.test_rejects_unsupported_version_role_and_session_generation) ... ok
+test_session_generation_must_fit_shared_js_safe_integer_range (test_v1.ContractV1Tests.test_session_generation_must_fit_shared_js_safe_integer_range) ... ok
+
+----------------------------------------------------------------------
+Ran 20 tests in 0.407s
+
+OK

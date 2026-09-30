@@ -1,0 +1,21 @@
+{
+  "invocation": "cw12-fence-protocol-oracle-01",
+  "outcome": "complete",
+  "recommendation": "Use a run-bound monotonic fence token plus exact-peer validation at the G3 transport submission boundary.",
+  "fence_protocol": [
+    "State includes never-reset generation, binding_nonce, run identity/incarnation, mode, and reason.",
+    "close always increments generation and never waits for in-flight action; open requires the originally captured current token.",
+    "Admission locks only through ticket validation, permit issuance, and consumed/in-flight registration; action and ACK wait occur outside admission/coordinator/fence locks.",
+    "Ticket run/incarnation, admission active run/incarnation, and fence run/incarnation/token must all match.",
+    "Cancellation and failure results use close_if_binding on the captured nonce so stale run A cannot affect B."
+  ],
+  "transport_protocol": [
+    "Extend G3 request with expected_peer or expected_peers and authority_token.",
+    "After acquiring the selected live peer write lock, validate current peer identity and token under the bridge condition immediately before pending registration.",
+    "Never retry or reselect a replacement peer after a bound request mismatch/failure.",
+    "Bound pause/resume and automatic OMP delivery use this API; arbitrary callback is local-admission-only and cannot claim exact-peer delivery."
+  ],
+  "lock_order": "A/C/B may briefly consult F; F never calls A/C/B. External action, probe, mirror publication, transport write, and ACK wait are outside A/C/F locks.",
+  "scope": "CW12 and existing G3 integration only; CW15 boundary unchanged",
+  "files_modified": false
+}

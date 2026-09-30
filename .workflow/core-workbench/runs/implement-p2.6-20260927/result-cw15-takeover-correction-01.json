@@ -1,0 +1,39 @@
+{
+  "invocation": "cw15-takeover-correction-01",
+  "outcome": "complete",
+  "candidate_ready": true,
+  "base_candidate": "86c0acd50a27f8ce9bc72326b167421d56e359500c7cba5e1d5e15a576a27966",
+  "candidate_id": "9e28c562106ade67a6f7a4a03336d3727cd28d5f892dee48a85d11afc4e48cc4",
+  "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw15-takeover-correction.json",
+  "changed_paths": ["src/workbench/app/lifecycle.py", "tests/lifecycle/test_lifecycle_runtime.py", "graphify-out/**"],
+  "linearization": "The coordinator RLock serializes takeover's durable fence and external control transition with command/review/shutdown and every transition that changes automatic eligibility.",
+  "takeover_behavior": {
+    "durable_order": "current manager/control/process checks, then durable takeover_requested, then external request",
+    "unknown_command": "CommandState before/after equal; one original send and zero replay",
+    "review_first": "one review completes before the durable takeover fence; later tick held",
+    "takeover_first": "durable fence precedes waiting tick; pause dispatch, review and send counts are zero",
+    "external_failure": "durable takeover fence remains set and the reentrant path terminates within three seconds"
+  },
+  "checks": {
+    "red_before_patch": "4/4 new regressions failed",
+    "focused_after_patch": "4/4 passed",
+    "lifecycle": "27/27 passed",
+    "pause": "122/122 passed",
+    "observation": "95/95 passed",
+    "bridge": "22/22 passed",
+    "storage": "33/33 passed",
+    "recovery": "26/26 passed",
+    "g4_ports": "2/2 passed",
+    "persistent_shell": "10/10 passed",
+    "graphify_update": "passed",
+    "compileall": "passed",
+    "diff_check": "passed",
+    "residual_processes": "none observed"
+  },
+  "sha256": {
+    "src/workbench/app/lifecycle.py": "ae94d6ce59805de0ba434bf61da30b40e08e00298207733f913c7dfd7e63646d",
+    "tests/lifecycle/test_lifecycle_runtime.py": "87af8ba45a47d98e188c1271efc5021763c8763f92db22b1b1980245af48a911"
+  },
+  "pending": ["live external OMP", "real reboot", "pyte-dependent environment"],
+  "mutation_owner": "/root/cw12_post_review_correction"
+}

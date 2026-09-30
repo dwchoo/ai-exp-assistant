@@ -1,0 +1,35 @@
+{
+  "invocation": "cw05-g4-correction-01",
+  "role": "worker_senior",
+  "unit": "V-CW-05-p2.6-current",
+  "objective": "Correct every independently reproduced CW-05 G4 probe/validator false-pass while preserving the passing actual runtime and contracts.",
+  "failure_evidence": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw05-g4-test-01.json",
+  "required_behavior": [
+    "Make runtime evidence reject manager/worker PID alias, parent/supervisor PID alias, backend Popen/snapshot PID mismatch, missing or non-positive worker PID, and contradictory detach/reattach lease state.",
+    "Make cleanup evidence reject residue masking and require exact bounded owned-process identity rather than accepting a post-cleanup empty list alone.",
+    "Make aggregate validation reject empty required context and empty/schema-only pinned evidence; retain explicit provenance-only fixture semantics and never promote synthetic evidence to runtime authorization.",
+    "Keep actual normal/paused >60-second runtime passing, metadata behavior unchanged, v1/v2 contracts compatible, and all independent tests unmodified."
+  ],
+  "allowed_files": [
+    "tests/gates/g4_lifetime/live_detach_probe.py",
+    "tests/gates/harness/aggregate.py",
+    "tests/gates/g4_lifetime/test_ports.py",
+    "tests/gates/g4_evidence/test_aggregate.py"
+  ],
+  "constraints": [
+    "Do not edit test_independent_boundaries.py, test_aggregate_independent.py, or test_contract_independent.py.",
+    "Do not weaken assertions, skip cases, modify docs/product contracts/G1-G3 code, or touch workflow/graphify.",
+    "No commit/reset/clean/stash/push/deploy and no Docker."
+  ],
+  "checks": [
+    "Run all G4 lifetime and evidence tests including independent files.",
+    "Run actual normal and paused >60-second probes after the correction.",
+    "Run Python/Node contracts, focused G2 deadline tests, git diff --check, and process/temp residue checks."
+  ],
+  "report": [
+    "exact predicate corrections",
+    "before failures and after results",
+    "actual runtime observations and cleanup",
+    "candidate digest, snapshot, scope audit, candidate_ready or needs_reroute"
+  ]
+}

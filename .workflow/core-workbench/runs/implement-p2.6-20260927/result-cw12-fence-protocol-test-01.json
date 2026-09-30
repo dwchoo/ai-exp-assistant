@@ -1,0 +1,24 @@
+{
+  "invocation": "cw12-fence-protocol-test-01",
+  "outcome": "complete",
+  "candidate_ready": true,
+  "manifest": "candidate 6b72a3f3df45355fd6102103c0205afd6bf12c550c6e2b408d2e63b4e3e330d6 matched; unknowns=[]",
+  "independent_additions": [
+    "Delayed run A repository error cannot change run B fence or persistence state.",
+    "Actual OMP fresh automatic delivery must carry exact expected_peer, full expected_peers, and current authority_token to the G3 request boundary; negative controls fail."
+  ],
+  "checks": {
+    "pause": "50/50 passed",
+    "observation": "93/93 passed",
+    "bridge": "22/22 passed in three runs",
+    "workflow": "44/44 passed",
+    "tasks": "22/22 passed",
+    "contracts": "20/20 passed",
+    "status": "2/2 passed",
+    "g3_python": "117/117 passed",
+    "g3_typescript": "30/30 passed",
+    "actual_omp_18_2_10": "bound_automatic_transport true, passed, zero_residue true",
+    "graphify": "update succeeded"
+  },
+  "scope_audit": "outside_scope=[]; production unchanged"
+}

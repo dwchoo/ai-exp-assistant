@@ -1,0 +1,7 @@
+{
+  "requirements": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw14.json",
+  "candidate": "26686fe852fb9e2099acac0f0fb2b6f37a9c0d1164ebe6da3a5193de48c54558",
+  "checks": [
+    "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/check-cw14-fixture-final-observed.json"
+  ]
+}

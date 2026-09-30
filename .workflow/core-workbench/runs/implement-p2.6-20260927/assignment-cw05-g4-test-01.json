@@ -1,0 +1,32 @@
+{
+  "invocation": "cw05-g4-test-01",
+  "role": "test_designer",
+  "unit": "V-CW-05-p2.6-current",
+  "objective": "Independently test the frozen CW-05 G4 candidate against requirements-cw05.json and expose false-pass paths without modifying product code.",
+  "candidate_manifest": ".workflow/core-workbench/runs/implement-p2.6-20260927/cw05-test-checkpoint.json",
+  "requirements": ".workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw05.json",
+  "required_tests": [
+    "Independently inspect the lifetime/wake probe and add or run adversarial tests for PID substitution, duplicate backend/OMP/process identities, frontend attach side effects, detach shorter than >60 seconds, fake/non-OMP delivery, pause delivery leakage, stopped host observation, and residue masking.",
+    "Test metadata success/failure atomicity and prove failure holds only new dispatch without killing an existing run.",
+    "Test Python/TypeScript v2 contract equivalence, v1 adapter behavior, unsupported versions, malformed states, and required fields.",
+    "Test aggregate validator rejection for missing/extra or duplicate required item, stale requirements/approval/candidate/source identity, fixture evidence substituted for runtime, failed checks, required unknowns, and empty/schema-only evidence.",
+    "Run actual normal and paused >60-second probes if the environment supports them; record exact evidence and cleanup. Re-run focused contracts/G4 and relevant G2 deadline tests."
+  ],
+  "allowed_files": [
+    "tests/gates/g4_lifetime/**",
+    "tests/gates/g4_evidence/**",
+    "tests/gates/harness/**",
+    "tests/contracts/**"
+  ],
+  "constraints": [
+    "Do not modify product source, docs, PLAN/tickets, workflow ledger, graphify output, or existing tests merely to weaken assertions.",
+    "Preserve the frozen candidate evidence and clearly distinguish independent tests from worker-authored checks.",
+    "No commit/reset/clean/stash/push/deploy and no Docker."
+  ],
+  "report": [
+    "new independent tests and defects found",
+    "exact commands/results and actual runtime observations",
+    "candidate digest before/after, cleanup/residue, scope audit",
+    "candidate_ready or needs_reroute"
+  ]
+}

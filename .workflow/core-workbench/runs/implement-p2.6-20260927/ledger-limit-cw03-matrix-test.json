@@ -1,0 +1,12 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 174,
+  "event": {"id": "limit-cw03-matrix-test-20260928", "kind": "limit", "data": {
+    "bucket": "role:test_designer", "origin": "operating", "value": 86,
+    "authority": "C-D55 plus workflow-contract section 8 and current implementation authorization",
+    "reason": "One independent cross-matrix canonical RUN migration test turn",
+    "decision_owner": "Root", "remaining_work_estimate": 1,
+    "expected_previous": {"value": 85, "authority": "C-D55 plus workflow-contract section 8 and current implementation authorization", "reason": "One independent FD inventory/control-frame non-inheritance test turn"},
+    "scope_basis": null
+  }}
+}

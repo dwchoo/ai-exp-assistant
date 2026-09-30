@@ -1,0 +1,14 @@
+{
+  "invocation": "cw12-event-correction-01",
+  "outcome": "complete",
+  "candidate_ready": true,
+  "correction": "turn_stop_observed requires exact non-empty abortRequestId, bound manager sessionId/generation, manager role/name, after-cursor sequence, and unchanged pause/run binding.",
+  "durability_boundary": "Preserved oracle interpretation; no CW15 bootstrap/recovery behavior added.",
+  "checks": {
+    "actual_omp_18_2_10": "passed with exact stop event identity, zero paused activity, fresh provider plus agent start/end, and zero residue",
+    "related_regressions": "314 passed",
+    "policy": "28/31 passed; one oracle-reclassified namespace-loss assertion and two stale FakeBridge fixtures lack newly required event identity fields"
+  },
+  "tests_modified": false,
+  "graphify_updated": true
+}

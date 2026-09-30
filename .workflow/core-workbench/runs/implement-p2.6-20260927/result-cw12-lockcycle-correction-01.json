@@ -1,0 +1,19 @@
+{
+  "invocation": "cw12-lockcycle-correction-01",
+  "outcome": "complete",
+  "candidate_ready": true,
+  "design": [
+    "CW11-owned authoritative ReviewAdmissionFence provides the pause admission linearization point.",
+    "Coordinator mirror publication is lock-free with respect to the CW11 lock; no coordinator publication or transition lock is held while acquiring the CW11 lock.",
+    "Resume opening and every automatic dispatch double-probe exact manager and worker session/generation; a switch closes the fence and reports held/reconciliation-needed."
+  ],
+  "checks": {
+    "pause": "43/43 passed in three repeated runs plus final run",
+    "related_python": "314/314 passed",
+    "g3_typescript": "30/30 passed",
+    "actual_omp_18_2_10": "exit 0, result passed, stage resume, zero_residue true, real status/manual evidence preserved",
+    "graphify": "update succeeded"
+  },
+  "scope": "worker_review.py, pause_automation/controller.py, test_pause_policy.py, and graphify-out only",
+  "cleanup": "all subprocesses stopped"
+}

@@ -1,0 +1,41 @@
+{
+  "invocation": "cw11-worker-01",
+  "role": "worker",
+  "unit": "V-CW-11-p2.6-current",
+  "ticket": "CW-11",
+  "objective": "Implement periodic worker review and evidence-based hang investigation over the verified CW-10 active-run/session/exit boundaries.",
+  "checkpoint": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw11-worker-checkpoint.json",
+  "requirements": ".workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw11.json",
+  "dependencies": {
+    "CW-10": "final gate passed at candidate 679237e11f9f4cfd73c780f9ed7a431c0812437bcd006ace428207c8a37bc0a0",
+    "CW-05": "AutomationState and observation port contracts are available in src/workbench/contracts/ports_v2.py"
+  },
+  "allowed_write_scope": [
+    "src/workbench/observation/**",
+    "tests/observation/**"
+  ],
+  "required_behavior": [
+    "Use an explicit clock/tick seam. While automation is active and a run is active, make a worker model review due every 60 seconds; do not impose a fixed lifetime count cap.",
+    "When worker/model transport is busy or user conversation/composer/approval input has priority, retain only the newest due review, expose delayed/coalesced status, and dispatch it when safe. User interaction always wins.",
+    "During local pause/cancel/unapproved/unhealthy state, do not start a new model review, but continue non-model log/process/exit collection and immediately surface confirmed exit events. CW-12 owns actual manager abort/reconcile integration.",
+    "Silence and elapsed time alone must never classify hang or exit. Hang investigation must report explicit process/lifecycle evidence, unknowns, and suggested next observations.",
+    "Prove the 121st periodic review and 13th normal peer wake execute; usage has no fixed cap and distinguishes observed, estimated, and unknown values.",
+    "Consume active run/session/exit facts through narrow ports/callables; do not bypass CW-10 public response/authority contracts or persist model text/secrets."
+  ],
+  "verification": [
+    "Deterministic clock tests for exact 60-second boundaries, long-run 121 checks, 13 peer wakes, busy latest-one coalescing, user-priority delay, pause behavior, immediate exit, silence/hang evidence, usage labels.",
+    "Actual OMP 18.2.10 review path with bounded cleanup and no private provider state; relevant CW-10 workflow/bridge regressions.",
+    "git diff --check, residue/privacy scan, graphify update ., snapshot and scope audit."
+  ],
+  "constraints": [
+    "Use apply_patch only. Do not edit workflow, bridge, task, contract, docs, PLAN/state, workflow artifacts, graphify sources, dependencies, or unrelated files.",
+    "Do not implement CW-12 pause-abort-reconcile, CW-13 completion policy, Phase 2, or UI features.",
+    "No commit/push/merge/stash/reset/clean. Preserve all existing user changes."
+  ],
+  "report": [
+    "design and changed paths",
+    "runtime and deterministic evidence for P-C-AC-12/21/27",
+    "commands/results and unknowns",
+    "snapshot/scope audit and candidate_ready or needs_reroute"
+  ]
+}

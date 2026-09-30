@@ -1,0 +1,25 @@
+{
+  "invocation": "cw10-idtype-test-01",
+  "role": "test_designer",
+  "unit": "V-CW-10-p2.6-current",
+  "objective": "Independently verify the corrected CW-10 worker-response identity type boundary and the complete frozen workflow candidate.",
+  "candidate_manifest": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw10-idtype-test-checkpoint.json",
+  "requirements": ".workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw10.json",
+  "required_tests": [
+    "Run the existing independent identity attack matrix, including bool, float, negative, unsafe integer, malformed UUID, wrong exact identities, stale/replayed response, and valid control.",
+    "Run all workflow suites and the existing actual OMP 18.2.10 two-response vertical probe with real Git worktree and shell.",
+    "Run relevant terminal, bridge, and task regressions, git diff --check, secret/residue checks."
+  ],
+  "allowed_files": [],
+  "constraints": [
+    "Read-only verification: do not edit any product, tests, docs, workflow artifacts, graphify, or dependencies.",
+    "Do not trust prior pass claims; inspect current files and command output.",
+    "No commit/push/merge/stash/reset/clean."
+  ],
+  "report": [
+    "commands and exact results",
+    "identity attack matrix result",
+    "actual runtime evidence",
+    "candidate_ready or needs_reroute"
+  ]
+}

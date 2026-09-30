@@ -1,0 +1,28 @@
+{
+  "invocation": "cw03-hook-env-repair-review-01",
+  "role": "reviewer",
+  "unit": "V-CW-03",
+  "candidate": "be8d060e1c2ac170a64c5f91adbbe88a61b4c53048092d30aca704a435b242f7",
+  "purpose": "Fresh delta review of G2-HOOK-ENV subreaper restoration repair and independent regression",
+  "mode": "read_only",
+  "review_scope": [
+    "tests/gates/g2_shell/live_hook_env_probe.py",
+    "tests/gates/g2_shell/test_live_hook_env_predicates.py"
+  ],
+  "requirements": [
+    "Verify cleanup proc_fields, kill, and waitpid exceptions cannot bypass restoration of the prior subreaper state.",
+    "Verify the original cleanup exception remains observable and restoration failure behavior does not silently claim successful cleanup.",
+    "Verify the independent regression materially fails an equivalent pre-repair mutation and restores actual kernel state after every test.",
+    "Verify fixture-owned PID/start-time scope, unknown persistence, user-confirmation no-clear, and no arbitrary daemon discovery/auto-kill boundaries remain unchanged.",
+    "Reconcile the exact candidate manifest and report findings first; do not modify files."
+  ],
+  "evidence": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/review-cw03-hook-env-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/final-hook-env-repair-candidate.json"
+  ],
+  "constraints": [
+    "No file writes.",
+    "No commit, push, publish, or deploy.",
+    "Report process residue."
+  ]
+}

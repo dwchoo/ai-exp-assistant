@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "feature_id": "core-workbench",
+  "ticket_id": "CW-07 (delta, found in CW-17 unit)",
+  "attempt_id": "input-fix-attempt-02",
+  "invocation": "p27-input-fix-worker-02",
+  "approved_bundle_digest": "a521acdc3838b43a26e277afc233bab695c8b02ce0d42392c3678931b2e3f027",
+  "authority": "p2.7a approval; finding F-CW17-INPUT-01; Root adjudication",
+  "actual_workspace": "/home/dwchoo/ai-exp-assistant",
+  "checkpoint_ref": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-input-fix-02-checkpoint.json",
+  "finding": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw17-test-01.json#finding",
+  "required_behavior_root_adjudication": [
+    "Gap1: when wb-handoff is rejected (HANDOFF -> HOOK_REJECTED) and the parent then reports its authenticated prompt READY, treat that as a confirmed manual prompt return (manual_prompt_confirmed) so manual input to the live prompt works; automation stays held. Use only existing authenticated control-channel events.",
+    "Gap2: under a confirmed takeover of an automation-launched foreground run, manual bytes (including ESC/editing/control bytes) are input to the experiment, not shell-line edits: they must not latch the parent line uncertainty into lifecycle unknown / control_observation_lost, and must not release confirmed_target. The run's lifecycle and later wb-handoff/claim_manager checks keep their existing conservative rules (C-AC-08 foreground-takeover example: experiment untouched, manual input to confirmed current target).",
+    "Keep everything from attempt 01 intact."
+  ],
+  "acceptance_tests": [
+    "tests/backend/test_live_input_independent.py must pass unmodified (it is the independent acceptance)",
+    "All previously passing suites must still pass: tests/terminal, tests/gates/g2_shell (non-live and canonical live matrix: tests.gates.g2_shell.test_canonical_matrix_integration), tests/backend (worker + independent), tests/contracts, tests/lifecycle, tests/gates/g4_lifetime non-live"
+  ],
+  "allowed_write_paths": [
+    "src/workbench/terminal/shell_g2/**",
+    "src/workbench/terminal/shell_persistent/**",
+    "src/workbench/backend/panes.py",
+    "tests/terminal/**",
+    "tests/gates/g2_shell/** (only to add regression cases; modifying an existing assertion requires listing it with justification in the result)"
+  ],
+  "prohibited_paths": [
+    "tests/backend/test_*_independent.py",
+    "tests/backend/independent_support.py",
+    "tests/contracts/**",
+    "docs/**",
+    ".workflow/**",
+    "all other src/**"
+  ],
+  "stop_conditions": [
+    "an existing G2/CW-07 test encodes rejecting manual input to an observable user foreground target: do not delete it; list it with the conflicting spec clause and return needs_oracle if unsure",
+    "fix would require weakening automation holds, replay protection, or exact identity",
+    "need tmux or credentials"
+  ],
+  "routing": {
+    "planned_role": "worker_senior",
+    "selected_role": "worker_senior",
+    "reason_codes": [
+      "coupled_invariants"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw17-test-01.json"
+    ]
+  },
+  "prior_assignment_ref": ".workflow/core-workbench/runs/implement-p2.6-20260927/assignment-p27-input-fix-worker-01.json",
+  "prior_result_ref": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-input-fix-worker-01.json"
+}

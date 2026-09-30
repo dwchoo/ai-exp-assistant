@@ -1,0 +1,696 @@
+{
+  "schema_version": 1,
+  "invocation": "cw05-g4-01",
+  "unit": "V-CW-05-p2.6-current",
+  "outcome": "candidate_ready",
+  "cwd": "/home/dwchoo/ai-exp-assistant",
+  "candidate": "9ef5306a70cbc86e864feebd0aa3c1de5cf86cf403cff7da73bc06813f6015d5",
+  "baseline_candidate": "7d4e8715da933281bae5721cb3620ae20140f2bae771e72f8522e80bf5ed96ee",
+  "snapshot_ref": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw05-g4-after.json",
+  "scope_audit_ref": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/scope-audit-cw05-g4.json",
+  "requirements_ref": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw05.json",
+  "requirements_file_sha256": "903f1d732f9a1223dd65ebad4bfa95d6636fe21ad6909a1db468ee81f85dbbd4",
+  "approved_bundle_identity": "64bcf577a30e7c6bbff3e4e775f8e6c17ca212ce3bf79b5bc5be31196a792b07",
+  "cd55_approval_file_sha256": "2bf016f6a7ae6d44d3b790c7e98009056786ac76854b1011f97f8bd774d01c68",
+  "reroute_ref": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/reroute-cw05-g2-deadline-01.json",
+  "changed_paths": [
+    "docs/features/core-workbench/gates/G4.md",
+    "omp_bridge/contract/ports_v2.ts",
+    "pyproject.toml",
+    "src/workbench/contracts/ports_v2.py",
+    "src/workbench/runtime/g4.py",
+    "src/workbench/terminal/shell_g2/lifecycle.py",
+    "tests/contracts/fixtures/ports-v2.json",
+    "tests/contracts/test_ports_v2.py",
+    "tests/gates/g2_shell/test_return_deadline.py",
+    "tests/gates/g4_evidence/test_aggregate.py",
+    "tests/gates/g4_lifetime/live_detach_probe.py",
+    "tests/gates/g4_lifetime/test_ports.py",
+    "tests/gates/harness/aggregate.py",
+    "tests/gates/harness/ports-v2.test.ts",
+    "tests/gates/harness/run-contracts.sh"
+  ],
+  "environment": {
+    "python": "3.12.3",
+    "node": "22.23.2",
+    "omp": "18.2.10",
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "venv": "/tmp/cw02-g1-venv",
+    "runtime_namespace": "unique temporary directories + private UDS + local provider ephemeral ports; inherited HERDR_* removed"
+  },
+  "architecture_boundary": [
+    "Minimal fixture backend owns two actual OMP PTYs plus persistent Bash parent and canonical split-PG supervisor/experiment.",
+    "Private UDS frontend display lease detaches without process teardown; shell ownership and fixture display-user ownership are observed separately.",
+    "60-second one-shot approved wake consumed once, including closed pause or failed durable metadata gate; no automatic replay.",
+    "Existing supervisor accepts an explicit bounded return_timeout; omitted/default five-second wire unchanged. CW05 opts into 240 seconds.",
+    "Python/TypeScript five v2 observation ports preserve independent v1 envelope compatibility.",
+    "Aggregate validates verifier-pinned current inputs, approvals, candidate, exact owned item coverage and actual evidence content; semantic verification and reuse authorization remain Root-owned."
+  ],
+  "runtime_observations": {
+    "normal": {
+      "after": {
+        "agent_end": 1,
+        "agent_start": 1,
+        "attached": true,
+        "backend_pid": 3965181,
+        "control_mode": "managed_control_wait",
+        "deliveries": 1,
+        "experiment_pid": 3965192,
+        "host_main_exit": null,
+        "host_observations": 1238,
+        "host_running": true,
+        "host_unknowns": [],
+        "omp_pids": {
+          "manager": 3965193,
+          "worker": 3965195
+        },
+        "omp_sessions": {
+          "manager": [
+            "01a0e476-dbda-74a0-b18c-06f8f3c5e7d1",
+            1
+          ],
+          "worker": [
+            "01a0e476-dbd9-75c6-bf03-2b47b0573cf1",
+            1
+          ]
+        },
+        "owned_alive": true,
+        "owner": "manager",
+        "owner_epoch": 1,
+        "parent_shell_pid": 3965186,
+        "provider_requests": {
+          "manager": 0,
+          "worker": 1
+        },
+        "semantic_match": true,
+        "supervisor_pid": 3965188,
+        "ticks": 1,
+        "user_owner": "user",
+        "user_owner_epoch": 1,
+        "wake_status": "api_returned"
+      },
+      "backend_cleanup": {
+        "backend_pid": 3965181,
+        "delivered": {
+          "ack": {
+            "kind": "api_ack",
+            "messageId": "8d467a9f-6bc6-4105-93d1-f4b93b7bddfb",
+            "modelProcessed": false,
+            "requestId": "aa1ad3a1-1e73-4db7-a3a1-45f8a7408685",
+            "status": "api_accepted"
+          },
+          "message_id": "8d467a9f-6bc6-4105-93d1-f4b93b7bddfb"
+        },
+        "last": {
+          "agent_end": 1,
+          "agent_start": 1,
+          "attached": true,
+          "backend_pid": 3965181,
+          "control_mode": "managed_control_wait",
+          "deliveries": 1,
+          "experiment_pid": 3965192,
+          "host_main_exit": null,
+          "host_observations": 1239,
+          "host_running": true,
+          "host_unknowns": [],
+          "omp_pids": {
+            "manager": 3965193,
+            "worker": 3965195
+          },
+          "omp_sessions": {
+            "manager": [
+              "01a0e476-dbda-74a0-b18c-06f8f3c5e7d1",
+              1
+            ],
+            "worker": [
+              "01a0e476-dbd9-75c6-bf03-2b47b0573cf1",
+              1
+            ]
+          },
+          "owned_alive": true,
+          "owner": "manager",
+          "owner_epoch": 1,
+          "parent_shell_pid": 3965186,
+          "provider_requests": {
+            "manager": 0,
+            "worker": 1
+          },
+          "semantic_match": true,
+          "supervisor_pid": 3965188,
+          "ticks": 1,
+          "user_owner": "user",
+          "user_owner_epoch": 1,
+          "wake_status": "api_returned"
+        },
+        "owned_pids": [
+          3965186,
+          3965188,
+          3965192,
+          3965193,
+          3965195
+        ],
+        "paused": false,
+        "pty_drain": [
+          {
+            "bytes": 133870,
+            "role": "manager"
+          },
+          {
+            "bytes": 122074,
+            "role": "worker"
+          }
+        ],
+        "residue": [],
+        "result": "observed"
+      },
+      "backend_exit": 0,
+      "before": {
+        "agent_end": 0,
+        "agent_start": 0,
+        "attached": true,
+        "backend_pid": 3965181,
+        "control_mode": "managed_control_wait",
+        "deliveries": 0,
+        "experiment_pid": 3965192,
+        "host_main_exit": null,
+        "host_observations": 1,
+        "host_running": true,
+        "host_unknowns": [],
+        "omp_pids": {
+          "manager": 3965193,
+          "worker": 3965195
+        },
+        "omp_sessions": {
+          "manager": [
+            "01a0e476-dbda-74a0-b18c-06f8f3c5e7d1",
+            1
+          ],
+          "worker": [
+            "01a0e476-dbd9-75c6-bf03-2b47b0573cf1",
+            1
+          ]
+        },
+        "owned_alive": true,
+        "owner": "manager",
+        "owner_epoch": 1,
+        "parent_shell_pid": 3965186,
+        "provider_requests": {
+          "manager": 0,
+          "worker": 0
+        },
+        "semantic_match": false,
+        "supervisor_pid": 3965188,
+        "ticks": 0,
+        "user_owner": "user",
+        "user_owner_epoch": 1,
+        "wake_status": "unarmed"
+      },
+      "detached": {
+        "agent_end": 0,
+        "agent_start": 0,
+        "attached": false,
+        "backend_pid": 3965181,
+        "control_mode": "managed_control_wait",
+        "deliveries": 0,
+        "experiment_pid": 3965192,
+        "host_main_exit": null,
+        "host_observations": 3,
+        "host_running": true,
+        "host_unknowns": [],
+        "omp_pids": {
+          "manager": 3965193,
+          "worker": 3965195
+        },
+        "omp_sessions": {
+          "manager": [
+            "01a0e476-dbda-74a0-b18c-06f8f3c5e7d1",
+            1
+          ],
+          "worker": [
+            "01a0e476-dbd9-75c6-bf03-2b47b0573cf1",
+            1
+          ]
+        },
+        "owned_alive": true,
+        "owner": "manager",
+        "owner_epoch": 1,
+        "parent_shell_pid": 3965186,
+        "provider_requests": {
+          "manager": 0,
+          "worker": 0
+        },
+        "semantic_match": false,
+        "supervisor_pid": 3965188,
+        "ticks": 0,
+        "user_owner": "user",
+        "user_owner_epoch": 1,
+        "wake_status": "armed"
+      },
+      "elapsed_detached_seconds": 62.00760073401034,
+      "paused": false,
+      "result": "passed",
+      "same_identities": true,
+      "stderr_bytes": 0,
+      "version": "omp/18.2.10",
+      "wake_ok": true
+    },
+    "paused": {
+      "after": {
+        "agent_end": 0,
+        "agent_start": 0,
+        "attached": true,
+        "backend_pid": 3965276,
+        "control_mode": "managed_control_wait",
+        "deliveries": 0,
+        "experiment_pid": 3965284,
+        "host_main_exit": null,
+        "host_observations": 1240,
+        "host_running": true,
+        "host_unknowns": [],
+        "omp_pids": {
+          "manager": 3965285,
+          "worker": 3965287
+        },
+        "omp_sessions": {
+          "manager": [
+            "01a0e476-e18d-73a0-ac67-ae62836f0b9b",
+            1
+          ],
+          "worker": [
+            "01a0e476-e1ae-7705-957c-da181357c195",
+            1
+          ]
+        },
+        "owned_alive": true,
+        "owner": "manager",
+        "owner_epoch": 1,
+        "parent_shell_pid": 3965281,
+        "provider_requests": {
+          "manager": 0,
+          "worker": 0
+        },
+        "semantic_match": false,
+        "supervisor_pid": 3965283,
+        "ticks": 1,
+        "user_owner": "user",
+        "user_owner_epoch": 1,
+        "wake_status": "held_paused"
+      },
+      "backend_cleanup": {
+        "backend_pid": 3965276,
+        "delivered": {},
+        "last": {
+          "agent_end": 0,
+          "agent_start": 0,
+          "attached": true,
+          "backend_pid": 3965276,
+          "control_mode": "managed_control_wait",
+          "deliveries": 0,
+          "experiment_pid": 3965284,
+          "host_main_exit": null,
+          "host_observations": 1241,
+          "host_running": true,
+          "host_unknowns": [],
+          "omp_pids": {
+            "manager": 3965285,
+            "worker": 3965287
+          },
+          "omp_sessions": {
+            "manager": [
+              "01a0e476-e18d-73a0-ac67-ae62836f0b9b",
+              1
+            ],
+            "worker": [
+              "01a0e476-e1ae-7705-957c-da181357c195",
+              1
+            ]
+          },
+          "owned_alive": true,
+          "owner": "manager",
+          "owner_epoch": 1,
+          "parent_shell_pid": 3965281,
+          "provider_requests": {
+            "manager": 0,
+            "worker": 0
+          },
+          "semantic_match": false,
+          "supervisor_pid": 3965283,
+          "ticks": 1,
+          "user_owner": "user",
+          "user_owner_epoch": 1,
+          "wake_status": "held_paused"
+        },
+        "owned_pids": [
+          3965281,
+          3965283,
+          3965284,
+          3965285,
+          3965287
+        ],
+        "pause_ack": "paused",
+        "paused": true,
+        "pty_drain": [
+          {
+            "bytes": 133613,
+            "role": "manager"
+          },
+          {
+            "bytes": 127917,
+            "role": "worker"
+          }
+        ],
+        "residue": [],
+        "result": "observed"
+      },
+      "backend_exit": 0,
+      "before": {
+        "agent_end": 0,
+        "agent_start": 0,
+        "attached": true,
+        "backend_pid": 3965276,
+        "control_mode": "managed_control_wait",
+        "deliveries": 0,
+        "experiment_pid": 3965284,
+        "host_main_exit": null,
+        "host_observations": 1,
+        "host_running": true,
+        "host_unknowns": [],
+        "omp_pids": {
+          "manager": 3965285,
+          "worker": 3965287
+        },
+        "omp_sessions": {
+          "manager": [
+            "01a0e476-e18d-73a0-ac67-ae62836f0b9b",
+            1
+          ],
+          "worker": [
+            "01a0e476-e1ae-7705-957c-da181357c195",
+            1
+          ]
+        },
+        "owned_alive": true,
+        "owner": "manager",
+        "owner_epoch": 1,
+        "parent_shell_pid": 3965281,
+        "provider_requests": {
+          "manager": 0,
+          "worker": 0
+        },
+        "semantic_match": false,
+        "supervisor_pid": 3965283,
+        "ticks": 0,
+        "user_owner": "user",
+        "user_owner_epoch": 1,
+        "wake_status": "unarmed"
+      },
+      "detached": {
+        "agent_end": 0,
+        "agent_start": 0,
+        "attached": false,
+        "backend_pid": 3965276,
+        "control_mode": "managed_control_wait",
+        "deliveries": 0,
+        "experiment_pid": 3965284,
+        "host_main_exit": null,
+        "host_observations": 3,
+        "host_running": true,
+        "host_unknowns": [],
+        "omp_pids": {
+          "manager": 3965285,
+          "worker": 3965287
+        },
+        "omp_sessions": {
+          "manager": [
+            "01a0e476-e18d-73a0-ac67-ae62836f0b9b",
+            1
+          ],
+          "worker": [
+            "01a0e476-e1ae-7705-957c-da181357c195",
+            1
+          ]
+        },
+        "owned_alive": true,
+        "owner": "manager",
+        "owner_epoch": 1,
+        "parent_shell_pid": 3965281,
+        "provider_requests": {
+          "manager": 0,
+          "worker": 0
+        },
+        "semantic_match": false,
+        "supervisor_pid": 3965283,
+        "ticks": 0,
+        "user_owner": "user",
+        "user_owner_epoch": 1,
+        "wake_status": "armed"
+      },
+      "elapsed_detached_seconds": 62.06617039907724,
+      "paused": true,
+      "result": "passed",
+      "same_identities": true,
+      "stderr_bytes": 0,
+      "version": "omp/18.2.10",
+      "wake_ok": true
+    }
+  },
+  "checks": [
+    {
+      "name": "contracts_python",
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/contracts -v",
+      "result": "passed",
+      "exit_code": 0,
+      "count": 16,
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "candidate": "9ef5306a70cbc86e864feebd0aa3c1de5cf86cf403cff7da73bc06813f6015d5",
+      "environment": {
+        "python": "3.12.3",
+        "node": "22.23.2",
+        "omp": "18.2.10",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "venv": "/tmp/cw02-g1-venv",
+        "runtime_namespace": "unique temporary directories + private UDS + local provider ephemeral ports; inherited HERDR_* removed"
+      }
+    },
+    {
+      "name": "contracts_node",
+      "command": "node --experimental-strip-types --test tests/gates/harness/contracts.test.ts tests/gates/harness/ports-v2.test.ts",
+      "result": "passed",
+      "exit_code": 0,
+      "count": 14,
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "candidate": "9ef5306a70cbc86e864feebd0aa3c1de5cf86cf403cff7da73bc06813f6015d5",
+      "environment": {
+        "python": "3.12.3",
+        "node": "22.23.2",
+        "omp": "18.2.10",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "venv": "/tmp/cw02-g1-venv",
+        "runtime_namespace": "unique temporary directories + private UDS + local provider ephemeral ports; inherited HERDR_* removed"
+      }
+    },
+    {
+      "name": "metadata_lifetime_fixture",
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/gates/g4_lifetime -v",
+      "result": "passed",
+      "exit_code": 0,
+      "count": 2,
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "candidate": "9ef5306a70cbc86e864feebd0aa3c1de5cf86cf403cff7da73bc06813f6015d5",
+      "environment": {
+        "python": "3.12.3",
+        "node": "22.23.2",
+        "omp": "18.2.10",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "venv": "/tmp/cw02-g1-venv",
+        "runtime_namespace": "unique temporary directories + private UDS + local provider ephemeral ports; inherited HERDR_* removed"
+      }
+    },
+    {
+      "name": "aggregate_fixture",
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/gates/g4_evidence -v",
+      "result": "passed",
+      "exit_code": 0,
+      "count": 4,
+      "owned_items": 25,
+      "evidence_level": "fixture",
+      "qualification": "Synthetic observed-run provenance on copied current integrated source bytes + approved PLAN ownership list; not an actual G1-G4 runtime certificate.",
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "candidate": "9ef5306a70cbc86e864feebd0aa3c1de5cf86cf403cff7da73bc06813f6015d5",
+      "environment": {
+        "python": "3.12.3",
+        "node": "22.23.2",
+        "omp": "18.2.10",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "venv": "/tmp/cw02-g1-venv",
+        "runtime_namespace": "unique temporary directories + private UDS + local provider ephemeral ports; inherited HERDR_* removed"
+      }
+    },
+    {
+      "name": "normal_detach_actual",
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g3_omp /tmp/cw02-g1-venv/bin/python tests/gates/g4_lifetime/live_detach_probe.py",
+      "result": "passed",
+      "exit_code": 0,
+      "evidence_level": "runtime",
+      "evidence_ref": "runtime_observations.normal",
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "candidate": "9ef5306a70cbc86e864feebd0aa3c1de5cf86cf403cff7da73bc06813f6015d5",
+      "environment": {
+        "python": "3.12.3",
+        "node": "22.23.2",
+        "omp": "18.2.10",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "venv": "/tmp/cw02-g1-venv",
+        "runtime_namespace": "unique temporary directories + private UDS + local provider ephemeral ports; inherited HERDR_* removed"
+      }
+    },
+    {
+      "name": "paused_detach_actual",
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g3_omp /tmp/cw02-g1-venv/bin/python tests/gates/g4_lifetime/live_detach_probe.py --paused",
+      "result": "passed",
+      "exit_code": 0,
+      "evidence_level": "runtime",
+      "evidence_ref": "runtime_observations.paused",
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "candidate": "9ef5306a70cbc86e864feebd0aa3c1de5cf86cf403cff7da73bc06813f6015d5",
+      "environment": {
+        "python": "3.12.3",
+        "node": "22.23.2",
+        "omp": "18.2.10",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "venv": "/tmp/cw02-g1-venv",
+        "runtime_namespace": "unique temporary directories + private UDS + local provider ephemeral ports; inherited HERDR_* removed"
+      }
+    },
+    {
+      "name": "g1_regression",
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g1_vt:tests/gates/g3_omp /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/gates/g1_vt -q",
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "candidate_before": "9ef5306a70cbc86e864feebd0aa3c1de5cf86cf403cff7da73bc06813f6015d5",
+      "candidate_after": "9ef5306a70cbc86e864feebd0aa3c1de5cf86cf403cff7da73bc06813f6015d5",
+      "result": "passed",
+      "exit_code": 0,
+      "count": 63,
+      "skipped": 0,
+      "stdout_stderr": "----------------------------------------------------------------------\nRan 63 tests in 1.497s\n\nOK\n",
+      "candidate": "9ef5306a70cbc86e864feebd0aa3c1de5cf86cf403cff7da73bc06813f6015d5",
+      "environment": {
+        "python": "3.12.3",
+        "node": "22.23.2",
+        "omp": "18.2.10",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "venv": "/tmp/cw02-g1-venv",
+        "runtime_namespace": "unique temporary directories + private UDS + local provider ephemeral ports; inherited HERDR_* removed"
+      }
+    },
+    {
+      "name": "g2_regression_and_deadline",
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/gates/g2_shell -q",
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "candidate_before": "9ef5306a70cbc86e864feebd0aa3c1de5cf86cf403cff7da73bc06813f6015d5",
+      "candidate_after": "9ef5306a70cbc86e864feebd0aa3c1de5cf86cf403cff7da73bc06813f6015d5",
+      "result": "passed",
+      "exit_code": 0,
+      "count": 132,
+      "skipped": 6,
+      "stdout_stderr": "----------------------------------------------------------------------\nRan 132 tests in 112.985s\n\nOK (skipped=6)\n",
+      "candidate": "9ef5306a70cbc86e864feebd0aa3c1de5cf86cf403cff7da73bc06813f6015d5",
+      "environment": {
+        "python": "3.12.3",
+        "node": "22.23.2",
+        "omp": "18.2.10",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "venv": "/tmp/cw02-g1-venv",
+        "runtime_namespace": "unique temporary directories + private UDS + local provider ephemeral ports; inherited HERDR_* removed"
+      }
+    },
+    {
+      "name": "g3_regression",
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g3_omp /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/gates/g3_omp -q",
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "candidate_before": "9ef5306a70cbc86e864feebd0aa3c1de5cf86cf403cff7da73bc06813f6015d5",
+      "candidate_after": "9ef5306a70cbc86e864feebd0aa3c1de5cf86cf403cff7da73bc06813f6015d5",
+      "result": "passed",
+      "exit_code": 0,
+      "count": 117,
+      "skipped": 0,
+      "stdout_stderr": "/usr/lib/python3.12/pty.py:95: DeprecationWarning: This process (pid=3967531) is multi-threaded, use of forkpty() may lead to deadlocks in the child.\n  pid, fd = os.forkpty()\n----------------------------------------------------------------------\nRan 117 tests in 53.629s\n\nOK\n",
+      "candidate": "9ef5306a70cbc86e864feebd0aa3c1de5cf86cf403cff7da73bc06813f6015d5",
+      "environment": {
+        "python": "3.12.3",
+        "node": "22.23.2",
+        "omp": "18.2.10",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "venv": "/tmp/cw02-g1-venv",
+        "runtime_namespace": "unique temporary directories + private UDS + local provider ephemeral ports; inherited HERDR_* removed"
+      }
+    },
+    {
+      "name": "diff_check",
+      "command": "git diff --check",
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "result": "passed",
+      "exit_code": 0,
+      "candidate": "9ef5306a70cbc86e864feebd0aa3c1de5cf86cf403cff7da73bc06813f6015d5",
+      "environment": {
+        "python": "3.12.3",
+        "node": "22.23.2",
+        "omp": "18.2.10",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "venv": "/tmp/cw02-g1-venv",
+        "runtime_namespace": "unique temporary directories + private UDS + local provider ephemeral ports; inherited HERDR_* removed"
+      }
+    }
+  ],
+  "discriminators": [
+    "Initial >62s attempt did not reach provider: inherited G3 --max-time=45 was insufficient. Explicit bounded --max-time=180 yielded exactly one actual worker provider request.",
+    "Second attempt achieved worker wake but canonical supervisor's 5s main deadline produced UNKNOWN:SUPERVISOR_FAILURE. Root-approved explicit bound removed that failure without changing default behavior.",
+    "Focused long-main regression initially inspected mutable lifecycle after cleanup and observed cleanup UNKNOWN. Deepcopy at the actual input-return boundary passed; no product predicate/independent tests weakened.",
+    "All initial runtime attempts and final normal/paused owned PID residue checks were empty."
+  ],
+  "preserved_negative_controls": [
+    "All existing G1-G3 acceptance predicates, common RUN independent pre-exec/FD/foreground/stop-continue tests and legacy direct-eval controls unchanged.",
+    "Default wire excludes return_timeout; invalid/nonfinite/nonpositive/over-300 bounds reject; explicit 5.2s main succeeds under8s; expiry0.1s remains UNKNOWN with no input return."
+  ],
+  "cleanup": {
+    "runtime_owned_pids": [
+      3965186,
+      3965188,
+      3965192,
+      3965193,
+      3965195,
+      3965181,
+      3965281,
+      3965283,
+      3965284,
+      3965285,
+      3965287,
+      3965276
+    ],
+    "runtime_residue": [],
+    "historical_attempt_residue": [],
+    "temporary_cw05_g4_directories": [],
+    "pty_drain": "continuous dedicated threads; bytes in runtime observations",
+    "pipe_drain": "continuous communicate thread; stderr 0 bytes in both runs",
+    "mutation_subprocess_state": "none running at handoff; no commit/push"
+  },
+  "remaining_unknowns": [
+    "G2 delegated cgroup scope is unavailable: six existing optional tests skipped; not a required delegated-cgroup product decision.",
+    "Installed binary/module hashes are not distribution/wheel hashes or a reproducible build attestation; prior OS Python/Node install commands are unknown.",
+    "This is a bounded display-lease/backend fixture, not a production detachable TUI screen-replay implementation; user_owner is display lease, actual shell owner is recorded separately.",
+    "Store is an fsynced fixture append log, not production crash recovery/WAL/concurrent persistence.",
+    "Aggregate positive test is a fixture-level validator contract, not an authorization to relabel older candidate runtime records. Root must supply approved current records/reuse context for formal aggregate.",
+    "ptrace denied and privileged/setuid/file-capability exec remain unsupported UNKNOWN as before."
+  ],
+  "remaining_required_worker_checks": [],
+  "overall_completion_claim": false,
+  "candidate_stability": {
+    "before": "9ef5306a70cbc86e864feebd0aa3c1de5cf86cf403cff7da73bc06813f6015d5",
+    "after": "9ef5306a70cbc86e864feebd0aa3c1de5cf86cf403cff7da73bc06813f6015d5",
+    "stable": true,
+    "unknowns": [],
+    "scope_comparable": true,
+    "outside_scope": [],
+    "index_changed": []
+  }
+}

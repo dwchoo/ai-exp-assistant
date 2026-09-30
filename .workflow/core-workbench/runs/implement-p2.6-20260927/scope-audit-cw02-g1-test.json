@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "invocation": "cw02-g1-test-01",
+  "before": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw02-g1-worker-after.json",
+  "after": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw02-g1-test-after.json",
+  "allowed": [
+    "tests/gates/g1_vt/**",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw02-g1-test-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw02-g1-test-after.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/scope-audit-cw02-g1-test.json"
+  ],
+  "changed": [
+    "tests/gates/g1_vt/test_closure_independent.py"
+  ],
+  "named_workflow_artifacts": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw02-g1-test-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw02-g1-test-after.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/scope-audit-cw02-g1-test.json"
+  ],
+  "index_changed": [],
+  "outside_scope": [],
+  "comparable": true,
+  "baseline_candidate_digest_verified": true,
+  "all_1095_baseline_file_kind_mode_content_records_unchanged": true,
+  "head_unchanged": true,
+  "product_source_unchanged": true,
+  "workflow_artifacts_excluded_by_assigned_baseline": true,
+  "graphify_not_invoked": "Assignment explicitly forbids graph writes; no graph query/update was invoked in this unit."
+}

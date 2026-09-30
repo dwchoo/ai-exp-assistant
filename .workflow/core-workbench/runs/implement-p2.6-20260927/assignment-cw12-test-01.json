@@ -1,0 +1,26 @@
+{
+  "invocation": "cw12-test-01",
+  "role": "test_designer",
+  "unit": "V-CW-12-p2.6-current",
+  "objective": "Independently verify CW-12 pause/cancel/resume policy, concurrency fences, durable evidence, and three-area status projection.",
+  "candidate_manifest": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw12-worker-after.json",
+  "candidate": "e5fcd4ad296d15e5479a859f9d048a0613a0988ccfdc9a340e84fadcdc3b0494",
+  "requirements": ".workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw12.json",
+  "ticket": "docs/features/core-workbench/tickets/CW-12.md",
+  "worker_evidence": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-worker-01.json",
+  "write_scope": ["tests/policy/pause_*/**", "tests/ui/status_*/**", "graphify-out/**"],
+  "must_test": [
+    "Race pause against dispatch_automatic and CW-11 review admission; once pause linearizes, no new automatic manager/worker/review action may start, while an already-started action is not misreported as aborted.",
+    "Verify cancellation is durably tied to exact Task/revision/run/approval scope, distinguished from pause, closes automation, preserves journal/result artifacts, and projects accurately to status.",
+    "Attack journal corruption, symlink/special-file targets, concurrent append ordering, write/fsync failure, restart binding mismatch, stale/future evidence, session/generation replacement, changed approval/scope, unresolved tools, and manual activity not resuming automation.",
+    "Verify partial resume (only one peer resumes, response loss, persistence failure) re-closes both peers and never replays held abort/wait/delivery requests.",
+    "Verify status separates manager/worker unknown tool results, confirmed vs absent file/process observations, last actions, pause/abort acknowledgement, cancellation, terminal owner, and immutable snapshots.",
+    "Rerun focused and relevant contract/workflow/observation/bridge/G3 regressions; independently exercise the existing actual OMP 18.2.10 pause probe with managed PI_CONFIG_DIR if feasible."
+  ],
+  "constraints": [
+    "Tests only; do not edit product, existing G3/workflow/observation/contracts, tickets, PLAN, or workflow records.",
+    "Apply_patch only; no uv/local environment/package artifacts; use /tmp/cw02-g1-venv/bin/python.",
+    "Run graphify update . after test changes and report exact failures as candidate defect vs environment qualification."
+  ],
+  "report": ["candidate validation", "tests added", "race/cancellation/durability findings", "exact results", "candidate_ready or needs_reroute"]
+}

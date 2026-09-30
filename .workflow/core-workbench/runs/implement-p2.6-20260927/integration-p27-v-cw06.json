@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "unit": "V-CW-06-p2.7",
+  "tickets": ["CW-06", "cross-ticket corrections: CW-17 ui_server overflow framing (root-adjudication-p27-cw06-flood.json), CW-02/G1 vt_g1 SU/SD (root-adjudication-p27-vt-su-sd.json)"],
+  "status": "integrated",
+  "recorded_at": "2026-09-30",
+  "approved_bundle_digest": "a521acdc3838b43a26e277afc233bab695c8b02ce0d42392c3678931b2e3f027",
+  "workspace": "/home/dwchoo/ai-exp-assistant (serial shared checkout; in-place integration)",
+  "integrated_candidate": "671b05d3085701f0111e6440955fa6f4b9edc5ddcdba9f54c6d5af27a7c7351b",
+  "integrated_candidate_manifest": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-cw06-integrated-checkpoint.json (milestone: UR-UX / CW-12/15 delta base, full blobs retained)",
+  "integration_delta_vs_verified": {"verified_candidate": "01cee2da36f84822ab5a5dc24fed01667ad9a50f77e1ca46efce77fb58c6650e", "delta": "graphify-out/** only (28 files)", "audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-cw06-integrated.json", "affects_checks": false},
+  "gate_items": {
+    "P-C-AC-01": {"result": "passed", "level": "runtime", "evidence": ["result-p27-cw06-rerun-test-08-agent.json (S10 manager conversation through product UI, real omp/18.2.10) on 01cee2da", "check-p27-cw06-integration-live-01.json S10 (4d00e101)"], "unknowns": []},
+    "P-C-AC-06": {"result": "passed", "level": "runtime", "evidence": ["rerun-test-08 S8/S13-S16 (focus vs owner, held reasons, resize, detach/reattach)", "result-p27-cw06-test-01-agent.json"], "unknowns": []},
+    "P-C-AC-14": {"result": "passed", "level": "runtime", "evidence": ["rerun-test-08 S11 both OMP panes (keys, slash, Esc, Ctrl-C, Alt-Enter), S6 literal prefix", "result-p27-cw06-rerun-test-02 addendum: Esc aborts a running tool command through the UI"], "unknowns": ["approval-prompt interaction not applicable on the user's OMP configuration (no prompt for shell tool) -> CW-16 I-COMPAT"]},
+    "L-CW17-DETACH/START (re-checked after --plain adaptation and ui_server change)": {"result": "passed", "level": "runtime", "evidence": ["tests/backend incl. independent green in rerun-test-08 (71 OK on rerun)"]}
+  },
+  "verification_chain": [
+    "p27-cw06-worker-01 -> p27-cw06-test-01 (Opus, real OMP; F1-F5, F6 routed) -> fix-worker-02 -> rerun-test-02 (P-C-AC-14 Esc) -> review-cw06-01 (Opus full frozen review: block P2-1 flood + P3-1..6) -> fix-worker-03 -> rerun-test-03 -> flood-worker-04 (Opus; + CW-17 ui_server framing) -> rerun-test-04 -> ctrlc-diag-05 (76 trials, 0 failures) + delta-review-02 (integrate) -> integration-live-01 FAILED (replay trimmed by catch-up) -> replay-worker-05 -> rerun-test-06 (F2 slow_client regression) -> catchup-worker-06 (Opus redesign) -> rerun-test-07 + delta-review-03 (integrate) -> flake-worker-07 (2004 guard; SU/SD cause found) -> vt-susd-worker-08 -> rerun-test-08 + delta-review-04 (integrate)"
+  ],
+  "root_adjudications": ["root-adjudication-p27-cw06-entry-wiring.json", "root-adjudication-p27-cw06-test-01.json", "root-adjudication-p27-cw06-rerun-02.json", "root-adjudication-p27-review-cw06-01.json", "root-adjudication-p27-cw06-flood.json", "root-adjudication-p27-cw06-replay-regression.json", "root-adjudication-p27-vt-su-sd.json"],
+  "carried_forward": {
+    "CW-18": ["F6: multi-line manual input in host shell holds wb-handoff (G2 open item gates/G2.md:290); UI shows held reasons", "O2: backend switches owner to user at takeover request (review at UR-UX/CW-18)"],
+    "CW-16": ["P-C-AC-14 approval-prompt interaction unknown (I-COMPAT)", "test hygiene: tests/backend and tests/terminal leave TMPDIR cw03-g2-*/shell-init; connection_cap test EAGAIN flake (listen backlog 8 vs 20 connects); test_product_pty send_failure race (asserts 2004l when UI exits before enabling 2004)", "Ctrl-C-under-flood single unexplained failure (0/76 in diagnostic; bound <4.7%/trial)"],
+    "UR-UX": ["3-column layout width (~32 cols/pane at 100 cols)", "sustained-flood display: repeated catch-up resets and partial tail at top until flood ends", "Ctrl-] prefix and key map provisional", "256-colour approximation, no scrollback UI"],
+    "later VT/UI polish": ["delta-review-02 P3-a/b addressed; delta-review-03 P3 _align short tail; delta-review-04 P3-1..4 (ESC[>4T as SD, history on partial margins, BCE full attrs, signal test ordering)"]
+  },
+  "operational_notes": ["real model turns used in CW-06 verification: 12 total (Root operating caps exceeded once by 2 via live-probe discovery; probes now opt-in with CW06_LIVE_MODEL=1)", "leaked /tmp/cw06-* fixture dirs (20) from a system-python3 review run removed by Root after inspection"],
+  "next": "CW-12/15 delta re-verification (unit V-CW-12-15-p2.7-cw06-delta), then UR-UX preparation and user review request"
+}

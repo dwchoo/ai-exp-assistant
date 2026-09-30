@@ -1,0 +1,1 @@
+{"path":".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json","expected_revision":981,"event":{"id":"check-cw12-pause-final-01","kind":"check","data":{"check_id":"cw12-pause-final-01","path":".workflow/core-workbench/runs/implement-p2.6-20260927/check-cw12-pause-final-observed.json","sha256":"2bd4987b0854e332bb14158194bde0215c3bbb7badf01e2834508f3850736a57"}}}

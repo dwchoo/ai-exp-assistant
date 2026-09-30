@@ -1,0 +1,33 @@
+{
+  "invocation": "cw05-g4-review-01",
+  "role": "reviewer",
+  "unit": "V-CW-05-p2.6-current",
+  "objective": "Fresh independent review of the frozen integrated CW-05 G4 candidate after test-designer findings and correction.",
+  "candidate_manifest": ".workflow/core-workbench/runs/implement-p2.6-20260927/cw05-review-candidate.json",
+  "candidate_digest": "237cec5bdb645f1b93becd550471845f50f9210c160fd13f8948dfbf978ced51",
+  "requirements": ".workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw05.json",
+  "evidence": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw05-g4-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw05-g4-test-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw05-g4-correction-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/reroute-cw05-g2-deadline-01.json"
+  ],
+  "review_focus": [
+    "Check all CW-05 changed product, contract, probe, validator, fixture, test, and G4 documentation paths against G4-LIFETIME, G4-WAKE, G4-STORE-PORT, G4-CONTRACT, and G4-EVIDENCE.",
+    "Verify the G2 explicit return deadline preserves the 5-second default and cannot create unbounded waits or weaken unknown/cleanup semantics.",
+    "Verify the corrected runtime predicate cannot accept PID alias/substitution/missing identity, contradictory attach state, short detach, fake delivery, pause leakage, stopped host observation, or residue masking.",
+    "Verify aggregate validation rejects missing/duplicate/stale/low-level/failed/unknown/empty/schema-only evidence and keeps provenance-only fixtures distinct from runtime authorization.",
+    "Review metadata failure ordering, v1/v2 cross-language compatibility, dependency documentation, cleanup, and scope. Identify P0-P3 findings only with file/line and concrete consequence."
+  ],
+  "constraints": [
+    "Read-only review: do not modify any file, workflow record, graph output, or repository state.",
+    "Do not trust status flags alone; inspect code, independent tests, manifests, and exact evidence.",
+    "Do not claim downstream CW-09/11/12/15 production completion."
+  ],
+  "report": [
+    "verdict pass or findings",
+    "P0-P3 findings with precise path/line and consequence",
+    "reviewed candidate identity and evidence limitations",
+    "whether formal Root gate verification may proceed"
+  ]
+}

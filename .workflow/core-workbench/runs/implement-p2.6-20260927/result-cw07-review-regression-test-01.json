@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "invocation": "cw07-review-regression-test-01",
+  "unit": "V-CW-07-p2.6-current",
+  "task_result": "needs_reroute",
+  "candidate_before": "9868eff50a732257c8143a097e5a7ea37a33cf99224ada39ef387c5790eaf9e6",
+  "candidate_after": "413f090c5cf9507b2b830e9aaaa307ec8105a7235a4680acd56d3805e181184f",
+  "requirements_sha256": "55631496c4af5c47c7bf932c8f0e574b56ea0ef4f59bcdfbb0bf03f3c72e792a",
+  "changed_paths": [
+    "tests/terminal/live_persistent_shell_independent.py",
+    "tests/terminal/test_persistent_shell_independent.py"
+  ],
+  "new_test_methods": 2,
+  "new_shell_subcases": 4,
+  "checks": [
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest -v tests/terminal/test_persistent_shell_independent.py",
+      "exit_code": 1,
+      "tests": 3,
+      "failures": 4,
+      "classification": "one existing method passed; new live and PTY-writer regressions failed on Bash and sh"
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/terminal -v",
+      "exit_code": 1,
+      "tests": 7,
+      "failures": 4,
+      "classification": "five prior tests passed; only two new methods failed across Bash/sh subtests"
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python tests/terminal/live_persistent_shell_independent.py",
+      "exit_code": 0,
+      "bash_cases": 6,
+      "sh_cases": 6,
+      "residue": []
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0
+    },
+    {
+      "command": "find /tmp -maxdepth 1 -type d -name 'cw07-independent-*'",
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "command": "pgrep -af '[/]tmp/cw07-independent-'",
+      "exit_code": 1,
+      "output": ""
+    }
+  ],
+  "implementation_defects": [
+    {
+      "id": "CW07-UNKNOWN-MANUAL-PTY-WRITE",
+      "severity": "P2",
+      "observed": "Following real Bash/sh exec 9>&- control loss, phase=unknown and unknown_or_manual_residue while input_owner=user; send_user returned success. A public-adapter regression intercepted ShellProcess.send_user and observed writer invocation on both shells. In one full suite run, sh shell-side marker also appeared; Bash marker was not consistently observed.",
+      "expected": "send_user raises UnsafeShellState before PTY writer is called; no shell-side marker."
+    }
+  ],
+  "accepted_scope_only": true,
+  "outside_approved_scope_not_tested": "No detached daemon/cgroup/universal manual daemon discovery claim; excluded by C-D55 and ADR-0002.",
+  "not_run": {
+    "G2_and_G4": "Production unchanged in this test-only turn; previous CW-07 independent turn ran G2 132 and G4 18 successfully. Full terminal suite isolates this review P2."
+  },
+  "cleanup": {
+    "owned_processes_running": false,
+    "temporary_directory_residue": []
+  },
+  "needs_oracle": false,
+  "overall_completion_claimed": false
+}

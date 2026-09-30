@@ -1,0 +1,25 @@
+{
+  "invocation": "cw03-run-protocol-test-01",
+  "status": "needs_reroute",
+  "candidate": "fa53bd6c59bec51a0c65c767d7a815aa38cf5b7f6eb67f11514253d7b31b03c3",
+  "changed_paths": ["tests/gates/g2_shell/test_common_run_protocol_independent.py"],
+  "valid_implementation_failure": {
+    "title": "Normal child exit before exec is mistaken for a successful CLOEXEC acknowledgement",
+    "evidence": "Replacing supervisor child os.execvpe with os._exit(72) produces EXEC_READY, EXPERIMENT_START, MAIN_RETURN:72, LIFETIME_DONE, and INPUT_BARRIER in Bash/sh although the payload marker is absent. lifecycle.py accepts cached numeric exit after EOF and rejects only signaled exits.",
+    "required_correction": "Treat exec acknowledgement as successful only when EOF is not paired with any pre-exec child wait status; fail UNKNOWN/EXEC_ERROR for normal or signaled pre-exec exit and never emit experiment start or completion facts."
+  },
+  "passing_independent_coverage": [
+    "Foreground read-back failure keeps the child prepared and prevents experiment start.",
+    "Missing or wrong exec event fails closed.",
+    "Literal argv and script requests avoid parent reinterpretation.",
+    "Supervisor/control loss becomes UNKNOWN and blocks replay."
+  ],
+  "checks": [
+    {"command": "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest tests.gates.g2_shell.test_common_run_protocol_independent -v", "exit_code": 1, "summary": "5 tests; pre-exec normal-exit Bash/sh subtests failed, four tests passed"},
+    {"command": "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest tests.gates.g2_shell.test_common_run_protocol tests.gates.g2_shell.test_split_pg_control -v", "exit_code": 0, "summary": "8 tests passed in 15.075s"},
+    {"command": "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/gates/g2_shell -p 'test_*.py' -v", "exit_code": 1, "summary": "125 tests in 102.985s; same two failure subtests and 6 delegated-cgroup skips"},
+    {"command": "git diff --check", "exit_code": 0, "summary": "clean"}
+  ],
+  "file_sha256": {"tests/gates/g2_shell/test_common_run_protocol_independent.py": "33b85cb62ee91c8a617fc016fcdf36cdc24cfeed585e590eb35bd59008e03109"},
+  "owned_processes_remaining": false
+}

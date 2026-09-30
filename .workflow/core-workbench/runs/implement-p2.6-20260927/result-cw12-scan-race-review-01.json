@@ -1,0 +1,19 @@
+{
+  "invocation": "cw12-scan-race-review-01",
+  "outcome": "needs_correction",
+  "candidate_ready": false,
+  "candidate": "515a8428abf0502170f2d581991a58ff7232bfd936b134854020b7ad7f8c4cdb",
+  "findings": [
+    {
+      "severity": "P1",
+      "confidence": "high",
+      "summary": "Mandatory peer cwd full-tree baseline caps at 2048 entries/64 MiB, so ordinary repository cwd configurations cannot bind or open automation authority.",
+      "evidence": ["src/workbench/policy/pause_automation/controller.py:580", "src/workbench/policy/pause_automation/controller.py:1142"],
+      "acceptance_ids": ["C-AC-33"]
+    }
+  ],
+  "observed_workspace_scale": {"entries_excluding_git": 4308, "bytes_excluding_git": 46376816186},
+  "closed_findings": ["early durable baseline", "ignored outputs", "fd-relative nofollow traversal", "out-of-scope reject then explicit cleanup/reconcile"],
+  "requirement_assessment": {"C-AC-25": "met", "C-AC-30": "met", "C-AC-33": "blocked_by_liveness"},
+  "tests_run": false
+}

@@ -1,0 +1,23 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 1056,
+  "event": {
+    "id": "limit-cw14-recovery-worker-20260929",
+    "kind": "limit",
+    "data": {
+      "bucket": "role:worker",
+      "origin": "operating",
+      "value": 21,
+      "authority": "C-D55 plus workflow-contract section 8 and current $implement authorization",
+      "reason": "One bounded CW-14 same-store recovery correction after independent failure evidence",
+      "decision_owner": "Root",
+      "remaining_work_estimate": 1,
+      "expected_previous": {
+        "value": 20,
+        "authority": "C-D55 plus workflow-contract section 8 and current $implement authorization",
+        "reason": "CW-14 bounded implementation and one correction reserve"
+      },
+      "scope_basis": null
+    }
+  }
+}

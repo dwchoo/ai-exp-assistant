@@ -1,0 +1,128 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw06-rerun-test-08",
+  "role": "test_designer (wb-test-rerun)",
+  "status": "needs_reroute",
+  "reason": "두 개의 간헐 실패(둘 다 기존 테스트의 timing race로 분류, production 결함 증거 없음): test_product_pty.test_send_failure_shows_reason_and_no_traceback (5회 반복 중 1회) 및 tests/backend test_connection_cap_and_exclusive_attach (전체 스위트 1회 + 단독 10회 중 3회 실패). 반복 요건 'pty 5x 모두 통과' 불충족.",
+  "frozen_candidate": "01cee2da36f84822ab5a5dc24fed01667ad9a50f77e1ca46efce77fb58c6650e",
+  "frozen_hashes_equal": true,
+  "checks": [
+    [
+      "live_product_omp_independent (CW06_LIVE_MODEL=1)",
+      0,
+      "1 test OK, S0-S16 pass; S15 ratio manager 1.0/worker 1.0/host 0.94; S16 same",
+      "75s"
+    ],
+    [
+      "live_product_flood_independent_p27f x3",
+      0,
+      "3/3 OK; slow_client_detach false (3x); Ctrl-C 0.36-1.07s; identities unchanged; residue empty",
+      "74/77/78s"
+    ],
+    [
+      "test_product_replay_independent_p27h x10",
+      0,
+      "10/10 OK",
+      "197s total"
+    ],
+    [
+      "test_product_pty x5",
+      1,
+      "4/5 pass; run5: 15 tests, failures=1 (test_send_failure_shows_reason_and_no_traceback: b'\\x1b[?2004l' not in raw)",
+      "52s total"
+    ],
+    [
+      "test_product_pty rerun x10 (extra)",
+      0,
+      "10/10 OK",
+      "~100s"
+    ],
+    [
+      "test_send_failure_shows_reason_and_no_traceback alone x40 (extra)",
+      0,
+      "40/40 OK",
+      "-"
+    ],
+    [
+      "tests/ui discover x2",
+      0,
+      "129 OK, 129 OK",
+      "59s/61s"
+    ],
+    [
+      "tests/backend discover (1st)",
+      1,
+      "71 run, errors=1: test_connection_cap_and_exclusive_attach... Raw.connect BlockingIOError EAGAIN",
+      "265s"
+    ],
+    [
+      "tests/backend discover (rerun)",
+      0,
+      "71 OK",
+      "263s"
+    ],
+    [
+      "test_connection_cap... alone x10 (extra)",
+      1,
+      "7 pass / 3 fail, same BlockingIOError at Raw(...).connect",
+      "-"
+    ],
+    [
+      "tests/contracts",
+      0,
+      "43 OK",
+      "<1s"
+    ],
+    [
+      "tests/terminal",
+      0,
+      "70 OK",
+      "540s"
+    ],
+    [
+      "tests/gates/g1_vt (src:.)",
+      0,
+      "85 OK",
+      "2s"
+    ],
+    [
+      "tests/gates/g4_lifetime (src:.)",
+      0,
+      "8 OK",
+      "<1s"
+    ],
+    [
+      "tests/gates/g2_shell (src:.)",
+      0,
+      "142 OK (skipped=1)",
+      "116s"
+    ]
+  ],
+  "failure_classification": {
+    "pty_send_failure": {
+      "class": "test",
+      "evidence": "실패 raw에 ?2004h/curses 출력이 전혀 없음 -> UI가 curses loop 진입 전 after_attach()에서 ConnectionLost로 return 1 (app.py L215-222), 이 경로는 2004h를 쓰지 않으므로 2004l도 없음. 테스트는 attach 수신 직후 server.closing+shutdown 하므로 UI 진입 시점과 race. 이전 rerun-07의 test_sigterm_restores_terminal 간헐 실패와 동일한 startup race 계열. 반복 재현: 55회 중 1회(단독 40/40 통과). production 변경 없음."
+    },
+    "backend_connection_cap": {
+      "class": "test (or listen backlog=8 in ui_server.py L91 vs 테스트가 20개 raw connect를 accept 대기 없이 연속 수행)",
+      "evidence": "AF_UNIX connect가 backlog 초과 시 EAGAIN; 단독 실행 3/10 재현, 전체 스위트 재실행 시 통과. 이전 라운드에서는 미관측이므로 부하(동시 delta review) 영향 가능성 있으나 미확정. Root 판단 필요(contract: backlog vs MAX_CONNECTIONS=16)."
+    }
+  },
+  "model_turns": 2,
+  "model_turns_note": "live 1회 실행, S10(manager reply WBOK42) + S12(esc cancel) 2 tiny turns",
+  "repo_changes": "none",
+  "frozen_hashes": {
+    "src/workbench/ui/product/__init__.py": "8b250db5...",
+    "src/workbench/ui/product/app.py": "4aad51ef...",
+    "src/workbench/ui/product/input.py": "ee5a9e92...",
+    "src/workbench/ui/product/model.py": "c890f6ab...",
+    "src/workbench/ui/product/view.py": "2c6b21ff...",
+    "src/workbench/backend/ui_server.py": "e6aa3e0b...",
+    "src/workbench/backend/cli.py": "9b44e484...",
+    "src/workbench/terminal/vt_g1/screen.py": "2dcb887e...",
+    "note": "start/end sha256 전부 동일하고 packet 값과도 일치"
+  },
+  "finding_test_hygiene": "tests/backend/tests/terminal이 TMPDIR 아래 cw03-g2-*/shell-init을 정상 종료 후에도 남김 (/tmp/r08 안에 1개 확인 후 삭제). CW-16 hygiene 대상.",
+  "residue": "/tmp/r08 삭제; 내 프로세스 없음; /tmp diff는 타 프로세스의 pyright-* 뿐; 기존 /tmp/cw03-g2-* 26개와 /tmp/cw06_*.txt 미접촉; scratchpad에만 로그/evidence 보존",
+  "evidence_dir": "/tmp/claude-1000/-home-dwchoo-ai-exp-assistant/15c9739f-c964-485c-9b56-aee81d926557/scratchpad"
+}

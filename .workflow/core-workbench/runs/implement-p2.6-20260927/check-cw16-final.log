@@ -1,0 +1,11 @@
+test_actual_bash_and_dash_canonical_matrix (test_cw16_runtime_matrix.Cw16RuntimeMatrixTests.test_actual_bash_and_dash_canonical_matrix) ... ok
+test_output_capture_has_a_hard_file_and_memory_bound (test_cw16_runtime_matrix.Cw16RuntimeMatrixTests.test_output_capture_has_a_hard_file_and_memory_bound) ... ok
+test_plain_tmux_and_herdr_outer_matrix (test_cw16_runtime_matrix.Cw16RuntimeMatrixTests.test_plain_tmux_and_herdr_outer_matrix) ... ok
+test_shell_selection_ignores_login_shell_and_fails_with_guidance (test_cw16_runtime_matrix.Cw16RuntimeMatrixTests.test_shell_selection_ignores_login_shell_and_fails_with_guidance) ... ok
+test_timeout_is_bounded_when_pipe_holder_drops_owner_token (test_cw16_runtime_matrix.Cw16RuntimeMatrixTests.test_timeout_is_bounded_when_pipe_holder_drops_owner_token) ... ok
+test_timeout_kills_detached_owned_descendants (test_cw16_runtime_matrix.Cw16RuntimeMatrixTests.test_timeout_kills_detached_owned_descendants) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 32.293s
+
+OK

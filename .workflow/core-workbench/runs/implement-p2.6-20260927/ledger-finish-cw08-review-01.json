@@ -1,0 +1,17 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 424,
+  "event": {
+    "id": "finish-cw08-review-01",
+    "kind": "transition",
+    "data": {
+      "invocation": "cw08-review-01",
+      "state": "finished",
+      "evidence": "collaboration final from /root/cw03_split_pg_review; P1 sendall timeout, P2 generation bool admission, P3 unmatched ACK retention",
+      "outcome": "partial",
+      "observed_model": "unverified",
+      "observed_effort": "unverified",
+      "not_started_evidence": null
+    }
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "invocation": "cw15-intent-test-01",
+  "outcome": "complete",
+  "candidate_ready": true,
+  "candidate_id": "d9ea1d5de9f371776d456f7d80d8f81a8f96eb77fca1ec158c2229a694f14e66",
+  "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw15-intent-test.json",
+  "production_frozen": true,
+  "test_only_delta": "tests/lifecycle/test_production_binding.py",
+  "transport_evidence": {
+    "timeline_ns": {
+      "invocation": 2174284695866053,
+      "intent_set": 2174284695908784,
+      "intent_observed": 2174284695918317,
+      "g3_return": 2174284696039240,
+      "durable_takeover": 2174284698604109
+    },
+    "deliver_frames": 0,
+    "api_calls": 0,
+    "replays": 0,
+    "receipt": "REJECTED api_called=false",
+    "history": "attempted->failed",
+    "command": "unknown preserved"
+  },
+  "negative_tokens": "missing current raises TypeError; throwing, false, and non-boolean truthy tokens hold; all cause zero TaskMailbox.deliver and zero worker deliveries",
+  "checks": {
+    "total": "388/388 passed (28 lifecycle plus 360 predecessors)",
+    "positive_delivery": "one separate command delivery",
+    "graphify_update": "passed",
+    "production_hashes": "all frozen hashes match",
+    "residue": "zero temp directories, threads or shell processes"
+  },
+  "sha256": {
+    "tests/lifecycle/test_production_binding.py": "6be0789c5413e0ff908b6806fdf72d13d415fc3f8cb730dbcab92b23c3096a10"
+  },
+  "pending": ["live external OMP", "real reboot"],
+  "mutation_owner": "/root/cw12_post_review_test"
+}

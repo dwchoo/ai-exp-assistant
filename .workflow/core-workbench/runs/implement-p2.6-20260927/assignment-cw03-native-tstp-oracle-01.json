@@ -1,0 +1,27 @@
+{
+  "incident_id": "cw03-native-tstp-control-contract",
+  "ticket_id": "CW-03",
+  "spec_revision": "s2.6",
+  "candidate_id": "c9ec5ed63ef04b3f0be19d17c75ca48193da3cea02ba0c905f27d532ff73fb3d",
+  "expected_behavior": "Without changing approved user-facing Ctrl-Z semantics, native child suspend/resume must not return the parent prompt before lifetime and input-return barriers, must not turn stopped status into main completion, and must preserve observable supervisor/control state or explicit sound unknown.",
+  "observed_behavior": "After correcting the fixture to re-deliver default SIGTSTP, Bash start/return shows SIGNAL_TSTP then READY before SIGNAL_CONT and INPUT_BARRIER; dash start/return shows RETURN:148 then WAIT while the supervisor remains alive. Parent-WAIT Bash/dash cells show TSTP ignored, not caught/blocked, in a separate PTY session leader and remain unknown.",
+  "reproducer_and_logs": "result-cw03-resume-correction-worker-01.json; worker broad suite 107 tests with 5 failures/1 error and live_combined exit 1; formal pre-worker baseline check-resume-broad-suite.log shows the legacy 11 failures now reconciled by the candidate delta.",
+  "attempted_approaches": [
+    "Marker-only SIGTSTP handler: unsound because it never stopped the supervisor.",
+    "Default SIGTSTP re-delivery in the supervisor: reveals Bash early parent READY/foreground PG restoration failure and dash stopped status misclassification.",
+    "Legacy direct-eval/prompt failures: retained as explicit negative controls and equivalent current child-exec regressions pass."
+  ],
+  "constraints": [
+    "Read-only advice; no file edits or runtime mutation.",
+    "Do not invent or change Ctrl-Z product policy.",
+    "Keep Bash-first and actual sh/dash fallback.",
+    "No cgroup requirement, Docker, extra privilege, or parent direct eval.",
+    "Unknown/no replay and input-return barrier remain mandatory."
+  ],
+  "unknowns": [
+    "Whether a separate experiment process group plus controlled tcsetpgrp is the smallest safe correction.",
+    "Whether supervisor should remain outside the signal target and forward stop/continue only to the experiment group.",
+    "How to prevent dash from treating stopped child status 148 as main return."
+  ],
+  "precise_question": "What is the smallest technically coherent control/process-group state machine that preserves the approved contract and makes native TSTP/CONT causal for Bash and dash? Specify required event ordering, waitpid flags/state handling, terminal foreground ownership, unknown transitions, and a discriminating runtime experiment. State whether the current approved decision is invalidated."
+}

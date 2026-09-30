@@ -1,0 +1,17 @@
+{
+  "invocation": "cw12-execution-flags-test-01",
+  "outcome": "complete",
+  "candidate_ready": true,
+  "product_mutation": false,
+  "test_only_changed_paths": ["tests/policy/pause_automation/test_pause_policy.py", "graphify-out/**"],
+  "checks": {
+    "execution_flag_focused": "8 passed in 1.391s",
+    "pause": "105 passed in 20.435s",
+    "topology": "manager and worker peer cwd paths both outside execution worktree",
+    "cases": "assume-unchanged, skip-worktree, flag removal/restore, observation errors, legacy baseline omission all passed",
+    "actual_omp": "omp/18.2.10 exit 0; reject-cleanup-reconcile-resume and zero_residue=true",
+    "graphify": "graphify update . exit 0"
+  },
+  "unknowns": ["Actual OMP end-to-end did not manipulate Git index flags; the flag topology used real Git and real process-backed peer fixtures."],
+  "mutation_owner": "/root/cw12_post_review_test"
+}

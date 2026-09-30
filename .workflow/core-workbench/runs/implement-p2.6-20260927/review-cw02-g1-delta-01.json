@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "invocation": "cw02-g1-delta-review-01",
+  "candidate": "a3eae7024ca8b9180d6d33281890de80ae688e90ae0214b991938b59419fd544",
+  "verdict": "pass",
+  "severity_counts": {"P0": 0, "P1": 0, "P2": 0, "P3": 0},
+  "closed_findings": [
+    {
+      "source": ".workflow/core-workbench/runs/implement-p2.6-20260927/review-cw02-g1-01.json",
+      "severity": "P2",
+      "title": "Wide glyph at the last inner column can overwrite the pane border",
+      "result": "closed",
+      "evidence": "A shared wcswidth guard excludes any glyph whose full display width exceeds the pane inner boundary in normal curses and RGB paths; RGB run end tracking uses display width. The 30-to-28 resize fixture rejects four clipped wide/combining subcases while preserving fitting wide, continuation-skip, combining, SGR grouping, and cursor restore behavior."
+    }
+  ],
+  "verified": [
+    "app.py and test_wide_boundary.py hashes matched candidate manifest a3eae7024ca8b9180d6d33281890de80ae688e90ae0214b991938b59419fd544.",
+    "Only those two files changed from the reviewed frozen candidate for this correction.",
+    "Independent PID/geometry tests and outer probe/predicate hashes were unchanged and their negative controls were not weakened.",
+    "No P0-P3 delta regression was found."
+  ],
+  "retained_unknowns": [
+    "Runtime was not re-executed by reviewer; recorded 61 tests and color/plain/Herdr runs remain separate evidence.",
+    "Physical font/pixel fidelity, Unicode-version width differences, some pyte wide-combining normalization, first concurrent plain unknown, and OMP query semantic consumption are not newly claimed."
+  ],
+  "runtime_reexecuted": false,
+  "source_or_test_files_modified": false,
+  "provenance": "Recorded by Root from delta reviewer final payload."
+}

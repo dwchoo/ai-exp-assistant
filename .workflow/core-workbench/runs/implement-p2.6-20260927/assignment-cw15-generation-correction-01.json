@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "invocation": "cw15-generation-correction-01",
+  "role": "worker_senior",
+  "unit": "V-CW-15-p2.6-current",
+  "authority": "User $implement request; approved CW-15/C-D52; fresh lost-intent handoff review",
+  "objective": "Prevent a successful handoff reopen from erasing a newer concurrent takeover request, preserving all established submission-claim and no-replay behavior.",
+  "candidate": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw15-claim-test.json",
+    "candidate_id": "575be7c7da45f1ae4584b6c1940f5f4a3c8153e1e83c7c8998e1605c3b8ba15d"
+  },
+  "required_changes": [
+    "Make every takeover intent set advance a monotonic fence generation. Handoff captures the generation it is returning and may reopen only if that exact generation is still current; a newer request makes reopen a no-op and stays revoked.",
+    "A successful conditional reopen must advance generation again so all older lifecycle permits remain invalid. Failure to reopen because of a newer request is not a handoff failure: durable manager control may exist, but automatic admission remains closed until that new takeover request is processed and later handed off.",
+    "Add a deterministic three-thread regression: handoff durably commits manager control, newer request sets intent before conditional reopen, automatic dispatch races, and both command/review remain zero after the newer invocation. Then allow the new request to acquire the lifecycle lock and prove its durable state is not lost.",
+    "Retain normal same-coordinator handoff reopening, external/commit failure closure, revoke-before-claim/claim-before-revoke semantics, exact epoch invalidation and token-negative behavior. Do not change the approved claim-as-submission linearization interpretation."
+  ],
+  "allowed_write_paths": ["src/workbench/app/**", "tests/lifecycle/**", "graphify-out/**"],
+  "constraints": ["Surgical generation-aware correction only. No other production/docs/workflow/PLAN/state, G3 protocol changes, external OMP/reboot, delegation, dependency installation, commit, publish, deploy or Docker. Use apply_patch; focused RED/GREEN and full non-live regressions, graphify/hash/residue."],
+  "report": "Return candidate_ready/needs_reroute; exact generation values/thread order/action counts/durable states; normal/failure handoff and submission-claim regressions; hashes/suites/residue/pending."
+}

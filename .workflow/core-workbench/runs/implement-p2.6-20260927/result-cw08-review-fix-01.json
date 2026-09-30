@@ -1,0 +1,105 @@
+{
+  "schema_version": 1,
+  "invocation": "cw08-review-fix-01",
+  "role": "worker",
+  "unit": "V-CW-08-p2.6-current",
+  "status": "candidate_ready",
+  "baseline_candidate": "46f9b307b7c85ab0524ed3fd6acec27265c319a03f96a8cfc639b9e302ffbec0",
+  "baseline_source_sha256": "3cb9a702070ef603df151ab217a951f40f4f15c753e0272f6b7913dde4bbaec6",
+  "candidate": "4bbae4e9dba234ba1e7ab1b5a3080b82ce1d2d14c217c03d496d17b14faed1b1",
+  "candidate_source_sha256": "45993a6589209f7daab625be331801ef5a4bf2c72233307308f9b8b7e08e6aaf",
+  "requirements_sha256": "2fa2a94f03fe18671123d25b355d193e6dc2f600c94eca061f588db699f91722",
+  "changed_files": [
+    "src/workbench/ipc/bridge_g3/mailbox.py"
+  ],
+  "findings": [
+    {
+      "id": "P1",
+      "status": "addressed",
+      "fix": "Use one monotonic deadline from request entry through peer wait, write-lock acquisition, bounded socket send and ACK wait. Socket writes use select plus MSG_DONTWAIT outside the condition; close clears state under the condition and shuts sockets down after releasing it.",
+      "pre_repro": "The exact frozen source blob (sha256 3cb9a702...) blocked both condition acquisition and close during a backpressured sendall; shutting down the socket drained the probe.",
+      "post_repro": "A 0.28s total budget with 0.12s peer-registration delay and missing ACK completed at 0.28s; a backpressured 4 MiB send timed out at 0.224s for a 0.22s budget. During a blocked send, another thread acquired the condition and close completed within 0.5s; the request thread drained."
+    },
+    {
+      "id": "P2",
+      "status": "addressed",
+      "fix": "Require type(generation) is int before generation equality in state and omp_event parsing and TaskMailbox readiness. Existing hello parsing already required exact int and remains unchanged.",
+      "pre_repro": "Frozen source accepted state generation True and 1.0, accepted a bool-generation event, and considered bool-generation readiness safe.",
+      "post_repro": "State values True, 1.0, \"1\" and null were all rejected; bool-generation event was not retained; readiness rejected bool. Hello generation True remains rejected."
+    },
+    {
+      "id": "P3",
+      "status": "addressed",
+      "fix": "Replace the unbounded ACK cache with a request-ID-keyed pending map. Receive accepts an ACK only for the current peer and an outstanding request, preserves the first matching ACK, and timeout/disconnect/close cleanup removes pending state.",
+      "pre_repro": "Frozen source retained an unsolicited ACK in _acks.",
+      "post_repro": "Unmatched and late ACKs were not retained; matching ACK completed its request; two concurrent requests completed with reverse-order ACKs correlated to the correct request IDs; pending state was empty afterward."
+    }
+  ],
+  "checks": [
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/bridge -v",
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "exit_code": 0,
+      "result": "passed",
+      "summary": "14 bridge tests, including independent mailbox boundary regressions."
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g3_omp /tmp/cw02-g1-venv/bin/python -m unittest -v test_g3_protocol test_tui_message_kinds_predicates test_tui_session_predicates test_tui_session_inflight_predicates test_tui_event_surface_predicates",
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "exit_code": 0,
+      "result": "passed",
+      "summary": "54 G3 protocol, readiness, session and event-surface regressions."
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/tasks -q",
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "exit_code": 0,
+      "result": "passed",
+      "summary": "22 Task repository tests."
+    },
+    {
+      "command": "node --experimental-strip-types --test tests/gates/g3_omp/bridge.test.ts",
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "exit_code": 0,
+      "result": "passed",
+      "summary": "19 G3 extension tests."
+    },
+    {
+      "command": "awk 'match($0, /[ \\t]+$/) { printf \"%d:%s\\n\", NR, $0; bad=1 } END { exit bad }' src/workbench/ipc/bridge_g3/mailbox.py && git diff --check",
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "exit_code": 0,
+      "result": "passed",
+      "summary": "No trailing whitespace or tracked-diff whitespace diagnostics."
+    }
+  ],
+  "focused_repros": {
+    "baseline_source": "cw08-frozen-candidate.json blob sha256 3cb9a702070ef603df151ab217a951f40f4f15c753e0272f6b7913dde4bbaec6; loaded in memory without modifying product files.",
+    "post_candidate": "AF_UNIX socketpair harnesses exercised peer wait + ACK deadline, 4 MiB send backpressure, condition acquisition/close progress, malformed generation typing, ACK filtering, and out-of-order concurrent ACK correlation.",
+    "process_state": "All focused-repro threads and temporary sockets were drained/closed."
+  },
+  "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw08-review-fix-after.json",
+  "scope_audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/scope-audit-cw08-review-fix.json",
+  "scope": {
+    "allowed_files": [
+      "src/workbench/ipc/bridge_g3/mailbox.py"
+    ],
+    "changed_paths": [
+      "src/workbench/ipc/bridge_g3/mailbox.py"
+    ],
+    "outside_scope": [],
+    "index_changed": [],
+    "independent_tests_modified": false,
+    "graphify_modified_by_this_invocation": false,
+    "audit_comparable": true,
+    "snapshot_stable": true
+  },
+  "runtime": {
+    "actual_omp_runtime_rerun": false,
+    "reason": "This bounded correction used direct AF_UNIX socketpair runtime repros; no new two-OMP process session was started."
+  },
+  "remaining_gaps": [
+    "Root owns fresh independent delta review and final integrated verification; this correction did not rerun a two-OMP session."
+  ],
+  "needs_oracle": false,
+  "commit_created": false
+}

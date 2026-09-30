@@ -1,0 +1,1 @@
+{"path":".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json","expected_revision":305,"event":{"id":"check-cw05-store-final-01","kind":"check","data":{"check_id":"cw05-lifetime-suite-final-01","path":".workflow/core-workbench/runs/implement-p2.6-20260927/check-cw05-store-observed.json","sha256":"e6e86f45af1beea5627e6e53cdec6d4972db71be112a59ac3a017d502eb996a5"}}}

@@ -1,0 +1,31 @@
+{
+  "invocation": "cw12-fence-protocol-test-01",
+  "role": "test_designer",
+  "unit": "V-CW-12-p2.6-current",
+  "objective": "Independently verify the frozen Oracle-protocol CW-12 candidate, focusing on authority-token and exact-peer transport linearization.",
+  "candidate_manifest": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw12-fence-protocol-test.json",
+  "candidate": "6b72a3f3df45355fd6102103c0205afd6bf12c550c6e2b408d2e63b4e3e330d6",
+  "evidence": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-lockcycle-review-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-fence-protocol-oracle-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-fence-protocol-correction-01.json"
+  ],
+  "write_scope": ["tests/policy/pause_*/**", "tests/observation/**", "tests/bridge/**", "tests/workflow/**", "tests/gates/g3_omp/**", "graphify-out/**"],
+  "must_verify": [
+    "Manifest and all relevant source hashes match before tests change.",
+    "A resume/bind open token captured before a newer close can never reopen the fence; repeat pause retains abort responsibility and original correlation.",
+    "A long action, callback, ACK, mirror publication, journal or repository delay does not delay local close or exact-bound manager pause/abort submission; later admission stays held.",
+    "Ticket/active/fence run and incarnation plus A-B-A binding nonce mismatches all reject without consuming/replaying the wrong ticket.",
+    "Delayed A cancellation/error after B bind is a no-op on B.",
+    "At the real G3 write_lock/condition/pending boundary, peer replacement, pair mismatch, and stale authority token send zero bytes and never retry replacement; post-pending replacement stays pinned to the original live peer.",
+    "Actual automatic OMP delivery uses the bound adapter; local arbitrary callback is not credited as exact-peer evidence.",
+    "All previously closed stop-event, durability, resume_failed, no-replay, real status/manual TUI and cleanup behavior remains intact."
+  ],
+  "verification": [
+    "Add only missing requirement-derived tests; repeat focused interleavings under barriers.",
+    "Run full pause, observation, bridge, workflow, G3 Python/TypeScript, status and actual OMP 18.2.10 probe.",
+    "Run graphify update . if test files change."
+  ],
+  "constraints": ["No production/contract/workflow evidence/ticket/PLAN/ledger edits.", "Use apply_patch for test edits; no destructive git, uv, local .venv, commit, publish, or deploy."],
+  "report": ["manifest/scope", "independent interleavings", "full/live results", "candidate_ready or needs_reroute"]
+}

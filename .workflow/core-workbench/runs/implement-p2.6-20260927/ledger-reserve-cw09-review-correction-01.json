@@ -1,0 +1,20 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 340,
+  "event": {
+    "id": "reserve-cw09-review-correction-01",
+    "kind": "reserve",
+    "data": {
+      "invocation": "cw09-review-correction-01",
+      "role": "worker",
+      "unit": "V-CW-09-p2.6-current",
+      "incident": "",
+      "purpose": "Fix CW-09 immutable-revision REPLACE and fail-closed migration review findings",
+      "model": "gpt-6-luna",
+      "effort": "max",
+      "buckets": ["total", "role:worker", "unit:V-CW-09-p2.6-current"],
+      "writer": true,
+      "workspace": "/home/dwchoo/ai-exp-assistant"
+    }
+  }
+}

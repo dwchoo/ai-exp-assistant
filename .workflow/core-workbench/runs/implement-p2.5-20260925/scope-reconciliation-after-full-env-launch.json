@@ -1,0 +1,6 @@
+{
+  "schema_version": 1,
+  "outside_scope_change": "graphify-out cache and generated graph files observed in the worker baseline audit",
+  "classification": "Root-attributable graphify query/update outputs created before the full env-launch worker mutation; preserved and excluded from worker output",
+  "overlap": false
+}

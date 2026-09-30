@@ -1,0 +1,82 @@
+{
+ "schema_version": 1,
+ "invocation": "p27-cw06-rerun-test-02",
+ "ticket_id": "CW-06",
+ "role": "test_designer",
+ "status": "needs_reroute",
+ "status_reason": "P-C-AC-14 (a) no visible cancel marker/ambiguous, (b) not exercised: model-turn budget exhausted (4 turns used, 2 unintended by tester error)",
+ "checks": [
+  {
+   "command": "tests/ui discover test_*.py x5",
+   "exit": 0,
+   "result": "91 OK each",
+   "duration_s": 9.4
+  },
+  {
+   "command": "tests/ui -p '*_independent.py' (also ran the live probe incl. 2 model turns, unintended)",
+   "exit": 0,
+   "result": "OK"
+  },
+  {
+   "command": "live_product_rerun_independent_p27e (NO_MODEL) F1-sh, S5 bash, F6-ui",
+   "exit": 0,
+   "result": "3 tests OK, 1 skipped, run twice",
+   "duration_s": 16
+  },
+  {
+   "command": "live ac14 test real OMP",
+   "exit": 1,
+   "result": "FAIL: no cancel marker",
+   "duration_s": 12.6
+  },
+  {
+   "command": "tests/backend",
+   "exit": 0,
+   "result": "OK",
+   "duration_s": 263
+  },
+  {
+   "command": "tests/contracts",
+   "exit": 0,
+   "result": "43 OK"
+  },
+  {
+   "command": "g1_vt",
+   "exit": 0,
+   "result": "63 OK"
+  },
+  {
+   "command": "g4_lifetime",
+   "exit": 0,
+   "result": "8 OK"
+  }
+ ],
+ "verdicts": {
+  "F1-F5": "pass 5/5 runs, no flake seen (first-run failure not reproduced)",
+  "F1_sh": "pass",
+  "S5_bash": "pass",
+  "F6_ui": "pass (footer shows held: user_owner, unsubmitted_or_unconsumed_input)",
+  "AC14a": "inconclusive: Esc at ~20 stopped at 42, no marker; earlier run reached 400 in 3s",
+  "AC14b": "not exercised",
+  "frozen_hashes_equal": true,
+  "residue": "none"
+ },
+ "files_added": [
+  "tests/ui/test_product_rerun_independent_p27e.py",
+  "tests/ui/live_product_rerun_independent_p27e.py"
+ ],
+ "model_turns_used": 4,
+ "model_turn_note": "2 unintended: full-module run and '*_independent.py' discover ran live probes with model enabled",
+ "addendum_root_redesign": {
+  "test": "live_product_rerun_independent_p27e.RerunLiveProbe.test_ac14_single_turn_sleep_tool_approval_and_esc (explicit name)",
+  "model_turns_used_in_addendum": 2,
+  "model_turns_total": 6,
+  "turn1": "harness failure (sleep detector filtered WBDONE7; tool had already finished 25 s wall). Screen showed tool ran with no approval prompt.",
+  "turn2": "detector broadened; still no separate `sleep 25` process found (tool likely runs in-process), so the exact-identity child check could not be observed.",
+  "b_approval": "not_applicable: OMP ran the shell tool without any approval prompt (2 runs, screen evidence: command box appears directly, no prompt lines)",
+  "a_esc": "pass by screen: tool box running ~5.8 s, Esc -> box shows 'Command aborted', hint '↻ F5 to Retry', WBDONE7 output never appeared (40 s window)",
+  "child_check": "not verifiable: no `sleep 25` process ever observed under OMP/project cwd; post-shutdown residue empty (identities, session members, sockets)",
+  "test_status": "the test method still FAILS on the 'running child seen' assertion (harness limit, left unweakened)",
+  "status": "a/b evidence obtained; child-process check open -> Root decides"
+ }
+}

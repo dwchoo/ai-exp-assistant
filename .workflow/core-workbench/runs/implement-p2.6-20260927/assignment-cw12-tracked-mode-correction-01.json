@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "invocation": "cw12-tracked-mode-correction-01",
+  "role": "worker_senior",
+  "unit": "V-CW-12-p2.6-current",
+  "authority": "User $implement docs/features/core-workbench request; approved PLAN p2.6 CW-12 and independent failing regression",
+  "objective": "Detect non-Git-visible permission changes for all tracked files without hashing clean content.",
+  "base": {"snapshot":".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw12-file-mode-correction.json","candidate_id":"01ee9848ee006f3bd2705e7fbbc1bb7b889a2334a8efe92b3ed48ec6e8710040","failing_test":"test_execution_tracked_nonexecutable_chmod_outside_scope_blocks_resume"},
+  "required_corrections": [
+    "For Git peer and execution worktrees, boundedly enumerate all tracked paths and capture path-to-full-st_mode metadata at the early baseline without reading clean file contents.",
+    "At resume, compare tracked mode maps and treat changed paths as file deltas subject to current approved paths; missing/special/unreadable paths, path-list overflow, output overflow, or mutation fail closed.",
+    "Keep changed/flagged content hashing and large clean repo liveness; use a separate explicit tracked-mode entry/output bound high enough for the representative 2050-file fixture.",
+    "Make the preserved 0644-to-0600 execution regression pass and add peer tracked non-executable chmod, approved-path chmod, path removal, and tracked-mode bound/error cases."
+  ],
+  "allowed_write_paths": ["src/workbench/policy/pause_automation/**", "tests/policy/pause_automation/**", "graphify-out/**"],
+  "constraints": ["Sole product mutation owner; preserve prior fixes/tests.", "Use apply_patch; no .workflow/docs/PLAN/state or other product edits.", "No delegation, commit, publish, deploy, or Docker.", "Run preserved failing test first, focused tracked-mode/large-repo cases, full policy, graphify update ."],
+  "report": "Return changed paths, tracked-mode bounds/format, checks/counts, candidate_ready/blocker, and residual risks."
+}

@@ -1,0 +1,1290 @@
+{
+  "schema_version": 1,
+  "invocation": "cw02-g1-closure-01",
+  "ticket": "CW-02",
+  "unit": "V-CW-02-p2.6-current",
+  "status": "candidate-ready",
+  "task_result": "candidate_ready",
+  "root_verification_pending": true,
+  "baseline": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw02-g1-worker-before.json",
+  "after_snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw02-g1-worker-after.json",
+  "scope_audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/scope-audit-cw02-g1-worker.json",
+  "candidate": "41d508cb7a017906e42e03f75e5b6f55a28ce894990f5f62dfd08c48c01fbe42",
+  "changed_files": [
+    "src/workbench/terminal/vt_g1/screen.py",
+    "src/workbench/ui/terminal_g1/app.py",
+    "tests/gates/g1_vt/live_color_probe.py",
+    "tests/gates/g1_vt/live_outer_compat_probe.py",
+    "tests/gates/g1_vt/test_closure_predicates.py"
+  ],
+  "additional_generated_scope": "graphify-out/**",
+  "attributable_delta": {
+    "renderer": "COLORTERM=truecolor에서 RGB cell을 curses layout refresh 후 exact SGR로 출력한다. 연속 cell의 cursor/style를 합쳐 bounded runtime의 rendering backpressure를 줄인다. 기존 palette fallback, pane/input/resize 경로는 유지한다.",
+    "vt": "pyte가 거부하던 private DSR keyword를 수용한다. private CPR(6)은 DEC CPR로 응답하고 unknown private DSR(관측996)은 no-op이며 지원하지 않는 capability를 주장하지 않는다.",
+    "probes": "실제 OMP local-provider text/strong/italic output을 동일 78x41 frame으로 replay하고 real curses Workbench outer PTY bytes/RGB/emphasis와 비교한다. plain PTY 및 실제 isolated non-nested Herdr attach에서 fresh 3-pane normal input, bracketed multiline paste, resize와 alternate restore/cleanup을 확인한다.",
+    "negative_controls": "RGB 근사, data 불일치, bold/italic 손실, static/parser-only evidence, stale input/paste, cross-route, wrong geometry/PID, restore/cleanup 및 Herdr isolation/default-state 불일치를 거부한다."
+  },
+  "checks": [
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g1_vt /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/gates/g1_vt -p 'test_*.py' -v",
+      "exit_code": 0,
+      "tests": 52,
+      "duration_seconds": 1.057
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g1_vt /tmp/cw02-g1-venv/bin/python tests/gates/g1_vt/live_color_probe.py",
+      "exit_code": 0,
+      "evidence_key": "color"
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g1_vt /tmp/cw02-g1-venv/bin/python tests/gates/g1_vt/live_outer_compat_probe.py",
+      "exit_code": 0,
+      "evidence_key": "plain"
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g1_vt /tmp/cw02-g1-venv/bin/python tests/gates/g1_vt/live_outer_compat_probe.py --herdr",
+      "exit_code": 0,
+      "evidence_key": "herdr"
+    },
+    {
+      "command": "env -u HERDR_BIN_PATH -u HERDR_ENV -u HERDR_PANE_ID -u HERDR_SOCKET_PATH -u HERDR_TAB_ID -u HERDR_WORKSPACE_ID PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g1_vt /tmp/cw02-g1-venv/bin/python tests/gates/g1_vt/live_normal_resize_probe.py",
+      "exit_code": 0,
+      "evidence_key": "resize"
+    },
+    {
+      "command": "env -u HERDR_BIN_PATH -u HERDR_ENV -u HERDR_PANE_ID -u HERDR_SOCKET_PATH -u HERDR_TAB_ID -u HERDR_WORKSPACE_ID PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g1_vt /tmp/cw02-g1-venv/bin/python tests/gates/g1_vt/live_runtime_probe.py",
+      "exit_code": 0,
+      "evidence_key": "tool"
+    },
+    {
+      "command": "env -u HERDR_BIN_PATH -u HERDR_ENV -u HERDR_PANE_ID -u HERDR_SOCKET_PATH -u HERDR_TAB_ID -u HERDR_WORKSPACE_ID PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g1_vt /tmp/cw02-g1-venv/bin/python tests/gates/g1_vt/live_three_pane_resize_probe.py",
+      "exit_code": 0,
+      "evidence_key": "three"
+    },
+    {
+      "command": "env -u HERDR_BIN_PATH -u HERDR_ENV -u HERDR_PANE_ID -u HERDR_SOCKET_PATH -u HERDR_TAB_ID -u HERDR_WORKSPACE_ID PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g1_vt /tmp/cw02-g1-venv/bin/python tests/gates/g1_vt/live_outer_tmux_probe.py",
+      "exit_code": 0,
+      "evidence_key": "tmux"
+    },
+    {
+      "command": "graphify update .",
+      "exit_code": 0,
+      "AST_only": true,
+      "semantic_LLM_used": false
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0
+    }
+  ],
+  "runtime_evidence": {
+    "color": {
+      "COLORTERM": "truecolor",
+      "FORCE_COLOR": "3",
+      "NO_COLOR": "removed for original OMP",
+      "TERM": "xterm-256color",
+      "cleaned": true,
+      "diagnostic_text_styles": {
+        "G1_COLOR_BOLD": {
+          "bg": "default",
+          "bold": true,
+          "fg": "default",
+          "italics": false,
+          "underscore": false
+        },
+        "G1_COLOR_ITALIC": {
+          "bg": "default",
+          "bold": false,
+          "fg": "default",
+          "italics": true,
+          "underscore": false
+        },
+        "G1_COLOR_NORMAL": {
+          "bg": "default",
+          "bold": false,
+          "fg": "default",
+          "italics": false,
+          "underscore": false
+        }
+      },
+      "distinct_rgb_foregrounds": [
+        "00b4ff",
+        "07d5e5",
+        "0ad3e5",
+        "0dd0e5",
+        "0f1216",
+        "14cae6",
+        "1bc5e7",
+        "1f252d",
+        "21bfe8",
+        "2a3038",
+        "2fb4e9",
+        "32b2e9",
+        "3998bf",
+        "3ca9eb",
+        "40a7eb",
+        "4a5058",
+        "4a9eec",
+        "5793ed",
+        "6488ef",
+        "6b7280",
+        "727df0",
+        "7f72f2",
+        "8c67f3",
+        "9ca3b0",
+        "ab5feb",
+        "b661e8",
+        "c865e3",
+        "d167e0",
+        "d4c090",
+        "de5dd9",
+        "e5e5e7",
+        "e657d4",
+        "e856d3",
+        "e8ecf4",
+        "f150cf",
+        "f350ce",
+        "f64fcd",
+        "ffb347"
+      ],
+      "exact_rgb_and_emphasis": true,
+      "live_omp_ready": true,
+      "matched_geometry": true,
+      "mismatch_attributes": {
+        "bg": 0,
+        "bold": 0,
+        "data": 0,
+        "fg": 0,
+        "italics": 0,
+        "reverse": 0,
+        "underscore": 0
+      },
+      "mismatch_samples": [],
+      "mismatched_cells": 0,
+      "omp_version": "omp/18.2.10",
+      "original_output_bytes": 85860,
+      "original_output_sha256": "c4dd7ecebcd403d51810b9b78ae32524751c5d082dfb68cb6dc8e66e0da634f9",
+      "pids": {
+        "original_omp": 3865963,
+        "replay_and_idle_children": [
+          3866043,
+          3866044,
+          3866045
+        ],
+        "workbench": 3866042
+      },
+      "provider_requests": 1,
+      "real_renderer_ready": true,
+      "result": "passed",
+      "rgb_emphasis_distinguishable": true,
+      "rgb_sgr_in_original_bytes": true,
+      "rgb_sgr_in_rendered_bytes": true,
+      "rgb_text_cells": 810,
+      "same_output_replayed": true,
+      "stale_herdr_context_removed": [
+        "HERDR_BIN_PATH",
+        "HERDR_ENV",
+        "HERDR_PANE_ID",
+        "HERDR_SOCKET_PATH",
+        "HERDR_TAB_ID",
+        "HERDR_WORKSPACE_ID"
+      ],
+      "theme": "same captured live OMP frame"
+    },
+    "plain": {
+      "alternate_before_exit": true,
+      "app_pid": 3865885,
+      "children_cleaned": true,
+      "fresh_after": [
+        true,
+        true,
+        true
+      ],
+      "fresh_before": [
+        true,
+        true,
+        true
+      ],
+      "fresh_input": true,
+      "initial": {
+        "child_pids": [
+          3865886,
+          3865887,
+          3865888
+        ],
+        "child_sizes": [
+          [
+            78,
+            41
+          ],
+          [
+            78,
+            41
+          ],
+          [
+            78,
+            41
+          ]
+        ],
+        "cross_routed": [
+          false,
+          false,
+          false
+        ],
+        "target": [
+          true,
+          true,
+          true
+        ],
+        "titles": [
+          true,
+          true,
+          true
+        ]
+      },
+      "local_alternate_restored": true,
+      "mode": "plain",
+      "omp_version": "omp/18.2.10",
+      "outer_cleaned": true,
+      "owned_child_pids": [
+        3865886,
+        3865887,
+        3865888
+      ],
+      "paste_checks": [
+        true,
+        true,
+        true
+      ],
+      "paste_fresh_and_routed": true,
+      "private_dsr_queries": [],
+      "resize_propagated": true,
+      "result": "passed",
+      "sizes": [
+        {
+          "app": [
+            210,
+            39
+          ],
+          "children": [
+            [
+              68,
+              35
+            ],
+            [
+              68,
+              35
+            ],
+            [
+              68,
+              35
+            ]
+          ],
+          "cross_routed": false,
+          "outer": [
+            210,
+            39
+          ],
+          "propagated": true,
+          "stable_pids": true
+        },
+        {
+          "app": [
+            240,
+            45
+          ],
+          "children": [
+            [
+              78,
+              41
+            ],
+            [
+              78,
+              41
+            ],
+            [
+              78,
+              41
+            ]
+          ],
+          "cross_routed": false,
+          "outer": [
+            240,
+            45
+          ],
+          "propagated": true,
+          "stable_pids": true
+        }
+      ],
+      "stale_herdr_context_removed": [
+        "HERDR_BIN_PATH",
+        "HERDR_ENV",
+        "HERDR_PANE_ID",
+        "HERDR_SOCKET_PATH",
+        "HERDR_TAB_ID",
+        "HERDR_WORKSPACE_ID"
+      ],
+      "startup_ready": true,
+      "three_pane_routing": true
+    },
+    "herdr": {
+      "alternate_before_exit": true,
+      "app_pid": 3866449,
+      "children_cleaned": true,
+      "default_state_unchanged": true,
+      "fresh_after": [
+        true,
+        true,
+        true
+      ],
+      "fresh_before": [
+        true,
+        true,
+        true
+      ],
+      "fresh_input": true,
+      "herdr_version": "herdr 0.9.1",
+      "initial": {
+        "child_pids": [
+          3866475,
+          3866476,
+          3866477
+        ],
+        "child_sizes": [
+          [
+            78,
+            40
+          ],
+          [
+            78,
+            40
+          ],
+          [
+            78,
+            40
+          ]
+        ],
+        "cross_routed": [
+          false,
+          false,
+          false
+        ],
+        "target": [
+          true,
+          true,
+          true
+        ],
+        "titles": [
+          true,
+          true,
+          true
+        ]
+      },
+      "isolated_session_paths": true,
+      "local_alternate_restored": true,
+      "mode": "herdr",
+      "non_nested_attach": true,
+      "omp_version": "omp/18.2.10",
+      "outer_cleaned": true,
+      "owned_child_pids": [
+        3866475,
+        3866476,
+        3866477
+      ],
+      "pane_list": {
+        "id": "cli:pane:list",
+        "result": {
+          "panes": [
+            {
+              "agent_status": "unknown",
+              "cwd": "/home/dwchoo/ai-exp-assistant",
+              "focused": true,
+              "foreground_cwd": "/home/dwchoo/ai-exp-assistant",
+              "pane_id": "w1:p1",
+              "revision": 1,
+              "scroll": {
+                "max_offset_from_bottom": 0,
+                "offset_from_bottom": 0,
+                "viewport_rows": 44
+              },
+              "tab_id": "w1:t1",
+              "terminal_id": "term_65c7b4e9d1d081",
+              "terminal_title": "dwchoo@dwchoo-mini-pc: ~/ai-exp-assistant",
+              "terminal_title_stripped": "dwchoo@dwchoo-mini-pc: ~/ai-exp-assistant",
+              "workspace_id": "w1"
+            }
+          ],
+          "type": "pane_list"
+        }
+      },
+      "pane_run_exit": 0,
+      "paste_checks": [
+        true,
+        true,
+        true
+      ],
+      "paste_fresh_and_routed": true,
+      "private_dsr_queries": [
+        996
+      ],
+      "resize_propagated": true,
+      "result": "passed",
+      "session_delete_exit": 0,
+      "session_deleted": true,
+      "session_stop_exit": 0,
+      "sizes": [
+        {
+          "app": [
+            210,
+            38
+          ],
+          "children": [
+            [
+              68,
+              34
+            ],
+            [
+              68,
+              34
+            ],
+            [
+              68,
+              34
+            ]
+          ],
+          "cross_routed": false,
+          "outer": [
+            210,
+            39
+          ],
+          "propagated": true,
+          "stable_pids": true
+        },
+        {
+          "app": [
+            240,
+            44
+          ],
+          "children": [
+            [
+              78,
+              40
+            ],
+            [
+              78,
+              40
+            ],
+            [
+              78,
+              40
+            ]
+          ],
+          "cross_routed": false,
+          "outer": [
+            240,
+            45
+          ],
+          "propagated": true,
+          "stable_pids": true
+        }
+      ],
+      "stale_herdr_context_removed": [
+        "HERDR_BIN_PATH",
+        "HERDR_ENV",
+        "HERDR_PANE_ID",
+        "HERDR_SOCKET_PATH",
+        "HERDR_TAB_ID",
+        "HERDR_WORKSPACE_ID"
+      ],
+      "startup_ready": true,
+      "three_pane_routing": true
+    },
+    "resize": {
+      "cases": [
+        {
+          "approval_before": {
+            "approval_visible": true,
+            "child_size": [
+              100,
+              32
+            ],
+            "composer_rows": [],
+            "composer_visible": false,
+            "marker_in_composer": false,
+            "marker_rows": [
+              16,
+              24
+            ],
+            "marker_visible": true,
+            "screen_size": [
+              100,
+              32
+            ]
+          },
+          "approval_pre_quiet": false,
+          "approval_resize_passed": false,
+          "approval_restored": {
+            "approval_visible": true,
+            "child_size": [
+              100,
+              32
+            ],
+            "composer_rows": [],
+            "composer_visible": false,
+            "marker_in_composer": false,
+            "marker_rows": [
+              16,
+              24
+            ],
+            "marker_visible": true,
+            "screen_size": [
+              100,
+              32
+            ],
+            "surface_redraw_seen": false
+          },
+          "approval_small": {
+            "approval_visible": true,
+            "child_size": [
+              100,
+              32
+            ],
+            "composer_rows": [],
+            "composer_visible": false,
+            "marker_in_composer": false,
+            "marker_rows": [
+              16,
+              24
+            ],
+            "marker_visible": true,
+            "screen_size": [
+              100,
+              32
+            ],
+            "surface_redraw_seen": false
+          },
+          "approval_visible": true,
+          "artifact_absent_after_resize": true,
+          "artifact_absent_before_approval": true,
+          "child_cleaned": true,
+          "child_pid": 3867546,
+          "clear_ack": true,
+          "draft_before": {
+            "approval_visible": false,
+            "child_size": [
+              100,
+              32
+            ],
+            "composer_rows": [
+              25
+            ],
+            "composer_visible": true,
+            "marker_in_composer": true,
+            "marker_rows": [
+              26
+            ],
+            "marker_visible": true,
+            "screen_size": [
+              100,
+              32
+            ]
+          },
+          "draft_pre_quiet": true,
+          "draft_resize_passed": false,
+          "draft_restored": {
+            "approval_visible": false,
+            "child_size": [
+              100,
+              32
+            ],
+            "composer_rows": [
+              30
+            ],
+            "composer_visible": true,
+            "marker_in_composer": true,
+            "marker_rows": [
+              31
+            ],
+            "marker_visible": true,
+            "screen_size": [
+              100,
+              32
+            ],
+            "surface_redraw_seen": false
+          },
+          "draft_small": {
+            "approval_visible": false,
+            "child_size": [
+              100,
+              32
+            ],
+            "composer_rows": [
+              30
+            ],
+            "composer_visible": true,
+            "marker_in_composer": true,
+            "marker_rows": [
+              31
+            ],
+            "marker_visible": true,
+            "screen_size": [
+              100,
+              32
+            ],
+            "surface_redraw_seen": false
+          },
+          "draft_typed": true,
+          "final_visible": true,
+          "input_after_resize": true,
+          "mode": "no_resize",
+          "provider_followup": true,
+          "provider_received_full_draft": true,
+          "provider_requested": true,
+          "pty_bytes_drained": 199473,
+          "startup_ready": true,
+          "tool_output_visible": true
+        },
+        {
+          "approval_before": {
+            "approval_visible": true,
+            "child_size": [
+              100,
+              32
+            ],
+            "composer_rows": [],
+            "composer_visible": false,
+            "marker_in_composer": false,
+            "marker_rows": [
+              16,
+              24
+            ],
+            "marker_visible": true,
+            "screen_size": [
+              100,
+              32
+            ]
+          },
+          "approval_pre_quiet": false,
+          "approval_resize_passed": false,
+          "approval_restored": {
+            "approval_visible": false,
+            "child_size": [
+              100,
+              32
+            ],
+            "composer_rows": [],
+            "composer_visible": false,
+            "marker_in_composer": false,
+            "marker_rows": [
+              8,
+              16
+            ],
+            "marker_visible": true,
+            "screen_size": [
+              100,
+              32
+            ],
+            "surface_redraw_seen": false
+          },
+          "approval_small": {
+            "approval_visible": false,
+            "child_size": [
+              100,
+              32
+            ],
+            "composer_rows": [],
+            "composer_visible": false,
+            "marker_in_composer": false,
+            "marker_rows": [
+              8,
+              16
+            ],
+            "marker_visible": true,
+            "screen_size": [
+              84,
+              24
+            ],
+            "surface_redraw_seen": false
+          },
+          "approval_visible": true,
+          "artifact_absent_after_resize": true,
+          "artifact_absent_before_approval": true,
+          "child_cleaned": true,
+          "child_pid": 3868759,
+          "clear_ack": true,
+          "draft_before": {
+            "approval_visible": false,
+            "child_size": [
+              100,
+              32
+            ],
+            "composer_rows": [
+              26
+            ],
+            "composer_visible": true,
+            "marker_in_composer": true,
+            "marker_rows": [
+              27
+            ],
+            "marker_visible": true,
+            "screen_size": [
+              100,
+              32
+            ]
+          },
+          "draft_pre_quiet": true,
+          "draft_resize_passed": false,
+          "draft_restored": {
+            "approval_visible": false,
+            "child_size": [
+              100,
+              32
+            ],
+            "composer_rows": [
+              22
+            ],
+            "composer_visible": true,
+            "marker_in_composer": true,
+            "marker_rows": [
+              23
+            ],
+            "marker_visible": true,
+            "screen_size": [
+              100,
+              32
+            ],
+            "surface_redraw_seen": false
+          },
+          "draft_small": {
+            "approval_visible": false,
+            "child_size": [
+              100,
+              32
+            ],
+            "composer_rows": [
+              22
+            ],
+            "composer_visible": true,
+            "marker_in_composer": true,
+            "marker_rows": [
+              23
+            ],
+            "marker_visible": true,
+            "screen_size": [
+              84,
+              24
+            ],
+            "surface_redraw_seen": false
+          },
+          "draft_typed": true,
+          "final_visible": true,
+          "input_after_resize": true,
+          "mode": "screen_only",
+          "provider_followup": true,
+          "provider_received_full_draft": true,
+          "provider_requested": true,
+          "pty_bytes_drained": 203652,
+          "startup_ready": true,
+          "tool_output_visible": true
+        },
+        {
+          "approval_before": {
+            "approval_visible": true,
+            "child_size": [
+              100,
+              32
+            ],
+            "composer_rows": [],
+            "composer_visible": false,
+            "marker_in_composer": false,
+            "marker_rows": [
+              16,
+              24
+            ],
+            "marker_visible": true,
+            "screen_size": [
+              100,
+              32
+            ]
+          },
+          "approval_pre_quiet": false,
+          "approval_resize_passed": true,
+          "approval_restored": {
+            "approval_visible": true,
+            "child_size": [
+              100,
+              32
+            ],
+            "composer_rows": [],
+            "composer_visible": false,
+            "marker_in_composer": false,
+            "marker_rows": [
+              16,
+              24
+            ],
+            "marker_visible": true,
+            "screen_size": [
+              100,
+              32
+            ],
+            "surface_redraw_seen": true
+          },
+          "approval_small": {
+            "approval_visible": true,
+            "child_size": [
+              84,
+              24
+            ],
+            "composer_rows": [],
+            "composer_visible": false,
+            "marker_in_composer": false,
+            "marker_rows": [
+              8,
+              16
+            ],
+            "marker_visible": true,
+            "screen_size": [
+              84,
+              24
+            ],
+            "surface_redraw_seen": true
+          },
+          "approval_visible": true,
+          "artifact_absent_after_resize": true,
+          "artifact_absent_before_approval": true,
+          "child_cleaned": true,
+          "child_pid": 3868976,
+          "clear_ack": true,
+          "draft_before": {
+            "approval_visible": false,
+            "child_size": [
+              100,
+              32
+            ],
+            "composer_rows": [
+              26
+            ],
+            "composer_visible": true,
+            "marker_in_composer": true,
+            "marker_rows": [
+              27
+            ],
+            "marker_visible": true,
+            "screen_size": [
+              100,
+              32
+            ]
+          },
+          "draft_pre_quiet": false,
+          "draft_resize_passed": true,
+          "draft_restored": {
+            "approval_visible": false,
+            "child_size": [
+              100,
+              32
+            ],
+            "composer_rows": [
+              30
+            ],
+            "composer_visible": true,
+            "marker_in_composer": true,
+            "marker_rows": [
+              31
+            ],
+            "marker_visible": true,
+            "screen_size": [
+              100,
+              32
+            ],
+            "surface_redraw_seen": true
+          },
+          "draft_small": {
+            "approval_visible": false,
+            "child_size": [
+              84,
+              24
+            ],
+            "composer_rows": [
+              22
+            ],
+            "composer_visible": true,
+            "marker_in_composer": true,
+            "marker_rows": [
+              23
+            ],
+            "marker_visible": true,
+            "screen_size": [
+              84,
+              24
+            ],
+            "surface_redraw_seen": true
+          },
+          "draft_typed": true,
+          "final_visible": true,
+          "input_after_resize": true,
+          "mode": "normal",
+          "provider_followup": true,
+          "provider_received_full_draft": true,
+          "provider_requested": true,
+          "pty_bytes_drained": 293771,
+          "startup_ready": true,
+          "tool_output_visible": true
+        }
+      ],
+      "gate_status": "pending",
+      "normal_resize_confirmed": true,
+      "omp_version": "omp/18.2.10"
+    },
+    "tool": {
+      "approval_surface_present_after_resize": true,
+      "approval_visible": true,
+      "artifact_absent_before_approval": true,
+      "artifact_absent_on_approval_ui": true,
+      "artifact_present_after_approval": true,
+      "child_exit_before_cleanup": null,
+      "child_pid": 3867596,
+      "composer_ready": true,
+      "final_visible": true,
+      "gate_status": "pending",
+      "no_resize_control_redraw_anchor_seen": true,
+      "normal_resize_confirmed": false,
+      "normal_resize_result": "inconclusive_no_resize_control_redrew",
+      "omp_version": "omp/18.2.10",
+      "post_continue_pty_bytes_drained": 43116,
+      "post_continue_redraw_anchor_seen": true,
+      "pre_resize_child_stopped": true,
+      "pre_resize_output_quiet": true,
+      "pre_resize_pty_bytes_drained": 0,
+      "provider_followup_observed": true,
+      "provider_requests": 2,
+      "pty_bytes_drained": 104023,
+      "query_replies_before_resize": 9,
+      "query_replies_total": 10,
+      "query_reply_bytes_accepted": 52,
+      "query_reply_consumption_level": "tty_input_drained",
+      "query_reply_omp_interpretation_confirmed": false,
+      "query_reply_queue_drained": true,
+      "query_reply_tty_canonical": false,
+      "query_reply_tty_input_drained": true,
+      "query_reply_tty_pending_bytes": 0,
+      "resize_child_columns": 84,
+      "resize_child_rows": 24,
+      "result": "approval_tool_scenario_passed",
+      "scenario": "approval_tool_roundtrip",
+      "scenario_passed": true,
+      "tool_output_visible": true
+    },
+    "three": {
+      "children_cleaned": true,
+      "initial": {
+        "child_pids": [
+          3865481,
+          3865482,
+          3865483
+        ],
+        "child_sizes": [
+          [
+            78,
+            41
+          ],
+          [
+            78,
+            41
+          ],
+          [
+            78,
+            41
+          ]
+        ],
+        "marker_in_other_panes": [
+          false,
+          false,
+          false
+        ],
+        "marker_in_target": [
+          true,
+          true,
+          false
+        ],
+        "outer_size": [
+          240,
+          45
+        ],
+        "pane_title_visible": [
+          true,
+          true,
+          true
+        ]
+      },
+      "observed_child_count": 3,
+      "omp_version": "omp/18.2.10",
+      "outer_cleaned": true,
+      "pty_bytes_drained": 792978,
+      "restored_routed": {
+        "child_pids": [
+          3865481,
+          3865482,
+          3865483
+        ],
+        "child_sizes": [
+          [
+            78,
+            41
+          ],
+          [
+            78,
+            41
+          ],
+          [
+            78,
+            41
+          ]
+        ],
+        "marker_in_other_panes": [
+          false,
+          false,
+          false
+        ],
+        "marker_in_target": [
+          true,
+          true,
+          true
+        ],
+        "outer_size": [
+          240,
+          45
+        ],
+        "pane_title_visible": [
+          true,
+          true,
+          true
+        ]
+      },
+      "small": {
+        "child_pids": [
+          3865481,
+          3865482,
+          3865483
+        ],
+        "child_sizes": [
+          [
+            68,
+            35
+          ],
+          [
+            68,
+            35
+          ],
+          [
+            68,
+            35
+          ]
+        ],
+        "marker_in_other_panes": [
+          false,
+          false,
+          false
+        ],
+        "marker_in_target": [
+          true,
+          true,
+          false
+        ],
+        "outer_size": [
+          210,
+          39
+        ],
+        "pane_title_visible": [
+          true,
+          true,
+          true
+        ]
+      },
+      "small_routed": {
+        "child_pids": [
+          3865481,
+          3865482,
+          3865483
+        ],
+        "child_sizes": [
+          [
+            68,
+            35
+          ],
+          [
+            68,
+            35
+          ],
+          [
+            68,
+            35
+          ]
+        ],
+        "marker_in_other_panes": [
+          false,
+          false,
+          false
+        ],
+        "marker_in_target": [
+          true,
+          true,
+          true
+        ],
+        "outer_size": [
+          210,
+          39
+        ],
+        "pane_title_visible": [
+          true,
+          true,
+          true
+        ]
+      },
+      "startup_ready": true,
+      "three_pane_resize_confirmed": true
+    },
+    "tmux": {
+      "alternate_before_quit": true,
+      "child_pids": [
+        3865568,
+        3865569,
+        3865570
+      ],
+      "fresh_input_after": {
+        "host": true,
+        "manager": true,
+        "manager_append": true,
+        "worker": true,
+        "worker_append": true
+      },
+      "fresh_input_before": {
+        "host": true,
+        "manager": true,
+        "manager_append": true,
+        "worker": true,
+        "worker_append": true
+      },
+      "input_routed": true,
+      "local_vt_restored": true,
+      "paste_absent_before": true,
+      "paste_visible": true,
+      "post_exit_bytes": 130,
+      "post_exit_drain": "eof",
+      "processes_cleaned": true,
+      "pty_bytes_drained": 563710,
+      "resize_observed": true,
+      "result": "observed",
+      "startup_at_18s": [
+        true,
+        true,
+        true
+      ],
+      "startup_ready": true,
+      "tmux_client_cleaned": true,
+      "tmux_new_session_exit": 0,
+      "tmux_pane_pid": 3865560,
+      "tmux_pane_term": "tmux-256color",
+      "tmux_server_pid": 3865559,
+      "tmux_socket_removed": true,
+      "tmux_window_initial": "240x44",
+      "tmux_window_restored": "240x44",
+      "tmux_window_small": "210x38",
+      "versions": {
+        "omp": "omp/18.2.10",
+        "tmux": "tmux 3.4"
+      }
+    }
+  },
+  "discriminating_attempts": [
+    {
+      "stage": "before renderer correction",
+      "observation": "real original OMP RGB SGR=true; real Workbench RGB SGR=false; 611 RGB text cells mismatched. 당시 emphasis가 NO_COLOR 상속으로 비활성화된 부분 결과를 G1 pass로 해석하지 않았다."
+    },
+    {
+      "stage": "color final-frame correction",
+      "observation": "actual OMP formatting은 FORCE_COLOR=3 및 NO_COLOR 제거로 bold/italic을 구분했다. output 전체가 real renderer에 수렴하기 전에 verdict를 내리지 않도록 비교 boundary를 보완했다."
+    },
+    {
+      "stage": "Herdr initial actual attach",
+      "observation": "격리는 성립했으나 actual private DSR996에서 pyte TypeError를 관측했다. private DSR handling 수정 후 no false capability/no crash로 재검증했다. owned session은 stop/delete했고 default state를 변경하지 않았다."
+    },
+    {
+      "stage": "outer freshness/resize boundary",
+      "observation": "초기 plain runtime에서 late repaint 때문에 bounded fresh-after cutoff가 실패했다. 연속 RGB run 출력으로 불필요한 cursor/style bytes를 줄인 후 fresh normal/paste/resize가 통과했다. Herdr resize 판정은 kernel geometry만이 아니라 view PID/geometry도 같은 단계로 수렴해야 한다."
+    }
+  ],
+  "isolation": {
+    "stale_HERDR_context": [
+      "HERDR_BIN_PATH",
+      "HERDR_ENV",
+      "HERDR_PANE_ID",
+      "HERDR_SOCKET_PATH",
+      "HERDR_TAB_ID",
+      "HERDR_WORKSPACE_ID"
+    ],
+    "root_approved_interpretation": "관측 ancestry는 python→bash→codex→codex→PID1이며 두 Codex stdin은 /dev/null이다. Herdr ancestor가 없어 stale context 제거한 disposable child를 비중첩 실행기로 취급했다.",
+    "new_probe_child_exec": "/usr/bin/env -u for every inherited HERDR_*; isolated Herdr config selector only is re-added",
+    "herdr_config_and_runtime": "TemporaryDirectory 내부 HERDR_CONFIG_PATH, XDG_CONFIG_HOME, XDG_RUNTIME_DIR; preflight의 session/socket 경로가 모두 임시 root 안에 있어야 launch",
+    "user_default_state_unchanged": true
+  },
+  "cleanup": {
+    "all_final_owned_pids_absent": [
+      3865481,
+      3865482,
+      3865483,
+      3865559,
+      3865560,
+      3865568,
+      3865569,
+      3865570,
+      3865885,
+      3865886,
+      3865887,
+      3865888,
+      3865963,
+      3866042,
+      3866043,
+      3866044,
+      3866045,
+      3866449,
+      3866475,
+      3866476,
+      3866477,
+      3867546,
+      3867596,
+      3868759,
+      3868976
+    ],
+    "herdr_session_stop_exit": 0,
+    "herdr_session_delete_exit": 0,
+    "herdr_session_deleted": true,
+    "tmux_processes_cleaned": true,
+    "tmux_socket_removed": true,
+    "owned_temporary_directories_remaining": [],
+    "preexisting_venvs_preserved": [
+      "/tmp/cw02-g1-venv",
+      "/tmp/cw02-g1-venv-sys"
+    ],
+    "active_owned_checks_or_writers": 0
+  },
+  "supported_claims": [
+    "현재 Linux/OMP18.2.10의 동일 captured frame에서 actual Workbench PTY RGB/text/emphasis fidelity",
+    "plain outer PTY surrogate 및 isolated non-nested Herdr0.9.1의 3-pane input/paste/resize/local alternate restore",
+    "기존 external tmux3.4 및 G1 정상 resize/승인/tool/query FIFO fixture regression 유지"
+  ],
+  "unknowns": [
+    "물리적 display의 pixel/color calibration과 font/glyph 모양 fidelity는 검증하지 않았다.",
+    "plain PTY는 general-terminal surrogate이며 모든 GUI terminal, 다른 OMP/Herdr/tmux 버전 또는 OS의 포괄적 지원을 주장하지 않는다.",
+    "color 비교의 Workbench child는 실제 OMP output의 replay boundary이다. 실제 OMP child를 갖는 통합 routing/resize/paste는 별도 plain/Herdr/tmux runtime이 확인한다.",
+    "기존 query evidence는 TTY input drained까지이며 OMP semantic interpretation을 새로 확정하지 않는다.",
+    "기존 STOP/CONT tool probe의 normal resize unknown flag는 그대로다. 별도 normal_resize 대조 실행에서 정상 resize를 판별했다.",
+    "Root independent tests/review와 전체 gate 완료 선언은 남아 있다."
+  ],
+  "scope": {
+    "outside_scope": [],
+    "index_changed": [],
+    "comparable": true,
+    "snapshot_stable": true
+  },
+  "commit_created": false
+}

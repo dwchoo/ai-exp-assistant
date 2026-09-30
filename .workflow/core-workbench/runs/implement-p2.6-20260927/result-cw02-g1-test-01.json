@@ -1,0 +1,662 @@
+{
+  "schema_version": 1,
+  "invocation": "cw02-g1-test-01",
+  "ticket": "CW-02",
+  "unit": "V-CW-02-p2.6-current",
+  "task_result": "needs_reroute",
+  "candidate": "9d9d884d70c5b511def88915acde152df79dc0dca52d329235ac36893e6d3862",
+  "base_candidate": "41d508cb7a017906e42e03f75e5b6f55a28ce894990f5f62dfd08c48c01fbe42",
+  "baseline": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw02-g1-worker-after.json",
+  "after_snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw02-g1-test-after.json",
+  "scope_audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/scope-audit-cw02-g1-test.json",
+  "requirements_sha256": "d8365622b3d43cd10dc8a96a0699eb0a8d9b3fb44fcc8ef3ce8089554eb38f99",
+  "changed_files": [
+    "tests/gates/g1_vt/test_closure_independent.py"
+  ],
+  "workflow_artifacts": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw02-g1-test-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw02-g1-test-after.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/scope-audit-cw02-g1-test.json"
+  ],
+  "checks": [
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g1_vt /tmp/cw02-g1-venv/bin/python -m unittest -v tests/gates/g1_vt/test_closure_independent.py",
+      "exit_code": 1,
+      "tests": 6,
+      "failing_test_methods": 2,
+      "failing_subcases": 6,
+      "duration_seconds": 0.049
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g1_vt /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/gates/g1_vt -p 'test_*.py' -v",
+      "exit_code": 1,
+      "tests": 58,
+      "failing_test_methods": 2,
+      "failing_subcases": 6,
+      "duration_seconds": 1.089
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g1_vt /tmp/cw02-g1-venv/bin/python tests/gates/g1_vt/live_color_probe.py",
+      "exit_code": 0,
+      "evidence_key": "color",
+      "execution": "First three runtime probes launched concurrently; separate disposable paths and provider ports."
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g1_vt /tmp/cw02-g1-venv/bin/python tests/gates/g1_vt/live_outer_compat_probe.py",
+      "exit_code": 1,
+      "evidence_key": "plain_initial",
+      "execution": "First three runtime probes launched concurrently; separate disposable paths and provider ports."
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g1_vt /tmp/cw02-g1-venv/bin/python tests/gates/g1_vt/live_outer_compat_probe.py --herdr",
+      "exit_code": 0,
+      "evidence_key": "herdr",
+      "execution": "First three runtime probes launched concurrently; separate disposable paths and provider ports."
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g1_vt /tmp/cw02-g1-venv/bin/python tests/gates/g1_vt/live_outer_compat_probe.py",
+      "exit_code": 0,
+      "evidence_key": "plain_serial_retry",
+      "execution": "One bounded serial retry, no code or timeout changes; initial unknown retained."
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0
+    },
+    {
+      "command": "pgrep -af '[/]tmp/cw02-g1-(color|outer-compat)-'",
+      "exit_code": 1,
+      "meaning": "No matching process; this exit code is the expected empty match."
+    }
+  ],
+  "runtime_evidence": {
+    "color": {
+      "COLORTERM": "truecolor",
+      "FORCE_COLOR": "3",
+      "NO_COLOR": "removed for original OMP",
+      "TERM": "xterm-256color",
+      "cleaned": true,
+      "diagnostic_text_styles": {
+        "G1_COLOR_BOLD": {
+          "bg": "default",
+          "bold": true,
+          "fg": "default",
+          "italics": false,
+          "underscore": false
+        },
+        "G1_COLOR_ITALIC": {
+          "bg": "default",
+          "bold": false,
+          "fg": "default",
+          "italics": true,
+          "underscore": false
+        },
+        "G1_COLOR_NORMAL": {
+          "bg": "default",
+          "bold": false,
+          "fg": "default",
+          "italics": false,
+          "underscore": false
+        }
+      },
+      "distinct_rgb_foregrounds": [
+        "00b4ff",
+        "0f1216",
+        "1f252d",
+        "25d8e8",
+        "2a3038",
+        "3998bf",
+        "3dd1eb",
+        "4a5058",
+        "50caed",
+        "54a0ed",
+        "5a91ee",
+        "6b7280",
+        "717ef0",
+        "7e73f2",
+        "9562f3",
+        "9ca3b0",
+        "9e60f0",
+        "a05fef",
+        "aa5eeb",
+        "ac5dea",
+        "ae5de9",
+        "b55ce6",
+        "b75be6",
+        "ba5be5",
+        "be5ae3",
+        "c359e1",
+        "c758df",
+        "d156dc",
+        "d356db",
+        "d4c090",
+        "da55d8",
+        "dc54d7",
+        "e353d4",
+        "e5e5e7",
+        "e8ecf4",
+        "ec51d1",
+        "f54fcd",
+        "ffb347"
+      ],
+      "exact_rgb_and_emphasis": true,
+      "live_omp_ready": true,
+      "matched_geometry": true,
+      "mismatch_attributes": {
+        "bg": 0,
+        "bold": 0,
+        "data": 0,
+        "fg": 0,
+        "italics": 0,
+        "reverse": 0,
+        "underscore": 0
+      },
+      "mismatch_samples": [],
+      "mismatched_cells": 0,
+      "omp_version": "omp/18.2.10",
+      "original_output_bytes": 71269,
+      "original_output_sha256": "ac7c2e119e67cbe573b9caa5ed30926837657d3ee224dd06f77c00ef500dd5f8",
+      "pids": {
+        "original_omp": 3872643,
+        "replay_and_idle_children": [
+          3872773,
+          3872774,
+          3872775
+        ],
+        "workbench": 3872772
+      },
+      "provider_requests": 1,
+      "real_renderer_ready": true,
+      "result": "passed",
+      "rgb_emphasis_distinguishable": true,
+      "rgb_sgr_in_original_bytes": true,
+      "rgb_sgr_in_rendered_bytes": true,
+      "rgb_text_cells": 831,
+      "same_output_replayed": true,
+      "stale_herdr_context_removed": [
+        "HERDR_BIN_PATH",
+        "HERDR_ENV",
+        "HERDR_PANE_ID",
+        "HERDR_SOCKET_PATH",
+        "HERDR_TAB_ID",
+        "HERDR_WORKSPACE_ID"
+      ],
+      "theme": "same captured live OMP frame"
+    },
+    "plain_initial": {
+      "alternate_before_exit": true,
+      "app_pid": 3872711,
+      "children_cleaned": true,
+      "fresh_after": [
+        false,
+        true,
+        true
+      ],
+      "fresh_before": [
+        true,
+        true,
+        true
+      ],
+      "fresh_input": false,
+      "initial": {
+        "child_pids": [
+          3872712,
+          3872713,
+          3872714
+        ],
+        "child_sizes": [
+          [
+            78,
+            41
+          ],
+          [
+            78,
+            41
+          ],
+          [
+            78,
+            41
+          ]
+        ],
+        "cross_routed": [
+          false,
+          false,
+          false
+        ],
+        "target": [
+          true,
+          true,
+          true
+        ],
+        "titles": [
+          true,
+          true,
+          true
+        ]
+      },
+      "local_alternate_restored": true,
+      "mode": "plain",
+      "omp_version": "omp/18.2.10",
+      "outer_cleaned": true,
+      "owned_child_pids": [
+        3872712,
+        3872713,
+        3872714
+      ],
+      "paste_checks": [
+        true,
+        true,
+        true
+      ],
+      "paste_fresh_and_routed": true,
+      "private_dsr_queries": [],
+      "resize_propagated": true,
+      "result": "unknown",
+      "sizes": [
+        {
+          "app": [
+            210,
+            39
+          ],
+          "children": [
+            [
+              68,
+              35
+            ],
+            [
+              68,
+              35
+            ],
+            [
+              68,
+              35
+            ]
+          ],
+          "cross_routed": false,
+          "outer": [
+            210,
+            39
+          ],
+          "propagated": true,
+          "stable_pids": true
+        },
+        {
+          "app": [
+            240,
+            45
+          ],
+          "children": [
+            [
+              78,
+              41
+            ],
+            [
+              78,
+              41
+            ],
+            [
+              78,
+              41
+            ]
+          ],
+          "cross_routed": false,
+          "outer": [
+            240,
+            45
+          ],
+          "propagated": true,
+          "stable_pids": true
+        }
+      ],
+      "stale_herdr_context_removed": [
+        "HERDR_BIN_PATH",
+        "HERDR_ENV",
+        "HERDR_PANE_ID",
+        "HERDR_SOCKET_PATH",
+        "HERDR_TAB_ID",
+        "HERDR_WORKSPACE_ID"
+      ],
+      "startup_ready": true,
+      "three_pane_routing": true
+    },
+    "herdr": {
+      "alternate_before_exit": true,
+      "app_pid": 3872809,
+      "children_cleaned": true,
+      "default_state_unchanged": true,
+      "fresh_after": [
+        true,
+        true,
+        true
+      ],
+      "fresh_before": [
+        true,
+        true,
+        true
+      ],
+      "fresh_input": true,
+      "herdr_version": "herdr 0.9.1",
+      "initial": {
+        "child_pids": [
+          3872839,
+          3872840,
+          3872841
+        ],
+        "child_sizes": [
+          [
+            78,
+            40
+          ],
+          [
+            78,
+            40
+          ],
+          [
+            78,
+            40
+          ]
+        ],
+        "cross_routed": [
+          false,
+          false,
+          false
+        ],
+        "target": [
+          true,
+          true,
+          true
+        ],
+        "titles": [
+          true,
+          true,
+          true
+        ]
+      },
+      "isolated_session_paths": true,
+      "local_alternate_restored": true,
+      "mode": "herdr",
+      "non_nested_attach": true,
+      "omp_version": "omp/18.2.10",
+      "outer_cleaned": true,
+      "owned_child_pids": [
+        3872839,
+        3872840,
+        3872841
+      ],
+      "pane_list": {
+        "id": "cli:pane:list",
+        "result": {
+          "panes": [
+            {
+              "agent_status": "unknown",
+              "cwd": "/home/dwchoo/ai-exp-assistant",
+              "focused": true,
+              "foreground_cwd": "/home/dwchoo/ai-exp-assistant",
+              "pane_id": "w1:p1",
+              "revision": 1,
+              "scroll": {
+                "max_offset_from_bottom": 0,
+                "offset_from_bottom": 0,
+                "viewport_rows": 44
+              },
+              "tab_id": "w1:t1",
+              "terminal_id": "term_65c7b6a3b9d411",
+              "terminal_title": "dwchoo@dwchoo-mini-pc: ~/ai-exp-assistant",
+              "terminal_title_stripped": "dwchoo@dwchoo-mini-pc: ~/ai-exp-assistant",
+              "workspace_id": "w1"
+            }
+          ],
+          "type": "pane_list"
+        }
+      },
+      "pane_run_exit": 0,
+      "paste_checks": [
+        true,
+        true,
+        true
+      ],
+      "paste_fresh_and_routed": true,
+      "private_dsr_queries": [
+        996
+      ],
+      "resize_propagated": true,
+      "result": "passed",
+      "session_delete_exit": 0,
+      "session_deleted": true,
+      "session_stop_exit": 0,
+      "sizes": [
+        {
+          "app": [
+            210,
+            38
+          ],
+          "children": [
+            [
+              68,
+              34
+            ],
+            [
+              68,
+              34
+            ],
+            [
+              68,
+              34
+            ]
+          ],
+          "cross_routed": false,
+          "outer": [
+            210,
+            39
+          ],
+          "propagated": true,
+          "stable_pids": true
+        },
+        {
+          "app": [
+            240,
+            44
+          ],
+          "children": [
+            [
+              78,
+              40
+            ],
+            [
+              78,
+              40
+            ],
+            [
+              78,
+              40
+            ]
+          ],
+          "cross_routed": false,
+          "outer": [
+            240,
+            45
+          ],
+          "propagated": true,
+          "stable_pids": true
+        }
+      ],
+      "stale_herdr_context_removed": [
+        "HERDR_BIN_PATH",
+        "HERDR_ENV",
+        "HERDR_PANE_ID",
+        "HERDR_SOCKET_PATH",
+        "HERDR_TAB_ID",
+        "HERDR_WORKSPACE_ID"
+      ],
+      "startup_ready": true,
+      "three_pane_routing": true
+    },
+    "plain_serial_retry": {
+      "result": "passed",
+      "app_pid": 3874190,
+      "owned_child_pids": [
+        3874191,
+        3874192,
+        3874193
+      ],
+      "fresh_before": [
+        true,
+        true,
+        true
+      ],
+      "fresh_after": [
+        true,
+        true,
+        true
+      ],
+      "paste_checks": [
+        true,
+        true,
+        true
+      ],
+      "initial_child_sizes": [
+        [
+          78,
+          41
+        ],
+        [
+          78,
+          41
+        ],
+        [
+          78,
+          41
+        ]
+      ],
+      "sizes": [
+        {
+          "outer": [
+            210,
+            39
+          ],
+          "app": [
+            210,
+            39
+          ],
+          "children": [
+            [
+              68,
+              35
+            ],
+            [
+              68,
+              35
+            ],
+            [
+              68,
+              35
+            ]
+          ]
+        },
+        {
+          "outer": [
+            240,
+            45
+          ],
+          "app": [
+            240,
+            45
+          ],
+          "children": [
+            [
+              78,
+              41
+            ],
+            [
+              78,
+              41
+            ],
+            [
+              78,
+              41
+            ]
+          ]
+        }
+      ],
+      "three_pane_routing": true,
+      "resize_propagated": true,
+      "local_alternate_restored": true,
+      "children_cleaned": true,
+      "outer_cleaned": true,
+      "omp_version": "omp/18.2.10"
+    }
+  },
+  "defects": [
+    {
+      "id": "G1-OUTER-PID-VALIDITY",
+      "path": "tests/gates/g1_vt/live_outer_compat_probe.py",
+      "interface": "passed(result)",
+      "observed": "[0,2,3], [-1,2,3], [null,2,3], [true,2,3], [1,2,3,3] all pass despite not identifying exactly three positive non-boolean PID integers.",
+      "test": "OuterBoundaryRegressionTests.test_invalid_missing_or_extra_child_pid_cannot_prove_three_live_panes",
+      "expected": "Reject invalid/missing/extra child PID observations."
+    },
+    {
+      "id": "G1-OUTER-GEOMETRY-CONTRADICTION",
+      "path": "tests/gates/g1_vt/live_outer_compat_probe.py",
+      "interface": "passed(result)",
+      "observed": "plain outer=[210,39], app=[180,30], children=[[58,26]]*3 passes when propagated=true; actual outer/app geometry is contradictory.",
+      "test": "OuterBoundaryRegressionTests.test_self_consistent_children_do_not_hide_wrong_plain_outer_geometry",
+      "expected": "Reject wrong plain app/outer geometry, not merely a self-consistent child/app relation."
+    }
+  ],
+  "acceptance_coverage": {
+    "new": [
+      "RGB overlay exact foreground/background/strong/italic/underline/reverse with wide glyph and changed-style redraw; overlay must preserve established curses cursor.",
+      "Private DEC CPR with origin mode, byte-fragmented query, resize, and unsupported private DSR996 no reply.",
+      "Mixed private/public query response FIFO through zero/partial PTY writes.",
+      "All inherited HERDR_* keys removed before version/default-state preflight.",
+      "Invalid child PID and plain outer geometry negative evidence."
+    ],
+    "existing_sufficient": [
+      "test_closure_predicates.ColorEvidenceTests.test_exact_color_and_emphasis_mapping: palette approximation, missing bold/italic and text mismatch.",
+      "test_closure_predicates.ColorEvidenceTests.test_static_parser_only_unmatched_and_dirty_results_cannot_pass: missing SGR, geometry, parser/static-only and cleanup rejection.",
+      "test_closure_predicates.OuterEvidenceTests.test_freshness_cross_route_geometry_restore_and_cleanup_required: stale markers, partial paste, cross-route, duplicate PID, alternate restore, cleanup, Herdr isolation/non-nesting/default-state/session deletion.",
+      "test_outer_tmux_predicates.OuterTmuxPredicateTests.test_incomplete_paste_rejects_success and test_stale_pane_text_cannot_prove_fresh_routing_or_paste."
+    ],
+    "runtime": "Actual OMP18.2.10 color/plain and isolated non-nested Herdr0.9.1 run independently of worker assertions. Herdr private query996 observed without crash."
+  },
+  "unknowns": [
+    "Initial concurrent plain probe fresh_after manager=false while later target=true; serial unchanged retry passes. Timing/load cause not established; first unknown is not overwritten.",
+    "The new RGB draw regression isolates actual SGR overlay output; full curses/OMP runtime is covered separately by color probe.",
+    "Physical pixel calibration/font shape and arbitrary GUI terminals/other versions are not independently verified.",
+    "Query FIFO and reply bytes do not establish OMP internal semantic consumption.",
+    "Overall G1 acceptance remains Root-owned; gate predicate false positives require reroute."
+  ],
+  "cleanup": {
+    "owned_pids_checked": [
+      3872643,
+      3872772,
+      3872773,
+      3872774,
+      3872775,
+      3872711,
+      3872712,
+      3872713,
+      3872714,
+      3872809,
+      3872839,
+      3872840,
+      3872841,
+      3874190,
+      3874191,
+      3874192,
+      3874193
+    ],
+    "owned_pids_remaining": [],
+    "herdr_session_stop_exit": 0,
+    "herdr_session_delete_exit": 0,
+    "herdr_session_deleted": true,
+    "default_state_unchanged": true,
+    "temporary_process_path_matches": 0,
+    "active_owned_checks_or_writers": 0
+  },
+  "product_source_modified": false,
+  "graphify_modified": false,
+  "commit_created": false,
+  "needs_oracle": false
+}

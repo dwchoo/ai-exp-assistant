@@ -1,0 +1,38 @@
+{
+ "schema_version": 1,
+ "invocation": "p27-cw06-ctrlc-diag-05",
+ "status": "no_failure_reproduced",
+ "model_turns": 0,
+ "trials": {
+  "midflood_ctrlc": 64,
+  "of_which": {
+   "random_variants_48": "4 variants x 12, delay 0.5-20.4s, 4 parallel sessions",
+   "smoke_4": "",
+   "seq_F0_F1_then_F2_style_12": "200MB head flood + 22s flood before, Ctrl-C at 20-22s, 4 sessions x3"
+  },
+  "early_ctrlc_before_or_at_flood_start": 12,
+  "total": 76
+ },
+ "failures": 0,
+ "gone_after_s": {
+  "min": 0.01,
+  "median": 0.023,
+  "max": 0.056,
+  "threshold": 1.0
+ },
+ "per_trial_evidence": "pre/post host_shell state (parent_mode manual_foreground->manual_prompt, input_owner user, dropped_input_bytes 0, last_input_problem null), UI raw tail with ^C+PROMPT, backend.log delta (empty), footer, usable_after true for all",
+ "bound": "0/64 mid-flood: 95% upper (rule of 3) ~4.7%; per-trial rate < 1/20",
+ "early_ctrlc": "12/12 stopped/absent, no flood left running; no lost Ctrl-C even at 0-0.4s after Enter",
+ "conclusion": "unexplained_not_reproduced; no implementation defect observed. Earlier single miss not reproducible; plausible harness-timing (Ctrl-C victim/timing under heavy parallel load or before host_shell fg) but NOT proven. No hop failure observed at UI stdin->frame->admission->PTY->SIGINT (all landed <60ms).",
+ "caveat": "earlier miss had no evidence retained; original probe measures with pyte-free pump; my runs used same Watch/PtyRun harness with instrumentation; 4 sessions ran concurrently (load stress).",
+ "scratch": "/tmp/claude-1000/-home-dwchoo-ai-exp-assistant/dd5e2cee-e10d-41c4-8ebb-7c00b50dd465/scratchpad/ctrlc-diag/ (drive.py, drive2.py, ev/*.json, log-*.txt)",
+ "frozen_hashes_equal": true,
+ "repo_files_written": [],
+ "residue": {
+  "identities": {},
+  "session_members": {},
+  "cmdline_matches": [],
+  "tmp_dirs": 0,
+  "stray_yes": 0
+ }
+}

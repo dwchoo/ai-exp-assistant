@@ -1,0 +1,47 @@
+## 02-help-overlay: help overlay (prefix ?)
+## size 160x45
+------------------------------------------------------------
+focus: MANAGER OMP | host 입력 owner: user | shell mode: manual_prompt | 자동화: not_configured
+backend: ready | bridge manager=ok worker=ok | 마지막 확인 03:52:33 (0s 전) | Ctrl-] ? 도움말
+┌─ MANAGER OMP *FOCUS* alive ───────────────────────┐┌─ WORKER OMP alive ────────────────────────────────┐┌─ HOST SHELL alive owner=user ──────────────────────┐
+│                                                   ││                                                   ││$                                                   │
+│╭─── omp v18.2.10 ──────────────────────────────╮  ││╭─── omp v18.2.10 ──────────────────────────────╮  ││                                                    │
+││                │ Tips                         │  │││                │ Tips                         │  ││                                                    │
+││ Welcome back!  │ # for prompt actions         │  │││ Welcome back!  │ # for prompt actions         │  ││                                                    │
+││                │ / for commands               │  │││                │ / for commands               │  ││                                                    │
+││  ████████████  │ ! to run bash                │  │││  ████████████  │ ! to run bash                │  ││                                                    │
+││     ██  ██     │ $ to run python              │  │││     ██  ██     │ $ to run python              │  ││                                                    │
+││     ██  ██     │ ──────────────────────────── │  │││     ██  ██     │ ──────────────────────────── │  ││                                                    │
+││     ▒▒  ██     │ LSP Servers                  │  │││     ▒▒  ██     │ LSP Servers                  │  ││                                                    │
+││         ██     │ No LSP servers               │  │││         ██     │ No LSP servers               │  ││                                                    │
+││                │                              │  │││                │                              │  ││                                                    │
+││    GPT-5.5     │                                                                                                                                            │
+││  openai-codex  │                              OMP Workbench 키 (임시 배치 — 사용자 UX 검토 대상)                                                            │
+││                │ ───────────────────────────                                                                                                                │
+││                │ Recent sessions              prefix = Ctrl-]   (그 외 모든 키는 focus된 pane에 원본 그대로 전달)                                           │
+││                │ No recent sessions             prefix prefix   prefix 바이트(0x1d)를 그대로 전송                                                           │
+││                │                                prefix 1/2/3    manager OMP / worker OMP / host shell로 focus                                               │
+││                │                                prefix Tab      다음 pane으로 focus                                                                         │
+││                │                                prefix t        host shell 사용자 인수 요청                                                                 │
+││                │                                prefix c        인수 확인 (요청 후)                                                                         │
+│╰────────────────┴────────────────────────────    prefix h        host shell을 manager에게 되돌리기(handoff)                                                  │
+│ Tip: `/force read` pins the next turn to one     prefix r        focus pane 다시 그리기 요청                                                                 │
+│      specific tool when the model keeps reach    prefix d        detach (backend와 PTY는 계속 실행)                                                          │
+│      for the wrong one                           prefix ?        이 도움말 (아무 키로 닫기)                                                                  │
+│                                                                                                                                                              │
+│──────────────────────────────────────────────  focus 변경은 host 입력 owner를 바꾸지 않는다.                                                                 │
+│ Update Available                                                                                                                                             │
+│ New version 18.4.3 is available. Run: omp update  ││ New version 18.4.3 is available. Run: omp update  ││                                                    │
+│───────────────────────────────────────────────────││───────────────────────────────────────────────────││                                                    │
+│                                                   ││                                                   ││                                                    │
+│ π > ◒ GPT-5.5 > 🗑 p > (sub) ▶─7%─────────╎─┃─272K─││ π > ◒ GPT-5.5 > 🗑 p > (sub) ▶─7%─────────╎─┃─272K─││                                                    │
+│╰─                                                 ││╰─                                                 ││                                                    │
+│                                                   ││                                                   ││                                                    │
+│                                                   ││                                                   ││                                                    │
+│                                                   ││                                                   ││                                                    │
+│                                                   ││                                                   ││                                                    │
+│                                                   ││                                                   ││                                                    │
+│                                                   ││                                                   ││                                                    │
+│                                                   ││                                                   ││                                                    │
+│                                                   ││                                                   ││                                                    │
+└───────────────────────────────────────────────────┘└───────────────────────────────────────────────────┘└────────────────────────────────────────────────────┘

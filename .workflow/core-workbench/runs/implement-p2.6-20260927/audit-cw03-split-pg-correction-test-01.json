@@ -1,0 +1,5 @@
+{
+  "before": ".workflow/core-workbench/runs/implement-p2.6-20260927/split-pg-correction-candidate.json",
+  "after": ".workflow/core-workbench/runs/implement-p2.6-20260927/split-pg-correction-test-candidate.json",
+  "allowed": ["tests/gates/g2_shell/test_split_pg_control.py"]
+}

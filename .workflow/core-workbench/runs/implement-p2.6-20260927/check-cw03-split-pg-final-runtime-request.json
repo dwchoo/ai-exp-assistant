@@ -1,0 +1,14 @@
+{
+  "root": "/home/dwchoo/ai-exp-assistant",
+  "requirements": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw03.json",
+  "argv": ["python3", "tests/gates/g2_shell/live_combined_boundary_probe.py"],
+  "environment": {
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "description": "Linux Python 3.12.3 with Bash and dash; frozen split-PG feasibility runtime; conda and Docker excluded"
+  },
+  "log": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/check-cw03-split-pg-final-runtime.log",
+  "check_id": "cw03-split-pg-final-runtime-01",
+  "watch": [],
+  "exclude": [".workflow/core-workbench/runs/implement-p2.6-20260927/**"],
+  "timeout": 300
+}

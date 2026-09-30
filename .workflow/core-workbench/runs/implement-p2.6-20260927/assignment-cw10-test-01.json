@@ -1,0 +1,17 @@
+{
+  "invocation":"cw10-test-01","role":"test_designer","unit":"V-CW-10-p2.6-current",
+  "objective":"Independently test CW-10 vertical workflow, Git/worktree safety, durable lifecycle, and evidence judgment.",
+  "candidate_manifest":".workflow/core-workbench/runs/implement-p2.6-20260927/cw10-test-checkpoint.json",
+  "requirements":".workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw10.json",
+  "required_tests":[
+    "Use independent temporary Git repos and real worktrees to attack explicit commit/cwd validation, source dirty+untracked preservation, path confusion, preparation failure, and no push/merge/stash/reset/clean behavior.",
+    "Exercise approval/proceed/revision/scope mismatch and direct-worker request classification; scope expansion must never execute before new manager authority.",
+    "Exercise real shell success, nonzero failure, exit-0 criteria failure, missing/ambiguous logs, lifecycle unknown, and bounded cleanup; exit 0 alone must not become success.",
+    "Verify pause keeps termination/log collection but blocks new judgment/report; modification-needed report ends the instruction and never auto-returns without a new instruction.",
+    "Verify TASK/REPORT delivery ambiguity is durable and no automatic replay occurs."
+  ],
+  "allowed_files":["tests/workflow/test_run_independent.py","tests/workflow/live_workflow_independent.py"],
+  "constraints":["Do not modify product code, worker tests, guide, workflow artifacts, or graphify.","Do not weaken worker tests; use bounded runtime and clean fixtures.","No shared repo commit/push/merge/stash/reset/clean and no Docker."],
+  "checks":["Run all tests/workflow and dependency terminal/bridge/tasks tests.","Run actual host-shell/worktree runtime independently where safe.","Run git diff --check."],
+  "report":["new tests and defects","runtime/check results","candidate/scope audit","candidate_ready or needs_reroute"]
+}

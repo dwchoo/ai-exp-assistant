@@ -1,0 +1,23 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 1057,
+  "event": {
+    "id": "limit-cw14-recovery-unit-20260929",
+    "kind": "limit",
+    "data": {
+      "bucket": "unit:V-CW-14-p2.6-current",
+      "origin": "operating",
+      "value": 8,
+      "authority": "Approved PLAN p2.6 CW-14, independent same-store recovery failure, workflow-contract section 8, and current $implement authorization",
+      "reason": "One bounded same-store recovery correction, independent regression, and fresh final review",
+      "decision_owner": "Root",
+      "remaining_work_estimate": 3,
+      "expected_previous": {
+        "value": 6,
+        "authority": "Approved PLAN p2.6 CW-14, fresh C-AC-28 review findings, workflow-contract section 8, and current $implement authorization",
+        "reason": "One bounded repeated-failure/malformed-entry correction, independent regression, and fresh delta review"
+      },
+      "scope_basis": null
+    }
+  }
+}

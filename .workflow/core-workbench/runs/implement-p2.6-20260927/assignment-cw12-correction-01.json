@@ -1,0 +1,23 @@
+{
+  "invocation": "cw12-correction-01",
+  "role": "worker",
+  "unit": "V-CW-12-p2.6-current",
+  "objective": "Correct the six independently reproduced CW-12 concurrency, cancellation, rebind-state, and FIFO journal defects.",
+  "candidate_manifest": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw12-test-after.json",
+  "candidate": "f0193c9097546ce65e646b9a506200834e9522277c5c259af8c86024ee61ed61",
+  "test_evidence": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-test-01.json",
+  "write_scope": ["src/workbench/policy/pause_*/**", "src/workbench/ui/status_*/**", "graphify-out/**"],
+  "must_fix": [
+    "Make pause status/admission one linearized fence: when the coordinator is observably paused, no fresh CW-11 review ticket may dispatch. Preserve already-started dispatch semantics and avoid lock-order deadlock.",
+    "Serialize dispatch_automatic authority check and action start so a pause either follows an already-started action or holds it; no action may begin after pause linearizes.",
+    "Observe exact persisted run cancellation before every status/automation/automatic dispatch boundary, durably record it once, close automation even without a prior pause, preserve artifacts, and distinguish cancellation from pause/abort completion.",
+    "Reset all per-run acknowledgement, abort, unknown-tool, timestamp, cancellation, and persistence fields when binding a genuinely different clean run; fail closed on mismatched existing journal.",
+    "Open journal read targets nonblocking, fstat and reject FIFO/device/socket/directory without hangs; preserve symlink and append safety.",
+    "Make all 15 independent policy tests and existing focused/status/regression suites pass without weakening assertions."
+  ],
+  "constraints": [
+    "Production correction only inside assigned policy/status scope; do not edit independent tests, G3/workflow/observation/contracts, tickets, PLAN, or workflow records.",
+    "Apply_patch only, no destructive git, no uv/local environment artifacts; run graphify update . after changes."
+  ],
+  "report": ["root cause and correction per finding", "deadlock/linearization argument", "exact checks", "candidate_ready or needs_reroute"]
+}

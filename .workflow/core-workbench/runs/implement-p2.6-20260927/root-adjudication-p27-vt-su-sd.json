@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "id": "root-adjudication-p27-vt-su-sd",
+  "source": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw06-flake-worker-07.json",
+  "observation": "vt_g1 TerminalScreen (pyte 0.8.2 HistoryScreen) ignores CSI S/T (SU/SD). ncurses emits SU for hardware scroll, so (a) tests that read the product UI through TerminalScreen misjudge rows intermittently (p27h), and (b) the product pane renderer misrenders any pane application that uses SU/SD (fidelity gap for C-AC-14 / G1).",
+  "decision": "Bounded CW-02/G1 emulator defect fix authorized inside approved behaviour (original TUI fidelity), not a product behaviour or contract change: implement CSI Ps S / Ps T in TerminalScreen honouring the scroll region (DECSTBM margins), default Ps=1, clamp to region height, blank lines with current background/erase attributes, alternate screen aware, history behaviour consistent with pyte index/reverse_index at the top/bottom margin. Preserve the pre-existing uncommitted edits in screen.py (it is modified vs HEAD by an earlier session). Re-verify G1 suites and the p27h independent test unmodified (30x), then delta review including G1 fidelity.",
+  "owner_note": "vt_g1 belongs to CW-02 (integrated); change recorded as a cross-ticket correction discovered by CW-06 verification."
+}

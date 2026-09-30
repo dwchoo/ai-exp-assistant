@@ -1,0 +1,21 @@
+{
+  "root": "/home/dwchoo/ai-exp-assistant",
+  "requirements": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw07.json",
+  "argv": [
+    "/usr/bin/env",
+    "PYTHONDONTWRITEBYTECODE=1",
+    "PYTHONPATH=src:tests/terminal",
+    "/tmp/cw02-g1-venv/bin/python",
+    "tests/terminal/live_persistent_shell.py"
+  ],
+  "environment": {
+    "description": "Linux real PTY runtime with installed Bash and /bin/sh; C-D55 excludes conda-specific and cgroup requirements"
+  },
+  "log": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/check-cw07-runtime-final.log",
+  "check_id": "cw07-runtime-final-01",
+  "watch": [],
+  "exclude": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/**"
+  ],
+  "timeout": 120
+}

@@ -1,0 +1,28 @@
+{
+  "invocation": "cw10-public-response-review-01",
+  "role": "reviewer",
+  "unit": "V-CW-10-p2.6-current",
+  "objective": "Fresh final review of the complete frozen CW-10 candidate after production public-response closure and independent attacks.",
+  "candidate_manifest": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw10-public-response-final.json",
+  "candidate": "c73671a6ce6340e0e7981e06b46bf21c72939ee8ab113782dde4d44d349027ee",
+  "requirements": ".workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw10.json",
+  "ticket": "docs/features/core-workbench/tickets/CW-10.md",
+  "must_review": [
+    "Production bridge response contract/parser/terminal settle: exact identity, duplicate/unknown JSON keys, one response, provider round, role/session/generation, pause/abort/tool/error/continuation/session/socket failure, no raw content leakage.",
+    "Production G3WorkerResponsePort public-event-only correlation, shared deadline, strict types, event order, one arm/observe, replay resistance; no provider private state in actual probes.",
+    "All earlier CW-10 classes: current authority re-read, direct-request durable approval boundary, transient secrets, evidence indeterminate, no auto-return, worktree/commit/push-merge separation.",
+    "Independent tests are meaningful and frozen source/test hashes match manifest."
+  ],
+  "constraints": [
+    "Review-only: do not modify files or run mutating actions.",
+    "Inspect code and tests directly; do not rely on status claims.",
+    "Report severity-ordered findings with file/line evidence or explicit no findings, plus runtime qualifications.",
+    "No commit/push/merge/stash/reset/clean."
+  ],
+  "report": [
+    "candidate hash validation",
+    "findings",
+    "coverage/runtime qualifications",
+    "candidate_ready or needs_reroute"
+  ]
+}

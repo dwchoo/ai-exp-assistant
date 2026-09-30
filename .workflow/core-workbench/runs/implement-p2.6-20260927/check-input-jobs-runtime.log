@@ -1,0 +1,347 @@
+{
+  "results": [
+    {
+      "shell": "bash",
+      "case": "unsubmitted",
+      "admission": "held",
+      "stale_identity_held": false,
+      "parent_prompt_and_new_input": false,
+      "marker_absent": true,
+      "owned_pids_stopped": [
+        3897292
+      ]
+    },
+    {
+      "shell": "bash",
+      "case": "multiline",
+      "admission": "held",
+      "stale_identity_held": false,
+      "parent_prompt_and_new_input": false,
+      "marker_absent": true,
+      "owned_pids_stopped": [
+        3897293
+      ]
+    },
+    {
+      "shell": "bash",
+      "case": "repl",
+      "admission": "held",
+      "stale_identity_held": false,
+      "parent_prompt_and_new_input": false,
+      "marker_absent": true,
+      "owned_pids_stopped": [
+        3897294,
+        3897295
+      ]
+    },
+    {
+      "shell": "bash",
+      "case": "background",
+      "admission": "held",
+      "stale_identity_held": false,
+      "parent_prompt_and_new_input": true,
+      "marker_absent": true,
+      "owned_pids_stopped": [
+        3897296,
+        3897297
+      ]
+    },
+    {
+      "shell": "bash",
+      "case": "suspended",
+      "admission": "held",
+      "stale_identity_held": false,
+      "parent_prompt_and_new_input": true,
+      "marker_absent": true,
+      "owned_pids_stopped": [
+        3897300,
+        3897301
+      ]
+    },
+    {
+      "shell": "bash",
+      "case": "handoff_trailing",
+      "admission": "held",
+      "stale_identity_held": false,
+      "parent_prompt_and_new_input": true,
+      "marker_absent": true,
+      "owned_pids_stopped": [
+        3897304
+      ]
+    },
+    {
+      "shell": "bash",
+      "case": "partial_write",
+      "admission": "held",
+      "stale_identity_held": false,
+      "parent_prompt_and_new_input": true,
+      "marker_absent": true,
+      "owned_pids_stopped": [
+        3897307
+      ]
+    },
+    {
+      "shell": "bash",
+      "case": "paste",
+      "admission": "held",
+      "stale_identity_held": false,
+      "parent_prompt_and_new_input": true,
+      "marker_absent": true,
+      "owned_pids_stopped": [
+        3897310
+      ]
+    },
+    {
+      "shell": "bash",
+      "case": "query_reply",
+      "admission": "held",
+      "stale_identity_held": false,
+      "parent_prompt_and_new_input": true,
+      "marker_absent": true,
+      "owned_pids_stopped": [
+        3897313
+      ]
+    },
+    {
+      "shell": "bash",
+      "case": "clean",
+      "admission": "accepted",
+      "stale_identity_held": true,
+      "parent_prompt_and_new_input": true,
+      "marker_absent": true,
+      "owned_pids_stopped": [
+        3897316,
+        3897319,
+        3897320
+      ]
+    },
+    {
+      "shell": "bash",
+      "negative": false,
+      "barriers": [
+        "main_return",
+        "descendant_live",
+        "signal_observed",
+        "descendant_reaped",
+        "wait_empty",
+        "input_barrier",
+        "input_released",
+        "parent_wait",
+        "prompt",
+        "new_input"
+      ],
+      "marker_spilled": false,
+      "parent_pid_preserved": true,
+      "following_line_suppressed": true,
+      "queued_marker_spilled": false,
+      "trap_restored": true,
+      "owned_pids": [
+        3897325,
+        3897329,
+        3897330,
+        3897333
+      ]
+    },
+    {
+      "shell": "bash",
+      "negative": true,
+      "barriers": [
+        "main_return",
+        "descendant_live",
+        "no_signal_control",
+        "descendant_reaped",
+        "wait_empty",
+        "input_barrier",
+        "input_released",
+        "parent_wait",
+        "prompt",
+        "new_input"
+      ],
+      "marker_spilled": true,
+      "parent_pid_preserved": true,
+      "following_line_suppressed": true,
+      "queued_marker_spilled": true,
+      "trap_restored": true,
+      "owned_pids": [
+        3897335,
+        3897338,
+        3897339,
+        3897344
+      ]
+    },
+    {
+      "shell": "dash",
+      "case": "unsubmitted",
+      "admission": "held",
+      "stale_identity_held": false,
+      "parent_prompt_and_new_input": false,
+      "marker_absent": true,
+      "owned_pids_stopped": [
+        3897347
+      ]
+    },
+    {
+      "shell": "dash",
+      "case": "multiline",
+      "admission": "held",
+      "stale_identity_held": false,
+      "parent_prompt_and_new_input": false,
+      "marker_absent": true,
+      "owned_pids_stopped": [
+        3897350
+      ]
+    },
+    {
+      "shell": "dash",
+      "case": "repl",
+      "admission": "held",
+      "stale_identity_held": false,
+      "parent_prompt_and_new_input": false,
+      "marker_absent": true,
+      "owned_pids_stopped": [
+        3897353,
+        3897356
+      ]
+    },
+    {
+      "shell": "dash",
+      "case": "background",
+      "admission": "held",
+      "stale_identity_held": false,
+      "parent_prompt_and_new_input": true,
+      "marker_absent": true,
+      "owned_pids_stopped": [
+        3897358,
+        3897361
+      ]
+    },
+    {
+      "shell": "dash",
+      "case": "suspended",
+      "admission": "held",
+      "stale_identity_held": false,
+      "parent_prompt_and_new_input": true,
+      "marker_absent": true,
+      "owned_pids_stopped": [
+        3897368,
+        3897371
+      ]
+    },
+    {
+      "shell": "dash",
+      "case": "handoff_trailing",
+      "admission": "held",
+      "stale_identity_held": false,
+      "parent_prompt_and_new_input": true,
+      "marker_absent": true,
+      "owned_pids_stopped": [
+        3897378
+      ]
+    },
+    {
+      "shell": "dash",
+      "case": "partial_write",
+      "admission": "held",
+      "stale_identity_held": false,
+      "parent_prompt_and_new_input": true,
+      "marker_absent": true,
+      "owned_pids_stopped": [
+        3897385
+      ]
+    },
+    {
+      "shell": "dash",
+      "case": "paste",
+      "admission": "held",
+      "stale_identity_held": false,
+      "parent_prompt_and_new_input": true,
+      "marker_absent": true,
+      "owned_pids_stopped": [
+        3897392
+      ]
+    },
+    {
+      "shell": "dash",
+      "case": "query_reply",
+      "admission": "held",
+      "stale_identity_held": false,
+      "parent_prompt_and_new_input": true,
+      "marker_absent": true,
+      "owned_pids_stopped": [
+        3897399
+      ]
+    },
+    {
+      "shell": "dash",
+      "case": "clean",
+      "admission": "accepted",
+      "stale_identity_held": true,
+      "parent_prompt_and_new_input": true,
+      "marker_absent": true,
+      "owned_pids_stopped": [
+        3897406,
+        3897413,
+        3897416
+      ]
+    },
+    {
+      "shell": "dash",
+      "negative": false,
+      "barriers": [
+        "main_return",
+        "descendant_live",
+        "signal_observed",
+        "descendant_reaped",
+        "wait_empty",
+        "input_barrier",
+        "input_released",
+        "parent_wait",
+        "prompt",
+        "new_input"
+      ],
+      "marker_spilled": false,
+      "parent_pid_preserved": true,
+      "following_line_suppressed": true,
+      "queued_marker_spilled": false,
+      "trap_restored": true,
+      "owned_pids": [
+        3897420,
+        3897424,
+        3897425,
+        3897428
+      ]
+    },
+    {
+      "shell": "dash",
+      "negative": true,
+      "barriers": [
+        "main_return",
+        "descendant_live",
+        "no_signal_control",
+        "descendant_reaped",
+        "wait_empty",
+        "input_barrier",
+        "input_released",
+        "parent_wait",
+        "prompt",
+        "new_input"
+      ],
+      "marker_spilled": true,
+      "parent_pid_preserved": true,
+      "following_line_suppressed": true,
+      "queued_marker_spilled": true,
+      "trap_restored": true,
+      "owned_pids": [
+        3897432,
+        3897436,
+        3897441,
+        3897444
+      ]
+    }
+  ],
+  "unknown": [
+    "external writers bypassing the owner gate",
+    "pre-supervisor manual daemons",
+    "production adapter integration"
+  ]
+}

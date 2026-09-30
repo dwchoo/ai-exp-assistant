@@ -1,0 +1,20 @@
+{
+  "invocation":"cw11-aba-correction-01",
+  "role":"worker_senior",
+  "unit":"V-CW-11-p2.6-current",
+  "objective":"Close the independently reproduced A-B-A stale ReviewRequest reauthorization defect without weakening atomic admission.",
+  "base_candidate":"8c728dd78f4fb2f44f8bc4a6a483f44a5ab6578f7fbb1ba9549c1d5aee85a7a8",
+  "test_evidence":".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw11-atomic-test-01.json",
+  "requirements":".workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw11.json",
+  "write_scope":["src/workbench/observation/**","tests/observation/**"],
+  "required_change":[
+    "Bind every review request to its issuance epoch/token inside SerializedReviewAdmission at request issuance; callers must not be able to pair an old request with a newly fetched snapshot epoch.",
+    "Prefer an owner-issued opaque ticket/nonce or an immutable issued-request object validated by the same owner. admit_and_dispatch must consume the bound token internally and must not accept a free caller-supplied current epoch for an arbitrary request.",
+    "Any active-run, authority, or exit-fence epoch change including A->B->A invalidates all earlier unconsumed tickets. Failed/deferred semantics must preserve latest-only policy without replaying unknown delivery.",
+    "Update the scheduler to issue and retain the owner-bound ticket, not a bare ReviewRequest. Remove or fail-close legacy call shapes that reintroduce arbitrary epoch pairing.",
+    "Make the independent failing A-B-A test pass and add forgery/other-owner/stale-ticket/exactly-once focused coverage."
+  ],
+  "verification":["Run observation and relevant workflow/bridge/contracts/G4 regressions.","Rerun actual OMP only if production probe call shape changes; otherwise explain reuse.","Run graphify update ."],
+  "constraints":["apply_patch only; no workflow record edits, uv/local env/package artifacts, commit/push/merge/stash/reset/clean, or graphify restore."],
+  "report":["token API/invariant","changed files","checks","runtime evidence decision","candidate_ready or needs_reroute"]
+}

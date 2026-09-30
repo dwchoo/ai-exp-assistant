@@ -1,0 +1,5 @@
+{
+  "path": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 43,
+  "event": {"id": "start-cw03-takeover-repair-test-01", "kind": "transition", "data": {"invocation": "cw03-takeover-repair-test-01", "state": "starting", "evidence": ".workflow/core-workbench/runs/implement-p2.6-20260927/assignment-cw03-takeover-repair-test-01.json", "outcome": null, "observed_model": "unverified", "observed_effort": "unverified", "not_started_evidence": null}}
+}

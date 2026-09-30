@@ -1,0 +1,23 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 414,
+  "event": {
+    "id": "limit-cw08-correction-total-20260928",
+    "kind": "limit",
+    "data": {
+      "bucket": "total",
+      "origin": "operating",
+      "value": 298,
+      "authority": "C-D55 plus workflow-contract section 8 and current implementation authorization",
+      "reason": "One bounded correction for independently reproduced CW-08 malformed readiness input",
+      "decision_owner": "Root",
+      "remaining_work_estimate": 1,
+      "expected_previous": {
+        "value": 297,
+        "authority": "C-D55 plus workflow-contract section 8 and current implementation authorization",
+        "reason": "Three-call bounded CW-08 mailbox implementation, independent runtime testing, and fresh review batch"
+      },
+      "scope_basis": null
+    }
+  }
+}

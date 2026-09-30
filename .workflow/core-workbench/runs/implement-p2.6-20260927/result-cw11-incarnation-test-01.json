@@ -1,0 +1,9 @@
+{
+  "invocation":"cw11-incarnation-test-01",
+  "outcome":"complete",
+  "candidate_ready":true,
+  "coverage":"Prior delayed-tick failure, exact first-observed new-run boundary, no inherited ticket/pending/coalescing/review_count, idempotent A, same-incarnation pause hold, mid-issue and writer/dispatch A-B-A, and forged/foreign/stale/duplicate/discarded/legacy tickets.",
+  "checks":{"observation":"69/69 passed","workflow":"44/44 passed","bridge":"18/18 passed","contracts":"20/20 passed","actual_omp_18_2_10":"60.0-second review, 13 wakes, 15 requests, real WorkflowRun exit in 0.054 seconds, secret absent, zero residue"},
+  "changed_files":["tests/observation/test_atomic_admission_independent.py"],
+  "graphify_updated":true
+}

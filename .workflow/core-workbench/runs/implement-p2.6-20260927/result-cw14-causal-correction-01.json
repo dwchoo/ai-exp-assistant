@@ -1,0 +1,29 @@
+{
+  "invocation": "cw14-causal-correction-01",
+  "outcome": "complete",
+  "candidate_ready": true,
+  "base_candidate": "40ba9f2cdde65f0e565e999480aa673c8203e509a0a64d194654b29b93062dd3",
+  "changed_paths": [
+    "src/workbench/storage/log_raw/store.py",
+    "tests/storage/test_log_raw.py",
+    "graphify-out/**"
+  ],
+  "model": "Per-store pending failure delta is composed exactly once with verified current durable state under the project lock; it is cleared only after durable success, with post-rename uncertain state tracked separately.",
+  "checks": {
+    "causal_trace_before": "failed at (3,14,11,11)",
+    "causal_trace_after": "passed intermediate (3,15,12,12) and final (3,16,13,13)",
+    "prior_same_run": "passed (3,7,4,4)",
+    "single_store_recovery": "passed (4,6,2,2)",
+    "storage": "32 tests passed",
+    "recovery": "26 tests passed",
+    "observation": "95 tests passed",
+    "workflow": "44 tests passed",
+    "graphify_update": "exit 0"
+  },
+  "sha256": {
+    "src/workbench/storage/log_raw/store.py": "949c8cbb02fa2713ee82c60a92596edc0f7d43bf4667f64ecc95c882f37f9018",
+    "tests/storage/test_log_raw.py": "066e970f088f9642877a97beee87e49a2f8b14e6debad0963feacb5171ed60d8"
+  },
+  "residual_risk": "Pending failure delta is process-local; unpersisted state at process death is not recovered by the package and must be characterized by the final review/integration contract.",
+  "mutation_owner": "/root/cw12_post_review_correction"
+}

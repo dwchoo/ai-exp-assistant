@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "invocation": "cw12-post-review-correction-01",
+  "role": "worker_senior",
+  "unit": "V-CW-12-p2.6-current",
+  "authority": "User $implement docs/features/core-workbench request; approved bundle 64bcf577a30e7c6bbff3e4e775f8e6c17ca212ce3bf79b5bc5be31196a792b07",
+  "objective": "Correct the three fresh-review findings without expanding CW-12 scope.",
+  "base_candidate": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-resume-20260928-checkpoint.json",
+    "candidate_id": "6dfa6011d7c57b108749d8f8fe76a1722c998d702e7c2313d43390b1be3da957"
+  },
+  "inputs": [
+    "docs/features/core-workbench/tickets/CW-12.md",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-run-permit-review-01.json",
+    "docs/features/core-workbench/BRIEF.md",
+    "docs/features/core-workbench/SPEC.md",
+    "docs/features/core-workbench/OPERATING-CONTRACT.md"
+  ],
+  "required_corrections": [
+    "Before every local or bound automatic dispatch opens, atomically/fail-closed verify the exact Task/revision/run remains the repository's current active persisted run; complete_run/fail_run/cancel races must never emit an action or transport bytes.",
+    "Provide a production-owned reconciliation path for explicit resume that derives file/tool/process/task/approval match facts from actual observations rather than trusting caller-authored booleans. Keep the boundary small and compatible with the existing live runtime port.",
+    "If a CW-11 review callback returns after pause, rebind, exit, or other authority change, preserve the historical OMP outcome where appropriate but do not attribute it as the current tick's dispatched success or increment the current review_count.",
+    "Add deterministic regression tests for all three findings, including the relevant races and negative paths."
+  ],
+  "allowed_write_paths": [
+    "src/workbench/policy/pause_automation/**",
+    "src/workbench/observation/**",
+    "tests/policy/pause_automation/**",
+    "tests/observation/**",
+    "graphify-out/**"
+  ],
+  "constraints": [
+    "You are the sole product mutation owner in the shared workspace for this invocation.",
+    "Preserve all existing user and prior-ticket changes; make the smallest correction.",
+    "Do not edit .workflow records, approved docs, PLAN/state, or files outside allowed_write_paths.",
+    "Do not commit, push, publish, deploy, use Docker, or delegate.",
+    "Use apply_patch for edits. Run focused tests, then proportional regressions. Run graphify update . after code changes."
+  ],
+  "report": "Return changed paths, exact behavior fixed, commands/results, candidate_ready or precise blocker, and residual risks."
+}

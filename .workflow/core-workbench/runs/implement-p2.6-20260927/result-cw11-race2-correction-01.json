@@ -1,0 +1,13 @@
+{
+  "invocation":"cw11-race2-correction-01",
+  "outcome":"complete",
+  "candidate_ready":true,
+  "corrections":[
+    "Final dispatch guard re-reads authority after the last active-run callback.",
+    "Exit events require the full six-field immutable run identity; run_id-only events are rejected even when a run argument is present.",
+    "Exit delivery is pending/in-flight/surfaced, preventing concurrent or reentrant duplicates while allowing retry after callback failure, including after active_run disappears."
+  ],
+  "checks":{"observation":"34 passed","workflow":"44 passed","bridge":"18 passed","contracts":"20 passed","g4_evidence":"10 passed","g4_lifetime":"8 passed","total":"134/134 passed"},
+  "live_probe":"not rerun because the delta only changes exit identity/notification retry and not OMP periodic review dispatch",
+  "graphify_updated":true
+}

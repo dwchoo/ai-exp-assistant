@@ -1,0 +1,25 @@
+{
+  "invocation": "cw15-duplicate-correction-01",
+  "outcome": "complete",
+  "candidate_ready": true,
+  "base_candidate": "c58b390ddeda38511b48e8005d9670ef23b408af71d8dd1e19d326288b580a81",
+  "candidate_id": "e38934dd98f3335b9f04d2e5c0458baec94b338e520012a7fe825c497ea89994",
+  "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw15-duplicate-correction.json",
+  "changed_paths": ["src/workbench/app/lifecycle.py", "tests/lifecycle/test_lifecycle_runtime.py", "graphify-out/**"],
+  "correction": "A duplicate request updates the active takeover generation to max(active, invocation generation) before raising no-replay; journal and external control remain untouched.",
+  "evidence": {
+    "duplicates": "two duplicate intents generations 2 and 3, journal commits 0, external takeover calls 0, automatic actions 0, durable lifecycle generation remains 4",
+    "handoff": "one valid handoff commits lifecycle generation 5 and reopens fence generation 4; later tick 1 and command 1 commit generation 7",
+    "races": "both duplicate-before-handoff and request-after-handoff-capture schedules pass"
+  },
+  "checks": {
+    "non_live": "362 passed: lifecycle runtime 32, pause 122, G4 2, observation 95, storage 33, recovery 26, tasks 22, contracts 20, terminal 10",
+    "compile_graphify_scope_residue": "passed; 14 changes, zero missing/outside scope, zero test process residue",
+    "excluded": "scripted/external OMP and reboot not run"
+  },
+  "sha256": {
+    "src/workbench/app/lifecycle.py": "1dde5f6bd9c4159eed336042112c1bd1bb237805fb39094e8f4832675708b5cb",
+    "tests/lifecycle/test_lifecycle_runtime.py": "caff5c22f3f374e699004cf48d5b05798de7a71fabcf56b0263515e549762cb9"
+  },
+  "mutation_owner": "/root/cw12_post_review_correction"
+}

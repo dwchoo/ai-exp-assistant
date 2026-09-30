@@ -1,0 +1,43 @@
+{
+  "feature_id": "core-workbench",
+  "ticket_id": "CW-03",
+  "attempt_id": "cw03-takeover-repair-01",
+  "invocation": "cw03-takeover-repair-01",
+  "approved_bundle_digest": "64bcf577a30e7c6bbff3e4e775f8e6c17ca212ce3bf79b5bc5be31196a792b07",
+  "actual_workspace": "/home/dwchoo/ai-exp-assistant",
+  "baseline_snapshot": "candidate 21c6830d2cc380eb5c89c21501efadcc7fb79dd968f746ab6f2984b23f945884",
+  "effective_write_capability": "shared physical checkout; serial correction mutation lease",
+  "acceptance_ids": ["C-AC-08"],
+  "gate_item": "G2-TAKEOVER",
+  "allowed_write_paths": [
+    "src/workbench/terminal/shell_g2/control_probe.py",
+    "tests/gates/g2_shell/live_takeover_probe.py",
+    "tests/gates/g2_shell/test_live_takeover_predicates.py"
+  ],
+  "prohibited_paths": ["docs/**", ".workflow/**", ".codex/**", ".agents/**", "graphify-out/**"],
+  "resource_claims": ["host:shell-fixture exclusive"],
+  "mutation_owner": "worker_senior cw03-takeover-repair-01",
+  "checkpoint_ref": ".workflow/core-workbench/runs/implement-p2.6-20260927/pretakeover-repair-checkpoint.json",
+  "requirements_identity": "e0ea9ef4ea1457ea2b76df7b53a7ccb17f48555652a81886978ec1bc3fe6d0e6",
+  "requirements_path": ".workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw03.json",
+  "review_finding": ".workflow/core-workbench/runs/implement-p2.6-20260927/review-cw03-takeover-01.json",
+  "exact_checks": [
+    "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest tests.gates.g2_shell.test_live_takeover_predicates -v",
+    "PYTHONDONTWRITEBYTECODE=1 python3 tests/gates/g2_shell/live_takeover_probe.py",
+    "PYTHONDONTWRITEBYTECODE=1 python3 tests/gates/g2_shell/live_input_jobs_probe.py",
+    "git diff --check -- src/workbench/terminal/shell_g2/control_probe.py tests/gates/g2_shell/live_takeover_probe.py tests/gates/g2_shell/test_live_takeover_predicates.py"
+  ],
+  "reserved_budget": {"total": 1, "role:worker_senior": 1, "unit:V-CW-03": 1},
+  "stop_conditions": [
+    "A product decision outside the accepted P1/P2 findings is required",
+    "A write outside the three allowed paths is required",
+    "The correction would claim impossible atomicity across independent syscalls",
+    "A runtime probe cannot be bounded or cleaned up"
+  ],
+  "configured_model": "gpt-6-sol",
+  "configured_effort": "high",
+  "host_observed_model": "unverified",
+  "host_observed_effort": "unverified",
+  "routing": {"planned_role": "worker_senior", "selected_role": "worker_senior", "reason_codes": ["review_P1_P2_correction", "takeover_input_race"], "evidence_refs": [".workflow/core-workbench/runs/implement-p2.6-20260927/review-cw03-takeover-01.json"]},
+  "task": "Correct only the accepted takeover P1/P2. For P1, make target/foreground/completion revalidation occur before every PTY write attempt, including the first attempt after any BlockingIOError or zero-progress retry; preserve bounded timeout/fail-closed behavior and do not overclaim atomicity between the final check and syscall. For P2, make the focused fixture's actual general user-input path refuse writes until either the confirmed foreground target is current or takeover ACK plus fresh READY has confirmed the manual parent prompt; route foreground input through the confirmed sender rather than direct ShellProcess.send_user. Add discriminating Bash/dash controls for first-write EAGAIN followed by target exit and for unconfirmed general input under lost/delayed ACK. Preserve existing partial-success race, no-replay, flush/barrier, and input-jobs tests. Run exact checks, report changed paths, line rationale, cleanup/process status, and residual syscall-race limits. Do not update graphify; Root owns it."
+}

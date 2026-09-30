@@ -1,0 +1,103 @@
+{
+  "schema_version": 1,
+  "invocation": "cw08-review-regression-test-01",
+  "unit": "V-CW-08-p2.6-current",
+  "task_result": "candidate_ready",
+  "candidate_before": "511d183ec24dbfa098416e422fc5ffb03dccab4c535bb48e0eff68b80f59265b",
+  "candidate_after": "5c155eee484bf193087d2de49f0e654065914741f4771fa10d3a5b5fc644a274",
+  "requirements_sha256": "2fa2a94f03fe18671123d25b355d193e6dc2f600c94eca061f588db699f91722",
+  "changed_paths": [
+    "tests/bridge/test_mailbox_independent.py"
+  ],
+  "new_test_methods": 3,
+  "checks": [
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest -v tests/bridge/test_mailbox_independent.py",
+      "exit_code": 0,
+      "tests": 7
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest -q tests.bridge.test_mailbox_independent.BridgeServerIndependentRegressions tests.bridge.test_mailbox_independent.BridgeServerIndependentRegressions tests.bridge.test_mailbox_independent.BridgeServerIndependentRegressions",
+      "exit_code": 0,
+      "tests": 9,
+      "note": "three repetitions of the three new bounded socket regressions"
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/bridge -v",
+      "exit_code": 0,
+      "tests": 17
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/tasks -q",
+      "exit_code": 0,
+      "tests": 22
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/contracts -q",
+      "exit_code": 0,
+      "tests": 20
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g3_omp /tmp/cw02-g1-venv/bin/python -m unittest -q test_g3_protocol test_tui_message_kinds_predicates test_tui_session_predicates test_tui_session_inflight_predicates test_tui_event_surface_predicates test_tui_extension_fault_predicates test_tui_pause_reconcile_predicates test_tui_contention_predicates test_tui_draft_predicates test_tui_reconnect_predicates",
+      "exit_code": 0,
+      "tests": 114
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g3_omp /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/gates/g4_lifetime -q",
+      "exit_code": 0,
+      "tests": 8
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/gates/g4_evidence -q",
+      "exit_code": 0,
+      "tests": 10
+    },
+    {
+      "command": "node --experimental-strip-types --test tests/gates/g3_omp/bridge.test.ts tests/gates/harness/contracts.test.ts tests/gates/harness/ports-v2.test.ts",
+      "exit_code": 0,
+      "tests": 34
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g3_omp /tmp/cw02-g1-venv/bin/python tests/bridge/live_mailbox_independent.py",
+      "exit_code": 0,
+      "actual_omp_processes": 2,
+      "message_kinds": 4,
+      "child_socket_thread_residue": 0
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0
+    },
+    {
+      "command": "find /tmp -maxdepth 1 -type d -name 'cw08-independent-*' -o -name 'cw08-independent-live-*'",
+      "exit_code": 0,
+      "output": ""
+    }
+  ],
+  "regressions": [
+    {
+      "id": "CW08-BACKPRESSURE-CLOSE",
+      "outcome": "passed",
+      "evidence": "Real authenticated Unix peer stops reading. A 4MB request times out under its deadline; another backpressured request does not block concurrent close and both threads finish bounded."
+    },
+    {
+      "id": "CW08-STRICT-GENERATION",
+      "outcome": "passed",
+      "evidence": "Boolean generation rejected in hello, state, and event; positive integer accepted. Existing independent readiness test now includes boolean generation."
+    },
+    {
+      "id": "CW08-UNMATCHED-LATE-ACK",
+      "outcome": "passed",
+      "evidence": "128 unmatched ACKs plus an ACK after timed-out request are discarded; no pending retention and next request times out independently."
+    }
+  ],
+  "actual_runtime": "Two OMP 18.2.10 sessions processed task/question/answer/report with exact target-provider IDs, duplicate dedupe, durable API/OMP distinction; child/cwd/socket/provider/drain-thread residue zero.",
+  "implementation_defects": [],
+  "cleanup": {
+    "socket_threads_closed": true,
+    "temporary_directory_residue": [],
+    "owned_omp_child_residue": []
+  },
+  "needs_oracle": false,
+  "overall_completion_claimed": false
+}

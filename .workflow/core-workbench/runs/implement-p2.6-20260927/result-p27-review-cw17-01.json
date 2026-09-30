@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-review-cw17-01",
+  "verdict": "integrate",
+  "frozen_candidate": "cd921059f0a9b2d916a9a5dc817367532ac5f728e52da43f093ca28f57b39674",
+  "findings": {
+    "P2-1": "lifecycle.py:719-736 main wait reaps only main child; subreaper orphans accumulate as zombies without bound after deadline removal (repro 50 zombies)",
+    "P2-2": "panes.py:237-241 OmpPane.close scans _session_groups(self.pid) without identity after OMP already reaped; PID reuse -> SIGKILL foreign session (C-D45)",
+    "P2-3": "SIGPIPE/SIGXFSZ SIG_IGN inherited by OmpPane (panes.py:131-137), ShellProcess (prototype.py:402-429), supervisor child (lifecycle.py:636-640); C-AC-32",
+    "P2-4": "manual foreground paste: _live_group_in_session scans /proc per 1KiB write + synchronous _flush -> 48.5s block for 2MiB (C-AC-19)",
+    "P3-1": "accepted shell paste remainder dropped if target becomes unknown mid-flush; partial-write 0.25s fail_closed theoretical path",
+    "P3-2": "INPUT_BARRIER release unbounded; only WorkflowRun.collect releases -> CW-18 must always release",
+    "P3-3": "no hello timeout (16 idle conns block); SIGSTOPped attached client cannot be displaced",
+    "P3-4": "ensure_private_dir silently chmods user-specified existing dir to 0700",
+    "P3-5": "full shutdown verified covers only backend-known refs"
+  },
+  "item_verdicts": {
+    "1 automation holds": "PASS",
+    "2 elapsed-time rules": "PASS (P2-1)",
+    "3 identity/replay": "PASS except P2-2",
+    "4 leaks/signals": "conditional (P2-1..3)",
+    "5 ui_v1": "PASS (perf P2-4)",
+    "6 security": "PASS",
+    "7 tests": "mostly PASS; DETACH supervisor identity empty pre-CW-18; no tests for P2s",
+    "8 adjudication consistency": "PASS"
+  },
+  "root_disposition": {
+    "fix_before_integration": [
+      "P2-1",
+      "P2-2",
+      "P2-3",
+      "P2-4"
+    ],
+    "handoff_CW-18": [
+      "P3-2 backend must always release INPUT_BARRIER; DETACH supervisor identity delta"
+    ],
+    "record_for_UR-UX_or_CW-19": [
+      "P3-1",
+      "P3-3",
+      "P3-4",
+      "P3-5"
+    ]
+  },
+  "read_only_confirmed": true,
+  "reviewer_scratch": "/tmp/claude-1000/-home-dwchoo-ai-exp-assistant/bb27cc53-2459-48d2-983d-3d0acbcdc8ab/scratchpad/review/"
+}

@@ -1,0 +1,72 @@
+{
+  "schema_version": 1,
+  "invocation": "cw07-test-01",
+  "unit": "V-CW-07-p2.6-current",
+  "task_result": "candidate_ready",
+  "baseline_candidate": "c0e000a2e06773dd973f8e7d7fb1113f9dbe62a73fbf792cf3721225b2397362",
+  "candidate": "826e53c0c28b213c25e2e40ff442f6d7970f631ddbb7aec62ea6529efb861971",
+  "requirements_sha256": "55631496c4af5c47c7bf932c8f0e574b56ea0ef4f59bcdfbb0bf03f3c72e792a",
+  "changed_paths": [
+    "tests/terminal/live_persistent_shell_independent.py",
+    "tests/terminal/test_persistent_shell_independent.py"
+  ],
+  "raw_runtime_ref": ".workflow/core-workbench/runs/implement-p2.6-20260927/raw-cw07-independent-runtime.json",
+  "checks": [
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python tests/terminal/live_persistent_shell_independent.py",
+      "exit_code": 0,
+      "bash_cases": 6,
+      "sh_cases": 6,
+      "residue": []
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/terminal -v",
+      "exit_code": 0,
+      "tests": 5
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/gates/g2_shell -q",
+      "exit_code": 0,
+      "tests": 132,
+      "skipped": 6,
+      "seconds": 113.025
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g4_lifetime /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/gates/g4_lifetime -q",
+      "exit_code": 0,
+      "tests": 8
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g4_evidence /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/gates/g4_evidence -q",
+      "exit_code": 0,
+      "tests": 10
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0
+    },
+    {
+      "command": "find /tmp -maxdepth 1 -type d -name 'cw07-independent-*'",
+      "exit_code": 0,
+      "output": ""
+    }
+  ],
+  "coverage": {
+    "P-C-AC-08": "Runtime Bash/sh immediate dispatch hold; request/confirmation separation; SIGSTOP live foreground rejects input/confirmation, SIGCONT confirms before exit/prompt; no replay after handoff.",
+    "P-C-AC-26": "Runtime parent PID/cwd/exported environment preserved; child-local cd/export not propagated; unsubmitted input, manual job, hook, trap, and control-FD loss fail closed with reason/phase.",
+    "P-C-AC-32": "Runtime prepared cwd/PATH/export inheritance and app-only environment exclusion in Bash/sh."
+  },
+  "implementation_defects": [],
+  "unsupported_boundaries": [
+    "Conda-specific activation/deactivation excluded by C-D55.",
+    "Privileged/setuid/file-capability and ptrace-denied environments are not proven.",
+    "No other shell beyond Linux Bash and /bin/sh asserted."
+  ],
+  "cleanup": {
+    "runtime_owned_pid_residue": [],
+    "temporary_directory_residue": [],
+    "live_probe_process_exited": true
+  },
+  "needs_oracle": false,
+  "overall_completion_claimed": false
+}

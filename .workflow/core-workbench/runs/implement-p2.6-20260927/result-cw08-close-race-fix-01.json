@@ -1,0 +1,95 @@
+{
+  "schema_version": 1,
+  "invocation": "cw08-close-race-fix-01",
+  "role": "worker",
+  "unit": "V-CW-08-p2.6-current",
+  "status": "candidate_ready",
+  "baseline_candidate": "5dbd67a9c699b81beaa5f0dd8d6cecec5a078b0f8537c7ff1650289277122271",
+  "baseline_source_sha256": "45993a6589209f7daab625be331801ef5a4bf2c72233307308f9b8b7e08e6aaf",
+  "candidate": "fcf13afb01c74effabec12f82bbbd8bc9d30f90d7099109f999bb5c4cf2968fa",
+  "candidate_source_sha256": "587c7bdce1620b6f3e14f3a464c15bf44551766ed3e545190edc216939e926c4",
+  "requirements_sha256": "2fa2a94f03fe18671123d25b355d193e6dc2f600c94eca061f588db699f91722",
+  "changed_files": [
+    "src/workbench/ipc/bridge_g3/mailbox.py"
+  ],
+  "fix": {
+    "finding": "A concurrent close between pending-ACK registration and select/send can close the socket, making select raise ValueError and escaping the transport failure path.",
+    "change": "Normalize ValueError alongside OSError around _send_until as BridgeDisconnected. TaskMailbox's existing delivery failure path records BridgeDisconnected as a durable UNKNOWN and prevents replay; pending ACK cleanup remains in request finally.",
+    "behavioral_scope": "Only G3BridgeServer.request send-boundary error normalization changed; no test, schema, extension, or other product file was edited."
+  },
+  "checks": [
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/bridge -v",
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "exit_code": 0,
+      "result": "passed",
+      "summary": "17 bridge tests, including independent mailbox close/deadline/ACK regressions."
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g3_omp /tmp/cw02-g1-venv/bin/python -m unittest -v test_g3_protocol test_tui_message_kinds_predicates test_tui_session_predicates test_tui_session_inflight_predicates test_tui_event_surface_predicates",
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "exit_code": 0,
+      "result": "passed",
+      "summary": "54 G3 protocol, readiness, session and event-surface regressions."
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/tasks -q",
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "exit_code": 0,
+      "result": "passed",
+      "summary": "22 Task repository tests."
+    },
+    {
+      "command": "awk 'match($0, /[ \\t]+$/) { printf \"%d:%s\\n\", NR, $0; bad=1 } END { exit bad }' src/workbench/ipc/bridge_g3/mailbox.py && git diff --check",
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "exit_code": 0,
+      "result": "passed",
+      "summary": "No trailing whitespace in mailbox.py or tracked-diff whitespace diagnostics."
+    }
+  ],
+  "focused_repro": {
+    "command": "Inline Python socket-bridge harness with select.select gated on call 2; concurrent G3BridgeServer.close() runs after the deliver request registers its pending ACK and before select/send.",
+    "exit_code": 0,
+    "result": "passed",
+    "observed": {
+      "boundary": "pending ACK registered, before deliver select/send",
+      "receipt": "unknown",
+      "reason": "BridgeDisconnected",
+      "durable_history": [
+        "attempted",
+        "unknown"
+      ],
+      "same_receipt_on_repeat": true,
+      "pending_ack_count": 0,
+      "close_completed": true,
+      "elapsed_seconds": 0.031,
+      "select_calls": 2
+    },
+    "conclusion": "Closed-descriptor ValueError did not escape delivery; close and delivery both completed within the focused bound and no attempt remained stranded."
+  },
+  "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw08-close-race-fix-after.json",
+  "scope_audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/scope-audit-cw08-close-race-fix.json",
+  "scope": {
+    "allowed_files": [
+      "src/workbench/ipc/bridge_g3/mailbox.py"
+    ],
+    "changed_paths": [
+      "src/workbench/ipc/bridge_g3/mailbox.py"
+    ],
+    "outside_scope": [],
+    "index_changed": [],
+    "independent_tests_modified": false,
+    "graphify_modified_by_this_invocation": false,
+    "audit_comparable": true,
+    "snapshot_stable": true
+  },
+  "runtime": {
+    "actual_two_omp_runtime_rerun": false,
+    "reason": "The focused regression used a live G3BridgeServer Unix socket and protocol client fixture to exercise the exact close/select race; it was not a two-OMP integration session."
+  },
+  "remaining_gaps": [
+    "Root owns fresh independent review, graphify update, and final integrated verification."
+  ],
+  "needs_oracle": false,
+  "commit_created": false
+}

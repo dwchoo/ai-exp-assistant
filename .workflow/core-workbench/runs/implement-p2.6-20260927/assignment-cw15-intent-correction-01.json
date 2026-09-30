@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "invocation": "cw15-intent-correction-01",
+  "role": "worker_senior",
+  "unit": "V-CW-15-p2.6-current",
+  "authority": "User $implement request; approved PLAN p2.6 CW-15; C-D52 immediate takeover request contract; fresh P1 review",
+  "objective": "Fence new automatic delivery at user takeover invocation even when an earlier command is blocked inside G3 preflight, while preserving durable no-replay evidence and all established lifecycle invariants.",
+  "candidate": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw15-takeover-test.json",
+    "candidate_id": "dccc1a3d2813ab121eca173d463cd541aa18eef293e2904ae38c20cb8eec473a"
+  },
+  "required_changes": [
+    "At request_takeover method entry, synchronously close a coordinator-local intent fence before waiting for _linear_lock. The fence is one-way/fail-closed for this coordinator and automatic admission must consult it.",
+    "Bind each command attempt to a current lifecycle permit and propagate a combined lifecycle+pause authority token through BoundMailboxCommandAdapter and PauseCoordinator to TaskMailbox/G3BridgeServer. G3BridgeServer already checks authority immediately before submission; ensure the combined token makes takeover intent invalidate that boundary.",
+    "Do not erase or replay the durable command.delivery=unknown record when intent wins. Distinguish no API call/rejected-before-submission from genuinely already-submitted/unknown evidence using existing receipt semantics; do not claim cancellation of already delivered requests.",
+    "Keep exact worker/manager/session/owner/process checks, metadata/pause/model gates, shutdown ordering, reentrant safety and test fakes compatible. Use the smallest predecessor API extension needed; do not weaken G3 authority checks.",
+    "Add deterministic regression that blocks after probe but before actual bridge submission, invokes takeover, then proves the deliver frame/API call count remains zero after request time, intent is immediate before durable lock acquisition, takeover becomes durable after the in-flight call unwinds, command evidence remains unknown/no-replay, and all threads finish within three seconds. Preserve the existing action-first and fence-first tests with corrected expectations."
+  ],
+  "allowed_write_paths": ["src/workbench/app/**", "src/workbench/policy/pause_automation/**", "tests/lifecycle/**", "tests/policy/pause_automation/**", "graphify-out/**"],
+  "constraints": [
+    "Bounded CW-15 correction only. Do not modify G3 transport guarantees except by passing its existing authority token, other predecessor packages, docs, workflow/PLAN/state. No external OMP, reboot, delegation, commit, publish, deploy or Docker.",
+    "Use apply_patch. Run focused transport race, lifecycle, pause, production binding and predecessor suites; graphify update, compile/diff/residue and candidate hash checks."
+  ],
+  "report": "Return candidate_ready/needs_reroute; exact invocation/fence/G3-send timestamps and counts; command journal/receipt state; interface changes; tests/hashes/residue; pending environments."
+}

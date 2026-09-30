@@ -1,0 +1,23 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 1072,
+  "event": {
+    "id": "limit-cw14-branch-total-20260929",
+    "kind": "limit",
+    "data": {
+      "bucket": "total",
+      "origin": "operating",
+      "value": 426,
+      "authority": "C-D55 plus workflow-contract section 8 and current $implement authorization",
+      "reason": "Complete CW-14 branch-safe correction and retain mandatory CW-15/CW-16 implementation, test and review calls",
+      "decision_owner": "Root",
+      "remaining_work_estimate": 8,
+      "expected_previous": {
+        "value": 425,
+        "authority": "C-D55 plus workflow-contract section 8 and current $implement authorization",
+        "reason": "Complete mandatory CW-14 through CW-16 implementation, independent tests and fresh reviews with two bounded correction cycles and one diagnostic reserve"
+      },
+      "scope_basis": null
+    }
+  }
+}

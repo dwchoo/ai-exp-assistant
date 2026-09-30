@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "invocation": "cw12-tracked-mode-test-01",
+  "role": "test_designer",
+  "unit": "V-CW-12-p2.6-current",
+  "authority": "User $implement docs/features/core-workbench request; approved PLAN p2.6 CW-12",
+  "objective": "Independently verify the frozen CW-12 tracked-mode correction and actual OMP pause/reconcile lifecycle.",
+  "candidate": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw12-tracked-mode-correction.json",
+    "candidate_id": "a0497221bb84f6283c9196b5442260d7bfc43aec4287ff34bbe31e4d4e61d72b"
+  },
+  "required_tests": [
+    "Verify execution and separate-peer tracked 0644-to-0600 or equivalent non-executable mode deltas outside scope block resume.",
+    "Verify approved-path chmod succeeds, tracked removal and special or unreadable replacements fail closed, and listing/entry/sidecar bounds fail closed.",
+    "Verify large clean Git repositories remain live without hashing every clean file, while changed/flagged/untracked content behavior is preserved.",
+    "Run the complete pause_automation suite and the actual omp/18.2.10 reject-cleanup-reconcile probe; report zero residual processes/resources."
+  ],
+  "allowed_write_paths": ["tests/policy/pause_automation/**", "graphify-out/**"],
+  "constraints": [
+    "Independent test-only owner; do not modify production code or workflow/docs/PLAN/state.",
+    "Use apply_patch for test edits, preserve existing regressions, and run graphify update . after any test code modification.",
+    "No delegation, commit, publish, deploy, or Docker."
+  ],
+  "report": "Return candidate_ready or needs_reroute, changed test paths, exact commands/counts, actual OMP version and zero-residue evidence, findings mapped to C-AC-25/C-AC-30/C-AC-33, and residual risks."
+}

@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-p22-rerun-test-01",
+  "status": "candidate_ready",
+  "candidate_id": "89110a7fe46b0a7ca1ae331013fa427aabda6a1f6faa60ec8f6413e88f084a50",
+  "after_snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-p22-rerun-test-after.json",
+  "scope_audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-p22-rerun-test.json (only the allowed new test file; no outside-scope)",
+  "added_tests": {"tests/backend/test_pane_pin_independent_p27d.py": "8027c2c8901bf870b42aebf098d71bcd59059ceb8f81c45104c40bbb41b6b03b (8 tests)"},
+  "checks": [["p27c unmodified x5", 0, "4 OK x5"], ["p27d new x5", 0, "8 OK x5"], ["tests/backend discover", 0, "68 OK 263s"], ["tests/contracts", 0, "43 OK"], ["tests/lifecycle", 0, "38 OK"]],
+  "verdicts": {"P2-2": "PASS", "a": "PASS (foreign leader live and exited; 0 signals)", "b": "PASS (grandchildren after reap cleaned while anchor alive)", "c": "PASS (fd count equal in 3 scenarios)", "d": "PASS (SESSION_PIN_LIMIT patched to 1 and 3 with 8 members; test reads private pane._pins)", "e": "PASS (TERM-ignoring leader -9, cooperative -15; killpg only on proven own group)"},
+  "frozen_hashes_equal": true,
+  "notes": "first backend run output truncated -> rerun with log; one '-t src' invocation error (method, not code)",
+  "residue": "no processes or temp dirs",
+  "observed_model": "sonnet (wb-test-rerun definition; host metadata unverified)"
+}

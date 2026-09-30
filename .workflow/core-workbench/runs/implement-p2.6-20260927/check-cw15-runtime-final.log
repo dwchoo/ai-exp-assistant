@@ -1,0 +1,8 @@
+/usr/lib/python3.12/pty.py:95: DeprecationWarning: This process (pid=3670502) is multi-threaded, use of forkpty() may lead to deadlocks in the child.
+  pid, fd = os.forkpty()
+/usr/lib/python3.12/pty.py:95: DeprecationWarning: This process (pid=3670502) is multi-threaded, use of forkpty() may lead to deadlocks in the child.
+  pid, fd = os.forkpty()
+----------------------------------------------------------------------
+Ran 38 tests in 4.094s
+
+OK

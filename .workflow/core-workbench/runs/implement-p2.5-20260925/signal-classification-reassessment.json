@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "unit": "V-CW-03-P25-SIGNAL-CLASSIFICATION",
+  "decision_owner": "Root",
+  "reason": "Fresh review found required INT/QUIT/CONT timeouts share the allowed TSTP unknown category. The preceding four-call unit is exhausted and the defect blocks minimum discriminator acceptance.",
+  "remaining_work_estimate": 3,
+  "planned_roles": ["worker_senior", "test_designer", "reviewer"],
+  "hard_total_cap": 220,
+  "used_before_unit": 210,
+  "available_before_unit": 10
+}

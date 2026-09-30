@@ -1,0 +1,5 @@
+{
+  "before": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw10-public-response-worker-checkpoint.json",
+  "after": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw10-public-response-final.json",
+  "allowed": ["omp_bridge/g3/bridge.ts", "src/workbench/workflow/**", "tests/bridge/**", "tests/gates/g3_omp/**", "tests/workflow/**"]
+}

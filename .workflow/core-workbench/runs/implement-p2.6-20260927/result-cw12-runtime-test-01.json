@@ -1,0 +1,15 @@
+{
+  "invocation": "cw12-runtime-test-01",
+  "outcome": "needs_reroute",
+  "candidate_ready": false,
+  "candidate_validated": "4e425c8e4c07322bd30bf2529df398afcbb9add78fbdd3de1127493f2840c282",
+  "policy_tests": "29/31 passed; 2 failures",
+  "findings": [
+    {"severity": "P1", "summary": "pause accepts an exact abortRequestId stop event from a replacement manager session/generation without checking the bound peer identity"},
+    {"severity": "design_blocker", "summary": "after first parent-directory fsync failure and modeled crash namespace loss, missing journal is indistinguishable from never-paused and restart opens automation"}
+  ],
+  "actual_omp_18_2_10": "Strengthened live probe passed 3/3: zero paused provider/agent starts, exact pause/stop/unknown evidence, all reconciliation true, no replay, fresh provider delta 1 with agent start/end, zero residue.",
+  "negative_predicates": "5/5 passed",
+  "regressions": "observation 91, workflow 44, tasks 22, contracts 20, bridge 18, status 2, G3 TypeScript 23 passed; G3 Python 114/117 with three existing pids-fixture KeyErrors under unmanaged state path",
+  "graphify_updated": true
+}

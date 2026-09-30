@@ -1,0 +1,15 @@
+{
+  "invocation": "cw12-fence-protocol-review-01",
+  "outcome": "needs_reroute",
+  "approved": false,
+  "manifest": "candidate 9ead57ed41b17cee505c10b883dff8e5ff1e98274eb7b441179f7623614c7e0d and all 1388 file hashes matched",
+  "finding": {
+    "severity": "P1",
+    "title": "Automatic dispatch permits a bound run while CW11 active run differs",
+    "location": "controller.py:427-446 and 258-277",
+    "detail": "bind_run(B) opens a fence bound to run_identity=None when admission active A differs, and automatic paths call permit() without required run/incarnation, allowing B transport despite the A/B mismatch."
+  },
+  "closed": ["lost open", "action-lock pause delay", "stale cancellation cross-run", "G3 submission exact peer/pair/token"],
+  "candidate_difference_note": "Test-to-review candidate production hashes match; only graphify and three tests changed.",
+  "files_modified": false
+}

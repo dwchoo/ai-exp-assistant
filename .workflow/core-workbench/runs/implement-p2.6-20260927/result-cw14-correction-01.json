@@ -1,0 +1,26 @@
+{
+  "invocation": "cw14-correction-01",
+  "outcome": "complete",
+  "candidate_ready": true,
+  "base_candidate": "ba9c7658c840770789ee1bf19d649d6b04ab1a7887aa07ff588c2f3aa347eadf",
+  "changed_paths": [
+    "src/workbench/storage/log_raw/store.py",
+    "tests/storage/test_log_raw.py",
+    "graphify-out/**"
+  ],
+  "changes": [
+    "Failure snapshots and status select the newest durable-or-volatile run state so repeated failures preserve monotonic counters.",
+    "Invalid .log run IDs during project scan become StoreIntegrityError and are returned as immutable failure snapshots by append/status."
+  ],
+  "checks": {
+    "new_regressions": "2 tests passed",
+    "storage": "26 tests passed",
+    "graphify_update": "exit 0; 4859 nodes, 10328 edges, 449 communities"
+  },
+  "sha256": {
+    "src/workbench/storage/log_raw/store.py": "ae7cc9a3ed00915f9fff9d1b480b3ca25415b4087f5cf3202b196a8f002e0b8e",
+    "tests/storage/test_log_raw.py": "fd14c05b99767aa074e2e556908e3c3c55bfc58a2ced836f30e5d77c3173e147"
+  },
+  "residual_integration_risk": "CW-15 must wire metadata admission to durable metadata outcomes and reconcile restart state.",
+  "mutation_owner": "/root/cw14_worker"
+}

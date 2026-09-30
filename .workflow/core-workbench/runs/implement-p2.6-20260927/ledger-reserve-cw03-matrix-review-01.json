@@ -1,0 +1,10 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 188,
+  "event": {"id": "reserve-cw03-matrix-review-01", "kind": "reserve", "data": {
+    "invocation": "cw03-matrix-review-01", "role": "reviewer", "unit": "V-CW-03", "incident": "",
+    "purpose": "Fresh review of canonical remaining G2 matrix migration and hook lifecycle correction",
+    "model": "gpt-6-sol", "effort": "high", "buckets": ["total", "role:reviewer", "unit:V-CW-03"],
+    "writer": false, "workspace": "/home/dwchoo/ai-exp-assistant"
+  }}
+}

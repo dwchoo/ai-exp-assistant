@@ -1,0 +1,39 @@
+{
+  "invocation": "cw15-claim-correction-01",
+  "outcome": "complete",
+  "candidate_ready": true,
+  "base_candidate": "d9ea1d5de9f371776d456f7d80d8f81a8f96eb77fca1ec158c2229a694f14e66",
+  "candidate_id": "04ce8812f710e9df469184772288e685f5144906969e6f20387f91bd43b86c8c",
+  "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw15-claim-correction.json",
+  "changed_paths": ["src/workbench/app/lifecycle.py", "src/workbench/app/production.py", "src/workbench/ipc/bridge_g3/mailbox.py", "src/workbench/policy/pause_automation/controller.py", "tests/lifecycle/test_lifecycle_runtime.py", "tests/lifecycle/test_production_binding.py", "graphify-out/**"],
+  "linearization": "_SubmissionFence.claim orders one lifecycle permit against revoke; _CombinedAuthority.claim runs at the G3 write-locked boundary immediately before _send_until.",
+  "orders": {
+    "revoke_first": "zero frame and zero API submission",
+    "claim_first": "one already-in-flight frame and one API ACK; outcome retained without cancellation or replay"
+  },
+  "handoff": "The fence reopens only after a valid manager/control_wait external result is durably committed; external or commit failure remains fenced.",
+  "port_contract": "Token-unaware CommandPort fallback removed; unbound port produces zero send and retains command unknown.",
+  "checks": {
+    "red": "same-coordinator handoff remained held and current-to-send revoke still transmitted before correction",
+    "focused_green": "3/3 passed",
+    "lifecycle": "31/31 passed",
+    "pause": "122/122 passed",
+    "g3_protocol": "7/7 passed",
+    "bridge": "22/22 passed",
+    "observation": "95/95 passed",
+    "storage": "33/33 passed",
+    "recovery": "26/26 passed",
+    "terminal": "10/10 passed",
+    "graphify_compile_diff_residue": "passed; no test process residue"
+  },
+  "sha256": {
+    "src/workbench/app/lifecycle.py": "a928801cda30208105f6ac490495eb30818caaf4db90b24e75f36d1ce29e41da",
+    "src/workbench/app/production.py": "e07d39f89622a411d5567a269b5b59737b429aff79ec8228d93fabfa9338e788",
+    "src/workbench/ipc/bridge_g3/mailbox.py": "197c0636c9d6d55d9e66c4e525bf1e6b4ee0360bc30a574c7de4a7de6024aa79",
+    "src/workbench/policy/pause_automation/controller.py": "693a1afb366053655314a6abd7a97a0b167ec5abaf093f8d249f5c09fdbfb765",
+    "tests/lifecycle/test_lifecycle_runtime.py": "9fca39f5fcb9b9cb354a5cbd9b369f9669740014716017e6c4bce775550c0048",
+    "tests/lifecycle/test_production_binding.py": "4681f6659aa43ab3c00b9b14d5fc03a03bbf95bce96e7cfaa6c94971b0fe2966"
+  },
+  "pending": ["pyte live suite", "live external OMP", "real reboot"],
+  "mutation_owner": "/root/cw12_post_review_correction"
+}

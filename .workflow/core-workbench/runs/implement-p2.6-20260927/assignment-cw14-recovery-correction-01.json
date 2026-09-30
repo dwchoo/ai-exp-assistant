@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "invocation": "cw14-recovery-correction-01",
+  "role": "worker",
+  "unit": "V-CW-14-p2.6-current",
+  "authority": "User $implement docs/features/core-workbench request; approved PLAN p2.6 CW-14; independent correction-test evidence",
+  "objective": "Fix the single same-store recovery defect after a transient malformed-entry storage-integrity failure.",
+  "candidate": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw14-correction-test.json",
+    "candidate_id": "da959ee8faef57cedc50e1f3b6d382f21b71c176c9ce50a0711e16f902022a3e"
+  },
+  "required_change": [
+    "After the malformed entry is removed and storage integrity is restored, the same RawLogStore must durably reconcile its latest volatile failure counters and resume appending new bytes without erasing prior missing/dropped accounting.",
+    "Preserve the independent test's exact sequence: 3B stored, malformed entry, status plus failed 2B append => (3,5,2,2), remove entry, append 1B => (4,6,2,2) and raw b'abcf'.",
+    "Do not weaken fail-closed treatment of unresolved integrity/status/lock/path failures or accepted C-AC-24 behavior."
+  ],
+  "allowed_write_paths": ["src/workbench/storage/log_raw/**", "tests/storage/**", "graphify-out/**"],
+  "constraints": [
+    "Single bounded recovery correction only; no workflow/repository/runtime/docs/PLAN/state/ledger edits.",
+    "Use apply_patch; run the exact failing test and full storage suite plus graphify update; no delegation, commit, publish, deploy, Docker, or destructive actions."
+  ],
+  "report": "Return candidate_ready/needs_reroute, reconciliation invariant, exact recovery result, suite counts, hashes/scope and remaining CW-15 obligations."
+}

@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "invocation": "cw12-post-review-final-review-01",
+  "role": "reviewer",
+  "unit": "V-CW-12-p2.6-current",
+  "authority": "User $implement docs/features/core-workbench request; approved PLAN p2.6 CW-12",
+  "purpose": "Fresh independent final review of the corrected and independently tested CW-12 candidate.",
+  "candidate": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw12-post-review-test.json",
+    "candidate_id": "c31bc816c10ae08dd29a5a625ad83336c7584bccc4ae5497d5369aef8e3d7639",
+    "base_scope_audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/audit-cw12-post-review-correction.json"
+  },
+  "requirements": {
+    "ticket": "docs/features/core-workbench/tickets/CW-12.md",
+    "brief": "docs/features/core-workbench/BRIEF.md",
+    "spec": "docs/features/core-workbench/SPEC.md",
+    "acceptance_ids": ["C-AC-25", "C-AC-30", "C-AC-33"]
+  },
+  "evidence": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-run-permit-review-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-post-review-correction-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-post-review-test-01.json"
+  ],
+  "review_scope": [
+    "Verify all three prior findings are actually closed in production code, not only tests.",
+    "Review the persisted-run guard for deadlocks, cross-process correctness, resource lifetime, fail-closed behavior, and normal delivery liveness.",
+    "Review production resume observation, actual peer cwd bounded manifests, unknown/failure behavior, approval-scope semantics, TOCTOU exposure, privacy, and cost bounds.",
+    "Review late CW-11 outcome attribution semantics and regressions.",
+    "Assess the residual risk that peer cwd manifests prove stable state but do not directly map every file to approved scope; decide whether it blocks C-AC-33."
+  ],
+  "constraints": {
+    "read_only": true,
+    "allowed_write_paths": [],
+    "run_tests": false,
+    "no_commit": true,
+    "no_publish": true,
+    "report_format": "State candidate_ready, severity-ordered findings with file:line evidence, acceptance assessment, and residual risks."
+  }
+}

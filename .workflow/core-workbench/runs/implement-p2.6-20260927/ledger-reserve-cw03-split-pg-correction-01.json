@@ -1,0 +1,20 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 115,
+  "event": {
+    "id": "reserve-cw03-split-pg-correction-01",
+    "kind": "reserve",
+    "data": {
+      "invocation": "cw03-split-pg-correction-01",
+      "role": "worker_senior",
+      "unit": "V-CW-03",
+      "incident": "",
+      "purpose": "Correct fresh review findings in the bounded split-PG control/lifecycle probe",
+      "model": "gpt-6-sol",
+      "effort": "high",
+      "buckets": ["total", "role:worker_senior", "unit:V-CW-03"],
+      "writer": true,
+      "workspace": "/home/dwchoo/ai-exp-assistant"
+    }
+  }
+}

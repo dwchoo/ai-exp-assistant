@@ -1,0 +1,13 @@
+## 13-after-detach: detach(prefix d) 후 바깥 터미널 메시지
+## size 160x45 | exit=0
+------------------------------------------------------------
+starting backend: shell bash (/usr/bin/bash), omp/18.2.10
+backend pid 4117446 phase ready
+data dir /tmp/uxfill24mq/d
+  host_shell: pid 4117501 alive=True owner=user
+  manager_omp: pid 4117502 alive=True owner=user
+  worker_omp: pid 4117503 alive=True owner=user
+  shell: bash /usr/bin/bash mode=manual_prompt
+[workbench] detached; backend keeps running
+
+__SH_DONE__

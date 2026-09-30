@@ -1,0 +1,33 @@
+{
+  "invocation": "cw15-positive-test-01",
+  "outcome": "complete",
+  "candidate_ready": true,
+  "base_candidate": "35a10c000ed43187c9fa25eba29a3c0b5618a4dbb35cea0eabc49e743f929f5d",
+  "changed_paths": ["tests/lifecycle/test_production_binding.py", "graphify-out/**"],
+  "positive_composition": {
+    "baseline": "disposable Git repository, local config, core.filemode=true, tracked 0644 result.txt, clean commit/HEAD, both peer HEAD values equal",
+    "path": "authenticated G3 -> PauseCoordinator.dispatch_bound_automatic -> TaskMailbox.deliver -> app.dispatch_command",
+    "result": "omp_processed",
+    "durable_states": ["attempted", "api_returned", "omp_processed"],
+    "delivery_count": 1,
+    "duplicate_additional_deliveries": 0,
+    "generation_2_reconnect_additional_deliveries": 0
+  },
+  "checks": {
+    "lifecycle": "15 tests passed",
+    "pause": "122 tests passed",
+    "recovery": "26 tests passed",
+    "bridge": "22 tests passed",
+    "terminal": "10 tests passed",
+    "storage": "33 tests passed",
+    "observation": "95 tests passed",
+    "workflow": "44 tests passed",
+    "g4": "8 tests passed",
+    "graphify_update": "exit 0",
+    "residue": "shell, sockets, peer threads and temporary repository all removed"
+  },
+  "production_hashes": "all five frozen production files match snapshot",
+  "test_sha256": "69252950b1411aa8405c460463b9610d45c7c20e2a7b390dd2d978970149eba8",
+  "pending_environment": "External actual OMP positive delivery and real reboot remain unexecuted; authenticated local stand-in peer was used.",
+  "mutation_owner": "/root/cw12_post_review_test"
+}

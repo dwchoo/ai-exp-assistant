@@ -1,0 +1,1 @@
+{"changed":["graphify-out/cache/last_query_stamp","src/workbench/storage/metadata_sqlite/__init__.py","src/workbench/storage/metadata_sqlite/schema.py","src/workbench/tasks/__init__.py","src/workbench/tasks/repository.py","tests/tasks/test_repository.py"],"comparable":true,"index_changed":[],"outside_scope":["graphify-out/cache/last_query_stamp"]}

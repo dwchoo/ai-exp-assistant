@@ -1,0 +1,24 @@
+{
+  "invocation": "cw12-final-scope-test-01",
+  "outcome": "complete",
+  "candidate_ready": true,
+  "test_only_changed_paths": ["tests/policy/pause_automation/test_pause_policy.py", "graphify-out/**"],
+  "checks": {
+    "pause": "77 passed",
+    "observation": "95 passed",
+    "tasks": "22 passed",
+    "bridge": "22 passed",
+    "workflow": "44 passed",
+    "actual_omp": "omp/18.2.10 exit 0; result=passed; zero_residue=true; no runtime temp residue",
+    "graphify": "graphify update . succeeded"
+  },
+  "coverage": [
+    "approved peer cwd change permits resume",
+    "post-pause out-of-bound peer change rejects resume",
+    "descendant cwd accepted and escape rejected",
+    "file/Git output limits, special files, mutation during scan, and HEAD drift reject resume"
+  ],
+  "unknowns": [],
+  "residual_risk": "File verification and resume are not one atomic filesystem transaction.",
+  "mutation_owner": "/root/cw12_post_review_test"
+}

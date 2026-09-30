@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw17-worker-01",
+  "ticket_id": "CW-17",
+  "status": "candidate_ready",
+  "candidate_id": "8ad024ff4820404513cdf223e2ad1e7eaccc202b6beddc43855c5f287ac13242",
+  "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-cw17-worker-after.json",
+  "scope_audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-cw17-worker.json",
+  "scope_audit_attribution": {
+    "worker_changes_outside_scope": [],
+    "root_concurrent_changes": [
+      "docs/features/core-workbench/{DECISIONS,PLAN,SPEC}.*",
+      "tickets/CW-06/16/18.md",
+      ".workflow/core-workbench/state.json",
+      "planning-p2.7-20260929/*amendment-a*"
+    ],
+    "read_only_tool_side_effect": [
+      "graphify-out/cache/last_query_stamp"
+    ],
+    "preexisting_dirty": "pyproject.toml dependencies line (worker added only [project.scripts])"
+  },
+  "worker_checks": [
+    {
+      "command": "/usr/bin/env PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/backend -p 'test_*.py' -v",
+      "exit_code": 0,
+      "result": "28 tests OK, 73.1s"
+    },
+    {
+      "command": "... -m unittest discover -s tests/contracts -p 'test_*.py'",
+      "exit_code": 0,
+      "result": "32 tests OK"
+    }
+  ],
+  "worker_claimed_gate_coverage": {
+    "L-CW17-DETACH": "runtime",
+    "L-CW17-START": "runtime (zsh only as SHELL env; zsh not installed)",
+    "L-CW17-CONTRACT": "fixture"
+  },
+  "remaining_gaps": [
+    "active supervisor identity across detach not exercised (no managed run until CW-18) -> delta verification after CW-18",
+    "PersistentShell.send_user rejects input when foreground is a user-launched program (vim/REPL) or ESC sequences make boundary uncertain (input_target_unknown) -> runtime characterization needed; UX-critical",
+    "reattach replay is raw 256 KiB tail per pane; screen restoration strategy is CW-06's",
+    "bridge extension default path repo-relative",
+    "automation not_configured; confirm_boot rejected until CW-19",
+    "pane exit -> degraded, no restart (CW-19)"
+  ],
+  "observed_model": "opus (host process args)"
+}

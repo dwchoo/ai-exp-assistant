@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "invocation": "cw13-force-test-01",
+  "role": "test_designer",
+  "unit": "V-CW-13-p2.6-current",
+  "authority": "User $implement docs/features/core-workbench request; approved PLAN p2.6 CW-13",
+  "objective": "Independently verify the frozen ordinary-stop-before-force correction and complete C-AC-34 fixture evidence.",
+  "candidate": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw13-force-correction.json",
+    "candidate_id": "047353c3a55e85d8666672fdea6f09fea7dff8f5bc0cd6c383973f2efcf884cb"
+  },
+  "required_tests": [
+    "No stop request must return only request_stop/observe steps; stop_requested without valid proof and proof without a strictly later observation must never return force_requested.",
+    "Validate proof schema and exact binding for task/revision/run, target identity, canonical request ID, positive sequence and trusted source; malformed, cross-run, wrong target, wrong source or stale sequence fails closed.",
+    "Force may be planned only on a strictly later observation where the exact delegated owned target remains running and descendants are not clear; terminated, unknown, drifted, paused, revoked, metadata-unhealthy or wrong-owner states block it.",
+    "After force, require a further strictly later full-termination observation before any mutation/relaunch path. Verify no elapsed-time threshold exists.",
+    "Run full recovery and predecessor regressions with production snapshot unchanged."
+  ],
+  "allowed_write_paths": ["tests/policy/recovery_manager/**", "graphify-out/**"],
+  "constraints": [
+    "Independent test-only owner; no production or workflow/docs/PLAN/state edits.",
+    "Use apply_patch and run graphify update . after tests change; no delegation, commit, publish, deploy, Docker, or live kill."
+  ],
+  "report": "Return candidate_ready/needs_reroute, cases/counts, production hash, C-AC-34 judgment, and remaining CW-15 adapter obligations."
+}

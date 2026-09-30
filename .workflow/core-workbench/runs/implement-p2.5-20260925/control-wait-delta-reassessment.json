@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "unit": "V-CW-03-P25-CONTROL-WAIT-DELTA",
+  "decision_owner": "Root",
+  "reason": "The four-call correction unit is exhausted. The final correction requires independent fail-closed and set-e verification plus focused delta review before integration.",
+  "remaining_work_estimate": 3,
+  "planned_roles": ["test_designer", "reviewer"],
+  "correction_reserve": 1,
+  "hard_total_cap": 220,
+  "used_before_unit": 203,
+  "available_before_unit": 17
+}

@@ -1,0 +1,21 @@
+{
+  "root": "/home/dwchoo/ai-exp-assistant",
+  "requirements": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw08.json",
+  "argv": [
+    "/usr/bin/env",
+    "PYTHONDONTWRITEBYTECODE=1",
+    "PYTHONPATH=src:tests/gates/g3_omp:tests/bridge",
+    "/tmp/cw02-g1-venv/bin/python",
+    "tests/bridge/live_mailbox_independent.py"
+  ],
+  "environment": {
+    "description": "Linux actual OMP 18.2.10 manager and worker TUI processes with authenticated Unix-socket G3 bridge"
+  },
+  "log": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/check-cw08-runtime-final.log",
+  "check_id": "cw08-runtime-final-01",
+  "watch": [],
+  "exclude": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/**"
+  ],
+  "timeout": 180
+}

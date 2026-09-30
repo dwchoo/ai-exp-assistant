@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "invocation": "cw15-admission-final-review-01",
+  "role": "reviewer",
+  "unit": "V-CW-15-p2.6-current",
+  "authority": "User $implement docs/features/core-workbench request; approved PLAN p2.6 CW-15; final corrected runtime candidate",
+  "objective": "Perform a fresh final read-only review of the complete corrected CW-15 candidate.",
+  "candidate": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw15-admission-test.json",
+    "candidate_id": "b3ed52eaec0b1fb9c200659ac9a4719c2845f4556a7295626703828857ed02b2"
+  },
+  "acceptance_ids": ["C-AC-15", "C-AC-16", "C-AC-17", "C-AC-18", "C-AC-22", "C-AC-23"],
+  "review_focus": [
+    "Close the prior ended-run command and metadata periodic-review findings by inspecting the shared automatic admission predicate and all call sites; ensure explicit/non-automatic user operations are not accidentally blocked.",
+    "Re-review production composition, exact identities, no replay, detach/restart/model/takeover/boot/shutdown transitions and target/incarnation action fences for concrete remaining defects.",
+    "Assess positive clean-baseline G3 delivery, 377 regression results, journal/action-count assertions, resource cleanup and frozen hashes against each acceptance ID.",
+    "Separate environment-pending external OMP and real reboot from any in-repo product gap; list bounded CW16 checks."
+  ],
+  "constraints": [
+    "Read-only; do not edit files, run mutating graphify, signal processes or change external state.",
+    "No delegation, test writes, commit, publish, deploy or Docker."
+  ],
+  "report": "Return candidate_ready true/false, prior finding closure, new concrete findings if any, per-acceptance runtime verdict, evidence adequacy, environment pending and exact CW16 obligations."
+}

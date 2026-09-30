@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "invocation": "cw13-cas-test-01",
+  "role": "test_designer",
+  "unit": "V-CW-13-p2.6-current",
+  "authority": "User $implement docs/features/core-workbench request; approved PLAN p2.6 CW-13",
+  "objective": "Independently verify the frozen CW-13 durable CAS correction and complete fixture evidence.",
+  "candidate": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw13-cas-correction.json",
+    "candidate_id": "022a1c5d0ad3a3b20d814a317c0ed6a431906ccadf9d22e274380abf39354fec"
+  },
+  "required_tests": [
+    "Re-run the preserved inconsistent reservation regression for truthy non-bool, True without persistence, missing/duplicate/skipped/wrong decision attempt, prior-history replacement, fact drift, malformed/read exception, and valid exact append.",
+    "Exercise concurrent callers and post-read scheduling so exactly one action plan is admitted, the winner reports confirmed usage/ordinal, and losers or uncertain commits have no steps and are never replayed.",
+    "Check that post-CAS equality covers identity, approval, criteria, authority/settings, automation/metadata/revocation/owner, observation, worker/artifacts and scope while permitting only the exact appended attempt.",
+    "Run complete recovery fixtures and relevant CW-10/11/12 regressions; production files must remain snapshot-identical."
+  ],
+  "allowed_write_paths": ["tests/policy/recovery_manager/**", "graphify-out/**"],
+  "constraints": [
+    "Independent test-only owner; do not modify production or workflow/docs/PLAN/state.",
+    "Use apply_patch, preserve all tests, run graphify update . after test edits, and do not delegate/commit/publish/deploy/use Docker."
+  ],
+  "report": "Return candidate_ready/needs_reroute, exact cases/counts, production snapshot match, acceptance mapping, and residual adapter risks."
+}

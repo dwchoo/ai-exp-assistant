@@ -1,0 +1,22 @@
+{
+  "invocation": "cw03-split-pg-test-01",
+  "ticket_id": "CW-03",
+  "status": "candidate_ready",
+  "actual_workspace": "/home/dwchoo/ai-exp-assistant",
+  "base_snapshot": "347b6b832fabe2ca3d9ecbc97cc9bd4882a94f36ce1bde04590693f728f090e8",
+  "candidate_id": "b6d40d810309313f392d187fe448ca031c740755ab19017b13194b95dc46575a",
+  "attributable_output_bundle": "test_split_pg_control.py plus preserved automatic graphify query-stamp scope evidence",
+  "changed_paths": ["tests/gates/g2_shell/test_split_pg_control.py"],
+  "scope_audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/split-pg-test-scope-audit.json; graphify-out/cache/last_query_stamp was an automatic graphify query cache side effect and is retained for Root graph refresh reconciliation",
+  "checks": [
+    "new independent stale-input regression: 1 test, 1.252s, exit 0",
+    "split-PG predicates: 19 tests, 35.083s, exit 0",
+    "full G2 discovery: 111 tests, 77.642s, exit 0, six delegated-cgroup skips",
+    "git diff --check: passed"
+  ],
+  "active_or_stopped_subprocesses": "all owned subprocesses stopped; no fixture/unittest residue",
+  "remaining_gaps": ["Fresh frozen reviewer and final Root gate evidence remain"],
+  "gate_result_refs": [],
+  "original_review_ref": null,
+  "delta_review_scope": null
+}

@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw06-rerun-test-04",
+  "ticket_id": "CW-06 (+ CW-17 ui_server overflow fix)",
+  "role": "test_designer",
+  "unit": "V-CW-06-p2.7",
+  "approved_bundle_digest": "a521acdc3838b43a26e277afc233bab695c8b02ce0d42392c3678931b2e3f027",
+  "routing": {"planned_role": "test_designer", "selected_role": "test_designer (wb-test-rerun, Sonnet high)", "reason_codes": ["correction_reverification"], "evidence_refs": ["checks defined by root-adjudication-p27-cw06-flood.json and result-p27-cw06-rerun-test-03-agent.json"]},
+  "frozen_candidate": "183c15f93d8afedf2ccfd7a8c0d4afbb9a02461a146cba4a43f5a6fc9be5e8f5",
+  "frozen_production_files": {"src/workbench/backend/ui_server.py": "e6aa3e0b12fc48c920ed901d8e3b8ec8e1063d9d1cb3a89bd5345066de533469", "src/workbench/ui/product/app.py": "b604cb6f687a9c62b93bc3ed055636405a5dbbffb6858bfcf927d6b63e8cb28e", "src/workbench/ui/product/model.py": "75f29f3d5bac58cfb40414e1b2ebe2cc82d305f76a6d557abb731a8ffebbf6d5", "src/workbench/ui/product/input.py": "ee5a9e925c292a15cc60ba0e76e4c6f16cdbf46ffa6f3ccc2171b866967a8605", "src/workbench/ui/product/view.py": "2c6b21ff331e67e0075ad2e9256d187d279dacd2d3ac093a865e3c2ba1148159", "src/workbench/backend/cli.py": "9b44e4847275514ec27e7c9474dfe7ad0c5556d3803651f7fc292be0402a2b4e"},
+  "inputs": [".workflow/core-workbench/runs/implement-p2.6-20260927/root-adjudication-p27-cw06-flood.json", ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw06-flood-worker-04.json", ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw06-rerun-test-03-agent.json", "src/workbench/contracts/ui_v1.py (CLOSING/slow_client semantics)"],
+  "required": [
+    "Probe defect claim: independently confirm in a plain bash PTY (no UI) that `cmd; echo TOKEN` does not print TOKEN when cmd is interrupted by Ctrl-C (interactive bash aborts the list). If confirmed, fix ONLY the F2 post-Ctrl-C assertion in tests/ui/live_product_flood_independent_p27f.py so it checks the same user intent without weakening: after Ctrl-C the flood process is gone within 1 s, '^C' and a fresh prompt appear in the host pane within 2 s, and a NEW command typed through the UI (e.g. `echo F2_OK_$((6*7))`) shows its output within 1 s. If not confirmed, classify the failure as implementation and stop.",
+    "Run the live flood probe (stub OMP, real backend, ZERO model turns) 3x: F0/F1/F2 all pass; UI never detaches; no traceback.",
+    "Independent backend overflow test (new file tests/backend/test_ui_server_overflow_independent_p27g.py), derived from ui_v1 before reading ui_server.py: a client that stops reading until the backend overflows, then resumes, decodes a valid frame stream ending with CLOSING slow_client and nothing after it; the partially sent frame is completed, never truncated; the backend and other state are unaffected; a new client can attach afterwards.",
+    "Regression (pattern 'test_*.py'; never CW06_LIVE_MODEL=1): tests/ui x3, tests/backend (all incl. independent), tests/contracts, tests/gates/g1_vt (src:.), tests/gates/g4_lifetime (src:.)."
+  ],
+  "allowed_write_paths": ["tests/ui/live_product_flood_independent_p27f.py (F2 post-assertion only)", "tests/backend/test_ui_server_overflow_independent_p27g.py", ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw06-rerun-test-04-agent.json"],
+  "prohibited": "production frozen; other tests unchanged; zero model turns; no graphify update, commits, tmux/herdr, credentials; leave /tmp/cw03-g2-* alone.",
+  "result_format": "Write full JSON result; reply <=20 lines: checks table, status, verdicts (probe claim, live F0/F1/F2, overflow independent, regressions), probe edit before/after sha256, frozen hashes equal?, residue."
+}

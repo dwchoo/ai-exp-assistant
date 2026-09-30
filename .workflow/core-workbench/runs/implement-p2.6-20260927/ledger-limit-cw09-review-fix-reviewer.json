@@ -1,0 +1,23 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 335,
+  "event": {
+    "id": "limit-cw09-review-fix-reviewer-20260928",
+    "kind": "limit",
+    "data": {
+      "bucket": "role:reviewer",
+      "origin": "operating",
+      "value": 64,
+      "authority": "C-D55 plus workflow-contract section 8 and current implementation authorization",
+      "reason": "One CW-09 delta review after accepted fresh-review P2 corrections",
+      "decision_owner": "Root",
+      "remaining_work_estimate": 1,
+      "expected_previous": {
+        "value": 63,
+        "authority": "C-D55 plus workflow-contract section 8 and current implementation authorization",
+        "reason": "One fresh CW-09 frozen-candidate review"
+      },
+      "scope_basis": null
+    }
+  }
+}

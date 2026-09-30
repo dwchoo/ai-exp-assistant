@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "invocation": "cw05-g4-test-01",
+  "before": ".workflow/core-workbench/runs/implement-p2.6-20260927/cw05-test-checkpoint.json",
+  "after": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw05-g4-test-after.json",
+  "allowed": [
+    "tests/gates/g4_lifetime/**",
+    "tests/gates/g4_evidence/**",
+    "tests/gates/harness/**",
+    "tests/contracts/**",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw05-g4-test-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw05-g4-test-after.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/scope-audit-cw05-g4-test.json"
+  ],
+  "changed": [
+    "tests/contracts/test_ports_v2_independent.py",
+    "tests/gates/g4_evidence/test_aggregate_independent.py",
+    "tests/gates/g4_lifetime/test_independent_boundaries.py"
+  ],
+  "index_changed": [],
+  "outside_scope": [],
+  "comparable": true,
+  "baseline_candidate_digest_verified": true,
+  "baseline_file_count": 1129,
+  "all_baseline_files_unchanged": true,
+  "head_unchanged": true,
+  "product_and_docs_unchanged": true,
+  "named_workflow_artifacts": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw05-g4-test-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw05-g4-test-after.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/scope-audit-cw05-g4-test.json"
+  ],
+  "workflow_artifacts_excluded_by_assigned_baseline": true
+}

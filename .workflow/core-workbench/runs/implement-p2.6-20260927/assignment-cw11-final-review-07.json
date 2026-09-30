@@ -1,0 +1,23 @@
+{
+  "invocation": "cw11-final-review-07",
+  "role": "reviewer",
+  "unit": "V-CW-11-p2.6-current",
+  "objective": "Fresh final review of the complete CW-11 candidate after bounded token ownership and independent long-run verification.",
+  "candidate_manifest": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw11-token-retention-final.json",
+  "candidate": "6a8e898b72447c96aadd45e2494da9f84a8bbbfba5723bfde2dd9829e655104d",
+  "requirements": ".workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw11.json",
+  "ticket": "docs/features/core-workbench/tickets/CW-11.md",
+  "prior_review": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw11-final-review-06.json",
+  "correction_evidence": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw11-token-retention-correction-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw11-token-retention-test-01.json"
+  ],
+  "must_review": [
+    "Reproduce/refute prior token-retention finding: indefinite active ticks keep internal ownership O(1), external source registration is weak and identity checked, and exit/replacement clears unusable tokens.",
+    "Attack object-id reuse, stale source activation, same-six-field reincarnation, positive public run_incarnation, exit fences/UI maps, ReviewTicket A-B-A, and serialized admission.",
+    "Re-audit exact 60-second recurring schedule without cap, 121st review, 13th wake, latest-one/user priority/pause, non-model hang/usage, persisted TASK binding, privacy and cleanup.",
+    "Validate current candidate hash, independent 91/91 observation evidence, related suites, and current actual OMP 18.2.10 probe evidence."
+  ],
+  "constraints": ["Review-only; no edits/mutations; report P0-P3 findings or explicit no findings; no destructive git actions."],
+  "report": ["candidate validation", "prior-finding closure", "new findings", "runtime qualifications", "candidate_ready or needs_reroute"]
+}

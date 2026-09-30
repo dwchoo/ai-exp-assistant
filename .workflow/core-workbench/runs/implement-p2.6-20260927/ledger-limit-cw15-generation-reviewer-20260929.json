@@ -1,0 +1,23 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 1218,
+  "event": {
+    "id": "limit-cw15-generation-reviewer-20260929",
+    "kind": "limit",
+    "data": {
+      "bucket": "role:reviewer",
+      "origin": "operating",
+      "value": 109,
+      "authority": "C-D55 plus workflow-contract section 8 and current $implement authorization",
+      "reason": "Fresh CW-15 generation-reopen review plus mandatory CW-16 final review",
+      "decision_owner": "Root",
+      "remaining_work_estimate": 2,
+      "expected_previous": {
+        "value": 108,
+        "authority": "C-D55 plus workflow-contract section 8 and current $implement authorization",
+        "reason": "Fresh CW-15 submission-claim review plus mandatory CW-16 final review"
+      },
+      "scope_basis": null
+    }
+  }
+}

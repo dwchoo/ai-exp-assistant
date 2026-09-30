@@ -1,0 +1,28 @@
+{
+  "invocation": "cw12-fence-protocol-correction-01",
+  "outcome": "complete",
+  "candidate_ready": true,
+  "implementation": [
+    "Fence token binds never-reset generation, binding_nonce, run/incarnation, mode, and reason; every close increments generation and stale open uses CAS rejection.",
+    "Action, ACK, journal/repository I/O, and mirror publication execute outside admission/coordinator/fence locks.",
+    "Review admission compares ticket, active run, fence run/incarnation, and current permit token.",
+    "Stale cancellation/error applies through captured binding only.",
+    "G3 request validates selected live exact target/pair and authority token after write_lock acquisition under the bridge condition immediately before pending registration; mismatch is zero-byte/no-retry.",
+    "Coordinator pause/resume/compensation and live automatic OMP delivery use bound transport submission."
+  ],
+  "checks": {
+    "pause": "49/49 passed plus two repeated runs",
+    "observation": "93/93 passed",
+    "bridge": "22/22 passed",
+    "workflow": "44/44 passed",
+    "tasks": "22/22 passed",
+    "contracts": "20/20 passed",
+    "status": "2/2 passed",
+    "g3_python": "117/117 passed",
+    "g3_typescript": "30/30 passed",
+    "actual_omp_18_2_10": "passed with zero_residue true",
+    "graphify": "update succeeded"
+  },
+  "scope_audit": "assignment-authorized paths only",
+  "cleanup": "no running subprocesses"
+}

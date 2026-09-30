@@ -1,0 +1,23 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 383,
+  "event": {
+    "id": "limit-cw07-partial-fix-total-20260928",
+    "kind": "limit",
+    "data": {
+      "bucket": "total",
+      "origin": "operating",
+      "value": 294,
+      "authority": "C-D55 plus workflow-contract section 8 and current implementation authorization",
+      "reason": "Independent regression, bounded correction, and second delta review for CW-07 partial-write P2",
+      "decision_owner": "Root",
+      "remaining_work_estimate": 3,
+      "expected_previous": {
+        "value": 291,
+        "authority": "C-D55 plus workflow-contract section 8 and current implementation authorization",
+        "reason": "Independent regression, bounded correction, and delta review for accepted CW-07 unknown-input P2"
+      },
+      "scope_basis": null
+    }
+  }
+}

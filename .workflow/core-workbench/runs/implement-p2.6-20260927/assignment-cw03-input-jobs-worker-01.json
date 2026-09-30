@@ -1,0 +1,66 @@
+{
+  "feature_id": "core-workbench",
+  "ticket_id": "CW-03",
+  "attempt_id": "cw03-input-jobs-01",
+  "invocation": "cw03-input-jobs-worker-01",
+  "approved_bundle_digest": "64bcf577a30e7c6bbff3e4e775f8e6c17ca212ce3bf79b5bc5be31196a792b07",
+  "actual_workspace": "/home/dwchoo/ai-exp-assistant",
+  "repository_identity": "git HEAD 79808a78fb9eaca8a43caddf2fce268fade542ec; dirty approved/user workspace",
+  "baseline_snapshot": "candidate 3c8ea538feb8752f5e3d913bb9efade1c872ccdb084a12f9cd3b9ff5ac08e13f",
+  "effective_write_capability": "shared physical checkout; prompt-scoped detective boundary; serial mutation lease only",
+  "acceptance_ids": ["C-AC-08", "C-AC-26"],
+  "relevant_contracts": [
+    "BRIEF r1.13 C-AC-08/C-AC-26",
+    "SPEC s2.6 managed shell and takeover contracts",
+    "PLAN p2.6 G2-INPUT-JOBS",
+    "CW-03 minimum composite discriminator",
+    "ADR-0002 input-return barrier"
+  ],
+  "allowed_write_paths": [
+    "src/workbench/terminal/shell_g2/**",
+    "tests/gates/g2_shell/**"
+  ],
+  "prohibited_paths": [
+    "docs/features/core-workbench/**",
+    ".workflow/**",
+    ".codex/**",
+    ".agents/**",
+    "graphify-out/**"
+  ],
+  "generated_outputs": [],
+  "resource_claims": ["host:shell-fixture exclusive"],
+  "mutation_owner": "worker_senior cw03-input-jobs-worker-01",
+  "checkpoint_ref": ".workflow/core-workbench/runs/implement-p2.6-20260927/preaccounting-checkpoint.json",
+  "exact_checks": [
+    "PYTHONDONTWRITEBYTECODE=1 python -m unittest tests.gates.g2_shell.test_g2_shell tests.gates.g2_shell.test_control_boundaries tests.gates.g2_shell.test_control_lifecycle -v",
+    "new or existing bounded input-jobs runtime probe for Bash and dash, with owned process cleanup"
+  ],
+  "reserved_budget": {
+    "total": 1,
+    "role:worker_senior": 1,
+    "unit:V-CW-03": 1
+  },
+  "stop_conditions": [
+    "Any need to change user-facing behavior, supported shells, required permissions, or C-D55 boundaries",
+    "Any write outside allowed paths",
+    "Unable to establish a bounded probe with owned process cleanup",
+    "Conda- or Docker-specific validation would be required"
+  ],
+  "configured_model": "gpt-6-sol",
+  "configured_effort": "high",
+  "host_observed_model": "unverified",
+  "host_observed_effort": "unverified",
+  "metadata_reference": "collaboration worker_senior role contract",
+  "routing": {
+    "planned_role": "worker_senior",
+    "selected_role": "worker_senior",
+    "reason_codes": ["coupled_invariants", "pty_input_job_control_and_generation_interaction"],
+    "evidence_refs": [
+      "PLAN p2.6 CW-03 worker=worker_senior",
+      "final-root-check remaining_scope G2 input-jobs matrix",
+      "existing ShellProcess/InputBoundary spans input owner, PTY, job probes, and control-wait"
+    ]
+  },
+  "requirements_identity": "06e66cc0304db71918ae82cc0f61a2f8e3d9782466a1b32e4fcb52832bf1bba6",
+  "task": "Implement only the smallest remaining CW-03 G2-INPUT-JOBS verification unit. First classify current tests/probes against multiline and unsubmitted input, REPL, background and suspended jobs, stale owner/generation, wb-handoff plus trailing line in one write/paste, and the input-return barrier through actual parent prompt/new normal input. Reuse proven coverage. Add or adjust the minimum production seam and bounded Bash/dash runtime probe/tests needed to close uncovered cases. Preserve known negative controls and explicit unknowns. Do not claim overall G2/CW-03 completion; do not add conda or Docker checks; do not expand into takeover/failure/TSTP work except where strictly required by this unit. Run focused checks, ensure all child processes stop, and return a result packet with changed paths, exact commands/exits, remaining gaps, and scope audit. Do not edit central docs, approval, state, ledger, graphify, or workflow records."
+}

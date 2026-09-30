@@ -1,0 +1,25 @@
+{
+  "invocation": "cw14-worker-01",
+  "outcome": "complete",
+  "candidate_ready": true,
+  "changed_paths": [
+    "src/workbench/storage/log_raw/__init__.py",
+    "src/workbench/storage/log_raw/admission.py",
+    "src/workbench/storage/log_raw/store.py",
+    "tests/storage/test_log_raw.py",
+    "graphify-out/**"
+  ],
+  "checks": {
+    "storage": "17 tests passed",
+    "workflow_cw07": "33 tests passed after one non-reproducing parent-shell-cwd environment failure",
+    "repository_cw09": "22 tests passed",
+    "graphify_update": "exit 0; 4844 nodes and 10300 edges",
+    "ruff": "not installed"
+  },
+  "acceptance": {
+    "C-AC-24": "raw log run/project quota, exact-boundary prefix retention, immutable status, concurrency, reopen, and fail-closed path fixtures",
+    "C-AC-28": "raw-log failure remains non-blocking while the separate metadata-admission latch blocks new automatic runs until explicit durable success"
+  },
+  "residual_integration_risk": "CW-15 must connect the process-local metadata admission latch to the metadata port's durable failure/success outcomes and initialize health on restart.",
+  "mutation_owner": "/root/cw14_worker"
+}

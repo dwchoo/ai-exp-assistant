@@ -1,0 +1,23 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 130,
+  "event": {
+    "id": "limit-cw03-adapter-integration-worker-20260928",
+    "kind": "limit",
+    "data": {
+      "bucket": "role:worker_senior",
+      "origin": "operating",
+      "value": 93,
+      "authority": "C-D55 plus workflow-contract section 8 and current implementation authorization",
+      "reason": "One bounded senior adapter integration call plus one correction contingency",
+      "decision_owner": "Root",
+      "remaining_work_estimate": 2,
+      "expected_previous": {
+        "value": 91,
+        "authority": "C-D55 plus workflow-contract section 8 and current implementation authorization",
+        "reason": "One bounded senior correction for the fresh split-PG review findings"
+      },
+      "scope_basis": null
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "invocation": "cw15-duplicate-test-01",
+  "role": "test_designer",
+  "unit": "V-CW-15-p2.6-current",
+  "authority": "User $implement request; approved CW-15/C-D52; independent rerun after duplicate-generation correction",
+  "objective": "Re-run the independent duplicate and three-thread generation tests against frozen production and close the prior intentional failure.",
+  "candidate": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw15-duplicate-correction.json",
+    "candidate_id": "e38934dd98f3335b9f04d2e5c0458baec94b338e520012a7fe825c497ea89994"
+  },
+  "requirements": [
+    "Run the previously failing duplicate request test unchanged in substance: duplicate must raise no-replay, journal bytes/commits and external calls stay unchanged/zero, active generation follows newest fence, valid handoff reopens once and automation resumes.",
+    "Exercise two duplicates including out-of-order lock acquisition, duplicate before handoff capture, new request after capture, and stale/invalid failures. Confirm no newer request is erased and no old permit revives.",
+    "Re-run all final claim/current token, ACK cleanup, handoff failure, shutdown/action and production-binding tests plus allowed non-live predecessors. Do not launch any scripted/external OMP suite.",
+    "Verify frozen production hashes, stable candidate, graph and residue. Test-only edits only if a material independent gap exists."
+  ],
+  "allowed_write_paths": ["tests/lifecycle/**", "tests/integration/**", "graphify-out/**"],
+  "constraints": ["No production/docs/workflow/PLAN/state changes, full/live g3_omp, scripted/external OMP, reboot, dependency installation, delegation, commit, publish, deploy or Docker. Use apply_patch for tests."],
+  "report": "Return candidate_ready/needs_reroute, exact duplicate generations/commit/external/action counts, race schedules, total tests/hashes/test deltas/residue/pending."
+}

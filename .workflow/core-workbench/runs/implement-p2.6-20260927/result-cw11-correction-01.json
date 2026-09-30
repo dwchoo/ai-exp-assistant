@@ -1,0 +1,30 @@
+{
+  "invocation": "cw11-correction-01",
+  "outcome": "complete",
+  "candidate_ready": true,
+  "changed_files": [
+    "src/workbench/observation/worker_review.py",
+    "tests/observation/test_worker_review.py"
+  ],
+  "corrections": [
+    "Final authority and immutable active-run identity are rechecked immediately before dispatch.",
+    "Confirmed exits fence later reviews for the same immutable run identity.",
+    "Bounded single-flight non-model hang investigation is integrated and sanitized.",
+    "Observed, estimated, and unknown usage provenance is integrated into TickResult and review facts."
+  ],
+  "checks": {
+    "observation": "24/24 passed",
+    "workflow": "44/44 passed",
+    "bridge": "18/18 passed",
+    "contracts": "20/20 passed",
+    "g4_evidence": "10/10 passed",
+    "g4_lifetime": "8/8 passed",
+    "actual_omp_18_2_10": "periodic review and 13/13 peer wakes omp_processed; zero OMP children; provider stopped; PTY drained"
+  },
+  "unknowns": [
+    "The existing actual OMP probe does not exercise a live persistent-shell hang-investigation adapter."
+  ],
+  "graphify_updated": true,
+  "source_sha256": "96d2a55771719ba8d89a5a354e7857bbf491a9e3d5dcc9e754f3421798f0ff7c",
+  "worker_test_sha256": "2b952c980e68e457f18493483faab925aed494f35e821bb523d063e822146cf0"
+}

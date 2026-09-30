@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "invocation": "cw14-causal-test-01",
+  "role": "test_designer",
+  "unit": "V-CW-14-p2.6-current",
+  "authority": "User $implement docs/features/core-workbench request; approved PLAN p2.6 CW-14; senior causal-accounting correction",
+  "objective": "Independently verify the frozen causal pending-delta candidate and all accumulated CW-14 failure/concurrency invariants.",
+  "candidate": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw14-causal-correction.json",
+    "candidate_id": "77057a428d9e8804cd7af8e0e2ed626a4d7c1fe94806738facbd79aa43546804"
+  },
+  "required_tests": [
+    "Run the exact repeated-failure concurrent-writer trace and assert intermediate (3,15,12,12), final recovery (3,16,13,13), no local-byte loss and no concurrent durable-byte double count.",
+    "Re-run prior same-run (3,7,4,4), single-store (4,6,2,2), malformed log/status, repeated scan, post-rename uncertain-state, zero-quota cap source and unsafe mismatch cases.",
+    "Exercise repeated recover/fail cycles to show a pending delta is applied once and cleared only after durable success; current-process failure status must remain observable even though process-death persistence is outside the CW-14 fixture contract.",
+    "Run full storage and relevant recovery/observation/workflow regressions; confirm production hashes match the frozen snapshot."
+  ],
+  "allowed_write_paths": ["tests/storage/**", "graphify-out/**"],
+  "constraints": [
+    "Independent test-only owner; no production/workflow/docs/PLAN/state/ledger edits.",
+    "No delegation, commit, publish, deploy, Docker, or destructive actions."
+  ],
+  "report": "Return candidate_ready/needs_reroute, exact causal and prior trace results, suite counts, hash confirmation, process-local risk classification, C-AC-24/C-AC-28 verdict and CW-15 obligations."
+}

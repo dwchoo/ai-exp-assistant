@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "invocation": "cw14-correction-test-01",
+  "role": "test_designer",
+  "unit": "V-CW-14-p2.6-current",
+  "authority": "User $implement docs/features/core-workbench request; approved PLAN p2.6 CW-14; fresh review correction",
+  "objective": "Independently validate the frozen CW-14 repeated-failure and malformed-entry correction without changing production.",
+  "candidate": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw14-correction.json",
+    "candidate_id": "3cf31f4c60426f43d9f328d2915013e4ba83dcba97f110ec860a4061c44a842c"
+  },
+  "required_tests": [
+    "Reproduce successful 3-byte write followed by at least two consecutive scan/status failures with new bytes; assert observed/dropped/missing monotonically accumulate to the exact totals and timestamps do not regress.",
+    "Place malformed .log names in the dedicated raw root and exercise append and status; neither may propagate ValueError or block, both must return immutable failure status, preserve bytes and sentinels, and allow later recovery after the entry is removed.",
+    "Run all storage tests and relevant CW-07/CW-09 regressions; verify production hashes match the frozen correction snapshot."
+  ],
+  "allowed_write_paths": ["tests/storage/**", "graphify-out/**"],
+  "constraints": [
+    "Independent test-only owner; no production/workflow/docs/PLAN/state/ledger edits.",
+    "Use apply_patch and graphify update only if tests change; no delegation, commit, publish, deploy, Docker, or destructive actions."
+  ],
+  "report": "Return candidate_ready/needs_reroute, exact reproduction assertions/counts, production hash confirmation, C-AC-28 verdict and remaining CW-15 risks."
+}

@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-delta-review-cw06-03",
+  "ticket_id": "CW-06",
+  "role": "reviewer",
+  "unit": "V-CW-06-p2.7",
+  "approved_bundle_digest": "a521acdc3838b43a26e277afc233bab695c8b02ce0d42392c3678931b2e3f027",
+  "routing": {"planned_role": "reviewer", "selected_role": "reviewer (wb-delta-reviewer, Sonnet high)", "reason_codes": ["bounded_delta_after_full_review"], "evidence_refs": ["prior delta review p27-delta-review-cw06-02 integrate on 660411cd; changes since are model.py/test_product_model.py only"]},
+  "frozen_candidate": "8ff079fdb724457a58015d786c314cc371ef94f3f18d2942bc563600b78e5dbd",
+  "prior_review": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-delta-review-cw06-02-agent.json (covered candidate 660411cd...)",
+  "delta_under_review": {"files": ["src/workbench/ui/product/model.py", "tests/ui/test_product_model.py", "tests/ui/test_product_replay_independent_p27h.py (new independent test)"], "base_bytes": "model.py and test_product_model.py as of 660411cd: .workflow/core-workbench/runs/implement-p2.6-20260927/p27-cw06-flood-delta-backup/ (src/workbench/ui/product/model.py, tests/ui/test_product_model.py)", "intermediate": "p27-cw06-replay-delta-backup/ (replay fix that regressed flood)", "results": ["result-p27-cw06-replay-worker-05.json", "result-p27-cw06-rerun-test-06.json", "result-p27-cw06-catchup-worker-06.json", "check-p27-cw06-integration-live-01.json", "root-adjudication-p27-cw06-replay-regression.json"]},
+  "focus": [
+    "Kinds REPLAY/TAIL/LIVE and counters stay consistent on every path (enqueue, on_display sync path, feed, catch-up, identity change, generation change); no negative/leaking counters.",
+    "Attach replay is never trimmed and equals synchronous feed; catch-up only drops LIVE+TAIL; tail aligned to a safe boundary; quiet feed for REPLAY/TAIL (no stale query replies) but live queries still answered.",
+    "2004 tracking at receive time is correct across chunk boundaries and identity changes; paste marker decisions (F1 tri-state + sh) unchanged in effect.",
+    "Per-loop cost bounded; resize nudge rate limit never loses the final nudge; flood responsiveness preserved.",
+    "UX note: during sustained flood each loop resets the screen to a fresh tail - is this acceptable as a view behaviour or does it cause excessive flicker? classify P2/P3 with reasoning."
+  ],
+  "scratch": "/tmp/claude-1000/-home-dwchoo-ai-exp-assistant/dd5e2cee-e10d-41c4-8ebb-7c00b50dd465/scratchpad/cw06-delta3/",
+  "rules": "Read-only in the repo except the result JSON .workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-delta-review-cw06-03-agent.json. Tests only with /tmp/cw02-g1-venv/bin/python (never system python3), pattern test_*.py, unique temp dirs; never run live_* files. A concurrent re-verification runs live probes.",
+  "result_format": "Findings P0..P3 (file:line, scenario, clause, fix direction); verdicts per focus item; overall integrate/block. Write JSON; reply <=15 lines. Korean."
+}

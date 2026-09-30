@@ -1,0 +1,21 @@
+{
+  "invocation": "cw16-final-review-01",
+  "outcome": "needs_reroute",
+  "candidate_ready": false,
+  "candidate_id": "315df4d67702f432f1a83324497edaabbaba9e7e20ff2296e07ed2bd03cea93b",
+  "snapshot_stable": true,
+  "findings": [
+    {
+      "severity": "P2",
+      "path": "tests/integration/test_cw16_runtime_matrix.py",
+      "summary": "subprocess.run timeout kills only the probe Python process; if the probe finally block is skipped, isolated tmux/Herdr resources and OMP descendants can remain."
+    }
+  ],
+  "evidence_boundary": {
+    "demonstrated": "separate Bash/dash G2 canonical matrix and Bash-host plain/tmux/Herdr outer probes",
+    "pending": "final manager-worker-host flow, final UI/backend shell composition, combined policy runtime, backend-preserving detach/reconnect and real reboot"
+  },
+  "whole_core_done_verified": false,
+  "needs_oracle": false,
+  "mutation_owner": null
+}

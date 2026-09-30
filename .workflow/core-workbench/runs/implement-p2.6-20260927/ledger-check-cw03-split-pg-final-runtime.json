@@ -1,0 +1,13 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 127,
+  "event": {
+    "id": "check-cw03-split-pg-final-runtime-01",
+    "kind": "check",
+    "data": {
+      "check_id": "cw03-split-pg-final-runtime-01",
+      "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/check-cw03-split-pg-final-runtime-observed.json",
+      "sha256": "f0802a58c9926838555e92e3816a70c87408a9559ef87a953aba19e00958e3e1"
+    }
+  }
+}

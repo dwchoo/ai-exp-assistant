@@ -1,0 +1,82 @@
+{
+  "feature_id": "core-workbench",
+  "ticket_id": "CW-03",
+  "attempt_id": "cw03-takeover-worker-01",
+  "invocation": "cw03-takeover-worker-01",
+  "approved_bundle_digest": "64bcf577a30e7c6bbff3e4e775f8e6c17ca212ce3bf79b5bc5be31196a792b07",
+  "actual_workspace": "/home/dwchoo/ai-exp-assistant",
+  "baseline_snapshot": "candidate b890f5a4748a1d9b87ca0428edd05009e40af43ef224742a28e1a038be2ba263",
+  "effective_write_capability": "shared physical checkout; serial mutation lease",
+  "acceptance_ids": [
+    "C-AC-08",
+    "C-AC-20"
+  ],
+  "gate_item": "G2-TAKEOVER",
+  "required_evidence_level": "runtime",
+  "relevant_contracts": [
+    "CW-03 G2-TAKEOVER matrix",
+    "ADR-0002 takeover request/ack and no-replay boundary",
+    "SPEC ShellControl one outstanding request and unknown semantics",
+    "C-D55 unknown lifecycle blocks automatic follow-up"
+  ],
+  "allowed_write_paths": [
+    "src/workbench/terminal/shell_g2/**",
+    "tests/gates/g2_shell/**"
+  ],
+  "prohibited_paths": [
+    "docs/**",
+    ".workflow/**",
+    ".codex/**",
+    ".agents/**",
+    "graphify-out/**"
+  ],
+  "resource_claims": [
+    "host:shell-fixture exclusive"
+  ],
+  "mutation_owner": "worker_senior cw03-takeover-worker-01",
+  "checkpoint_ref": ".workflow/core-workbench/runs/implement-p2.6-20260927/pretakeover-checkpoint.json",
+  "requirements_identity": "e0ea9ef4ea1457ea2b76df7b53a7ccb17f48555652a81886978ec1bc3fe6d0e6",
+  "requirements_path": ".workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw03.json",
+  "required_matrix": [
+    "takeover before send: immediate latch, new dispatch denied, request/ack distinct, no stale execution",
+    "takeover after send and after accept/start: sent request remains unknown, new dispatch denied, no replay",
+    "confirmed foreground input only while the observed process-group identity still matches",
+    "foreground termination race fails closed and does not redirect input",
+    "lost or delayed takeover ACK does not imply confirmation or trigger retry/replay",
+    "input-return barrier precedes takeover ACK/manual prompt and queued PTY input cannot leak"
+  ],
+  "exact_checks": [
+    "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest tests.gates.g2_shell.test_control_probe tests.gates.g2_shell.test_control_boundaries tests.gates.g2_shell.test_control_lifecycle -v",
+    "Run any new focused G2-TAKEOVER runtime probe for Bash and dash",
+    "git diff --check -- src/workbench/terminal/shell_g2 tests/gates/g2_shell"
+  ],
+  "reserved_budget": {
+    "total": 1,
+    "role:worker_senior": 1,
+    "unit:V-CW-03": 1
+  },
+  "stop_conditions": [
+    "A product decision outside the approved takeover contract is required",
+    "A write outside allowed paths is required",
+    "The focused runtime cannot be bounded or cleaned up",
+    "Closing the gate would require treating unknown as completed or replaying a request"
+  ],
+  "configured_model": "gpt-6-sol",
+  "configured_effort": "high",
+  "host_observed_model": "unverified",
+  "host_observed_effort": "unverified",
+  "routing": {
+    "planned_role": "worker_senior",
+    "selected_role": "worker_senior",
+    "reason_codes": [
+      "coupled_takeover_lifecycle",
+      "runtime_matrix_gap"
+    ],
+    "evidence_refs": [
+      "docs/features/core-workbench/tickets/CW-03.md",
+      "src/workbench/terminal/shell_g2/control_probe.py",
+      "tests/gates/g2_shell/test_control_lifecycle.py"
+    ]
+  },
+  "task": "Close only the G2-TAKEOVER evidence/implementation slice. First inspect and run the existing takeover tests to distinguish already-supported behavior from missing coverage; do not relabel historical prose as current evidence. Implement the smallest production/probe/test delta needed to exercise the full required matrix on the current candidate with actual Bash and dash. Prefer a focused bounded structured runtime probe plus discriminating predicate tests; modify control logic only if a real gap is reproduced. Preserve one outstanding request, immediate takeover latch, request-versus-confirmation distinction, unknown for already-sent work, confirmed-target-only manual input, input-return barrier, and never-retry/no-replay behavior. Include failure controls, exact exits, candidate paths, cleanup and residue checks, and identify any matrix item still unknown. Do not update graphify; Root owns that step."
+}

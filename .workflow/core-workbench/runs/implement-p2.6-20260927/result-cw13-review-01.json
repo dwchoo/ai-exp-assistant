@@ -1,0 +1,28 @@
+{
+  "invocation": "cw13-review-01",
+  "outcome": "needs_reroute",
+  "candidate_ready": false,
+  "candidate": "0934631203e4733523f94a343960288a2d724ee680b15c167382243e4061e945",
+  "findings": [
+    {
+      "severity": "P1",
+      "confidence": "high",
+      "acceptance_ids": ["C-AC-34"],
+      "summary": "The force path checks delegation and exact target but does not require a prior ordinary stop request, so force_requested can be planned before the target has failed to respond to normal stop.",
+      "paths": [
+        "src/workbench/policy/recovery_manager/policy.py:463",
+        "tests/policy/recovery_manager/test_recovery_policy.py:325"
+      ]
+    }
+  ],
+  "acceptance": {
+    "C-AC-04": "passed",
+    "C-AC-07": "passed",
+    "C-AC-10": "passed",
+    "C-AC-13": "passed",
+    "C-AC-31": "passed",
+    "C-AC-34": "failed"
+  },
+  "mutation": "none",
+  "reviewer": "/root/cw12_post_review_final_reviewer"
+}

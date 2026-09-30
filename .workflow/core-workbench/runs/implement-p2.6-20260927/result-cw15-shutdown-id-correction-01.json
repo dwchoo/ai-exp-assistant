@@ -1,0 +1,25 @@
+{
+  "invocation": "cw15-shutdown-id-correction-01",
+  "outcome": "complete",
+  "candidate_ready": true,
+  "base_candidate": "4eb8da95d47761acb737ba4d627b67306eef988567b7e04cafde38db218a9cd8",
+  "candidate_id": "5b5abb6f5d088fd6138da72bf480d5a2c49388c82fab13dfd9c6f799d6122434",
+  "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw15-shutdown-id-correction.json",
+  "changed_paths": ["src/workbench/app/lifecycle.py", "tests/lifecycle/test_lifecycle_runtime.py", "graphify-out/**"],
+  "correction": "Shared exact-current RunObservation predicate requires task_id, revision and run_id match in both reconcile and shutdown.",
+  "evidence": {
+    "wrong": "wrong task, revision, run, malformed object, None and exception all yield confirmed=true, complete=false, survivors empty, full_termination_unconfirmed",
+    "correct": "exact identity with fully_terminated yields complete=true and no problems",
+    "repeated": "first and repeated shutdown total normal stop count remains four; durable lifecycle generation 2"
+  },
+  "checks": {
+    "non_live": "363 passed: lifecycle runtime 33, pause 122, G4 2, observation 95, storage 33, recovery 26, tasks 22, contracts 20, terminal 10",
+    "compile_graphify_scope_residue": "passed; 13 changes, zero missing/outside scope, zero test process residue",
+    "excluded": "scripted/external OMP, live G3 and reboot not run"
+  },
+  "sha256": {
+    "src/workbench/app/lifecycle.py": "6d8b158ae1579875705c35acce9a4252f8998f2526691d2be04a14b59e9d6e7f",
+    "tests/lifecycle/test_lifecycle_runtime.py": "29fd9c3032ec9f5bd9b290cd6ef94d35054cc0353dd21b2d43da377489e571b5"
+  },
+  "mutation_owner": "/root/cw12_post_review_correction"
+}

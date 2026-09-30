@@ -1,0 +1,312 @@
+{
+  "results": [
+    {
+      "shell": "bash",
+      "case": "before_send",
+      "request_state": "not_sent",
+      "manual_prompt_confirmed": true,
+      "run_writes": 0,
+      "takeover_writes": 1,
+      "marker_absent": true,
+      "owned_pids": [
+        1396565
+      ]
+    },
+    {
+      "shell": "bash",
+      "case": "after_send",
+      "request_state": "unknown",
+      "manual_prompt_confirmed": true,
+      "run_writes": 1,
+      "takeover_writes": 1,
+      "marker_absent": true,
+      "owned_pids": [
+        1396568,
+        1396571,
+        1396572
+      ]
+    },
+    {
+      "shell": "bash",
+      "case": "after_accept",
+      "request_state": "unknown",
+      "manual_prompt_confirmed": true,
+      "run_writes": 1,
+      "takeover_writes": 1,
+      "marker_absent": true,
+      "owned_pids": [
+        1396574,
+        1396577,
+        1396582
+      ]
+    },
+    {
+      "shell": "bash",
+      "case": "after_start",
+      "request_state": "unknown",
+      "manual_prompt_confirmed": true,
+      "run_writes": 1,
+      "takeover_writes": 1,
+      "marker_absent": true,
+      "owned_pids": [
+        1396585,
+        1396588,
+        1396589
+      ]
+    },
+    {
+      "shell": "bash",
+      "case": "foreground",
+      "request_state": "unknown",
+      "manual_prompt_confirmed": true,
+      "run_writes": 1,
+      "takeover_writes": 1,
+      "marker_absent": true,
+      "owned_pids": [
+        1396591,
+        1396594,
+        1396595
+      ]
+    },
+    {
+      "shell": "bash",
+      "case": "exit_race",
+      "request_state": "unknown",
+      "manual_prompt_confirmed": false,
+      "run_writes": 1,
+      "takeover_writes": 0,
+      "marker_absent": true,
+      "owned_pids": [
+        1396597,
+        1396600,
+        1396601
+      ]
+    },
+    {
+      "shell": "bash",
+      "case": "partial_race",
+      "request_state": "unknown",
+      "manual_prompt_confirmed": true,
+      "run_writes": 1,
+      "takeover_writes": 1,
+      "marker_absent": true,
+      "owned_pids": [
+        1396602,
+        1396605,
+        1396606
+      ]
+    },
+    {
+      "shell": "bash",
+      "case": "eagain_race",
+      "request_state": "unknown",
+      "manual_prompt_confirmed": true,
+      "run_writes": 1,
+      "takeover_writes": 1,
+      "marker_absent": true,
+      "owned_pids": [
+        1396612,
+        1396615,
+        1396616
+      ]
+    },
+    {
+      "shell": "bash",
+      "case": "zero_race",
+      "request_state": "unknown",
+      "manual_prompt_confirmed": true,
+      "run_writes": 1,
+      "takeover_writes": 1,
+      "marker_absent": true,
+      "owned_pids": [
+        1396618,
+        1396621,
+        1396622
+      ]
+    },
+    {
+      "shell": "bash",
+      "case": "ack_lost",
+      "request_state": "unknown",
+      "manual_prompt_confirmed": false,
+      "run_writes": 1,
+      "takeover_writes": 1,
+      "marker_absent": true,
+      "owned_pids": [
+        1396624,
+        1396627,
+        1396631
+      ]
+    },
+    {
+      "shell": "bash",
+      "case": "ack_delayed",
+      "request_state": "unknown",
+      "manual_prompt_confirmed": true,
+      "run_writes": 1,
+      "takeover_writes": 1,
+      "marker_absent": true,
+      "owned_pids": [
+        1396634,
+        1396637,
+        1396638
+      ]
+    },
+    {
+      "shell": "dash",
+      "case": "before_send",
+      "request_state": "not_sent",
+      "manual_prompt_confirmed": true,
+      "run_writes": 0,
+      "takeover_writes": 1,
+      "marker_absent": true,
+      "owned_pids": [
+        1396640
+      ]
+    },
+    {
+      "shell": "dash",
+      "case": "after_send",
+      "request_state": "unknown",
+      "manual_prompt_confirmed": true,
+      "run_writes": 1,
+      "takeover_writes": 1,
+      "marker_absent": true,
+      "owned_pids": [
+        1396647,
+        1396652,
+        1396653
+      ]
+    },
+    {
+      "shell": "dash",
+      "case": "after_accept",
+      "request_state": "unknown",
+      "manual_prompt_confirmed": true,
+      "run_writes": 1,
+      "takeover_writes": 1,
+      "marker_absent": true,
+      "owned_pids": [
+        1396657,
+        1396662,
+        1396663
+      ]
+    },
+    {
+      "shell": "dash",
+      "case": "after_start",
+      "request_state": "unknown",
+      "manual_prompt_confirmed": true,
+      "run_writes": 1,
+      "takeover_writes": 1,
+      "marker_absent": true,
+      "owned_pids": [
+        1396667,
+        1396672,
+        1396674
+      ]
+    },
+    {
+      "shell": "dash",
+      "case": "foreground",
+      "request_state": "unknown",
+      "manual_prompt_confirmed": true,
+      "run_writes": 1,
+      "takeover_writes": 1,
+      "marker_absent": true,
+      "owned_pids": [
+        1396681,
+        1396686,
+        1396688
+      ]
+    },
+    {
+      "shell": "dash",
+      "case": "exit_race",
+      "request_state": "unknown",
+      "manual_prompt_confirmed": false,
+      "run_writes": 1,
+      "takeover_writes": 0,
+      "marker_absent": true,
+      "owned_pids": [
+        1396692,
+        1396697,
+        1396698
+      ]
+    },
+    {
+      "shell": "dash",
+      "case": "partial_race",
+      "request_state": "unknown",
+      "manual_prompt_confirmed": true,
+      "run_writes": 1,
+      "takeover_writes": 1,
+      "marker_absent": true,
+      "owned_pids": [
+        1396699,
+        1396704,
+        1396705
+      ]
+    },
+    {
+      "shell": "dash",
+      "case": "eagain_race",
+      "request_state": "unknown",
+      "manual_prompt_confirmed": true,
+      "run_writes": 1,
+      "takeover_writes": 1,
+      "marker_absent": true,
+      "owned_pids": [
+        1396709,
+        1396714,
+        1396715
+      ]
+    },
+    {
+      "shell": "dash",
+      "case": "zero_race",
+      "request_state": "unknown",
+      "manual_prompt_confirmed": true,
+      "run_writes": 1,
+      "takeover_writes": 1,
+      "marker_absent": true,
+      "owned_pids": [
+        1396722,
+        1396727,
+        1396729
+      ]
+    },
+    {
+      "shell": "dash",
+      "case": "ack_lost",
+      "request_state": "unknown",
+      "manual_prompt_confirmed": false,
+      "run_writes": 1,
+      "takeover_writes": 1,
+      "marker_absent": true,
+      "owned_pids": [
+        1396733,
+        1396738,
+        1396739
+      ]
+    },
+    {
+      "shell": "dash",
+      "case": "ack_delayed",
+      "request_state": "unknown",
+      "manual_prompt_confirmed": true,
+      "run_writes": 1,
+      "takeover_writes": 1,
+      "marker_absent": true,
+      "owned_pids": [
+        1396742,
+        1396747,
+        1396748
+      ]
+    }
+  ],
+  "unknown": [
+    "production adapter integration",
+    "manual daemons before supervision"
+  ]
+}

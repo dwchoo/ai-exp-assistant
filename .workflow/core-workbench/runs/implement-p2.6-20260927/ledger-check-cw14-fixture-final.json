@@ -1,0 +1,13 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 1101,
+  "event": {
+    "id": "check-cw14-fixture-final-01",
+    "kind": "check",
+    "data": {
+      "check_id": "cw14-fixture-final-01",
+      "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/check-cw14-fixture-final-observed.json",
+      "sha256": "9971f478d71d2e15b6042c0b746be3ec3f2787b785e23e7958bc059a7379325b"
+    }
+  }
+}

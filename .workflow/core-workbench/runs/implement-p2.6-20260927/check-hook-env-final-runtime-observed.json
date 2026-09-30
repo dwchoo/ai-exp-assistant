@@ -1,0 +1,9 @@
+{
+  "schema_version": 1, "check_id": "cw03-hook-env-final-runtime-01", "requirements_identity": "e0ea9ef4ea1457ea2b76df7b53a7ccb17f48555652a81886978ec1bc3fe6d0e6",
+  "argv": ["python3", "tests/gates/g2_shell/live_hook_env_probe.py"], "cwd": "/home/dwchoo/ai-exp-assistant",
+  "environment": {"PYTHONDONTWRITEBYTECODE": "1", "description": "Linux Python 3.12.3 with Bash and dash; focused manual residue/unknown runtime; conda and cgroup prerequisites excluded by C-D55"},
+  "started_at": "2026-09-27T13:21:59.761616+00:00", "finished_at": "2026-09-27T13:22:03.403734+00:00", "exit_code": 0, "timed_out": false,
+  "log": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/check-hook-env-final-runtime.log", "log_sha256": "b1afa3bd11658035eb2e85afe5d39d07d043ee96cf4c1e117a6fff1f9dd5037c",
+  "before": "f4d5b1beb17e60570a7442986ae1b72349c5bca6e3f5f65acb3a79f2b3bd2111", "after": "f4d5b1beb17e60570a7442986ae1b72349c5bca6e3f5f65acb3a79f2b3bd2111", "stable": true,
+  "items": [{"id": "G2-HOOK-ENV", "acceptance_ids": ["C-AC-26", "C-AC-32"], "result": "passed", "observed_evidence_level": "runtime", "evidence": "check-hook-env-final-runtime.log plus check-env-launch-hook-final-runtime.log (sha256 6d91c4...): Bash/dash preserved cwd/PATH/export and isolated child changes, restored compatible hook/trap state, held incompatible hook/trap and observable manual jobs, retained oracle-grounded escaped residue as unknown across user confirmation, and allowed a fresh same-parent handoff only after owned PID/start-time cleanup and recheck", "unknowns": []}]
+}

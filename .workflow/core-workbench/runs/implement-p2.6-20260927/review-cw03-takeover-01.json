@@ -1,0 +1,12 @@
+{
+  "invocation": "cw03-takeover-review-01",
+  "candidate": "21c6830d2cc380eb5c89c21501efadcc7fb79dd968f746ab6f2984b23f945884",
+  "status": "changes_required",
+  "findings": [
+    {"severity": "P1", "title": "An initial EAGAIN retries the complete input against a changed target", "evidence": "control_probe.py:411 only revalidates when offset is nonzero; after first-write BlockingIOError, target can disappear during select and the full payload is retried with offset zero", "required_correction": "Revalidate target/foreground/completion before every write attempt, including retries with zero progress"},
+    {"severity": "P2", "title": "The focused fixture's general send_user path bypasses confirmed-target admission", "evidence": "live_takeover_probe.py TakeoverSession inherits ShellProcess.send_user; after owner=user it can write while manual_prompt_confirmed is false and confirmed_target is absent, including lost-ACK state", "required_correction": "Make the fixture's actual user-input path enforce confirmed foreground or confirmed manual prompt, and exercise that path with negative controls"}
+  ],
+  "needs_oracle": false,
+  "writes": [],
+  "owned_processes_remaining": false
+}

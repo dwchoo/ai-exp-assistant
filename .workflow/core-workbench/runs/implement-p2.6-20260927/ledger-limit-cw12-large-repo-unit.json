@@ -1,0 +1,23 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 900,
+  "event": {
+    "id": "limit-cw12-large-repo-unit-20260928",
+    "kind": "limit",
+    "data": {
+      "bucket": "unit:V-CW-12-p2.6-current",
+      "origin": "operating",
+      "value": 36,
+      "authority": "Approved PLAN p2.6 CW-12, fresh liveness review finding, workflow-contract section 8, and current $implement authorization",
+      "reason": "One bounded Git-aware large-repository baseline correction, independent delta verification, and fresh delta review",
+      "decision_owner": "Root",
+      "remaining_work_estimate": 3,
+      "expected_previous": {
+        "value": 33,
+        "authority": "Approved PLAN p2.6 CW-12, fresh delta review findings, workflow-contract section 8, and current $implement authorization",
+        "reason": "One bounded pre-pause baseline/ignored-file/fd-scan correction, independent delta verification, and fresh delta review"
+      },
+      "scope_basis": null
+    }
+  }
+}

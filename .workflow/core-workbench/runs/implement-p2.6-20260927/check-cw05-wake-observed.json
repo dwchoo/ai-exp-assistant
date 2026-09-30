@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "check_id": "cw05-runtime-paused-final-01",
+  "requirements_identity": "3f3ee9ba0cee2a99163a3285c07886467ae6930ce7ff1f973fba56e57378e2c0",
+  "argv": ["/usr/bin/env", "PYTHONDONTWRITEBYTECODE=1", "PYTHONPATH=src:tests/gates/g4_lifetime:tests/gates/g3_omp", "/tmp/cw02-g1-venv/bin/python", "tests/gates/g4_lifetime/live_detach_probe.py", "--paused"],
+  "cwd": "/home/dwchoo/ai-exp-assistant",
+  "environment": {"description": "Linux, actual OMP 18.2.10, paused >60-second detach with host observation continuing and zero model delivery"},
+  "started_at": "2026-09-27T20:41:49.838875+00:00",
+  "finished_at": "2026-09-27T20:42:56.328968+00:00",
+  "exit_code": 0,
+  "timed_out": false,
+  "log": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/check-cw05-runtime-paused.log",
+  "log_sha256": "0736cfa548dadfb40b34857cbb21e82f1a29874a95ff0e8c4fbc573142787d44",
+  "before": "23f790d7098743fd5968c9e72e501ea2c6bb086f93ecdc48eb53586c523854a1",
+  "after": "23f790d7098743fd5968c9e72e501ea2c6bb086f93ecdc48eb53586c523854a1",
+  "stable": true,
+  "items": [{"id": "G4-WAKE", "acceptance_ids": ["C-AC-12", "C-AC-15", "C-AC-30"], "result": "passed", "observed_evidence_level": "runtime", "evidence": "check-cw05-runtime-normal.log: one detached 60-second tick produced exactly one worker provider request and one agent start/end with manager requests zero; check-cw05-runtime-paused.log: actual pause ACK held one tick with delivery/provider/agent counts zero while host observations increased from 3 to 1241 and all identities remained live", "unknowns": []}]
+}

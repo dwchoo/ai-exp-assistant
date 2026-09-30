@@ -1,0 +1,29 @@
+{
+  "invocation": "cw12-worker-01",
+  "outcome": "complete",
+  "candidate_ready": true,
+  "changes": [
+    "src/workbench/policy/pause_automation/**",
+    "src/workbench/ui/status_workbench/**",
+    "tests/policy/pause_automation/**",
+    "tests/ui/status_workbench/**",
+    "graphify-out/**"
+  ],
+  "checks": {
+    "pause_policy": "4/4 passed",
+    "status_projection": "2/2 passed",
+    "contracts": "20/20 passed",
+    "workflow": "44/44 passed",
+    "observation": "91/91 passed",
+    "bridge": "18/18 passed",
+    "g3_pause_protocol": "7/7 passed",
+    "g3_pause_reconcile_predicates": "6/6 passed",
+    "g3_typescript": "30/30 passed",
+    "actual_omp_18_2_10": "passed_abort_only; abort ack 0.001 seconds, turn stop observed, tool outcome unknown retained, paused delivery deferred, zero residue"
+  },
+  "qualifications": [
+    "The print-mode OMP bridge closed after turn completion, so live resume was not exercised by this probe.",
+    "Full G3 Python discovery has three pre-existing extension-fault harness KeyError failures caused by a missing pids helper field; focused affected pause suites pass."
+  ],
+  "graphify_updated": true
+}

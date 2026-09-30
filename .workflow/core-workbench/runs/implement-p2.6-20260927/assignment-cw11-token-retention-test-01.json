@@ -1,0 +1,18 @@
+{
+  "invocation":"cw11-token-retention-test-01",
+  "role":"test_designer",
+  "unit":"V-CW-11-p2.6-current",
+  "objective":"Independently verify bounded exit-token ownership during indefinite observation and source churn.",
+  "candidate_manifest":".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw11-token-retention.json",
+  "candidate":"6184e2fbbba4242ddca20efca3285f6f9f90389a39516d891075217a9a810acc",
+  "review_evidence":".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw11-final-review-06.json",
+  "write_scope":["tests/observation/**"],
+  "must_test":[
+    "Run at least 10,000 active no-review ticks and prove internal token/nonce/source registry sizes remain O(1), with the same token reused for the incarnation.",
+    "Churn many WorkflowRun sources/incarnations, retain a subset, collect the rest, and prove weak registry size tracks live bindings rather than historical count; attack object-id reuse assumptions and old-source late activation.",
+    "Prove exit/run replacement clears unusable current tokens while pending UI retry and source activation/incarnation safety remain correct.",
+    "Rerun full observation, related regressions, and current actual OMP 18.2.10 probe."
+  ],
+  "constraints":["Tests only; apply_patch only; no product/workflow edits; graphify update; no uv/local env/package artifacts or destructive git actions."],
+  "report":["bounded-state measurements","exact results/runtime","candidate_ready or needs_reroute"]
+}

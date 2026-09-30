@@ -1,0 +1,344 @@
+{
+ "schema_version": 1,
+ "invocation": "p27-cw06-test-01",
+ "ticket_id": "CW-06",
+ "role": "test_designer",
+ "frozen_candidate": "158a6a6ca10f43fcaa42f6c52615c3316efea8e1a391a28c57cfc905c2b52297",
+ "status": "needs_reroute",
+ "status_reason": "CW-06 implementation findings F1-F5 with failing independent tests; P-C-AC-01/06/14 runtime observations passed",
+ "checks": [
+  {
+   "command": "PYTHONPATH=src:tests/backend python -m unittest tests/backend/test_live_detach_independent.py tests/backend/test_live_start_independent.py",
+   "exit": 0,
+   "result": "8 OK",
+   "duration_s": 88
+  },
+  {
+   "command": "PYTHONPATH=src python -m unittest discover -s tests/ui -p 'test_*.py'",
+   "exit": 1,
+   "result": "81 run, 6 fail (all intentional finding tests F1-F5)",
+   "duration_s": 11
+  },
+  {
+   "command": "PYTHONPATH=src python -m unittest discover -s tests/backend -p 'test_*.py'",
+   "exit": 0,
+   "result": "68 OK",
+   "duration_s": 262
+  },
+  {
+   "command": "PYTHONPATH=src python -m unittest discover -s tests/contracts -p 'test_*.py'",
+   "exit": 0,
+   "result": "43 OK",
+   "duration_s": 0.3
+  },
+  {
+   "command": "PYTHONPATH=src:. python -m unittest discover -s tests/gates/g1_vt -p 'test_*.py'",
+   "exit": 0,
+   "result": "63 OK",
+   "duration_s": 2
+  },
+  {
+   "command": "PYTHONPATH=src:. python -m unittest discover -s tests/gates/g4_lifetime -p 'test_*.py'",
+   "exit": 0,
+   "result": "8 OK",
+   "duration_s": 0.2
+  },
+  {
+   "command": "PYTHONPATH=src:tests/ui python -m unittest tests/ui/live_product_omp_independent.py (live-full-1, 2 model turns, earlier probe revision)",
+   "exit": 1,
+   "result": "S0-S14 pass; S15 fail = F8 test design (fixed)",
+   "duration_s": 85
+  },
+  {
+   "command": "CW06_LIVE_NO_MODEL=1 PYTHONPATH=src:tests/ui python -m unittest tests/ui/live_product_omp_independent.py (final file, dry7)",
+   "exit": 0,
+   "result": "OK (S0-S9, S11, S13-S16)",
+   "duration_s": 61
+  }
+ ],
+ "python": "/usr/bin/env PYTHONDONTWRITEBYTECODE=1 /tmp/cw02-g1-venv/bin/python",
+ "python_note": "PYTHONPATH values per row",
+ "gate_items": {
+  "P-C-AC-01": {
+   "verdict": "pass",
+   "evidence_level": "runtime (real OMP 18.2.10, user config, --no-session)",
+   "basis": "S10"
+  },
+  "P-C-AC-06": {
+   "verdict": "pass",
+   "evidence_level": "runtime",
+   "basis": "S1,S2,S8"
+  },
+  "P-C-AC-14": {
+   "verdict": "pass with partial sub-items",
+   "evidence_level": "runtime",
+   "basis": "S6,S11,S12",
+   "partial": [
+    "Esc interrupt of running turn: abort marker not captured (S12)",
+    "approval prompt: no harmless trigger found, unverified"
+   ]
+  },
+  "C-AC-19 paste via UI": {
+   "verdict": "pass except F1/F2/F4",
+   "evidence_level": "runtime + fixture",
+   "basis": "S4,S7,S8,S9 + fixture tests"
+  },
+  "resize/detach/reattach/abrupt kill": {
+   "verdict": "pass",
+   "evidence_level": "runtime",
+   "basis": "S3,S13,S14,S15,S16"
+  },
+  "L-CW17-DETACH": {
+   "verdict": "pass after --plain",
+   "evidence_level": "runtime"
+  },
+  "L-CW17-START": {
+   "verdict": "pass (no change needed)",
+   "evidence_level": "runtime"
+  }
+ },
+ "live_probe_steps": [
+  {
+   "step": "S0_start",
+   "verdict": "pass",
+   "run": "full-1+dry7",
+   "observation": "real entrypoint start in owned PTY -> product UI (not minimal client), phase ready"
+  },
+  {
+   "step": "S1_three_areas",
+   "verdict": "pass",
+   "run": "full-1+dry7",
+   "observation": "3 titles visible; header shows focus and host input owner separately"
+  },
+  {
+   "step": "S2_focus_vs_owner",
+   "verdict": "pass",
+   "run": "full-1+dry7",
+   "observation": "4 focus switches; owner/epoch unchanged; focus shown"
+  },
+  {
+   "step": "S3_sizes",
+   "verdict": "pass",
+   "run": "full-1+dry7",
+   "observation": "42x213: shell stty 37 69, both OMP pts 37x69 == pane sizes"
+  },
+  {
+   "step": "S8_owner (runs after S3)",
+   "verdict": "pass",
+   "run": "full-1+dry7",
+   "observation": "prefix h before wb-handoff refused visibly; wb-handoff+prefix h -> manager/epoch3; input+paste refused input_owner_manager visibly, not executed; focus keeps owner; prefix t/c -> user/epoch4; last-confirmed advanced"
+  },
+  {
+   "step": "S4_korean_paste",
+   "verdict": "pass",
+   "run": "full-1+dry7",
+   "observation": "heredoc Korean multi-line paste intact in bash (Enter needed = bash bracketed-paste semantics)"
+  },
+  {
+   "step": "S5_paste_to_cat_without_2004",
+   "verdict": "observation->F1",
+   "run": "full-1+dry7",
+   "observation": "cat received literal 200~/201~ markers"
+  },
+  {
+   "step": "S6_literal_prefix_esc_ctrlc",
+   "verdict": "pass",
+   "run": "full-1+dry7",
+   "observation": "cat -v got ^]^[x; Ctrl-C returns to prompt"
+  },
+  {
+   "step": "S7_big_paste",
+   "verdict": "pass",
+   "run": "full-1+dry7",
+   "observation": "paste_too_large visible, queued 0, clean line after"
+  },
+  {
+   "step": "S9_queue_full",
+   "verdict": "pass",
+   "run": "full-1+dry7",
+   "observation": "queue_full visible: 800012 bytes exceeds free queue space 614548; drained, prompt back"
+  },
+  {
+   "step": "S10_manager_turn",
+   "verdict": "pass",
+   "run": "full-1 only (model turn 1)",
+   "observation": "reply WBOK42 in manager pane in 3.2s, not in worker pane"
+  },
+  {
+   "step": "S11_tui_keys",
+   "verdict": "pass",
+   "run": "full-1+dry7",
+   "observation": "both OMP panes: backspace, Alt+Enter newline, Ctrl-C clear, /hot autocomplete, Esc closes it, /hotkeys table, alive"
+  },
+  {
+   "step": "S12_esc_cancel",
+   "verdict": "partial",
+   "run": "full-1 only (model turn 2; evidence recording refined afterwards, not re-run)",
+   "observation": "streaming seen, Esc sent, 400 not reached; no abort marker captured"
+  },
+  {
+   "step": "S13_resize",
+   "verdict": "pass",
+   "run": "full-1(171 cols)+dry7(173 cols)",
+   "observation": "SIGWINCH 36x173: shell 31 57, OMP 31 55 each == pane sizes"
+  },
+  {
+   "step": "S14_detach",
+   "verdict": "pass",
+   "run": "full-1+dry7",
+   "observation": "exit 0, 'backend keeps running', identities same, all alive, outer termios restored"
+  },
+  {
+   "step": "S15_reattach",
+   "verdict": "pass (dry7); full-1 fail = F8 test design, fixed",
+   "run": "dry7",
+   "observation": "restore ratio 1.0/1.0/0.94, focus kept, identities same, count.txt once (no duplicate input)"
+  },
+  {
+   "step": "S16_sigkill_ui",
+   "verdict": "pass",
+   "run": "dry7",
+   "observation": "backend intact; outer tty raw after kill; stty sane restores icanon/echo/isig; reattach works exit 0"
+  }
+ ],
+ "live_probe_constraints": "final probe file's model-turn steps (S10, S12) not re-run after live-full-1 to respect the 1-2 turn budget; S10 code identical, S12 only evidence recording refined",
+ "findings": [
+  {
+   "id": "F1",
+   "class": "implementation",
+   "severity": "medium",
+   "owner": "CW-06 (ui/product)",
+   "summary": "Paste frame always keeps 200~/201~ markers even if the pane application did not enable DECSET 2004; real terminals send plain text then.",
+   "evidence": "live S5: cat > f in host shell -> '\\x1b[200~붙여 abc\\x1b[201~\\n'; likely affects sh(dash) fallback and REPLs (inferred)",
+   "repro": "tests/ui/test_product_paste_independent.py::PanePasteModeTests::test_app_without_bracketed_paste_gets_plain_text",
+   "fix_direction": "track per-pane bracketed-paste mode from the pane VT screen (DECSET/DECRST 2004); strip markers when off, keep whole-frame/size rules"
+  },
+  {
+   "id": "F2",
+   "class": "implementation",
+   "severity": "low-medium",
+   "owner": "CW-06 (input.py)",
+   "summary": "Prefix followed by a bracketed paste: ESC consumed as prefix command, '[200~...\\x1b[201~' delivered as typed input (lines execute one by one, whole-paste/2 MiB rule bypassed).",
+   "repro": "tests/ui/test_product_keys_independent.py::PassthroughTests::test_prefix_then_paste_keeps_the_paste_framed",
+   "fix_direction": "when prefix is pending and the next bytes start a paste introducer (or ESC), cancel the prefix (or treat as unknown command) and parse the paste normally"
+  },
+  {
+   "id": "F3",
+   "class": "implementation",
+   "severity": "low",
+   "owner": "CW-06 (input.py)",
+   "summary": "Prefix + non-ASCII key consumes only the first UTF-8 byte; continuation bytes (e.g. \\x95\\x9c) leak into the pane.",
+   "repro": "tests/ui/test_product_keys_independent.py::PassthroughTests::test_prefix_then_non_ascii_key_leaks_no_utf8_continuation_bytes",
+   "fix_direction": "consume the whole UTF-8 sequence after prefix as one unknown command"
+  },
+  {
+   "id": "F4",
+   "class": "implementation",
+   "severity": "low",
+   "owner": "CW-06 (model.py _handle_events)",
+   "summary": "While help overlay is open, a paste is dropped silently and a >2 MiB PasteRejected sets no notice (C-AC-19 visible reason violated in that state).",
+   "repro": [
+    "tests/ui/test_product_paste_independent.py::PasteLimitTests::test_rejection_visible_even_if_help_overlay_is_open",
+    "tests/ui/test_product_paste_independent.py::PasteLimitTests::test_paste_while_help_open_is_not_silently_lost"
+   ],
+   "fix_direction": "handle PasteRejected (and Paste) before the help-close branch: close overlay and either deliver the paste or show a notice"
+  },
+  {
+   "id": "F5",
+   "class": "implementation",
+   "severity": "low",
+   "owner": "CW-06 (model.py on_result)",
+   "summary": "takeover_request ok result with takeover_requested=False (user already owner) is announced as '인수 요청됨 — prefix c 로 확인'; following confirm is refused takeover_held: no takeover request.",
+   "evidence": "live (explore recover run) and dry2",
+   "repro": "tests/ui/test_product_state_independent.py::TakeoverTests::test_request_not_recorded_by_backend_is_not_announced_as_pending",
+   "fix_direction": "derive notice from returned shell state (takeover_requested / input_owner), e.g. '이미 user가 owner'"
+  },
+  {
+   "id": "F6",
+   "class": "contract / backend implementation outside CW-06 scope (G2 open item)",
+   "severity": "medium",
+   "owner": "CW-07/G2 shell boundary (backend), not CW-06",
+   "summary": "Multi-line manual input in host shell (typed heredoc or multi-line bracketed paste; single-line paste OK) leaves boundary in manual_input with held_reasons unsubmitted_or_unconsumed_input (+unknown_or_manual_residue for paste); wb-handoff + prefix h then refused handoff_held: no clean direct same-parent handoff. Ctrl-C at prompt recovered once immediately after, but not after several later steps (dry4). UI shows only the refusal reason, not held_reasons.",
+   "doc": "docs/features/core-workbench/gates/G2.md '여러 줄 paste 뒤 clean 경계 복귀 방법' listed as unconfirmed",
+   "repro": "scratchpad explore4.py SCEN=paste2|typedheredoc|recover (live, no model turn)",
+   "fix_direction": "Root decision: route to backend shell owner or record as known limitation; optionally show held_reasons in UI"
+  },
+  {
+   "id": "F7",
+   "class": "test",
+   "severity": "none (resolved)",
+   "summary": "Live probe typed next command immediately after Ctrl-C; bash/tty flushed the type-ahead (real terminal behaviour).",
+   "fix": "1 s pause after Ctrl-C in S6"
+  },
+  {
+   "id": "F8",
+   "class": "test",
+   "severity": "none (resolved)",
+   "summary": "live-full-1 S15 failed because /hotkeys table (S11) scrolled the WBOK reply off the manager pane; not a restore defect.",
+   "fix": "S15/S16 compare each pane against its pre-detach lines (ratio >= 0.8); dry7 ratios 1.0/1.0/0.94"
+  },
+  {
+   "id": "O1",
+   "class": "observation",
+   "severity": "non-blocking",
+   "summary": "Product view lacks G1 truecolor RGB overlay (256-colour approximation only) — same level as G1 'partial candidate'."
+  },
+  {
+   "id": "O2",
+   "class": "observation",
+   "severity": "non-blocking",
+   "summary": "Backend switches owner to user already at takeover request (epoch+1) before confirm (backend semantics)."
+  }
+ ],
+ "files": {
+  "tests/ui/independent_support_cw06.py": "26f33afa96e71b7158d2766a65d56f5cbc40fd95f7c4ab0adef0e5a56eaef618",
+  "tests/ui/test_product_keys_independent.py": "279ac34f46bce73d5570e0073c15908f2a727f0e3e1c2de0923dae09d24bef8f",
+  "tests/ui/test_product_paste_independent.py": "6b8f17ed93df9c4cae902bd61d2ea9602f542673ba0bd3be4f6354152f71ef1b",
+  "tests/ui/test_product_state_independent.py": "246d7a8124258692eb378fcce7fd75386d1cd2deb8f90175613b35ce016838a8",
+  "tests/ui/test_product_pty_independent.py": "392b248b0ea48b2c6b5737cf7d5a783d77875398d11b270a1e032daa749e2fba",
+  "tests/ui/live_product_omp_independent.py": "9f8bc1f79fe103ec6681f87be4da4d52aaa7c76773d0ccb0daf450d00e6cece8",
+  "tests/backend/test_live_detach_independent.py": "8ab41c49092dd62be1729e0caba610b61a8b4ea5bb0084dd87d100876ceee0ac",
+  "tests/backend/test_live_start_independent.py": "60b0fda201808e8fb224e86493f33d4c2e425a5602bd323987d7e632f5b04e1f"
+ },
+ "file_notes": {
+  "tests/backend/test_live_detach_independent.py": "argv-only: --plain added at L42 (start) and L90 (attach); before sha256 19dd9e0f9d3aa3c14eb5359f66fa0e83d32311bb345fc6575bbb82f060c8da6f",
+  "tests/backend/test_live_start_independent.py": "unchanged"
+ },
+ "frozen_hashes": {
+  "start": {
+   "src/workbench/ui/product/__init__.py": "8b250db57bcf1590be1ba6959cf059139155475f18d84ee4577e84e7ad1d536b",
+   "src/workbench/ui/product/app.py": "28eda32d93bee15e6df21a55f8a2d4a000318508a8d892501e0bcfe94a1e9ba2",
+   "src/workbench/ui/product/input.py": "c82a0b52b43c1e17ac333b1527bef19e277ecf887667059c1df1134b2832081f",
+   "src/workbench/ui/product/model.py": "d604e5531bb66d0f144514607206f02ae8ef3a34c2493c457d5a860202ba038b",
+   "src/workbench/ui/product/view.py": "c41b895574027ab5391066c4cf7b04ba5744f53bd94fc943a2d1bee7446514d0",
+   "src/workbench/backend/cli.py": "9b44e4847275514ec27e7c9474dfe7ad0c5556d3803651f7fc292be0402a2b4e"
+  },
+  "end": {
+   "src/workbench/ui/product/__init__.py": "8b250db57bcf1590be1ba6959cf059139155475f18d84ee4577e84e7ad1d536b",
+   "src/workbench/ui/product/app.py": "28eda32d93bee15e6df21a55f8a2d4a000318508a8d892501e0bcfe94a1e9ba2",
+   "src/workbench/ui/product/input.py": "c82a0b52b43c1e17ac333b1527bef19e277ecf887667059c1df1134b2832081f",
+   "src/workbench/ui/product/model.py": "d604e5531bb66d0f144514607206f02ae8ef3a34c2493c457d5a860202ba038b",
+   "src/workbench/ui/product/view.py": "c41b895574027ab5391066c4cf7b04ba5744f53bd94fc943a2d1bee7446514d0",
+   "src/workbench/backend/cli.py": "9b44e4847275514ec27e7c9474dfe7ad0c5556d3803651f7fc292be0402a2b4e"
+  },
+  "match": true
+ },
+ "residue": {
+  "live_runs": "every run shutdown --yes verified true, residue {}",
+  "tmp": "no /tmp/cw06-* or /tmp/cw17-* left",
+  "processes": "no workbench/omp processes left",
+  "untouched": "/tmp/cw03-g2-*",
+  "omp": "settings/model unchanged; ~/.omp not read; --no-session",
+  "other": "no commits, no graphify update"
+ },
+ "evidence_dir": "/tmp/claude-1000/-home-dwchoo-ai-exp-assistant/c9b9cf04-65fa-4b20-a1f0-e0fd8b62fc82/scratchpad",
+ "evidence_files": [
+  "live-full-1.json",
+  "live-full-1.log",
+  "dry7.json",
+  "e4-*.json",
+  "cw17_indep.log",
+  "reg-*.log",
+  "explore4.py"
+ ]
+}

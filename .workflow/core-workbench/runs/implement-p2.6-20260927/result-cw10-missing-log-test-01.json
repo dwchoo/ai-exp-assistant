@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "invocation": "cw10-missing-log-test-01",
+  "unit": "V-CW-10-p2.6-current",
+  "task_result": "candidate_ready",
+  "candidate_before": "ae6c8c4189ee2fa342f28b8de3257562775e3e90b5e34bc9b0e9e7f20796c645",
+  "candidate_after": "a8b845bf0575d68290d81824f706cc8ad1547b5d465b8b0489d0c9f588626fd0",
+  "requirements_sha256": "6c6296b8ab37529d6488b23d2f498dcac20b6cffc6e167dc9395c402702cfdbf",
+  "changed_paths": ["tests/workflow/test_run_independent.py"],
+  "new_unittest_methods": 3,
+  "strengthened_existing_methods": 1,
+  "new_failure_scenarios": ["raw_log unreadable", "raw_log truncated", "raw_log changed but criteria text retained", "result_file missing", "result_file changed but criteria text retained"],
+  "old_fail_new_pass": {
+    "test": "test_missing_raw_log_after_confirmed_exit_is_indeterminate",
+    "old_candidate": "b445f8dd2570503ee3f46c83a9f6194531cf108231c9f3fad188bad1c0d82626",
+    "old_result": "FileNotFoundError at src/workbench/workflow/run.py:184 in prior independent turn",
+    "current_result": "PASS with durable indeterminate REPORT and no replay"
+  },
+  "checks": [
+    {"command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest -v tests/workflow/test_run_independent.py", "exit_code": 0, "tests": 12},
+    {"command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/workflow -v", "exit_code": 0, "tests": 19},
+    {"command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/terminal -v", "exit_code": 0, "tests": 10},
+    {"command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/bridge -v", "exit_code": 0, "tests": 18},
+    {"command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/tasks -v", "exit_code": 0, "tests": 22},
+    {"command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/workflow /tmp/cw02-g1-venv/bin/python tests/workflow/live_workflow_independent.py", "exit_code": 0, "cases": 4, "evidence": "raw-cw10-missing-log-runtime-01.json"},
+    {"command": "git diff --check", "exit_code": 0}
+  ],
+  "implementation_defects": [],
+  "cleanup": {"temporary_directory_residue": [], "owned_process_residue": []},
+  "needs_oracle": false,
+  "overall_completion_claimed": false
+}

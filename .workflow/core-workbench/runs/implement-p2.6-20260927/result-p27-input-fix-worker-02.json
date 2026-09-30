@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-input-fix-worker-02",
+  "status": "candidate_ready",
+  "candidate_id": "04fb52ccf0e69c5a7d80a105fad474b79ce174c61b858d0bc50e5eb7f067292f",
+  "scope_audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-input-fix-02.json",
+  "checks": [
+    [
+      "independent input",
+      0,
+      "4 OK"
+    ],
+    [
+      "tests/backend",
+      0,
+      "47 OK"
+    ],
+    [
+      "tests/terminal",
+      0,
+      "29 OK"
+    ],
+    [
+      "g2_shell discover",
+      0,
+      "132 OK skipped=1 (same env skip)"
+    ],
+    [
+      "canonical matrix",
+      0,
+      "3 OK"
+    ],
+    [
+      "contracts",
+      0,
+      "43 OK"
+    ],
+    [
+      "lifecycle",
+      0,
+      "38 OK"
+    ],
+    [
+      "g4",
+      0,
+      "8 OK"
+    ]
+  ],
+  "red_green": "2 new live tests (bash/dash, 4 subtests) failed pre-fix: gap1 parent_mode stuck unknown; gap2 UnsafeShellState foreground write target changed",
+  "notes": [
+    "each backend suite run leaves one empty /tmp/cw03-g2-* shell-init dir (likely SIGKILL-ed backend tests); normal-shutdown cleanup to be checked by independent test",
+    "held_reasons unsupported_hook_or_trap persists after user fixes trap (display only; UR-UX item)"
+  ]
+}

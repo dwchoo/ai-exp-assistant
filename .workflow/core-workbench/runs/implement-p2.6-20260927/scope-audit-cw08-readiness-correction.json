@@ -1,0 +1,20 @@
+{
+  "invocation": "cw08-readiness-correction-01",
+  "baseline_candidate": "e519878ceb9880617bec7a67c9f83e7376c8cbc801f436739bdff47d794eac77",
+  "candidate": "3860a6a21a1a1e5e2767541ffc2168bb03ff43ffbe57c6a247f438860d869da2",
+  "changed": [
+    "src/workbench/ipc/bridge_g3/mailbox.py"
+  ],
+  "allowed_write_scope": [
+    "src/workbench/ipc/bridge_g3/mailbox.py"
+  ],
+  "file_sha256_before": "8906ab3ee3a091888fe241e9e7089ce48811ea39884cb710884f27c4ad3bb5d7",
+  "file_sha256_after": "3cb9a702070ef603df151ab217a951f40f4f15c753e0272f6b7913dde4bbaec6",
+  "independent_test_files_modified": false,
+  "graphify_modified_by_this_invocation": false,
+  "storage_or_documentation_changed": false,
+  "index_changed": [],
+  "outside_scope": [],
+  "comparable": true,
+  "snapshot_stable": true
+}

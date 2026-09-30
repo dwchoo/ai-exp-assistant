@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "id": "root-adjudication-p27-cw06-entry-wiring",
+  "recorded_at": "2026-09-29",
+  "authority": "p2.7a approval (bundle a521acdc...); CW-17 ticket: '최소 attach client: 계약 검증과 CW-06 이전 시험을 위한 최소 client다. 제품 UI는 CW-06이 소유한다'; CW-06 ticket: 제품 UI는 ui_v1 client, UI 종료는 detach; PLAN user_review_checkpoints UR-UX environment '실제 진입점(python -m workbench)'; workflow-contract s3 technical elaboration",
+  "observation": "CW-06 write_scope_hint is src/workbench/ui/** and tests/ui/**, but the entrypoint that users run (backend/cli.py start/attach) currently launches the CW-17 minimal client (backend/client.py run_attach). UR-UX and P-C-AC-01/06/14 runtime checks require the product UI through the real entrypoint. CW-17 live tests (test_live_detach*.py, test_live_start*.py, 2 of them independent) drive `start`/`attach` in a PTY and assert minimal-client text.",
+  "decision": [
+    "`start` (default attach) and `attach` launch the CW-06 product UI. The CW-17 minimal client stays available as an explicit `--plain` option on start/attach for dumb terminals, scripting and contract tests. No change to backend, ui_v1, v1 or ports_v2.",
+    "CW-06 writer may edit src/workbench/backend/cli.py only for this wiring (option + dispatch to the product UI), plus non-independent CW-17 tests/harness (tests/backend/live_harness.py, test_live_detach.py, test_live_start.py) only to pass `--plain` where they intentionally exercise the minimal client.",
+    "Independent CW-17 tests (tests/backend/*_independent*.py) are not edited by the writer; the CW-06 first independent test_designer adapts them (argument-only change to `--plain`, or re-expressing the same assertion through the product UI) and must show L-CW17-DETACH/START still pass; this preserves the CW-17 acceptance instead of weakening it."
+  ],
+  "not_a_behavior_change_rationale": "Planned CW-06 deliverable (product UI via the entrypoint); subcommand names were left to implementation by CW-17. `--plain` keeps the verified CW-17 path reachable.",
+  "stop_if": "Any need to change ui_v1/backend semantics, or to weaken L-CW17-* acceptance -> stop and ask the user."
+}

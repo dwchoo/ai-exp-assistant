@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "check_id": "cw04-contention-approval-final-01",
+  "requirements_identity": "389e09ebc30025507d4bba225d0806b04b36c269e3729c9a72587ac85fb6c808",
+  "argv": ["/tmp/cw02-g1-venv/bin/python", "tests/gates/g3_omp/live_tui_contention_probe.py", "--scenario", "approval"],
+  "cwd": "/home/dwchoo/ai-exp-assistant",
+  "environment": {"PYTHONDONTWRITEBYTECODE": "1", "PYTHONPATH": "src:tests/gates/g3_omp", "description": "Linux, OMP 18.2.10, real native approval contention; frozen CW-04 candidate"},
+  "started_at": "2026-09-27T18:11:24.751476+00:00",
+  "finished_at": "2026-09-27T18:11:31.586647+00:00",
+  "exit_code": 0,
+  "timed_out": false,
+  "log": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/check-cw04-contention-approval.log",
+  "log_sha256": "6b41a8af781c02a9b424db92651f43eb0b9f9cec98c0feb109f9a7753d427d87",
+  "before": "5beffb2a06b8d306b12e3c06e242d0aae8b7139f8c598eac554074c5c8743619",
+  "after": "5beffb2a06b8d306b12e3c06e242d0aae8b7139f8c598eac554074c5c8743619",
+  "stable": true,
+  "items": [{"id": "G3-TUI-CONTENTION", "acceptance_ids": ["C-AC-02", "C-AC-27"], "result": "passed", "observed_evidence_level": "runtime", "evidence": "check-cw04-contention-busy.log and check-cw04-contention-approval.log: real OMP busy-turn and native approval contention preserved the draft, withheld delivery, then admitted exactly once only after the observed safe boundary", "unknowns": []}]
+}

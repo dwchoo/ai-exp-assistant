@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw06-fix-worker-03",
+  "ticket_id": "CW-06",
+  "role": "worker",
+  "unit": "V-CW-06-p2.7",
+  "approved_bundle_digest": "a521acdc3838b43a26e277afc233bab695c8b02ce0d42392c3678931b2e3f027",
+  "prior_assignment_ref": ".workflow/core-workbench/runs/implement-p2.6-20260927/assignment-p27-cw06-fix-worker-02.json",
+  "routing": {"planned_role": "worker", "selected_role": "worker (wb-worker, Sonnet high)", "reason_codes": ["bounded_pattern"], "evidence_refs": ["UI-local event-loop slicing, terminal restore and key parsing; concrete repros from review"]},
+  "base_candidate": "101b87f58fef043e9707b5ac6de1eaed15cfd0711447f8686bfc432b450e571b",
+  "checkpoint_ref": [".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-cw17-integrated-checkpoint.json", ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-cw06-worker-delta-backup/", ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-cw06-test-delta-backup/", ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-cw06-fix-delta-backup/", ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-cw06-rerun-delta-backup/"],
+  "findings": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-review-cw06-01-agent.json (read the scratch experiment descriptions for repro ideas)",
+  "adjudication": ".workflow/core-workbench/runs/implement-p2.6-20260927/root-adjudication-p27-review-cw06-01.json",
+  "required_behavior": "Implement exactly the adjudication decisions P2-1 (a)(b)(c), P3-1, P3-2, P3-3, P3-4 (if bounded) and P3-6 wording if touched. backend/client.py UiClient is outside your write scope: if its recv(1 MiB) pump is in the way, wrap/drive it from the UI (e.g. your own recv loop over client.sock with ui_v1.FrameDecoder, or smaller reads) without editing backend code.",
+  "acceptance": [
+    "red->green tests in tests/ui/test_product_model.py / test_product_pty.py: under a fixture flood of >= 8 MiB display to one pane, a key typed mid-flood reaches the server within 0.3 s; the socket is drained so a fake server with a bounded outbound buffer never stalls; catch-up indicator appears; after flood the pane shows the latest tail; send failure -> exit with reason message, no traceback; cursor visible after help closes; SIGTERM/SIGHUP restore (2004l, rmcup, termios) in a PTY test; prefix + Up/F5/Alt-x sends nothing to the pane.",
+    "Expected: tests/ui/test_product_rerun_independent_p27e.py pins production hashes and WILL fail after any production change - do not edit it; list it. All other tests/ui/test_*.py (incl. *_independent) must pass unmodified.",
+    "suites: tests/ui with pattern 'test_*.py' ONLY (never live_*), tests/contracts, tests/gates/g1_vt (PYTHONPATH=src:.)."
+  ],
+  "allowed_write_paths": ["src/workbench/ui/product/**", "tests/ui/test_product_model.py", "tests/ui/test_product_pty.py", "tests/ui/test_product_entrypoint.py", "tests/ui/support.py"],
+  "prohibited_paths": ["tests/**/*_independent*.py", "tests/ui/independent_support_cw06.py", "tests/ui/live_*.py", "src/workbench/backend/**", "src/workbench/contracts/**", "src/workbench/terminal/**", "docs/**", ".workflow/**"],
+  "stop_conditions": ["needs backend/ui_v1 change", "catch-up cannot keep OMP screens correct without a contract change -> return blocked with evidence"],
+  "rules": "Python /usr/bin/env PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python; never -t .; no real OMP/model, no graphify update, no commits, no tmux/herdr; clean up everything.",
+  "result_format": "checks table first, status, changed paths + sha256, per-finding fix summary, measured flood latency numbers, residue, gaps. Korean, concise."
+}

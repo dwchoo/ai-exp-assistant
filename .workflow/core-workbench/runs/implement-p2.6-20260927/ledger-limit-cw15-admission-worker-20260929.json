@@ -1,0 +1,23 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 1132,
+  "event": {
+    "id": "limit-cw15-admission-worker-20260929",
+    "kind": "limit",
+    "data": {
+      "bucket": "role:worker_senior",
+      "origin": "operating",
+      "value": 144,
+      "authority": "C-D55 plus workflow-contract section 8 and current $implement authorization",
+      "reason": "One bounded CW-15 ended-run and metadata-tick admission correction",
+      "decision_owner": "Root",
+      "remaining_work_estimate": 1,
+      "expected_previous": {
+        "value": 143,
+        "authority": "C-D55 plus workflow-contract section 8 and current $implement authorization",
+        "reason": "One senior CW-15 production binding and shutdown-idempotence correction"
+      },
+      "scope_basis": null
+    }
+  }
+}

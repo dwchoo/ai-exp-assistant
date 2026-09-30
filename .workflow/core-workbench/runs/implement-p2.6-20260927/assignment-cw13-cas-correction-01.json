@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "invocation": "cw13-cas-correction-01",
+  "role": "worker_senior",
+  "unit": "V-CW-13-p2.6-current",
+  "authority": "User $implement docs/features/core-workbench request; approved PLAN p2.6 CW-13 and independent failing C-AC-07/13 regression",
+  "objective": "Make recovery reservation fail closed unless an exact boolean success is followed by a durable, exact post-CAS attempt observation under unchanged authority.",
+  "base": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw13-test.json",
+    "candidate_id": "9a8352878665850f784a8c49978e57df2a0fba39b77fbfae2fcfa826ef6515ad",
+    "failing_test": "test_inconsistent_reservation_result_never_authorizes_retry"
+  },
+  "required_corrections": [
+    "Accept reserve_recovery success only when the return value is exactly bool True; reject truthy non-bool values.",
+    "Immediately read fresh RecoveryFacts after a successful reservation and authorize no steps unless the same task has exactly one additional recovery attempt whose attempt_id equals request.decision_id, retries_used is expected_used+1, and the prior history remains intact.",
+    "Require post-read exact identity/current identity, approval hash/current approval, criteria, authority version, settings revision, automation/metadata/revocation/terminal-owner state and other decision-critical facts to remain compatible; any read error, malformed value, drift, missing/duplicate/skipped attempt, or inconsistent result returns blocked_unresolved with no steps.",
+    "Report the confirmed post-reservation retry ordinal and attempt usage. Do not auto-replay an uncertain reservation or execute any action in this policy layer.",
+    "Preserve one-winner concurrent CAS behavior and all existing recovery, force, revision and predecessor regressions."
+  ],
+  "allowed_write_paths": ["src/workbench/policy/recovery_manager/**", "tests/policy/recovery_manager/**", "graphify-out/**"],
+  "constraints": [
+    "Sole product mutation owner; use apply_patch and preserve independent failing tests.",
+    "Do not modify existing CW-10/11/12 production modules, workflow/docs/PLAN/state, or add dependencies.",
+    "No delegation, commit, publish, deploy, Docker, or live destructive termination. Run focused failing test, full recovery suite, relevant predecessors, and graphify update ."
+  ],
+  "report": "Return exact validation semantics, changed paths, before/after failure, checks/counts, candidate_ready/blocker, and residual adapter risks."
+}

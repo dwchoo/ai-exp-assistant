@@ -1,0 +1,43 @@
+{
+  "invocation": "cw15-intent-correction-01",
+  "outcome": "complete",
+  "candidate_ready": true,
+  "base_candidate": "dccc1a3d2813ab121eca173d463cd541aa18eef293e2904ae38c20cb8eec473a",
+  "candidate_id": "910f6638552602afbb5676a624ef52b9c97a9cdd62254370e769419e982db7c3",
+  "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw15-intent-correction.json",
+  "changed_paths": ["src/workbench/app/lifecycle.py", "src/workbench/app/production.py", "src/workbench/policy/pause_automation/controller.py", "tests/lifecycle/test_lifecycle_runtime.py", "tests/lifecycle/test_production_binding.py", "graphify-out/**"],
+  "boundary": "request_takeover sets a one-way local Event before lock acquisition; a lifecycle permit is combined with the pause permit and checked by G3 immediately before socket submission.",
+  "transport_race": {
+    "red": "one deliver frame was submitted after takeover invocation",
+    "green": "zero deliver frames submitted",
+    "timeline_ns": {
+      "invocation": 2174035217079891,
+      "intent_set": 2174035217109891,
+      "g3_final_return": 2174035217245563,
+      "durable_takeover": 2174035219799358
+    },
+    "receipt": "REJECTED with api_called=false and history attempted->failed",
+    "command_journal": "delivery unknown retained; no replay"
+  },
+  "checks": {
+    "lifecycle": "28/28 passed",
+    "pause": "122/122 passed",
+    "bridge": "22/22 passed",
+    "observation": "95/95 passed",
+    "storage": "33/33 passed",
+    "recovery": "26/26 passed",
+    "g4": "2/2 passed",
+    "terminal": "10/10 passed",
+    "graphify_update": "passed",
+    "compile_diff_residue": "passed; no fixture process residue"
+  },
+  "sha256": {
+    "src/workbench/app/lifecycle.py": "6ccd47cdb557d703a77098d2cd84bbf50d04de3f801f7154c060fc5f97159c02",
+    "src/workbench/app/production.py": "f0cb3e572302a0a977b4db24ddc6a68a24311f757a1680b1d35aa0953359c3c4",
+    "src/workbench/policy/pause_automation/controller.py": "5dd01e798f41045aaa0130774b0c7c198d135e7920139d2d1f9c184ec32dffa3",
+    "tests/lifecycle/test_production_binding.py": "5bf47df796973eb32e9f665cf5234839111a8e8b7c08c4b0b099cc65ca3f0708",
+    "tests/lifecycle/test_lifecycle_runtime.py": "9e167b0bfe7550244b1bc5a6a52bccbbfd1570a8407534ab20d983c30640fb5f"
+  },
+  "pending": ["live external OMP", "real reboot", "pyte-dependent environment"],
+  "mutation_owner": "/root/cw12_post_review_correction"
+}

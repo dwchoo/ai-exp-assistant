@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "feature_id": "core-workbench",
+  "status": "approved_for_implementation",
+  "decision": "C-D56",
+  "recorded_at": "2026-09-29T04:46:24.727073+00:00",
+  "authority": {
+    "source": "current user conversation",
+    "plan_change_quote": "후속 ticket(plan 변경)은 승인해.",
+    "proceed_quote": "진행해줘.",
+    "bundle_approval_quote": "진행해",
+    "presented": "p2.7 요약(CW-17~19 추가, CW-06 재개, CW-12/15 stale 표시, 해석 3건, digest d8a12056…a230ff313)을 제시한 뒤 승인·구현 시작 요청에 대한 응답"
+  },
+  "approved_revisions": {
+    "brief": "r1.13",
+    "spec": "s2.7",
+    "plan": "p2.7"
+  },
+  "manifest": ".workflow/core-workbench/runs/planning-p2.7-20260929/manifest.json",
+  "candidate_files": {
+    "docs/features/core-workbench/BRIEF.md": "373d44845fd14d7ab702a740d66a04dd5b3fa3554630bcc84dbaaa0a87e4bb00",
+    "docs/features/core-workbench/SPEC.md": "aa57bbe24bf9a20d396b524d5232b6c0900da3895b265acc63b5fceee5bb7ace",
+    "docs/features/core-workbench/PLAN.json": "376118161339541664ca2bdbf9784c0a789513333e4b19d18a166b8ac359fa3a",
+    "docs/features/core-workbench/DECISIONS.md": "d2b4d8b5271425dd27d2faa14225076665fb9091a36ab0e3b6c950df0c59d200",
+    "docs/features/core-workbench/OPERATING-CONTRACT.md": "b5f006a86125a871f6b44d8bbf4ebc11d3e5f89ff7794e866f519f96ea8308b7",
+    "docs/features/core-workbench/DECISION-2026-09-26.md": "f82d544ad967aa7420e59982813bdda33fc66b2861a89f6f58850e256aa656e6",
+    "docs/features/core-workbench/START-IMPLEMENT.md": "77b8c10483a85e964c1c7387761b171f3aacee6d2f1d6c0a7ff7c59cb7cf56f6",
+    "docs/features/core-workbench/gates/G2.md": "60c744a07e18dfee3b2410753601925c7c9c3a4be07d3ad5442c958b5ddaf345",
+    "docs/features/core-workbench/tickets/CW-01.md": "7dae35e6d1a4d2a3475609849178bb9ea05a6f790eb4931dc0139925ba75bcb2",
+    "docs/features/core-workbench/tickets/CW-02.md": "1eeed9b1c8f7b6f44ba994deef657bdcffffe96f8ef4052172be3aab92bae863",
+    "docs/features/core-workbench/tickets/CW-03.md": "2df80b08be50dde81061d83ce296b96f20d7617f2636358d8e3d5a64791dfc37",
+    "docs/features/core-workbench/tickets/CW-04.md": "781c2e721f7d8b1cbcf2a5f0d1a9a7fe569968eed40a21fde3590d878875af0a",
+    "docs/features/core-workbench/tickets/CW-05.md": "725d1f6a72ab8b0ba0feb82413ad8f512517c2a95f374f08616e9813b2fa9354",
+    "docs/features/core-workbench/tickets/CW-06.md": "67ed6cafa857cc4132824a7ae2016415abda8fa3215d578d5a56f96b7dd54178",
+    "docs/features/core-workbench/tickets/CW-07.md": "68557389e64ed872d97bc73f78639212c738c6a46ffc6efda59c18439f474d2d",
+    "docs/features/core-workbench/tickets/CW-08.md": "464e8db03c660b6165b45806bff135a3f159476ff823341af57fc9948ebb5967",
+    "docs/features/core-workbench/tickets/CW-09.md": "a4c7f18e82875f9c236884854b94eeed8796350317ee6619bbbed2b36977bff3",
+    "docs/features/core-workbench/tickets/CW-10.md": "c48c1b8f8e33c7f29bc7783690720610579fbbb5d88766116949f71240f045b0",
+    "docs/features/core-workbench/tickets/CW-11.md": "2fbce6c5eda9cfb2287b7d0d92c0fc6f7ac86dc0bc31d0390f8419c8d07cc3eb",
+    "docs/features/core-workbench/tickets/CW-12.md": "5940cafdaec0a6f0114763ca73a9036361497c89bac3652825a8d9ab6f0a0372",
+    "docs/features/core-workbench/tickets/CW-13.md": "b048e999ba81b1cf5753785523c5d8d66d9f304ef5490d90104f82f605e73fd4",
+    "docs/features/core-workbench/tickets/CW-14.md": "b7a5cf8f0bcca3c44058e0fc22cf6fc3bb1fd445d95bb2e8a0a3d1130cc8ba2f",
+    "docs/features/core-workbench/tickets/CW-15.md": "78b9e00b0e7fad0ffe3550bfcd313e12f26a44471cbee91be31f236c9afac620",
+    "docs/features/core-workbench/tickets/CW-16.md": "61caaab70e1e3e148ec2e01b2f5a31de499cc807dece5267918b71f8dbbfb322",
+    "docs/features/core-workbench/tickets/CW-17.md": "886b22fbb4b0031b18c75669b7c740f16df6f83ce0e1067a2fe0d6842c8bb0ce",
+    "docs/features/core-workbench/tickets/CW-18.md": "aa1214897dbcd849a9e17ad90e5c67ab94cb4b711a141dd245def117bda6e75b",
+    "docs/features/core-workbench/tickets/CW-19.md": "6c65ac014b51716ecc068e9df95ac8b97ea814fcd2e6dad5d1bdaaf14c808bdb",
+    "docs/adr/0002-managed-shell-control-wait.md": "198981745f6235bbc0f3a00d14bdf5949075905aefa1ebc81ce90768bdc2e37c"
+  },
+  "bundle_digest": "d8a1205611980030629c927acaaa3db630268cd2d704da2ece27a9db230ff313",
+  "digest_policy": "SHA-256 of candidate_files JSON with sorted keys, UTF-8, compact separators; this record excluded",
+  "prior_approval_record": ".workflow/core-workbench/runs/decisions-cd55-20260926/approval.json",
+  "authorization": {
+    "implementation_authorized": true,
+    "entry": "$implement docs/features/core-workbench",
+    "logical_frontier": [
+      "CW-17"
+    ],
+    "publication_authorized": false,
+    "commit_authorized": false
+  },
+  "interpretations_presented": [
+    "Task 승인은 Workbench가 확인한 사용자 UI 조작만 인정",
+    "재부팅 뒤 backend 자동 시작 없음",
+    "CW-18은 scripted provider, 실제 provider는 CW-16"
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw06-rerun-test-07",
+  "status": "needs_reroute (two intermittent failures)",
+  "frozen_candidate": "8ff079fdb724457a58015d786c314cc371ef94f3f18d2942bc563600b78e5dbd",
+  "agent_result": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw06-rerun-test-07-agent.json",
+  "repo_changes": "none (execution-only; audit vs catch-up snapshot unchanged)",
+  "verdicts": {"real OMP live (2 turns)": "pass S0-S16; S15 manager 1.0, worker 1.0, host 0.94", "stub flood p27f x3": "pass, no slow_client", "p27h replay_over_256kib": "intermittent FAIL 2/9: one-row offset vs synchronous pyte (unclassified)", "test_product_pty.test_sigterm_restores_terminal": "intermittent FAIL 2/8: no ?2004l, fails 0.07 s after start (suspected startup race)", "tests/backend": "71 OK after rerun with short TMPDIR (first run AF_UNIX path too long: environment)", "contracts/g1/g4": "pass"},
+  "finding_test_hygiene": "tests/backend leaves cw03-g2-*/shell-init dirs in TMPDIR even on passing runs -> source of accumulating /tmp/cw03-g2-* (record for CW-16 test hygiene)",
+  "model_turns": 2,
+  "frozen_hashes_equal": true,
+  "residue": "no processes; scratchpad r07 logs kept by agent",
+  "observed_model": "sonnet (wb-test-rerun definition; host metadata unverified)"
+}

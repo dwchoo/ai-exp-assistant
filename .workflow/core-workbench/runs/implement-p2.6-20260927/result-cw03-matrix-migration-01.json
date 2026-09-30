@@ -1,0 +1,40 @@
+{
+  "invocation": "cw03-matrix-migration-01",
+  "unit": "V-CW-03",
+  "status": "candidate_ready",
+  "candidate": "9970d25c747b922a2efb40c27e2903697a6947b5d0511b8307503a10c47a685c",
+  "lifecycle_sha256": "c290d179b75cb2ba28a0f4a0b854f2c6d6bb21892d2e997aed93462011f288cc",
+  "changed_files": [
+    "src/workbench/terminal/shell_g2/lifecycle.py",
+    "tests/gates/g2_shell/live_input_jobs_probe.py",
+    "tests/gates/g2_shell/live_hook_env_probe.py",
+    "tests/gates/g2_shell/live_takeover_probe.py",
+    "tests/gates/g2_shell/test_common_run_protocol.py",
+    "tests/gates/g2_shell/test_live_hook_env_predicates.py"
+  ],
+  "scope_audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/scope-audit-cw03-matrix-worker.json",
+  "mapping": {
+    "input_jobs": "raw base64 RUN plus local completion observer -> dispatch_managed plus preserved owner/job/completion guards",
+    "hook_env": "raw base64 RUN plus manual gate -> canonical RUN plus typed pre-ACCEPT manual denial",
+    "takeover": "input/jobs legacy transport plus recovery barriers -> canonical RUN plus foreground writer and ACK barriers"
+  },
+  "checks": [
+    {"name": "input/jobs live matrix", "result": "passed", "cases": 24},
+    {"name": "hook/env live matrix", "result": "passed", "cases": 4},
+    {"name": "takeover live matrix", "result": "passed", "cases": 22},
+    {"name": "targeted six-suite unittest", "result": "passed", "tests": 37, "elapsed_seconds": 35.872},
+    {"name": "full G2 discovery", "result": "passed", "tests": 127, "skipped": 6, "elapsed_seconds": 104.555},
+    {"name": "git diff --check", "result": "passed"}
+  ],
+  "observations": [
+    "Rearm requires verified return, manual ACK/prompt, fresh same-parent HANDOFF, and a newly observed WAIT callback.",
+    "No fresh handoff, missing fresh WAIT, or a prior unknown lifecycle rejects rearm; a verified second same-parent RUN succeeds.",
+    "All-deny, always-allow, missing flush, lost/delayed ACK, partial/EAGAIN/zero-write, and marker-leak negative controls remain.",
+    "No supervisor, fixture, unittest, sleep, or zombie process residue was observed."
+  ],
+  "unknowns": [
+    "Production adapter generalization is owned by CW-07 after G4.",
+    "Arbitrary manual daemon discovery and external writer control are not guaranteed.",
+    "Conda-specific checks are excluded by C-D55 and delegated-cgroup cases remain environment-skipped."
+  ]
+}

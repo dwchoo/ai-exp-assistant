@@ -1,0 +1,9 @@
+{
+  "before": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw03-run-protocol-frozen-candidate.json",
+  "after": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw03-fd-frozen-candidate.json",
+  "allowed": [
+    "src/workbench/terminal/shell_g2/lifecycle.py",
+    "tests/gates/g2_shell/test_common_run_protocol_independent.py",
+    "graphify-out/**"
+  ]
+}

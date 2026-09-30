@@ -1,0 +1,11 @@
+{
+  "invocation":"cw11-aba-test-01",
+  "outcome":"needs_reroute",
+  "candidate_ready":false,
+  "closed":"Prior A-B-A request reauthorization and forged/foreign/stale/discarded/duplicate/legacy epoch pairings are rejected.",
+  "finding":{"severity":"P1","summary":"A pause-held due schedule can cross A->None->the same six-field A incarnation. The scheduler advances/coalesces before detecting incarnation change and dispatches at t=120, only 59 seconds after the new incarnation at t=61."},
+  "checks":{"observation":"61/62 passed; delayed-tick incarnation test failed as intended","workflow":"44/44 passed","bridge":"18/18 passed","contracts":"20/20 passed","actual_omp_18_2_10":"60.0-second review, 13 wakes, 15 requests, real exit in 0.056 seconds, secret absent, zero residue"},
+  "changed_files":["tests/observation/test_atomic_admission_independent.py"],
+  "product_files_modified":false,
+  "graphify_updated":true
+}

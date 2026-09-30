@@ -1,0 +1,51 @@
+{
+  "after": "6a8e898b72447c96aadd45e2494da9f84a8bbbfba5723bfde2dd9829e655104d",
+  "argv": [
+    "/usr/bin/env",
+    "PYTHONDONTWRITEBYTECODE=1",
+    "PYTHONPATH=src:tests/observation:tests/bridge:tests/gates/g3_omp:tests/workflow",
+    "/tmp/cw02-g1-venv/bin/python",
+    "tests/observation/live_worker_review_independent.py"
+  ],
+  "before": "6a8e898b72447c96aadd45e2494da9f84a8bbbfba5723bfde2dd9829e655104d",
+  "check_id": "cw11-live-final-01",
+  "cwd": "/home/dwchoo/ai-exp-assistant",
+  "environment": {
+    "description": "Linux; frozen CW-11 candidate; actual OMP 18.2.10 worker TUI peer; real 60-second clock, real Git WorkflowRun and persistent host shell"
+  },
+  "exit_code": 0,
+  "finished_at": "2026-09-28T08:11:28.445609+00:00",
+  "items": [
+    {
+      "id": "P-C-AC-12",
+      "acceptance_ids": ["C-AC-12"],
+      "result": "passed",
+      "observed_evidence_level": "runtime",
+      "evidence": "Actual omp/18.2.10 stayed below the first review boundary, dispatched exactly at 60.0 seconds, collected non-model state, kept silence-only hang classification unknown, omitted private raw-log content, and cleaned every child/thread/socket resource.",
+      "unknowns": []
+    },
+    {
+      "id": "P-C-AC-21",
+      "acceptance_ids": ["C-AC-21"],
+      "result": "passed",
+      "observed_evidence_level": "runtime",
+      "evidence": "The actual OMP peer processed all 13 normal wakes; provider request count reached 15 across the periodic review, wakes, and workflow execution. Missing provider metrics remained explicitly unknown rather than a fabricated token count.",
+      "unknowns": []
+    },
+    {
+      "id": "P-C-AC-27",
+      "acceptance_ids": ["C-AC-27"],
+      "result": "passed",
+      "observed_evidence_level": "runtime",
+      "evidence": "A real WorkflowRun emitted a confirmed exact-incarnation exit notification in 0.087 seconds, the next scheduler tick was exited, identity matched the bound worker session, private facts were absent, and cleanup left no residue.",
+      "unknowns": []
+    }
+  ],
+  "log": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/check-cw11-live-final.log",
+  "log_sha256": "581834952db1b324b2d1109bbe87353081b825f678dd64dadb52c53cfbf0da4c",
+  "requirements_identity": "e2b46bf9d2b853e107bcd70e0151c230e6ee48593d240686c5fdc692ff5a8e98",
+  "schema_version": 1,
+  "stable": true,
+  "started_at": "2026-09-28T08:10:23.948471+00:00",
+  "timed_out": false
+}

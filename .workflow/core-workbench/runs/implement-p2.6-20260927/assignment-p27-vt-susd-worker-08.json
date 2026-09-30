@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-vt-susd-worker-08",
+  "ticket_id": "CW-02/G1 correction (found by CW-06 verification)",
+  "role": "worker",
+  "unit": "V-CW-06-p2.7",
+  "approved_bundle_digest": "a521acdc3838b43a26e277afc233bab695c8b02ce0d42392c3678931b2e3f027",
+  "routing": {"planned_role": "worker", "selected_role": "worker (wb-worker, Sonnet high)", "reason_codes": ["bounded_pattern"], "evidence_refs": ["standard VT sequence addition with a clear spec and deterministic repro"]},
+  "base_candidate": "71f3edd4288e7a6f9fe2800a0cd3dba3cf575f1b0bbb75628bcc3c911510a689",
+  "checkpoint_ref": ["p27-snapshot-cw17-integrated-checkpoint.json (holds current screen.py bytes e36dcf08...) + CW-06 delta backups"],
+  "adjudication": ".workflow/core-workbench/runs/implement-p2.6-20260927/root-adjudication-p27-vt-su-sd.json",
+  "evidence": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw06-flake-worker-07.json",
+  "required_behavior": "Implement CSI Ps S (scroll up) and CSI Ps T (scroll down) in src/workbench/terminal/vt_g1/screen.py TerminalScreen per the adjudication (xterm semantics: operate within DECSTBM top/bottom margins, cursor position unchanged, Ps default 1, clamp, blank lines use erase/background attributes, alternate screen aware). Hook it so make_stream() dispatches S/T (pyte Stream csi table). Keep the file's existing (uncommitted) content otherwise intact.",
+  "acceptance": [
+    "red->green unit tests (new file tests/gates/g1_vt/test_vt_su_sd.py): SU/SD with and without margins, Ps>region, attributes of blank lines, cursor unchanged, alternate screen, and the ncurses pattern ESC[5;37r ... ESC[2S from the worker-07 evidence.",
+    "tests/ui/test_product_replay_independent_p27h.py passes UNMODIFIED 30x in a row.",
+    "suites: tests/gates/g1_vt (PYTHONPATH=src:.), tests/terminal, tests/ui (test_*.py) x2, tests/contracts. Never run live_* / CW06_LIVE_MODEL. Use /tmp/cw02-g1-venv/bin/python; short TMPDIR for backend if needed."
+  ],
+  "allowed_write_paths": ["src/workbench/terminal/vt_g1/screen.py", "tests/gates/g1_vt/test_vt_su_sd.py"],
+  "prohibited_paths": ["tests/**/*_independent*.py", "tests/ui/live_*.py", "all other src/** and tests/**", "docs/**", ".workflow/**"],
+  "stop_conditions": ["pyte internals make SU/SD impossible without forking pyte -> report options", "any G1 suite regression that cannot be resolved inside screen.py"],
+  "rules": "No graphify update, commits, tmux/herdr, credentials, real model; zero residue.",
+  "result_format": "checks table first (incl. p27h 30x), status, changed paths + sha256 (before/after for screen.py), design summary, residue, gaps. Korean, concise."
+}

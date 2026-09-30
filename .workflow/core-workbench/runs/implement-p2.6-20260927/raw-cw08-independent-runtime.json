@@ -1,0 +1,90 @@
+{
+  "schema_version": 1,
+  "invocation": "cw08-test-01",
+  "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g3_omp /tmp/cw02-g1-venv/bin/python tests/bridge/live_mailbox_independent.py",
+  "exit_code": 0,
+  "cases": [
+    {
+      "history": [
+        "attempted",
+        "api_returned",
+        "omp_processed"
+      ],
+      "kind": "task",
+      "message_id": "8b8cc24f-b231-4a30-9140-0cfa18666c68",
+      "other_delta": 0,
+      "provider_exact_id_seen": true,
+      "reply_to": null,
+      "same_receipt": true,
+      "sender": "manager",
+      "status": "omp_processed",
+      "target": "worker",
+      "target_delta": 1,
+      "task_completed": false
+    },
+    {
+      "history": [
+        "attempted",
+        "api_returned",
+        "omp_processed"
+      ],
+      "kind": "question",
+      "message_id": "dec67182-9e51-4b32-ae70-38776d419efe",
+      "other_delta": 0,
+      "provider_exact_id_seen": true,
+      "reply_to": null,
+      "same_receipt": true,
+      "sender": "manager",
+      "status": "omp_processed",
+      "target": "worker",
+      "target_delta": 1,
+      "task_completed": false
+    },
+    {
+      "history": [
+        "attempted",
+        "api_returned",
+        "omp_processed"
+      ],
+      "kind": "answer",
+      "message_id": "19b08865-0331-4c33-9fb8-eb4ff41c965b",
+      "other_delta": 0,
+      "provider_exact_id_seen": true,
+      "reply_to": "dec67182-9e51-4b32-ae70-38776d419efe",
+      "same_receipt": true,
+      "sender": "worker",
+      "status": "omp_processed",
+      "target": "manager",
+      "target_delta": 1,
+      "task_completed": false
+    },
+    {
+      "history": [
+        "attempted",
+        "api_returned",
+        "omp_processed"
+      ],
+      "kind": "report",
+      "message_id": "c6df42ea-5242-4d43-bd02-a4ea1aba41e5",
+      "other_delta": 0,
+      "provider_exact_id_seen": true,
+      "reply_to": "8b8cc24f-b231-4a30-9140-0cfa18666c68",
+      "same_receipt": true,
+      "sender": "worker",
+      "status": "omp_processed",
+      "target": "manager",
+      "target_delta": 1,
+      "task_completed": false
+    }
+  ],
+  "child_residue": [],
+  "cwd_process_residue": {
+    "manager": [],
+    "worker": []
+  },
+  "drain_threads_remaining": 0,
+  "omp_version": "omp/18.2.10",
+  "provider_threads_remaining": 0,
+  "socket_residue": false,
+  "status": "passed"
+}

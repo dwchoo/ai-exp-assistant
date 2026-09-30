@@ -1,0 +1,21 @@
+{
+  "invocation": "cw12-delta-test-01",
+  "role": "test_designer",
+  "unit": "V-CW-12-p2.6-current",
+  "objective": "Independently verify the CW-12 correction closes all six findings without lock-order deadlock or regression.",
+  "candidate_manifest": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw12-correction-after.json",
+  "candidate": "f33f3347d29a2b0b2d0a05a8c192dbc529888b425dc921043cbd3da2fab0304b",
+  "prior_test": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-test-01.json",
+  "correction_evidence": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-correction-01.json",
+  "write_scope": ["tests/policy/pause_*/**", "tests/ui/status_*/**", "graphify-out/**"],
+  "must_test": [
+    "Rerun all 15 adversarial policy cases and verify each prior finding is closed.",
+    "Stress repeated concurrent review dispatch, local automatic action, pause, status reads, and cancellation; prove bounded completion/no deadlock and that every action start is ordered before pause or held after it.",
+    "Verify cancellation journal is exactly-once under concurrent status/dispatch calls and stays bound to the cancelled run while files/results remain present.",
+    "Verify clean rebind has no old acknowledgement/unknown/timestamp state and corrupt/mismatched journals remain fail-closed.",
+    "Verify FIFO/device/directory/symlink reads reject promptly with no surviving child/process.",
+    "Rerun focused status and relevant observation/workflow/tasks/contracts/bridge/G3 regressions."
+  ],
+  "constraints": ["Tests only; do not edit production or workflow records; apply_patch only; no destructive git/uv/local env; graphify update after test changes."],
+  "report": ["candidate validation", "prior finding closure", "deadlock/stress measurements", "exact results", "candidate_ready or needs_reroute"]
+}

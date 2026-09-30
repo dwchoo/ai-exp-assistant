@@ -1,0 +1,20 @@
+{
+  "invocation":"cw11-final-review-04",
+  "role":"reviewer",
+  "unit":"V-CW-11-p2.6-current",
+  "objective":"Fresh final review of the complete CW-11 candidate after linearizable admission, real WorkflowRun binding, issuance tickets, and run-incarnation corrections.",
+  "candidate_manifest":".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw11-final-atomic.json",
+  "candidate":"20c78e3e0558722ab91bd0879f9cc665512a09e54002331acfe1c45d34269948",
+  "requirements":".workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw11.json",
+  "ticket":"docs/features/core-workbench/tickets/CW-11.md",
+  "prior_reviews":[".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw11-review-01.json",".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw11-final-review-02.json",".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw11-final-review-03.json"],
+  "must_review":[
+    "Verify all prior findings are closed in production code, including both-direction authority/run TOCTOU, exit identity/retry, hang/usage integration, and actual CW-10 immediate exit binding.",
+    "Review SerializedReviewAdmission linearization: all owner writers, exit fence, issuance ticket, synchronous dispatch, errors/unknown/replay, reentrancy and concurrency; ensure callbacks cannot bypass owner and no unchecked fallback remains.",
+    "Review A-B-A and same-six-field new incarnation handling: ticket invalidation, scheduler detection before scheduling/coalescing, exact 60-second baseline, idempotent A and authority-only pause semantics.",
+    "Review WorkflowObservationBinding persisted TASK validation and same-WorkflowRun confirmed lifetime/control/input exit; ensure old-session/current-peer enrichment is impossible.",
+    "Review all P-C-AC-12/21/27 evidence including 121st review, 13th wake, usage provenance, privacy, cleanup, and latest actual OMP 18.2.10 probe."
+  ],
+  "constraints":["Review-only; no edits/mutations; report P0-P3 findings with file/line evidence or explicit no findings; no destructive git actions."],
+  "report":["candidate validation","prior-finding closure","new findings","runtime qualifications","candidate_ready or needs_reroute"]
+}

@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw06-rerun-test-03",
+  "ticket_id": "CW-06",
+  "role": "test_designer",
+  "unit": "V-CW-06-p2.7",
+  "approved_bundle_digest": "a521acdc3838b43a26e277afc233bab695c8b02ce0d42392c3678931b2e3f027",
+  "routing": {"planned_role": "test_designer", "selected_role": "test_designer (wb-test-rerun, Sonnet high)", "reason_codes": ["correction_reverification"], "evidence_refs": ["checks defined by review p27-review-cw06-01 and root-adjudication-p27-review-cw06-01.json"]},
+  "frozen_candidate": "92889e2443a458d14a701354e635be77b0a1d5b762ede9372a1fcca7c54f2a25",
+  "frozen_production_files": {"src/workbench/ui/product/__init__.py": "8b250db57bcf1590be1ba6959cf059139155475f18d84ee4577e84e7ad1d536b", "src/workbench/ui/product/app.py": "ea85ff059cd6012b9d69bbb79fe00b8ce3ac8843a83447ee1aa4cca8f2469371", "src/workbench/ui/product/input.py": "ee5a9e925c292a15cc60ba0e76e4c6f16cdbf46ffa6f3ccc2171b866967a8605", "src/workbench/ui/product/model.py": "41e94c481527c22f79af51344249593b77f45d4c8d09eeb17bb4d09928c299a6", "src/workbench/ui/product/view.py": "2c6b21ff331e67e0075ad2e9256d187d279dacd2d3ac093a865e3c2ba1148159", "src/workbench/backend/cli.py": "9b44e4847275514ec27e7c9474dfe7ad0c5556d3803651f7fc292be0402a2b4e"},
+  "inputs": [".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-review-cw06-01-agent.json (P2-1 repro: scratch exp_flood/exp_real_flood descriptions)", ".workflow/core-workbench/runs/implement-p2.6-20260927/root-adjudication-p27-review-cw06-01.json", ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw06-fix-worker-03.json"],
+  "required": [
+    "P2-1 runtime WITHOUT model turns: real entrypoint (`python -m workbench start` with a stub OMP as in tests/backend live harness / tests/ui support) + product UI in a PTY you own; in the host shell run a sustained flood (e.g. `yes | head -c 200000000`, and a coloured/Korean line flood) for >= 20 s. Pass: UI stays responsive (a Ctrl-C typed mid-flood reaches the shell and stops the flood within 1 s), no traceback, either no slow_client detach or a visible reason if it happens (record which), catch-up indicator visible, after flood the shell prompt is usable and screen shows the latest tail; backend/PTY identities unchanged. Also fixture-level: 8 MiB flood key latency < 0.3 s (independent test, not the worker's).",
+    "P2-1c: backend-closed / EPIPE path shows reason and exits cleanly (no traceback) - fixture.",
+    "P3-1..P3-4: independent tests (cursor visibility after help; SIGTERM and SIGHUP restore 2004l/rmcup/termios in a PTY; prefix + Up/F5/Alt-x sends nothing; split paste introducer ESC [ 2 / 20 / 200 over >50 ms still framed).",
+    "P3-5 test maintenance (Root-authorized edits of these independent files only): (i) tests/ui/test_product_rerun_independent_p27e.py must not pin production hashes (remove only that pin test; record hashes in your result instead); (ii) tests/ui/live_product_omp_independent.py and tests/ui/live_product_rerun_independent_p27e.py must spend real model turns only when CW06_LIVE_MODEL=1 is set (default: skip model steps with an explicit skip reason). No other assertion changes.",
+    "Regression (pattern 'test_*.py' only; never run live_* with CW06_LIVE_MODEL=1): tests/ui, tests/backend (incl. independent), tests/contracts, tests/gates/g1_vt (src:.), tests/gates/g4_lifetime (src:.). Run tests/ui 5x for flake detection."
+  ],
+  "allowed_write_paths": ["tests/ui/test_product_flood_independent_p27f.py", "tests/ui/live_product_flood_independent_p27f.py", "tests/ui/test_product_rerun_independent_p27e.py (remove hash-pin test only)", "tests/ui/live_product_omp_independent.py (model-turn opt-in gating only)", "tests/ui/live_product_rerun_independent_p27e.py (model-turn opt-in gating only)", ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw06-rerun-test-03-agent.json"],
+  "prohibited": "production frozen; model turns: ZERO; other tests unchanged; no graphify update; no commits; no tmux/herdr; no credentials; leave /tmp/cw03-g2-* alone.",
+  "result_format": "Write full JSON result file; reply <=25 lines: checks table, status, per-item verdicts (P2-1 runtime/fixture, P2-1c, P3-1..4, P3-5 edits with before/after sha256), flake, frozen hashes equal?, residue."
+}

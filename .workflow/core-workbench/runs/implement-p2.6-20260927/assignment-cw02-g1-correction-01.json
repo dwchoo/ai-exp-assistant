@@ -1,0 +1,24 @@
+{
+  "invocation": "cw02-g1-correction-01",
+  "ticket": "CW-02",
+  "unit": "V-CW-02-p2.6-current",
+  "role": "worker_senior",
+  "workspace": "/home/dwchoo/ai-exp-assistant",
+  "baseline": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw02-g1-test-after.json",
+  "candidate": "9d9d884d70c5b511def88915acde152df79dc0dca52d329235ac36893e6d3862",
+  "authority": "User $implement docs/features/core-workbench; independent test reroute result-cw02-g1-test-01.json",
+  "objective": "Correct only the independently demonstrated G1 outer evidence predicate false positives and return a tested candidate.",
+  "requirements": [
+    "Read the independent test result and test_closure_independent.py. Keep all six negative subcases intact and make the smallest correction in tests/gates/g1_vt/live_outer_compat_probe.py.",
+    "Reject child PID lists unless they contain exactly three distinct positive non-boolean integers, and enforce a single consistent plain outer/app/child geometry relation for every stage. Apply equivalent safe invariants to Herdr where relevant without overfitting fixed PIDs.",
+    "Do not alter product source behavior unless the failing independent tests prove it necessary; the current defect is in the runtime evidence predicate.",
+    "Run independent focused tests, full G1 suite, live color, plain outer, and isolated Herdr outer. Preserve the first tester plain concurrency unknown as historical evidence; bounded serial verification may establish the corrected candidate.",
+    "Use apply_patch only. Touch only tests/gates/g1_vt/live_outer_compat_probe.py and, only if required for a valid non-weakened test, tests/gates/g1_vt/**; plus named result/snapshot/audit artifacts. Do not edit docs, PLAN, ledger, product source, graphify, or commit/push.",
+    "Return result-cw02-g1-correction-01.json, compact after snapshot, and clean scope audit with exact checks, cleanup, and unknowns."
+  ],
+  "deliverables": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw02-g1-correction-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw02-g1-correction-after.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/scope-audit-cw02-g1-correction.json"
+  ]
+}

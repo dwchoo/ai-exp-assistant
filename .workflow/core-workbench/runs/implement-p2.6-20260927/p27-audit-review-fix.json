@@ -1,0 +1,1 @@
+{"changed":["src/workbench/backend/panes.py","src/workbench/terminal/shell_g2/lifecycle.py","src/workbench/terminal/shell_g2/prototype.py","src/workbench/terminal/shell_persistent/adapter.py","tests/backend/test_live_paste_responsive.py","tests/backend/test_panes.py","tests/terminal/test_review_p2_fixes.py"],"comparable":true,"index_changed":[],"outside_scope":[]}

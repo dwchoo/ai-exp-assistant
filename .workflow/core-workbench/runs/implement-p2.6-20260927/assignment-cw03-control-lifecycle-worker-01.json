@@ -1,0 +1,32 @@
+{
+  "invocation": "cw03-control-lifecycle-worker-01",
+  "role": "worker_senior",
+  "unit": "V-CW-03",
+  "base_candidate": "0969258347cf5b0f3839643afc573cbf3090bdccd8416b41ae64d198e6e92135",
+  "purpose": "Implement and prove the remaining coupled G2-CONTROL and G2-LIFECYCLE runtime slice",
+  "write_scope": [
+    "src/workbench/terminal/shell_g2/**",
+    "tests/gates/g2_shell/live_control_lifecycle_probe.py",
+    "tests/gates/g2_shell/live_combined_boundary_probe.py"
+  ],
+  "read_only_tests": [
+    "tests/gates/g2_shell/test_control_boundaries.py",
+    "tests/gates/g2_shell/test_control_lifecycle.py",
+    "tests/gates/g2_shell/test_control_probe.py",
+    "tests/gates/g2_shell/test_g2_shell.py"
+  ],
+  "requirements": [
+    "Start by running the existing control/lifecycle tests and combined runtime probe; implement only observed gaps.",
+    "G2-CONTROL must observe direct Bash/dash wb-handoff control wait without prompt return, fixed supervisor separate execution, and distinct accepted/supervisor-start/experiment-start/main-return/all-descendants-ended-or-unknown/input-return/control-return events while preserving parent PID/cwd/export and separating stdin/control.",
+    "G2-LIFECYCLE must distinguish normal/nonzero main exit, descendant lifetime including double-fork/setsid and fork/exit races, interrupt/quit/suspend-resume, and FD/flush/supervisor failures without claiming completion for unknown lifetime.",
+    "Record single-reaper/wait scope, SIGCHLD and child signal disposition assumptions; do not claim arbitrary manual daemon discovery, retroactive management, cgroup enforcement, or log-derived success.",
+    "Use deterministic barriers and bounded cleanup; include known-bad/all-deny discrimination where needed.",
+    "Do not edit test_*.py; independent test_designer owns new predicates/regressions. Preserve all four already-passing current-candidate slices."
+  ],
+  "constraints": [
+    "One mutation owner in the shared workspace.",
+    "No Docker, commit, push, publish, or deploy.",
+    "Conda-specific validation remains excluded by C-D55.",
+    "Report exact checks, unknowns, modified paths, and process residue."
+  ]
+}

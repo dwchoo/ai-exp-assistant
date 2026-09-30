@@ -1,0 +1,4 @@
+{
+  "path": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json", "expected_revision": 53,
+  "event": {"id": "finish-cw03-hook-env-worker-01", "kind": "transition", "data": {"invocation": "cw03-hook-env-worker-01", "state": "finished", "evidence": "collaboration /root/cw03_input_jobs_worker candidate_ready; env/launch 8 tests and 10 cases plus focused hook-env 3 tests and 4 cases passed; list_agents completed; no owned subprocesses remain", "outcome": "complete", "observed_model": "unverified", "observed_effort": "unverified", "not_started_evidence": null}}
+}

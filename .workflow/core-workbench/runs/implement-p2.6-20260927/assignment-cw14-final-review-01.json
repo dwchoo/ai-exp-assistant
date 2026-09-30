@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "invocation": "cw14-final-review-01",
+  "role": "reviewer",
+  "unit": "V-CW-14-p2.6-current",
+  "authority": "User $implement docs/features/core-workbench request; approved PLAN p2.6 CW-14; completed bounded corrections and independent tests",
+  "objective": "Perform a fresh read-only final review of the complete CW-14 candidate, closing or rejecting every prior finding.",
+  "candidate": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw14-recovery-test.json",
+    "candidate_id": "4b093e9b5f25e5f8aa84274d3756fc0085b9a766c165cc05988ee840d30caa00"
+  },
+  "acceptance_ids": ["C-AC-24", "C-AC-28"],
+  "prior_findings_to_close": [
+    "Repeated scan/status failures must use the newest safe state so observed/dropped/missing counters do not regress.",
+    "Malformed .log entries must not propagate ValueError from append/status or stop observation.",
+    "After the malformed entry is removed, the same store must reconcile safe volatile state and resume append without losing missing counters; unsafe mismatches remain fail-closed."
+  ],
+  "review_focus": [
+    "Inspect the reconciliation preconditions against stale/raw-prefix mismatch, cap/accounting, concurrent writers, and durable status failure; ensure recovery cannot bless unverified bytes.",
+    "Reconfirm all original cap, exact-prefix, immutable status, path safety, non-deletion, raw-failure continuity and metadata-admission separation contracts.",
+    "Assess the independent 27 storage plus 76 predecessor regression evidence and hash match; distinguish fixture acceptance from CW-15 PTY/metadata/UI integration."
+  ],
+  "constraints": [
+    "Read-only; do not edit files or run mutating graphify commands.",
+    "No delegation, test writes, commit, publish, deploy, Docker, or process signals."
+  ],
+  "report": "Return candidate_ready true/false, disposition of all three prior findings, any new material findings with paths/lines, C-AC-24/C-AC-28 verdict, evidence adequacy and bounded CW-15 risks."
+}

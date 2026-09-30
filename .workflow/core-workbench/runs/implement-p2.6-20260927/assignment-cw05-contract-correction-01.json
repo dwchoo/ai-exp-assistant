@@ -1,0 +1,33 @@
+{
+  "invocation": "cw05-contract-correction-01",
+  "role": "worker_senior",
+  "unit": "V-CW-05-p2.6-current",
+  "objective": "Fix the fresh-review TypeScript exact-key collision and add cross-language regression coverage without changing any unrelated G4 behavior.",
+  "finding": ".workflow/core-workbench/runs/implement-p2.6-20260927/review-cw05-g4-01.json",
+  "required_behavior": [
+    "Replace comma-joined key-list equality with collision-free exact key count and membership comparison.",
+    "Add the generation,ownerEpoch collision as a negative fixture/test in both TypeScript and Python-facing contract validation so both languages reject it.",
+    "Retain strict unknown-field rejection, all valid v1 adapter/v2 fixtures, safe integer rules, and existing public shapes."
+  ],
+  "allowed_files": [
+    "omp_bridge/contract/ports_v2.ts",
+    "tests/gates/harness/ports-v2.test.ts",
+    "tests/contracts/test_ports_v2.py",
+    "tests/contracts/fixtures/ports-v2.json"
+  ],
+  "constraints": [
+    "Do not modify independent CW-05 tests or any runtime/metadata/evidence behavior.",
+    "Do not weaken validation or add dependencies.",
+    "No commit/reset/clean/stash/push/deploy and no Docker."
+  ],
+  "checks": [
+    "Reproduce the collision before the fix and show rejection after it.",
+    "Run all Python contracts and Node contract tests.",
+    "Run G4 lifetime/evidence suites and git diff --check."
+  ],
+  "report": [
+    "changed files and exact fix",
+    "before/after collision result and regression counts",
+    "candidate digest, scope audit, candidate_ready or needs_reroute"
+  ]
+}

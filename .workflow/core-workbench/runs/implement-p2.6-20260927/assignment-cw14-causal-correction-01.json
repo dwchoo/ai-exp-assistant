@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "invocation": "cw14-causal-correction-01",
+  "role": "worker_senior",
+  "unit": "V-CW-14-p2.6-current",
+  "authority": "User $implement docs/features/core-workbench request; approved PLAN p2.6 CW-14; repeated-failure concurrent-writer P1 review evidence",
+  "objective": "Replace cross-branch snapshot selection with a minimal causal local failure-accounting model that is exact under repeated failures and concurrent same-run durable writers.",
+  "candidate": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw14-branch-test.json",
+    "candidate_id": "40ba9f2cdde65f0e565e999480aa673c8203e509a0a64d194654b29b93062dd3"
+  },
+  "required_invariants": [
+    "Track each store instance's pending failed observations as a causal delta, not as an alternate full snapshot chosen by observed_bytes magnitude. Compose current durable state plus the local pending delta exactly once for failure responses and recovery.",
+    "Under the project lock, recovery must read current durable truth, validate stored-byte/raw ancestry as needed, durably apply only this store's pending failure delta, clear it only after durable success, then account for the new append. Never double-count concurrent durable bytes or lose local failed bytes.",
+    "Exact P1 trace at run cap 3B: A abc; A failed de; B durably drops 10B; A failed g; later recovery must preserve total observed 16 and dropped/missing 13, with no intermediate local de loss or B double count.",
+    "Preserve prior same-run 7/4/4, single-store (4,6,2,2) recovery, malformed log/status handling, repeated failures, fail-closed unsafe raw mismatch, quotas, path safety, sentinels and metadata-admission separation."
+  ],
+  "allowed_write_paths": ["src/workbench/storage/log_raw/**", "tests/storage/**", "graphify-out/**"],
+  "constraints": [
+    "Senior bounded correction; simplify or replace the flawed volatile branch helpers rather than layering another magnitude heuristic.",
+    "Do not modify workflow/repository/runtime/docs/PLAN/state/ledger. Use apply_patch; run focused before/after repro, full storage, relevant regressions and graphify update. No delegation, commit, publish, deploy, Docker, or destructive actions."
+  ],
+  "report": "Return candidate_ready/needs_reroute, causal state model/invariants, exact 16/13/13 trace and all prior trace results, suite counts, hashes/scope, and CW-15 obligations."
+}

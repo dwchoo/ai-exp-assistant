@@ -1,0 +1,11 @@
+{
+  "invocation":"cw11-atomic-oracle-01",
+  "outcome":"complete",
+  "root_cause":"Independent active_run and automation_state callback reads cannot form a linearizable dispatch admission; whichever callback is last can mutate the other state before dispatch.",
+  "recommended_contract":"Use a mandatory authoritative SerializedReviewAdmission owner. All active-run, authority, exit-fence, epoch, and review-consumption writers plus the final dispatch submission share one lock or single-writer event loop. The admission check and dispatch submission occur in one operation with no callback, await, or unlock between them; no unchecked fallback is allowed.",
+  "exit_adapter":"Attach a WorkflowObservationBinding to the exact WorkflowRun instance at start, freeze the persisted TASK message revision_id/target_session_id/target_session_generation together with Task/revision/run, verify collect() records belong to that run, and enrich only confirmed exits. Never enrich a late event from the current peer.",
+  "minimum_linearization":"For the bounded synchronous implementation, retain the admission lock through dispatch_review return; pause or run replacement that linearizes first yields zero delivery, while dispatch that linearizes first is an already-started operation.",
+  "required_runtime":"Update the actual OMP probe to use the production admission and WorkflowObservationBinding paths on the latest candidate.",
+  "writer":false,
+  "files_modified":[]
+}

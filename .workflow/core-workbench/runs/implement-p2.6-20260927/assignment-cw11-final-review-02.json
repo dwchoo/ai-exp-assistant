@@ -1,0 +1,33 @@
+{
+  "invocation": "cw11-final-review-02",
+  "role": "reviewer",
+  "unit": "V-CW-11-p2.6-current",
+  "objective": "Fresh final review of the fully corrected and independently tested CW-11 candidate.",
+  "candidate_manifest": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw11-correction-final.json",
+  "candidate": "ae03421ba5ff20f37a7978f9ffd4af988e4e7c029d7a5f4238631b7aa4a09e5d",
+  "requirements": ".workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw11.json",
+  "ticket": "docs/features/core-workbench/tickets/CW-11.md",
+  "prior_review": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw11-review-01.json",
+  "correction_evidence": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw11-correction-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw11-correction-test-01.json"
+  ],
+  "must_review": [
+    "Verify all four prior findings are actually closed in production code, not only tests: final authority/run recheck, immutable identity exit fence, scheduler-integrated bounded/sanitized hang investigation, and scheduler-integrated usage provenance/status.",
+    "Attack callback interleavings, stale facts, new immutable identities, investigator timeout/exception/single-flight, and usage absence/invalid/private values.",
+    "Review all CW-11 acceptance criteria including indefinite 60-second review cadence, 121st review, 13th peer wake, user priority/coalescing/pause hold, and confirmed-exit immediate behavior.",
+    "Treat the missing positive live persistent-shell hang seam as an explicit runtime qualification; decide whether it exposes a product defect or only limits evidence, with concrete reasoning."
+  ],
+  "constraints": [
+    "Review-only; no file edits or mutating actions.",
+    "Report severity-ordered P0-P3 findings with file/line evidence or explicit no findings.",
+    "No commit, push, merge, stash, reset, clean, or graphify restoration."
+  ],
+  "report": [
+    "candidate hash validation",
+    "prior-finding closure",
+    "new findings",
+    "runtime qualifications",
+    "candidate_ready or needs_reroute"
+  ]
+}

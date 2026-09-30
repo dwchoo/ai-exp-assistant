@@ -1,0 +1,14 @@
+{
+  "invocation":"cw09-correction-01","role":"worker","unit":"V-CW-09-p2.6-current",
+  "objective":"Close the independently reproduced cross-Task invalidated_revisions authority-link integrity gap.",
+  "failure_evidence":".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw09-test-01.json",
+  "required_behavior":[
+    "At the SQLite schema boundary, reject any invalidated_revisions row unless the decision, referenced TaskSpec revision, and owning Task belong to the same Task authority domain and the decision kind is valid for invalidation.",
+    "Preserve valid cancellation/revocation flows, append-only history, reopen behavior, and transaction rollback.",
+    "Do not rely only on public API checks; direct SQLite insertion from the independent test must fail atomically."
+  ],
+  "allowed_files":["src/workbench/storage/metadata_sqlite/schema.py","src/workbench/tasks/repository.py","tests/tasks/test_repository.py"],
+  "constraints":["Do not modify tests/tasks/test_repository_independent.py.","Do not change unrelated APIs or downstream scope.","No commit/reset/clean/stash/push/deploy and no Docker."],
+  "checks":["Run all tests/tasks including the fixed independent failure.","Run G4 lifetime/evidence and Python/Node contract regressions.","Run git diff --check."],
+  "report":["schema constraint/trigger fix","before/after independent result","candidate/snapshot/scope audit","candidate_ready or needs_reroute"]
+}

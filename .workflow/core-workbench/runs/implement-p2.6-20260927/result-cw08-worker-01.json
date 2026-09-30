@@ -1,0 +1,121 @@
+{
+  "schema_version": 1,
+  "invocation": "cw08-worker-01",
+  "role": "worker",
+  "unit": "V-CW-08-p2.6-current",
+  "status": "candidate_ready",
+  "baseline_candidate": "cddee3c12dba1dcf610f88d49f4050d4ff7a3eb87385410594ced55f3838ec6c",
+  "candidate": "560c4188aff8f61efdffac59a2deb39a86218140984455a7eb5345ed6b5c18ef",
+  "requirements_sha256": "2fa2a94f03fe18671123d25b355d193e6dc2f600c94eca061f588db699f91722",
+  "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw08-worker-after.json",
+  "scope_audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/scope-audit-cw08-worker.json",
+  "runtime_evidence": ".workflow/core-workbench/runs/implement-p2.6-20260927/raw-runtime-cw08-worker-01.json",
+  "changed_files": [
+    "omp_bridge/g3/bridge.ts",
+    "src/workbench/ipc/bridge_g3/mailbox.py",
+    "tests/bridge/live_mailbox_probe.py",
+    "tests/bridge/test_mailbox.py"
+  ],
+  "implementation": [
+    "Added a token-authenticated Unix-socket G3 server and TaskMailbox adapter consuming only public TaskRepository message/run/delivery APIs and the existing G3 DeliveryLedger.",
+    "Persisted Task/revision/run/message linkage, stable logical message IDs, distinct append-only delivery attempt IDs, role/kind direction, and matching answer/report reply linkage.",
+    "Required current role/session generation plus idle, no pending work, no approval, known-empty composer, zero in-flight tools and unpaused state before API injection; the extension repeats fail-closed checks immediately before sendUserMessage.",
+    "Separated API return from exact provider-request identity, provider response and same-session agent_end evidence. Unknown/async errors and lost ACKs persist as unknown without automatic replay; process-owned handles reject delivery after mailbox reopen.",
+    "Added metadata-only G3 processing/unknown events; no model/user content is emitted through those events. Socket cleanup only unlinks the same socket inode created by this server."
+  ],
+  "checks": [
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/bridge -v",
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "exit_code": 0,
+      "result": "passed",
+      "summary": "10 deterministic mailbox tests: directions/reply links, readiness blockers, generation mismatch, API-vs-processing, async error, lost ACK/no replay, reopen rejection, and dedupe."
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/tasks -v",
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "exit_code": 0,
+      "result": "passed",
+      "summary": "22 Task repository tests."
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/contracts -v",
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "exit_code": 0,
+      "result": "passed",
+      "summary": "20 Python contract tests."
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g3_omp /tmp/cw02-g1-venv/bin/python -m unittest -v test_g3_protocol test_tui_message_kinds_predicates test_tui_session_predicates test_tui_session_inflight_predicates test_tui_event_surface_predicates test_tui_extension_fault_predicates test_tui_pause_reconcile_predicates test_tui_contention_predicates test_tui_draft_predicates test_tui_reconnect_predicates",
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "exit_code": 0,
+      "result": "passed",
+      "summary": "114 G3 protocol and independent predicate tests."
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g3_omp /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/gates/g4_lifetime -v",
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "exit_code": 0,
+      "result": "passed",
+      "summary": "8 G4 lifetime tests."
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/gates/g4_evidence -v",
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "exit_code": 0,
+      "result": "passed",
+      "summary": "10 G4 evidence tests."
+    },
+    {
+      "command": "node --experimental-strip-types --test tests/gates/g3_omp/bridge.test.ts tests/gates/harness/contracts.test.ts tests/gates/harness/ports-v2.test.ts",
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "exit_code": 0,
+      "result": "passed",
+      "summary": "34 Node G3 and shared contract compatibility tests."
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g3_omp:tests/bridge /tmp/cw02-g1-venv/bin/python tests/bridge/live_mailbox_probe.py",
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "exit_code": 0,
+      "result": "passed",
+      "summary": "Actual manager+worker OMP 18.2.10 TUI runtime: task/question/answer/report each observed as omp_processed; exact provider identity and role routing; same-handle duplicate suppressed; bounded cleanup left no children, cwd processes, provider threads or bridge socket. Full sanitized runtime data is referenced above."
+    },
+    {
+      "command": "git diff --check",
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "exit_code": 0,
+      "result": "passed"
+    }
+  ],
+  "scope": {
+    "allowed_write_scope": [
+      "src/workbench/ipc/**",
+      "omp_bridge/**",
+      "tests/bridge/**"
+    ],
+    "changed_paths": [
+      "omp_bridge/g3/bridge.ts",
+      "src/workbench/ipc/bridge_g3/mailbox.py",
+      "tests/bridge/live_mailbox_probe.py",
+      "tests/bridge/test_mailbox.py"
+    ],
+    "outside_scope": [
+      "graphify-out/.graphify_learning.json",
+      "graphify-out/cache/last_query_stamp",
+      "graphify-out/reflections/LESSONS.md"
+    ],
+    "generated_operational_outside_scope_preserved": true,
+    "audit_comparable": true,
+    "index_changed": []
+  },
+  "iteration_notes": [
+    "The first deterministic run had 7 passes and two fixture errors caused by looking for a delivery request before invoking deliver(); corrected the fixture and final bridge suite passes 10/10.",
+    "The first actual runtime processed all four kinds but exposed a leftover Unix socket path; server cleanup was corrected with device/inode validation and the final rerun exited 0."
+  ],
+  "remaining_gaps": [
+    "Root owns graphify update, independent fresh review/test integration and final combined-candidate verification.",
+    "No CW-10/CW-15 orchestration or process-restart recovery loop was added; persisted messages deliberately do not replay on mailbox reopen."
+  ],
+  "needs_oracle": false,
+  "commit_created": false
+}

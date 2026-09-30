@@ -1,0 +1,48 @@
+{
+  "invocation": "cw12-lockcycle-correction-01",
+  "role": "worker_senior",
+  "unit": "V-CW-12-p2.6-current",
+  "objective": "Replace the flawed CW-12 admission-publication locking boundary and close the late resume peer-replacement race without weakening pause or identity guarantees.",
+  "evidence": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-final-review-03.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-final-race-test-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-durability-oracle-01.json"
+  ],
+  "write_scope": [
+    "src/workbench/policy/pause_*/**",
+    "src/workbench/observation/worker_review.py",
+    "src/workbench/ui/status_*/**",
+    "tests/policy/pause_*/**",
+    "tests/observation/test_atomic_admission*.py",
+    "tests/ui/status_*/**",
+    "graphify-out/**"
+  ],
+  "must_fix": [
+    "Remove the publication_lock/CW11 lock inversion. No code may hold a coordinator publication or transition lock while acquiring the SerializedReviewAdmission lock, and no CW11 callback may need such a lock to finish.",
+    "Introduce an authoritative fail-closed admission fence whose pause linearization is visible to admit_and_dispatch without coordinator-lock reentry. Once pause pending is published to that fence, no new automatic review may be admitted even if a stale display/state copy is in flight.",
+    "Keep any mirrored AutomationState publication deadlock-free and convergence-safe under out-of-order publishers; it must not be the sole safety boundary.",
+    "Bind automatic admission/dispatch after resume to the exact reconciled manager and worker session/generation (or an equivalent monotonic peer epoch) so a peer replacement after any sequential probe is observed before automatic work can run and forces held/reconciliation-needed state.",
+    "A resume may report success only if the exact binding remains valid at its commit boundary; if a late switch is detected, repause both peers, journal resume_failed, and keep the authoritative admission fence set.",
+    "Preserve pause(A)/bind(B) serialization, exact stop-event correlation, durability behavior, no replay, manual TUI independence, real status evidence, and public API compatibility unless the smallest safe API extension is required."
+  ],
+  "required_regressions": [
+    "Barrier stale-unpaused publisher paused immediately before setter: pause fence blocks review throughout, not only at final convergence.",
+    "Exact lock-cycle harness from final review completes without timeout/deadlock and admission stays safe.",
+    "Manager replacement during worker final probe, after final probe, and immediately before first automatic admission cannot produce successful dispatch on stale binding.",
+    "High-cycle concurrent pause/resume/bind/admission stress proves no deadlock and admission/fence consistency."
+  ],
+  "verification": [
+    "Run focused regressions repeatedly, all pause/status/atomic-admission tests, actual OMP live probe, and relevant full regressions.",
+    "Run graphify update ."
+  ],
+  "constraints": [
+    "Do not edit contracts, workflow/observation evidence, tickets, PLAN, or ledger records.",
+    "Use apply_patch for source/test edits; preserve unrelated changes; no destructive git, uv, local .venv, commit, publish, or deploy."
+  ],
+  "report": [
+    "new admission linearization and lock-order invariant",
+    "peer identity binding mechanism",
+    "exact regression/runtime results",
+    "candidate_ready or needs_reroute"
+  ]
+}

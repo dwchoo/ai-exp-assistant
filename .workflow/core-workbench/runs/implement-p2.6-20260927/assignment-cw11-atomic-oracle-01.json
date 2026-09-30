@@ -1,0 +1,17 @@
+{
+  "invocation":"cw11-atomic-oracle-01",
+  "role":"oracle",
+  "unit":"V-CW-11-p2.6-current",
+  "objective":"Recommend the smallest sound design that closes CW-11 atomic dispatch admission and real CW-10 exit identity integration without scope expansion.",
+  "candidate":"e4d18349adda351975340ab3a2bcf1b76919bf6df6cff7a0947272408578e409",
+  "review_evidence":".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw11-final-review-03.json",
+  "requirements":".workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw11.json",
+  "ticket":"docs/features/core-workbench/tickets/CW-11.md",
+  "questions":[
+    "Given separate potentially blocking active_run and automation_state callbacks, what minimal admission contract makes no-stale-dispatch provable? Compare repeated reads, version tokens, a combined atomic admission callback/lease, and validation inside dispatch; specify the required happens-before/linearization point and fail-closed behavior.",
+    "How should the scheduler receive immediate confirmed-exit events from the actual CW-10 WorkflowRun, whose record lacks revision_id/session_id/session_generation, while preventing late same-run-id cross-session misbinding? Specify the smallest safe adapter or API shape and ownership of identity enrichment.",
+    "What exact invariant-focused tests are necessary so a worker cannot merely reverse the race again?"
+  ],
+  "constraints":["Read-only advice only; inspect current code/tests/contracts directly; no edits or mutating actions; keep recommendation within CW-11 observation/workflow integration and existing dependencies."],
+  "report":["root cause","recommended contract/API","rejected alternatives","required tests","remaining qualification"]
+}

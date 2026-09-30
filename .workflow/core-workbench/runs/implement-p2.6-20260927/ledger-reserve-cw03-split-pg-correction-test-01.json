@@ -1,0 +1,20 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 119,
+  "event": {
+    "id": "reserve-cw03-split-pg-correction-test-01",
+    "kind": "reserve",
+    "data": {
+      "invocation": "cw03-split-pg-correction-test-01",
+      "role": "test_designer",
+      "unit": "V-CW-03",
+      "incident": "",
+      "purpose": "Independently test the reviewer-required split-PG signal and cleanup corrections",
+      "model": "gpt-6-sol",
+      "effort": "high",
+      "buckets": ["total", "role:test_designer", "unit:V-CW-03"],
+      "writer": true,
+      "workspace": "/home/dwchoo/ai-exp-assistant"
+    }
+  }
+}

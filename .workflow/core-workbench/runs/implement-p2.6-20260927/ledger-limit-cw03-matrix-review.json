@@ -1,0 +1,12 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 175,
+  "event": {"id": "limit-cw03-matrix-review-20260928", "kind": "limit", "data": {
+    "bucket": "role:reviewer", "origin": "operating", "value": 57,
+    "authority": "C-D55 plus workflow-contract section 8 and current implementation authorization",
+    "reason": "Fresh remaining-matrix review plus one delta-review reserve",
+    "decision_owner": "Root", "remaining_work_estimate": 2,
+    "expected_previous": {"value": 55, "authority": "C-D55 plus workflow-contract section 8 and current implementation authorization", "reason": "One fresh delta review after reviewer-required FD correction and independent test"},
+    "scope_basis": null
+  }}
+}

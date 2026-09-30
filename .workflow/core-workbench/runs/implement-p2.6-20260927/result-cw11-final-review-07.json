@@ -1,0 +1,14 @@
+{
+  "invocation": "cw11-final-review-07",
+  "candidate": "6a8e898b72447c96aadd45e2494da9f84a8bbbfba5723bfde2dd9829e655104d",
+  "candidate_hash_validated": true,
+  "outcome": "candidate_ready",
+  "findings": [],
+  "prior_finding_closed": "1,000 active ticks retained one internal token; weak external registrations, exit/replacement invalidation, stale-source rejection, late first bind, A-B-A ticket, and positive run_incarnation paths were re-audited without regression.",
+  "qualifications": [
+    "The 121st recurring review is unit-test evidence.",
+    "A positive live persistent-shell hang classification is not exercised by the current public probe seam."
+  ],
+  "writer": false,
+  "files_modified": []
+}

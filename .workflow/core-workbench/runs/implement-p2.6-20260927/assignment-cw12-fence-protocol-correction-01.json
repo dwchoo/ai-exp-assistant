@@ -1,0 +1,50 @@
+{
+  "invocation": "cw12-fence-protocol-correction-01",
+  "role": "worker_senior",
+  "unit": "V-CW-12-p2.6-current",
+  "objective": "Implement the oracle-approved run/generation-bound nonblocking fence and exact-peer G3 transport submission protocol, closing all findings from the last fresh review.",
+  "evidence": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-lockcycle-review-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-fence-protocol-oracle-01.json"
+  ],
+  "write_scope": [
+    "src/workbench/policy/pause_*/**",
+    "src/workbench/observation/worker_review.py",
+    "src/workbench/ipc/bridge_g3/**",
+    "src/workbench/workflow/**",
+    "tests/policy/pause_*/**",
+    "tests/observation/**",
+    "tests/bridge/**",
+    "tests/workflow/**",
+    "tests/gates/g3_omp/**",
+    "graphify-out/**"
+  ],
+  "must_implement": [
+    "ReviewAdmissionFence state includes a never-reset monotonic generation, binding_nonce, exact run identity/incarnation, CLOSED/OPEN mode, and reason. Every close invalidates earlier open tokens; open is compare-and-swap on the originally captured token and binding.",
+    "Fence operations perform only short state comparisons/updates. Review/coordinator locks cover only ticket validation, permit/in-flight registration, and state commit. No action, bridge probe/request/write, journal/repository I/O, mirror publication, or ACK wait occurs while holding admission/coordinator/fence locks.",
+    "Pause immediately closes the fence and can issue exact-bound manager abort/pause without waiting for an in-flight automatic action or mirror publication. An already admitted action is in-flight; all admissions linearized after close are held.",
+    "Admission requires ticket run/incarnation == SerializedReviewAdmission active run/incarnation == fence bound run/incarnation and a current open permit token. bind_run(B) cannot authorize A; A-to-B-to-A and same identity/new incarnation remain distinct.",
+    "Cancellation/repository errors and failure compensation apply only through close_if_binding(captured binding_nonce/token), never close globally before revalidating the captured run.",
+    "Extend G3BridgeServer.request/TaskMailbox delivery with optional expected peer identity and authority token validation at the real submission boundary: selected live write_lock acquired, then bridge condition checks current live, exact sessionId/generation, peer pair when required, and current authority token immediately before pending registration. Bound mismatch sends zero bytes, creates no replacement retry/reselection, and returns/raises a fail-closed result.",
+    "Use bound G3 requests for pause, resume, compensation pause, and actual automatic OMP delivery. Keep arbitrary callback support only as clearly local admission; add/migrate a concrete bound automatic delivery adapter so exact-peer claims are enforced by the transport rather than a pre-probe.",
+    "A stale resume waiting on write_lock cannot send after a newer pause close; a peer replacement cannot receive bytes intended for the old binding. Preserve stop-event correlation, durability, no replay, manual TUI independence, and CW15 boundary."
+  ],
+  "required_regressions": [
+    "Resume stopped before open, then newer pause close: stale open fails and no admission occurs.",
+    "Long in-flight action/ACK: pause fence and manager abort request progress before action release; later admission is held.",
+    "A ticket with B fence, A-B-A binding nonce, and same identity/new incarnation are rejected.",
+    "A cancellation/error lookup delayed across B bind cannot change B fence/status.",
+    "Peer switch while request waits for write_lock sends no bytes to replacement; pending-registration-then-switch never retries replacement.",
+    "Resume waiting for write_lock is overtaken by pause and rejected at authority-token submission check.",
+    "Late deferred/unknown completion after pause/rebind never reactivates or replays the old ticket/message.",
+    "Repeat pause/resume/bind/action/status/cancellation stress retains abort responsibility and has no deadlock."
+  ],
+  "verification": [
+    "Run focused deterministic tests repeatedly, all pause/atomic-admission/bridge/workflow/G3 tests, actual OMP 18.2.10 live pause probe, relevant full regressions, and graphify update ."
+  ],
+  "constraints": [
+    "Do not edit approved contracts, workflow evidence, tickets, PLAN, or ledger.",
+    "Apply source/test edits only with apply_patch; preserve unrelated changes; no destructive git, uv, local .venv, commit, publish, or deploy."
+  ],
+  "report": ["fence token/state machine", "bound transport API and migrated paths", "lock/linearization evidence", "tests/runtime/graphify", "candidate_ready or needs_reroute"]
+}

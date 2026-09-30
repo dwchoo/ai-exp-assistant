@@ -1,0 +1,103 @@
+{
+  "invocation": "cw08-worker-01",
+  "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g3_omp:tests/bridge /tmp/cw02-g1-venv/bin/python tests/bridge/live_mailbox_probe.py",
+  "cwd": "/home/dwchoo/ai-exp-assistant",
+  "final_attempt": {
+    "exit_code": 0,
+    "result": "passed_actual_two_omp_four_kind_mailbox",
+    "mode": "actual-two-omp-task-mailbox",
+    "omp_versions": {
+      "manager": "omp/18.2.10",
+      "worker": "omp/18.2.10"
+    },
+    "pids": {
+      "manager": 4143278,
+      "worker": 4143280
+    },
+    "distinct_omp_pids": true,
+    "initial_ready": true,
+    "initial_provider_requests": {
+      "manager": 0,
+      "worker": 0
+    },
+    "deliveries": [
+      {
+        "kind": "task",
+        "sender_role": "manager",
+        "target_role": "worker",
+        "message_id": "7e2ca303-d5a5-4d3d-a92c-35b7ae6d85c1",
+        "delivery_attempt_id": "1dc3c28d-3eec-41a8-8a4c-cb90e5fd754c",
+        "in_reply_to_message_id": null,
+        "status": "omp_processed",
+        "provider_exact_message_fields_match": true,
+        "target_provider_request_delta": 1,
+        "other_provider_request_delta": 0,
+        "duplicate_same_receipt": true,
+        "task_completed_claim": false
+      },
+      {
+        "kind": "question",
+        "sender_role": "manager",
+        "target_role": "worker",
+        "message_id": "d0f3ec06-89ba-4d19-9feb-200343043c7f",
+        "delivery_attempt_id": "f6e4c6d4-6997-46ad-acbc-0c34952c3093",
+        "in_reply_to_message_id": null,
+        "status": "omp_processed",
+        "provider_exact_message_fields_match": true,
+        "target_provider_request_delta": 1,
+        "other_provider_request_delta": 0,
+        "duplicate_same_receipt": true,
+        "task_completed_claim": false
+      },
+      {
+        "kind": "answer",
+        "sender_role": "worker",
+        "target_role": "manager",
+        "message_id": "75a3ff07-60d8-4357-be90-04d5b420a725",
+        "delivery_attempt_id": "344cc077-0850-475a-8393-d28a706e9a3e",
+        "in_reply_to_message_id": "d0f3ec06-89ba-4d19-9feb-200343043c7f",
+        "status": "omp_processed",
+        "provider_exact_message_fields_match": true,
+        "target_provider_request_delta": 1,
+        "other_provider_request_delta": 0,
+        "duplicate_same_receipt": true,
+        "task_completed_claim": false
+      },
+      {
+        "kind": "report",
+        "sender_role": "worker",
+        "target_role": "manager",
+        "message_id": "43fe4c7b-c7fb-4679-8c60-fad77478b43c",
+        "delivery_attempt_id": "9247df76-a75d-49a8-a444-ca1a60e4fed8",
+        "in_reply_to_message_id": "7e2ca303-d5a5-4d3d-a92c-35b7ae6d85c1",
+        "status": "omp_processed",
+        "provider_exact_message_fields_match": true,
+        "target_provider_request_delta": 1,
+        "other_provider_request_delta": 0,
+        "duplicate_same_receipt": true,
+        "task_completed_claim": false
+      }
+    ],
+    "provider_request_totals": {
+      "manager": 2,
+      "worker": 2
+    },
+    "pty_drains": [
+      {"role": "manager", "bytes": 94269},
+      {"role": "worker", "bytes": 84564}
+    ],
+    "cleanup": {
+      "omp_children_remaining": 0,
+      "cwd_processes_remaining": {"manager": [], "worker": []},
+      "bridge_socket_removed": true,
+      "provider_threads_remaining": 0
+    }
+  },
+  "superseded_attempt": {
+    "exit_code": 1,
+    "result": "passed_actual_two_omp_four_kind_mailbox",
+    "reason": "The four deliveries and dedupe passed, but bridge_socket_removed was false; added inode-checked cleanup and reran successfully.",
+    "restored_or_overwritten": false
+  },
+  "privacy": "Only IDs, booleans, counters, process metadata and status values are retained; no user prompt/provider response text is stored."
+}

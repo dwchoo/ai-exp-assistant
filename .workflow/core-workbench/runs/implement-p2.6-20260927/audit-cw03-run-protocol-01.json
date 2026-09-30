@@ -1,0 +1,11 @@
+{
+  "before": ".workflow/core-workbench/runs/implement-p2.6-20260927/split-pg-correction-frozen-candidate.json",
+  "after": ".workflow/core-workbench/runs/implement-p2.6-20260927/cw03-run-protocol-candidate.json",
+  "allowed": [
+    "src/workbench/terminal/shell_g2/prototype.py",
+    "src/workbench/terminal/shell_g2/lifecycle.py",
+    "tests/gates/g2_shell/live_control_lifecycle_probe.py",
+    "tests/gates/g2_shell/live_env_launch_probe.py",
+    "tests/gates/g2_shell/test_common_run_protocol.py"
+  ]
+}

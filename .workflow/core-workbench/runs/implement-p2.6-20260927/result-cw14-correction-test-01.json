@@ -1,0 +1,26 @@
+{
+  "invocation": "cw14-correction-test-01",
+  "outcome": "complete",
+  "candidate_ready": false,
+  "base_candidate": "3cf31f4c60426f43d9f328d2915013e4ba83dcba97f110ec860a4061c44a842c",
+  "production_hashes_match": true,
+  "finding": {
+    "severity": "P1",
+    "acceptance": "C-AC-28",
+    "summary": "After a malformed .log entry is removed, the same RawLogStore remains permanently fail-closed because the volatile failure snapshot differs from durable status.",
+    "reproduction": "3 bytes stored; malformed entry; status and 2-byte append fail safely at (3,5,2,2); remove entry; 1-byte append expected (4,6,2,2) and b'abcf', actual (3,6,3,3) and b'abc'."
+  },
+  "checks": {
+    "storage": "25 of 26 tests passed with the new recovery assertion",
+    "repeated_scan_failure": "passed exact 3+2+4 byte accumulation to (3,9,6,6)",
+    "terminal": "10 tests passed",
+    "tasks": "22 tests passed",
+    "workflow": "44 tests passed",
+    "graphify_update": "exit 0"
+  },
+  "sha256": {
+    "src/workbench/storage/log_raw/store.py": "ae7cc9a3ed00915f9fff9d1b480b3ca25415b4087f5cf3202b196a8f002e0b8e",
+    "tests/storage/test_log_raw.py": "e813fce3ca145a8e250482b7bc12e0ff2e6b1aa9cfeaccca2663c279de013832"
+  },
+  "mutation_owner": "/root/cw12_post_review_test"
+}

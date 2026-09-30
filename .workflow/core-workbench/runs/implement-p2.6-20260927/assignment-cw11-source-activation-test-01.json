@@ -1,0 +1,19 @@
+{
+  "invocation":"cw11-source-activation-test-01",
+  "role":"test_designer",
+  "unit":"V-CW-11-p2.6-current",
+  "objective":"Migrate independent tests to the explicit activation-token API and independently verify late-first-bind and public-incarnation closure.",
+  "candidate_manifest":".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw11-source-activation.json",
+  "candidate":"78439281e59354f10e4c3a0b527d4879adb4059a49e1dfa8efd233353d7a6ab5",
+  "review_evidence":".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw11-final-review-05.json",
+  "write_scope":["tests/observation/**"],
+  "must_test":[
+    "Update the two legacy independent API calls using explicit coordinator activate_run_source followed by binding.bind(preissued_token); no product changes.",
+    "Reproduce the prior attach-old/delay-first-bind schedule and prove an old/no token cannot bind after A->None->same A. Binding must never issue a token itself.",
+    "Attack activation with old/foreign/retired source, token swapping, delayed old token, repeated binding, and explicit new source activation.",
+    "Assert every public exit callback and failure retry carries the exact positive run_incarnation and old retry cannot be mistaken for the current incarnation.",
+    "Run the full observation suite, related regressions, and current actual OMP 18.2.10 bound probe."
+  ],
+  "constraints":["Tests only; apply_patch only; no product/workflow edits; graphify update; no uv/local env/package artifacts or destructive git actions."],
+  "report":["migrated/adversarial tests","exact results/runtime","candidate_ready or needs_reroute"]
+}

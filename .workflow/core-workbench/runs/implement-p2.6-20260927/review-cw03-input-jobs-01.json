@@ -1,0 +1,21 @@
+{
+  "invocation": "cw03-input-jobs-review-01",
+  "candidate": "93763c65d189184706b0b9bc6e21fdc4bccb5067d70369fd101e9ae9da044182",
+  "status": "changes_required",
+  "findings": [
+    {
+      "severity": "P2",
+      "title": "Successful first execution permanently rejects a normal second handoff",
+      "evidence": "tests/gates/g2_shell/live_input_jobs_probe.py:58 sets active_command, while the combined controller emits RETURN/WAIT and src/workbench/terminal/shell_g2/prototype.py:202 clears normal completion only for DONE; takeover READY then latches needs_review at prototype.py:166",
+      "reproducer": "initial_admission=True; after_return active_command=input-jobs ready=False dirty=False; second_handoff_admitted=False; needs_review=True",
+      "required_correction": "Bridge the combined controller's successful completion/return state into InputBoundary and add a same-parent second normal admission regression check"
+    }
+  ],
+  "residual_risks": [
+    "The reviewer did not independently rerun the broader legacy suite's 11 baseline failures",
+    "CW-03 still lacks five unrelated gate items"
+  ],
+  "needs_oracle": false,
+  "writes": [],
+  "owned_processes_remaining": false
+}

@@ -1,0 +1,33 @@
+{
+  "invocation": "cw15-claim-test-01",
+  "outcome": "complete",
+  "candidate_ready": true,
+  "candidate_id": "575be7c7da45f1ae4584b6c1940f5f4a3c8153e1e83c7c8998e1605c3b8ba15d",
+  "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw15-claim-test.json",
+  "production_frozen": true,
+  "test_only_delta": ["tests/lifecycle/test_lifecycle_runtime.py", "tests/lifecycle/test_production_binding.py"],
+  "orders": {
+    "revoke_first": "current_enter < revoke <= current_return < claim_enter <= claim_rejected; frame/API/worker delivery 0",
+    "claim_first": "current_return < claim_enter < revoke < claim_return < frame < ACK return; frame 1, api_accepted ACK 1, delivery 1, replay 0",
+    "pending_acks": "empty after both orders"
+  },
+  "negative_contracts": "Eight malformed, throwing, false or non-boolean current/claim cases sent zero additional frames and left no pending ACK; a later valid request sent one frame and received one ACK.",
+  "handoff": "External failure and journal commit failure remain fenced with review/send 0; durable commit keeps reentrant tick held and then permits one tick and one command send.",
+  "unbound_port": "zero send and command journal unknown",
+  "checks": {
+    "allowed_regressions": "391 passed: lifecycle 31, bridge 22, terminal 10, storage 33, observation 95, recovery 26, G4 8, pause 122, workflow 44",
+    "production_hashes": "all six match frozen snapshot",
+    "graphify_update": "passed",
+    "residue": "no related process, temporary directory or socket"
+  },
+  "scope_incident": {
+    "summary": "The test agent mistakenly started the full g3_omp suite, which launched two scripted OMP child processes despite the assignment prohibition.",
+    "containment": "The runner and both children had exited on recheck; no residue remained. The suite result is excluded and no live OMP claim is made."
+  },
+  "sha256": {
+    "tests/lifecycle/test_lifecycle_runtime.py": "eda67ad2aff374abddbc96019dc0a33e2a1ecc6b804ebdcfa7272f22cbfb36fc",
+    "tests/lifecycle/test_production_binding.py": "1a06a92424013443a6fe9ec78994716fbeebdaeb8f78490ed230792fe7f2aa5d"
+  },
+  "pending": ["live external OMP", "real reboot", "pyte live suite"],
+  "mutation_owner": "/root/cw12_post_review_test"
+}

@@ -1,0 +1,101 @@
+{
+  "schema_version": 1,
+  "invocation": "cw08-test-01",
+  "unit": "V-CW-08-p2.6-current",
+  "task_result": "needs_reroute",
+  "candidate_before": "b92674291216820e59b9fcbb3faf3db44a61e20130ef0b7bbd9bb2b8ab700a13",
+  "candidate_after": "e519878ceb9880617bec7a67c9f83e7376c8cbc801f436739bdff47d794eac77",
+  "requirements_sha256": "2fa2a94f03fe18671123d25b355d193e6dc2f600c94eca061f588db699f91722",
+  "changed_paths": [
+    "tests/bridge/live_mailbox_independent.py",
+    "tests/bridge/test_mailbox_independent.py"
+  ],
+  "new_independent_tests": 4,
+  "raw_runtime_ref": ".workflow/core-workbench/runs/implement-p2.6-20260927/raw-cw08-independent-runtime.json",
+  "checks": [
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/bridge -v",
+      "exit_code": 1,
+      "tests": 14,
+      "failures": 1,
+      "classification": "10 worker and 3 independent tests passed; one independent malformed-readiness subtest failed."
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g3_omp /tmp/cw02-g1-venv/bin/python tests/bridge/live_mailbox_independent.py",
+      "exit_code": 0,
+      "omp_version": "omp/18.2.10",
+      "real_omp_processes": 2,
+      "kinds": 4,
+      "child_socket_thread_residue": 0
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/tasks -q",
+      "exit_code": 0,
+      "tests": 22
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/contracts -q",
+      "exit_code": 0,
+      "tests": 20
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g3_omp /tmp/cw02-g1-venv/bin/python -m unittest -q test_g3_protocol test_tui_message_kinds_predicates test_tui_session_predicates test_tui_session_inflight_predicates test_tui_event_surface_predicates test_tui_extension_fault_predicates test_tui_pause_reconcile_predicates test_tui_contention_predicates test_tui_draft_predicates test_tui_reconnect_predicates",
+      "exit_code": 0,
+      "tests": 114
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g3_omp /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/gates/g4_lifetime -q",
+      "exit_code": 0,
+      "tests": 8
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/gates/g4_evidence -q",
+      "exit_code": 0,
+      "tests": 10
+    },
+    {
+      "command": "node --experimental-strip-types --test tests/gates/g3_omp/bridge.test.ts tests/gates/harness/contracts.test.ts tests/gates/harness/ports-v2.test.ts",
+      "exit_code": 0,
+      "tests": 34
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0
+    },
+    {
+      "command": "find /tmp -maxdepth 1 -type d -name 'cw08-independent-*' -o -name 'cw08-independent-live-*'",
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "command": "pgrep -af '[/]tmp/cw08-independent-live-'",
+      "exit_code": 1,
+      "output": ""
+    }
+  ],
+  "implementation_defects": [
+    {
+      "id": "CW08-READINESS-BOOLEAN-COUNT",
+      "severity": "P2",
+      "observed": "A malformed public bridge state inFlightToolCount=false passes Python equality with integer 0. TaskMailbox sends an attempt and can record OMP_PROCESSED instead of deferring. Observed using an injected public bridge state, not in the real OMP runtime.",
+      "expected": "Just-before-injection count must be a numeric zero, not boolean false; malformed count should defer with no attempt."
+    }
+  ],
+  "coverage": {
+    "P-C-AC-02": "Actual two OMPs: task/question/answer/report role routing and reply linkage, one exact target provider request per message, no wrong-role request, same-message dedupe, durable attempted/api_returned/omp_processed distinction and task_completed=false.",
+    "negative": "Malformed/missing readiness, session and generation switch, extension last-moment deferred, ACK loss, incomplete provider evidence, async processing unknown, mailbox reopen and no replay."
+  },
+  "cleanup": {
+    "owned_child_residue": [],
+    "cwd_process_residue": {
+      "manager": [],
+      "worker": []
+    },
+    "socket_residue": false,
+    "provider_threads_remaining": 0,
+    "drain_threads_remaining": 0,
+    "temporary_directory_residue": []
+  },
+  "needs_oracle": false,
+  "overall_completion_claimed": false
+}

@@ -1,0 +1,105 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-deadline-test-01",
+  "status": "candidate_ready",
+  "candidate_id": "f0bbdabe6077900135904beeb67d0a554704a674afe89465f16d98bd54a26e2e",
+  "after_snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-deadline-test-after.json",
+  "scope_audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-deadline-test.json",
+  "checks": [
+    [
+      "test_experiment_lifetime_independent_p27b",
+      0,
+      "11 OK",
+      240
+    ],
+    [
+      "test_workflow_unbounded_independent_p27b",
+      0,
+      "2 OK",
+      121
+    ],
+    [
+      "RejectedHandoffTests",
+      0,
+      "2 OK",
+      6
+    ],
+    [
+      "tests/terminal",
+      0,
+      "65 OK",
+      449
+    ],
+    [
+      "g2_shell",
+      0,
+      "142 OK skip=1",
+      119
+    ],
+    [
+      "canonical",
+      0,
+      "3 OK",
+      4
+    ],
+    [
+      "backend",
+      0,
+      "47 OK",
+      231
+    ],
+    [
+      "contracts",
+      0,
+      "43 OK",
+      1
+    ],
+    [
+      "lifecycle",
+      0,
+      "38 OK",
+      4
+    ],
+    [
+      "g4",
+      0,
+      "8 OK",
+      0
+    ],
+    [
+      "workflow",
+      0,
+      "46 OK",
+      130
+    ],
+    [
+      "observation",
+      0,
+      "95 OK",
+      1
+    ]
+  ],
+  "verdicts": {
+    "runtime >90s default args (PersistentShell, TaskWorkflow.start)": "pass",
+    "descendants incl double-fork/setsid": "pass",
+    "unknown only on real loss": "pass",
+    "explicit stop/close, no replay": "pass",
+    "start handshake bounded": "pass",
+    "INPUT_BARRIER between collects": "pass",
+    "dash ENV": "pass",
+    "RejectedHandoff expectation updated per RA-P27-HOOK-REJECTED": "pass",
+    "regressions": "pass"
+  },
+  "notes": [
+    "TaskWorkflow.start pre-experiment cwd check 3s may hold (WorkflowHeld) under heavy load; safe hold, not a kill",
+    "#WB_START_HOLD/#WB_CHILD_ID_HOLD fixture directives fixed 5s, not start_timeout; not interpreted on production literal-argv path"
+  ],
+  "expectation_change": {
+    "file": "tests/terminal/test_manual_input_boundary_independent.py",
+    "old": "test_rejected_handoff_without_any_prompt_ready_keeps_input_held_with_reason",
+    "new": "test_rejected_handoff_outside_control_loop_without_ready_delivers_manual_input_holds_automation",
+    "basis": "RA-P27-HOOK-REJECTED"
+  },
+  "frozen_hashes_equal": true,
+  "residue": "none"
+}

@@ -1,0 +1,22 @@
+{
+  "root": "/home/dwchoo/ai-exp-assistant",
+  "requirements": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw03.json",
+  "argv": [
+    "python3",
+    "-m",
+    "unittest",
+    "tests.gates.g2_shell.test_live_input_jobs_predicates",
+    "-v"
+  ],
+  "environment": {
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "description": "Linux Python 3.12.3; no conda or Docker validation"
+  },
+  "log": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/check-input-jobs-fixture-final.log",
+  "check_id": "cw03-input-jobs-fixture-final-01",
+  "watch": [],
+  "exclude": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/**"
+  ],
+  "timeout": 60
+}

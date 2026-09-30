@@ -1,0 +1,18 @@
+{
+  "invocation":"cw11-incarnation-test-01",
+  "role":"test_designer",
+  "unit":"V-CW-11-p2.6-current",
+  "objective":"Independently verify run-incarnation scheduling reset and all prior atomic admission invariants on the corrected CW-11 candidate.",
+  "candidate_manifest":".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw11-incarnation-correction.json",
+  "candidate":"db831a34cb93850156e62de6cf6539561c574df3f1d424b955ba3298696825a5",
+  "prior_test":".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw11-aba-test-01.json",
+  "write_scope":["tests/observation/**"],
+  "must_test":[
+    "Make the prior t=60 pause, t=61 A->None->same A, t=120 test wait; prove before/exact/after the new 60-second boundary and no old pending/ticket/coalescing/review_count crosses.",
+    "Prove idempotent A observation and authority-only pause/resume retain the same incarnation and intended pause-held latest-one behavior.",
+    "Attack incarnation change during scheduling/ticket issuance/dispatch, A-B-A, forged/foreign/stale tickets, exit fence, concurrency, and reentrancy.",
+    "Run observation and relevant regressions; rerun actual OMP on the current candidate or explicitly justify evidence reuse."
+  ],
+  "constraints":["Tests only; apply_patch only; no product/workflow edits; graphify update; no uv/local env/package artifacts or destructive git actions."],
+  "report":["coverage","exact results","runtime evidence","candidate_ready or needs_reroute"]
+}

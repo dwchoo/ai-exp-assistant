@@ -1,0 +1,17 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 154,
+  "event": {
+    "id": "finish-cw03-run-protocol-review-01",
+    "kind": "transition",
+    "data": {
+      "invocation": "cw03-run-protocol-review-01",
+      "state": "finished",
+      "evidence": ".workflow/core-workbench/runs/implement-p2.6-20260927/review-cw03-run-protocol-01.json",
+      "outcome": "partial",
+      "observed_model": "unverified",
+      "observed_effort": "unverified",
+      "not_started_evidence": null
+    }
+  }
+}

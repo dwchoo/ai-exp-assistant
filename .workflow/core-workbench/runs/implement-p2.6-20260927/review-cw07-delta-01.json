@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "invocation": "cw07-delta-review-01",
+  "candidate": "5d50853a90d2bd12eb7c828f2a4defe6c51e0281ee0231326d387e46456c15af",
+  "verdict": "findings",
+  "approval": false,
+  "counts": {"P0": 0, "P1": 0, "P2": 1, "P3": 0},
+  "accepted_prior_P2": "closed",
+  "findings": [
+    {
+      "severity": "P2",
+      "path": "src/workbench/terminal/shell_persistent/adapter.py",
+      "line": 233,
+      "summary": "The clean manual-parent branch delegates the complete payload to an unguarded _write_all, so a boundary transition to unknown after a partial write does not stop remaining bytes.",
+      "evidence": "Memory-only diagnosis wrote one byte, transitioned the boundary to unknown, then observed the second write deliver the remaining bytes and send_user return success."
+    }
+  ],
+  "prior_detached_daemon_P1": "Root outside-scope adjudication accepted; no new contract contradiction found.",
+  "candidate_manifest_match": true,
+  "required_followup": "Add an independent partial-write transition regression, implement bounded per-attempt admission, and review the corrected candidate.",
+  "needs_oracle": false
+}

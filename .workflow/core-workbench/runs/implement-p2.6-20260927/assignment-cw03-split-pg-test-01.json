@@ -1,0 +1,46 @@
+{
+  "feature_id": "core-workbench",
+  "ticket_id": "CW-03",
+  "attempt_id": "split-pg-independent-test-01",
+  "invocation": "cw03-split-pg-test-01",
+  "approved_bundle_digest": "64bcf577a30e7c6bbff3e4e775f8e6c17ca212ce3bf79b5bc5be31196a792b07",
+  "actual_workspace": "/home/dwchoo/ai-exp-assistant",
+  "repository_identity": "git HEAD 7b2048c50e0794da847ad8674d4dc0433d643c33 on main",
+  "baseline_snapshot": "347b6b832fabe2ca3d9ecbc97cc9bd4882a94f36ce1bde04590693f728f090e8",
+  "effective_write_capability": "shared workspace; sole mutation owner while dispatched",
+  "acceptance_ids": ["C-AC-03", "C-AC-08", "C-AC-10", "C-AC-26", "C-AC-34"],
+  "relevant_contracts": ["G2-CONTROL", "G2-LIFECYCLE", "ADR-0002", "C-D55"],
+  "allowed_write_paths": [
+    "tests/gates/g2_shell/test_live_combined_boundary_predicates.py",
+    "tests/gates/g2_shell/test_split_pg_control.py"
+  ],
+  "prohibited_paths": ["src/**", "docs/**", ".workflow/**", ".codex/**", "graphify-out/**", "tests/gates/g2_shell/live_combined_boundary_probe.py"],
+  "generated_outputs": [],
+  "resource_claims": [{"resource": "host:shell-fixture", "mode": "exclusive"}],
+  "mutation_owner": "cw03-split-pg-test-01",
+  "checkpoint_ref": ".workflow/core-workbench/runs/implement-p2.6-20260927/split-pg-pretest-checkpoint.json",
+  "exact_checks": [
+    "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest tests.gates.g2_shell.test_live_combined_boundary_predicates -v",
+    "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/gates/g2_shell -p 'test_*.py' -v"
+  ],
+  "reserved_budget": 1,
+  "stop_conditions": [
+    "A production correction is required",
+    "The contract is internally contradictory",
+    "The runtime fixture cannot clean all owned PG/PID"
+  ],
+  "configured_model": "gpt-6-sol",
+  "configured_effort": "high",
+  "host_observed_model": "unverified",
+  "host_observed_effort": "unverified",
+  "routing": {
+    "planned_role": "test_designer",
+    "selected_role": "test_designer",
+    "reason_codes": ["independent_contract_derived_coverage"],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw03-split-pg-worker-01.json",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/oracle-cw03-native-tstp-01.json"
+    ]
+  },
+  "prior_assignment_ref": ".workflow/core-workbench/runs/implement-p2.6-20260927/assignment-cw03-split-pg-worker-01.json"
+}

@@ -1,0 +1,24 @@
+{
+  "independent_live_four_cases": {
+    "status": "passed",
+    "cases": [
+      {"case": "success", "shell": "bash", "exit_status": 0, "judgment": "success", "reason_codes": ["criteria_met"], "shell_event_order": ["sent", "accepted", "started", "ended"], "parent_pid_residue": false},
+      {"case": "nonzero", "shell": "bash", "exit_status": 9, "judgment": "failure", "reason_codes": ["nonzero_exit"], "shell_event_order": ["sent", "accepted", "started", "ended"], "parent_pid_residue": false},
+      {"case": "exit_zero_wrong_result", "shell": "sh", "exit_status": 0, "judgment": "failure", "reason_codes": ["exit_zero_criteria_failed"], "shell_event_order": ["sent", "accepted", "started", "ended"], "parent_pid_residue": false},
+      {"case": "no_log", "shell": "sh", "exit_status": 0, "judgment": "indeterminate", "reason_codes": ["insufficient_raw_log"], "shell_event_order": ["sent", "accepted", "started", "ended"], "parent_pid_residue": false}
+    ]
+  },
+  "two_omp_vertical": {
+    "result": "passed", "omp_version": "omp/18.2.10", "run_id": "7fb5dbff-5127-4d38-9529-1d73ec3e0f61",
+    "task_id": "2ec92002-daca-442a-946a-8cd5d34687bb", "exit_status": 0,
+    "judgment": "success", "shell_events": ["sent", "accepted", "started", "ended"],
+    "worker_request_status": "omp_processed", "worker_report_status": "omp_processed",
+    "source_dirty_untracked_preserved": true, "worktree_commit_verified": true,
+    "omp_children_remaining": 0, "provider_threads_remaining": 0, "bridge_socket_removed": true
+  },
+  "post_exit_evidence_mutation_checks": [
+    {"source": "raw_log", "mutation": "truncate to X", "judgment": "indeterminate", "reason": "insufficient_raw_log", "error": "ChangedSinceCollection", "report": "omp_processed"},
+    {"source": "result_file", "mutation": "truncate to X", "judgment": "indeterminate", "reason": "missing_or_empty_result_file", "error": "ChangedSinceCollection", "report": "omp_processed"},
+    {"source": "raw_log", "mutation": "replace with directory", "judgment": "indeterminate", "reason": "insufficient_raw_log", "error": "IsADirectoryError", "report": "omp_processed"}
+  ]
+}

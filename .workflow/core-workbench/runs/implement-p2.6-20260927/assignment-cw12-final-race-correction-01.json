@@ -1,0 +1,40 @@
+{
+  "invocation": "cw12-final-race-correction-01",
+  "role": "worker_senior",
+  "unit": "V-CW-12-p2.6-current",
+  "objective": "Close the final CW-12 admission publication, cross-run transition, resume identity, and live status/manual-activity evidence defects found by fresh review.",
+  "evidence": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-final-review-02.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-durability-oracle-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-final-test-01.json"
+  ],
+  "write_scope": [
+    "src/workbench/policy/pause_*/**",
+    "src/workbench/ui/status_*/**",
+    "tests/policy/pause_*/**",
+    "tests/ui/status_*/**",
+    "graphify-out/**"
+  ],
+  "must_fix": [
+    "Serialize or version admission publication so an older unpaused publish can never finish after and override a newer paused state; keep set_automation_state outside the coordinator lock and avoid lock-order deadlocks.",
+    "Guard pause/resume transitions against concurrent bind_run and revalidate the exact run, pause, session, and generation identity at every phase so pause(A) cannot mutate run B.",
+    "On resume, require both acknowledgement state and a fresh post-ack probe to match the exact bound sessionId/generation and ready unpaused state before journaling or publishing unpaused; on mismatch, repause both peers and remain resume_failed/held.",
+    "Make the actual OMP live probe project real ConfirmedFileChange and RunningProcess evidence, assert manager/worker unknown tool-result rows, and exercise a direct manual TUI turn while automation remains paused without implicit resume or automatic delivery.",
+    "Strengthen qualifies() so missing/false file, process, unknown-result, or manual-activity evidence cannot pass.",
+    "Preserve exact event correlation, durable file+directory fsync behavior, no held replay, current host collection, and the oracle-confirmed CW12/CW15 durability boundary."
+  ],
+  "verification": [
+    "Add focused deterministic regressions for stale publisher ordering, pause(A)/bind(B), resume peer replacement at ack/probe/publication boundaries, and deadlock-free concurrent pressure.",
+    "Run all pause/status tests and the actual OMP 18.2.10 live probe; run graphify update ."
+  ],
+  "constraints": [
+    "Do not edit G3/workflow/observation/contracts, tickets, PLAN, or workflow records.",
+    "Use apply_patch for source/test edits; preserve unrelated user changes; no destructive git, uv, local .venv, commit, publish, or deploy."
+  ],
+  "report": [
+    "race fixes and invariants",
+    "live evidence fields and manual TUI behavior",
+    "tests and graphify result",
+    "candidate_ready or needs_reroute"
+  ]
+}

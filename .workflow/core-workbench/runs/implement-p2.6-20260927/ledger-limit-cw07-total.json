@@ -1,0 +1,23 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 349,
+  "event": {
+    "id": "limit-cw07-total-20260928",
+    "kind": "limit",
+    "data": {
+      "bucket": "total",
+      "origin": "operating",
+      "value": 288,
+      "authority": "C-D55 plus workflow-contract section 8 and current implementation authorization",
+      "reason": "Three-call bounded CW-07 implementation, independent runtime testing, and fresh review batch",
+      "decision_owner": "Root",
+      "remaining_work_estimate": 3,
+      "expected_previous": {
+        "value": 285,
+        "authority": "C-D55 plus workflow-contract section 8 and current implementation authorization",
+        "reason": "Independent regressions, bounded correction, and delta review for two fresh-review CW-09 P2 findings"
+      },
+      "scope_basis": null
+    }
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-delta-review-cw17-01",
+  "role": "reviewer",
+  "unit": "V-CW-17-p2.7",
+  "approved_bundle_digest": "a521acdc3838b43a26e277afc233bab695c8b02ce0d42392c3678931b2e3f027",
+  "routing": {"planned_role": "reviewer", "selected_role": "reviewer (wb-delta-reviewer, Sonnet high)", "reason_codes": ["bounded_delta_after_full_review"], "evidence_refs": ["original full frozen review p27-review-cw17-01 verdict integrate; user-approved model routing 2026-09-29"]},
+  "frozen_candidate": "89110a7fe46b0a7ca1ae331013fa427aabda6a1f6faa60ec8f6413e88f084a50",
+  "original_review": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-review-cw17-01.json (reviewed candidate cd921059f0a9b2d916a9a5dc817367532ac5f728e52da43f093ca28f57b39674; findings P2-1..4 + P3-1..5 with Root disposition)",
+  "delta_under_review": [
+    {"attempt": "p27-p22-rerun-test-01 (independent tests, test-only)", "files": ["tests/backend/test_pane_pin_independent_p27d.py"], "base_bytes": "new file"},
+    {"attempt": "p27-review-fix-worker-01 (P2-1..4)", "result": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-review-fix-worker-01.json", "files": ["src/workbench/backend/panes.py", "src/workbench/terminal/shell_g2/lifecycle.py", "src/workbench/terminal/shell_g2/prototype.py", "src/workbench/terminal/shell_persistent/adapter.py", "tests/backend/test_live_paste_responsive.py", "tests/backend/test_panes.py", "tests/terminal/test_review_p2_fixes.py"], "base_bytes": "NOT AVAILABLE (reviewed-candidate checkpoint blobs were pruned). Review the current code of the functions named in each finding directly against the finding and its contract clauses."},
+    {"attempt": "p27-p22-fix-worker-02 (P2-2 retry)", "result": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-p22-fix-worker-02.json", "files": ["src/workbench/backend/panes.py", "tests/backend/test_panes.py"], "base_bytes": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-p22-delta-review-base/pre-p22fix-37233705/ (diff -u against the working tree)"}
+  ],
+  "independent_verification": [".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-review-fix-test-01.json (P2-1/3/4 PASS, P2-2 FAIL)", ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-p22-rerun-test-01.json"],
+  "focus": [
+    "Each of P2-1..4 really fixed at the named site; no regression of invariants the original review verified (automation holds, elapsed-time rules, identity/replay, ui_v1, security).",
+    "P2-2: C-D45 — no signal to a process whose own-session membership is not proven at signal time; pidfd pin/anchor reasoning sound (sid number cannot be reallocated while a member lives; members cannot rejoin a session); no fd leak; poll() still reaps; killpg only on unreaped proven child; waitid WNOWAIT usage correct; behaviour under SESSION_PIN_LIMIT.",
+    "P2-1 zombie reaping in supervisor does not steal the main child's status or break DESCENDANT_REAPED/exit-status recording.",
+    "P2-4 bounded flush keeps all-or-nothing admission and per-write target re-validation."
+  ],
+  "scratch": "/tmp/claude-1000/-home-dwchoo-ai-exp-assistant/dd5e2cee-e10d-41c4-8ebb-7c00b50dd465/scratchpad/delta-review/",
+  "rules": "Strictly read-only in the repo. Tests may be run with PYTHONDONTWRITEBYTECODE=1 (prefix /usr/bin/env PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python). No graphify update.",
+  "result_format": "Findings first P0..P3 with file:line, scenario, violated clause, fix direction; then per-prior-finding verdict (P2-1..4, P3 handoff notes unchanged?), then overall integrate/block. Korean, concise."
+}

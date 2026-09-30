@@ -1,0 +1,25 @@
+{
+  "invocation": "cw11-race2-correction-01",
+  "role": "worker",
+  "unit": "V-CW-11-p2.6-current",
+  "objective": "Close the three remaining CW-11 dispatch and exit-event races found by the second fresh review.",
+  "base_candidate": "ae03421ba5ff20f37a7978f9ffd4af988e4e7c029d7a5f4238631b7aa4a09e5d",
+  "review_evidence": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw11-final-review-02.json",
+  "requirements": ".workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw11.json",
+  "write_scope": ["src/workbench/observation/**", "tests/observation/**"],
+  "required_corrections": [
+    "Make the final dispatch guard end with a fresh authority read after the last potentially blocking callback, including active_run. No callback that can change/read external state may occur between that final authority validation and dispatch except the dispatch itself; fail closed on malformed or changed state.",
+    "Do not bind exit events to an immutable run identity using run_id alone. Require or validate the full task/spec/revision/run/session/generation identity and reject/return indeterminate for unbound or stale late events. Preserve compatibility only if it remains fail-closed.",
+    "Make on_exit delivery retry-safe and once-only: do not permanently mark surfaced before callback success; prevent concurrent duplicate delivery; after callback exception allow a later retry while preserving no duplicate after success.",
+    "Add focused tests for authority mutation inside the final active_run callback, a late old-session exit against a newer same-run-id identity, callback exception then retry, and concurrent/reentrant once-only behavior."
+  ],
+  "verification": [
+    "Run observation tests and relevant workflow/bridge/contracts/G4 regressions with /tmp/cw02-g1-venv/bin/python.",
+    "Do not rerun the 60-second live probe unless the changed behavior can affect it; state the rationale.",
+    "Run graphify update . after edits."
+  ],
+  "constraints": [
+    "Use apply_patch only. No uv, local environment, packaging artifacts, workflow-record edits, commit/push/merge/stash/reset/clean, or graphify restore."
+  ],
+  "report": ["changed files and mapping", "exact checks", "unknowns", "candidate_ready or needs_reroute"]
+}

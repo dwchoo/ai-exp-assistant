@@ -1,0 +1,33 @@
+## 15-narrow-100x30: 좁은 터미널 100x30
+## size 100x30
+------------------------------------------------------------
+focus: HOST SHELL | host 입력 owner: user | shell mode: manual_input | 자동화: not_configured
+backend: ready | bridge manager=ok worker=ok | 마지막 확인 03:53:16 (0s 전) | Ctrl-] ? 도움말
+┌─ MANAGER OMP alive ───────────┐┌─ WORKER OMP alive ────────────┐┌─ HOST SHELL *FOCUS* alive owne─┐
+││                           │  │││       ████████████        │  ││플러드                          │
+││       ████████████        │  │││          ██  ██           │  ││플러드                          │
+││          ██  ██           │  │││          ██  ██           │  ││플러드                          │
+││          ██  ██           │  │││          ▒▒  ██           │  ││플러드                          │
+││          ▒▒  ██           │  │││              ██           │  ││플러드                          │
+││              ██           │  │││                           │  ││플러드                          │
+││                           │  │││          GPT-5.5          │  ││플러드                          │
+││          GPT-5.5          │  │││       openai-codex        │  ││플러드                          │
+││       openai-codex        │  ││╰───────────────────────────╯  ││플러드                          │
+│╰───────────────────────────╯  ││ Tip: Log in to several        ││플러드                          │
+│ Tip: `/force read` pins the   ││      accounts [redacted]
+│      next turn to one         ││      provider — `/login`      ││플러드                          │
+│      specific tool when the   ││      again — and omp          ││플러드                          │
+│      model keeps reaching     ││      load-balances across     ││플러드                          │
+│      for the wrong one        ││      them automatically       ││플러드                          │
+│                               ││                               ││플러드                          │
+│                               ││                               ││플러드                          │
+│───────────────────────────────││───────────────────────────────││플러드                          │
+│ Update Available              ││ Update Available              ││플러드                          │
+│ New version 18.4.3 is         ││ New version 18.4.3 is         ││플러드                          │
+│ available. Run: omp update    ││ available. Run: omp update    ││플러드                          │
+│───────────────────────────────││───────────────────────────────││플러드                          │
+│                               ││                               ││�^C                             │
+│ π > 🗑 p ▶─7%─────────╎─┃─272K─││ π > 🗑 p ▶─7%─────────╎─┃─272K─││$                               │
+│╰─                             ││╰─                             ││$                               │
+└───────────────────────────────┘└───────────────────────────────┘└────────────────────────────────┘
+원본 키는 focus pane으로 그대로 전달됩니다 · Ctrl-] d = detach

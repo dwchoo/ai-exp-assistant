@@ -1,0 +1,18 @@
+{
+  "invocation": "cw15-binding-test-01",
+  "outcome": "complete",
+  "candidate_ready": false,
+  "base_candidate": "35a10c000ed43187c9fa25eba29a3c0b5618a4dbb35cea0eabc49e743f929f5d",
+  "production_hashes_match": true,
+  "files_modified": false,
+  "verified": {
+    "lifecycle": "14 tests passed",
+    "related_regressions": "360 tests passed",
+    "shutdown": "4 exact targets received one normal_stop each; repeated complete and incomplete calls added 0 stops and 0 forces",
+    "binding_fail_closed": "authenticated G3 sockets, TaskMailbox and PersistentShell fail-closed composition passed with shell reaped and no residue"
+  },
+  "evidence_gap": "Positive real public dispatch did not reach delivery because PauseCoordinator correctly rejected the dirty workspace baseline as entry_baseline_unavailable. A non-Git temp root was also invalid; the exploratory test was removed and all frozen hashes restored.",
+  "reroute": "Create a valid temporary Git execution root/baseline in a test-only fixture and prove positive G3 -> PauseCoordinator.dispatch_bound_automatic -> TaskMailbox delivery through bind_production without changing production.",
+  "pending_environment": "External OMP and real reboot remain unexecuted.",
+  "mutation_owner": null
+}

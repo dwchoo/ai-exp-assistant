@@ -1,0 +1,29 @@
+{
+  "invocation": "cw03-run-protocol-01",
+  "status": "candidate_ready",
+  "candidate": "bd8d3b443456b632dfbe7e59810a26d1da48b6ad9219eab537c42752efde9775",
+  "changed_paths": [
+    "src/workbench/terminal/shell_g2/prototype.py",
+    "src/workbench/terminal/shell_g2/lifecycle.py",
+    "tests/gates/g2_shell/live_control_lifecycle_probe.py",
+    "tests/gates/g2_shell/live_env_launch_probe.py",
+    "tests/gates/g2_shell/test_common_run_protocol.py"
+  ],
+  "implemented": [
+    "Canonical script and literal-argv RUN requests execute only through a fixed supervisor.",
+    "A real child preparation barrier precedes distinct same-session process-group and foreground read-back verification.",
+    "CLOEXEC exec acknowledgement reports success or explicit EXEC_ERROR; failed exec cannot start a replacement shell or experiment.",
+    "ManagedLifecycle maps prepared, experiment start, main return, descendant ECHILD, input release, controller return, and manual prompt acknowledgement.",
+    "Native TSTP stop/continue remains nonterminal, and signal statuses -2/-3 remain distinct from numeric 130/131/148."
+  ],
+  "checks": [
+    {"command": "PYTHONDONTWRITEBYTECODE=1 python3 tests/gates/g2_shell/live_control_lifecycle_probe.py", "exit_code": 0, "summary": "14 cells observed"},
+    {"command": "PYTHONDONTWRITEBYTECODE=1 python3 tests/gates/g2_shell/live_env_launch_probe.py", "exit_code": 0, "summary": "10 cells plus fallback and exec-error observed"},
+    {"command": "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest tests.gates.g2_shell.test_control_lifecycle tests.gates.g2_shell.test_live_env_launch_predicates -v", "exit_code": 0, "summary": "20 tests passed in 19.864s"},
+    {"command": "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest tests.gates.g2_shell.test_split_pg_control -v", "exit_code": 0, "summary": "4 tests passed in 12.586s"},
+    {"command": "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/gates/g2_shell -p 'test_*.py' -v", "exit_code": 0, "summary": "120 tests passed in 100.507s; 6 delegated-cgroup skips"},
+    {"command": "git diff --check", "exit_code": 0, "summary": "clean"}
+  ],
+  "remaining_scope": ["Input/jobs, manual hook, and takeover runtime helpers still use their existing controller paths and need migration to the canonical RUN protocol before six-item split-path integration is complete."],
+  "owned_processes_remaining": false
+}

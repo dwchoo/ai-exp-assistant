@@ -1,0 +1,24 @@
+{
+  "invocation": "cw02-g1-closure-01",
+  "ticket": "CW-02",
+  "unit": "V-CW-02-p2.6-current",
+  "role": "worker_senior",
+  "workspace": "/home/dwchoo/ai-exp-assistant",
+  "baseline": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw02-g1-worker-before.json",
+  "authority": "User $implement docs/features/core-workbench; approved PLAN p2.6 and CW-02",
+  "objective": "Close the smallest remaining G1 feasibility gaps on the current integrated candidate: runtime color fidelity and general-terminal/non-nested-Herdr outer compatibility, while preserving all already established G1 resize, three-pane, text/tool, paste, query, and external-tmux behavior.",
+  "requirements": [
+    "Inspect the current G1 implementation and prior evidence before editing; do not reinterpret old partial evidence as a pass.",
+    "Build bounded real-runtime probes for G1-COLOR and G1-OUTER using installed OMP 18.2.10 and Herdr 0.9.1. The current root is not nested in Herdr, so a uniquely named isolated Herdr session may be used; never disturb user sessions or configuration.",
+    "For color, compare original OMP and Workbench under matched rows/columns, OMP version, theme, TERM=xterm-256color, COLORTERM=truecolor, and the same parser-visible output. Require distinguishable RGB text/emphasis and reject static-only or pyte-parsing-only claims. If the curses 256-color renderer loses required fidelity, make only the smallest in-scope renderer change supported by observed runtime evidence.",
+    "For outer environments, cover the existing plain outer PTY as the general-terminal surrogate and a genuinely non-nested isolated Herdr attach. Verify three-pane input routing, normal and bracketed paste, outer resize propagation, and local alternate-screen restoration; include freshness/cross-route/cleanup negative predicates. Preserve existing external tmux evidence and do not introduce an internal multiplexer dependency.",
+    "Re-run the full tests/gates/g1_vt suite and the relevant real-runtime probes. Record exact versions, commands, exit codes, cleanup, supported claims, and any remaining unknowns. Do not broaden support or hide an unavailable environment.",
+    "Use apply_patch for edits. Touch only src/workbench/terminal/vt_g1/**, src/workbench/ui/terminal_g1/**, tests/gates/g1_vt/**, plus the result/scope artifacts named below. Do not edit normative product decisions, PLAN, ledger, unrelated files, or commit/push.",
+    "Create .workflow/core-workbench/runs/implement-p2.6-20260927/result-cw02-g1-closure-01.json with candidate-ready/needs-reroute status, changed files, checks, runtime evidence, cleanup, and unknowns. Create an after snapshot and scope audit against the assigned baseline, allowing only the stated source/test paths plus graphify-out/** if graphify is run."
+  ],
+  "deliverables": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw02-g1-closure-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw02-g1-worker-after.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/scope-audit-cw02-g1-worker.json"
+  ]
+}

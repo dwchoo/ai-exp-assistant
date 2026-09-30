@@ -1,0 +1,37 @@
+{
+  "invocation": "cw12-run-permit-review-01",
+  "outcome": "needs_correction",
+  "candidate_ready": false,
+  "needs_oracle": false,
+  "candidate": "6dfa6011d7c57b108749d8f8fe76a1722c998d702e7c2313d43390b1be3da957",
+  "findings": [
+    {
+      "severity": "P1",
+      "confidence": "high",
+      "summary": "Automatic dispatch can proceed after the bound run has been completed or failed and removed from the repository active_runs table.",
+      "evidence": ["src/workbench/policy/pause_automation/controller.py:205", "src/workbench/tasks/repository.py:521"],
+      "acceptance_ids": ["C-AC-25"]
+    },
+    {
+      "severity": "P2",
+      "confidence": "high",
+      "summary": "The production resume path trusts caller-supplied match booleans; the actual file, tool, and process reconciliation exists only in the live test probe.",
+      "evidence": ["src/workbench/policy/pause_automation/controller.py:936", "tests/policy/pause_automation/live_pause_runtime_probe.py:331"],
+      "acceptance_ids": ["C-AC-33"]
+    },
+    {
+      "severity": "P2",
+      "confidence": "medium",
+      "summary": "A CW-11 callback result arriving after a fence authority change can still be attributed to the current tick and increment review_count.",
+      "evidence": ["src/workbench/observation/worker_review.py:518", "src/workbench/observation/worker_review.py:1080"],
+      "acceptance_ids": ["C-AC-30"]
+    }
+  ],
+  "requirement_assessment": {
+    "C-AC-25": "not_met",
+    "C-AC-30": "partially_met",
+    "C-AC-33": "not_met"
+  },
+  "tests_run": false,
+  "mutation": false
+}

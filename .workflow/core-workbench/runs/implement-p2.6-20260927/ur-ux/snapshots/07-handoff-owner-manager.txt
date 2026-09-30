@@ -1,0 +1,48 @@
+## 07-handoff-owner-manager: wb-handoff + prefix h → host 입력 owner manager
+## size 160x45 | backend input_owner=manager
+------------------------------------------------------------
+focus: HOST SHELL | host 입력 owner: manager | shell mode: control_wait | 자동화: not_configured
+backend: ready | bridge manager=ok worker=ok | 마지막 확인 03:52:46 (0s 전) | Ctrl-] ? 도움말
+┌─ MANAGER OMP alive ───────────────────────────────┐┌─ WORKER OMP alive ────────────────────────────────┐┌─ HOST SHELL *FOCUS* alive owner=manager ───────────┐
+│                                                   ││                                                   ││$ echo 안녕 workbench                               │
+│╭─── omp v18.2.10 ──────────────────────────────╮  ││╭─── omp v18.2.10 ──────────────────────────────╮  ││안녕 workbench                                      │
+││                │ Tips                         │  │││                │ Tips                         │  ││$ pwd                                               │
+││ Welcome back!  │ # for prompt actions         │  │││ Welcome back!  │ # for prompt actions         │  ││/tmp/uxfill24mq/p                                   │
+││                │ / for commands               │  │││                │ / for commands               │  ││$ ls -la | head -5                                  │
+││  ████████████  │ ! to run bash                │  │││  ████████████  │ ! to run bash                │  ││total 8                                             │
+││     ██  ██     │ $ to run python              │  │││     ██  ██     │ $ to run python              │  ││drwxrwxr-x 2 dwchoo dwchoo 4096 Sep 30 03:52 .      │
+││     ██  ██     │ ──────────────────────────── │  │││     ██  ██     │ ──────────────────────────── │  ││drwx------ 6 dwchoo dwchoo 4096 Sep 30 03:52 ..     │
+││     ▒▒  ██     │ LSP Servers                  │  │││     ▒▒  ██     │ LSP Servers                  │  ││$ wb-handoff                                        │
+││         ██     │ No LSP servers               │  │││         ██     │ No LSP servers               │  ││                                                    │
+││                │                              │  │││                │                              │  ││                                                    │
+││    GPT-5.5     │                              │  │││    GPT-5.5     │                              │  ││                                                    │
+││  openai-codex  │                              │  │││  openai-codex  │                              │  ││                                                    │
+││                │ ──────────────────────────── │  │││                │ ──────────────────────────── │  ││                                                    │
+││                │ Recent sessions              │  │││                │ Recent sessions              │  ││                                                    │
+││                │ No recent sessions           │  │││                │ No recent sessions           │  ││                                                    │
+││                │                              │  │││                │                              │  ││                                                    │
+││                │                              │  │││                │                              │  ││                                                    │
+││                │                              │  │││                │                              │  ││                                                    │
+││                │                              │  │││                │                              │  ││                                                    │
+│╰────────────────┴──────────────────────────────╯  ││╰────────────────┴──────────────────────────────╯  ││                                                    │
+│ Tip: `/force read` pins the next turn to one      ││ Tip: Log in to several accounts [redacted]
+│      specific tool when the model keeps reaching  ││      provider — `/login` again — and omp          ││                                                    │
+│      for the wrong one                            ││      load-balances across them automatically      ││                                                    │
+│                                                   ││                                                   ││                                                    │
+│───────────────────────────────────────────────────││───────────────────────────────────────────────────││                                                    │
+│ Update Available                                  ││ Update Available                                  ││                                                    │
+│ New version 18.4.3 is available. Run: omp update  ││ New version 18.4.3 is available. Run: omp update  ││                                                    │
+│───────────────────────────────────────────────────││───────────────────────────────────────────────────││                                                    │
+│                                                   ││                                                   ││                                                    │
+│ π > ◒ GPT-5.5 > 🗑 p > (sub) ▶─7%─────────╎─┃─272K─││ π > ◒ GPT-5.5 > 🗑 p > (sub) ▶─7%─────────╎─┃─272K─││                                                    │
+│╰─                                                 ││╰─                                                 ││                                                    │
+│                                                   ││                                                   ││                                                    │
+│                                                   ││                                                   ││                                                    │
+│                                                   ││                                                   ││                                                    │
+│                                                   ││                                                   ││                                                    │
+│                                                   ││                                                   ││                                                    │
+│                                                   ││                                                   ││                                                    │
+│                                                   ││                                                   ││                                                    │
+│                                                   ││                                                   ││                                                    │
+└───────────────────────────────────────────────────┘└───────────────────────────────────────────────────┘└────────────────────────────────────────────────────┘
+host shell을 manager에게 되돌림

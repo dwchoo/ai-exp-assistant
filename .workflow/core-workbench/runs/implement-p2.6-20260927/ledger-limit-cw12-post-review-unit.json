@@ -1,0 +1,23 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 861,
+  "event": {
+    "id": "limit-cw12-post-review-unit-20260928",
+    "kind": "limit",
+    "data": {
+      "bucket": "unit:V-CW-12-p2.6-current",
+      "origin": "operating",
+      "value": 27,
+      "authority": "Approved PLAN p2.6 CW-12, fresh review findings, workflow-contract section 8, and current $implement authorization",
+      "reason": "One coupled correction, independent delta verification, and fresh delta review for the three remaining CW-12 findings",
+      "decision_owner": "Root",
+      "remaining_work_estimate": 3,
+      "expected_previous": {
+        "value": 24,
+        "authority": "Approved PLAN p2.6 CW-12, workflow-contract section 8, current implementation authorization, and final-review run-bound permit evidence",
+        "reason": "Require active/fence/coordinator run and incarnation equality for all automatic dispatch with independent verification"
+      },
+      "scope_basis": null
+    }
+  }
+}

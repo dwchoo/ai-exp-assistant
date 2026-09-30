@@ -1,0 +1,74 @@
+{
+  "schema_version": 1,
+  "invocation": "cw09-correction-01",
+  "role": "worker",
+  "status": "candidate_ready",
+  "baseline_candidate": "e9b341493efcb3c27bb64b4d34c8b3032e4c1465c84bd3ea053c5ac40ee608fe",
+  "candidate": "c202c712f039b3408dca09fcbbeb2d35044b60d47d7c25cc336e14b70eea8422",
+  "requirements_sha256": "ce80ee1ddd377af0e1234b4f61f957b86136ab3cc97d2cd908186eea3f612db3",
+  "prior_independent_result": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw09-test-01.json",
+  "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw09-correction-after.json",
+  "scope_audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/scope-audit-cw09-correction.json",
+  "changed_files": [
+    "src/workbench/storage/metadata_sqlite/schema.py",
+    "src/workbench/tasks/repository.py",
+    "tests/tasks/test_repository.py"
+  ],
+  "schema_fix": {
+    "schema_version": 2,
+    "invalidated_revisions_foreign_key": "(decision_id, task_id, revision) REFERENCES task_decisions(decision_id, task_id, revision), in addition to the TaskSpec composite foreign key.",
+    "kind_guard": "A SQLite BEFORE INSERT trigger permits invalidation only when the linked decision kind is cancelled or revoked.",
+    "legacy_migration": "Schema v1 is transactionally rebuilt to schema v2. Existing rows are copied under the new composite constraint; invalid legacy links abort and roll back the migration. Valid cancellation history and revision invalidation survive reopen."
+  },
+  "independent_failure_before_after": {
+    "before": "RepositoryInvariantTests.test_database_invalidation_cannot_reference_another_tasks_authority_decision failed: SQLite accepted Task A/revision 1 invalidation linked to Task B scope approval.",
+    "after": "The unchanged independent test passes. A worker-owned control inserts an unused revoked decision for Task B, which passes the invalidation-kind trigger, then attempts to attach it to Task A; the composite foreign key rejects the cross-Task/revision link. A second direct-SQL control confirms a same-Task non-terminal decision kind is rejected by the trigger."
+  },
+  "checks": [
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/tasks -v",
+      "exit_code": 0,
+      "result": "passed",
+      "summary": "20 tests, including all 9 independent test_designer cases, cross-Task invalidation rejection, invalidation-kind guard, schema v1 migration, and reopen/rollback cases."
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g3_omp /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/gates/g4_lifetime -v",
+      "exit_code": 0,
+      "result": "passed",
+      "summary": "8 tests."
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/gates/g4_evidence -v",
+      "exit_code": 0,
+      "result": "passed",
+      "summary": "10 tests."
+    },
+    {
+      "command": "sh tests/gates/harness/run-contracts.sh",
+      "exit_code": 0,
+      "result": "passed",
+      "summary": "Python 20 tests and Node 15 tests."
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0,
+      "result": "passed"
+    }
+  ],
+  "scope": {
+    "allowed_changed_paths": [
+      "src/workbench/storage/metadata_sqlite/schema.py",
+      "src/workbench/tasks/repository.py",
+      "tests/tasks/test_repository.py"
+    ],
+    "independent_test_file_modified": false,
+    "index_changed": [],
+    "outside_scope": [],
+    "audit_comparable": true
+  },
+  "remaining_gaps": [
+    "Migration tests cover a valid schema v1 database with durable cancellation history; corrupt legacy data is expected to fail migration atomically but is not separately fault-injected in this correction.",
+    "This correction does not add concurrent-writer or power-loss recovery claims."
+  ],
+  "commit_created": false
+}

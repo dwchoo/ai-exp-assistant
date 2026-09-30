@@ -1,0 +1,26 @@
+{
+  "invocation": "cw12-final-review-02",
+  "role": "reviewer",
+  "unit": "V-CW-12-p2.6-current",
+  "objective": "Final fresh review of the complete CW-12 candidate after exact event correlation and full actual runtime evidence.",
+  "candidate_manifest": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw12-final-test.json",
+  "candidate": "1f253e330255da939dbd5c78af8dfa3a96597f115b5dda4e66f8b1d2e264ff2d",
+  "requirements": ".workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw12.json",
+  "ticket": "docs/features/core-workbench/tickets/CW-12.md",
+  "prior_review": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-review-01.json",
+  "oracle_evidence": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-durability-oracle-01.json",
+  "corrections": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-runtime-correction-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-event-correction-01.json"
+  ],
+  "final_test": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-final-test-01.json",
+  "must_review": [
+    "Validate manifest/hash and map C-AC-25/30/33 plus P-C-AC-25/30/33 runtime clauses to current code and live evidence.",
+    "Reproduce/refute prior resume_failed restart, cross-session snapshot/event stop attribution, and file/directory fsync findings; ensure exact correlation requires request/session/generation/cursor/pause binding and only proves stop observation.",
+    "Re-audit pause/review/local dispatch linearization, cancellation exact-run sync, journal integrity, partial resume compensation, clean rebind, status truthfulness, privacy, no replay, and lock-order/deadlock behavior.",
+    "Audit the strengthened live probe and negative predicates for actual production wiring and false-pass resistance: actual manager/worker peers, Task/run/scope, CW11 admission, host collection, three-area projection, five reconciliation facts, pause-zero activity, fresh turn, cleanup.",
+    "Confirm the oracle boundary is faithfully stated: current process persistence failure is fail-closed; zero-surviving-evidence whole-restart bootstrap is not claimed by CW12 and remains CW15-owned, without weakening CW12 acceptance."
+  ],
+  "constraints": ["Review-only; no edits/mutations; report P0-P3 findings or explicit no findings; no destructive git actions."],
+  "report": ["candidate validation", "prior-finding closure", "acceptance/runtime coverage", "durability boundary", "new findings", "candidate_ready or needs_reroute"]
+}

@@ -1,0 +1,17 @@
+{
+  "invocation": "cw02-g1-delta-review-01",
+  "ticket": "CW-02",
+  "unit": "V-CW-02-p2.6-current",
+  "role": "reviewer",
+  "workspace": "/home/dwchoo/ai-exp-assistant",
+  "candidate_manifest": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw02-g1-wide-correction-after.json",
+  "candidate": "a3eae7024ca8b9180d6d33281890de80ae688e90ae0214b991938b59419fd544",
+  "authority": "User $implement docs/features/core-workbench; required delta review after review-cw02-g1-01.json P2",
+  "objective": "Read-only delta review of the wide-glyph correction and its impact on the already reviewed frozen G1 candidate.",
+  "requirements": [
+    "Verify the corrected app.py and new test_wide_boundary.py hashes against the candidate manifest, and compare their delta to frozen candidate c8c8d4c1dba9767e9fb941bdfec31fcf10516d5c5c07ee186593587fb1f0a722.",
+    "Re-evaluate the exact P2 memory fixture in review-cw02-g1-01.json for normal curses and exact RGB paths, including wide+combining text, fitting wide glyphs, continuation handling, clipping, cursor restore, SGR/style leakage, and run grouping.",
+    "Confirm existing independent PID/geometry negative tests and runtime probe semantics were not weakened, and determine whether the correction introduces any P0-P3 regression in G1 scope.",
+    "Do not execute runtime tests or modify source/tests/docs/graph. Return verdict pass/needs_fix and P0-P3 findings in final payload; Root will record review-cw02-g1-delta-01.json."
+  ]
+}

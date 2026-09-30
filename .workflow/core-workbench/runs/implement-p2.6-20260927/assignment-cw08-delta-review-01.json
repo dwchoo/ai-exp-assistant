@@ -1,0 +1,10 @@
+{
+  "invocation":"cw08-delta-review-01","role":"reviewer","unit":"V-CW-08-p2.6-current",
+  "objective":"Read-only delta review of the final CW-08 candidate after P1/P2/P3 corrections and independent regressions.",
+  "candidate_manifest":".workflow/core-workbench/runs/implement-p2.6-20260927/cw08-final-frozen-candidate.json",
+  "requirements":".workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw08.json",
+  "evidence":[".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw08-review-fix-01.json",".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw08-review-regression-test-01.json"],
+  "review_focus":["Verify the prior P1 sendall/deadline/lock finding is fully closed without new races.","Verify strict generation typing across every ingress/readiness comparison.","Verify ACK correlation cleanup is bounded and cannot consume or retain unrelated ACKs.","Check independent regressions are meaningful, bounded, and candidate hashes match.","Reassess any new P0-P2 correctness issue introduced by the patch."],
+  "constraints":["Read-only; do not modify files or rerun unsafe commands.","Report precise severity/file/line evidence, pass or needs_reroute, and residual limits separately."],
+  "report":["pass or needs_reroute","P0-P3 findings","prior findings closure","candidate identity","needs_oracle"]
+}

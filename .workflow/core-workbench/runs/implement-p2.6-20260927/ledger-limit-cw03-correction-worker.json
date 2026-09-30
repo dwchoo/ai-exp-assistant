@@ -1,0 +1,23 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 114,
+  "event": {
+    "id": "limit-cw03-split-pg-correction-worker-20260928",
+    "kind": "limit",
+    "data": {
+      "bucket": "role:worker_senior",
+      "origin": "operating",
+      "value": 91,
+      "authority": "C-D55 plus workflow-contract section 8 and current implementation authorization",
+      "reason": "One bounded senior correction for the fresh split-PG review findings",
+      "decision_owner": "Root",
+      "remaining_work_estimate": 1,
+      "expected_previous": {
+        "value": 90,
+        "authority": "C-D55 plus workflow-contract section 8 and current implementation authorization",
+        "reason": "One bounded senior implementation experiment for the Oracle-derived split experiment process-group control state machine"
+      },
+      "scope_basis": null
+    }
+  }
+}

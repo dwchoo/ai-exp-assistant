@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "feature_id": "core-workbench",
+  "ticket_id": "CW-07/CW-03 lifecycle delta (found in V-CW-07-p2.7-input)",
+  "invocation": "p27-deadline-fix-worker-01",
+  "attempt_id": "deadline-fix-attempt-01",
+  "approved_bundle_digest": "a521acdc3838b43a26e277afc233bab695c8b02ce0d42392c3678931b2e3f027",
+  "authority": "p2.7a approval; finding F-P27-DEADLINE; Root adjudication",
+  "actual_workspace": "/home/dwchoo/ai-exp-assistant",
+  "checkpoint_ref": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-deadline-fix-checkpoint.json",
+  "finding": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-input-test-01.json#finding",
+  "required_behavior_root_adjudication": [
+    "No elapsed-time termination of an experiment (BRIEF '실험 실행 시간 상한 없음', C-AC-07 '경과 시간만으로 실험을 종료하지 않는다', OPERATING-CONTRACT §3): after EXPERIMENT_START the supervisor waits for the main program without any deadline, and after MAIN_RETURN it keeps tracking live managed descendants without a deadline (report MAIN_RETURN; lifecycle stays 'descendants alive' / not complete, per C-AC-08 example '주 프로그램은 끝났지만 후손이 생존'); ending an experiment happens only via explicit stop/force paths already governed by CW-13/CW-15 policy.",
+    "Bounded deadlines remain only for startup/handshake steps whose failure means the run never started correctly (e.g. exec-transition acknowledgement, RUN framing, release handshakes); they must not kill a running experiment. Rename/split the parameter so the startup handshake timeout cannot be confused with experiment runtime; PersistentShell.submit and TaskWorkflow.start must not impose a runtime limit (remove the 300 s cap for runtime).",
+    "Audit the whole automated-run path (supervisor, lifecycle probe _drain, PersistentShell, workflow/run.py, observation/worker review) for any other elapsed-time rule that terminates or marks unknown a healthy running experiment or its descendants; fix those in allowed paths and report any outside.",
+    "If the rejected wb-handoff arrives outside the control loop (HANDOFF -> HOOK_REJECTED with no WAIT), treat HOOK_REJECTED itself as the authenticated return-to-prompt event for manual input (READY may never come when the user removed hooks); automation stays held.",
+    "dash: do not leave ENV pointing at the Workbench shell-init in the user/experiment environment after init (C-AC-32 separation), if feasible without breaking dash init; otherwise report why.",
+    "Keep all input-boundary behavior of attempts 01/02, automation holds, no replay, exact identity."
+  ],
+  "acceptance_tests": [
+    "tests/terminal/test_manual_input_boundary_independent.py::ConfirmedRunTakeoverTests::test_production_default_submit_keeps_taken_over_experiment_running_past_5s must pass unmodified",
+    "add red/green tests: default submit experiment running > 60 s survives and completes normally; main returns while a descendant lives > 10 s -> not complete, then completes when descendant exits, never killed by elapsed time",
+    "all suites of the input unit: tests/terminal, tests/gates/g2_shell (PYTHONPATH=src:.), canonical matrix, tests/backend, tests/contracts, tests/lifecycle, tests/gates/g4_lifetime (PYTHONPATH=src:.), plus tests/workflow and tests/observation non-live suites"
+  ],
+  "allowed_write_paths": [
+    "src/workbench/terminal/shell_g2/**",
+    "src/workbench/terminal/shell_persistent/**",
+    "src/workbench/workflow/run.py",
+    "tests/terminal/**",
+    "tests/gates/g2_shell/**",
+    "tests/workflow/**"
+  ],
+  "prohibited_paths": [
+    "tests/**/test_*_independent*.py",
+    "tests/backend/independent_support.py",
+    "docs/**",
+    ".workflow/**",
+    "other src/**"
+  ],
+  "stop_conditions": [
+    "an existing test asserts experiment kill by elapsed time: list it with the contradicted clause; do not silently delete",
+    "fix requires changing CW-13/CW-15 stop/force policy or contracts",
+    "tmux/credentials"
+  ],
+  "routing": {
+    "planned_role": "worker_senior",
+    "selected_role": "worker_senior",
+    "reason_codes": [
+      "coupled_invariants"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-input-test-01.json"
+    ]
+  }
+}

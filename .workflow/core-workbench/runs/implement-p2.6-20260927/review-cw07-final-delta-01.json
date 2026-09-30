@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "invocation": "cw07-final-delta-review-01",
+  "candidate": "c42a2834893090b89faf94f37236b99061dcc5cdd165050ca57f0b065c4b2bb1",
+  "verdict": "pass",
+  "approval": true,
+  "findings": [],
+  "counts": {"P0": 0, "P1": 0, "P2": 0, "P3": 0},
+  "accepted_prior_P2_closed": 2,
+  "impact_review": {
+    "per_attempt_revalidation": true,
+    "partial_unknown_stops_remaining_bytes": true,
+    "retry_deadline_seconds": 0.25,
+    "valid_partial_write_preserved": true,
+    "live_foreground_preserved": true,
+    "handoff_no_replay_preserved": true,
+    "independent_tests_weakened": false,
+    "manifest_match": true
+  },
+  "residual_limitations": [
+    "Universal discovery of manually detached daemons remains outside the C-D55 guarantee.",
+    "Privileged or ptrace-denied execution and shells other than Bash and /bin/sh are not established."
+  ],
+  "needs_oracle": false
+}

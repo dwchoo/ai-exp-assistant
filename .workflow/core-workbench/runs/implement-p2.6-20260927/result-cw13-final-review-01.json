@@ -1,0 +1,23 @@
+{
+  "invocation": "cw13-final-review-01",
+  "outcome": "complete",
+  "candidate_ready": true,
+  "candidate": "89b27e0f23d91d76a2d40fe0eb97aeed6ba4299ad51f12fbf35dcc675597970c",
+  "findings": [],
+  "acceptance": {
+    "C-AC-04": "passed",
+    "C-AC-07": "passed",
+    "C-AC-10": "passed",
+    "C-AC-13": "passed",
+    "C-AC-31": "passed",
+    "C-AC-34": "passed"
+  },
+  "scope": "fixture-level CW-13 policy candidate acceptance, not CW-15 runtime acceptance",
+  "residual_risks": [
+    "CW-15 must implement durable task-wide CAS and fresh reads.",
+    "CW-15 must collect trustworthy stop and target-liveness evidence and revalidate authority before actions.",
+    "CW-15 must execute and verify actual force signals and full managed termination."
+  ],
+  "mutation": "none",
+  "reviewer": "/root/cw12_post_review_final_reviewer"
+}

@@ -1,0 +1,1 @@
+{"path":".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json","expected_revision":725,"event":{"id":"check-cw11-live-final-01","kind":"check","data":{"check_id":"cw11-live-final-01","path":".workflow/core-workbench/runs/implement-p2.6-20260927/check-cw11-live-final-observed.json","sha256":"0277aa6318edea2679a73dc03ddb7e2546ed51137cc6d4fc5f5371387f456413"}}}

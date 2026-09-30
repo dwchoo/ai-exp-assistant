@@ -1,0 +1,20 @@
+{
+  "invocation": "cw12-directory-mode-review-01",
+  "outcome": "complete",
+  "candidate_ready": true,
+  "candidate": "308debdd963312700a0fccf7f034fcd3b091b7c5a5aaff52dd53a58187542e07",
+  "findings": [],
+  "acceptance": {
+    "C-AC-25": "passed",
+    "C-AC-30": "passed",
+    "C-AC-33": "passed"
+  },
+  "evidence_reviewed": "129 pause tests and actual omp/18.2.10 directory chmod reject-restore-reconcile-resume with zero residue",
+  "residual_risks": [
+    "Scan or sidecar bound overflow fails closed.",
+    "Actual fsmonitor environments remain unverified.",
+    "A filesystem TOCTOU window remains after verification."
+  ],
+  "mutation": "none",
+  "reviewer": "/root/cw12_post_review_final_reviewer"
+}

@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "cwd": "/home/dwchoo/ai-exp-assistant",
+  "candidate_files": {
+    "tests/gates/g2_shell/live_combined_boundary_probe.py": "87ce3def658776b1ef9850fb21ffecd0183536923339d9c70182cc25e4728661",
+    "tests/gates/g2_shell/test_live_combined_boundary_predicates.py": "9da37de34ca28f208b235c95c03f421f8d08f34ebc6059c1dfe214ca59e6db23",
+    "tests/gates/g2_shell/live_env_launch_probe.py": "d9e4a0a161ded04c2c7161c529266ddf672181de273bc3ebe3e5403e1415219b",
+    "tests/gates/g2_shell/test_live_env_launch_predicates.py": "876ea6dcf45053b1a35fe738fbaaa7859c6ff119cd73829fa7e4b84e0f64b48e"
+  },
+  "results": [
+    "env launch predicates: 8 passed",
+    "combined and lifecycle predicates: 25 passed",
+    "env launch live probe: observed, exit 0, 10 cases",
+    "combined live probe: inconclusive, exit 2, 44 cases, two parent-WAIT TSTP unknowns, four signal-stage TSTP unknowns, zero failures",
+    "git diff --check passed",
+    "graphify update rebuilt 1802 nodes, 3855 edges and 111 communities"
+  ],
+  "bounded_status": {
+    "minimum_combined_discriminator": "passed_for_full_matrix_expansion_with_explicit_tstp_unknowns",
+    "g2_hook_env_launch_slice": "passed_with_conda_unavailable_and_limited_hook_detection",
+    "cw03": "incomplete",
+    "core_workbench_feature": "incomplete"
+  },
+  "remaining_scope": [
+    "G2 input-jobs matrix: multiline, unsubmitted input, REPL, background/suspended jobs and stale owner/generation",
+    "G2 takeover matrix: send/accept/start/ACK-loss races, foreground-exit race, no replay",
+    "G2 failure matrix: supervisor/FD/flush faults, manual daemon residue and observation loss",
+    "actual TSTP suspend semantics and conda activation on an available host",
+    "remaining CW-03 integration and downstream CW-05 through CW-16"
+  ],
+  "docker_runtime_validation": "skipped_by_user_decision"
+}

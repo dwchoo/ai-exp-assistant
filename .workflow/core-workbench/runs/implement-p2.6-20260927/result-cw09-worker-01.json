@@ -1,0 +1,94 @@
+{
+  "schema_version": 1,
+  "invocation": "cw09-worker-01",
+  "role": "worker",
+  "status": "candidate_ready",
+  "baseline_candidate": "437efdf06af1ce5e5e17be8cbc3b2d528b1dfa2f23244babebce091a71c93245",
+  "candidate": "fa168d4ac50f1ffd39674f359b288998b550f1e3f2e208f662eed362b6469497",
+  "requirements": {
+    "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw09.json",
+    "sha256": "ce80ee1ddd377af0e1234b4f61f957b86136ab3cc97d2cd908186eea3f612db3"
+  },
+  "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw09-worker-after.json",
+  "scope_audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/scope-audit-cw09-worker.json",
+  "changed_files": [
+    "src/workbench/storage/metadata_sqlite/__init__.py",
+    "src/workbench/storage/metadata_sqlite/schema.py",
+    "src/workbench/tasks/__init__.py",
+    "src/workbench/tasks/repository.py",
+    "tests/tasks/test_repository.py"
+  ],
+  "storage": {
+    "engine": "Python standard-library sqlite3",
+    "schema_version": 1,
+    "invariants": [
+      "Task identity is a stable primary key; immutable TaskSpec revisions are sequential and have separate rows.",
+      "TaskSpec, decision, run, run-event, settings, message, delivery, shell, takeover, and cancellation/revocation history tables reject UPDATE and DELETE.",
+      "Automatic run creation uses BEGIN IMMEDIATE and one transaction; a valid scope approval and an unused persisted proceed decision are required, and the proceed decision is consumed by exactly one run.",
+      "Cancelling or revoking a revision appends history, ends its current run when applicable, and permanently invalidates that revision for future authorization.",
+      "Each run, decision, and run lifecycle event links the settings revision and retry count used; retry decision counts cannot decrease within a run.",
+      "A settings update appends a session-wide revision and does not modify the current run or its retry history.",
+      "Messages link stable message_id to Task/revision/run; each delivery attempt has its own append-only statuses, with api_returned and omp_processed represented separately.",
+      "Shell lifecycle and takeover request/confirmation records link to the existing run; foreign keys and unique indexes enforce links and one active run per Task.",
+      "SQLite uses explicit transactions, foreign_keys=ON, synchronous=FULL, explicit close/context-manager behavior, and errors propagate after rollback."
+    ]
+  },
+  "checks": [
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/tasks -v",
+      "exit_code": 0,
+      "result": "passed",
+      "summary": "9 tests; SQLite reopen/durability, stable Task ID and sequential immutable revisions, approval-before-proceed, one-time proceed consumption, cancellation/revocation, session settings and monotonic retry linkage, delivery/shell/takeover history, foreign keys, append-only guards, and close behavior."
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g3_omp /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/gates/g4_lifetime -v",
+      "exit_code": 0,
+      "result": "passed",
+      "summary": "8 tests."
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/gates/g4_evidence -v",
+      "exit_code": 0,
+      "result": "passed",
+      "summary": "10 tests."
+    },
+    {
+      "command": "sh tests/gates/harness/run-contracts.sh",
+      "exit_code": 0,
+      "result": "passed",
+      "summary": "Python 20 tests and Node 15 tests."
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0,
+      "result": "passed"
+    }
+  ],
+  "failure_injection": {
+    "mechanism": "A test-only SQLite BEFORE INSERT trigger aborts run_events insertion for kind=started after run and authorization-consumption rows have been attempted.",
+    "observed": "sqlite3.IntegrityError propagated; transaction rollback kept all durable table counts unchanged, left no active run, preserved the prior completed run history and the proceed decision. After dropping the trigger, the same proceed decision created one run successfully."
+  },
+  "environment": {
+    "python": "3.12.3",
+    "sqlite": "3.45.1",
+    "venv": "/tmp/cw02-g1-venv"
+  },
+  "scope_observation": {
+    "allowed_changed_paths": 5,
+    "index_changed": [],
+    "outside_scope": ["graphify-out/cache/last_query_stamp"],
+    "outside_scope_detail": {
+      "observed_change_from": "The required read-only graphify query command for CW-09 updated this generated operational cache stamp.",
+      "baseline_sha256": "c9b7469c211eba0306d6f62fc2dfee41513f5b43c683d8ea6f02eb8e2649b877",
+      "baseline_content": "1790541960.9251676",
+      "current_sha256": "885994aa97443134aca8d288d1bdde5fa988049134c54ec7b2a90868eb1a5f0b",
+      "current_content": "1790542119.6386857",
+      "current_mtime": "2026-09-28 05:48:39.638867972 +0900",
+      "handling": "Preserved as directed by Root; recorded in the full scope audit."
+    }
+  },
+  "remaining_gaps": [
+    "This is the CW-09 durable metadata boundary only; it is not wired to CW-08 delivery, production policy scheduling, or recovery.",
+    "The system Python lacked pyte for the first G4 lifetime attempt; the complete G4 regressions passed under the repository's validated Python venv."
+  ]
+}

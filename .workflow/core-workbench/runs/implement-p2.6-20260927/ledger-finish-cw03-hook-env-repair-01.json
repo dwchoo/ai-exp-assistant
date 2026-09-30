@@ -1,0 +1,17 @@
+{
+  "path": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 66,
+  "event": {
+    "id": "finish-cw03-hook-env-repair-01",
+    "kind": "transition",
+    "data": {
+      "invocation": "cw03-hook-env-repair-01",
+      "state": "finished",
+      "evidence": "collaboration worker candidate_ready; one-file nested-finally correction; hook-env 4 predicates and 4 Bash/dash runtime cases passed; inline cleanup fault checks passed; no residue",
+      "outcome": "complete",
+      "observed_model": "unverified",
+      "observed_effort": "unverified",
+      "not_started_evidence": null
+    }
+  }
+}

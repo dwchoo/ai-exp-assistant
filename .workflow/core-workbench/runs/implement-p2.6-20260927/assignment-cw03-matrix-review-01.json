@@ -1,0 +1,28 @@
+{
+  "invocation": "cw03-matrix-review-01",
+  "role": "reviewer",
+  "unit": "V-CW-03",
+  "candidate": "2fbb0fdbdccdbb7133c21a468ef33558c60b462bff7af1a56ad20f0823ee266a",
+  "candidate_manifest": ".workflow/core-workbench/runs/implement-p2.6-20260927/cw03-matrix-frozen-candidate.json",
+  "scope": [
+    "Fresh review of remaining input/jobs, hook/env, takeover migration onto canonical ManagedLifecycleProbe RUN and split-PG supervisor.",
+    "Verify no legacy raw base64/direct eval accepted path remains in those matrices and causal identity evidence cannot be synthesized from stale events.",
+    "Review lifecycle rearm: only verified completion plus manual ACK/prompt plus fresh same-parent handoff and new WAIT; unknown/missing boundary must remain sticky and no replay.",
+    "Review hook/env correction for the independent missing-EXEC_READY false-success, including failure before release and preservation of pre-ACCEPT manual denial/fresh retry.",
+    "Review takeover race barriers, lost/delayed ACK, partial writes, foreground confirmation, and separation of manual input from new automatic RUN.",
+    "Review independent integration test for real runtime identity/causal assertions, mutation discrimination, cleanup, and false-pass risks.",
+    "Assess interactions with prior common RUN/FD/PTRACE review coverage."
+  ],
+  "evidence": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw03-matrix-migration-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw03-matrix-test-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw03-hook-lifecycle-correction-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/review-cw03-fd-correction-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/scope-audit-cw03-matrix-integrated.json"
+  ],
+  "constraints": [
+    "Read-only: do not edit files or run graphify query.",
+    "Do not review production adapter generalization owned by CW-07 or require excluded conda/cgroup coverage.",
+    "Classify findings P0-P3 with file/line evidence; pass only with no P0-P2."
+  ]
+}

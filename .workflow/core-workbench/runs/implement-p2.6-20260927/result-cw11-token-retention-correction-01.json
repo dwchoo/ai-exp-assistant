@@ -1,0 +1,9 @@
+{
+  "invocation":"cw11-token-retention-correction-01",
+  "outcome":"complete",
+  "candidate_ready":true,
+  "correction":"One internal ExitSourceToken is reused per incarnation; unusable tokens clear on exit/run replacement. External WorkflowRun sources use identity-checked weak registration with only the active source strongly owned.",
+  "bounded_tests":"1,500 ticks keep the internal registry bounded; 1,200 source churn entries prune after GC/retirement.",
+  "checks":{"observation":"87/87 passed","workflow":"44/44 passed","bridge":"18/18 passed","contracts":"20/20 passed","actual_omp_18_2_10":"60.0-second review, 13th wake, exit in 0.084 seconds, privacy and cleanup passed"},
+  "graphify_updated":true
+}

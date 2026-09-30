@@ -1,0 +1,17 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 149,
+  "event": {
+    "id": "running-cw03-run-ack-correction-01",
+    "kind": "transition",
+    "data": {
+      "invocation": "cw03-run-ack-correction-01",
+      "state": "running",
+      "evidence": "collaboration.followup_task /root/cw03_split_pg started the independent-test-required exec acknowledgement correction",
+      "outcome": null,
+      "observed_model": "unverified",
+      "observed_effort": "unverified",
+      "not_started_evidence": null
+    }
+  }
+}

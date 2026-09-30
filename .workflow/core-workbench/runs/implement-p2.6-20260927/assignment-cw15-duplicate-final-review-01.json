@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "invocation": "cw15-duplicate-final-review-01",
+  "role": "reviewer",
+  "unit": "V-CW-15-p2.6-current",
+  "authority": "User $implement request; approved CW-15/C-D52; final fresh change-verification review",
+  "objective": "Final fresh read-only review of the complete frozen CW-15 candidate after duplicate-generation closure.",
+  "candidate": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw15-duplicate-test.json",
+    "candidate_id": "4eb8da95d47761acb737ba4d627b67306eef988567b7e04cafde38db218a9cd8"
+  },
+  "review": [
+    "Audit takeover generation state machine across first, duplicate, stale, failed, concurrent handoff and post-handoff requests. Confirm no intent can be erased or permanently strand a valid handoff and old permits never revive.",
+    "Audit claim-as-submission linearization, Pause combined authority, G3 write lock/current/claim/send ordering, pending ACK cleanup, receipt/journal mapping and no token-unaware path. Treat claim-first as already in-flight per the recorded Root interpretation; verify implementation is consistent with that boundary.",
+    "Audit C-AC-15,16,17,18,22,23 including shutdown/action, model/metadata/ended-run/boot/detach/reconnect/restart, exact identities and positive production composition. Verify frozen hashes and independent 396-test evidence.",
+    "Treat the prior accidentally launched scripted suite as excluded and only assess residue evidence. Clearly list external OMP, reboot and pyte live pending items."
+  ],
+  "constraints": ["Strict read-only. Do not edit, run OMP-launching tests, delegate, invoke oracle, commit, publish, deploy or infer pending environment success."],
+  "report": "Return candidate_ready true/false; all P0/P1/P2 findings; acceptance matrix; hash/evidence/incident assessment; pending items and exact reroute if any."
+}

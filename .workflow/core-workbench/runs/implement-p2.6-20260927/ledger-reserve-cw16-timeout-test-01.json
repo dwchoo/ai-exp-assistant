@@ -1,0 +1,20 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 1272,
+  "event": {
+    "id": "reserve-cw16-timeout-test-01",
+    "kind": "reserve",
+    "data": {
+      "invocation": "cw16-timeout-test-01",
+      "role": "test_designer",
+      "unit": "V-CW-16-p2.6-current",
+      "incident": "",
+      "purpose": "Independent timeout cleanup and full CW-16 integration regression",
+      "model": "gpt-6-sol",
+      "effort": "high",
+      "buckets": ["total", "role:test_designer", "unit:V-CW-16-p2.6-current"],
+      "writer": false,
+      "workspace": "/home/dwchoo/ai-exp-assistant"
+    }
+  }
+}

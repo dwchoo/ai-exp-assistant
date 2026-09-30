@@ -1,0 +1,47 @@
+{
+  "invocation": "cw05-g4-01",
+  "role": "worker_senior",
+  "unit": "V-CW-05-p2.6-current",
+  "objective": "Implement and demonstrate the complete CW-05 G4 feasibility boundary on the integrated G1-G3 candidate.",
+  "required_behavior": [
+    "Build a minimal backend/frontend lifetime split owning two real OMP PTYs, one parent shell PTY, and a distinct experiment supervisor identity; detach for more than 60 seconds and reattach without PID/control/user-owner changes or duplicate processes.",
+    "Drive a real 60-second timer wake through the worker OMP exactly once while detached, using a bounded approval fixture; prove a closed pause port prevents model delivery while host experiment observation continues.",
+    "Provide a minimal metadata port whose durable-write success permits dispatch and whose injected failure holds new dispatch without terminating the existing run.",
+    "Add versioned Python and TypeScript contracts/adapters for ShellControl, Takeover, DeliveryObservation, AutomationState, and ResumeEvidence; preserve v1 compatibility, reject unsupported old versions, and test cross-language fixtures.",
+    "Record selected runtime/dependency source, hash/version, license, and install command in G4 documentation.",
+    "Provide a gate aggregate validator that rejects missing owned items, changed requirements/approval/candidate identity, insufficient evidence level, failed checks, required unknowns, and fixture-only evidence for runtime items; accept only a valid G1-G4 set tied to current integrated inputs.",
+    "Use actual OMP 18.2.10 for runtime claims, bounded cleanup, PTY/pipe drain, and residue checks. Do not claim CW-09/11/12/15 production completion."
+  ],
+  "allowed_files": [
+    "src/workbench/runtime/**",
+    "src/workbench/contracts/**",
+    "src/workbench/app/**",
+    "tests/gates/g4_*/**",
+    "tests/gates/harness/**",
+    "tests/contracts/**",
+    "omp_bridge/contract/**",
+    "docs/features/core-workbench/gates/G4.md",
+    "pyproject.toml",
+    "uv.lock",
+    "omp_bridge/package.json"
+  ],
+  "constraints": [
+    "Preserve all existing user and G1-G3 changes; do not reset, clean, stash, commit, push, or deploy.",
+    "Do not modify PLAN, BRIEF, SPEC, tickets, workflow records, graphify output, or implement downstream production features.",
+    "Keep the implementation minimal and make fixture/diagnostic behavior explicit rather than presenting it as production durability.",
+    "Do not use Docker."
+  ],
+  "checks": [
+    "Run focused Python and Node contract tests.",
+    "Run the actual >60-second detach/wake/reconnect probe and paused control case.",
+    "Run negative evidence-validator cases and an integrated valid-set case.",
+    "Run relevant G1-G4 regression tests and git diff --check."
+  ],
+  "report": [
+    "changed files and architecture boundary",
+    "exact runtime command, environment, elapsed detach interval, PIDs/identities and wake/pause observations",
+    "contract compatibility, metadata failure, dependency and evidence-validator results",
+    "cleanup/residue and unknowns",
+    "candidate_ready, needs_reroute, or needs_oracle"
+  ]
+}

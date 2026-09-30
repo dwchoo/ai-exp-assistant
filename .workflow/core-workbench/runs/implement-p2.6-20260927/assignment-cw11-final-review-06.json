@@ -1,0 +1,20 @@
+{
+  "invocation":"cw11-final-review-06",
+  "role":"reviewer",
+  "unit":"V-CW-11-p2.6-current",
+  "objective":"Fresh final review of the complete CW-11 candidate after atomic source activation and positive incarnation corrections.",
+  "candidate_manifest":".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw11-final-positive-incarnation.json",
+  "candidate":"15cced80d156715b781a16c402c7be98be7563fe4fa13e47a834888dc884f67a",
+  "requirements":".workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw11.json",
+  "ticket":"docs/features/core-workbench/tickets/CW-11.md",
+  "prior_review":".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw11-final-review-05.json",
+  "correction_evidence":[".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw11-source-activation-correction-01.json",".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw11-positive-incarnation-correction-01.json",".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw11-positive-incarnation-test-01.json"],
+  "must_review":[
+    "Reproduce/refute late first bind: WorkflowObservationBinding cannot issue/refresh tokens; only explicit coordinator activate_run_source may atomically activate/register the exact source, and delayed old/preissued tokens fail.",
+    "Verify public success/retry events include the exact positive run_incarnation and UI consumers can distinguish old same-identity updates.",
+    "Re-audit exit fences/UI maps, ticket A-B-A, run schedule incarnation, admission linearization, authority/pause, hang/usage, persisted TASK binding, 121st review, 13th wake, privacy and cleanup.",
+    "Validate current candidate hash, independent 84/84 evidence, and latest actual OMP 18.2.10 probe."
+  ],
+  "constraints":["Review-only; no edits/mutations; report P0-P3 findings or explicit no findings; no destructive git actions."],
+  "report":["candidate validation","prior-finding closure","new findings","runtime qualifications","candidate_ready or needs_reroute"]
+}

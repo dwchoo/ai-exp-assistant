@@ -1,0 +1,14 @@
+{
+  "invocation":"cw11-final-review-03",
+  "candidate":"e4d18349adda351975340ab3a2bcf1b76919bf6df6cff7a0947272408578e409",
+  "candidate_hash_validated":true,
+  "outcome":"needs_reroute",
+  "findings":[
+    {"severity":"P1","summary":"Two independent active-run and authority callbacks cannot provide atomic dispatch admission; reversing read order merely reverses the TOCTOU direction."},
+    {"severity":"P2","summary":"CW-11 immediate exit notification requires six identity fields that the actual CW-10 exit record does not provide, leaving immediate integration unproven."}
+  ],
+  "closed_prior_findings":["same-run-id cross-session exit misbinding","on_exit exception retry","reentrant and concurrent duplicate exit delivery"],
+  "runtime_qualifications":["Current candidate did not rerun actual OMP after race2 delta.","Positive live persistent-shell hang remains an evidence limitation."],
+  "writer":false,
+  "files_modified":[]
+}

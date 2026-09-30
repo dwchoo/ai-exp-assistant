@@ -1,0 +1,19 @@
+{
+  "invocation":"cw11-race2-test-01",
+  "role":"test_designer",
+  "unit":"V-CW-11-p2.6-current",
+  "objective":"Independently attack the final-dispatch and exit-event race2 corrections.",
+  "candidate_manifest":".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw11-race2-correction.json",
+  "candidate":"0254f4054bc09bd0170d6d4c390c2ff768ca7e05f75760cc01403b864cf6cace",
+  "review_evidence":".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw11-final-review-02.json",
+  "requirements":".workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw11.json",
+  "write_scope":["tests/observation/test_worker_review_independent.py","tests/observation/live_worker_review_independent.py"],
+  "must_test":[
+    "Mutate pause/cancel/approval/metadata inside the final active_run callback and prove no dispatch.",
+    "Deliver a late old-session exit with the same run_id as a new active identity and prove rejection/no fence; prove partial/run_id-only/spoofed identity is rejected.",
+    "Make on_exit fail then retry with and without an active_run, and prove exactly one successful surface; attack concurrent and reentrant duplicate calls.",
+    "Rerun the full observation suite and relevant regressions. The 60-second OMP probe may be reused from the immediately prior independent evidence because this delta does not change periodic OMP review dispatch, but explain the evidence scope."
+  ],
+  "constraints":["Tests only; apply_patch only; no product/workflow edits; no uv/local env/package artifacts; graphify update after edits; no commit/push/merge/stash/reset/clean."],
+  "report":["independent tests","exact checks","evidence reuse qualification","candidate_ready or needs_reroute"]
+}

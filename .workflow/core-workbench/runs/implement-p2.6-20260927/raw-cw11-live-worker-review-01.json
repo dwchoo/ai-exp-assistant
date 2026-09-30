@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "invocation": "cw11-worker-01",
+  "probe": "cw11-periodic-review-and-13th-peer-wake",
+  "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python tests/observation/live_worker_review_probe.py",
+  "cwd": "/home/dwchoo/ai-exp-assistant",
+  "exit_code": 0,
+  "result": "passed_actual_omp_18_2_10_review_and_13_peer_wakes",
+  "omp_version": "omp/18.2.10",
+  "scheduler_first_tick": "waiting",
+  "scheduler_review_status": "dispatched",
+  "periodic_review_mailbox_status": "omp_processed",
+  "normal_peer_wakes_processed": 13,
+  "thirteenth_normal_peer_wake_status": "omp_processed",
+  "review_count": 1,
+  "provider_request_count": 14,
+  "worker_session_generation": 1,
+  "active_task_run_observed": true,
+  "review_used_sanitized_facts": true,
+  "pty_drain_bytes": 161704,
+  "cleanup": {
+    "omp_children_remaining": 0,
+    "provider_stopped": true,
+    "temporary_directory": "TemporaryDirectory context cleanup"
+  },
+  "privacy": {
+    "provider": "isolated local scripted provider",
+    "provider_credentials_used": false,
+    "prompt_or_response_bodies_retained": false
+  },
+  "unknowns": [
+    "The live probe used a durable active TaskRepository run and real worker OMP/G3 delivery; process/lifecycle paths are independently exercised by CW-10 workflow regressions rather than attached to a live persistent shell in this probe."
+  ]
+}

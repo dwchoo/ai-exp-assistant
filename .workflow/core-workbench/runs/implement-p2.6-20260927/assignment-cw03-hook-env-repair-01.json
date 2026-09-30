@@ -1,0 +1,22 @@
+{
+  "invocation": "cw03-hook-env-repair-01",
+  "role": "worker_senior",
+  "unit": "V-CW-03",
+  "candidate": "e60988ba2aaf9d2b5ed1ea18e242a9cbbbbead2df023115d50757ec64cc544b5",
+  "purpose": "Correct the reviewed G2-HOOK-ENV subreaper restoration gap",
+  "write_scope": [
+    "tests/gates/g2_shell/live_hook_env_probe.py"
+  ],
+  "requirements": [
+    "Apply the minimal correction so the prior PR_SET_CHILD_SUBREAPER state is always restored from a separate finally path even when cleanup proc_fields, kill, or waitpid raises.",
+    "Preserve the existing fixture-owned PID/start-time cleanup boundary and do not add arbitrary daemon discovery or auto-kill behavior.",
+    "Do not modify predicate tests; independent test_designer owns regression-test changes.",
+    "Run the focused hook/env predicates and runtime probe after the correction and report exact results and residue."
+  ],
+  "finding": ".workflow/core-workbench/runs/implement-p2.6-20260927/review-cw03-hook-env-01.json",
+  "constraints": [
+    "One mutation owner in the shared workspace.",
+    "No commit, push, publish, or deploy.",
+    "Preserve unrelated user changes."
+  ]
+}

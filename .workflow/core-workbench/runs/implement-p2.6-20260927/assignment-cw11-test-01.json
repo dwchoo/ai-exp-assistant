@@ -1,0 +1,35 @@
+{
+  "invocation": "cw11-test-01",
+  "role": "test_designer",
+  "unit": "V-CW-11-p2.6-current",
+  "objective": "Independently test CW-11 periodic worker review, busy/user/pause policy, evidence-based hang classification, usage reporting, and actual OMP longevity.",
+  "candidate_manifest": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw11-worker-final.json",
+  "candidate": "e34800acc53f4494ffd5cc9ac81f2ef42de7c8c1900fbe7d9f6de8b47f0c61d9",
+  "requirements": ".workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw11.json",
+  "allowed_write_scope": [
+    "tests/observation/test_worker_review_independent.py",
+    "tests/observation/live_worker_review_independent.py"
+  ],
+  "required_attacks": [
+    "Clock edges before/exactly/after 60 seconds, large jumps, run identity replacement, inactive run, non-monotonic/invalid clocks, and no lifetime cap through the 121st review.",
+    "Busy/pending/approval/editor/tool/session/generation ambiguity, strict integer fields, latest-only coalescing, user priority, delivery deferred/unknown/exception, duplicate dispatch/replay prevention.",
+    "Pause starts no model review while collection/confirmed exit continues; cancel/revoke/unhealthy clears stale pending; immediate exit event is once-only.",
+    "Silence and elapsed time alone remain unknown; suspected hang needs explicit live stalled process plus lifecycle evidence; malformed/private facts are excluded.",
+    "Usage observed/estimated/unknown remains distinct and unbounded; 13th peer wake and actual OMP 18.2.10 review are processed with cleanup/residue checks."
+  ],
+  "constraints": [
+    "Do not modify product, worker tests/probe, workflow/bridge/contracts/docs/artifacts/dependencies, graphify sources, or unrelated files.",
+    "Use apply_patch for independent tests. Preserve failing product evidence and report needs_reroute rather than fixing product.",
+    "Use `/tmp/cw02-g1-venv/bin/python` with PYTHONDONTWRITEBYTECODE=1 and PYTHONPATH=src; do not use uv or create local environments/locks/egg-info.",
+    "No commit/push/merge/stash/reset/clean. Run graphify update . after test changes and report generated drift separately."
+  ],
+  "checks": [
+    "Independent tests, worker observation suite, actual independent OMP probe, workflow/bridge/contracts/G4 regressions, git diff/residue/privacy checks."
+  ],
+  "report": [
+    "new tests/findings",
+    "actual OMP and long-run evidence",
+    "commands/results",
+    "snapshot/scope audit and candidate_ready or needs_reroute"
+  ]
+}

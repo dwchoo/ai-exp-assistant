@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw06-rerun-test-08",
+  "ticket_id": "CW-06 (+ vt_g1 SU/SD correction)",
+  "role": "test_designer",
+  "unit": "V-CW-06-p2.7",
+  "approved_bundle_digest": "a521acdc3838b43a26e277afc233bab695c8b02ce0d42392c3678931b2e3f027",
+  "routing": {"planned_role": "test_designer", "selected_role": "test_designer (wb-test-rerun, Sonnet high)", "reason_codes": ["correction_reverification"], "evidence_refs": ["result-p27-cw06-flake-worker-07.json", "result-p27-vt-susd-worker-08.json"]},
+  "frozen_candidate": "01cee2da36f84822ab5a5dc24fed01667ad9a50f77e1ca46efce77fb58c6650e",
+  "frozen_production_files": {"src/workbench/ui/product/__init__.py": "8b250db57bcf1590be1ba6959cf059139155475f18d84ee4577e84e7ad1d536b", "src/workbench/ui/product/app.py": "4aad51ef500e1167624ff1a9aa521ff44e79bde66480562a32a7acae5f2faf52", "src/workbench/ui/product/input.py": "ee5a9e925c292a15cc60ba0e76e4c6f16cdbf46ffa6f3ccc2171b866967a8605", "src/workbench/ui/product/model.py": "c890f6abce3fa1e52780446b452b22ae3634341b2035439995b68c97ec197545", "src/workbench/ui/product/view.py": "2c6b21ff331e67e0075ad2e9256d187d279dacd2d3ac093a865e3c2ba1148159", "src/workbench/backend/ui_server.py": "e6aa3e0b12fc48c920ed901d8e3b8ec8e1063d9d1cb3a89bd5345066de533469", "src/workbench/backend/cli.py": "9b44e4847275514ec27e7c9474dfe7ad0c5556d3803651f7fc292be0402a2b4e", "src/workbench/terminal/vt_g1/screen.py": "2dcb887e25269aca54a7372e93fcef7d83a37471b465a56d936f7a9f53b97920"},
+  "mode": "execution-only final re-verification of the CW-06 unit candidate; do NOT edit repository files except the result JSON. A read-only delta review runs concurrently.",
+  "required": [
+    "Real OMP runtime (only model use; exactly one run, 2 tiny turns): tests/ui/live_product_omp_independent.py with CW06_LIVE_MODEL=1, evidence under your scratch dir. Pass S0-S16 incl. S15 ratios >= 0.8.",
+    "Stub OMP runtime: tests/ui/live_product_flood_independent_p27f.py 3x, all pass, no slow_client.",
+    "Repeat stability: tests/ui/test_product_replay_independent_p27h.py 10x and tests/ui/test_product_pty.py 5x - all pass.",
+    "Regression (pattern test_*.py, venv python, short TMPDIR e.g. /tmp/r08): tests/ui x2, tests/backend (incl. independent), tests/contracts, tests/terminal, tests/gates/g1_vt (src:.), tests/gates/g4_lifetime (src:.), tests/gates/g2_shell (src:.)."
+  ],
+  "allowed_write_paths": [".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw06-rerun-test-08-agent.json", "your scratch dir", "/tmp/r08* (remove at end)"],
+  "prohibited": "any repo edit; model turns <= 2; system python3; graphify update; commits; tmux/herdr; reading ~/.omp; leave /tmp/cw03-g2-* (pre-existing) and /tmp/cw06_*.txt alone.",
+  "result_format": "Write full JSON; reply <=15 lines: checks table, status, S15 ratios, repeat counts, model turns, frozen hashes equal?, residue. Korean."
+}

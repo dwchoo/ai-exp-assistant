@@ -1,0 +1,10 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 276,
+  "event": {"id": "reserve-cw05-g4-test-01", "kind": "reserve", "data": {
+    "invocation": "cw05-g4-test-01", "role": "test_designer", "unit": "V-CW-05-p2.6-current", "incident": "",
+    "purpose": "Independently test CW-05 G4 runtime, contract, metadata, and aggregate-validator boundaries",
+    "model": "gpt-6-sol", "effort": "high", "buckets": ["total", "role:test_designer", "unit:V-CW-05-p2.6-current"],
+    "writer": true, "workspace": "/home/dwchoo/ai-exp-assistant"
+  }}
+}

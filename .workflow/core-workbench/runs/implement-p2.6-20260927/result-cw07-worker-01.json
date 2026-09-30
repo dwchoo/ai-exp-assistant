@@ -1,0 +1,93 @@
+{
+  "schema_version": 1,
+  "invocation": "cw07-worker-01",
+  "unit": "V-CW-07-p2.6-current",
+  "task_result": "candidate_ready",
+  "baseline_candidate": "41c2b684d3ff4f2b1a463879de56646d768e4e454402b2c93a39d74d439e798f",
+  "candidate": "75aa7c21e481df191b15098d4dc8bb0b459caf664ffab3c93285f6c45a72c325",
+  "assignment_ref": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/assignment-cw07-worker-01.json",
+  "baseline_ref": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw07-worker-checkpoint.json",
+  "snapshot_ref": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw07-worker-after.json",
+  "scope_audit_ref": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/scope-audit-cw07-worker.json",
+  "raw_runtime_ref": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/raw-cw07-bash-sh.json",
+  "cwd": "/home/dwchoo/ai-exp-assistant",
+  "changed_product_test_paths": [
+    "src/workbench/terminal/shell_g2/lifecycle.py",
+    "src/workbench/terminal/shell_g2/prototype.py",
+    "src/workbench/terminal/shell_persistent/adapter.py",
+    "tests/terminal/live_persistent_shell.py",
+    "tests/terminal/test_persistent_shell.py"
+  ],
+  "implementation": [
+    "PersistentShell is a production adapter over G2 ManagedLifecycleProbe and ControlWaitProbe; explicit user environment, separate PTY/control, one outstanding v2 ShellControl/AutomationState request, and no Task-success inference.",
+    "Production handoff checks enforce direct same-parent control wait and fail closed for unsupported hook/trap, dirty input, manual jobs, and unknown ownership; supervisor and input barriers remain distinct.",
+    "Takeover request blocks new dispatch immediately but confirmation requires live foreground identity or a clean manual prompt; already-sent work is not cancelled, foreground user input is explicitly routed, and replay is denied.",
+    "A reaped short command at EXEC_READY does not become a false lifecycle UNKNOWN; a live foreground target with unconfirmed identity remains unconfirmable and input is held."
+  ],
+  "checks": [
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/terminal -q",
+      "result": "passed",
+      "observed": "4 tests; OK"
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/gates/g2_shell -q",
+      "result": "passed",
+      "observed": "132 tests in 114.195s; OK (skipped=6)"
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g4_lifetime /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/gates/g4_lifetime -q",
+      "result": "passed",
+      "observed": "8 tests; OK"
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g4_evidence /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/gates/g4_evidence -q",
+      "result": "passed",
+      "observed": "10 tests; OK"
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/terminal /tmp/cw02-g1-venv/bin/python tests/terminal/live_persistent_shell.py",
+      "result": "passed",
+      "observed": "Bash and /bin/sh each passed 8 bounded real-runtime cases; both reported empty owned-PID residue; final complete JSON retained in raw_runtime_ref"
+    },
+    {
+      "command": "jq -e '.items == [\"P-C-AC-08\",\"P-C-AC-26\",\"P-C-AC-32\"] and (.results | length == 2 and all(.[]; .result == \"passed\" and .residue == [] and (.cases | length == 8)))' .workflow/core-workbench/runs/implement-p2.6-20260927/raw-cw07-bash-sh.json",
+      "result": "passed",
+      "observed": "true"
+    },
+    {
+      "command": "git diff --check",
+      "result": "passed",
+      "observed": "exit 0, no whitespace errors"
+    },
+    {
+      "command": "pgrep -af '[/]tmp/cw07-runtime-'",
+      "result": "passed",
+      "observed": "exit 1, no matching owned runtime process"
+    },
+    {
+      "command": "find /tmp -maxdepth 1 -type d -name 'cw07-runtime-*' -print",
+      "result": "passed",
+      "observed": "empty output, no owned fixture directory"
+    }
+  ],
+  "runtime_observations": {
+    "bash": "Takeover requested and confirmed while main child active, with separate foreground identity and no exit/prompt dependency; user-prepared cwd/PATH/export inherited, app-only and private boundary variables absent; input barrier, manual return, fresh handoff, no replay and negative controls observed.",
+    "sh": "Same eight bounded cases passed for /bin/sh, including job/REPL/unsubmitted input, unsupported hook and trap, and control-FD-loss unknown hold.",
+    "stopped_or_unknown_owned_subprocesses": [],
+    "owned_pid_residue": []
+  },
+  "scope": {
+    "comparable": true,
+    "allowed_product_test_changes": 5,
+    "outside_scope": ["graphify-out/cache/last_query_stamp"],
+    "outside_scope_note": "Generated graphify cache stamp differs from baseline after a read query; exact attribution is not independently proven. No restoration or overwrite was attempted. Root will run graphify update and incorporate this generated cache delta into its final candidate snapshot."
+  },
+  "remaining_unknowns": [
+    "This worker candidate is not overall gate approval; Root must perform independent review and final combined verification.",
+    "G2 privileged/setuid/file-capability execution and ptrace-denied environments remain explicit unsupported/UNKNOWN boundaries; CW-10/11/14 behavior was not implemented.",
+    "The adapter consumes validated v2 ports but does not itself establish external approval authority or Task outcome; those belong to upstream/downstream components."
+  ],
+  "writer_lease": "returned",
+  "commit_or_push": false
+}

@@ -1,0 +1,30 @@
+{
+  "invocation": "cw12-tracked-mode-correction-01",
+  "outcome": "complete",
+  "candidate_ready": true,
+  "changed_paths": [
+    "src/workbench/policy/pause_automation/controller.py",
+    "tests/policy/pause_automation/test_pause_policy.py",
+    "graphify-out/**"
+  ],
+  "implementation": {
+    "tracked_mode_format": "v3:<full st_mode>",
+    "tracked_entry_limit": 10000,
+    "tracked_listing_byte_limit": 8388608,
+    "sidecar_byte_limit": 1048576,
+    "clean_content_hashing": "limited to existing Git changed and flagged paths",
+    "failure_policy": "missing, special, unreadable, overflow, scan error, or unstable tracked metadata fails closed"
+  },
+  "checks": {
+    "preserved_0644_to_0600_regression": "failed before correction and passed after correction",
+    "focused": "passed",
+    "pause_automation": "118 tests passed in 29.789 seconds",
+    "graphify_update": "exit 0; 4622 nodes and 9720 edges",
+    "residual_processes": "none"
+  },
+  "residual_risks": [
+    "Very large tracked-mode listings or sidecars fail closed at explicit bounds.",
+    "Clean tracked file contents remain outside full hashing unless Git reports the path as changed or flagged."
+  ],
+  "mutation_owner": "/root/cw12_post_review_correction"
+}

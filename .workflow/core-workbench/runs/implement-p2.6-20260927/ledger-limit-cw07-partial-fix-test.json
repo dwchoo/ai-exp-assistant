@@ -1,0 +1,23 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 385,
+  "event": {
+    "id": "limit-cw07-partial-fix-test-20260928",
+    "kind": "limit",
+    "data": {
+      "bucket": "role:test_designer",
+      "origin": "operating",
+      "value": 94,
+      "authority": "C-D55 plus workflow-contract section 8 and current implementation authorization",
+      "reason": "One independent CW-07 partial-write transition regression turn",
+      "decision_owner": "Root",
+      "remaining_work_estimate": 1,
+      "expected_previous": {
+        "value": 93,
+        "authority": "C-D55 plus workflow-contract section 8 and current implementation authorization",
+        "reason": "One independent regression-test turn for CW-07 unknown-state send_user bypass"
+      },
+      "scope_basis": null
+    }
+  }
+}

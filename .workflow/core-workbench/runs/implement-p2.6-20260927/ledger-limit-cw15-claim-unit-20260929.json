@@ -1,0 +1,23 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 1198,
+  "event": {
+    "id": "limit-cw15-claim-unit-20260929",
+    "kind": "limit",
+    "data": {
+      "bucket": "unit:V-CW-15-p2.6-current",
+      "origin": "operating",
+      "value": 21,
+      "authority": "Approved PLAN p2.6 CW-15, C-D52 handoff and transport-claim findings, workflow-contract section 8, and current $implement authorization",
+      "reason": "One bounded handoff/atomic submission correction, independent regression, and fresh final review",
+      "decision_owner": "Root",
+      "remaining_work_estimate": 3,
+      "expected_previous": {
+        "value": 18,
+        "authority": "Approved PLAN p2.6 CW-15, C-D52 immediate-request finding, workflow-contract section 8, and current $implement authorization",
+        "reason": "One bounded takeover intent/transport permit correction, independent regression, and fresh final review"
+      },
+      "scope_basis": null
+    }
+  }
+}

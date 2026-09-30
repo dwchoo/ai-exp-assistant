@@ -1,0 +1,100 @@
+TAP version 13
+# Subtest: Python golden control envelope parses and matches the bound session generation
+ok 1 - Python golden control envelope parses and matches the bound session generation
+  ---
+  duration_ms: 14.777526
+  type: 'test'
+  ...
+# Subtest: logical message ID is stable while each delivery has its own attempt ID
+ok 2 - logical message ID is stable while each delivery has its own attempt ID
+  ---
+  duration_ms: 1.79616
+  type: 'test'
+  ...
+# Subtest: rejects unsupported versions, roles, identifiers, unknown fields, and sessions
+ok 3 - rejects unsupported versions, roles, identifiers, unknown fields, and sessions
+  ---
+  duration_ms: 1.602631
+  type: 'test'
+  ...
+# Subtest: keeps accepted, started, completed, and unknown as distinct states
+ok 4 - keeps accepted, started, completed, and unknown as distinct states
+  ---
+  duration_ms: 1.407174
+  type: 'test'
+  ...
+# Subtest: keeps PTY display data as raw bytes outside the control envelope
+ok 5 - keeps PTY display data as raw bytes outside the control envelope
+  ---
+  duration_ms: 0.588623
+  type: 'test'
+  ...
+# Subtest: rejects non-JSON values nested inside a message payload
+ok 6 - rejects non-JSON values nested inside a message payload
+  ---
+  duration_ms: 1.420098
+  type: 'test'
+  ...
+# Subtest: rejects explicit null for optional wire fields
+ok 7 - rejects explicit null for optional wire fields
+  ---
+  duration_ms: 2.980515
+  type: 'test'
+  ...
+# Subtest: session generation fits the shared JS safe integer range
+ok 8 - session generation fits the shared JS safe integer range
+  ---
+  duration_ms: 1.046728
+  type: 'test'
+  ...
+# Subtest: command exit code fits the shared safe integer range
+ok 9 - command exit code fits the shared safe integer range
+  ---
+  duration_ms: 1.578121
+  type: 'test'
+  ...
+# Subtest: nested payload numbers preserve the shared numeric boundary
+ok 10 - nested payload numbers preserve the shared numeric boundary
+  ---
+  duration_ms: 1.696953
+  type: 'test'
+  ...
+# Subtest: PTY display counters fit the shared safe integer range
+ok 11 - PTY display counters fit the shared safe integer range
+  ---
+  duration_ms: 0.462847
+  type: 'test'
+  ...
+# Subtest: control writer preserves validated payload and cannot emit a hidden unsafe number
+ok 12 - control writer preserves validated payload and cannot emit a hidden unsafe number
+  ---
+  duration_ms: 1.610543
+  type: 'test'
+  ...
+# Subtest: shared five-port fixtures and v1 envelope compatibility
+ok 13 - shared five-port fixtures and v1 envelope compatibility
+  ---
+  duration_ms: 2.610473
+  type: 'test'
+  ...
+# Subtest: unsupported old ports, lost ownership and unknown reconciliation cannot pass
+ok 14 - unsupported old ports, lost ownership and unknown reconciliation cannot pass
+  ---
+  duration_ms: 0.71528
+  type: 'test'
+  ...
+# Subtest: comma-containing unknown key cannot replace two required ShellControl keys
+ok 15 - comma-containing unknown key cannot replace two required ShellControl keys
+  ---
+  duration_ms: 0.485355
+  type: 'test'
+  ...
+1..15
+# tests 15
+# suites 0
+# pass 15
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 173.125587

@@ -1,0 +1,91 @@
+{
+  "schema_version": 1,
+  "invocation": "cw08-close-race-test-01",
+  "unit": "V-CW-08-p2.6-current",
+  "task_result": "candidate_ready",
+  "candidate_before": "39f998a9db246a448fed8609263c7f3e82637f17ade5875d3e2e5a63384aa56a",
+  "candidate_after": "02404c943fc53bfcab51097fbcc69cbbb8c58e1101d4ffa6fe4409de14ac25ee",
+  "requirements_sha256": "2fa2a94f03fe18671123d25b355d193e6dc2f600c94eca061f588db699f91722",
+  "changed_paths": [
+    "tests/bridge/test_mailbox_independent.py"
+  ],
+  "new_test_methods": 1,
+  "checks": [
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest -v tests.bridge.test_mailbox_independent.BridgeServerIndependentRegressions.test_close_after_ack_pending_before_first_send_converges_to_durable_unknown",
+      "exit_code": 0,
+      "tests": 1
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest -q tests.bridge.test_mailbox_independent.BridgeServerIndependentRegressions.test_close_after_ack_pending_before_first_send_converges_to_durable_unknown tests.bridge.test_mailbox_independent.BridgeServerIndependentRegressions.test_close_after_ack_pending_before_first_send_converges_to_durable_unknown tests.bridge.test_mailbox_independent.BridgeServerIndependentRegressions.test_close_after_ack_pending_before_first_send_converges_to_durable_unknown tests.bridge.test_mailbox_independent.BridgeServerIndependentRegressions.test_close_after_ack_pending_before_first_send_converges_to_durable_unknown tests.bridge.test_mailbox_independent.BridgeServerIndependentRegressions.test_close_after_ack_pending_before_first_send_converges_to_durable_unknown",
+      "exit_code": 0,
+      "tests": 5,
+      "note": "exact invocation repeated the named test five times without product mutation"
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/bridge -v",
+      "exit_code": 0,
+      "tests": 18
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/tasks -q",
+      "exit_code": 0,
+      "tests": 22
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/contracts -q",
+      "exit_code": 0,
+      "tests": 20
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g3_omp /tmp/cw02-g1-venv/bin/python -m unittest -q test_g3_protocol test_tui_message_kinds_predicates test_tui_session_predicates test_tui_session_inflight_predicates test_tui_event_surface_predicates test_tui_extension_fault_predicates test_tui_pause_reconcile_predicates test_tui_contention_predicates test_tui_draft_predicates test_tui_reconnect_predicates",
+      "exit_code": 0,
+      "tests": 114
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g3_omp /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/gates/g4_lifetime -q",
+      "exit_code": 0,
+      "tests": 8
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/gates/g4_evidence -q",
+      "exit_code": 0,
+      "tests": 10
+    },
+    {
+      "command": "node --experimental-strip-types --test tests/gates/g3_omp/bridge.test.ts tests/gates/harness/contracts.test.ts tests/gates/harness/ports-v2.test.ts",
+      "exit_code": 0,
+      "tests": 34
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g3_omp /tmp/cw02-g1-venv/bin/python tests/bridge/live_mailbox_independent.py",
+      "exit_code": 0,
+      "actual_omp_processes": 2,
+      "message_kinds": 4,
+      "child_socket_thread_residue": 0
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0
+    },
+    {
+      "command": "find /tmp -maxdepth 1 -type d -name 'cw08-independent-*' -o -name 'cw08-independent-live-*'",
+      "exit_code": 0,
+      "output": ""
+    }
+  ],
+  "regression": {
+    "id": "CW08-CLOSE-BEFORE-SEND-UNKNOWN",
+    "outcome": "passed",
+    "boundary": "Authenticated worker peer connected; TaskMailbox persisted delivery attempt and G3BridgeServer registered pending ACK. Injected close at _send_until entry before first select/send; original send path then ran on closed connection.",
+    "observed": "No exception escaped TaskMailbox.deliver; bounded UNKNOWN receipt; durable attempted→unknown history; same receipt on duplicate call; pending ACK map empty, socket removed, client received no request bytes."
+  },
+  "implementation_defects": [],
+  "cleanup": {
+    "socket_threads_closed": true,
+    "temporary_directory_residue": [],
+    "owned_omp_child_residue": []
+  },
+  "needs_oracle": false,
+  "overall_completion_claimed": false
+}

@@ -1,0 +1,29 @@
+{
+  "invocation": "cw03-split-pg-worker-01",
+  "ticket_id": "CW-03",
+  "status": "candidate_ready",
+  "actual_workspace": "/home/dwchoo/ai-exp-assistant",
+  "base_snapshot": "c9ec5ed63ef04b3f0be19d17c75ca48193da3cea02ba0c905f27d532ff73fb3d",
+  "candidate_id": "347b6b832fabe2ca3d9ecbc97cc9bd4882a94f36ce1bde04590693f728f090e8",
+  "attributable_output_bundle": "two-file test/probe delta audited by split-pg-worker-scope-audit.json",
+  "changed_paths": [
+    "tests/gates/g2_shell/live_combined_boundary_probe.py",
+    "tests/gates/g2_shell/test_live_combined_boundary_predicates.py"
+  ],
+  "scope_audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/split-pg-worker-scope-audit.json",
+  "checks": [
+    "split-PG predicates: 19 tests, 35.085s, exit 0",
+    "standalone differential probe: split-PG 8 cells plus shared-PG 4 negative controls observed, exit 0",
+    "full G2 discovery: 110 tests, 76.406s, exit 0, six delegated-cgroup skips",
+    "git diff --check: passed"
+  ],
+  "active_or_stopped_subprocesses": "all owned subprocesses stopped; owned PID/PG and fixture/suite residue absent",
+  "remaining_gaps": [
+    "Independent test_designer assessment and fresh frozen review remain mandatory",
+    "CW-03 six gate items require final current candidate records before integration",
+    "cgroup cases remain environment-limited and non-required by C-D55"
+  ],
+  "gate_result_refs": [],
+  "original_review_ref": null,
+  "delta_review_scope": null
+}

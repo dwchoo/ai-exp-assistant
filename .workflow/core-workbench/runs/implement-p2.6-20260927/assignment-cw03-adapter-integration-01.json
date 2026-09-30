@@ -1,0 +1,73 @@
+{
+  "feature_id": "core-workbench",
+  "ticket_id": "CW-03",
+  "attempt_id": "split-pg-adapter-integration-01",
+  "invocation": "cw03-adapter-integration-01",
+  "approved_bundle_digest": "64bcf577a30e7c6bbff3e4e775f8e6c17ca212ce3bf79b5bc5be31196a792b07",
+  "actual_workspace": "/home/dwchoo/ai-exp-assistant",
+  "repository_identity": "git HEAD 7b2048c50e0794da847ad8674d4dc0433d643c33 on main",
+  "baseline_snapshot": "3e713a73d1191e1dfed0a02fb27445fb58afb27a3cf65e0a276671134f72c437",
+  "effective_write_capability": "shared workspace; sole mutation owner while dispatched",
+  "acceptance_ids": ["C-AC-03", "C-AC-08", "C-AC-10", "C-AC-20", "C-AC-26", "C-AC-32", "C-AC-34"],
+  "required_gate_items": ["G2-CONTROL", "G2-INPUT-JOBS", "G2-HOOK-ENV", "G2-TAKEOVER", "G2-LIFECYCLE", "G2-LAUNCH"],
+  "relevant_contracts": ["CW-03", "SPEC s2.6", "ADR-0002", "C-D55"],
+  "allowed_write_paths": [
+    "src/workbench/terminal/shell_g2/**",
+    "tests/gates/g2_shell/**"
+  ],
+  "prohibited_paths": [
+    "tests/gates/g2_shell/test_split_pg_control.py",
+    "docs/**",
+    ".workflow/**",
+    ".codex/**",
+    "graphify-out/**"
+  ],
+  "generated_outputs": [],
+  "resource_claims": [{"resource": "host:shell-fixture", "mode": "exclusive"}],
+  "mutation_owner": "cw03-adapter-integration-01",
+  "checkpoint_ref": ".workflow/core-workbench/runs/implement-p2.6-20260927/split-pg-correction-frozen-candidate.json",
+  "required_inputs": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/oracle-cw03-native-tstp-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw03-split-pg-correction-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw03-split-pg-correction-test-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/review-cw03-split-pg-correction-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/check-cw03-split-pg-final-runtime-observed.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/check-cw03-g2-final-suite-observed.json"
+  ],
+  "objective": "Integrate the validated same-session PG_S != PG_E control/lifecycle design into the current CW-03 shell_g2 adapter/harness used by the six G2 matrix items. The matrix must exercise one coherent split-PG path rather than passing environment, takeover, launch, and failure cases through unrelated shared-PG helpers. Preserve parent PID/cwd/export, input-return and takeover latches, native Bash/dash behavior, explicit unknown/no replay, launch selection, and bounded descendant cleanup. This is CW-03 feasibility integration, not final product acceptance for downstream tickets.",
+  "required_properties": [
+    "No parent direct eval of user payload; fixed supervisor and child interpreter/executable boundary.",
+    "Supervisor and experiment are in the same terminal session but distinct process groups; foreground ownership is verified before run/continue.",
+    "STOPPED/CONTINUED do not imply main return, lifetime done, input return, or parent control return.",
+    "Foreground INT/QUIT preserve observation where required and signal-derived status remains distinct from numeric exits.",
+    "setsid descendants and failure before host registration remain owned or UNKNOWN with bounded repeated cleanup.",
+    "Environment, input/jobs, takeover, hook compatibility, and launch probes actually traverse the integrated split path or explicitly prove why a bounded seam is equivalent.",
+    "Existing negative controls remain meaningful and delegated cgroup remains optional under C-D55."
+  ],
+  "exact_checks": [
+    "PYTHONDONTWRITEBYTECODE=1 python3 tests/gates/g2_shell/live_combined_boundary_probe.py",
+    "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest tests.gates.g2_shell.test_split_pg_control -v",
+    "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/gates/g2_shell -p 'test_*.py' -v",
+    "git diff --check"
+  ],
+  "reserved_budget": 1,
+  "stop_conditions": [
+    "Integration requires changing approved user behavior, dropping Bash/dash support, or making cgroup/extra privilege mandatory.",
+    "A coherent split path cannot preserve the input/takeover/environment/launch contracts without a new product decision.",
+    "No bounded implementation can replace the shared-PG matrix within this call; return a precise reroute with the smallest remaining seam.",
+    "Owned process cleanup cannot be proven."
+  ],
+  "configured_model": "gpt-6-sol",
+  "configured_effort": "high",
+  "host_observed_model": "unverified",
+  "host_observed_effort": "unverified",
+  "routing": {
+    "planned_role": "worker_senior",
+    "selected_role": "worker_senior",
+    "reason_codes": ["coupled_invariants", "multi_file_runtime_integration"],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/review-cw03-split-pg-correction-01.json",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/check-cw03-g2-final-suite-observed.json"
+    ]
+  }
+}

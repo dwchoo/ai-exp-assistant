@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "invocation": "cw07-review-regression-test-01",
+  "before": "9868eff50a732257c8143a097e5a7ea37a33cf99224ada39ef387c5790eaf9e6",
+  "after": "413f090c5cf9507b2b830e9aaaa307ec8105a7235a4680acd56d3805e181184f",
+  "allowed": [
+    "tests/terminal/live_persistent_shell_independent.py",
+    "tests/terminal/test_persistent_shell_independent.py"
+  ],
+  "named_workflow_artifacts": [
+    "result-cw07-review-regression-test-01.json",
+    "snapshot-cw07-review-regression-test-after.json",
+    "scope-audit-cw07-review-regression-test.json"
+  ],
+  "changed": [
+    "tests/terminal/live_persistent_shell_independent.py",
+    "tests/terminal/test_persistent_shell_independent.py"
+  ],
+  "outside_scope": [],
+  "head_unchanged": true,
+  "index_changed": [],
+  "baseline_file_count": 1170,
+  "unchanged_baseline_file_count": 1168,
+  "baseline_candidate_digest_verified": true,
+  "workflow_artifacts_excluded_by_assigned_baseline": true,
+  "comparable": true
+}

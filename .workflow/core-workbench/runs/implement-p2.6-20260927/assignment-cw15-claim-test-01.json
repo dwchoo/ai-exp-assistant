@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "invocation": "cw15-claim-test-01",
+  "role": "test_designer",
+  "unit": "V-CW-15-p2.6-current",
+  "authority": "User $implement request; approved CW-15/C-D52; change-verification independent test stage",
+  "objective": "Independently verify the final revoke-vs-G3-submission claim and durable handoff reopen candidate.",
+  "candidate": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw15-claim-correction.json",
+    "candidate_id": "04ce8812f710e9df469184772288e685f5144906969e6f20387f91bd43b86c8c"
+  },
+  "requirements": [
+    "At the actual current/claim/_send_until boundary, deterministically prove revoke-before-claim sends zero bytes/frames/API calls and claim-before-revoke is classified already in-flight with one frame, no cancellation claim and no replay.",
+    "Test malformed, throwing, false and non-boolean claim/current contracts; exact peers and Pause authority must remain fail-closed. Check pending-ACK cleanup and subsequent valid request behavior.",
+    "Same coordinator: takeover→confirm→valid durable handoff reopens command/tick only after commit. External handoff failure and journal commit failure remain fenced with zero automatic send/review.",
+    "Verify token-unaware command object cannot send, all prior takeover/shutdown/no-replay races and production composition remain valid. Run focused and full predecessor suites possible in the environment, hashes, graph/residue."
+  ],
+  "allowed_write_paths": ["tests/lifecycle/**", "tests/gates/g3_omp/**", "tests/policy/pause_automation/**", "tests/integration/**", "graphify-out/**"],
+  "constraints": ["Production frozen. No production/docs/workflow/PLAN/state edits, external OMP/reboot, delegation, dependency installation, commit, publish, deploy or Docker. Use apply_patch for test-only changes."],
+  "report": "Return candidate_ready/needs_reroute, total-order traces/frame/API/ACK/replay counts, handoff success/failure outcomes, token/cleanup tests, suite totals/skips, production hashes, test changes/residue/pending."
+}

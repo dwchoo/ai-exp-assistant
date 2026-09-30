@@ -1,0 +1,48 @@
+## 11-flood-catchup: host shell flood 진행 중
+## size 160x45 | catch-up 지표 관측=True
+------------------------------------------------------------
+focus: HOST SHELL | host 입력 owner: user | shell mode: manual_foreground | 자동화: not_configured
+backend: ready | bridge manager=ok worker=ok | 마지막 확인 03:52:55 (0s 전) | Ctrl-] ? 도움말
+┌─ MANAGER OMP alive ───────────────────────────────┐┌─ WORKER OMP alive ────────────────────────────────┐┌─ HOST SHELL *FOCUS* alive owner=user 따라잡음 ─────┐
+│                                                   ││                                                   ││플러드                                              │
+│╭─── omp v18.2.10 ──────────────────────────────╮  ││╭─── omp v18.2.10 ──────────────────────────────╮  ││플러드                                              │
+││                │ Tips                         │  │││                │ Tips                         │  ││플러드                                              │
+││ Welcome back!  │ # for prompt actions         │  │││ Welcome back!  │ # for prompt actions         │  ││플러드                                              │
+││                │ / for commands               │  │││                │ / for commands               │  ││플러드                                              │
+││  ████████████  │ ! to run bash                │  │││  ████████████  │ ! to run bash                │  ││플러드                                              │
+││     ██  ██     │ $ to run python              │  │││     ██  ██     │ $ to run python              │  ││플러드                                              │
+││     ██  ██     │ ──────────────────────────── │  │││     ██  ██     │ ──────────────────────────── │  ││플러드                                              │
+││     ▒▒  ██     │ LSP Servers                  │  │││     ▒▒  ██     │ LSP Servers                  │  ││플러드                                              │
+││         ██     │ No LSP servers               │  │││         ██     │ No LSP servers               │  ││플러드                                              │
+││                │                              │  │││                │                              │  ││플러드                                              │
+││    GPT-5.5     │                              │  │││    GPT-5.5     │                              │  ││플러드                                              │
+││  openai-codex  │                              │  │││  openai-codex  │                              │  ││플러드                                              │
+││                │ ──────────────────────────── │  │││                │ ──────────────────────────── │  ││플러드                                              │
+││                │ Recent sessions              │  │││                │ Recent sessions              │  ││플러드                                              │
+││                │ No recent sessions           │  │││                │ No recent sessions           │  ││플러드                                              │
+││                │                              │  │││                │                              │  ││플러드                                              │
+││                │                              │  │││                │                              │  ││플러드                                              │
+││                │                              │  │││                │                              │  ││플러드                                              │
+││                │                              │  │││                │                              │  ││플러드                                              │
+│╰────────────────┴──────────────────────────────╯  ││╰────────────────┴──────────────────────────────╯  ││플러드                                              │
+│ Tip: `/force read` pins the next turn to one      ││ Tip: Log in to several accounts [redacted]
+│      specific tool when the model keeps reaching  ││      provider — `/login` again — and omp          ││플러드                                              │
+│      for the wrong one                            ││      load-balances across them automatically      ││플러드                                              │
+│                                                   ││                                                   ││플러드                                              │
+│───────────────────────────────────────────────────││───────────────────────────────────────────────────││플러드                                              │
+│ Update Available                                  ││ Update Available                                  ││플러드                                              │
+│ New version 18.4.3 is available. Run: omp update  ││ New version 18.4.3 is available. Run: omp update  ││플러드                                              │
+│───────────────────────────────────────────────────││───────────────────────────────────────────────────││플러드                                              │
+│                                                   ││                                                   ││플러드                                              │
+│ π > ◒ GPT-5.5 > 🗑 p > (sub) ▶─7%─────────╎─┃─272K─││ π > ◒ GPT-5.5 > 🗑 p > (sub) ▶─7%─────────╎─┃─272K─││플러드                                              │
+│╰─                                                 ││╰─                                                 ││플러드                                              │
+│                                                   ││                                                   ││플러드                                              │
+│                                                   ││                                                   ││플러드                                              │
+│                                                   ││                                                   ││플러드                                              │
+│                                                   ││                                                   ││플러드                                              │
+│                                                   ││                                                   ││플러드                                              │
+│                                                   ││                                                   ││플러드                                              │
+│                                                   ││                                                   ││플러드                                              │
+│                                                   ││                                                   ││플                                                  │
+└───────────────────────────────────────────────────┘└───────────────────────────────────────────────────┘└────────────────────────────────────────────────────┘
+[HOST SHELL] 출력 따라잡음: 2590353 bytes 건너뜀

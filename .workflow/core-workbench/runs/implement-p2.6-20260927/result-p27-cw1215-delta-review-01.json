@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw1215-delta-review-01",
+  "verdict": "accept with amendments",
+  "frozen_candidate": "c47835913e65051c2382081a52f311d840f0c25ec734b12e82b161709b976fe2",
+  "agent_result": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw1215-delta-review-01-agent.json",
+  "findings": {"P2-takeover-assert": "p27i asserts only absence of '거부' after prefix t, not takeover_requested/notice", "P2-labels": "verdicts should read 'partial: UI subset verified'; all nine stay stale_pending", "P2-missing-ui-gap": "product UI lacks approval/progress/cancel/pause controls needed by AC-25/30/33", "P2-routing-4": "background-job handoff hold dead end is a defect/risk of the G2 shell-boundary line, not something CW-18 policy parts can change", "P3": ["test couples to open control_wait defect", "duplicate assertion", "confirm_boot/shutdown controls also CW-19"]},
+  "observed_model": "sonnet (wb-delta-reviewer definition; host metadata unverified)"
+}

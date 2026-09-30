@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-review-fix-worker-01",
+  "attempt_id": "review-fix-attempt-01",
+  "role": "worker_senior",
+  "unit": "V-CW-17-p2.7",
+  "approved_bundle_digest": "a521acdc3838b43a26e277afc233bab695c8b02ce0d42392c3678931b2e3f027",
+  "authority": "p2.7a; review p27-review-cw17-01 Root disposition",
+  "base_candidate": "cd921059f0a9b2d916a9a5dc817367532ac5f728e52da43f093ca28f57b39674",
+  "checkpoint_ref": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-review-fix-checkpoint.json",
+  "findings": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-review-cw17-01.json",
+  "required_behavior": [
+    "P2-1: while waiting for the main child, the supervisor also reaps any other exited child (subreaper orphans) with non-blocking waitpid(-1) and emits the existing descendant-reaped event; main child handled on its own path; no zombie accumulation over long runs.",
+    "P2-2: OmpPane (and any other pane/session cleanup) must never signal a process/group whose identity is not proven: record OMP sid+start_ticks at spawn; before killing session members verify membership identity (start_ticks >= OMP start and same sid, or pidfd snapshot taken while identity was proven); if OMP already reaped and identity cannot be proven, skip scanning. Never kill foreign sessions (C-D45).",
+    "P2-3: reset SIGPIPE and SIGXFSZ to SIG_DFL before exec in all child paths (OmpPane, ShellProcess, supervisor experiment child) so user shell/experiments inherit default dispositions.",
+    "P2-4: manual foreground input: per-write target check must be cheap (TIOCGPGRP + leader stat; full session scan only when the foreground group changes), and ShellPane._flush must be bounded per pump iteration so a 2 MiB paste never blocks the backend loop (OMP output, control drain, UI requests, SIGTERM) for more than a short slice; keep all-or-nothing admission and per-write target re-validation semantics."
+  ],
+  "acceptance": [
+    "red->green tests for each P2 (zombie count stays bounded with 50 double-fork orphans during a long main; PID-reuse simulation never signals a foreign session; child SigIgn lacks SIGPIPE/SIGXFSZ for shell, experiment, OMP; 2 MiB paste to a raw `cat` foreground completes while backend stays responsive e.g. UI status/snapshot latency < 1 s throughout)",
+    "all prior suites green: tests/terminal, tests/gates/g2_shell (PYTHONPATH=src:.), canonical matrix, tests/backend, tests/contracts, tests/lifecycle, tests/gates/g4_lifetime (PYTHONPATH=src:.), tests/workflow, tests/observation"
+  ],
+  "allowed_write_paths": [
+    "src/workbench/terminal/shell_g2/**",
+    "src/workbench/terminal/shell_persistent/**",
+    "src/workbench/backend/panes.py",
+    "tests/terminal/**",
+    "tests/backend/test_*.py (non-independent only)",
+    "tests/gates/g2_shell/**"
+  ],
+  "prohibited_paths": [
+    "tests/**/test_*_independent*.py",
+    "tests/backend/independent_support.py",
+    "docs/**",
+    ".workflow/**",
+    "other src/**"
+  ],
+  "stop_conditions": [
+    "fix requires contract change or weakening automation holds/identity",
+    "cannot bound a leak"
+  ]
+}

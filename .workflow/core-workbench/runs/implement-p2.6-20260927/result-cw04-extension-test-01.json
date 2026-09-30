@@ -1,0 +1,24 @@
+{
+  "invocation": "cw04-extension-test-01",
+  "unit": "V-CW-04-p2.6-current",
+  "status": "candidate_ready",
+  "candidate": "aec7c972d6a54680aeb1cb65426a3c1546e8df18c6ecc40bd10c666f51413ddf",
+  "changed_file": "tests/gates/g3_omp/test_tui_extension_fault_integration.py",
+  "sha256": "b3b9719e7e23bbb3038915bf371ea375c2551d57f0e0037140584f81cd07ce37",
+  "scope_audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/scope-audit-cw04-extension-test.json",
+  "scope_note": "graphify-out/cache/last_query_stamp is an automatic query side effect to be reconciled by the required root graphify update before review freeze.",
+  "coverage": [
+    "Actual outage and handler-fault no-ACK/no-provider/no-replay behavior.",
+    "Same-message unknown_no_replay after actual reconnect and a distinct fresh message exactly once.",
+    "Env-only, explicit-frame-without-env, and malformed-frame activation leakage controls.",
+    "Composer and PID/session/generation identity retention.",
+    "Two false-ACK mutations are rejected with AssertionError."
+  ],
+  "checks": [
+    {"name": "independent extension fault integration", "result": "passed", "tests": 3, "elapsed_seconds": 27.234},
+    {"name": "full G3 discovery", "result": "passed", "tests": 117, "elapsed_seconds": 52.887},
+    {"name": "Node bridge tests", "result": "passed", "tests": 19, "elapsed_seconds": 1.490},
+    {"name": "git diff --check", "result": "passed"}
+  ],
+  "cleanup": "Each run reported zero OMP child and fixture-cwd residue; final owned temp-path process search had no matches."
+}

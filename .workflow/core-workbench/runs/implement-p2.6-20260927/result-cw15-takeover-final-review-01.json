@@ -1,0 +1,25 @@
+{
+  "invocation": "cw15-takeover-final-review-01",
+  "outcome": "complete",
+  "candidate_ready": false,
+  "candidate_id": "dccc1a3d2813ab121eca173d463cd541aa18eef293e2904ae38c20cb8eec473a",
+  "snapshot_hashes_match": true,
+  "closed": "Prior admission, shutdown and takeover state-preservation findings are closed; 388 recorded tests and production hashes match.",
+  "finding": {
+    "severity": "P1",
+    "path": "src/workbench/app/lifecycle.py",
+    "lines": "433-452,487-505",
+    "summary": "The in-flight commands.send call holds the same lock that request_takeover needs. A user request during G3 preflight cannot fence immediately, so a deliver frame can be submitted after the user invoked takeover but before the durable fence commits.",
+    "support": "BoundMailboxCommandAdapter and PauseCoordinator do not independently consult lifecycle takeover intent at the final G3 submission boundary.",
+    "required_behavior": "Set a synchronous takeover-intent fence before waiting for the lock and combine it with the real transport authority check immediately before G3 submission, preserving unknown/already-delivered evidence without replay."
+  },
+  "acceptance": {
+    "C-AC-15": "met in-repo",
+    "C-AC-16": "met in-repo",
+    "C-AC-17": "met in-repo",
+    "C-AC-18": "not met due post-invocation delivery race; external OMP pending",
+    "C-AC-22": "met in-repo",
+    "C-AC-23": "met in-repo; real reboot pending"
+  },
+  "mutation_owner": null
+}

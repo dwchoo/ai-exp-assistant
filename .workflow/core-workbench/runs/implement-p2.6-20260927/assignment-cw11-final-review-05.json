@@ -1,0 +1,20 @@
+{
+  "invocation":"cw11-final-review-05",
+  "role":"reviewer",
+  "unit":"V-CW-11-p2.6-current",
+  "objective":"Fresh final review of the complete CW-11 candidate after exact-incarnation exit fencing and independent tests.",
+  "candidate_manifest":".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw11-final-exit-incarnation.json",
+  "candidate":"7401c2b0f4efc6a5894dd82b57ee36bb127dce9473da67348cccd93fae21f825",
+  "requirements":".workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw11.json",
+  "ticket":"docs/features/core-workbench/tickets/CW-11.md",
+  "prior_review":".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw11-final-review-04.json",
+  "correction_evidence":[".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw11-exit-incarnation-correction-01.json",".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw11-exit-incarnation-test-01.json"],
+  "must_review":[
+    "Reproduce or refute the prior old-exit/new-same-identity-incarnation P1 across admission fence, surfaced/pending/in-flight UI state, callback race/failure retry, and WorkflowObservationBinding rebind.",
+    "Confirm ExitSourceToken is owner/incarnation bound, validated at fence linearization, cannot be forged/rebound, and internal fact exits capture current incarnation safely.",
+    "Re-audit all earlier atomic admission, ticket A-B-A, schedule incarnation, hang/usage, WorkflowRun identity, indefinite cadence, 121st review, 13th wake, privacy and cleanup invariants for regression.",
+    "Validate latest actual OMP 18.2.10 evidence and candidate hash."
+  ],
+  "constraints":["Review-only; no edits/mutations; report P0-P3 findings or explicit no findings with file/line evidence; no destructive git actions."],
+  "report":["candidate validation","prior-finding closure","new findings","runtime qualifications","candidate_ready or needs_reroute"]
+}

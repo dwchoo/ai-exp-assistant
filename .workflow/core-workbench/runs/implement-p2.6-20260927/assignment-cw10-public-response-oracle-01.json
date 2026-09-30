@@ -1,0 +1,21 @@
+{
+  "invocation": "cw10-public-response-oracle-01",
+  "role": "oracle",
+  "unit": "V-CW-10-p2.6-current",
+  "objective": "Advise the smallest sound production design that binds a worker OMP assistant decision to exact public G3 delivery identity without exposing raw model text.",
+  "candidate_manifest": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw10-final-review.json",
+  "requirements": ".workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw10.json",
+  "finding": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw10-final-review-01.json",
+  "questions": [
+    "Can bridge.ts safely parse a marker-prefixed strict JSON response and publish only an allowlisted structured workerResponse object, never raw text?",
+    "What exact fields, type/range checks, stage/decision constraints, session/generation/event ordering, and one-response-per-delivery rules are needed?",
+    "Where should the production Python WorkerRolePort adapter live and how should it correlate assistant response and delivery_omp_processed without private provider state?",
+    "Which replay, stale, malformed, wrong-role, privacy, multiple-marker, partial-content, and error/abort cases must fail closed?"
+  ],
+  "constraints": [
+    "Read-only advice only; do not edit files.",
+    "Preserve the established no raw user/assistant content event contract.",
+    "Prefer the smallest compatible extension and explicitly flag any unresolved OMP API limitation.",
+    "No commit/push/merge/stash/reset/clean."
+  ]
+}

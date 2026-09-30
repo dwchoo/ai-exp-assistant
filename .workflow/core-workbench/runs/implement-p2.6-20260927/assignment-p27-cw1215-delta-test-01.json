@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw1215-delta-test-01",
+  "ticket_id": "CW-12, CW-15 (CW-06-dependent items)",
+  "role": "test_designer",
+  "unit": "V-CW-12-15-p2.7-cw06-delta",
+  "approved_bundle_digest": "a521acdc3838b43a26e277afc233bab695c8b02ce0d42392c3678931b2e3f027",
+  "routing": {"planned_role": "test_designer", "selected_role": "test_designer (wb-test-rerun, Sonnet high)", "reason_codes": ["delta_reverification"], "evidence_refs": ["PLAN gate_items evidence_status stale_pending_CW-06_delta; SPEC 'Production 조합' last paragraph"]},
+  "frozen_candidate": "671b05d3085701f0111e6440955fa6f4b9edc5ddcdba9f54c6d5af27a7c7351b",
+  "items": {"CW-15": ["P-C-AC-15", "P-C-AC-16", "P-C-AC-17", "P-C-AC-18", "P-C-AC-22", "P-C-AC-23"], "CW-12": ["P-C-AC-25", "P-C-AC-30", "P-C-AC-33"]},
+  "read_first": ["docs/features/core-workbench/PLAN.json gate_items for the items above (check, requires_tickets, final_checks, p2_7_note)", "docs/features/core-workbench/SPEC.md 'Production 조합 (s2.7, C-D56)'", "docs/features/core-workbench/tickets/CW-12.md, CW-15.md, CW-06.md, CW-18.md, CW-19.md", ".workflow/core-workbench/runs/implement-p2.6-20260927/gate-cw12-final-result.json, gate-cw15-final-result.json and their check-*-final-request/observed records", ".workflow/core-workbench/runs/implement-p2.6-20260927/integration-p27-v-cw06.json"],
+  "required": [
+    "Impact comparison per item: which part of the item's observable check is supplied by CW-06 (product UI display/controls: focus/owner/held reasons/takeover/handoff/detach-reattach/state text), which part remains with CW-18 (flow/policy wiring in backend), CW-19 (restart/reboot recovery) or CW-16 (final). State whether the previous local gate pass (CW-12/15 local components) is affected by CW-06/ui_server/vt_g1 changes (code-path evidence).",
+    "Re-run the original local gate checks on the frozen candidate: (a) tests/policy/pause_automation test_*.py; (b) tests/lifecycle test_*.py; (c) tests/policy/pause_automation/live_pause_runtime_probe.py (actual OMP 18.2.10 with a SCRIPTED provider - no real model turns; verify it does not call a real provider before running; bounded with timeout 180s). Compare results with the p2.6 recorded observed checks.",
+    "For items with a CW-06-supplied UI part that is exercisable today without CW-18 wiring (e.g. P-C-AC-18 takeover request/confirm, user owner and handoff state preserved across UI detach/reattach with no automatic send; P-C-AC-15 detach keeps both OMP and host shell running), run a stub-OMP runtime check through the real entrypoint and product UI. Write it as a new independent test tests/ui/live_product_state_independent_p27i.py (no model turns).",
+    "Classify each item: 'local+UI delta verified (pending CW-18/19/16 supplier parts: ...)' or 'unchanged local evidence re-confirmed; UI part not applicable', never a final pass."
+  ],
+  "allowed_write_paths": ["tests/ui/live_product_state_independent_p27i.py", ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw1215-delta-test-01-agent.json"],
+  "prohibited": "production frozen (no src edits); other tests unchanged; no real model turns; venv python only; short TMPDIR (e.g. /tmp/r12) removed at end; no graphify update, commits, tmux/herdr; never read ~/.omp; leave /tmp/cw03-g2-* and /tmp/cw06_*.txt alone.",
+  "result_format": "Write full JSON (per-item table: CW-06 part, remaining supplier, evidence, verdict); reply <=20 lines. Korean."
+}

@@ -1,0 +1,9 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 192,
+  "event": {"id": "check-cw03-g2-integrated-final-02", "kind": "check", "data": {
+    "check_id": "cw03-g2-integrated-final-02",
+    "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/check-cw03-g2-integrated-final-observed.json",
+    "sha256": "c9146ac23ec599758ac7793f8570a176762b2ef3925703c94c797c416a05658c"
+  }}
+}

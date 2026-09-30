@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "invocation": "cw15-binding-correction-01",
+  "role": "worker_senior",
+  "unit": "V-CW-15-p2.6-current",
+  "authority": "User $implement docs/features/core-workbench request; approved PLAN p2.6 CW-15; independent runtime finding",
+  "objective": "Add the missing production composition/adapters for actual predecessor public APIs and make completed shutdown idempotent.",
+  "candidate": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw15-test.json",
+    "candidate_id": "4252bf102166d0f01f6df33a6c4c4530791ac4bc8c2e884e1dcf095e9552b8fa"
+  },
+  "required_changes": [
+    "Provide a production composition root in src/workbench/app/** that constructs LifecycleCoordinator adapters around the actual G4 backend/FrontendLease, G3BridgeServer.peer/request and TaskMailbox.deliver exact-session APIs, PersistentShell.snapshot/request_takeover/confirm_takeover/claim_manager controls, PauseCoordinator state/dispatch, WorkerReviewScheduler tick state, RecoveryCoordinator decisions, RawLogStore and MetadataAdmissionGate.",
+    "Adapters must translate existing public contracts without duplicating their policy, never weaken exact session/generation/owner epoch/authority checks, never convert unknown to alive/complete, and never auto-replay a command whose delivery is attempted/unknown/delivered.",
+    "Production binding must be executable in tests using real G3 server/client fixtures and PersistentShell where supported, not merely import/type aliases. Keep side effects injected so stop/force follows CW13 decision steps and exact target evidence.",
+    "After shutdown is durably/locally confirmed complete, repeated shutdown calls must return/reobserve the terminal result without emitting new normal_stop/force/command actions. Incomplete shutdown may reobserve but must not blindly duplicate an already-issued stop for the same target/incarnation.",
+    "Preserve the existing process-backed lifecycle behavior, boot/model/metadata/raw/takeover gates, and all predecessor contracts."
+  ],
+  "required_tests": [
+    "Keep the independent shutdown idempotence regression and make it pass.",
+    "Add runtime composition tests that instantiate actual G3BridgeServer/TaskMailbox and PersistentShell/public Pause/Review/Recovery seams where practical, verify exact identities/no replay, and account for every thread/process/socket/temporary path.",
+    "Run lifecycle and changed-seam predecessor suites plus graphify update."
+  ],
+  "allowed_write_paths": ["src/workbench/runtime/**", "src/workbench/app/**", "tests/lifecycle/**", "graphify-out/**"],
+  "constraints": [
+    "Do not modify predecessor packages to fit the coordinator; adapt only in CW15 scope. No fake-only production binding, real reboot, live external OMP mutation, tmux dependency, delegation, commit, publish, deploy or Docker.",
+    "Use apply_patch; bounded cleanup is mandatory."
+  ],
+  "report": "Return candidate_ready/needs_reroute, concrete adapter/composition mapping to every predecessor API, shutdown idempotence evidence, per-acceptance runtime results, exact suites/residue, hashes/scope, and true environment-pending cases."
+}

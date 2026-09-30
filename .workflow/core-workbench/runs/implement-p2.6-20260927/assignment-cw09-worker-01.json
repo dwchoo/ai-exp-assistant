@@ -1,0 +1,27 @@
+{
+  "invocation":"cw09-worker-01",
+  "role":"worker",
+  "unit":"V-CW-09-p2.6-current",
+  "objective":"Implement CW-09 durable delegation, TaskSpec revision, run/cancel history, session settings, and CW-08 message/delivery metadata boundary.",
+  "required_behavior":[
+    "Persist stable Task identity separately from immutable sequential TaskSpec revisions; revision changes never reset Task ID and affect only later runs.",
+    "Require both persisted delegation scope approval and persisted explicit proceed instruction before creating a new automatic run. A metadata write failure must block the new run without mutating the prior durable state.",
+    "Record append-only run lifecycle and cancellation/revocation history. Immediate cancellation or authority revocation applies to the current run; a cancelled/revoked revision cannot be replayed as authorization.",
+    "Persist session-wide settings revisions and link each run/decision to the settings revision and retry count actually used. A settings change must not end the current run or reset its used retry count and applies to later decisions.",
+    "Provide a durable boundary for stable message_id, Task/revision/run links, logical message content, and separate delivery attempt/status history for CW-08. API return and confirmed OMP processing remain distinct.",
+    "Provide append-only linked shell lifecycle and takeover request/confirmation records without overwriting the run.",
+    "Use the standard library and a real durable local store with transactional constraints, foreign keys, restart/reopen tests, and explicit close/error behavior. Keep scope to CW-09; do not wire CW-08 or production policy."
+  ],
+  "allowed_files":["src/workbench/tasks/**","src/workbench/storage/metadata_*/**","tests/tasks/**"],
+  "constraints":[
+    "Preserve existing user and G1-G4 changes; do not modify contracts/runtime/UI/shell/bridge/docs/PLAN/tickets/workflow/graphify.",
+    "Do not add dependencies without demonstrated need; prefer Python sqlite3 and explicit transactions.",
+    "Do not implement downstream mailbox, policy scheduling, UI, or final recovery.",
+    "No commit/reset/clean/stash/push/deploy and no Docker."
+  ],
+  "checks":[
+    "Run all tests/tasks including reopen/durability, approval/proceed ordering, revisions/current-run changes, cancellation/revocation, settings/retry linkage, message/delivery history, shell/takeover links, and injected write failures.",
+    "Run relevant G4 metadata/contract regressions and git diff --check."
+  ],
+  "report":["schema and invariants","changed files","commands/results and failure injection","candidate digest/snapshot/scope audit","candidate_ready, needs_reroute, or needs_oracle"]
+}

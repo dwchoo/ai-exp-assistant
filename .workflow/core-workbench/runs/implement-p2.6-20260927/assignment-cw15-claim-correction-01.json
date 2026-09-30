@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "invocation": "cw15-claim-correction-01",
+  "role": "worker_senior",
+  "unit": "V-CW-15-p2.6-current",
+  "authority": "User $implement request; approved PLAN p2.6 CW-15/C-D52; fresh handoff and final transport-race review",
+  "objective": "Provide a linearizable takeover-vs-submission boundary and restore automatic eligibility after a successfully durable manager handoff, with no token-unaware coordinator send path.",
+  "candidate": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw15-intent-test.json",
+    "candidate_id": "d9ea1d5de9f371776d456f7d80d8f81a8f96eb77fca1ec158c2229a694f14e66"
+  },
+  "required_changes": [
+    "Replace check-only takeover intent with a synchronization primitive that atomically orders revoke against an actual G3 submission claim. If revoke wins, no frame/API submission occurs. If submission claim wins, classify the request as already in-flight/unknown and never claim cancellation or replay; takeover invocation must still record intent immediately without waiting for ACK/network completion.",
+    "Extend the combined lifecycle+Pause authority contract and G3BridgeServer final boundary minimally so the claim occurs immediately at the socket submission boundary, not merely before bridge.request. Retain existing plain authority-token compatibility and exact peer/run checks; malformed/throwing/non-boolean claims fail closed.",
+    "Remove or make impossible the token-unaware generic CommandPort fallback. Production and test command ports must implement the same bound authority contract; do not advertise invocation-time safety over one-shot check-only send.",
+    "In handoff, clear/reopen takeover intent only after external control returns a valid manager/control_wait state and that state is durably committed. If external handoff or durable commit fails, remain fail-closed. Confirm/takeover failure does not clear it.",
+    "Add deterministic tests for both total orders at the final check-to-_send_until boundary: revoke-before-claim gives zero frame; claim-before-revoke is already in-flight and preserves unknown/delivery evidence with no replay. Add same-coordinator takeover→confirm→handoff→automatic command/tick resumption and failed-handoff remains fenced."
+  ],
+  "allowed_write_paths": ["src/workbench/app/**", "src/workbench/ipc/bridge_g3/**", "src/workbench/policy/pause_automation/**", "tests/lifecycle/**", "tests/gates/g3_omp/**", "tests/policy/pause_automation/**", "graphify-out/**"],
+  "constraints": [
+    "Bounded CW-15 correction only. Preserve all CW-12 G3 protocol/authority/partial-write/no-replay guarantees and current public behavior. No docs/workflow/PLAN/state edits, external OMP/reboot, delegation, commit, publish, deploy or Docker.",
+    "Use apply_patch. Capture RED before fix for handoff and final check-to-send races; run focused plus lifecycle, pause, G3, production binding and predecessor suites, graphify, compile/diff/residue/hashes."
+  ],
+  "report": "Return candidate_ready/needs_reroute; the exact linearization point and two total-order traces; frame/API/journal counts; handoff reopen/failure evidence; interface compatibility; suites/hashes/residue/pending."
+}

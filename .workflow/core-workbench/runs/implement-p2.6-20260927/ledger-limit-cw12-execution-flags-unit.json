@@ -1,0 +1,23 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 922,
+  "event": {
+    "id": "limit-cw12-execution-flags-unit-20260929",
+    "kind": "limit",
+    "data": {
+      "bucket": "unit:V-CW-12-p2.6-current",
+      "origin": "operating",
+      "value": 42,
+      "authority": "Approved PLAN p2.6 CW-12, fresh execution-worktree flag review, workflow-contract section 8, and current $implement authorization",
+      "reason": "One bounded execution-worktree flag correction, independent regression, and fresh final review",
+      "decision_owner": "Root",
+      "remaining_work_estimate": 3,
+      "expected_previous": {
+        "value": 39,
+        "authority": "Approved PLAN p2.6 CW-12, independent assume-unchanged reproduction, workflow-contract section 8, and current $implement authorization",
+        "reason": "One bounded Git index-flag correction, independent regression, and fresh final review"
+      },
+      "scope_basis": null
+    }
+  }
+}

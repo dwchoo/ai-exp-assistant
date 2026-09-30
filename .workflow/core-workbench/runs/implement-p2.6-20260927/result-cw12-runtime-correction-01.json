@@ -1,0 +1,27 @@
+{
+  "invocation": "cw12-runtime-correction-01",
+  "outcome": "complete",
+  "candidate_ready": true,
+  "corrections": [
+    "resume_failed is a paused transition during restart replay",
+    "refresh cannot promote uncorrelated or replacement-session stop snapshots",
+    "first journal creation fsyncs both file and containing directory and fails closed"
+  ],
+  "actual_omp_18_2_10": {
+    "probe": "tests/policy/pause_automation/live_pause_runtime_probe.py",
+    "result": "passed",
+    "observations": "exact abort-request/stop correlation; unknown bash outcome retained; host running collection; zero paused provider/agent starts; all five reconciliation checks true; held unknown_no_replay; fresh omp_processed; zero child/thread/socket/cwd residue"
+  },
+  "checks": {
+    "policy": "24/24 passed",
+    "status": "2/2 passed",
+    "observation": "91/91 passed",
+    "workflow": "44/44 passed",
+    "tasks": "22/22 passed",
+    "contracts": "20/20 passed",
+    "bridge": "18/18 passed",
+    "g3": "117/117 passed with managed PI_CONFIG_DIR",
+    "total": "338 passed"
+  },
+  "graphify_updated": true
+}

@@ -1,0 +1,23 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 1245,
+  "event": {
+    "id": "limit-cw15-shutdown-id-worker-20260929",
+    "kind": "limit",
+    "data": {
+      "bucket": "role:worker_senior",
+      "origin": "operating",
+      "value": 151,
+      "authority": "C-D55 plus workflow-contract section 8 and current $implement authorization",
+      "reason": "One bounded CW-15 exact shutdown RunIdentity correction",
+      "decision_owner": "Root",
+      "remaining_work_estimate": 1,
+      "expected_previous": {
+        "value": 150,
+        "authority": "C-D55 plus workflow-contract section 8 and current $implement authorization",
+        "reason": "One bounded CW-15 duplicate takeover generation attribution correction"
+      },
+      "scope_basis": null
+    }
+  }
+}

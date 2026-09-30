@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "id": "root-adjudication-p27-cw06-rerun-02",
+  "source": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw06-rerun-test-02-agent.json",
+  "decisions": {
+    "P-C-AC-14": "passed at runtime for CW-06 scope: original OMP keys/commands work through the product UI in both panes (slash commands, composer editing, autocomplete Esc, Ctrl-C, prefix literal; Esc aborts a running tool command visibly). Approval-prompt interaction is not applicable on the user's OMP configuration (no approval prompt for the shell tool); recorded as an unknown for CW-16 I-COMPAT rather than forcing a settings change (settings changes are prohibited).",
+    "running_child_assertion": "The failing 'running child seen' assertion in tests/ui/live_product_rerun_independent_p27e.py checks OMP-internal tool execution (a process child of OMP), which is outside CW-06 criteria (UI key fidelity). Test left unmodified; the live file is an opt-in real-model probe and is excluded from required suite runs; its failure is recorded, not treated as a CW-06 defect.",
+    "live_probe_hazard": "tests/ui/live_product_*_independent*.py run real model turns by default when OMP is present and are matched by '*_independent.py' discovery. Required-suite commands must use pattern 'test_*.py'; future packets say so. Consider making model turns opt-in during a later test-maintenance delta (non-blocking)."
+  }
+}

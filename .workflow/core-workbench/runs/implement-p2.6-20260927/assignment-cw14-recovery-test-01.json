@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "invocation": "cw14-recovery-test-01",
+  "role": "test_designer",
+  "unit": "V-CW-14-p2.6-current",
+  "authority": "User $implement docs/features/core-workbench request; approved PLAN p2.6 CW-14; independent recovery finding",
+  "objective": "Independently validate the frozen same-store recovery correction and complete CW-14 regression evidence.",
+  "candidate": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw14-recovery-correction.json",
+    "candidate_id": "4b093e9b5f25e5f8aa84274d3756fc0085b9a766c165cc05988ee840d30caa00"
+  },
+  "required_tests": [
+    "Run the preserved exact 3B -> malformed -> status plus failed 2B append -> removal -> 1B append sequence and confirm (4,6,2,2), b'abcf', durable status equality and no exception.",
+    "Verify unrecovered malformed/status/path failures remain fail-closed, repeated failures remain monotonic, quota/prefix/concurrency/sentinel/admission behavior remains intact.",
+    "Run full storage and relevant CW-07/CW-09 regressions; confirm all production hashes match the frozen candidate."
+  ],
+  "allowed_write_paths": ["tests/storage/**", "graphify-out/**"],
+  "constraints": [
+    "Independent test-only owner; no production/workflow/docs/PLAN/state/ledger edits.",
+    "No delegation, commit, publish, deploy, Docker, or destructive actions."
+  ],
+  "report": "Return candidate_ready/needs_reroute, exact sequence and counts, production hash confirmation, C-AC-24/C-AC-28 verdict and CW-15 risks."
+}

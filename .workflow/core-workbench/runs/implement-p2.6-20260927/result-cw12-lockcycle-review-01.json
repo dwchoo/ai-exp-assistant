@@ -1,0 +1,15 @@
+{
+  "invocation": "cw12-lockcycle-review-01",
+  "outcome": "needs_reroute",
+  "approved": false,
+  "manifest": "candidate d27a7716ca9cf35b50a2e2e4555fca419bded786a4bfd8bccfcc4ccc1397e8f6 and all 1373 file hashes matched",
+  "closed": ["stale mirrored unpaused publication no longer admits while authoritative fence is closed", "final-03 publication/CW11 lock cycle completes without deadlock"],
+  "findings": [
+    {"severity":"P1","title":"stale resume reopens a newer pause close","location":"controller.py:562-566,912-915"},
+    {"severity":"P1","title":"sequential peer guard remains TOCTOU before transport request","location":"controller.py:342-360 and worker_review.py:152-165"},
+    {"severity":"P1","title":"fence lock held through blocking action delays pause and abort","location":"worker_review.py:152-165"},
+    {"severity":"P1","title":"run B fence can admit run A review","location":"controller.py:325-340"},
+    {"severity":"P2","title":"stale run A cancellation can close run B fence","location":"controller.py:203-250"}
+  ],
+  "files_modified": false
+}

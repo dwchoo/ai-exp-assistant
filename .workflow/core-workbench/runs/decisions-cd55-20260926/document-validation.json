@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "record_kind": "documentation_consistency_observation_not_runtime_check",
+  "scope": "C-D55 documentation and next-session handoff",
+  "checks": {
+    "git_diff_check": "passed",
+    "scheduling_ownership_dependency_artifacts_verification_units": "unchanged from before.json",
+    "ticket_ids_dependencies_resources_scopes_acceptance": "preserved 16 tickets",
+    "gate_ids_owners_suppliers_acceptance_evidence_levels": "preserved 64 items",
+    "changed_gate_descriptions": ["G2-HOOK-ENV", "G2-LIFECYCLE", "P-C-AC-32", "I-SHELL"],
+    "plan_source_hashes": "matched BRIEF and SPEC",
+    "approval_hashes": "matched all 25 files and bundle digest",
+    "ledger": "unchanged SHA-256; revision 150 and cumulative usage 220 retained",
+    "probe_test_hashes": "all 4 match historical final-root-check.json",
+    "state_current_pointers": "matched C-D55 and retained runtime ledger",
+    "local_markdown_link_errors": []
+  },
+  "method": "Read-only Python assertions against before.json checkpoint and current JSON/files; SHA-256 comparison; Markdown local link existence; git diff --check. No product command executed.",
+  "graphify": {
+    "tools": ["query", "path", "explain", "reflect", "save-result"],
+    "observed_relationships": ["BRIEF references CW-03", "BRIEF, SPEC, OPERATING-CONTRACT, CW-03 and G2 reference ADR-0002"],
+    "effect": "Expanded consistency review to connected ADR and historical G2 evidence page; added current-policy notice while retaining historical results",
+    "semantic_graph_rebuilt": false,
+    "limitation": "Existing graph is navigation evidence; current edited source files are authoritative. New decision and prompt are not claimed to have been semantically re-indexed."
+  },
+  "runtime_or_product_tests": "not_run_documentation_only",
+  "shared_gate_validator_run": false,
+  "gate_pass_claim": false
+}

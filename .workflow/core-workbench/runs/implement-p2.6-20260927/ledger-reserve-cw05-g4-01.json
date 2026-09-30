@@ -1,0 +1,10 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 272,
+  "event": {"id": "reserve-cw05-g4-01", "kind": "reserve", "data": {
+    "invocation": "cw05-g4-01", "role": "worker_senior", "unit": "V-CW-05-p2.6-current", "incident": "",
+    "purpose": "Implement the integrated CW-05 G4 runtime, contract, storage-port, and evidence feasibility boundary",
+    "model": "gpt-6-sol", "effort": "high", "buckets": ["total", "role:worker_senior", "unit:V-CW-05-p2.6-current"],
+    "writer": true, "workspace": "/home/dwchoo/ai-exp-assistant"
+  }}
+}

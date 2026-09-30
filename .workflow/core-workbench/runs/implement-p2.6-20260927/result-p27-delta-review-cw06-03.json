@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-delta-review-cw06-03",
+  "verdict": "integrate",
+  "frozen_candidate": "8ff079fdb724457a58015d786c314cc371ef94f3f18d2942bc563600b78e5dbd",
+  "agent_result": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-delta-review-cw06-03-agent.json",
+  "focus_verdicts": {"kinds_counters": "ok", "replay_vs_catchup": "ok (replay never trimmed, equals sync feed; catch-up drops LIVE+TAIL; quiet REPLAY/TAIL; live queries answered)", "2004_tracking": "ok", "cost_and_nudge": "ok (O(1) decision, catch-up bounded by 64 KiB, final nudge kept via nudge_due)", "ux_flicker": "P3"},
+  "findings": {"P3-flicker": "during sustained flood each loop resets the screen and only ~1-2 KiB of the 64 KiB tail is fed per 20 ms slice; drawn frames may show a partial tail at top; converges after flood. Fix direction: skip draw while catching up or feed one screenful before drawing.", "P3-align": "_align may yield a very short/empty tail when the only newline is near the end (view only)"},
+  "checks_by_reviewer": "tests.ui.test_product_model 48 OK (venv)",
+  "root_disposition": "non-blocking; both P3 recorded for UR-UX (flood display behaviour) and a later UI polish delta",
+  "observed_model": "sonnet (wb-delta-reviewer definition; host metadata unverified)"
+}

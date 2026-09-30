@@ -1,0 +1,98 @@
+{
+ "schema_version": 1,
+ "invocation": "p27-cw06-rerun-test-03",
+ "status": "needs_reroute",
+ "frozen_hashes_equal": true,
+ "checks": [
+  [
+   "tests/ui test_*.py x5",
+   1,
+   "117 run each; fail: new p27f help-Esc test 5/5; test_product_pty.connection_lost 1/5 (flake, 15/15 alone OK)",
+   "~27.7s each"
+  ],
+  [
+   "p27f fixture file alone",
+   1,
+   "12 run, 1 fail (help-Esc)",
+   "~12s"
+  ],
+  [
+   "tests/backend test_*.py",
+   1,
+   "68 run, 1 error (connect EAGAIN in test_live_contract_independent connection_cap); rerun full 68 OK; alone 3/3 OK",
+   "260s"
+  ],
+  [
+   "tests/contracts",
+   0,
+   "43 OK",
+   "0.3s"
+  ],
+  [
+   "g1_vt (src:.)",
+   0,
+   "63 OK",
+   "1.5s"
+  ],
+  [
+   "g4_lifetime (src:.)",
+   0,
+   "8 OK",
+   "0.1s"
+  ],
+  [
+   "live_product_flood_independent_p27f (stub OMP, real backend) x3",
+   1,
+   "UI detached mid-flood 3/3 (F0)",
+   "10-14s"
+  ]
+ ],
+ "verdicts": {
+  "P2-1 fixture": "pass: 8MiB flood key latency 0.05-0.12s (<0.3), catch-up indicator seen, tail shown, no traceback",
+  "P2-1 runtime": "FAIL (implementation): real backend + stub OMP, `yes|head -c 200000000` in host shell: UI exits status 1 after 4-10s with '[workbench] backend 연결이 끊김' (3/3 in final form; earlier 1 run survived F0 in 24s). No slow_client reason shown (backend queues CLOSING slow_client but UI never reads it; hypothesis unverified: ui_server._send clears partial outbound mid-frame). F1/F2 Ctrl-C-at-20s not reachable. Adjudication says record as known limitation if slow_client persists - Root decides.",
+  "P2-1c": "pass (fixture): closing+drop+key, drop+keys, RST+paste -> status 1, reason/message shown, no traceback, modes restored",
+  "P3-1": "partial FAIL: cursor visible on focus and after help closed by q/space; help closed by lone Esc leaves overlay+hidden cursor until next 5s snapshot tick (~3.5-4.7s) because app loop flush_input path does not set dirty. Deterministic 5/5 in test_esc_closes_help_and_cursor_restored_within_1s",
+  "P3-2": "pass: SIGTERM and SIGHUP restore 2004l/1049l/termios, no traceback",
+  "P3-3": "pass: prefix+Up/F5/Alt-x/SS3/Ctrl-Up sends nothing, sentinel follows (PTY + model)",
+  "P3-4": "pass: ESC[2 / ESC[20 / ESC[200 split >50ms still one paste frame (PTY + model)",
+  "P3-5": "done: p27e hash-pin test removed; live probes need CW06_LIVE_MODEL=1 (else skip with reason)"
+ },
+ "p35_hashes": {
+  "before": {
+   "tests/ui/test_product_rerun_independent_p27e.py": "2418df8f757e9758c1010ab9da70137de242583dea6d01fc49d20fbf24dcf323",
+   "tests/ui/live_product_omp_independent.py": "9f8bc1f79fe103ec6681f87be4da4d52aaa7c76773d0ccb0daf450d00e6cece8",
+   "tests/ui/live_product_rerun_independent_p27e.py": "80ea794d6eaf30f26fdb71004c697cf18e243bf1293476fab1a51eaa79a6e2fe"
+  },
+  "after": {
+   "tests/ui/test_product_rerun_independent_p27e.py": "bf4c89e514e9360cd459c0ce2f12c9fe6727fd5bf11357ae083fac188238ffd9",
+   "tests/ui/live_product_omp_independent.py": "6474fd64d595abb57a8bc5b2ce17f1b3777403d597dab2082fd65f3cd0a79f18",
+   "tests/ui/live_product_rerun_independent_p27e.py": "84926143a428c1d496f87abd71e5be6ce2fcbced218d5baa8bc098af9471c245",
+   "tests/ui/test_product_flood_independent_p27f.py": "c9d7f98f656efb8fbb962b6206da948abb6ce816b96c81e6c8638e0ae23be975",
+   "tests/ui/live_product_flood_independent_p27f.py": "31572f45b81f5fd049ecefbaa50cef03f14e6351ccaf3608ec41596cb04f5c3a"
+  }
+ },
+ "frozen_production_hashes": {
+  "src/workbench/ui/product/__init__.py": "8b250db57bcf1590be1ba6959cf059139155475f18d84ee4577e84e7ad1d536b",
+  "src/workbench/ui/product/app.py": "ea85ff059cd6012b9d69bbb79fe00b8ce3ac8843a83447ee1aa4cca8f2469371",
+  "src/workbench/ui/product/input.py": "ee5a9e925c292a15cc60ba0e76e4c6f16cdbf46ffa6f3ccc2171b866967a8605",
+  "src/workbench/ui/product/model.py": "41e94c481527c22f79af51344249593b77f45d4c8d09eeb17bb4d09928c299a6",
+  "src/workbench/ui/product/view.py": "2c6b21ff331e67e0075ad2e9256d187d279dacd2d3ac093a865e3c2ba1148159",
+  "src/workbench/backend/cli.py": "9b44e4847275514ec27e7c9474dfe7ad0c5556d3803651f7fc292be0402a2b4e"
+ },
+ "files_added": [
+  "tests/ui/test_product_flood_independent_p27f.py",
+  "tests/ui/live_product_flood_independent_p27f.py"
+ ],
+ "files_edited": [
+  "tests/ui/test_product_rerun_independent_p27e.py",
+  "tests/ui/live_product_omp_independent.py",
+  "tests/ui/live_product_rerun_independent_p27e.py"
+ ],
+ "flakes": {
+  "test_product_pty.test_connection_lost_exits_nonzero_and_restores": "1/5 in full ui run (EPIPE before curses start -> no 2004l in output; UI itself clean); 15/15 alone OK -> test timing, classification test",
+  "test_live_contract_independent.connection_cap": "1/2 full backend runs (BlockingIOError connect EAGAIN under load); alone 3/3 and full rerun OK -> environment/timing"
+ },
+ "model_turns": 0,
+ "residue": "none: no cw06-* temp dirs, no workbench/backend processes; live probe cleanup residue empty; pyc removed",
+ "notes": "live probe run: python -m unittest tests/ui/live_product_flood_independent_p27f.py with PYTHONPATH=src:tests/backend; scratch in session scratchpad only"
+}

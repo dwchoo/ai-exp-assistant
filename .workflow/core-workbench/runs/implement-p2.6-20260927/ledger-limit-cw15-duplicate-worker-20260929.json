@@ -1,0 +1,23 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 1229,
+  "event": {
+    "id": "limit-cw15-duplicate-worker-20260929",
+    "kind": "limit",
+    "data": {
+      "bucket": "role:worker_senior",
+      "origin": "operating",
+      "value": 150,
+      "authority": "C-D55 plus workflow-contract section 8 and current $implement authorization",
+      "reason": "One bounded CW-15 duplicate takeover generation attribution correction",
+      "decision_owner": "Root",
+      "remaining_work_estimate": 1,
+      "expected_previous": {
+        "value": 149,
+        "authority": "C-D55 plus workflow-contract section 8 and current $implement authorization",
+        "reason": "One bounded CW-15 generation-aware handoff reopen correction"
+      },
+      "scope_basis": null
+    }
+  }
+}

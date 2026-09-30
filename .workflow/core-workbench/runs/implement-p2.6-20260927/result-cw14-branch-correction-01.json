@@ -1,0 +1,24 @@
+{
+  "invocation": "cw14-branch-correction-01",
+  "outcome": "complete",
+  "candidate_ready": true,
+  "base_candidate": "4b093e9b5f25e5f8aa84274d3756fc0085b9a766c165cc05988ee840d30caa00",
+  "changed_paths": [
+    "src/workbench/storage/log_raw/store.py",
+    "tests/storage/test_log_raw.py",
+    "graphify-out/**"
+  ],
+  "invariant": "Volatile state is bound to the exact durable snapshot and raw identity; only a verified descendant receives the additive failure-only delta before durable reconciliation.",
+  "checks": {
+    "focused": "3 tests passed",
+    "same_run_two_store": "7 observed, 4 dropped, 4 missing",
+    "malformed_status": "append/status failure snapshots, sentinel preserved, removal recovery passed",
+    "storage": "29 tests passed",
+    "graphify_update": "exit 0; 4868 nodes, 10350 edges, 452 communities"
+  },
+  "sha256": {
+    "src/workbench/storage/log_raw/store.py": "fb562dac0f19240f99a8069b713b202b4ccffd6420ceebcd8d20a064fe5bd3a1",
+    "tests/storage/test_log_raw.py": "2ee2149e33972fcb2d8fb9faa038de0499da8d2e3b24144cf0bf46ed379904ee"
+  },
+  "mutation_owner": "/root/cw14_worker"
+}

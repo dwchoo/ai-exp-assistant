@@ -1,0 +1,8 @@
+{
+  "requirements": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw10.json",
+  "candidate": "679237e11f9f4cfd73c780f9ed7a431c0812437bcd006ace428207c8a37bc0a0",
+  "checks": [
+    "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/check-cw10-runtime-contract-final-observed.json",
+    "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/check-cw10-workflow-contract-final-observed.json"
+  ]
+}

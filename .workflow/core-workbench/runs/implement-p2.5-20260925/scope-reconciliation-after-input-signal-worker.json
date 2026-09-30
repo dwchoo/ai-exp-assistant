@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "audit": "post-input-signal-worker-audit.json",
+  "attributable_worker_change": "tests/gates/g2_shell/live_combined_boundary_probe.py",
+  "outside_scope_change": "graphify-out/cache/last_query_stamp",
+  "classification": "Root-attributable operational graphify query cache stamp created while selecting the next CW-03 scope; preserved and excluded from worker output",
+  "overlap": false
+}

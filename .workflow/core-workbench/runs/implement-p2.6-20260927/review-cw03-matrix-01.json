@@ -1,0 +1,21 @@
+{
+  "invocation": "cw03-matrix-review-01",
+  "unit": "V-CW-03",
+  "candidate": "2fbb0fdbdccdbb7133c21a468ef33558c60b462bff7af1a56ad20f0823ee266a",
+  "verdict": "pass",
+  "findings": [],
+  "severity_summary": {"P0": 0, "P1": 0, "P2": 0, "P3": 0},
+  "observations": [
+    "All three accepted matrices use canonical ManagedLifecycleProbe RUN.",
+    "Rearm requires completed prior lifecycle, manual ACK/prompt, fresh same-parent handoff, and new WAIT; unknown remains sticky.",
+    "Hook/env missing-EXEC_READY is rejected before input release while pre-ACCEPT manual denial and fresh retry remain.",
+    "Takeover separates request from ACK and revalidates foreground after partial write or EAGAIN.",
+    "Independent tests inspect live exec-barrier PPID/PGID/SID/foreground and per-run causal order; missing-exec mutation fails all matrices.",
+    "No change invalidates prior FD/PTRACE review coverage."
+  ],
+  "runtime_reexecuted": false,
+  "residual_limits": [
+    "Approved Linux/Bash/dash feasibility only.",
+    "Arbitrary manual daemon discovery, external writer control, and CW-07 production adapter generalization are outside scope."
+  ]
+}

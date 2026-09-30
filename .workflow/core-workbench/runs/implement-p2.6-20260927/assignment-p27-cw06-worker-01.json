@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw06-worker-01",
+  "ticket_id": "CW-06",
+  "role": "worker",
+  "unit": "V-CW-06-p2.7",
+  "approved_bundle_digest": "a521acdc3838b43a26e277afc233bab695c8b02ce0d42392c3678931b2e3f027",
+  "authority": "p2.7a approval-amendment-a; user resume instruction 2026-09-29 ('CW-17 unit 통합 ... → CW-06')",
+  "routing": {"planned_role": "worker", "selected_role": "worker (wb-worker, Sonnet high)", "reason_codes": ["bounded_pattern"], "evidence_refs": ["UI client over the integrated ui_v1 contract; rendering/input routing reuse terminal_g1 G1 candidate; no process-lifetime/signal ownership (backend owns PTYs)", "user-approved model routing 2026-09-29"]},
+  "base_candidate": "8d7e6787af9d403ec13e8b77f6922253f6591eeccef5333b3050c088b795308c (p27-snapshot-cw06-base.json)",
+  "checkpoint_ref": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-cw17-integrated-checkpoint.json (full blobs; only .workflow/core-workbench/state.json differs, Root-owned)",
+  "read_first": ["docs/features/core-workbench/tickets/CW-06.md", "docs/features/core-workbench/SPEC.md section 'Production 조합 (s2.7, C-D56)'", "docs/features/core-workbench/tickets/CW-17.md", "src/workbench/contracts/ui_v1.py", "src/workbench/backend/client.py (UiClient, run_attach)", "src/workbench/backend/cli.py", "src/workbench/ui/terminal_g1/app.py, input_router.py (G1 VT rendering/input routing to reuse)", "src/workbench/terminal/vt_g1/screen.py", ".workflow/core-workbench/runs/implement-p2.6-20260927/root-adjudication-p27-cw06-entry-wiring.json", "docs/features/core-workbench/gates/G1.md (fixed combination)"],
+  "acceptance_ids": ["C-AC-01", "C-AC-06", "C-AC-14"],
+  "gate_items": ["P-C-AC-01", "P-C-AC-06", "P-C-AC-14"],
+  "required_behavior": [
+    "Product UI package under src/workbench/ui/ (new module; name yours) that is a ui_v1 client via UiClient: attach with the terminal size, render the three panes (manager OMP, worker OMP, host shell) simultaneously from replay + live display frames using the G1 VT screen (pyte) and curses drawing, stream state pushes.",
+    "Show separately and always visible: which pane has focus; the host input owner (user/manager/unknown) and shell control mode; per-pane alive/exited status; automation state; bridge/backend phase; and the time the UI last received backend state ('마지막 확인 시각'). Focus change is NOT an input-owner change.",
+    "Keyboard input goes to the focused pane unchanged (original OMP TUI keys, slash commands, composer/approval keys must reach OMP). Workbench commands use a prefix key that does not collide with OMP/shell keys; the prefix pressed twice sends the literal byte. Required commands: switch pane (each of 3), detach, takeover request/confirm and handoff (existing ui_v1 types), help overlay listing keys. Key choices are provisional (UR-UX will review); document them in the help overlay only.",
+    "Paste: bracketed paste is forwarded as a ui_v1 `paste` frame whole; backend rejections (paste_too_large, queue_full, input_owner_manager, input_target_unknown, ...) are shown as a visible notice with the reason; never split a paste into partial sends. Korean/multi-line text must round-trip.",
+    "Resize: SIGWINCH recomputes the layout and sends per-pane resize with each pane's actual cell size so OMP/shell redraw to fit.",
+    "Exit/detach: quitting the UI sends detach and closes the connection; never stops backend/PTYs; restores the outer terminal (curses endwin, raw mode off) on every exit path incl. exceptions and backend close; prints 'detached; backend keeps running' after exit. Backend closing/reject shows a notice and exits non-zero.",
+    "Reattach: screen restores from replay (retained tail) without duplicate input; if replay alone leaves a pane garbled, request redraw via resize nudge as the minimal client does.",
+    "Entry wiring per root-adjudication-p27-cw06-entry-wiring.json: start/attach launch the product UI; `--plain` keeps the minimal client."
+  ],
+  "tests": "Add fixture/unit tests under tests/ui/ (e.g. fake ui_v1 server over a socketpair/UDS feeding display/state frames; curses rendered into a pseudo-terminal or via a render function that returns lines). Cover: three panes rendered with focus + input-owner separately shown; focus switch sends focus frame and does not change owner; prefix/literal prefix; paste frame whole + rejection notice; resize per-pane sizes; detach restores terminal and never sends shutdown; backend close handling. Run real-entrypoint smoke with a stub OMP (see tests/backend/live_harness.py for the fake OMP/provider pattern) - do NOT use real provider credentials; real-OMP runtime evidence belongs to the independent test_designer.",
+  "required_checks": "prefix `/usr/bin/env PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover`: tests/ui, tests/backend (non-independent and independent; independent tests that fail ONLY because start/attach now open the product UI are expected -> list them, do not edit), tests/contracts, tests/gates/g1_vt (PYTHONPATH=src:.), tests/gates/g4_lifetime (PYTHONPATH=src:.). Never -t .",
+  "allowed_write_paths": ["src/workbench/ui/**", "tests/ui/**", "src/workbench/backend/cli.py (entry wiring only)", "tests/backend/live_harness.py, tests/backend/test_live_detach.py, tests/backend/test_live_start.py (only to pass --plain)"],
+  "prohibited_paths": ["tests/**/*_independent*.py", "tests/backend/independent_support.py", "src/workbench/backend/** except cli.py", "src/workbench/contracts/**", "src/workbench/terminal/**", "omp_bridge/**", "docs/**", ".workflow/**", "pyproject.toml"],
+  "resource_claims": [{"resource": "host:interactive-terminal", "mode": "exclusive"}, {"resource": "repo:ui-status", "mode": "exclusive"}],
+  "stop_conditions": ["needs a ui_v1/backend/v1/ports_v2 contract change", "must break the G1/G4 fixed combination or claim untested key support", "cannot keep OMP keys unmodified with a prefix scheme"],
+  "rules": "No commits/push, no graphify update, no tmux/herdr inside the product, no credentials, no Docker. Own and clean every process/temp dir/data dir you start (exact identity). Leave /tmp/cw03-g2-* alone.",
+  "result_format": "checks table first (command, exit, counts, duration), status, changed paths, key map, design summary (<=12 lines), list of independent tests expected to need --plain adaptation, residue, gaps."
+}

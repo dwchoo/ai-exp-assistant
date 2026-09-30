@@ -1,0 +1,12 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 194,
+  "event": {"id": "limit-cw04-current-unit-20260928", "kind": "limit", "data": {
+    "bucket": "unit:V-CW-04-p2.6-current", "origin": "operating", "value": 5,
+    "authority": "Approved PLAN p2.6 CW-04, workflow-contract section 8, and current implementation authorization",
+    "reason": "Current-run CW-04 extension-fault closure and integrated independent verification; historical CW-04 calls remain accounted only in opening aggregate totals",
+    "decision_owner": "Root", "remaining_work_estimate": 5,
+    "expected_previous": null,
+    "scope_basis": {"status": "known-empty", "evidence_refs": [".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json revision 193 has no call assigned to unit V-CW-04-p2.6-current"]}
+  }}
+}

@@ -1,0 +1,10 @@
+{
+  "invocation":"cw11-race2-test-01",
+  "outcome":"complete",
+  "candidate_ready":true,
+  "independent_tests_added":4,
+  "checks":{"independent":"13/13 passed","observation":"38/38 passed","workflow":"44/44 passed","bridge":"18/18 passed","contracts":"20/20 passed","g4_evidence":"10/10 passed","g4_lifetime":"8/8 passed","node":"33/33 passed"},
+  "evidence_reuse":"The actual OMP 60-second review and 13th wake result from the immediately prior corrected candidate was reused; the present delta changes final authority and exit-event races rather than normal periodic OMP delivery, and the new boundaries were exercised independently.",
+  "current_candidate_live_omp_rerun":false,
+  "scope":"Only the allowed independent test file and preserved graphify output changed."
+}

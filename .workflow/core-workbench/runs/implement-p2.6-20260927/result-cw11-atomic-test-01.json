@@ -1,0 +1,10 @@
+{
+  "invocation":"cw11-atomic-test-01",
+  "outcome":"needs_reroute",
+  "candidate_ready":false,
+  "finding":{"severity":"P1","summary":"ReviewRequest does not carry its issuance epoch. After active run A->None->the same six-field A, a caller can pair the retained old request with the current snapshot epoch and reauthorize it."},
+  "checks":{"independent_atomic":"6/7 passed; A-B-A regression failed as intended","workflow_binding":"5/5 passed","observation":"54/55 passed; same A-B-A failure","actual_omp_18_2_10":"60.0-second review, 13 wakes, 15 provider requests, real WorkflowRun exit in 0.057 seconds, secret absent, zero residue"},
+  "changed_files":["tests/observation/test_atomic_admission_independent.py","tests/observation/test_workflow_binding.py"],
+  "product_files_modified":false,
+  "graphify_updated":true
+}

@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw06-rerun-test-06",
+  "status": "needs_reroute",
+  "reason": "stub-OMP flood probe p27f fails deterministically (3/3) at F2 (coloured Korean flood): backend closes UI with slow_client, UI shows the reason and exits 1. Same probe passed 5/5 on the earlier frozen candidate (result-p27-cw06-rerun-test-04). Classification: implementation regression suspected (not test/flake/environment; F0 and F1 pass; reruns identical); not proven which change causes it.",
+  "files_added": ["tests/ui/test_product_replay_independent_p27h.py"],
+  "checks": [
+    {"cmd": "unittest discover -s tests/ui -p test_product_replay_independent_p27h.py", "exit": 0, "counts": "1 test OK", "seconds": 16, "note": "mutation in scratch copy (replay counted in backlog + exemption removed) FAILS it: catch-up indicator shown for replay"},
+    {"cmd": "CW06_LIVE_MODEL=1 live_product_omp_independent.py (real OMP 18.2.10)", "exit": 0, "counts": "1 test OK, S0-S16 all pass", "seconds": 74, "model_turns": 2},
+    {"cmd": "live_product_flood_independent_p27f.py (stub OMP)", "exit": 1, "counts": "1 test FAILED; run 3 times (2 official + 1 scratch copy with larger tail): F0,F1 pass, F2 UI exit at <20s", "seconds": 57},
+    {"cmd": "tests/ui test_*.py x2", "exit": 0, "counts": "125 OK x2 (incl. new test)", "seconds": 60},
+    {"cmd": "tests/backend test_*.py", "exit": 0, "counts": "71 OK", "seconds": 266},
+    {"cmd": "tests/contracts", "exit": 0, "counts": "43 OK"},
+    {"cmd": "tests/gates/g1_vt (src:.)", "exit": 0, "counts": "63 OK"},
+    {"cmd": "tests/gates/g4_lifetime (src:.)", "exit": 0, "counts": "8 OK"}
+  ],
+  "verdicts": {
+    "replay_fixture_test": "pass: 3 panes x >=272 KiB replay with early alt-screen + scroll region; rendered panes == synchronous pyte feed, no catch-up indicator; 8 MiB live flood after replay triggers catch-up, tail coherent, no stray CSI text",
+    "S15_reattach_ratios": {"manager_omp": 0.93, "worker_omp": 1.0, "host_shell": 0.94, "pass": true},
+    "flood_probe": "FAIL (see reason)",
+    "model_turns_used": 2
+  },
+  "flood_failure_detail": "UI final message: '[workbench] backend가 연결을 닫음: slow_client'; catch-up seen in F0; evidence in scratchpad (not retained in repo). Root policy 'residual_policy' in root-adjudication-p27-cw06-flood.json may apply (known limitation) - Root decision needed.",
+  "frozen_production_hashes_equal": true,
+  "residue": "own leak (2 /tmp dirs from an aborted mutation attempt whose setUp failed before cleanup registration) removed by exact path and test fixed (cleanup registered before start()); 11 cw06-indep-*/10 cw06-p27f-* dirs dated 00:40-00:42 pre-date this session (not mine, left). None of mine (/tmp/cw06-* absent, no processes); /tmp/cw03-g2-rihuksfh disappeared during the run - not mine, untouched"
+}

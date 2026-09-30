@@ -1,0 +1,34 @@
+{
+  "invocation": "cw10-idtype-test-01",
+  "role": "test_designer",
+  "candidate": "9bce3816e82085a6b9066f32ed7c8f117a22d49dbfaa0ebd6455327561b23028",
+  "outcome": "candidate_ready",
+  "read_only": true,
+  "identity_matrix": {
+    "existing_independent_cases": "3/3 passed",
+    "additional_public_verifier_cases": "valid control passed; float, negative, JS-unsafe revision/generation, malformed message UUID, and unsafe event sequence rejected 8/8"
+  },
+  "checks": {
+    "workflow": "33/33 passed on isolated rerun",
+    "terminal": "10/10 passed",
+    "bridge": "18/18 passed",
+    "tasks": "22/22 passed",
+    "host_shell_cases": "4/4 passed",
+    "git_diff_check": "passed"
+  },
+  "runtime": {
+    "omp_version": "18.2.10",
+    "result": "passed",
+    "responses": "execute sequence 4<6 and analysis sequence 10<12 with distinct response IDs and exact Task/run/message/attempt/session/generation identities",
+    "worktree": "explicit commit and dirty source preserved",
+    "shell_events": ["sent", "accepted", "started", "ended"],
+    "secret_absent_from_all_files": true,
+    "residue": 0
+  },
+  "flaky_observation": "One parallel-load run hit the existing 3-second parent-shell cwd verification boundary; the test passed alone and the complete workflow suite passed 33/33 when rerun alone.",
+  "scope": {
+    "files_modified_by_tester": [],
+    "graphify_cache_drift": "graphify-out/cache/last_query_stamp changed after Root's graphify query and is not a tester or product change"
+  },
+  "needs_reroute": false
+}

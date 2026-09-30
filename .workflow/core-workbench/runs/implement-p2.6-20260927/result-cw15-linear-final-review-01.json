@@ -1,0 +1,24 @@
+{
+  "invocation": "cw15-linear-final-review-01",
+  "outcome": "complete",
+  "candidate_ready": false,
+  "candidate_id": "86c0acd50a27f8ce9bc72326b167421d56e359500c7cba5e1d5e15a576a27966",
+  "snapshot_hashes_match": true,
+  "closed": "The shutdown/action linearization race and the prior ended-run and metadata-tick admission findings are closed.",
+  "finding": {
+    "severity": "P1",
+    "path": "src/workbench/app/lifecycle.py",
+    "lines": "481-520",
+    "summary": "request_takeover is outside the shared linearization boundary: tick can begin an automatic review after takeover is requested, while an in-flight command.delivery=unknown causes request_takeover to be rejected by reconcile instead of durably closing automatic admission.",
+    "required_behavior": "Durably request takeover under the same coordinator lock as automatic actions, preserve any unknown command-delivery evidence without replay, and serialize all control transitions that change automatic eligibility."
+  },
+  "acceptance": {
+    "C-AC-15": "met in-repo",
+    "C-AC-16": "met in-repo",
+    "C-AC-17": "met in-repo",
+    "C-AC-18": "not met due takeover/automatic-action race; external OMP remains pending",
+    "C-AC-22": "met in-repo",
+    "C-AC-23": "met in-repo; real reboot remains pending"
+  },
+  "mutation_owner": null
+}

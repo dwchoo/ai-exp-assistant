@@ -1,0 +1,74 @@
+{
+  "feature_id": "core-workbench",
+  "ticket_id": "CW-03",
+  "attempt_id": "cw03-takeover-test-01",
+  "invocation": "cw03-takeover-test-01",
+  "approved_bundle_digest": "64bcf577a30e7c6bbff3e4e775f8e6c17ca212ce3bf79b5bc5be31196a792b07",
+  "actual_workspace": "/home/dwchoo/ai-exp-assistant",
+  "baseline_snapshot": "candidate 65c3b7a6f21ebdc8c4e3d613269e1880ec450fbe1b4ab36e204d5668b05d4afa",
+  "effective_write_capability": "shared physical checkout; serial test-only mutation lease",
+  "acceptance_ids": [
+    "C-AC-08",
+    "C-AC-20"
+  ],
+  "gate_item": "G2-TAKEOVER",
+  "expected_outcomes": [
+    "Takeover request immediately blocks every new automatic dispatch and remains distinct from ACK/manual prompt confirmation",
+    "Already-sent work is unknown and is never retried or replayed when ACK is lost or delayed",
+    "Manual input is sent only to the still-matching confirmed foreground process group",
+    "If the foreground target exits after a partial write, no remaining byte reaches the returned parent prompt or another foreground target",
+    "Input flush and input-return barriers precede takeover ACK and manual prompt/new input"
+  ],
+  "allowed_write_paths": [
+    "tests/gates/g2_shell/**"
+  ],
+  "prohibited_paths": [
+    "src/**",
+    "docs/**",
+    ".workflow/**",
+    ".codex/**",
+    ".agents/**",
+    "graphify-out/**"
+  ],
+  "resource_claims": [
+    "host:shell-fixture exclusive"
+  ],
+  "mutation_owner": "test_designer cw03-takeover-test-01",
+  "checkpoint_ref": ".workflow/core-workbench/runs/implement-p2.6-20260927/pretakeover-test-checkpoint.json",
+  "requirements_identity": "e0ea9ef4ea1457ea2b76df7b53a7ccb17f48555652a81886978ec1bc3fe6d0e6",
+  "requirements_path": ".workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw03.json",
+  "exact_checks": [
+    "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest tests.gates.g2_shell.test_live_takeover_predicates -v",
+    "PYTHONDONTWRITEBYTECODE=1 python3 tests/gates/g2_shell/live_takeover_probe.py",
+    "git diff --check -- tests/gates/g2_shell"
+  ],
+  "reserved_budget": {
+    "total": 1,
+    "role:test_designer": 1,
+    "unit:V-CW-03": 1
+  },
+  "stop_conditions": [
+    "Production correction is required",
+    "A product decision is ambiguous",
+    "A write outside tests/gates/g2_shell/** is required",
+    "A runtime probe cannot be bounded or cleaned up"
+  ],
+  "configured_model": "gpt-6-sol",
+  "configured_effort": "high",
+  "host_observed_model": "unverified",
+  "host_observed_effort": "unverified",
+  "routing": {
+    "planned_role": "test_designer",
+    "selected_role": "test_designer",
+    "reason_codes": [
+      "mandatory_independent_tests",
+      "takeover_race_regression"
+    ],
+    "evidence_refs": [
+      "workflow-contract section 7",
+      "change-verification skill",
+      "docs/features/core-workbench/tickets/CW-03.md"
+    ]
+  },
+  "task": "Independently test the G2-TAKEOVER candidate using the expected outcomes above as the oracle. Verify that the partial-write race is a real discriminator: a mutation that omits per-chunk revalidation must leak/accept unsafe remaining input, while the candidate fails closed without redirecting bytes. Independently challenge ACK lost/delayed no-replay, READY-only false confirmation, missing flush, dispatch latch phases, and same-parent barrier ordering on actual Bash and dash. Add/refine tests only for meaningful missing coverage, never production code, and preserve known legacy failures without treating them as passes. Run exact checks and report exits, changed test paths, scope, cleanup/residue, production-correction need, and remaining unknowns."
+}

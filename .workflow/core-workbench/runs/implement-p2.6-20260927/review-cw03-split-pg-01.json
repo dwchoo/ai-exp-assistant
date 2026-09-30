@@ -1,0 +1,23 @@
+{
+  "invocation": "cw03-split-pg-review-01",
+  "candidate": "1747ca33388580d8c4fcecf616a6a8dbe24372900dd49fa7aede3719857095ba",
+  "status": "changes_required",
+  "findings": [
+    {
+      "severity": "P1",
+      "title": "split supervisor leaves SIGINT/SIGQUIT at Python defaults",
+      "evidence": "tests/gates/g2_shell/live_combined_boundary_probe.py split_supervisor only handles SIGTSTP/SIGCONT; after foreground restoration a PTY Ctrl-\\ can terminate the observer before finally, producing RETURN:131/WAIT without an explicit unknown latch while a setsid descendant may remain active",
+      "required_correction": "Keep the split supervisor observable across foreground INT/QUIT, preserve descendant lifetime semantics, and add split-path runtime coverage that distinguishes the signal from numeric exit 131"
+    },
+    {
+      "severity": "P2",
+      "title": "split supervisor cleanup can miss a newly reparented setsid descendant",
+      "evidence": "cleanup snapshots direct children once and then blocks in waitpid; failure after setsid but before host identity registration can leave an adopted descendant outside both the snapshot and PTY-session cleanup",
+      "required_correction": "Make failure cleanup bounded and repeated, verify no owned descendants remain, and exercise an injected failure between setsid and host identity registration"
+    }
+  ],
+  "scope_limit": "The reviewed split_case covers Ctrl-Z, exit 148, parent WAIT, and stale input only; the broader environment/takeover/failure/INT/QUIT matrix still uses shared-PG helpers and is not evidence of completed CW-03 adapter integration.",
+  "needs_oracle": false,
+  "writes": [],
+  "owned_processes_remaining": false
+}

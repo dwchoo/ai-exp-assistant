@@ -1,0 +1,1 @@
+{"changed":["docs/features/core-workbench/WORKTREE-GUIDE.md","graphify-out/cache/last_query_stamp","src/workbench/workflow/__init__.py","src/workbench/workflow/run.py","src/workbench/workflow/worker_port.py","tests/workflow/live_workflow_probe.py","tests/workflow/test_run.py"],"comparable":true,"index_changed":[],"outside_scope":["graphify-out/cache/last_query_stamp"]}

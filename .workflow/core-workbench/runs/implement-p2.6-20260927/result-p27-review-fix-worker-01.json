@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-review-fix-worker-01",
+  "status": "candidate_ready",
+  "candidate_id": "37233705b980db4ee4a875fd826c0bca59c11a53c7304c1610876f05323e1088",
+  "scope_audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-review-fix.json",
+  "checks": [
+    [
+      "acceptance deadline",
+      0,
+      "1 OK"
+    ],
+    [
+      "terminal",
+      0,
+      "68 OK"
+    ],
+    [
+      "g2_shell",
+      0,
+      "142 OK skip=1 on rerun (1st run: 1 timing flake test_ctrl_c_hold_can_recover_same_shell_without_queued_input; 3x standalone OK)"
+    ],
+    [
+      "canonical",
+      0,
+      "3 OK"
+    ],
+    [
+      "backend",
+      0,
+      "51 OK"
+    ],
+    [
+      "contracts",
+      0,
+      "43 OK"
+    ],
+    [
+      "lifecycle",
+      0,
+      "38 OK"
+    ],
+    [
+      "g4",
+      0,
+      "8 OK"
+    ],
+    [
+      "workflow",
+      0,
+      "46 OK"
+    ],
+    [
+      "observation",
+      0,
+      "95 OK"
+    ]
+  ],
+  "red_green": {
+    "P2-1": "zombies 50 -> <=2",
+    "P2-2": "foreign session member killed -> 0 signals",
+    "P2-3": "SigIgn 0x1001000 -> 0 (OMP, shell, user child, experiment)",
+    "P2-4": "worst pump 48.5s -> <0.25s; live backend paste 46ms, snapshot worst 41ms"
+  },
+  "residue": "no processes; /tmp/cw03-g2-* now 9 (SIGKILL-owner pattern, unattributed)"
+}

@@ -1,0 +1,30 @@
+{
+  "invocation": "cw14-test-01",
+  "outcome": "complete",
+  "candidate_ready": true,
+  "added_tests": 7,
+  "changed_paths": [
+    "tests/storage/test_log_raw.py",
+    "graphify-out/**"
+  ],
+  "checks": {
+    "storage": "24 tests passed",
+    "terminal": "10 tests passed",
+    "tasks": "22 tests passed",
+    "workflow": "44 tests passed",
+    "graphify_update": "exit 0",
+    "production_hashes": "frozen snapshot match"
+  },
+  "production_sha256": {
+    "src/workbench/storage/log_raw/__init__.py": "2c336e18...31feb6",
+    "src/workbench/storage/log_raw/admission.py": "4ce23cba...d57345",
+    "src/workbench/storage/log_raw/store.py": "0af8207c...63bfac6"
+  },
+  "test_sha256": "9704f650f0eda7dc81930e40ac7db82b37431b6933b965ffe3262069075e833f",
+  "acceptance": {
+    "C-AC-24": "cap, accounting, exact-prefix retention, reopen, failures, concurrency, preservation, and path-safety fixtures passed",
+    "C-AC-28": "raw-storage failure status and continued observation remain independent from metadata admission"
+  },
+  "residual_integration_risk": "CW-15 must connect actual PTY bytes to append, wire metadata durable-success and automatic dispatch gate, and expose durable/missing status to UI integration.",
+  "mutation_owner": "/root/cw12_post_review_test"
+}

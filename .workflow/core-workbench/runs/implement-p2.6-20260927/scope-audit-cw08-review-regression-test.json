@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "invocation": "cw08-review-regression-test-01",
+  "before": "511d183ec24dbfa098416e422fc5ffb03dccab4c535bb48e0eff68b80f59265b",
+  "after": "5c155eee484bf193087d2de49f0e654065914741f4771fa10d3a5b5fc644a274",
+  "allowed": [
+    "tests/bridge/test_mailbox_independent.py"
+  ],
+  "named_workflow_artifacts": [
+    "result-cw08-review-regression-test-01.json",
+    "snapshot-cw08-review-regression-test-after.json",
+    "scope-audit-cw08-review-regression-test.json"
+  ],
+  "changed": [
+    "tests/bridge/test_mailbox_independent.py"
+  ],
+  "outside_scope": [],
+  "head_unchanged": true,
+  "index_changed": [],
+  "baseline_file_count": 1190,
+  "unchanged_baseline_file_count": 1189,
+  "baseline_candidate_digest_verified": true,
+  "workflow_artifacts_excluded_by_assigned_baseline": true,
+  "comparable": true
+}

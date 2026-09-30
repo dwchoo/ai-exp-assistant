@@ -1,0 +1,24 @@
+{
+  "changed": [
+    "graphify-out/.graphify_labels.json",
+    "graphify-out/.graphify_labels.json.sig",
+    "graphify-out/2026-09-28/.graphify_labels.json",
+    "graphify-out/2026-09-28/GRAPH_REPORT.md",
+    "graphify-out/2026-09-28/graph.json",
+    "graphify-out/2026-09-28/manifest.json",
+    "graphify-out/GRAPH_REPORT.md",
+    "graphify-out/cache/ast/v0.9.67-s4/230502062fa1cb299ef12561c40a0c754df3fcf61f99d74b3046646edeebedb3.json",
+    "graphify-out/cache/ast/v0.9.67-s4/eb39cf4d5f6e49d19994aea1154a186a316f8d27b7c71274fcc3e60d46d35b40.json",
+    "graphify-out/cache/ast/v0.9.67-s4/fffe84ac95f84a1cf0100c87d5418cddd70e70669a98181a720155021e61724a.json",
+    "graphify-out/cache/last_query_stamp",
+    "graphify-out/cache/stat-index.json",
+    "graphify-out/graph.html",
+    "graphify-out/graph.json",
+    "graphify-out/manifest.json",
+    "tests/gates/g1_vt/live_outer_tmux_probe.py",
+    "tests/gates/g1_vt/test_outer_tmux_predicates.py"
+  ],
+  "index_changed": [],
+  "outside_scope": [],
+  "comparable": true
+}

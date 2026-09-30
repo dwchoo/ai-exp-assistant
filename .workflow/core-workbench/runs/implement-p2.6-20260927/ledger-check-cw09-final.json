@@ -1,0 +1,13 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 348,
+  "event": {
+    "id": "check-cw09-final-01",
+    "kind": "check",
+    "data": {
+      "check_id": "cw09-tasks-final-01",
+      "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/check-cw09-tasks-final-observed.json",
+      "sha256": "aa85ea8d049c40adf960eb2258a1e2ab5a75d0c4287093f7eb81b9b6002b6d0c"
+    }
+  }
+}

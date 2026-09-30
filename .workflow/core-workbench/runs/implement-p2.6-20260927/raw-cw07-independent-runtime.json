@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "invocation": "cw07-test-01",
+  "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python tests/terminal/live_persistent_shell_independent.py",
+  "exit_code": 0,
+  "items": [
+    "P-C-AC-08",
+    "P-C-AC-26",
+    "P-C-AC-32"
+  ],
+  "results": [
+    {
+      "cases": {
+        "control_fd_loss": "unknown",
+        "hook": "not_sent",
+        "manual_job": "unknown",
+        "stopped_identity_takeover_environment_no_replay": "passed",
+        "trap": "not_sent",
+        "unsubmitted": "not_sent"
+      },
+      "owned_pids": [
+        4086501,
+        4086506,
+        4086511,
+        4086514,
+        4086517,
+        4086520,
+        4086522,
+        4086525,
+        4086529
+      ],
+      "residue": [],
+      "shell": "bash"
+    },
+    {
+      "cases": {
+        "control_fd_loss": "unknown",
+        "hook": "not_sent",
+        "manual_job": "unknown",
+        "stopped_identity_takeover_environment_no_replay": "passed",
+        "trap": "not_sent",
+        "unsubmitted": "not_sent"
+      },
+      "owned_pids": [
+        4086532,
+        4086538,
+        4086545,
+        4086551,
+        4086553,
+        4086555,
+        4086558,
+        4086560,
+        4086565
+      ],
+      "residue": [],
+      "shell": "sh"
+    }
+  ]
+}

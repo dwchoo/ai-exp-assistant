@@ -1,0 +1,26 @@
+{
+  "invocation": "cw12-run-permit-correction-01",
+  "role": "worker_senior",
+  "unit": "V-CW-12-p2.6-current",
+  "objective": "Close the final CW-12 active-run mismatch by requiring exact non-null run/incarnation permits on every automatic dispatch.",
+  "evidence": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-fence-protocol-review-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-fence-protocol-oracle-01.json"
+  ],
+  "write_scope": ["src/workbench/policy/pause_*/**", "src/workbench/observation/worker_review.py", "tests/policy/pause_*/**", "tests/observation/**", "graphify-out/**"],
+  "must_fix": [
+    "bind_run may open automation only when the coordinator target run/incarnation exactly equals SerializedReviewAdmission active run/incarnation and the persisted/current/peer reconciliation already passes. Missing active run or any mismatch remains CLOSED with reconciliation-needed/held semantics.",
+    "dispatch_automatic local admission and dispatch_bound_automatic transport must request permit with the coordinator's captured exact run_identity and incarnation; a non-null open token alone is insufficient and a fence bound to None must never authorize automatic work.",
+    "Revalidate the captured binding/token before committing any late result without reintroducing locks around action/transport/ACK.",
+    "Preserve Oracle fence CAS, bound G3 submission, pause latency, cancellation isolation, exact stop/durability/no-replay/status behavior."
+  ],
+  "required_regressions": [
+    "Admission active A + bind B with current persisted B/live peers remains closed and both local and bound automatic dispatch are held with zero callback/transport bytes.",
+    "Missing admission active run remains closed until exact active B is installed and a valid bind/reconciliation opens it.",
+    "Same run identity but different incarnation is held; exact run/incarnation succeeds.",
+    "A coordinator resumed after admission changed to B cannot reopen or dispatch A."
+  ],
+  "verification": ["Run focused tests repeatedly, full pause/observation/bridge/workflow/G3/status regressions, actual OMP probe, graphify update ."],
+  "constraints": ["Do not edit contracts/workflow evidence/tickets/PLAN/ledger.", "Use apply_patch only; no destructive git, uv, local .venv, commit, publish, or deploy."],
+  "report": ["exact permit fix", "regressions", "full/live results", "candidate_ready or needs_reroute"]
+}

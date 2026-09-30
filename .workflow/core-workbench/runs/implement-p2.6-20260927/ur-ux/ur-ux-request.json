@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "checkpoint": "UR-UX",
+  "decision": "C-D57",
+  "status": "awaiting_user_review",
+  "requested_at": "2026-09-30",
+  "candidate": "671b05d3085701f0111e6440955fa6f4b9edc5ddcdba9f54c6d5af27a7c7351b (CW-06 integrated)",
+  "guide": ".workflow/core-workbench/runs/implement-p2.6-20260927/ur-ux/UR-UX-GUIDE.md",
+  "snapshots": ".workflow/core-workbench/runs/implement-p2.6-20260927/ur-ux/snapshots/ (19)",
+  "questions_for_user": ["checklist items 1-6 (layout, focus vs owner, keys, paste, detach/reattach, wording)", "Q1 background-job handoff hold dead end (G2 open item): options a/b/c", "Q2 shutdown/confirm_boot controls inside the UI"],
+  "blocks": ["CW-18"],
+  "feedback_routing": "layout/keys/wording -> CW-06 delta + independent test/review; behaviour/acceptance -> new decision and plan change",
+  "record_on_answer": "user quote and outcome appended here"
+}

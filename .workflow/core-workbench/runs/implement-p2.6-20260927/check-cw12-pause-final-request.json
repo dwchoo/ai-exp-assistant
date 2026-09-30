@@ -1,0 +1,17 @@
+{
+  "root": "/home/dwchoo/ai-exp-assistant",
+  "requirements": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw12.json",
+  "argv": [
+    "/usr/bin/env",
+    "PYTHONDONTWRITEBYTECODE=1",
+    "PYTHONPATH=src",
+    "/tmp/cw02-g1-venv/bin/python",
+    "-m", "unittest", "discover", "-s", "tests/policy/pause_automation", "-p", "test_*.py", "-q"
+  ],
+  "environment": {"description": "Linux; frozen CW-12 candidate; complete pause automation suite with Git and non-Git peer/execution fixtures, actual-process seams, mode/index/identity bounds, and replay checks"},
+  "log": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/check-cw12-pause-final.log",
+  "check_id": "cw12-pause-final-01",
+  "watch": [],
+  "exclude": [".workflow/core-workbench/runs/implement-p2.6-20260927/**"],
+  "timeout": 180
+}

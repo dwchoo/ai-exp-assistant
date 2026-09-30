@@ -1,0 +1,28 @@
+{
+  "invocation": "cw03-fd-review-01",
+  "unit": "V-CW-03",
+  "candidate": "3a920441f1487dce849ce85c8432658ae73e5b546412d02a15d6d77f6ddfefaf",
+  "verdict": "pass",
+  "findings": [],
+  "severity_summary": {"P0": 0, "P1": 0, "P2": 0, "P3": 0},
+  "prior_finding": {
+    "id": "inherited-control-recovery-fd",
+    "severity": "P1",
+    "status": "closed",
+    "evidence": [
+      "src/workbench/terminal/shell_g2/lifecycle.py:482",
+      "tests/gates/g2_shell/test_common_run_protocol_independent.py:42"
+    ]
+  },
+  "observations": [
+    "The allowlist enumerates /proc/self/fd and closes FD7/8 and high-number aliases before prepared and immediately before exec.",
+    "The staged allowlists retain only preparation, release, exec-error acknowledgement, and explicit fixture channels required at each point.",
+    "No regression was found in the existing PTRACE exec confirmation path.",
+    "The independent test exercises the real payload boundary and its closure-removal mutation consumes both queued frames, demonstrating discrimination."
+  ],
+  "runtime_reexecuted": false,
+  "residual_limits": [
+    "Review is limited to the approved Linux bounded fixture contract, not a general custom-FD API or process sandbox.",
+    "The remaining input/jobs, manual hook, takeover, and six-matrix migration was outside this delta review."
+  ]
+}

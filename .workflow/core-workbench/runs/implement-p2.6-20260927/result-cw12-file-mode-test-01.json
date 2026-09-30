@@ -1,0 +1,16 @@
+{
+  "invocation": "cw12-file-mode-test-01",
+  "outcome": "needs_reroute",
+  "candidate_ready": false,
+  "product_mutation": false,
+  "test_only_changed_paths": ["tests/policy/pause_automation/test_pause_policy.py", "graphify-out/**"],
+  "finding": {
+    "severity": "P1",
+    "summary": "Git does not report non-executable tracked permission changes such as 0644 to 0600, so a separate-peer execution worktree can resume after an out-of-scope mode change.",
+    "reproduction": "test_execution_tracked_nonexecutable_chmod_outside_scope_blocks_resume",
+    "result": "PausePolicyError not raised",
+    "acceptance_ids": ["C-AC-33"]
+  },
+  "checks": {"single_reproduction":"failed as expected","pause":"113 run; 1 failure","actual_omp":"exit 0; zero_residue=true"},
+  "mutation_owner": "/root/cw12_post_review_test"
+}

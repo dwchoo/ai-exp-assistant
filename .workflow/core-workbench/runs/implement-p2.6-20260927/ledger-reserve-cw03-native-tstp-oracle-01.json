@@ -1,0 +1,20 @@
+{
+  "path": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 96,
+  "event": {
+    "id": "reserve-cw03-native-tstp-oracle-01",
+    "kind": "reserve",
+    "data": {
+      "invocation": "cw03-native-tstp-oracle-01",
+      "role": "oracle_senior",
+      "unit": "V-CW-03",
+      "incident": "",
+      "purpose": "Resolve the native TSTP process-group and stopped-child control contract",
+      "model": "gpt-6-astra",
+      "effort": "max",
+      "buckets": ["total", "role:oracle_senior", "unit:V-CW-03"],
+      "writer": false,
+      "workspace": "/home/dwchoo/ai-exp-assistant"
+    }
+  }
+}

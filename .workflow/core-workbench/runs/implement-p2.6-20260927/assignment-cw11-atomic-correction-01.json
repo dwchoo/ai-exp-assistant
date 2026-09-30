@@ -1,0 +1,30 @@
+{
+  "invocation":"cw11-atomic-correction-01",
+  "role":"worker",
+  "unit":"V-CW-11-p2.6-current",
+  "objective":"Replace the unsound dual-callback dispatch guard with a linearizable admission owner and integrate immediate confirmed exits from the actual CW-10 WorkflowRun identity.",
+  "base_candidate":"e4d18349adda351975340ab3a2bcf1b76919bf6df6cff7a0947272408578e409",
+  "review_evidence":".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw11-final-review-03.json",
+  "oracle_evidence":".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw11-atomic-oracle-01.json",
+  "requirements":".workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw11.json",
+  "ticket":"docs/features/core-workbench/tickets/CW-11.md",
+  "write_scope":["src/workbench/observation/**","tests/observation/**"],
+  "required_changes":[
+    "Add a mandatory authoritative SerializedReviewAdmission-style owner for the active six-field run identity, AutomationState, confirmed-exit fence, monotonic epoch, and review in-flight/consumed state. All owner writers and final dispatch submission must share one lock or single-writer boundary.",
+    "The admission check and synchronous dispatch_review call must occur in one linearized operation with no external callback, unlock, await, or queue handoff between them. No legacy unchecked dispatch fallback is allowed. Reentrant dispatch must fail closed without deadlock; concurrent tick must yield at most one side effect.",
+    "External callbacks may remain hints/collection inputs, but before admission their observations must be reconciled into the authoritative owner through explicit methods. Tests and actual runtime composition must mutate owner state for pause/cancel/revoke/run replacement/exit.",
+    "Keep UI exit delivery retry separate from terminal exit fence: once confirmed exit linearizes, new reviews remain forbidden even if on_exit blocks or raises; display can retry once-only until success.",
+    "Add WorkflowObservationBinding (or equally small production adapter) under observation. attach(workflow_run) must freeze and verify identity from WorkflowRun.task_message_id -> repository.get_message() persisted TASK content, including revision_id/target_session_id/target_session_generation, and exact task/revision/run/message direction/kind. collect_and_notify must only consume the same WorkflowRun instance's confirmed exit record, verify Task/revision/run and lifecycle confirmation, enrich it with the frozen identity, fence admission first, then notify immediately in that collect call.",
+    "Never enrich an old event from the current bridge peer. Fail closed for wrong/missing message identity, roles/kind, bool generation, different WorkflowRun record, unconfirmed exit, or incomplete lifetime/control/input return.",
+    "Update the actual OMP 18.2.10 live observation probe to use the production admission owner and WorkflowObservationBinding, and prove current-candidate periodic review, 13th wake, immediate real WorkflowRun exit notification without another 60-second tick, cleanup, silence-only hang unknown, and usage unknown."
+  ],
+  "required_tests":[
+    "Barrier-controlled writer-wins versus dispatch-wins linearization for pause/cancel/revoke/run replacement and A-B-A epochs.",
+    "Stale token/snapshot rejection, admission error and unknown no replay, reentrant/concurrent exactly-once dispatch.",
+    "Exit fence before blocking/raising UI callback prevents all new review while display retry remains possible.",
+    "Real TaskWorkflow.start WorkflowRun adapter path, old-session binding stability after peer replacement, wrong identity/kind/role/generation/run and unconfirmed/incomplete exit rejection."
+  ],
+  "verification":["Run observation plus workflow/bridge/contracts/G4 regressions.","Run the latest actual OMP 18.2.10 probe on this candidate.","Run graphify update . after changes."],
+  "constraints":["Use apply_patch only; no uv/local env/package artifacts; no workflow record/PLAN/ticket edits; no commit/push/merge/stash/reset/clean or graphify restoration."],
+  "report":["API and invariants","changed files","exact test/runtime results","remaining qualifications","candidate_ready or needs_reroute"]
+}

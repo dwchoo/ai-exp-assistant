@@ -1,7 +1,7 @@
 # Core Workbench 제품 동작 규약
 
-Revision: r1.11; state: 현재 요구·계획 묶음 승인. 갱신일: 2026-09-24. 최초 승인 기록은 [구현 승인](../../../.workflow/core-workbench/runs/implement-p2.3-20260924/approval.json)에 보관하고 C-D53 개정은 [정책 개정 기록](../../../.workflow/core-workbench/runs/implement-p2.3-20260924/cd53-policy-approval.json)을 따른다.
-[BRIEF](BRIEF.md)의 C-D01~C-D53은 개별 합의이며, 합의 표시가 없는 P1~P4 세부사항은 합의된 행동을 구현하기 위한 설계안이다. r1.7 전체 문서 묶음 승인 근거는 [승인 기록](../../../.workflow/core-workbench/runs/approval-r1.7/approval.json)에 보관한다. C-D49는 C-D35/C-D44의 일시정지 동작보다 우선한다. 설계안의 실제 구현 가능성은 검증이 필요하다. 결정 근거는 [DECISIONS.md](DECISIONS.md), 용어는 [CONTEXT.md](../../../CONTEXT.md)를 따른다.
+Revision: r1.13; state: 기존 r1.12 승인과 C-D55 반영. 갱신일: 2026-09-26. [C-D55 승인 기록](../../../.workflow/core-workbench/runs/decisions-cd55-20260926/approval.json)과 [C-D55](DECISION-2026-09-26.md)을 따른다. 현재 작업은 문서화·다음 세션 준비다.
+[BRIEF](BRIEF.md)의 C-D01~C-D55는 개별 합의이며, 합의 표시가 없는 P1~P4 세부사항은 합의된 행동을 구현하기 위한 설계안이다. r1.7 전체 문서 묶음 승인 근거는 [승인 기록](../../../.workflow/core-workbench/runs/approval-r1.7/approval.json)에 보관한다. C-D49는 C-D35/C-D44의 일시정지 동작보다 우선하고 C-D54는 부모 control 대기와 별도 실험 실행 단위를 확정한다. 설계안의 실제 구현 가능성은 검증이 필요하다. 결정 근거는 [DECISIONS.md](DECISIONS.md), 용어는 [CONTEXT.md](../../../CONTEXT.md)를 따른다.
 이 문서는 제품 동작이다. 저장소 개발 절차는 [workflow contract](../../../.codex/workflow-contract.md)가 정한다. 규약만으로 런타임 제어·격리가 구현되었다고 간주하지 않는다.
 
 ## 1. 역할, 위임과 작업 식별
@@ -38,7 +38,7 @@ Revision: r1.11; state: 현재 요구·계획 묶음 승인. 갱신일: 2026-09-
 1. Manager가 기준 commit, 실행 명세, 필요한 설정·데이터·환경을 전달한다. Worker가 실행용 경로를 준비하고 실제 cwd·commit을 기록한다.
 2. [C-D40 합의] Commit/worktree가 없거나 생성할 수 없으면 worker가 원인을 manager에게 보고하고 조정한다. 허용 범위의 local commit 준비·새 경로 선택 등은 자동 해결한다. 해결할 수 없거나 추가 권한이 필요하면 사용자에게 묻는다. 사용자 변경을 임의 삭제·stash하거나 mutable 개발 디렉터리에서 대신 실행하지 않는다. 기준 commit 변경 자체를 매번 재승인 사유로 삼지 않으며 기존 위임 범위를 따른다.
 3. Branch 이름만 다르거나 같은 디렉터리에서 branch를 바꾸는 것은 파일 격리가 아니다. `stash`, `reset`, `clean`, 사용자 worktree 삭제를 암묵적으로 수행하지 않는다.
-4. Commit은 외부 데이터·untracked 설정·환경 전체를 고정하지 않는다. 실행에 필요한 입력·출력 경로와 공유 GPU·환경 등의 충돌을 확인해 명세에 남긴다. [C-D43 합의] 사용자가 선택한 기존 conda/venv를 재사용하고 Workbench 자체 환경과 분리한다. 새 환경 생성·패키지 변경은 위임받은 범위에서만 수행한다. 작업별 환경 생성·복제를 기본 동작으로 강제하지 않는다.
+4. Commit은 외부 데이터·untracked 설정·환경 전체를 고정하지 않는다. 실행에 필요한 입력·출력 경로와 공유 GPU·환경 등의 충돌을 확인해 명세에 남긴다. [C-D43/C-D55 합의] 사용자가 terminal에서 직접 준비한 기존 환경을 재사용하고 Workbench 자체 환경과 분리한다. conda 전용 점검과 환경 관리자별 activation/deactivation 보장은 core 완료 조건에서 제외한다. 새 환경 생성·패키지 변경은 위임받은 범위에서만 수행한다. 작업별 환경 생성·복제를 기본 동작으로 강제하지 않는다.
 5. 실행·개발 worktree 구분은 보안 sandbox가 아니다. 다른 editor 쓰기까지 막는다고 표시하지 않는다.
 
 ## 3. Host terminal과 사용자 제어권
@@ -48,8 +48,8 @@ Revision: r1.11; state: 현재 요구·계획 묶음 승인. 갱신일: 2026-09-
 - [C-D52 합의] Terminal 인수 요청 즉시 새 자동 전송을 막고 인수 요청·확인을 구분한다. 이미 전달된 명령은 실행 중·종료·미확인으로 표시하며 취소됐다고 추정하지 않는다. 실행 중 실험은 유지한다. 수동 입력은 확인된 현재 대상에 전달하고, 대상이 불명확하면 입력을 보류하며 이유를 표시한다. 인수·상태 확인 뒤 오래된 요청을 자동 재실행하지 않는다.
 - 실행 중 소스·설정을 직접 수정하려면 먼저 중단하고 실제 종료를 확인한다. 사용자의 직접 명령 입력·로그 조회와 파일 수정은 구분한다.
 - [C-D48 합의] 수동 입력 뒤 사용자가 같은 shell에서 `wb-handoff`를 직접 실행한다. 명령의 실행·현재 shell·미제출 입력·job·cwd를 확인하고 상태가 안전할 때만 자동 실행 재개를 검토한다. 반환 조작만으로 clean 상태를 추정하지 않는다. 사용자 제어권은 detach 후에도 유지한다.
-- [C-D50 합의] 관리된 shell에서 cwd·export·검증된 conda/venv 전환을 지원한다. 비호환 hook·trap 변경과 상태 불명에서는 자동 복귀를 보류한다. 같은 사용자 권한 코드의 고의적 내부 함수 변조·event 위조를 방어하는 보안 경계는 요구하지 않으며, 일반 입력·job 경합 방지는 계속 필수다.
-- [C-D51 합의] 안전한 handoff 뒤 같은 interpreter가 prompt로 돌아가지 않고 전용 control 경로에서 자동 명령을 기다리는 모드로 전환한다. Shell PID·cwd·환경을 보존한다. 사용자 제어권 인수는 실행 중 실험을 종료하지 않으며, 수동 prompt로 돌아갈 수 있는 안전한 시점에 복귀한다. 실제 Bash/dash 가능성은 검증 전이다.
+- [C-D50/C-D55 합의] 관리된 shell에서 사용자가 직접 준비한 cwd·PATH·exported environment를 보존하고 실험 자식에 상속한다. 비호환 hook·trap 변경과 상태 불명에서는 자동 복귀를 보류한다. 같은 사용자 권한 코드의 고의적 내부 함수 변조·event 위조를 방어하는 보안 경계는 요구하지 않으며, 일반 입력·job 경합 방지는 계속 필수다.
+- [C-D51/C-D54 합의] 안전한 handoff 뒤 부모 interpreter가 prompt로 돌아가지 않고 전용 control 경로에서 기다린다. 부모 shell PID·준비된 cwd·exported environment를 보존한다. 자동 실험은 고정 supervisor/subreaper 아래 별도 interpreter 또는 executable에서 실행하고 실험 내부 상태 변경을 부모에 자동 반영하지 않는다. 사용자 제어권 인수는 실행 중 실험을 종료하지 않으며, 수동 prompt로 돌아갈 수 있는 안전한 시점에 복귀한다. 입력 반환·signal·subreaper의 실제 Bash/dash 결합 가능성은 검증 전이다.
 
 방향과 대안은 [ADR-0002](../../adr/0002-managed-shell-control-wait.md)에 기록한다.
 현재 실행 중인 foreground program에 수동 입력을 전달하는 것과 shell prompt로
@@ -57,16 +57,17 @@ Revision: r1.11; state: 현재 요구·계획 묶음 승인. 갱신일: 2026-09-
 
 **P2/P4 실행 경계 제안**
 
-- Host terminal은 하나의 실제 persistent interactive shell이다. 그 shell에서 설정한 cwd·conda/venv·export를 유지한다. 부모 shell의 비수출 변수까지 자동 복제한다는 뜻은 아니다.
+- Host terminal은 하나의 실제 persistent interactive 부모 shell이다. 사용자가 그 shell에서 직접 설정한 cwd·PATH·exported environment를 유지하고 자동 실험 자식에 상속한다. 부모 shell의 비수출 변수·함수까지 자동 복제하거나 실험 내부 cd·export를 부모에 되돌린다는 뜻은 아니다.
 - Workbench 자체 Python 환경을 실험용 `python`·CUDA 환경으로 주입하지 않는다. Worker 명령을 별도 runner shell로 우회시키지 않는다.
+- [C-D54 합의] 부모 control 경로는 고정 helper만 시작하고 실험 script 전체를 supervisor 아래 별도 interpreter에서 평가한다. 단순 argv는 불필요한 shell 재해석 없이 실행할 수 있다. Pipeline·명령 치환·redirection을 supervisor 밖에서 먼저 실행하지 않는다. Supervisor는 실행 전에 subreaper 설정 성공을 확인하고 한 실험의 주 프로그램과 관리 대상 후손 수명을 구분한다.
 - [C-D41/C-D42 합의] Linux에서 Bash를 우선 사용하고, Bash가 없으면 sh로도 동작하도록 지원한다. Bash 5.x가 우선 검증 대상이며 sh도 자동 실행·관측·사용자 입력의 핵심 흐름을 검증한다. 기본/login shell이 zsh여도 Workbench 전용 persistent Bash 또는 sh를 시작하며 사용자 기본 shell 설정은 바꾸지 않는다. 둘 다 사용할 수 없으면 시작 요건을 안내한다. 선택한 실행 파일과 실제 shell 구현을 표시·기록하고 검증한 지원 조합을 명시한다. zsh adapter는 현재 범위 밖이다. 시작 후에는 선택한 shell을 유지하며 실행 오류를 다른 shell로 우회하지 않는다.
 - Shell 준비/시작/종료/exit code/cwd는 display output과 분리된 lifecycle 경로에서 확인한다. Prompt regex, 무출력, stdout의 가짜 marker로 완료를 판정하지 않는다.
-- 관리 대상 프로그램의 종료는 관측 사실이며 실험 성공·실패 판단과 별도다. 확인 가능한 exit status와 로그·결과 위치를 연결하고 불명확한 수명은 unknown으로 남긴다. CW-03/G2는 로그 해석이나 실험 성공 판단을 맡지 않는다. Delegated cgroup 필수 여부는 아직 정하지 않았다.
+- 관리 대상 프로그램의 종료는 관측 사실이며 실험 성공·실패 판단과 별도다. 주 프로그램 반환, 전체 관리 대상 후손 종료·회수, 부모 control 반환과 입력권 반환을 구분한다. 확인 가능한 exit status와 로그·결과 위치를 연결하고 supervisor 장애·관측 channel 손실·수동 잔존 등 불명확한 수명은 unknown으로 남긴다. CW-03/G2는 로그 해석이나 실험 성공 판단을 맡지 않는다. C-D55에 따라 delegated cgroup은 core 필수 조건으로 추가하지 않는다. 자동 실험의 관리 대상 후손을 추적하며 supervisor 이전 수동 daemon의 발견·소급 관리를 보장하지 않는다. 불명 잔존은 이유를 표시하고 사용자가 정리한 뒤 재확인한다. 사용자 확인만으로 unknown을 완료로 승격하거나 귀속 불명 프로세스를 자동 종료하지 않는다.
 - 하나의 foreground 실행을 다룬다. Busy, 미제출 입력, REPL, 입력 owner 불일치, cwd 불일치, 상태 불명 시 자동 입력을 보류하고 이유를 표시한다. 자동 명령 queue로 나중에 몰래 실행하지 않는다.
 - Nested shell·background/daemon·`exec`·suspend·hook 유실은 자동 관측 경계를 표시한다. Prompt 복귀만으로 전체 작업 종료를 주장하지 않는다.
 - 포커스와 입력 owner를 구분해 표시한다. 반환 시 실행·cwd·입력 상태를 재확인하고 명령을 자동 재전송하지 않는다.
 - [C-D45 합의] 일반 중단에 반응하지 않을 때 강제 종료가 위임 범위에 포함되고 대상 프로세스를 확인할 수 있는 경우에만 manager 판단으로 강제 종료한다. 그렇지 않으면 사용자에게 묻는다. 사용자 입력 제어권과 일시정지 규칙은 계속 적용한다. 대상이 불명확하면 추정한 프로세스를 종료하지 않는다. 강제 종료 후에도 실제 종료를 확인하기 전 수정·재실행하지 않는다.
-- 중단 요청·실제 종료를 구분한다. 종료 확인 실패는 중단 실패/확인 필요로 표시한다. 구체 signal 순서·중단 응답 대기 간격은 G2 검증으로 정한다. 이 대기 간격은 실험 실행 시간 상한이 아니다.
+- 중단 요청·실제 종료를 구분한다. 종료 확인 실패는 중단 실패/확인 필요로 표시한다. 입력 반환 장벽은 key·paste·부분 write·terminal query reply를 포함한 이전 writer를 회수·차단한 뒤 부모 PTY 읽기를 재개해야 한다. 같은 부모 shell의 실제 prompt 복귀와 새 정상 입력 처리 뒤에도 이전 marker가 생기지 않아야 하며 알려진 유출 후보의 음성 대조를 포함한다. `TCIFLUSH`만으로 shell parser나 송신 queue까지 비었다고 가정하지 않는다. 구체 signal 순서·process group 구성·중단 응답 대기 간격은 G2 합성 검증으로 정한다. 이 대기 간격은 실험 실행 시간 상한이 아니다.
 
 ## 4. 1분 점검과 hang 조사
 
@@ -121,5 +122,5 @@ Revision: r1.11; state: 현재 요구·계획 묶음 승인. 갱신일: 2026-09-
 
 ## 7. 기술 후보와 후속 계획
 
-Python 본체, 최소 TS 공개 OMP bridge, Textual·libvterm/CFFI, 분리된 display/control과 backend/frontend 수명이 후보 방향이다. 모델 호출·credential 관리는 기존 두 OMP에 두며 Python에 세 번째 판단 agent를 만들지 않는다. 구체 버전·배포·same-shell dispatch·독립 OMP 연결·detach는 BRIEF의 G1~G4 검증 대상이다.
+Python 본체, 최소 TS 공개 OMP bridge, Textual·libvterm/CFFI, 분리된 display/control과 backend/frontend 수명이 후보 방향이다. 모델 호출·credential 관리는 기존 두 OMP에 두며 Python에 세 번째 판단 agent를 만들지 않는다. 부모 same-shell control 대기와 별도 실험 supervisor/subreaper의 구체 signal·입력 반환·수명 판정, 독립 OMP 연결·detach는 BRIEF의 G1~G4 검증 대상이다. 준비된 host 환경을 우선 사용하며 이번 Docker runtime 검증은 생략한다. Container 호환성 목표는 유지하되 미검증 조합을 지원 완료로 표시하지 않는다.
 [개발 명세 대조표](SOURCE-RECONCILIATION.md)를 함께 읽는다. 참고 문서의 자체 detach 제외, macOS 초기 지원, 재시도 0회, review 120회·peer wake 12회 제한을 현재 결정 대신 적용하지 않는다.

@@ -1,0 +1,23 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 384,
+  "event": {
+    "id": "limit-cw07-partial-fix-unit-20260928",
+    "kind": "limit",
+    "data": {
+      "bucket": "unit:V-CW-07-p2.6-current",
+      "origin": "operating",
+      "value": 9,
+      "authority": "Approved PLAN p2.6 CW-07, workflow-contract section 8, current implementation authorization, and delta-review evidence",
+      "reason": "Independent regression, correction, and review for boundary transition during partial PTY writes",
+      "decision_owner": "Root",
+      "remaining_work_estimate": 3,
+      "expected_previous": {
+        "value": 6,
+        "authority": "Approved PLAN p2.6 CW-07, workflow-contract section 8, current implementation authorization, and fresh-review evidence",
+        "reason": "Independent regression, correction, and delta-review cycle for unknown-state manual input"
+      },
+      "scope_basis": null
+    }
+  }
+}

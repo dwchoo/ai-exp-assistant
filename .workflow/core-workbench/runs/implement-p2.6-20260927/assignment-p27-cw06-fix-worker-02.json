@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw06-fix-worker-02",
+  "ticket_id": "CW-06",
+  "role": "worker",
+  "unit": "V-CW-06-p2.7",
+  "approved_bundle_digest": "a521acdc3838b43a26e277afc233bab695c8b02ce0d42392c3678931b2e3f027",
+  "prior_assignment_ref": ".workflow/core-workbench/runs/implement-p2.6-20260927/assignment-p27-cw06-worker-01.json",
+  "routing": {"planned_role": "worker", "selected_role": "worker (wb-worker, Sonnet high)", "reason_codes": ["bounded_pattern"], "evidence_refs": ["UI input parsing/notice fixes with independent repro tests"]},
+  "base_candidate": "9c98d79d7009e0144050bddef3a5fd1a32273b4eca25df22296d1231f26d9fc6",
+  "checkpoint_ref": [".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-cw17-integrated-checkpoint.json", ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-cw06-worker-delta-backup/", ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-cw06-test-delta-backup/"],
+  "findings": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw06-test-01-agent.json",
+  "adjudication": ".workflow/core-workbench/runs/implement-p2.6-20260927/root-adjudication-p27-cw06-test-01.json",
+  "required_behavior": ["Fix F1-F5 exactly as in the adjudication.", "F6 UI part only: when the backend refuses (handoff_held, takeover_held, input_* etc.) show the reason plus any held_reasons / detail the result or current shell state carries, concise, in the footer notice. No backend change."],
+  "acceptance": [
+    "These independent repro tests pass UNMODIFIED: tests/ui/test_product_paste_independent.py, tests/ui/test_product_keys_independent.py, tests/ui/test_product_state_independent.py (and all other tests/ui/*_independent*.py)",
+    "red->green tests of your own in tests/ui/test_product_model.py / test_product_pty.py as appropriate",
+    "suites green: tests/ui (all incl. independent; live_product_omp_independent is a live probe - do NOT run it, it uses the real model), tests/contracts, tests/gates/g1_vt (PYTHONPATH=src:.). Run tests/backend only if you touch cli.py (you should not)."
+  ],
+  "allowed_write_paths": ["src/workbench/ui/product/**", "tests/ui/test_product_model.py", "tests/ui/test_product_pty.py", "tests/ui/test_product_entrypoint.py", "tests/ui/support.py"],
+  "prohibited_paths": ["tests/**/*_independent*.py", "tests/ui/independent_support_cw06.py", "tests/ui/live_product_omp_independent.py", "src/workbench/backend/**", "src/workbench/contracts/**", "src/workbench/terminal/**", "docs/**", ".workflow/**"],
+  "stop_conditions": ["a fix needs backend/contract change", "an independent test looks wrong -> report with evidence, do not edit it"],
+  "rules": "Python: /usr/bin/env PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python (src:. for tests/gates; never -t .). No real OMP/model use, no graphify update, no commits, no tmux/herdr. Clean up processes/temp dirs.",
+  "result_format": "checks table first, status, changed paths + sha256, per-finding fix summary (1-2 lines each), residue, gaps. Korean, concise."
+}

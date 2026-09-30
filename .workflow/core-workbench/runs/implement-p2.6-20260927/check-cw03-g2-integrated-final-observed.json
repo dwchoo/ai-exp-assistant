@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "check_id": "cw03-g2-integrated-final-02",
+  "requirements_identity": "e0ea9ef4ea1457ea2b76df7b53a7ccb17f48555652a81886978ec1bc3fe6d0e6",
+  "argv": ["python3", "-m", "unittest", "discover", "-s", "tests/gates/g2_shell", "-p", "test_*.py", "-v"],
+  "cwd": "/home/dwchoo/ai-exp-assistant",
+  "environment": {
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "description": "Linux Python 3.12.3 with Bash 5.2 and sh/dash; frozen integrated canonical split-PG G2 candidate; conda and Docker excluded by approved decisions; delegated cgroup is not a core requirement"
+  },
+  "started_at": "2026-09-27T17:38:59.001973+00:00",
+  "finished_at": "2026-09-27T17:40:49.822645+00:00",
+  "exit_code": 0,
+  "timed_out": false,
+  "log": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/check-cw03-g2-integrated-final.log",
+  "log_sha256": "ec785c876f7ae7324d6a2f61597fbb3f858c852f70e16eadb445a3788d8acf1e",
+  "before": "2fbb0fdbdccdbb7133c21a468ef33558c60b462bff7af1a56ad20f0823ee266a",
+  "after": "2fbb0fdbdccdbb7133c21a468ef33558c60b462bff7af1a56ad20f0823ee266a",
+  "stable": true,
+  "items": [
+    {
+      "id": "G2-CONTROL",
+      "acceptance_ids": ["C-AC-03", "C-AC-08", "C-AC-26"],
+      "result": "passed",
+      "observed_evidence_level": "runtime",
+      "evidence": "check-cw03-g2-integrated-final.log: canonical common-RUN, live identity, split-PG, parent control-wait, FD non-inheritance, direct-eval negative controls, and same-parent return/rearm tests passed on Bash/dash",
+      "unknowns": []
+    },
+    {
+      "id": "G2-INPUT-JOBS",
+      "acceptance_ids": ["C-AC-08", "C-AC-26"],
+      "result": "passed",
+      "observed_evidence_level": "runtime",
+      "evidence": "check-cw03-g2-integrated-final.log: canonical input/jobs live matrix, stale owner/generation, job/input admission, prompt return, second handoff, flush/marker leak, all-deny and incomplete lifecycle controls passed",
+      "unknowns": []
+    },
+    {
+      "id": "G2-HOOK-ENV",
+      "acceptance_ids": ["C-AC-26", "C-AC-32"],
+      "result": "passed",
+      "observed_evidence_level": "runtime",
+      "evidence": "check-cw03-g2-integrated-final.log: cwd/PATH/export inheritance and non-propagation, incompatible hook/manual residue holds, cleanup/fresh retry, user-confirmation denial, always-allow/all-deny controls, and missing-EXEC_READY fail-closed mutation passed",
+      "unknowns": []
+    },
+    {
+      "id": "G2-TAKEOVER",
+      "acceptance_ids": ["C-AC-08"],
+      "result": "passed",
+      "observed_evidence_level": "runtime",
+      "evidence": "check-cw03-g2-integrated-final.log: canonical takeover before/after send/accept/start, lost/delayed ACK, partial/EAGAIN/zero-write, foreground revalidation, unknown/no-replay and stale marker controls passed",
+      "unknowns": []
+    },
+    {
+      "id": "G2-LIFECYCLE",
+      "acceptance_ids": ["C-AC-10", "C-AC-26", "C-AC-34"],
+      "result": "passed",
+      "observed_evidence_level": "runtime",
+      "evidence": "check-cw03-g2-integrated-final.log: exec barrier, native stop/continue, INT/QUIT, numeric-versus-signal status, subreaper adoption/wait/ECHILD, setsid descendants, repeated cleanup, supervisor/control loss unknown, and lifecycle rearm/no-replay controls passed",
+      "unknowns": []
+    },
+    {
+      "id": "G2-LAUNCH",
+      "acceptance_ids": ["C-AC-20"],
+      "result": "passed",
+      "observed_evidence_level": "runtime",
+      "evidence": "check-cw03-g2-integrated-final.log: Bash-preferred launch, actual sh fallback, missing-shell guidance, pinned executable/supervisor, literal argv, failed/pre-exec error, and live child identity controls passed",
+      "unknowns": []
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "feature_id": "core-workbench",
+  "ticket_id": "CW-03",
+  "attempt_id": "split-pg-review-correction-review-01",
+  "invocation": "cw03-split-pg-correction-review-01",
+  "approved_bundle_digest": "64bcf577a30e7c6bbff3e4e775f8e6c17ca212ce3bf79b5bc5be31196a792b07",
+  "actual_workspace": "/home/dwchoo/ai-exp-assistant",
+  "repository_identity": "git HEAD 7b2048c50e0794da847ad8674d4dc0433d643c33 on main",
+  "candidate": "3e713a73d1191e1dfed0a02fb27445fb58afb27a3cf65e0a276671134f72c437",
+  "candidate_ref": ".workflow/core-workbench/runs/implement-p2.6-20260927/split-pg-correction-frozen-candidate.json",
+  "review_mode": "fresh read-only delta review",
+  "acceptance_ids": ["C-AC-03", "C-AC-08", "C-AC-10", "C-AC-26", "C-AC-34"],
+  "relevant_contracts": ["G2-CONTROL", "G2-LIFECYCLE", "ADR-0002", "C-D55"],
+  "review_paths": [
+    "tests/gates/g2_shell/live_combined_boundary_probe.py",
+    "tests/gates/g2_shell/test_live_combined_boundary_predicates.py",
+    "tests/gates/g2_shell/test_split_pg_control.py"
+  ],
+  "required_inputs": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/review-cw03-split-pg-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw03-split-pg-correction-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw03-split-pg-correction-test-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/scope-audit-cw03-split-pg-correction-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/scope-audit-cw03-split-pg-correction-graphify.json"
+  ],
+  "review_focus": [
+    "Verify both prior findings are resolved without new signal, lifetime, cleanup, or input-return regressions.",
+    "Assess independent mutation tests for discriminating power and cleanup safety.",
+    "Preserve the scope conclusion that this is bounded split-PG feasibility evidence, not completed production adapter integration."
+  ],
+  "writes_allowed": false,
+  "configured_model": "gpt-6-sol",
+  "configured_effort": "high",
+  "host_observed_model": "unverified",
+  "host_observed_effort": "unverified"
+}

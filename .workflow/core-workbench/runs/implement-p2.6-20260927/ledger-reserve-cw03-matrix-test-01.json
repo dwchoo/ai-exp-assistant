@@ -1,0 +1,10 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 180,
+  "event": {"id": "reserve-cw03-matrix-test-01", "kind": "reserve", "data": {
+    "invocation": "cw03-matrix-test-01", "role": "test_designer", "unit": "V-CW-03", "incident": "",
+    "purpose": "Independent cross-matrix canonical split-PG RUN integration tests",
+    "model": "gpt-6-sol", "effort": "high", "buckets": ["total", "role:test_designer", "unit:V-CW-03"],
+    "writer": true, "workspace": "/home/dwchoo/ai-exp-assistant"
+  }}
+}

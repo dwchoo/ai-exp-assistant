@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "check_id": "cw04-extension-integration-final-02",
+  "requirements_identity": "389e09ebc30025507d4bba225d0806b04b36c269e3729c9a72587ac85fb6c808",
+  "argv": ["/usr/bin/env", "PYTHONDONTWRITEBYTECODE=1", "PYTHONPATH=src:tests/gates/g3_omp", "/tmp/cw02-g1-venv/bin/python", "-m", "unittest", "-v", "tests/gates/g3_omp/test_tui_extension_fault_integration.py"],
+  "cwd": "/home/dwchoo/ai-exp-assistant",
+  "environment": {"description": "Linux, OMP 18.2.10, independent real-TUI outage/fault integration and negative mutations; frozen CW-04 candidate"},
+  "started_at": "2026-09-27T18:14:02.598607+00:00",
+  "finished_at": "2026-09-27T18:14:33.119060+00:00",
+  "exit_code": 0,
+  "timed_out": false,
+  "log": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/check-cw04-extension-integration-02.log",
+  "log_sha256": "2493b5c4c105f12ed79074acb7594344798377dc36699632928f684155a4b737",
+  "before": "5beffb2a06b8d306b12e3c06e242d0aae8b7139f8c598eac554074c5c8743619",
+  "after": "5beffb2a06b8d306b12e3c06e242d0aae8b7139f8c598eac554074c5c8743619",
+  "stable": true,
+  "items": [{"id": "G3-EXTENSION", "acceptance_ids": ["C-AC-14"], "result": "passed", "observed_evidence_level": "runtime", "evidence": "check-cw04-extension-integration-02.log and check-cw04-node.log: actual host-outage delivery and opt-in pre-enqueue handler exception produced no false success ACK or provider processing, same-message retry stayed unavailable/unknown_no_replay after same-process reconnect, a distinct fresh message processed once, and two false-ACK mutations were rejected", "unknowns": []}]
+}

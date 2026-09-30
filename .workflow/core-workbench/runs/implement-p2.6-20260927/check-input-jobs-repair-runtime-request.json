@@ -1,0 +1,19 @@
+{
+  "root": "/home/dwchoo/ai-exp-assistant",
+  "requirements": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw03.json",
+  "argv": [
+    "python3",
+    "tests/gates/g2_shell/live_input_jobs_probe.py"
+  ],
+  "environment": {
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "description": "Linux Python 3.12.3 with /usr/bin/bash and /usr/bin/dash; repaired same-parent second guarded admission; no conda or Docker validation"
+  },
+  "log": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/check-input-jobs-repair-runtime.log",
+  "check_id": "cw03-input-jobs-repair-runtime-01",
+  "watch": [],
+  "exclude": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/**"
+  ],
+  "timeout": 180
+}

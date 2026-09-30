@@ -1,0 +1,19 @@
+{
+  "invocation": "cw15-shutdown-id-test-01",
+  "outcome": "complete",
+  "candidate_ready": true,
+  "candidate_id": "865fc473ddae3f49ed15ebc9e99e6a8bbe4f41a66aa9cf187557dca0fd840a3c",
+  "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw15-shutdown-id-test.json",
+  "production_frozen": true,
+  "test_only_delta": "one changing-poll shutdown identity test",
+  "identity_evidence": "wrong task/revision/run, malformed, None and exception stay complete=false/survivors empty/full_termination_unconfirmed with stop count 4 and durable generation 2; exact identity completes true",
+  "polling_evidence": "task, revision and run mismatch followed by exact identity completes only on the fourth observation; repeated shutdown changed to wrong-run remains incomplete and adds zero stops",
+  "checks": {
+    "non_live": "398 passed: lifecycle 38 plus 360 predecessors",
+    "production_hashes": "42/42 source and omp_bridge hashes match",
+    "graphify_residue": "updated; zero related temporary/process residue",
+    "excluded": "scripted/external OMP, full/live G3 and reboot not run"
+  },
+  "sha256": {"tests/lifecycle/test_lifecycle_runtime.py": "11fef89ac616a4e5b806c675946f0ae480a3bdc54fc9e45c867b6cf7a65b6ec1"},
+  "mutation_owner": "/root/cw12_post_review_test"
+}

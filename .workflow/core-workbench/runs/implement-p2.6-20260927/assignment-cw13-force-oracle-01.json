@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "invocation": "cw13-force-oracle-01",
+  "role": "oracle",
+  "unit": "V-CW-13-p2.6-current",
+  "authority": "User $implement docs/features/core-workbench request; approved PLAN p2.6 CW-13; concrete unresolved C-AC-34 lifecycle semantics",
+  "objective": "Advise whether shell_state/exit_confirmed must gate force_requested, or whether exact ForceTarget evidence can safely authorize force after main exit/unknown shell state, and identify the minimal fail-closed contract.",
+  "evidence": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw13-force-test-01.json",
+    "src/workbench/policy/recovery_manager/policy.py",
+    "tests/policy/recovery_manager/test_recovery_policy.py",
+    "docs/features/core-workbench/BRIEF.md C-AC-10/C-AC-34",
+    "docs/features/core-workbench/SPEC.md managed shell lifetime and force policy",
+    "docs/features/core-workbench/OPERATING-CONTRACT.md C-D45"
+  ],
+  "questions": [
+    "Do shell_state and exit_confirmed describe the main experiment while ForceTarget may identify a still-live supervisor/descendant, making shell_state=exited compatible with a justified force after ordinary stop?",
+    "Does owned_target_confirmed plus exact observed_target currently prove that target is still alive at the fresh observation, or is a separate typed target-liveness observation/sequence required?",
+    "How should shell_state=unknown be treated when an exact target is allegedly confirmed, given fail-closed and user-control requirements?",
+    "What minimal product/test change satisfies C-AC-34 without preventing cleanup of confirmed descendants after main exit or inventing an elapsed-time timeout?"
+  ],
+  "constraints": [
+    "Read-only advice only; do not edit files, run mutating graphify commands, or execute tests/process actions.",
+    "Use approved documents and current types; distinguish observed fact from inference and state confidence.",
+    "No delegation, commit, publish, deploy, or Docker."
+  ],
+  "report": "Return a concrete verdict on each failing subcase, the required invariant/schema if any, invalid test assumptions, acceptance impact, and bounded residual risks."
+}

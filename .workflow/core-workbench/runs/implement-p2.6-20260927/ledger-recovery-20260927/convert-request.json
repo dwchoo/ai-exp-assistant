@@ -1,0 +1,352 @@
+{
+  "sources": [
+    {
+      "path": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.5-20260925/ledger.json",
+      "expected_sha256": "11940d1c4e4569a71ef4341a10f72e571184a0726b621ecb8dead8bbe89982be"
+    },
+    {
+      "path": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/decisions-cd55-20260926/approval.json",
+      "expected_sha256": "2bf016f6a7ae6d44d3b790c7e98009056786ac76854b1011f97f8bd774d01c68"
+    }
+  ],
+  "destination": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/ledger-recovery-20260927/ledger.json",
+  "run_id": "core-workbench-p2.6-20260927",
+  "mode": "write",
+  "strategy": "opening",
+  "mapping": {
+    "actor": "Root",
+    "authority": "C-D55 and explicit $implement docs/features/core-workbench request on 2026-09-26/27",
+    "reason": "Supersede the historical 220 child-call ceiling under the user's explicit delegation while preserving cumulative usage, original journal bytes, failed-call history, and finite Root-managed operating limits",
+    "quiescence": {
+      "status": "quiescent",
+      "evidence_refs": [
+        "collaboration.list_agents 2026-09-27: Root only",
+        "source ledger revision 150: active_calls={} reserved=0 unresolved=[]",
+        "process survey 2026-09-27: no Core Workbench probe/pytest writer observed"
+      ]
+    },
+    "field_mappings": [
+      {
+        "source": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/decisions-cd55-20260926/approval.json",
+        "source_pointer": "/budget/future_policy",
+        "target": "/limits/total/operating",
+        "evidence_refs": [
+          "C-D55 delegates finite operating budget increases to Root; initial p2.6 total is 260 with 220 cumulative used"
+        ]
+      },
+      {
+        "source": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/decisions-cd55-20260926/approval.json",
+        "source_pointer": "/budget/future_policy",
+        "target": "/limits/role:worker_senior/operating",
+        "evidence_refs": [
+          "Six senior implementation/correction calls reserved in the finite p2.6 batch"
+        ]
+      },
+      {
+        "source": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/decisions-cd55-20260926/approval.json",
+        "source_pointer": "/budget/future_policy",
+        "target": "/limits/role:test_designer/operating",
+        "evidence_refs": [
+          "Six independent test calls reserved in the finite p2.6 batch"
+        ]
+      },
+      {
+        "source": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/decisions-cd55-20260926/approval.json",
+        "source_pointer": "/budget/future_policy",
+        "target": "/limits/role:reviewer/operating",
+        "evidence_refs": [
+          "Six fresh or delta review calls reserved in the finite p2.6 batch"
+        ]
+      },
+      {
+        "source": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/decisions-cd55-20260926/approval.json",
+        "source_pointer": "/budget/future_policy",
+        "target": "/limits/role:worker/operating",
+        "evidence_refs": [
+          "Retain three bounded routine-worker calls from the prior operating allocation"
+        ]
+      },
+      {
+        "source": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/decisions-cd55-20260926/approval.json",
+        "source_pointer": "/budget/future_policy",
+        "target": "/limits/role:oracle/operating",
+        "evidence_refs": [
+          "One hard-diagnosis reserve in the finite p2.6 batch"
+        ]
+      },
+      {
+        "source": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/decisions-cd55-20260926/approval.json",
+        "source_pointer": "/budget/future_policy",
+        "target": "/limits/role:oracle_senior/operating",
+        "evidence_refs": [
+          "One deep-diagnosis reserve in the finite p2.6 batch"
+        ]
+      },
+      {
+        "source": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/decisions-cd55-20260926/approval.json",
+        "source_pointer": "/budget/future_policy",
+        "target": "/limits/role:code_explorer/operating",
+        "evidence_refs": [
+          "Historical usage only; no new code_explorer capacity"
+        ]
+      },
+      {
+        "source": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/decisions-cd55-20260926/approval.json",
+        "source_pointer": "/approved_revisions/plan",
+        "target": "/limits/unit:V-CW-03/operating",
+        "evidence_refs": [
+          "PLAN p2.6 V-CW-03 plus correction and independent verification reserve"
+        ]
+      },
+      {
+        "source": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.5-20260925/ledger.json",
+        "source_pointer": "/events",
+        "target": "/opening_used/total",
+        "evidence_refs": [
+          "ledger-read revision 150 reports cumulative total used=220"
+        ]
+      },
+      {
+        "source": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.5-20260925/ledger.json",
+        "source_pointer": "/events",
+        "target": "/opening_used/role:worker_senior",
+        "evidence_refs": [
+          "ledger-read revision 150 reports role:worker_senior used=80"
+        ]
+      },
+      {
+        "source": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.5-20260925/ledger.json",
+        "source_pointer": "/events",
+        "target": "/opening_used/role:test_designer",
+        "evidence_refs": [
+          "ledger-read revision 150 reports role:test_designer used=75"
+        ]
+      },
+      {
+        "source": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.5-20260925/ledger.json",
+        "source_pointer": "/events",
+        "target": "/opening_used/role:reviewer",
+        "evidence_refs": [
+          "ledger-read revision 150 reports role:reviewer used=45"
+        ]
+      },
+      {
+        "source": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.5-20260925/ledger.json",
+        "source_pointer": "/events",
+        "target": "/opening_used/role:worker",
+        "evidence_refs": [
+          "ledger-read revision 150 reports role:worker used=5"
+        ]
+      },
+      {
+        "source": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.5-20260925/ledger.json",
+        "source_pointer": "/events",
+        "target": "/opening_used/role:oracle",
+        "evidence_refs": [
+          "ledger-read revision 150 reports role:oracle used=7"
+        ]
+      },
+      {
+        "source": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.5-20260925/ledger.json",
+        "source_pointer": "/events",
+        "target": "/opening_used/role:oracle_senior",
+        "evidence_refs": [
+          "ledger-read revision 150 reports role:oracle_senior used=6"
+        ]
+      },
+      {
+        "source": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.5-20260925/ledger.json",
+        "source_pointer": "/events",
+        "target": "/opening_used/role:code_explorer",
+        "evidence_refs": [
+          "ledger-read revision 150 reports role:code_explorer used=2"
+        ]
+      },
+      {
+        "source": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/decisions-cd55-20260926/approval.json",
+        "source_pointer": "/budget/transition_status",
+        "target": "/opening_used/unit:V-CW-03",
+        "evidence_refs": [
+          "No p2.6 V-CW-03 invocation started before this conversion"
+        ]
+      }
+    ],
+    "unmapped": [
+      {
+        "source": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.5-20260925/ledger.json",
+        "source_pointer": "/events/0/data/limits/total/user",
+        "reason": "Historical user cap 220 is preserved in the source journal and preservation copy but is explicitly superseded for future dispatch by C-D55"
+      }
+    ],
+    "source_relationships": [
+      {
+        "sources": [
+          "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.5-20260925/ledger.json",
+          "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/decisions-cd55-20260926/approval.json"
+        ],
+        "relation": "independent",
+        "evidence_refs": [
+          "The ledger records invocation accounting; the approval records the later C-D55 policy amendment and does not add calls"
+        ]
+      }
+    ],
+    "opening": {
+      "limits": {
+        "total": {
+          "operating": {
+            "value": 260,
+            "authority": "C-D55 plus workflow-contract section 8 and current implementation authorization",
+            "reason": "Initial finite p2.6 batch: 40 calls beyond cumulative usage 220, retaining later reassessment"
+          }
+        },
+        "role:worker_senior": {
+          "operating": {
+            "value": 86,
+            "authority": "C-D55 plus workflow-contract section 8 and current implementation authorization",
+            "reason": "Six senior implementation/correction calls beyond historical usage 80"
+          }
+        },
+        "role:test_designer": {
+          "operating": {
+            "value": 81,
+            "authority": "C-D55 plus workflow-contract section 8 and current implementation authorization",
+            "reason": "Six independent test calls beyond historical usage 75"
+          }
+        },
+        "role:reviewer": {
+          "operating": {
+            "value": 51,
+            "authority": "C-D55 plus workflow-contract section 8 and current implementation authorization",
+            "reason": "Six fresh or delta review calls beyond historical usage 45"
+          }
+        },
+        "role:worker": {
+          "operating": {
+            "value": 8,
+            "authority": "workflow-contract section 8 and current implementation authorization",
+            "reason": "Retain three bounded routine-worker calls beyond historical usage 5"
+          }
+        },
+        "role:oracle": {
+          "operating": {
+            "value": 8,
+            "authority": "C-D55 plus workflow-contract section 8 and current implementation authorization",
+            "reason": "One hard-diagnosis reserve beyond historical usage 7"
+          }
+        },
+        "role:oracle_senior": {
+          "operating": {
+            "value": 7,
+            "authority": "C-D55 plus workflow-contract section 8 and current implementation authorization",
+            "reason": "One deep-diagnosis reserve beyond historical usage 6"
+          }
+        },
+        "role:code_explorer": {
+          "operating": {
+            "value": 2,
+            "authority": "workflow-contract section 8 and current implementation authorization",
+            "reason": "Historical usage only; no new allocation"
+          }
+        },
+        "unit:V-CW-03": {
+          "operating": {
+            "value": 10,
+            "authority": "Approved PLAN p2.6 and workflow-contract section 8",
+            "reason": "CW-03 smallest remaining unit, independent tests/reviews, corrections, and one diagnosis reserve"
+          }
+        }
+      },
+      "opening_used": {
+        "total": 220,
+        "role:worker_senior": 80,
+        "role:test_designer": 75,
+        "role:reviewer": 45,
+        "role:worker": 5,
+        "role:oracle": 7,
+        "role:oracle_senior": 6,
+        "role:code_explorer": 2,
+        "unit:V-CW-03": 0
+      },
+      "calls": {},
+      "checks": {},
+      "provenance": null,
+      "unresolved": []
+    },
+    "accounting": {
+      "total": {
+        "reported_used": 220,
+        "baseline_used": 220,
+        "materialized_started": 0,
+        "evidence_refs": [
+          "source ledger revision 150 replay summary"
+        ]
+      },
+      "role:worker_senior": {
+        "reported_used": 80,
+        "baseline_used": 80,
+        "materialized_started": 0,
+        "evidence_refs": [
+          "source ledger revision 150 replay summary"
+        ]
+      },
+      "role:test_designer": {
+        "reported_used": 75,
+        "baseline_used": 75,
+        "materialized_started": 0,
+        "evidence_refs": [
+          "source ledger revision 150 replay summary"
+        ]
+      },
+      "role:reviewer": {
+        "reported_used": 45,
+        "baseline_used": 45,
+        "materialized_started": 0,
+        "evidence_refs": [
+          "source ledger revision 150 replay summary"
+        ]
+      },
+      "role:worker": {
+        "reported_used": 5,
+        "baseline_used": 5,
+        "materialized_started": 0,
+        "evidence_refs": [
+          "source ledger revision 150 replay summary"
+        ]
+      },
+      "role:oracle": {
+        "reported_used": 7,
+        "baseline_used": 7,
+        "materialized_started": 0,
+        "evidence_refs": [
+          "source ledger revision 150 replay summary"
+        ]
+      },
+      "role:oracle_senior": {
+        "reported_used": 6,
+        "baseline_used": 6,
+        "materialized_started": 0,
+        "evidence_refs": [
+          "source ledger revision 150 replay summary"
+        ]
+      },
+      "role:code_explorer": {
+        "reported_used": 2,
+        "baseline_used": 2,
+        "materialized_started": 0,
+        "evidence_refs": [
+          "source ledger revision 150 replay summary"
+        ]
+      },
+      "unit:V-CW-03": {
+        "reported_used": 0,
+        "baseline_used": 0,
+        "materialized_started": 0,
+        "evidence_refs": [
+          "p2.6 unit has no invocation before conversion"
+        ]
+      }
+    },
+    "event_metadata": {}
+  },
+  "preservation_directory": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/ledger-recovery-20260927/sources-preserved"
+}

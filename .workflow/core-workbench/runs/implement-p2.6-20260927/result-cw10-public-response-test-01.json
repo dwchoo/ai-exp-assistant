@@ -1,0 +1,38 @@
+{
+  "invocation": "cw10-public-response-test-01",
+  "role": "test_designer",
+  "outcome": "candidate_ready",
+  "candidate_base": "a52be4dcbfe224ec5e0aa0565c0e77a5189acec2c4c625327e181ce0e0cb8716",
+  "new_files": [
+    "tests/workflow/test_worker_port_independent.py",
+    "tests/gates/g3_omp/bridge_public_response_independent.test.ts"
+  ],
+  "new_tests": {
+    "python": "5/5 passed: public adapter exact identity/deadline/order, missing counterpart, wrong identities/types, replay/duplicate arm, production-probe static guards",
+    "node": "5/5 passed: 19 malformed/identity/type frames, terminal/nonterminal/privacy/pause/session/socket-loss cases"
+  },
+  "regressions": {
+    "workflow": "42/42 passed",
+    "node_bridge": "27/27 passed",
+    "g3_python": "117/117 passed",
+    "python_bridge": "18/18 passed",
+    "tasks": "22/22 passed",
+    "terminal": "10/10 passed",
+    "git_diff_check": "passed"
+  },
+  "runtime": {
+    "omp_version": "18.2.10",
+    "worker_and_independent_probes": "passed",
+    "production_port_only": true,
+    "event_order": "execute 5<6; analysis 11<12",
+    "exact_identity": true,
+    "secret_absent": true,
+    "residue": 0
+  },
+  "scope": {
+    "direct_test_changes_only": true,
+    "graphify_generated_drift": "expected from required graphify update",
+    "head_and_index_unchanged": true
+  },
+  "needs_reroute": false
+}

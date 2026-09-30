@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "invocation": "cw12-file-mode-correction-01",
+  "role": "worker_senior",
+  "unit": "V-CW-12-p2.6-current",
+  "authority": "User $implement docs/features/core-workbench request; approved PLAN p2.6 CW-12 and fresh review evidence",
+  "objective": "Include file mode in bounded resume reconciliation across peer, non-Git, and execution-worktree snapshots.",
+  "base": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw12-execution-flags-test.json",
+    "candidate_id": "69d2445690982c42ddb2b7cad34e449399a6e984ade7fc5925c183386321d155",
+    "review": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-execution-flags-review-01.json"
+  },
+  "required_corrections": [
+    "Bind the relevant regular-file st_mode/type bits with content or missing state in peer Git, non-Git fd manifests, flagged paths, and execution-worktree snapshots.",
+    "Require scan-before/after mode equality as well as size/mtime/hash stability; chmod-only changes after the early baseline must be deltas requiring approval.",
+    "Use a versioned/unambiguous serialized identity so legacy content-only baselines fail closed rather than compare equal.",
+    "Add peer untracked, execution-worktree untracked, tracked executable-bit, non-Git chmod, and unchanged positive regressions."
+  ],
+  "allowed_write_paths": ["src/workbench/policy/pause_automation/**", "tests/policy/pause_automation/**", "graphify-out/**"],
+  "constraints": [
+    "Sole product mutation owner; smallest surgical change; preserve all prior fixes/tests.",
+    "Use apply_patch; do not edit .workflow/docs/PLAN/state or other product areas.",
+    "Do not delegate, commit, publish, deploy, or use Docker.",
+    "Run focused mode tests, full policy, graphify update ., and report the 2048-path liveness residual."
+  ],
+  "report": "Return changed paths, identity format, exact checks/counts, candidate_ready/blocker, and residual risks."
+}

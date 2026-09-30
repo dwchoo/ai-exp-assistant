@@ -1,0 +1,535 @@
+{
+  "schema_version": 1,
+  "revision": "r1.13/s2.6/p2.6 (comparison only)",
+  "authority": "comparison baseline; not an approval",
+  "acceptance_ids": [
+    "C-AC-01",
+    "C-AC-02",
+    "C-AC-03",
+    "C-AC-04",
+    "C-AC-05",
+    "C-AC-06",
+    "C-AC-07",
+    "C-AC-08",
+    "C-AC-09",
+    "C-AC-10",
+    "C-AC-11",
+    "C-AC-12",
+    "C-AC-13",
+    "C-AC-14",
+    "C-AC-15",
+    "C-AC-16",
+    "C-AC-17",
+    "C-AC-18",
+    "C-AC-19",
+    "C-AC-20",
+    "C-AC-21",
+    "C-AC-22",
+    "C-AC-23",
+    "C-AC-24",
+    "C-AC-25",
+    "C-AC-26",
+    "C-AC-27",
+    "C-AC-28",
+    "C-AC-29",
+    "C-AC-30",
+    "C-AC-31",
+    "C-AC-32",
+    "C-AC-33",
+    "C-AC-34"
+  ],
+  "gate_items": [
+    {
+      "id": "G1-RESIZE",
+      "acceptance_ids": [
+        "C-AC-06",
+        "C-AC-14",
+        "C-AC-19"
+      ],
+      "required_evidence_level": "runtime"
+    },
+    {
+      "id": "G1-THREE-PANE",
+      "acceptance_ids": [
+        "C-AC-06",
+        "C-AC-14",
+        "C-AC-19"
+      ],
+      "required_evidence_level": "runtime"
+    },
+    {
+      "id": "G1-TEXT-TOOLS",
+      "acceptance_ids": [
+        "C-AC-14",
+        "C-AC-19",
+        "C-AC-20"
+      ],
+      "required_evidence_level": "runtime"
+    },
+    {
+      "id": "G1-PASTE",
+      "acceptance_ids": [
+        "C-AC-19"
+      ],
+      "required_evidence_level": "runtime"
+    },
+    {
+      "id": "G1-VT-QUERY",
+      "acceptance_ids": [
+        "C-AC-14",
+        "C-AC-19"
+      ],
+      "required_evidence_level": "fixture"
+    },
+    {
+      "id": "G1-COLOR",
+      "acceptance_ids": [
+        "C-AC-14",
+        "C-AC-20"
+      ],
+      "required_evidence_level": "runtime"
+    },
+    {
+      "id": "G1-OUTER",
+      "acceptance_ids": [
+        "C-AC-19",
+        "C-AC-20"
+      ],
+      "required_evidence_level": "runtime"
+    },
+    {
+      "id": "G2-CONTROL",
+      "acceptance_ids": [
+        "C-AC-03",
+        "C-AC-08",
+        "C-AC-26"
+      ],
+      "required_evidence_level": "runtime"
+    },
+    {
+      "id": "G2-INPUT-JOBS",
+      "acceptance_ids": [
+        "C-AC-08",
+        "C-AC-26"
+      ],
+      "required_evidence_level": "runtime"
+    },
+    {
+      "id": "G2-HOOK-ENV",
+      "acceptance_ids": [
+        "C-AC-26",
+        "C-AC-32"
+      ],
+      "required_evidence_level": "runtime"
+    },
+    {
+      "id": "G2-TAKEOVER",
+      "acceptance_ids": [
+        "C-AC-08"
+      ],
+      "required_evidence_level": "runtime"
+    },
+    {
+      "id": "G2-LIFECYCLE",
+      "acceptance_ids": [
+        "C-AC-10",
+        "C-AC-26",
+        "C-AC-34"
+      ],
+      "required_evidence_level": "runtime"
+    },
+    {
+      "id": "G2-LAUNCH",
+      "acceptance_ids": [
+        "C-AC-20"
+      ],
+      "required_evidence_level": "runtime"
+    },
+    {
+      "id": "G3-TUI-DELIVERY",
+      "acceptance_ids": [
+        "C-AC-02"
+      ],
+      "required_evidence_level": "runtime"
+    },
+    {
+      "id": "G3-TUI-CONTENTION",
+      "acceptance_ids": [
+        "C-AC-02",
+        "C-AC-27"
+      ],
+      "required_evidence_level": "runtime"
+    },
+    {
+      "id": "G3-SESSION",
+      "acceptance_ids": [
+        "C-AC-02",
+        "C-AC-16"
+      ],
+      "required_evidence_level": "runtime"
+    },
+    {
+      "id": "G3-RECONNECT",
+      "acceptance_ids": [
+        "C-AC-02",
+        "C-AC-16"
+      ],
+      "required_evidence_level": "runtime"
+    },
+    {
+      "id": "G3-PAUSE",
+      "acceptance_ids": [
+        "C-AC-25",
+        "C-AC-30",
+        "C-AC-33"
+      ],
+      "required_evidence_level": "runtime"
+    },
+    {
+      "id": "G3-EXTENSION",
+      "acceptance_ids": [
+        "C-AC-14"
+      ],
+      "required_evidence_level": "runtime"
+    },
+    {
+      "id": "G4-LIFETIME",
+      "acceptance_ids": [
+        "C-AC-15",
+        "C-AC-18"
+      ],
+      "required_evidence_level": "runtime"
+    },
+    {
+      "id": "G4-WAKE",
+      "acceptance_ids": [
+        "C-AC-12",
+        "C-AC-15",
+        "C-AC-30"
+      ],
+      "required_evidence_level": "runtime"
+    },
+    {
+      "id": "G4-STORE-PORT",
+      "acceptance_ids": [
+        "C-AC-28",
+        "C-AC-29"
+      ],
+      "required_evidence_level": "fixture"
+    },
+    {
+      "id": "G4-CONTRACT",
+      "acceptance_ids": [
+        "C-AC-08",
+        "C-AC-25",
+        "C-AC-26",
+        "C-AC-33"
+      ],
+      "required_evidence_level": "fixture"
+    },
+    {
+      "id": "P-C-AC-01",
+      "acceptance_ids": [
+        "C-AC-01"
+      ],
+      "required_evidence_level": "runtime"
+    },
+    {
+      "id": "P-C-AC-02",
+      "acceptance_ids": [
+        "C-AC-02"
+      ],
+      "required_evidence_level": "runtime"
+    },
+    {
+      "id": "P-C-AC-03",
+      "acceptance_ids": [
+        "C-AC-03"
+      ],
+      "required_evidence_level": "runtime"
+    },
+    {
+      "id": "P-C-AC-04",
+      "acceptance_ids": [
+        "C-AC-04"
+      ],
+      "required_evidence_level": "fixture"
+    },
+    {
+      "id": "P-C-AC-05",
+      "acceptance_ids": [
+        "C-AC-05"
+      ],
+      "required_evidence_level": "runtime"
+    },
+    {
+      "id": "P-C-AC-06",
+      "acceptance_ids": [
+        "C-AC-06"
+      ],
+      "required_evidence_level": "runtime"
+    },
+    {
+      "id": "P-C-AC-07",
+      "acceptance_ids": [
+        "C-AC-07"
+      ],
+      "required_evidence_level": "fixture"
+    },
+    {
+      "id": "P-C-AC-08",
+      "acceptance_ids": [
+        "C-AC-08"
+      ],
+      "required_evidence_level": "runtime"
+    },
+    {
+      "id": "P-C-AC-09",
+      "acceptance_ids": [
+        "C-AC-09"
+      ],
+      "required_evidence_level": "runtime"
+    },
+    {
+      "id": "P-C-AC-10",
+      "acceptance_ids": [
+        "C-AC-10"
+      ],
+      "required_evidence_level": "fixture"
+    },
+    {
+      "id": "P-C-AC-11",
+      "acceptance_ids": [
+        "C-AC-11"
+      ],
+      "required_evidence_level": "runtime"
+    },
+    {
+      "id": "P-C-AC-12",
+      "acceptance_ids": [
+        "C-AC-12"
+      ],
+      "required_evidence_level": "runtime"
+    },
+    {
+      "id": "P-C-AC-13",
+      "acceptance_ids": [
+        "C-AC-13"
+      ],
+      "required_evidence_level": "fixture"
+    },
+    {
+      "id": "P-C-AC-14",
+      "acceptance_ids": [
+        "C-AC-14"
+      ],
+      "required_evidence_level": "runtime"
+    },
+    {
+      "id": "P-C-AC-15",
+      "acceptance_ids": [
+        "C-AC-15"
+      ],
+      "required_evidence_level": "runtime"
+    },
+    {
+      "id": "P-C-AC-16",
+      "acceptance_ids": [
+        "C-AC-16"
+      ],
+      "required_evidence_level": "runtime"
+    },
+    {
+      "id": "P-C-AC-17",
+      "acceptance_ids": [
+        "C-AC-17"
+      ],
+      "required_evidence_level": "runtime"
+    },
+    {
+      "id": "P-C-AC-18",
+      "acceptance_ids": [
+        "C-AC-18"
+      ],
+      "required_evidence_level": "runtime"
+    },
+    {
+      "id": "P-C-AC-19",
+      "acceptance_ids": [
+        "C-AC-19"
+      ],
+      "required_evidence_level": "runtime"
+    },
+    {
+      "id": "P-C-AC-20",
+      "acceptance_ids": [
+        "C-AC-20"
+      ],
+      "required_evidence_level": "runtime"
+    },
+    {
+      "id": "P-C-AC-21",
+      "acceptance_ids": [
+        "C-AC-21"
+      ],
+      "required_evidence_level": "runtime"
+    },
+    {
+      "id": "P-C-AC-22",
+      "acceptance_ids": [
+        "C-AC-22"
+      ],
+      "required_evidence_level": "runtime"
+    },
+    {
+      "id": "P-C-AC-23",
+      "acceptance_ids": [
+        "C-AC-23"
+      ],
+      "required_evidence_level": "runtime"
+    },
+    {
+      "id": "P-C-AC-24",
+      "acceptance_ids": [
+        "C-AC-24"
+      ],
+      "required_evidence_level": "fixture"
+    },
+    {
+      "id": "P-C-AC-25",
+      "acceptance_ids": [
+        "C-AC-25"
+      ],
+      "required_evidence_level": "runtime"
+    },
+    {
+      "id": "P-C-AC-26",
+      "acceptance_ids": [
+        "C-AC-26"
+      ],
+      "required_evidence_level": "runtime"
+    },
+    {
+      "id": "P-C-AC-27",
+      "acceptance_ids": [
+        "C-AC-27"
+      ],
+      "required_evidence_level": "runtime"
+    },
+    {
+      "id": "P-C-AC-28",
+      "acceptance_ids": [
+        "C-AC-28"
+      ],
+      "required_evidence_level": "fixture"
+    },
+    {
+      "id": "P-C-AC-29",
+      "acceptance_ids": [
+        "C-AC-29"
+      ],
+      "required_evidence_level": "fixture"
+    },
+    {
+      "id": "P-C-AC-30",
+      "acceptance_ids": [
+        "C-AC-30"
+      ],
+      "required_evidence_level": "runtime"
+    },
+    {
+      "id": "P-C-AC-31",
+      "acceptance_ids": [
+        "C-AC-31"
+      ],
+      "required_evidence_level": "fixture"
+    },
+    {
+      "id": "P-C-AC-32",
+      "acceptance_ids": [
+        "C-AC-32"
+      ],
+      "required_evidence_level": "runtime"
+    },
+    {
+      "id": "P-C-AC-33",
+      "acceptance_ids": [
+        "C-AC-33"
+      ],
+      "required_evidence_level": "runtime"
+    },
+    {
+      "id": "P-C-AC-34",
+      "acceptance_ids": [
+        "C-AC-34"
+      ],
+      "required_evidence_level": "fixture"
+    },
+    {
+      "id": "I-FLOW",
+      "acceptance_ids": [
+        "C-AC-01",
+        "C-AC-02",
+        "C-AC-03",
+        "C-AC-04",
+        "C-AC-05",
+        "C-AC-09",
+        "C-AC-11"
+      ],
+      "required_evidence_level": "runtime"
+    },
+    {
+      "id": "I-SHELL",
+      "acceptance_ids": [
+        "C-AC-03",
+        "C-AC-08",
+        "C-AC-20",
+        "C-AC-26",
+        "C-AC-32"
+      ],
+      "required_evidence_level": "runtime"
+    },
+    {
+      "id": "I-POLICY",
+      "acceptance_ids": [
+        "C-AC-07",
+        "C-AC-10",
+        "C-AC-12",
+        "C-AC-13",
+        "C-AC-21",
+        "C-AC-25",
+        "C-AC-27",
+        "C-AC-29",
+        "C-AC-30",
+        "C-AC-31",
+        "C-AC-33",
+        "C-AC-34"
+      ],
+      "required_evidence_level": "runtime"
+    },
+    {
+      "id": "I-FAULT",
+      "acceptance_ids": [
+        "C-AC-15",
+        "C-AC-16",
+        "C-AC-17",
+        "C-AC-18",
+        "C-AC-22",
+        "C-AC-23",
+        "C-AC-24",
+        "C-AC-28"
+      ],
+      "required_evidence_level": "runtime"
+    },
+    {
+      "id": "I-COMPAT",
+      "acceptance_ids": [
+        "C-AC-06",
+        "C-AC-14",
+        "C-AC-19",
+        "C-AC-20"
+      ],
+      "required_evidence_level": "runtime"
+    }
+  ]
+}

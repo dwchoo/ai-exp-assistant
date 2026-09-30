@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw06-rerun-test-02",
+  "status": "candidate_ready (after Root adjudication; agent reported needs_reroute on P-C-AC-14 items)",
+  "frozen_candidate": "a4115c98ca068759c9a8e25d344d4e491b927b22aad013fd182fadd582010cf2",
+  "candidate_after_tests": "101b87f58fef043e9707b5ac6de1eaed15cfd0711447f8686bfc432b450e571b",
+  "agent_result": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw06-rerun-test-02-agent.json (incl. addendum_root_redesign)",
+  "scope_audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-cw06-rerun.json (no outside-scope)",
+  "added_tests": {"tests/ui/test_product_rerun_independent_p27e.py": "2418df8f757e9758c1010ab9da70137de242583dea6d01fc49d20fbf24dcf323", "tests/ui/live_product_rerun_independent_p27e.py": "80ea794d6eaf30f26fdb71004c697cf18e243bf1293476fab1a51eaa79a6e2fe"},
+  "checks": [["tests/ui x5", 0, "91 OK each"], ["tests/ui *_independent", 0, "OK"], ["live rerun NO_MODEL (F1-sh, S5, F6-ui) x2", 0, "3 OK 1 skip"], ["live AC14 real OMP", 1, "screen criteria met; 'running child seen' assertion failed (OMP tool child not observable)"], ["tests/backend", 0, "68 OK"], ["tests/contracts", 0, "43 OK"], ["g1_vt / g4", 0, "63 / 8 OK"]],
+  "verdicts": {"F1-F5": "PASS (independent unmodified, 5 runs)", "F1-sh": "PASS runtime (dash host shell; cat and prompt paste plain)", "S5 bash cat": "PASS runtime", "F6-ui": "PASS runtime (held reasons shown)", "flake": "not reproduced in 5 runs (worker's single first-run failure unidentified)", "P-C-AC-14 a Esc cancel": "PASS runtime by screen: 'Command aborted' + 'F5 to Retry' after Esc through UI; WBDONE7 never within 40 s", "P-C-AC-14 b approval": "NOT APPLICABLE on this OMP configuration: shell tool ran without an approval prompt (2 runs, screen evidence)"},
+  "model_turns": "6 total (packet cap 2 + Root-authorized 2; 2 unintended via discover of live probe without CW06_LIVE_NO_MODEL) - deviation from Root operating instruction, not a user ceiling",
+  "frozen_hashes_equal": true,
+  "residue": "none (shutdown verified; no /tmp/cw06-live-*)",
+  "observed_model": "sonnet (wb-test-rerun definition; host metadata unverified)"
+}

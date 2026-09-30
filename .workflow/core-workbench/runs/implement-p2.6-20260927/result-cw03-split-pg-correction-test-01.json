@@ -1,0 +1,19 @@
+{
+  "invocation": "cw03-split-pg-correction-test-01",
+  "status": "candidate_ready",
+  "candidate": "5d1d96c8846c66baee91eca8470ac90e7f191ebc02545f4c9c6b863395fdfa4f",
+  "changed_paths": ["tests/gates/g2_shell/test_split_pg_control.py"],
+  "independent_observations": [
+    "A live SIGQUIT-default mutation produced RETURN:131 with a surviving setsid descendant and no UNKNOWN; the corrected supervisor remained observable.",
+    "A one-snapshot cleanup mutation left a descendant that was absent from the first snapshot; the corrected path rediscovered/reaped it and retained UNKNOWN.",
+    "Signal-derived MAIN_RETURN -2/-3 remains distinct from numeric MAIN_RETURN 130/131 even where parent return codes coincide."
+  ],
+  "checks": [
+    {"command": "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest tests.gates.g2_shell.test_split_pg_control -v", "exit_code": 0, "summary": "4 tests passed in 12.469s"},
+    {"command": "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/gates/g2_shell -p 'test_*.py' -v", "exit_code": 0, "summary": "116 tests passed in 95.951s; 6 delegated-cgroup skips"},
+    {"command": "git diff --check", "exit_code": 0, "summary": "clean"}
+  ],
+  "file_sha256": {"tests/gates/g2_shell/test_split_pg_control.py": "7bce4ce502e2911c77dc2ace20975722768ee5f9e77a5fa3b352e8fb8c69d1fa"},
+  "test_method_limit": "Failure causes were injected into the current candidate; the old candidate itself was not executed.",
+  "owned_processes_remaining": false
+}

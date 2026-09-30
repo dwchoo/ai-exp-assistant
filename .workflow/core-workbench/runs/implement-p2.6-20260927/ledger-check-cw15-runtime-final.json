@@ -1,0 +1,13 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 1261,
+  "event": {
+    "id": "check-cw15-runtime-final-01",
+    "kind": "check",
+    "data": {
+      "check_id": "cw15-runtime-final-01",
+      "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/check-cw15-runtime-final-observed.json",
+      "sha256": "5a7eb4dafaa75e382b4ac2a7c3dc62530863b1d9bc152257266bf7bfbbd91b4b"
+    }
+  }
+}

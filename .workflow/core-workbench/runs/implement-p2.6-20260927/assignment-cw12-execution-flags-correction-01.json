@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "invocation": "cw12-execution-flags-correction-01",
+  "role": "worker_senior",
+  "unit": "V-CW-12-p2.6-current",
+  "authority": "User $implement docs/features/core-workbench request; approved PLAN p2.6 CW-12 and fresh review evidence",
+  "objective": "Apply the existing bounded Git index-flag reconciliation to the execution worktree path.",
+  "base": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw12-index-flags-test.json",
+    "candidate_id": "be083b27ff5bea89d3931650705d4ddc81252a237a06d94a3a5017828300bdfb",
+    "review": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-index-flags-review-01.json"
+  },
+  "required_corrections": [
+    "In production resume observation, collect bounded execution-worktree index flags and pass them into the same _changed_files snapshot used for peer Git state.",
+    "Fail closed on flag-list errors, output/count/byte limits, hidden changed/missing/special files, and index flag changes.",
+    "Add execution-worktree-specific assume-unchanged and skip-worktree regressions where peer cwd is different, plus a normal unchanged positive case.",
+    "Do not relax the 2048 changed-path safety cap in this correction; report the many-untracked-path liveness limitation explicitly."
+  ],
+  "allowed_write_paths": ["src/workbench/policy/pause_automation/**", "tests/policy/pause_automation/**", "graphify-out/**"],
+  "constraints": [
+    "Sole product mutation owner; make the smallest surgical change and preserve prior fixes/tests.",
+    "Use apply_patch; do not edit .workflow/docs/PLAN/state or other product areas.",
+    "Do not delegate, commit, publish, deploy, or use Docker.",
+    "Run execution-worktree flag tests, focused Git cases, full policy, and graphify update ."
+  ],
+  "report": "Return changed paths, exact behavior, checks/counts, candidate_ready/blocker, and the remaining changed-path-cap risk."
+}

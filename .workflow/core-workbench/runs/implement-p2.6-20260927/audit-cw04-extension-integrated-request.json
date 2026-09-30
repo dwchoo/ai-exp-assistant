@@ -1,0 +1,12 @@
+{
+  "before": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw04-extension-worker-checkpoint.json",
+  "after": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw04-extension-frozen-candidate.json",
+  "allowed": [
+    "omp_bridge/g3/bridge.ts",
+    "tests/gates/g3_omp/bridge.test.ts",
+    "tests/gates/g3_omp/live_tui_extension_fault_probe.py",
+    "tests/gates/g3_omp/test_tui_extension_fault_predicates.py",
+    "tests/gates/g3_omp/test_tui_extension_fault_integration.py",
+    "graphify-out/**"
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "invocation": "cw12-correction-01",
+  "outcome": "complete",
+  "candidate_ready": true,
+  "corrections": [
+    "CW-11 admission receives paused state before coordinator public pause commit",
+    "dispatch_automatic serializes authority check and synchronous action start with pause",
+    "exact-run repository cancellation is observed once, journaled, projected, and fences dispatch without deleting artifacts",
+    "clean run rebind resets all prior run observation fields",
+    "journal read uses O_NONBLOCK and regular-file fstat rejection"
+  ],
+  "lock_order": "CW-11 state setter is called only while the coordinator lock is released; nested status cancellation synchronization is non-reentrant.",
+  "checks": {
+    "independent_pause_policy": "15/15 passed",
+    "status_projection": "2/2 passed",
+    "observation_workflow_tasks_contracts_bridge": "195 passed",
+    "g3_predicates": "23 passed"
+  },
+  "graphify_updated": true
+}

@@ -1,0 +1,26 @@
+{
+  "invocation": "cw03-fd-review-01",
+  "role": "reviewer",
+  "unit": "V-CW-03",
+  "candidate": "3a920441f1487dce849ce85c8432658ae73e5b546412d02a15d6d77f6ddfefaf",
+  "candidate_manifest": ".workflow/core-workbench/runs/implement-p2.6-20260927/cw03-fd-frozen-candidate.json",
+  "review_scope": [
+    "Fresh delta review of the lifecycle.py inherited-FD closure and independent FD regression only.",
+    "Confirm the earlier P1 is closed: payload cannot read persistent shell control FD8, recovery FD7, their aliases, or later automatic frames.",
+    "Check that the allowlist does not accidentally close descriptors required for exec ACK/tracing or the explicit bounded fixture contract.",
+    "Check pre-exec and immediately-pre-exec closure ordering, exception paths, range enumeration correctness, and portability claims within the approved Linux scope.",
+    "Assess the independent test's positive assertions, negative mutation discrimination, timeout/cleanup safety, and whether it could pass without exercising the real boundary.",
+    "Retain the prior common RUN review coverage for PTRACE exec confirmation; report any affected regression."
+  ],
+  "evidence": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/review-cw03-run-protocol-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw03-fd-correction-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw03-fd-test-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/scope-audit-cw03-fd-integrated.json"
+  ],
+  "constraints": [
+    "Read-only: do not edit files, run graphify query, or change stamps.",
+    "Do not broaden this review to the still-unmigrated input/jobs, manual hook, takeover, or whole six-matrix integration.",
+    "Classify findings P0-P3 with file/line evidence and state pass only if no P0-P2 remains."
+  ]
+}

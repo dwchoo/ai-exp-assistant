@@ -1,0 +1,20 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 862,
+  "event": {
+    "id": "reserve-cw12-post-review-correction-01",
+    "kind": "reserve",
+    "data": {
+      "invocation": "cw12-post-review-correction-01",
+      "role": "worker_senior",
+      "unit": "V-CW-12-p2.6-current",
+      "incident": "",
+      "purpose": "Correct persisted-run, resume-reconciliation, and late-result CW-12 review findings",
+      "model": "gpt-6-sol",
+      "effort": "high",
+      "buckets": ["total", "role:worker_senior", "unit:V-CW-12-p2.6-current"],
+      "writer": true,
+      "workspace": "/home/dwchoo/ai-exp-assistant"
+    }
+  }
+}

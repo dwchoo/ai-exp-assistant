@@ -1,0 +1,35 @@
+{
+  "invocation": "cw08-test-01",
+  "role": "test_designer",
+  "unit": "V-CW-08-p2.6-current",
+  "objective": "Independently test CW-08 Task-linked two-role mailbox and actual OMP processing evidence without modifying product code.",
+  "candidate_manifest": ".workflow/core-workbench/runs/implement-p2.6-20260927/cw08-test-checkpoint.json",
+  "requirements": ".workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw08.json",
+  "required_tests": [
+    "Derive tests from P-C-AC-02 independently of worker-authored tests; cover task, question, answer and report role routing and reply linkage.",
+    "Verify API acceptance, exact OMP provider processing, agent completion, and work completion remain distinct observations.",
+    "Attack each just-before-injection readiness predicate, session/generation changes, ACK loss, asynchronous errors, and duplicate logical-message delivery attempts.",
+    "Verify unknown outcomes never auto-replay after reconnect, mailbox reopen, new OMP process or new session/generation.",
+    "Run an actual two-OMP runtime probe when safely possible and verify bounded cleanup, no child/socket residue, and stable message ID deduplication."
+  ],
+  "allowed_files": [
+    "tests/bridge/test_mailbox_independent.py",
+    "tests/bridge/live_mailbox_independent.py"
+  ],
+  "constraints": [
+    "Do not modify product source, docs, workflow, graphify, or worker-authored tests.",
+    "Do not weaken or rewrite tests/bridge/test_mailbox.py or live_mailbox_probe.py.",
+    "No commit/reset/clean/stash/push/deploy and no Docker."
+  ],
+  "checks": [
+    "Run all tests/bridge and relevant tasks/contracts/G3/G4 regressions with the approved venv.",
+    "Run relevant Node G3/shared contract tests.",
+    "Run git diff --check."
+  ],
+  "report": [
+    "new independent tests and defects",
+    "commands/results and actual runtime evidence",
+    "candidate before/after and scope audit",
+    "candidate_ready or needs_reroute"
+  ]
+}

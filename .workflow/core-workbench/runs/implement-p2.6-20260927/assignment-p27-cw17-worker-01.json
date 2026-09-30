@@ -1,0 +1,87 @@
+{
+  "schema_version": 1,
+  "feature_id": "core-workbench",
+  "ticket_id": "CW-17",
+  "attempt_id": "cw17-attempt-01",
+  "invocation": "p27-cw17-worker-01",
+  "approved_bundle_digest": "d8a1205611980030629c927acaaa3db630268cd2d704da2ece27a9db230ff313",
+  "authority": "User approval of p2.7 bundle ('진행해', 2026-09-29) recorded at .workflow/core-workbench/runs/planning-p2.7-20260929/approval.json",
+  "actual_workspace": "/home/dwchoo/ai-exp-assistant",
+  "repository_identity": "main @ 7b2048c + shared dirty tree",
+  "baseline_snapshot": {
+    "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-cw17-base.json",
+    "candidate_id": "8c9901985d7b8f4df54d3e5af3b52a652dc0091be081dea137587e3ebdd97611"
+  },
+  "effective_write_capability": "single serial writer in shared checkout; no concurrent writer",
+  "acceptance_ids": [
+    "C-AC-15",
+    "C-AC-18",
+    "C-AC-19",
+    "C-AC-20"
+  ],
+  "required_gate_items": [
+    "L-CW17-DETACH",
+    "L-CW17-START",
+    "L-CW17-CONTRACT"
+  ],
+  "relevant_contracts": [
+    "docs/features/core-workbench/tickets/CW-17.md",
+    "docs/features/core-workbench/SPEC.md#production-조합",
+    "src/workbench/contracts/v1.py (read-only)",
+    "src/workbench/contracts/ports_v2.py (read-only)"
+  ],
+  "allowed_write_paths": [
+    "src/workbench/backend/**",
+    "src/workbench/contracts/ui_v1.py",
+    "src/workbench/__main__.py",
+    "pyproject.toml ([project.scripts] only)",
+    "tests/backend/**",
+    "tests/contracts/test_ui_v1*.py"
+  ],
+  "prohibited_paths": [
+    "docs/**",
+    ".workflow/**",
+    ".codex/**",
+    ".agents/**",
+    "src/workbench/contracts/v1.py",
+    "src/workbench/contracts/ports_v2.py",
+    "omp_bridge/**",
+    "all other src/** and tests/**",
+    "graphify-out/**"
+  ],
+  "resource_claims": [
+    "host:interactive-terminal",
+    "host:omp-runtime",
+    "host:shell-fixture",
+    "repo:shared-contract",
+    "repo:dependency-lock"
+  ],
+  "mutation_owner": "p27-cw17-worker-01",
+  "checkpoint_ref": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-cw17-base.json",
+  "exact_checks": [
+    "/usr/bin/env PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/backend -p 'test_*.py' -v",
+    "same interpreter: -m unittest discover -s tests/contracts -p 'test_*.py'"
+  ],
+  "reserved_budget": {
+    "unit": "unit:V-CW-17-p2.7",
+    "calls": 1
+  },
+  "stop_conditions": [
+    "need to change contracts/v1, ports_v2, CW-05 app entry or any file outside allowed_write_paths",
+    "need tmux or any external multiplexer internally",
+    "need to store/copy credentials",
+    "owned process/socket/data-dir leak cannot be bounded"
+  ],
+  "configured_model": "claude-opus-5-5 (Claude Code subagent)",
+  "host_observed_model": "unverified",
+  "routing": {
+    "planned_role": "worker_senior",
+    "selected_role": "worker_senior",
+    "reason_codes": [
+      "coupled_invariants"
+    ],
+    "evidence_refs": [
+      "docs/features/core-workbench/PLAN.json#CW-17"
+    ]
+  }
+}

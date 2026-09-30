@@ -1,0 +1,13 @@
+test_dispatch_occurs_after_both_syncs_and_callback_failure_is_never_replayed (test_independent_boundaries.DurableDispatchBoundaryTests.test_dispatch_occurs_after_both_syncs_and_callback_failure_is_never_replayed) ... ok
+test_file_and_directory_fsync_failures_hold_new_dispatch_without_killing_run (test_independent_boundaries.DurableDispatchBoundaryTests.test_file_and_directory_fsync_failures_hold_new_dispatch_without_killing_run) ... ok
+test_distinct_and_bound_process_identities_are_required (test_independent_boundaries.LifetimeEvidenceBoundaryTests.test_distinct_and_bound_process_identities_are_required) ... ok
+test_frontend_detach_and_reattach_must_really_change_display_lease (test_independent_boundaries.LifetimeEvidenceBoundaryTests.test_frontend_detach_and_reattach_must_really_change_display_lease) ... ok
+test_known_pass_and_existing_failure_controls_are_discriminating (test_independent_boundaries.LifetimeEvidenceBoundaryTests.test_known_pass_and_existing_failure_controls_are_discriminating) ... ok
+test_live_owned_residue_cannot_be_masked_by_empty_backend_residue_flag (test_independent_boundaries.LifetimeEvidenceBoundaryTests.test_live_owned_residue_cannot_be_masked_by_empty_backend_residue_flag) ... ok
+test_pause_consumes_tick_without_replay_and_attach_has_no_owner_change (test_ports.RuntimePortTests.test_pause_consumes_tick_without_replay_and_attach_has_no_owner_change) ... ok
+test_real_fsync_success_permits_once_and_failure_holds_without_killing_run (test_ports.RuntimePortTests.test_real_fsync_success_permits_once_and_failure_holds_without_killing_run) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.249s
+
+OK

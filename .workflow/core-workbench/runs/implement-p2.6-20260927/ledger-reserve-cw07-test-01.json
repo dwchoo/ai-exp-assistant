@@ -1,0 +1,20 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 358,
+  "event": {
+    "id": "reserve-cw07-test-01",
+    "kind": "reserve",
+    "data": {
+      "invocation": "cw07-test-01",
+      "role": "test_designer",
+      "unit": "V-CW-07-p2.6-current",
+      "incident": "",
+      "purpose": "Independently test CW-07 persistent shell runtime and manual-control invariants",
+      "model": "gpt-6-sol",
+      "effort": "high",
+      "buckets": ["total", "role:test_designer", "unit:V-CW-07-p2.6-current"],
+      "writer": true,
+      "workspace": "/home/dwchoo/ai-exp-assistant"
+    }
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "invocation": "cw12-final-review-03",
+  "outcome": "needs_reroute",
+  "approved": false,
+  "manifest": "candidate 160d2f8f7a2877f6213bc9f98509e2d599a0d2ff451061b6b68775d9a1ffb5c9 and all 1366 file hashes matched",
+  "findings": [
+    {
+      "severity": "P1",
+      "title": "Transient review-admission gap after pause begins",
+      "location": "src/workbench/policy/pause_automation/controller.py:441",
+      "detail": "A stale unpaused publisher can pass its version check before pause increments the fence/version, then publish unpaused while pause is pending; a new review is admitted before the final paused publication."
+    },
+    {
+      "severity": "P1",
+      "title": "publication_lock and CW11 lock deadlock",
+      "location": "src/workbench/policy/pause_automation/controller.py:441-465",
+      "detail": "Publisher holds publication_lock while waiting for the CW11 lock; an admit callback can hold the CW11 lock and reach status/cancellation synchronization that waits for publication_lock."
+    },
+    {
+      "severity": "P1",
+      "title": "Late post-probe peer replacement resumes stale binding",
+      "location": "src/workbench/policy/pause_automation/controller.py:751-845",
+      "detail": "Manager can switch during the subsequent worker probe; local-only final checks release the fence with an old bound manager identity and a replacement actual peer."
+    }
+  ],
+  "closed_findings": [
+    "pause(A)/bind(B) contamination",
+    "runtime real file/process/unknown/manual evidence false-pass",
+    "resume_failed recovery, exact stop-event correlation, and file+directory fsync remain intact"
+  ],
+  "files_modified": false
+}

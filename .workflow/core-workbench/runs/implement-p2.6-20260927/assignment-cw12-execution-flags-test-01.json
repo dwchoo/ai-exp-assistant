@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "invocation": "cw12-execution-flags-test-01",
+  "role": "test_designer",
+  "unit": "V-CW-12-p2.6-current",
+  "authority": "User $implement docs/features/core-workbench request; approved PLAN p2.6 CW-12",
+  "objective": "Independently verify execution-worktree index-flag reconciliation and final CW-12 runtime.",
+  "candidate": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw12-execution-flags-correction.json",
+    "candidate_id": "733eb27eb3b013a5c3877a6d2e1d5d8e1727a32e25ab46f2b7be464e622efaa3"
+  },
+  "must_verify": [
+    "execution worktree assume-unchanged and skip-worktree hidden changes reject resume when both peer cwd paths are elsewhere",
+    "flag-set changes, missing/regular state, observation errors, and legacy baseline omission fail closed; unchanged normal/sparse states remain live",
+    "peer Git, large repo, non-Git fallback, fd safety, persisted run, late result and pause regressions remain green",
+    "actual omp/18.2.10 reject-cleanup-reconcile-resume path passes with zero residue"
+  ],
+  "allowed_write_paths": ["tests/policy/pause_automation/**", "graphify-out/**"],
+  "constraints": [
+    "Independent test-only mutation owner; do not edit production/.workflow/docs/PLAN/state.",
+    "Use apply_patch for tests; do not delegate, commit, publish, deploy, or use Docker.",
+    "Return needs_reroute for product defects; do not fix production."
+  ],
+  "report": "Return candidate_ready/needs_reroute, exact checks/counts, actual OMP cleanup, test-only changes, acceptance assessment, and residual risks."
+}

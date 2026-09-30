@@ -1,0 +1,23 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 1085,
+  "event": {
+    "id": "limit-cw14-causal-unit-20260929",
+    "kind": "limit",
+    "data": {
+      "bucket": "unit:V-CW-14-p2.6-current",
+      "origin": "operating",
+      "value": 14,
+      "authority": "Approved PLAN p2.6 CW-14, repeated-failure concurrent-writer P1 evidence, workflow-contract section 8, and current $implement authorization",
+      "reason": "One senior causal-accounting correction, independent regression, and fresh final review",
+      "decision_owner": "Root",
+      "remaining_work_estimate": 3,
+      "expected_previous": {
+        "value": 11,
+        "authority": "Approved PLAN p2.6 CW-14, fresh same-run branch and malformed-status findings, workflow-contract section 8, and current $implement authorization",
+        "reason": "One bounded branch-safe correction, independent regression, and fresh final review"
+      },
+      "scope_basis": null
+    }
+  }
+}

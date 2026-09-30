@@ -1,0 +1,19 @@
+{
+  "invocation": "cw12-index-flags-test-01",
+  "outcome": "complete",
+  "candidate_ready": true,
+  "product_mutation": false,
+  "test_only_changed_paths": ["tests/policy/pause_automation/test_pause_policy.py", "graphify-out/**"],
+  "checks": {
+    "index_flag_focused": "9 passed",
+    "pause": "97 passed in 18.722s",
+    "large_repo": "2050 files plus clean file over 64 MiB passed",
+    "assume_unchanged": "preserved regression passed",
+    "skip_worktree": "existing/missing state and flag removal/restore cases passed",
+    "fsmonitor_parser": "mocked Git tag stream passed",
+    "actual_omp": "omp/18.2.10 exit 0; out_of_scope_rejected, cleanup, reconciliation, resume, fresh delivery, zero_residue all true",
+    "graphify": "graphify update . exit 0"
+  },
+  "unknowns": ["Actual Git fsmonitor-enabled environment was not available; tag parsing was verified with a mocked Git output stream."],
+  "mutation_owner": "/root/cw12_post_review_test"
+}

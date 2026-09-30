@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-delta-review-cw06-02",
+  "verdict": "integrate",
+  "frozen_candidate": "660411cd47a7ce8d11f619e21740a933c80e0e1b4b37a597c4ddf73add6e2dc5",
+  "agent_result": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-delta-review-cw06-02-agent.json",
+  "prior_finding_verdicts": {"P2-1": "fixed (intake 20ms budget, 1KiB feed chunks within 64KiB/20ms slices, draw <=20fps, catch-up reset+tail replay, 2004 tracking, resize nudge, ConnectionLost/ProtocolError reason; PTY: key latency max 0.07s, Ctrl-C 0.29s, intake ~225 MB/s)", "P3-1": "fixed", "P3-2": "fixed", "P3-3": "fixed", "P3-4": "fixed", "P3-5": "appropriate test maintenance, intent preserved", "P3-6": "non-blocking"},
+  "ui_server_verdict": "OK: in-flight remainder preserved, whole unsent frames dropped, CLOSING last, nothing after closing, amortized O(1), single detach, no CW-17 regression; p27g mutation-verified",
+  "new_findings": {"P3-a": "catch-up tail may start mid CSI/OSC -> stray chars after reset; skipped alt-screen/scroll-region state lost (full-screen apps recover via resize nudge). Fix: align tail to next ESC/newline boundary.", "P3-b": "feed_pending re-slices head payload per 1 KiB (quadratic for 1 MiB frames); use offset/memoryview.", "P3-c": "Ctrl-C 1/13 anomaly unexplained; no UI defect found; suspect backend manual_input_hold (adapter.py:358) rejecting input_target_unknown under load without retry -> diagnostic p27-cw06-ctrlc-diag-05 to confirm"},
+  "observed_model": "sonnet (wb-delta-reviewer definition; host metadata unverified)"
+}

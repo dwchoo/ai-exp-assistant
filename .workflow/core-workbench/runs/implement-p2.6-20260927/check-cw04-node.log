@@ -1,0 +1,124 @@
+TAP version 13
+# Subtest: internal handler fault is opt-in, one-shot, ACK-free and permanently no-replay
+ok 1 - internal handler fault is opt-in, one-shot, ACK-free and permanently no-replay
+  ---
+  duration_ms: 153.817301
+  type: 'test'
+  ...
+# Subtest: extension binds role/session and defers busy, pending, approval, and composer states
+ok 2 - extension binds role/session and defers busy, pending, approval, and composer states
+  ---
+  duration_ms: 97.622722
+  type: 'test'
+  ...
+# Subtest: API acceptance stays distinct from model completion and ACK loss never replays
+ok 3 - API acceptance stays distinct from model completion and ACK loss never replays
+  ---
+  duration_ms: 55.05559
+  type: 'test'
+  ...
+# Subtest: idle task starts a normal prompt without composer intrusion
+ok 4 - idle task starts a normal prompt without composer intrusion
+  ---
+  duration_ms: 24.341041
+  type: 'test'
+  ...
+# Subtest: active manager pause requests abort before an outstanding tool finishes
+ok 5 - active manager pause requests abort before an outstanding tool finishes
+  ---
+  duration_ms: 67.451606
+  type: 'test'
+  ...
+# Subtest: reconciled resume retains unknown tool outcome through late end and session switch
+ok 6 - reconciled resume retains unknown tool outcome through late end and session switch
+  ---
+  duration_ms: 130.201221
+  type: 'test'
+  ...
+# Subtest: pause before agent_start still pairs the later turn stop with its abort request
+ok 7 - pause before agent_start still pairs the later turn stop with its abort request
+  ---
+  duration_ms: 44.44444
+  type: 'test'
+  ...
+# Subtest: resume cannot clear pause while a requested manager abort has no observed stop
+ok 8 - resume cannot clear pause while a requested manager abort has no observed stop
+  ---
+  duration_ms: 53.390598
+  type: 'test'
+  ...
+# Subtest: session switch retains unresolved prior-session tool and abort evidence
+ok 9 - session switch retains unresolved prior-session tool and abort evidence
+  ---
+  duration_ms: 44.047974
+  type: 'test'
+  ...
+# Subtest: pause during an unresolved sendUserMessage reports uncertainty and forbids replay
+ok 10 - pause during an unresolved sendUserMessage reports uncertainty and forbids replay
+  ---
+  duration_ms: 55.323495
+  type: 'test'
+  ...
+# Subtest: idle manager and active worker pause hold automation without aborting a turn
+ok 11 - idle manager and active worker pause hold automation without aborting a turn
+  ---
+  duration_ms: 84.351217
+  type: 'test'
+  ...
+# Subtest: pause leaves native user input and its tool path available without starting automatic work
+ok 12 - pause leaves native user input and its tool path available without starting automatic work
+  ---
+  duration_ms: 22.667434
+  type: 'test'
+  ...
+# Subtest: resume exposes reconciliation state and never replays a paused request
+ok 13 - resume exposes reconciliation state and never replays a paused request
+  ---
+  duration_ms: 107.138559
+  type: 'test'
+  ...
+# Subtest: delivery keeps reply linkage for task, question, answer, and report
+ok 14 - delivery keeps reply linkage for task, question, answer, and report
+  ---
+  duration_ms: 65.568837
+  type: 'test'
+  ...
+# Subtest: extension reconnects after transport loss without replaying accepted input
+ok 15 - extension reconnects after transport loss without replaying accepted input
+  ---
+  duration_ms: 93.473442
+  type: 'test'
+  ...
+# Subtest: session switch rejects a late frame from the previous socket
+ok 16 - session switch rejects a late frame from the previous socket
+  ---
+  duration_ms: 91.912051
+  type: 'test'
+  ...
+# Subtest: opt-in provider request identity uses only one structured final user message
+ok 17 - opt-in provider request identity uses only one structured final user message
+  ---
+  duration_ms: 33.720924
+  type: 'test'
+  ...
+# Subtest: provider identity rejects history-only IDs, malformed input, duplicate JSON, and wrong attempt
+ok 18 - provider identity rejects history-only IDs, malformed input, duplicate JSON, and wrong attempt
+  ---
+  duration_ms: 126.423206
+  type: 'test'
+  ...
+# Subtest: provider request diagnostic event is absent without explicit opt-in
+ok 19 - provider request diagnostic event is absent without explicit opt-in
+  ---
+  duration_ms: 53.100446
+  type: 'test'
+  ...
+1..19
+# tests 19
+# suites 0
+# pass 19
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1503.347549

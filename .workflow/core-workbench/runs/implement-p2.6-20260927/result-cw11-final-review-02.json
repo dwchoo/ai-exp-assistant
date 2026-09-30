@@ -1,0 +1,18 @@
+{
+  "invocation": "cw11-final-review-02",
+  "candidate": "ae03421ba5ff20f37a7978f9ffd4af988e4e7c029d7a5f4238631b7aa4a09e5d",
+  "candidate_hash_validated": true,
+  "outcome": "needs_reroute",
+  "findings": [
+    {"severity":"P1","summary":"The final dispatch guard reads authority before a potentially blocking active-run callback and can dispatch with stale authority."},
+    {"severity":"P2","summary":"A late exit event without immutable run identity can bind by run_id to a newer session and fence it incorrectly."},
+    {"severity":"P2","summary":"The exit event is marked surfaced before on_exit succeeds, so callback failure permanently suppresses retry."}
+  ],
+  "closed_prior_findings": [
+    "Scheduler-integrated bounded sanitized hang investigation",
+    "Scheduler-integrated usage provenance and status"
+  ],
+  "runtime_qualification": "Actual OMP proves silence-only unknown but not positive live persistent-shell hang classification; reviewer classified this as an evidence limitation, not a product defect.",
+  "writer": false,
+  "files_modified": []
+}

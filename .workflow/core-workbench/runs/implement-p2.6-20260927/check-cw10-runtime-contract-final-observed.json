@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "check_id": "cw10-runtime-contract-final-01",
+  "requirements_identity": "0ed26ff87bdd69efb27d6e252a0a05a7f831b37ca5cffdf249bf7f9222a55b72",
+  "argv": ["/usr/bin/env", "PYTHONDONTWRITEBYTECODE=1", "PYTHONPATH=src:tests/bridge:tests/gates/g3_omp", "/tmp/cw02-g1-venv/bin/python", "tests/workflow/live_workflow_probe.py"],
+  "cwd": "/home/dwchoo/ai-exp-assistant",
+  "environment": {"description": "Linux; final frozen CW-10 response-contract candidate; actual OMP 18.2.10 manager/worker TUI peers; response derived from delivered contract; real Git detached worktree and persistent host shell"},
+  "started_at": "2026-09-28T03:35:15.365627+00:00",
+  "finished_at": "2026-09-28T03:35:20.525891+00:00",
+  "exit_code": 0,
+  "timed_out": false,
+  "log": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/check-cw10-runtime-contract-final.log",
+  "log_sha256": "56b7da8948e71b4271baaaf7daa015bf0ee13de18b9fd977698c3b0035bc9879",
+  "before": "679237e11f9f4cfd73c780f9ed7a431c0812437bcd006ace428207c8a37bc0a0",
+  "after": "679237e11f9f4cfd73c780f9ed7a431c0812437bcd006ace428207c8a37bc0a0",
+  "stable": true,
+  "items": [
+    {
+      "id": "P-C-AC-03",
+      "acceptance_ids": ["C-AC-03"],
+      "result": "passed",
+      "observed_evidence_level": "runtime",
+      "evidence": "Actual OMP 18.2.10 manager and worker TUI peers processed the approved Task. The worker received the production response contract, emitted a contract-derived execute frame on the public assistant event, and exact identity sequence 5 preceded linked delivery sequence 6. The real persistent host shell recorded sent/accepted/started/ended, confirmed exit 0, and persisted raw-log/result locations. No OMP child, cwd process, provider thread, or socket remained.",
+      "unknowns": []
+    },
+    {
+      "id": "P-C-AC-05",
+      "acceptance_ids": ["C-AC-05"],
+      "result": "passed",
+      "observed_evidence_level": "runtime",
+      "evidence": "The worker OMP produced distinct contract-derived execute and analysis responses with exact Task/revision/run/message/attempt/session/generation bindings; analysis public sequence 11 preceded linked processed sequence 12 and reported success from confirmed exit/log/result evidence. The 44-test workflow runtime independently covers nonzero failure, exit-zero criterion failure, missing/changed evidence indeterminate, modification-needed no-auto-return, current-authority holds, malformed/replayed public responses, and contract mutation/no-fallback cases.",
+      "unknowns": []
+    }
+  ]
+}

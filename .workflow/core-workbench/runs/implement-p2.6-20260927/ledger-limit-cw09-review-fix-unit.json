@@ -1,0 +1,23 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 333,
+  "event": {
+    "id": "limit-cw09-review-fix-unit-20260928",
+    "kind": "limit",
+    "data": {
+      "bucket": "unit:V-CW-09-p2.6-current",
+      "origin": "operating",
+      "value": 7,
+      "authority": "Approved PLAN p2.6 CW-09, workflow-contract section 8, current implementation authorization, and fresh-review evidence",
+      "reason": "Independent regression, correction, and delta-review cycle for immutable revision and migration validation",
+      "decision_owner": "Root",
+      "remaining_work_estimate": 3,
+      "expected_previous": {
+        "value": 4,
+        "authority": "Approved PLAN p2.6 CW-09, workflow-contract section 8, current implementation authorization, and independent test evidence",
+        "reason": "One bounded cross-Task integrity correction and one fresh review"
+      },
+      "scope_basis": null
+    }
+  }
+}

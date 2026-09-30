@@ -1,0 +1,21 @@
+{
+  "invocation": "cw11-correction-test-01",
+  "outcome": "complete",
+  "candidate_ready": true,
+  "independent_tests_added": 5,
+  "checks": {
+    "independent": "9/9 passed",
+    "observation": "29/29 passed",
+    "workflow": "44/44 passed",
+    "bridge": "18/18 passed",
+    "contracts": "20/20 passed",
+    "g4_evidence": "10/10 passed",
+    "g4_lifetime": "8/8 passed",
+    "node": "33/33 passed",
+    "actual_omp_18_2_10": "60.0-second review, 13th wake omp_processed, 14 provider requests, silence-only hang unknown, missing provider usage unknown, secret absent, zero child/socket/provider-thread/temp residue"
+  },
+  "runtime_qualifications": [
+    "A positive live persistent-shell hang classification was not synthesized because no public seam confirms stalled and blocked_on; positive classification is covered at the scheduler unit boundary while actual OMP proves the silence-only unknown path."
+  ],
+  "scope": "Only the two allowed observation test files plus preserved graphify-generated output changed."
+}

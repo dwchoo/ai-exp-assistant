@@ -1,0 +1,169 @@
+{
+  "schema_version": 1,
+  "invocation": "cw05-contract-correction-01",
+  "unit": "V-CW-05-p2.6-current",
+  "task_result": "candidate_ready",
+  "candidate": "bd4bc05806c6cfdce958a977a0bf037a0e73f869e875a330acf1361ba755d51a",
+  "baseline_candidate": "237cec5bdb645f1b93becd550471845f50f9210c160fd13f8948dfbf978ced51",
+  "baseline_ref": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw05-review-candidate.json",
+  "finding_ref": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/review-cw05-g4-01.json",
+  "assignment_ref": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/assignment-cw05-contract-correction-01.json",
+  "snapshot_ref": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw05-contract-correction-after.json",
+  "scope_audit_ref": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/scope-audit-cw05-contract-correction.json",
+  "cwd": "/home/dwchoo/ai-exp-assistant",
+  "changed_paths": [
+    "omp_bridge/contract/ports_v2.ts",
+    "tests/contracts/test_ports_v2.py",
+    "tests/gates/harness/ports-v2.test.ts"
+  ],
+  "fix": "TypeScript exact() now compares Object.keys(value).length against required length and uses keys.every(key => Object.hasOwn(value, key)); comma-joined key serialization removed. Python validator remains unchanged.",
+  "collision": {
+    "payload": "ShellControl fixture: remove generation + ownerEpoch; add boolean key generation,ownerEpoch",
+    "before": {
+      "typescript": "COLLISION_ACCEPTED",
+      "python": "COLLISION_REJECTED unsupported port kind/fields"
+    },
+    "after": {
+      "typescript": "COLLISION_REJECTED unsupported fields",
+      "python": "ContractError rejection covered by the new regression"
+    },
+    "regression_locations": [
+      "tests/gates/harness/ports-v2.test.ts: comma-containing unknown key cannot replace two required ShellControl keys",
+      "tests/contracts/test_ports_v2.py: test_comma_key_cannot_replace_two_required_shell_fields"
+    ]
+  },
+  "checks": [
+    {
+      "name": "python_contracts",
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/contracts -q",
+      "result": "passed",
+      "exit_code": 0,
+      "count": 20,
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "candidate": "bd4bc05806c6cfdce958a977a0bf037a0e73f869e875a330acf1361ba755d51a",
+      "environment": {
+        "python": "3.12.3",
+        "node": "22.23.2",
+        "venv": "/tmp/cw02-g1-venv",
+        "PYTHONDONTWRITEBYTECODE": "1"
+      }
+    },
+    {
+      "name": "node_contracts",
+      "command": "node --experimental-strip-types --test tests/gates/harness/contracts.test.ts tests/gates/harness/ports-v2.test.ts",
+      "result": "passed",
+      "exit_code": 0,
+      "count": 15,
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "candidate": "bd4bc05806c6cfdce958a977a0bf037a0e73f869e875a330acf1361ba755d51a",
+      "environment": {
+        "python": "3.12.3",
+        "node": "22.23.2",
+        "venv": "/tmp/cw02-g1-venv",
+        "PYTHONDONTWRITEBYTECODE": "1"
+      }
+    },
+    {
+      "name": "g4_lifetime",
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g4_lifetime /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/gates/g4_lifetime -q",
+      "result": "passed",
+      "exit_code": 0,
+      "count": 8,
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "candidate": "bd4bc05806c6cfdce958a977a0bf037a0e73f869e875a330acf1361ba755d51a",
+      "environment": {
+        "python": "3.12.3",
+        "node": "22.23.2",
+        "venv": "/tmp/cw02-g1-venv",
+        "PYTHONDONTWRITEBYTECODE": "1"
+      }
+    },
+    {
+      "name": "g4_evidence",
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g4_evidence /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/gates/g4_evidence -q",
+      "result": "passed",
+      "exit_code": 0,
+      "count": 10,
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "candidate": "bd4bc05806c6cfdce958a977a0bf037a0e73f869e875a330acf1361ba755d51a",
+      "environment": {
+        "python": "3.12.3",
+        "node": "22.23.2",
+        "venv": "/tmp/cw02-g1-venv",
+        "PYTHONDONTWRITEBYTECODE": "1"
+      }
+    },
+    {
+      "name": "diff_check",
+      "command": "git diff --check",
+      "result": "passed",
+      "exit_code": 0,
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "candidate": "bd4bc05806c6cfdce958a977a0bf037a0e73f869e875a330acf1361ba755d51a",
+      "environment": {
+        "python": "3.12.3",
+        "node": "22.23.2",
+        "venv": "/tmp/cw02-g1-venv",
+        "PYTHONDONTWRITEBYTECODE": "1"
+      }
+    },
+    {
+      "name": "process_residue_pattern",
+      "command": "pgrep -af '[/]tmp/cw05-(g4|deadline)-'",
+      "result": "passed",
+      "exit_code": 1,
+      "meaning": "Expected no matches",
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "candidate": "bd4bc05806c6cfdce958a977a0bf037a0e73f869e875a330acf1361ba755d51a",
+      "environment": {
+        "python": "3.12.3",
+        "node": "22.23.2",
+        "venv": "/tmp/cw02-g1-venv",
+        "PYTHONDONTWRITEBYTECODE": "1"
+      }
+    }
+  ],
+  "environment": {
+    "python": "3.12.3",
+    "node": "22.23.2",
+    "venv": "/tmp/cw02-g1-venv",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "scope": {
+    "changed": [
+      "omp_bridge/contract/ports_v2.ts",
+      "tests/contracts/test_ports_v2.py",
+      "tests/gates/harness/ports-v2.test.ts"
+    ],
+    "index_changed": [],
+    "outside_scope": [],
+    "comparable": true
+  },
+  "candidate_stability": {
+    "after_checks": "bd4bc05806c6cfdce958a977a0bf037a0e73f869e875a330acf1361ba755d51a",
+    "after_audit": "bd4bc05806c6cfdce958a977a0bf037a0e73f869e875a330acf1361ba755d51a",
+    "stable": true,
+    "unknowns": []
+  },
+  "preserved": [
+    "v1 adapter and all valid v2 golden fixtures unchanged",
+    "Python product validator unchanged; safe integer and strict unknown-field rules retained",
+    "All independent tests unchanged",
+    "No runtime/metadata/evidence implementation or tests changed",
+    "No dependencies/public shapes added or changed"
+  ],
+  "cleanup": {
+    "active_owned_subprocesses": 0,
+    "owned_residue": [],
+    "mutation_subprocess_state": "none running at handoff"
+  },
+  "actual_runtime_reexecuted": false,
+  "unknowns": [
+    "This contract-only correction did not rerun >60-second actual runtime; assignment required G4 lifetime/evidence suites, which passed. Prior runtime evidence is not relabeled as a new runtime execution.",
+    "Formal acceptance and any evidence reuse decisions remain Root-owned."
+  ],
+  "needs_oracle": false,
+  "remaining_required_worker_checks": [],
+  "overall_completion_claim": false,
+  "commit_created": false
+}

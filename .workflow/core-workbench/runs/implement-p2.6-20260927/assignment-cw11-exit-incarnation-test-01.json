@@ -1,0 +1,18 @@
+{
+  "invocation":"cw11-exit-incarnation-test-01",
+  "role":"test_designer",
+  "unit":"V-CW-11-p2.6-current",
+  "objective":"Independently verify exact-incarnation exit fencing, UI retry isolation, and bound WorkflowObservationBinding.",
+  "candidate_manifest":".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw11-exit-incarnation.json",
+  "candidate":"f653c02234d185126b97a5b48a26eb52449f16ca691c98bc8c694d3a2acc5b2d",
+  "review_evidence":".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw11-final-review-04.json",
+  "write_scope":["tests/observation/**"],
+  "must_test":[
+    "Confirm exit->A->None->same A starts a clean incarnation and reviews only at its own 60-second boundary.",
+    "Race an old exit callback/source token against replacement and prove it cannot fence or surface the new incarnation; prove old pending UI retry may finish once without affecting new state.",
+    "Attack forged/foreign/stale/rebound ExitSourceToken, old WorkflowObservationBinding rebind, idempotent A, independent new-incarnation exit, concurrent/reentrant exit notification, and callback failure retry.",
+    "Rerun all prior atomic/ticket/incarnation tests and the current actual OMP 18.2.10 bound WorkflowObservationBinding probe."
+  ],
+  "constraints":["Tests only; apply_patch only; no product/workflow edits; graphify update; no uv/local env/package artifacts or destructive git actions."],
+  "report":["coverage","exact results/runtime","candidate_ready or needs_reroute"]
+}

@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "invocation": "cw15-binding-test-01",
+  "role": "test_designer",
+  "unit": "V-CW-15-p2.6-current",
+  "authority": "User $implement docs/features/core-workbench request; approved PLAN p2.6 CW-15; production-binding correction",
+  "objective": "Independently verify the frozen CW-15 production composition and shutdown idempotence at runtime evidence level.",
+  "candidate": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw15-binding-correction.json",
+    "candidate_id": "35a10c000ed43187c9fa25eba29a3c0b5618a4dbb35cea0eabc49e743f929f5d"
+  },
+  "required_tests": [
+    "Instantiate bind_production with actual G3BridgeServer and authenticated manager/worker clients, TaskMailbox, PersistentShell, PauseCoordinator, WorkerReviewScheduler, RecoveryCoordinator, RawLogStore, MetadataAdmissionGate and FrontendLease; verify adapters call the real public APIs with exact session/generation/PID/start_ticks/owner evidence.",
+    "Exercise successful and unknown delivery, disconnect/reconnect generation drift, already attempted/delivered commands, stale owner/takeover state, pause/cancel/revocation and model/metadata/raw failure separation; no replay or duplicate run.",
+    "Re-run completed and incomplete shutdown repeatedly; assert normal stop/force is at-most-once per exact target/incarnation, later calls reobserve only, survivors remain visible and all process/socket/shell resources are cleaned.",
+    "Verify all six P-C-AC items through process-backed runtime paths, rerun relevant predecessor suites, and confirm production hashes remain frozen.",
+    "Classify actual external OMP positive delivery and real reboot as environment-pending only if all in-repo production seams are executable and verified."
+  ],
+  "allowed_write_paths": ["tests/lifecycle/**", "graphify-out/**"],
+  "constraints": [
+    "Independent test-only owner; no production/workflow/docs/PLAN/state/ledger edits.",
+    "No real reboot, uncontrolled live OMP mutation, tmux dependency, delegation, commit, publish, deploy or Docker. Bound and reap every process/thread/socket."
+  ],
+  "report": "Return candidate_ready/needs_reroute, per-acceptance runtime evidence, actual binding calls, shutdown action counts, suites/residue, hash confirmation, environment-pending items and CW16 obligations."
+}

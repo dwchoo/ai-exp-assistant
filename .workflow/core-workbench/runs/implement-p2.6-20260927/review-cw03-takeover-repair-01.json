@@ -1,0 +1,11 @@
+{
+  "invocation": "cw03-takeover-repair-review-01",
+  "candidate": "3aea53b58b0c08dc2e7df4f1620264f85cc51afab7bbd06da18be3d9559feaec",
+  "status": "passed",
+  "material_findings": [],
+  "adjudication": "Original P1/P2 resolved for the bounded feasibility candidate: all write attempts revalidate the confirmed target and unconfirmed general input performs no PTY write; confirmed foreground and ACK plus fresh READY prompt paths remain functional.",
+  "residual_risks": ["TOCTOU between final validation and os.write remains non-atomic and is not claimed solved", "Production adapter integration", "Fixture-external writers and pre-supervisor manual daemons"],
+  "needs_oracle": false,
+  "writes": [],
+  "owned_processes_remaining": false
+}

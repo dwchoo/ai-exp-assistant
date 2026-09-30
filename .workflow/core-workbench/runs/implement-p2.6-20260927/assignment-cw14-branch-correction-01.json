@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "invocation": "cw14-branch-correction-01",
+  "role": "worker",
+  "unit": "V-CW-14-p2.6-current",
+  "authority": "User $implement docs/features/core-workbench request; approved PLAN p2.6 CW-14; fresh final-review findings",
+  "objective": "Correct only the stale same-run reconciliation branch and malformed status-entry exception defects.",
+  "candidate": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw14-recovery-test.json",
+    "candidate_id": "4b093e9b5f25e5f8aa84274d3756fc0085b9a766c165cc05988ee840d30caa00"
+  },
+  "required_changes": [
+    "Bind each volatile recovery state to the exact durable base from which it branched. Reconcile only if current durable state still equals that base (or by an equivalently proven lossless merge); never overwrite a concurrent same-run durable observation.",
+    "Add the exact run-cap 3B two-store regression: A stores abc then records de during scan failure; B durably observes f for the same run; after A recovery and g observation, the final state must account for all 7 observed bytes and 4 dropped/missing bytes without overwriting B.",
+    "Normalize invalid status .json run IDs to StoreIntegrityError/failure snapshots for both append and status, matching malformed .log behavior; include removal/recovery and sentinel preservation.",
+    "Preserve the single-writer recovery sequence, fail-closed unsafe mismatch behavior, quotas, concurrency, exact-prefix and metadata-admission separation."
+  ],
+  "allowed_write_paths": ["src/workbench/storage/log_raw/**", "tests/storage/**", "graphify-out/**"],
+  "constraints": [
+    "Bounded correction only; no workflow/repository/runtime/docs/PLAN/state/ledger edits.",
+    "Use apply_patch; run focused reproductions, full storage suite and graphify update; no delegation, commit, publish, deploy, Docker, or destructive actions."
+  ],
+  "report": "Return candidate_ready/needs_reroute, branch identity/merge invariant, exact 7/4/4 and malformed-status recovery results, suite counts, hashes/scope and CW-15 obligations."
+}

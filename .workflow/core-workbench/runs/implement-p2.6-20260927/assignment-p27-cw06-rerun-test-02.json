@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw06-rerun-test-02",
+  "ticket_id": "CW-06",
+  "role": "test_designer",
+  "unit": "V-CW-06-p2.7",
+  "approved_bundle_digest": "a521acdc3838b43a26e277afc233bab695c8b02ce0d42392c3678931b2e3f027",
+  "routing": {"planned_role": "test_designer", "selected_role": "test_designer (wb-test-rerun, Sonnet high)", "reason_codes": ["correction_reverification"], "evidence_refs": ["checks defined by result-p27-cw06-test-01-agent.json findings and root-adjudication-p27-cw06-test-01.json"]},
+  "frozen_candidate": "a4115c98ca068759c9a8e25d344d4e491b927b22aad013fd182fadd582010cf2",
+  "frozen_production_files": {"src/workbench/ui/product/input.py": "e3b87b1c40772f5705ebb45456d5af41cbd7d00a1e7b6de8f4cf725c62efad61", "src/workbench/ui/product/model.py": "2892ae20a5baf0330ae506abaff5dd67d0ebcda63c96b95d3aff335d53857659", "src/workbench/ui/product/app.py": "28eda32d93bee15e6df21a55f8a2d4a000318508a8d892501e0bcfe94a1e9ba2", "src/workbench/ui/product/view.py": "c41b895574027ab5391066c4cf7b04ba5744f53bd94fc943a2d1bee7446514d0", "src/workbench/backend/cli.py": "9b44e4847275514ec27e7c9474dfe7ad0c5556d3803651f7fc292be0402a2b4e"},
+  "inputs": [".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw06-test-01-agent.json", ".workflow/core-workbench/runs/implement-p2.6-20260927/root-adjudication-p27-cw06-test-01.json", ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw06-fix-worker-02.json", "tests/ui/live_product_omp_independent.py (existing live probe; reuse its harness)"],
+  "required": [
+    "F1-F5: all tests/ui/*_independent.py pass unmodified; run the whole tests/ui suite 5x and identify the first-run failure the worker saw (capture its name/traceback if it recurs; classify with evidence, rerun standalone).",
+    "F1 sh: add a live check with the real entrypoint where the host shell is sh (dash), e.g. a PATH without bash as the CW-17 START independent test does, paste into `cat > f` and at the dash prompt: no ESC[200~/201~ bytes reach the file/command. Also bash `cat > f` (S5) plain text.",
+    "F6-ui: after a multi-line heredoc typed in the host shell, `wb-handoff` + prefix h refusal notice shows held reasons (screen excerpt).",
+    "P-C-AC-14 open items with the REAL OMP, at most 2 tiny model turns total: (a) Esc cancels an in-progress manager turn and the cancel is visible in the pane; (b) an OMP approval/confirmation prompt answered through the UI (e.g. ask OMP to run a harmless read-only shell tool such as `true` if its config asks approval; if OMP auto-approves or no harmless prompt exists, record not-applicable with the evidence of the config-independent reason). Never change OMP settings or read ~/.omp.",
+    "Regression: tests/ui, tests/backend (incl. independent), tests/contracts, tests/gates/g1_vt (src:.), tests/gates/g4_lifetime (src:.)."
+  ],
+  "allowed_write_paths": ["tests/ui/test_product_rerun_independent_p27e.py", "tests/ui/live_product_rerun_independent_p27e.py"],
+  "prohibited": "production frozen; other tests unmodified; no docs/.workflow edits except your result file .workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw06-rerun-test-02-agent.json; no graphify update; no commits; no tmux/herdr; no credentials; do not touch /tmp/cw03-g2-*.",
+  "resource_claims": [{"resource": "host:omp-runtime", "mode": "exclusive"}, {"resource": "host:interactive-terminal", "mode": "exclusive"}],
+  "result_format": "Write full JSON result to the result file above; final message <=25 lines: checks table, status, per-item verdicts (F1..F5, F1-sh, F6-ui, P-C-AC-14 a/b, flake), frozen hashes equal?, residue."
+}

@@ -1,6 +1,6 @@
 # Core Workbench — 요구사항 합의안
 
-Revision: r1.11; state: 요구·계획 묶음 승인, 구현 진행. 최초 승인 근거는 [구현 승인 기록](../../../.workflow/core-workbench/runs/implement-p2.3-20260924/approval.json), C-D53 개정 근거는 [정책 개정 기록](../../../.workflow/core-workbench/runs/implement-p2.3-20260924/cd53-policy-approval.json)에 있다. 실제 gate 통과는 별도 검증한다.
+Revision: r1.13; state: **승인된 r1.12 기준에 사용자 결정 C-D55 반영.** [C-D55 승인 기록](../../../.workflow/core-workbench/runs/decisions-cd55-20260926/approval.json)과 [C-D55](DECISION-2026-09-26.md)을 따른다. 기존 구현 승인을 유지하며 현재 작업은 문서화·다음 세션 준비에 한정한다. 실제 gate 통과는 별도 검증한다.
 작성일: 2026-09-23. r1.7 승인 근거·검토본은 [기존 승인 기록](../../../.workflow/core-workbench/runs/approval-r1.7/approval.json)에 보관한다. G1 붙여넣기와 G2 입력권 반환 정책을 같은 날 사용자 답변으로 보충 승인했다. 해당 답변과 r1.8 digest는 [보충 승인 기록](../../../.workflow/core-workbench/runs/implement-p2-20260923/g1-g2-policy-approval.json)에 보관한다. C-D49와 r1.9 digest는 [새 정책 승인 기록](../../../.workflow/core-workbench/runs/implement-p2-20260923/cd49-policy-approval.json)에 보관한다.
 기존 r1.9 승인은 **P1~P4의 설계 상세화**와 **G1~G4의 개발 초기 기술 검증**을 위한 요구사항 기준이었다. 기술 검증 통과나 제품 구현 완료를 뜻하지 않는다.
 
@@ -10,12 +10,15 @@ Revision: r1.11; state: 요구·계획 묶음 승인, 구현 진행. 최초 승�
 구현을 재개한다. 승인된 설계도 실제 gate 통과를 뜻하지 않는다.
 개별 답변의 출처는 [추가 결정 기록](../../../.workflow/core-workbench/runs/refine-recovery-20260924/decisions.json)에 보존한다.
 2026-09-24: 사용자가 [C-D53](DECISIONS.md)의 종료 사실→worker 1차 판단→manager 2차 확인→실패 후 조치 순서를 현재 구현 기준으로 추가 승인했다. CW-03의 입력·정리 결함은 계속 미해결이며 delegated cgroup 필수 여부는 정하지 않았다.
+2026-09-25: 이미 결정한 [C-D54](DECISIONS.md)의 A 방식과 [Oracle 검토](../../../.workflow/core-workbench/runs/oracle-review-20260924/REVIEW.md)를 반영해 r1.12/s2.5/p2.5 정식 변경안을 작성했다. 부모 persistent shell의 PID·준비된 cwd·exported environment는 유지하되 자동 실험 전체는 고정 supervisor/subreaper 아래 별도 interpreter 또는 executable에서 실행한다. 입력 반환·signal·subreaper의 결합 동작은 아직 미검증이며 CW-03의 선행 판별 대상이다. 이 문서 변경 요청은 제품 구현 재개 승인이 아니다.
+
+2026-09-26: r1.12/s2.5/p2.5 및 Oracle 보완의 기존 승인을 확인했다. C-D55로 사용자 직접 환경 준비, conda 전용 점검 제외, 관리 대상 후손 추적/unknown 보류, cgroup 비필수와 Root 개발 예산 위임을 확정하고 r1.13/s2.6/p2.6에 반영한다. 과거 승인 전 문구보다 기존 승인 기록과 이번 사용자 결정을 우선한다.
 
 ## 문제, 사용자와 목표
 
 로컬에서 실험하는 사용자가 manager와 목표·코드를 논의하고, worker에게 실행을 맡기며, 실제 terminal의 로그·결과를 한 화면에서 확인한다. 사용자가 허용한 수정·개선 범위에서는 manager가 스스로 판단해 실패 조사·코드 수정·재실행까지 진행한다.
 
-1차는 **manager OMP 하나 + worker OMP 하나 + host persistent terminal 하나**를 연결하는 자체 TUI Workbench다. 두 agent와 직접 대화할 수 있고 사용자는 terminal 제어권도 가져올 수 있다. 외부 Codex CLI 접수·Task Inbox·웹 게시판은 후속 Phase 2다. [결정 이력 C-D01~C-D53](DECISIONS.md)에 사용자 근거를 보존한다. C-D49는 기존 C-D35/C-D44의 일시정지 동작보다 우선한다. C-D50~C-D52는 C-D48의 same-shell handoff와 입력 제어권을 구체화하고 C-D53은 종료 사실과 결과 판단의 책임을 구분한다.
+1차는 **manager OMP 하나 + worker OMP 하나 + host persistent terminal 하나**를 연결하는 자체 TUI Workbench다. 두 agent와 직접 대화할 수 있고 사용자는 terminal 제어권도 가져올 수 있다. 외부 Codex CLI 접수·Task Inbox·웹 게시판은 후속 Phase 2다. [결정 이력 C-D01~C-D54](DECISIONS.md)에 사용자 근거를 보존한다. C-D49는 기존 C-D35/C-D44의 일시정지 동작보다 우선한다. C-D50~C-D52는 C-D48의 same-shell handoff와 입력 제어권을 구체화하고 C-D53은 종료 사실과 결과 판단의 책임을 구분한다. C-D54는 같은 부모 shell을 유지하면서 자동 실험은 별도 실행 단위로 격리하는 A 방식을 확정한다.
 
 ## 공통 용어
 
@@ -34,7 +37,8 @@ Revision: r1.11; state: 요구·계획 묶음 승인, 구현 진행. 최초 승�
 - **Python 중심, Linux 우선.** OS별 PTY·프로세스 처리를 분리해 향후 macOS 대응을 고려한다. Windows는 제외한다. [C-D26/C-D28]
 - **내부 tmux 등 외부 terminal multiplexer 의존 금지.** 사용자의 tmux·herdr 안에서 일반 terminal 앱으로 실행되어야 한다. 라이브러리 재사용은 가능하다. [ADR-0001](../../adr/0001-no-external-multiplexer.md), C-D25
 - **원본 OMP 텍스트 조작 유지:** 한글, 다중 행 붙여넣기, 색상, 도구 출력, slash command, 스크롤, resize. 전체 OMP 기능 호환을 시험 없이 선언하지 않는다. [C-D20/C-D27]
-- **관리된 shell의 지원 경계:** cwd·export·검증된 conda/venv 전환을 지원하고, 비호환 hook·trap 변경과 상태 불명에서는 자동 복귀를 보류한다. 같은 사용자 권한 코드의 고의적 내부 함수 변조·event 위조를 방어하는 보안 경계는 요구하지 않는다. 일반 입력·job 경합 방지는 필수다. [C-D50]
+- **관리된 shell의 지원 경계:** 사용자가 부모 persistent shell에서 환경을 직접 준비한다. 부모 PID·cwd·PATH를 포함한 exported environment를 유지하고 자동 실험 자식에 상속한다. 환경 관리자별 activation/deactivation을 core 기능으로 보장하지 않으며 conda 전용 점검은 제외한다. 자동 실험 전체는 고정 supervisor/subreaper 아래 별도 interpreter 또는 executable에서 실행하며 내부 상태는 부모에 자동 반영하지 않는다. 비호환 hook/trap·입력/job 경합·수명 불명에서는 자동 복귀를 보류한다. 고의적 내부 변조/event 위조를 방어하는 보안 경계는 요구하지 않는다. [C-D50/C-D54/C-D55]
+- **검증 환경:** 준비된 host 환경에서 subreaper 경로를 우선 검증한다. Container 호환성 목표는 유지하지만 이번 계획과 다음 G2 판별에서 Docker runtime 검증은 생략하고 미검증으로 표시한다. Docker 기반 MCP 실행·설치는 계속 금지한다. [C-D54]
 - **실험 실행 시간 상한 없음.** 자동 복구 재시도는 작업당 기본 3회, 최초 실행 제외. 정상 개선 실험과 실패 복구를 구분한다. 주기 점검·정상 peer 대화의 고정 호출 횟수 상한은 없다. [C-D16/C-D19/C-D29/C-D30]
 - **사용자 허용 범위 내 자율성.** 범위 내 명령마다 승인을 반복하지 않는다. 범위 밖 행동, push·merge는 별도 승인이다. [C-D11/C-D14]
 - 제품 실행 가이드는 저장소 개발 workflow와 구분한다. 제품의 local commit 허용은 이번 문서 작업의 commit 권한이 아니다. MCP 서버의 Docker 실행·설치는 금지한다.
@@ -52,7 +56,7 @@ C-AC-01~24와 C-AC-27~34는 인터뷰 결정을 구체화한 수락 기준이다
 | C-AC-05 | Manager가 코드·실행 조건을 준비하고 worker가 지시받은 실험·terminal의 실행·관측·보고를 맡는다. 종료 확인 뒤 worker는 로그·결과 파일의 근거와 미확인을 보고한다. Worker가 코드 수정 필요성을 근거와 함께 manager에게 보고하면 해당 지시는 끝난다. 수정 후 같은 작업을 worker에게 자동 반환하지 않고 manager의 새 지시를 받는다. |
 | C-AC-06 | Manager·worker·terminal을 한 화면에서 함께 보고 입력 영역을 선택한다. UI 포커스와 terminal 입력 권한을 구분한다. |
 | C-AC-07 | 실패 후 실제 종료를 확인하고 승인된 규칙·범위에서 manager가 원인을 해결해 수정·새 worker 지시·재실행을 진행한다. 해결 불가·범위 밖·작업당 기본 3회 복구 재시도 소진 시 자동 재시도를 멈추고 원인·로그/결과 근거·시도·남은 문제를 보고한다. Commit 변경·이름 변경으로 횟수를 초기화하지 않으며 경과 시간만으로 실험을 종료하지 않는다. |
-| C-AC-08 | Terminal 인수 요청 즉시 새 자동 전송을 막고 요청·확인을 구분한다. 이미 전달된 명령은 실행 중·종료·미확인으로 표시하며 인수만으로 실험을 종료하거나 명령을 취소됐다고 표시하지 않는다. 수동 입력은 확인된 현재 대상에 전달한다. 수동 작업 뒤 같은 shell에서 직접 `wb-handoff`를 실행하고 상태를 확인하면, 동일 interpreter가 prompt로 돌아가지 않고 전용 control 경로에서 자동 명령을 기다린다. PID·cwd·환경을 보존하고 오래된 요청을 자동 replay하지 않는다. [C-D48/C-D50~C-D52] |
+| C-AC-08 | Terminal 인수 요청 즉시 새 자동 전송을 막고 요청·확인을 구분한다. 이미 전달된 명령은 실행 중·종료·미확인으로 표시하며 인수만으로 실험을 종료하거나 명령을 취소됐다고 표시하지 않는다. 수동 입력은 확인된 현재 대상에 전달한다. 수동 작업 뒤 같은 부모 shell에서 직접 `wb-handoff`를 실행하고 상태를 확인하면, 부모 interpreter가 prompt로 돌아가지 않고 전용 control 경로에서 기다린다. 자동 실험은 그 아래 고정 supervisor/subreaper가 별도 interpreter 또는 executable로 실행한다. 부모 PID·준비된 cwd·exported environment를 보존하고 오래된 요청을 자동 replay하지 않는다. [C-D48/C-D50~C-D52/C-D54] |
 | C-AC-09 | 운영 가이드에 따라 기준 commit의 별도 실행용 worktree를 준비하고 개발용 경로와 구분한다. 전용 자동 관리·차단 검사 기능의 구현을 요구하는 항목은 아니다. [C-D40] 준비 실패는 worker가 보고하고 manager와 허용 범위에서 해결한다. 해결 불가·추가 권한 필요 시 확인을 요청한다. 사용자 변경을 삭제·stash하거나 개발 디렉터리로 우회하지 않는다. |
 | C-AC-10 | 실행 중 소스·설정을 수정하기 전에 해당 실험의 중단·종료를 확인한다. 중단 요청만 보낸 상태를 종료로 보지 않는다. 외부 editor 쓰기 차단은 보장하지 않는다. |
 | C-AC-11 | Manager는 위임받은 변경을 local commit으로 만들어 실행 기준으로 전달한다. 관련 없는 사용자 변경을 포함하거나 이 권한으로 push·merge하지 않는다. |
@@ -70,13 +74,13 @@ C-AC-01~24와 C-AC-27~34는 인터뷰 결정을 구체화한 수락 기준이다
 | C-AC-23 | OS 재부팅 뒤 기록을 복원하고 환경·실행 조건을 확인한다. 새 실험은 사용자 확인 후 시작한다. 일반 detach나 살아 있는 프로세스의 관측 복구와 구분한다. |
 | C-AC-24 | 작업·명세·결과 요약과 실행용 worktree를 자동 삭제하지 않는다. 수집 원문 로그는 run당 64 MiB, 프로젝트당 512 MiB까지만 저장하고 잘림을 표시한다. 상한 도달 후 실행·화면·관측은 계속한다. 실험이 생성한 결과 파일에는 이 한도를 적용하지 않는다. |
 | C-AC-25 [P1] | 승인 범위와 TaskSpec revision·run을 연결하고 결과를 추적한다. C-D49에 따라 일시정지 요청 즉시 새 자동 지시를 보류하고 manager OMP 진행 중 turn의 중단을 요청한다. 중단 요청·확인·불명 결과를 구분하고, 취소는 기록·결과 파일의 자동 삭제가 아니다. |
-| C-AC-26 [P2] | 사용자가 host shell에서 설정한 cwd·환경이 유지된다. 미제출 입력·REPL·다른 실행·상태 불명 시 자동 입력을 보류한다. 출력의 marker·prompt·무출력으로 lifecycle을 판정하거나 새 shell로 우회하지 않는다. |
+| C-AC-26 [P2] | 사용자가 부모 host shell에서 준비한 cwd·exported environment가 실험 자식에 상속되고 부모에 유지된다. 실험 내부 cd·export는 부모에 자동 반영하지 않는다. 미제출 입력·REPL·다른 실행·수동 후손·상태 불명 시 자동 입력을 보류한다. 출력의 marker·prompt·무출력으로 lifecycle을 판정하거나 새 부모 shell로 우회하지 않는다. |
 | C-AC-27 [C-D36/C-D49] | 자동화 활성 중 worker가 바쁘면 주기 점검을 최신 한 건으로 병합하고 지연을 표시한다. 일시정지 시 pending 점검은 자동 시작하지 않는다. 종료 이벤트는 즉시 기록·표시하고 결과 설명을 위한 새 자동 모델 작업은 일시정지 중 시작하지 않는다. 사용자 대화·입력·승인 대기를 자동 주입이 침범하지 않는다. |
 | C-AC-28 [C-D46] | Metadata 기록 실패 시 저장 복구까지 새 자동 실행을 보류하고 장애를 표시한다. 기존 실험과 가능한 관측은 유지한다. Raw log 저장 장애·상한 도달은 실행 중 프로세스를 중단시키지 않는다. 로그 누락과 마지막 관측 시각을 확인할 수 있다. |
 | C-AC-29 [C-D34] | 사용자가 위임 범위를 승인하고 진행을 지시하면 별도 AUTO ON 조작 없이 자동화를 시작한다. 승인 전에는 자율 실행하지 않는다. |
 | C-AC-30 [C-D49] | 자동화 일시정지 중 manager·worker의 새 자동 모델 작업과 1분 worker 모델 점검을 시작하지 않는다. Workbench의 로그·프로세스 상태 수집과 기존 host 실험은 계속한다. 사용자는 직접 조사·수정·rollback하거나 agent에게 명시적으로 수동 지시할 수 있으며, 이 조작은 자동화 재개가 아니다. 실험 종료는 별도 조작이다. |
 | C-AC-31 [C-D38] | 실행 중 명세 변경은 기본적으로 다음 실행에 새 revision으로 적용한다. 현재 실행과 과거 명세·결과 이력은 유지한다. 현재 실행에 적용하라는 지시가 있으면 중단·종료 확인 후 수정·재실행한다. 즉시 중단·권한 철회는 다음 실행까지 미루지 않는다. |
-| C-AC-32 [C-D43] | 사용자가 선택한 기존 conda/venv를 재사용하고 Workbench 자체 환경과 분리한다. 새 환경 생성·패키지 변경은 위임 범위에서만 수행한다. 작업별 환경 생성을 강제하지 않는다. |
+| C-AC-32 [C-D43/C-D55] | 사용자가 terminal에서 직접 준비한 기존 환경의 cwd·PATH·exported environment를 실험에 상속하고 Workbench 자체 환경과 분리한다. 환경 생성·패키지 변경은 별도 위임 범위에서만 수행하며 작업별 환경 생성을 강제하지 않는다. conda 전용 점검과 환경 관리자별 activation/deactivation 보장은 완료 조건에서 제외한다. |
 | C-AC-33 [C-D49] | 일시정지 요청 때 manager OMP의 진행 중 turn에 Esc와 같은 중단을 요청하고 실제 중단 확인을 별도로 표시한다. 도구 A 완료 대기나 준비된 도구 B의 별도 차단을 보장하지 않는다. 마지막 작업·확인된 파일 변경·실행 중 프로세스·미확인 도구 결과를 표시한다. 명시적 재개 시 실제 파일·도구 결과·terminal 프로세스·작업 상태와 현재 승인 범위를 대조하며 중단 명령·대기 요청을 자동 재실행하지 않는다. UI 버튼·단축키 위치는 미결정이다. |
 | C-AC-34 [C-D45] | 일반 중단에 반응하지 않으면 강제 종료가 위임 범위에 포함되고 대상 프로세스를 확인할 수 있는 경우에만 manager 판단으로 강제 종료한다. 그렇지 않으면 확인을 요청한다. 실제 종료 확인 전 수정·재실행하지 않으며 사용자 제어권·일시정지 규칙을 우회하지 않는다. |
 
@@ -84,28 +88,30 @@ C-AC-01~24와 C-AC-27~34는 인터뷰 결정을 구체화한 수락 기준이다
 
 | 상황 | 관측해야 할 동작 |
 |---|---|
-| 정상 cd/export·검증된 환경 전환 뒤 handoff | 같은 Bash/sh의 PID·cwd·환경을 유지해 자동 제어 대기로 들어가고, 승인된 새 명령 하나의 수락·시작·종료를 구분한다. |
+| 사용자 직접 환경 준비(cd/export/PATH) 뒤 handoff | 같은 부모 Bash/sh의 PID·cwd·exported environment를 유지해 자동 제어 대기로 들어가고, 고정 supervisor가 별도 실험 interpreter 또는 executable을 시작해 요청 수락·실험 시작·주 프로그램 반환·전체 후손 종료·입력 반환을 구분한다. |
 | 비호환 hook·trap 또는 미제출 입력·job·상태 불명 | 자동 복귀를 보류하고 이유를 표시한다. 정상 사례까지 항상 막는 후보는 수락하지 않는다. |
 | 인수 요청과 아직 보내지 않은 자동 요청이 겹침 | 새 전송을 막고 인수 뒤 그 요청을 자동 재실행하지 않는다. |
 | 인수 요청 전에 이미 전달한 명령의 상태가 불명 | 인수 요청과 확인을 구분하고 해당 명령을 미확인으로 표시한다. 취소·종료로 추정하거나 재전송하지 않는다. |
 | Foreground 실험 실행 중 사용자 인수 | 실험을 그대로 두고 확인된 현재 대상에 수동 입력을 전달한다. 인수 확인 자체에 실험 종료나 shell prompt 복귀를 요구하지 않는다. |
 | 현재 입력 대상도 불명 | 대상 확인 전 수동 입력을 보류하고 이유를 표시한다. 기존 실험은 인수 요청만으로 종료하지 않는다. |
+| 실험 주 프로그램은 끝났지만 후손이 생존 | 전체 실험 수명 종료로 표시하지 않고 후손 종료·회수 또는 `unknown` 판정 전 수정·재실행을 보류한다. |
+| 실험 종료 직후 이전 writer의 입력이 남음 | Supervisor의 입력 반환 장벽에서 key/paste/부분 write/query reply를 포함한 writer를 회수·차단한다. 같은 부모 shell의 실제 읽기·prompt 복귀와 새 정상 입력 처리까지 진행한 뒤 이전 입력의 marker 부작용이 없음을 확인하고, 알려진 유출 후보에서는 marker가 생기는 음성 대조를 둔다. `TCIFLUSH`만으로 shell parser·Workbench queue까지 비었다고 가정하지 않는다. |
 
 명시적 `wb-handoff`는 수동 개입 뒤 자동 제어로 반환하는 절차다. 최초 자동화 시작은
 기존 C-AC-29에 따라 위임 범위 승인과 진행 지시로 시작한다.
 
 ## 결정과 근거
 
-[DECISIONS.md](DECISIONS.md)에 C-D01~C-D53과 사용자 답변을 보존한다. [ADR-0001](../../adr/0001-no-external-multiplexer.md)은 외부 multiplexer 금지의 대안·비용을, [ADR-0002](../../adr/0002-managed-shell-control-wait.md)는 관리된 same-shell 자동 제어 대기의 방향·대안·미검증 경계를 설명한다. 다음은 세부 정책의 검토 상태다. 개별 합의와 남은 제안을 구분한다.
+[DECISIONS.md](DECISIONS.md)에 C-D01~C-D54와 사용자 답변을 보존한다. [ADR-0001](../../adr/0001-no-external-multiplexer.md)은 외부 multiplexer 금지의 대안·비용을, [ADR-0002](../../adr/0002-managed-shell-control-wait.md)는 부모 same-shell control 대기와 별도 실험 supervisor/subreaper의 방향·대안·미검증 경계를 설명한다. 다음은 세부 정책의 검토 상태다. 개별 합의와 남은 제안을 구분한다.
 
 - **P1 — 위임과 완료:** 승인 범위 안에서 manager가 실행 명세를 확정하고 완료를 판단한다. Task ID·revision·run을 구분한다. 시작은 C-D34, 일시정지와 worker 역할은 C-D49, manager의 완료 확정과 명세 변경의 다음 실행 적용은 C-D37/C-D38을 따른다. C-D35/C-D44의 충돌하는 일시정지 동작은 이력으로 남긴다. 상세 식별·취소 기록 형식은 설계안으로 계획 단계에서 구체화한다. 상세는 동작 규약 §1.
-- **P2 — Host shell과 worktree:** 하나의 실제 persistent shell에서 실행하고 app/실험 환경을 분리한다. C-D43에 따라 기존 실험 환경을 재사용한다. C-D50~C-D52의 관리된 shell·control 대기·인수 요청/확인 구분을 적용하며 실제 실행 경계를 검증한다. 강제 종료에는 C-D45의 권한·대상 확인 조건을 적용한다. Commit/worktree 준비 실패는 C-D40에 따라 manager와 worker가 범위 내에서 해결하고, 해결 불가·추가 권한 필요 시 사용자에게 묻는다. 상세는 §2~3.
+- **P2 — Host shell과 worktree:** 하나의 실제 persistent 부모 shell에서 준비 환경을 유지하고 app/실험 환경을 분리한다. C-D43에 따라 기존 실험 환경을 재사용하며 C-D54에 따라 자동 실험은 고정 supervisor/subreaper 아래 별도 실행 단위로 수행한다. C-D50~C-D52의 control 대기·인수 요청/확인 구분을 적용하고 입력 반환·signal·후손 수명을 결합 검증한다. 강제 종료에는 C-D45의 권한·대상 확인 조건을 적용한다. Commit/worktree 준비 실패는 C-D40에 따라 manager와 worker가 범위 내에서 해결하고, 해결 불가·추가 권한 필요 시 사용자에게 묻는다. 상세는 §2~3.
 - **P3 — 점검 경합 [C-D36 합의]:** 사용자 대화 우선, 60초 점검 요청, worker busy 시 최신 한 건 병합, 실제 마지막 점검 시각 표시, 종료 이벤트 즉시 기록·표시. 점검의 정확한 60초 내 완료를 보장하지는 않는다. 상세는 §4.
 - **P4 — 장애와 호환 범위:** C-D46에 따라 metadata 저장 실패 시 새 자동 실행을 보류하며 기존 실행·관측은 유지한다. Raw log만 저장 실패하면 누락을 표시하고 실행은 계속한다. C-D41/C-D42에 따라 기본/login shell과 관계없이 전용 persistent shell을 시작한다. Bash 5.x를 우선 검증하며 Bash 부재 시 sh에서도 핵심 흐름을 지원·검증한다. zsh adapter는 현재 범위 밖이다. 실제 shell별 검증 통과 전 지원 완료를 선언하지 않는다. 상세는 §3, §5~6.
 
 ## 구현 방향과 검증 의도
 
-다음 순서는 p2.3 계획을 만들 때 사용한 기술 검증 방향이다. 현재 실행 ticket·의존·파일 소유권은 C-D53을 반영한 [PLAN p2.4](PLAN.json)에 확정돼 있다. 일정은 여기서 확정하지 않는다.
+다음 순서는 기존 p2.5의 기술 검증 방향을 유지한다. 실행 ticket·의존·파일 소유권의 원본은 C-D55를 반영한 [PLAN p2.6](PLAN.json)이다. 다음 구현 세션은 현재 상태·회계·유효 근거를 대조한 뒤 재개한다. 일정은 여기서 확정하지 않는다.
 
 추가 진단의 해결 방향은 아래와 같다. 각 항목의 실험과 판정 기준은
 [DIAGNOSIS.md](DIAGNOSIS.md)에 구체화했다. 기술 가정의 실제 통과 여부는
@@ -113,14 +119,14 @@ C-AC-01~24와 C-AC-27~34는 인터뷰 결정을 구체화한 수락 기준이다
 
 | 문제 | 이번 해결 방향 | 다음 구현으로 넘어갈 근거 |
 |---|---|---|
-| G2 실행 경계 | 기존 READY 검사 보강에서 같은 interpreter의 control 대기로 전환한다. 정상 입력·환경 흐름과 비호환 설정 보류를 함께 검증한다. | 실제 Bash/dash에서 정상 실행, 입력·job 경합, 인수 중 요청 상태와 replay 금지의 최소 실험이 성립해야 한다. 미확인이면 제품 수정을 확대하지 않는다. |
+| G2 실행 경계 | 부모 same-shell control 대기는 유지하고 실험 script의 직접 eval은 폐기한다. 고정 supervisor/subreaper가 별도 interpreter 또는 executable을 시작하며 입력 반환 장벽·signal/process group·전체 후손 수명을 하나의 합성 probe에서 검증한다. | 실제 Bash/dash에서 return·exec·pipeline·명령 치환, dd/한 write의 handoff+후속 줄, foreground 종료 경합, Ctrl-C/Ctrl-Z·재개, double-fork/setsid, supervisor 장애와 수동 daemon 반례가 함께 성립해야 한다. 미확인이면 제품 수정을 확대하지 않는다. |
 | G1 화면·입력 | 일반 resize 뒤 배치·입력·승인 상태를 직접 판정하고 실제 3-pane 조합으로 확인한다. | 단일 marker나 SIGCONT redraw가 아닌 현재 크기의 화면·조작 근거가 필요하다. 외부 terminal 호환과 후속 detach 통합의 책임을 구분한다. |
 | G3 전달·중단 | 실제 TUI composer/session 전환과 mode별 API 전달 결과를 확인한다. | API 호출 복귀, OMP의 메시지 처리 관측, 업무 완료를 구분한다. RPC 근거를 TUI 초안 보존으로 대체하지 않는다. C-D49는 유지한다. |
 | 실행 기준·검증 소유 | 현재 입력 manifest, 유효한 partial 근거, gate와 후속 통합의 책임을 대조한다. | 기존 완료 작업과 ticket ID를 보존하고 실제 변경분만 재계획한다. 다음 배정 전 필요한 독립 검증 예산을 산정한다. |
 
 | 순서 | 목표와 통과 근거 |
 |---|---|
-| M0 기술 검증 | G1~G4를 먼저 검증한다. Python frontend/backend 수명 분리, 원본 OMP 두 개와 host terminal, 안전한 same-shell 실행의 가능성을 확인한다. 실패한 가정 위에 후속 기능을 쌓지 않는다. |
+| M0 기술 검증 | G1~G4를 먼저 검증한다. Python frontend/backend 수명 분리, 원본 OMP 두 개와 host terminal, 부모 same-shell 준비 상태와 별도 실험 supervisor/subreaper의 안전한 결합 가능성을 확인한다. 실패한 가정 위에 후속 기능을 쌓지 않는다. |
 | M1 조작 가능한 Workbench | 세 영역·입력 제어권·실행 lifecycle·자체 detach/재접속을 연결한다. 실험 프로세스와 UI 수명, 수동 제어 복원을 검증한다. |
 | M2 작업 하나의 전체 흐름 | 사용자 목표 → manager 명세/코드/commit → worker 실행용 worktree → 실행/1분 점검 → 결과 보고/완료 판단. 승인 범위와 같은 작업의 재시도 이력을 검증한다. |
 | M3 복구와 출시 검증 | 무출력 정상 작업, 실패/중단 실패, 모델 오류, busy 점검, 수동 인수, 재시작/재부팅, 로그 한도·저장 장애를 검증한다. 일반 terminal·tmux·herdr 호환 결과와 지원 버전을 기록한다. |
@@ -145,14 +151,14 @@ C-AC-01~24와 C-AC-27~34는 인터뷰 결정을 구체화한 수락 기준이다
 - 해결: 기본/login shell과 관계없이 전용 persistent shell 시작(C-D41), Bash 우선·sh 최소 지원으로 확장(C-D42).
 - 해결: 기존 실험 환경 재사용(C-D43), 허용된 대상만 강제 종료(C-D45), 저장 실패 시 새 자동 실행 보류(C-D46). C-D35/C-D44의 이전 일시정지 동작은 C-D49로 대체했다.
 - 사용자 입력 경합은 C-D10/C-D24와 보충 결정 C-D47/C-D48, 추가 진단의 C-D50~C-D52를 따른다. 입력 내용·실행 상태가 불명확하면 보류하고, 준비 완료 후 현재 명세·권한을 다시 확인한다. 오래된 명령을 자동 replay하지 않는다.
-- C-D50~C-D53의 정책과 r1.10 묶음 구현은 승인됐다. C-D53은 이 구현 중 책임 경계 개정이다. 아래 기술 가정은 개발 초기 검증 과제로 유지하며, 미검증 가정에 의존하는 구현은 해당 게이트를 통과하기 전 확정하지 않는다.
+- C-D50~C-D54와 r1.12/s2.5/p2.5 구현은 승인됐다. 이번 C-D55 개정은 승인된 범위의 환경·수명 관측 경계와 개발 예산을 정리한다. 미검증 가정에 의존하는 구현은 해당 게이트를 통과하기 전 확정하지 않는다.
 
 전체 검토에는 아래 **기술 검증으로의 보류**도 포함된다. 정책을 다시 임의로 선택하는 권한이 아니다.
 
 | ID | 확인할 사항 | 실패하거나 미확인일 때 |
 |---|---|---|
 | G1 | Python/Textual/VT 조합에서 원본 OMP TUI, 한글·붙여넣기·키·resize·화면 복원의 fidelity, 2 MiB paste 전체 거절·이유 표시, 최소 화면 크기와 외부 terminal matrix | 관련 UI 통합을 차단한다. tmux 내부 사용·headless UI로 요구를 축소하지 않는다. 다른 사용자 동작 변경은 재합의한다. |
-| G2 | C-D50의 관리된 Bash 5.x 및 실제 sh에서 same-shell dispatch, `wb-handoff` 뒤 동일 interpreter의 control 대기·입력 경합·job control·명시적 lifecycle. Bash 부재 시 sh 시작도 검증. zsh는 후속 | 실패한 경로를 지원 완료로 표시하거나 실행 중 다른 shell로 우회하지 않는다. 기존 내부 변조 사례는 C-D50의 신뢰 범위와 대조하되 정상 경합의 실패를 면제하지 않는다. sh 지원을 핵심 흐름보다 축소하려면 별도 합의한다. 지원 조합은 실제 시험으로 고정한다. |
+| G2 | C-D50/C-D54의 관리된 Bash 5.x 및 실제 sh에서 부모 control 대기, 별도 실험 interpreter/executable, 고정 supervisor/subreaper, 입력 반환 장벽, signal/process group, 전체 후손 종료/unknown을 결합 검증한다. Bash 부재 시 sh 시작도 검증하며 zsh는 후속이다. | 실패한 경로를 지원 완료로 표시하거나 실행 중 다른 부모 shell로 우회하지 않는다. 단독 subreaper·signal probe 결과를 합산해 통합 성공으로 보지 않는다. 입력 유출·signal·수명·수동 잔존 중 하나라도 불명확하면 자동 후속 실행을 보류한다. sh 지원을 축소하거나 사용자 동작을 바꿔야 하면 별도 합의한다. 이번 Docker runtime 근거는 pending으로 유지한다. |
 | G3 | 고정 OMP 버전의 공개 extension, 독립 두 프로세스 연결, session binding·중복 방지·비침범 메시지 전달 | Mailbox/자동화 연결을 차단한다. Process-global hub만으로 cross-process 전달을 가정하지 않는다. |
 | G4 | Backend와 UI 수명 분리, detach 중 세 PTY/agent/점검 유지, 실제 프로세스 대조·재접속 | 실행 지속·복구 기능을 완료로 표시하지 않는다. 상태를 알 수 없으면 확인 대기로 유지한다. |
 
@@ -160,10 +166,10 @@ C-AC-01~24와 C-AC-27~34는 인터뷰 결정을 구체화한 수락 기준이다
 
 ## 인계
 
-사용자가 `r1.10 + s2.3/p2.3 + 기존 CW-01~16` 묶음을 명시적 implement 요청으로 승인한 뒤 C-D53의 책임 경계를 추가 승인했다. 현재 r1.11/s2.4/p2.4는 ticket ID·dependency를 유지한 정책 개정이다.
+현재 기준은 기존 r1.12/s2.5/p2.5 승인에 C-D55를 반영한 r1.13/s2.6/p2.6이다. [결정 문서](DECISION-2026-09-26.md), [다음 세션 프롬프트](START-IMPLEMENT.md)와 새 승인 record를 따른다. 승인 범위는 보존하되 이번 문서화 작업에서 구현은 시작하지 않는다.
 최초 승인 byte와 C-D53 개정 byte의 digest는 현재 run의 별도 승인 기록에 보존한다.
 CW-01 완료와 유효한 기존 검증, 안정된 ticket ID를 유지한다.
 
-구현의 첫 과제는 [CW-03의 최소 판별 실험](tickets/CW-03.md)이며,
-[PLAN](PLAN.json)의 자원·선행 조건을 지켜 G1/G3의 독립 작업도 진행한다.
+다음 구현 세션은 [CW-03](tickets/CW-03.md)의 기존 제한된 합성 판별 근거를 대조한 뒤 남은 input-jobs·takeover·장애·suspend/resume·수명 matrix를 진행한다.
+[PLAN](PLAN.json)의 자원·선행 조건을 지켜 G1/G3의 독립 작업도 진행한다. conda 전용 점검은 제외하며 Docker runtime 생략은 유지한다. 누적 220회를 보존한 회계 전환과 Root의 유한 예산 배정은 dispatch 전에 완료한다.
 완료·실패/미확인은 gate item과 최종 통합 근거로 판정한다.

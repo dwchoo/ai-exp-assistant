@@ -1,0 +1,598 @@
+{
+  "schema_version": 1,
+  "invocation": "cw05-g4-test-01",
+  "role": "test_designer",
+  "unit": "V-CW-05-p2.6-current",
+  "task_result": "needs_reroute",
+  "candidate_before": "64966787656971b9d1c588358e30becdeaee4d52af523990bb1837c5c8658339",
+  "candidate_after": "0e9e6a1bed9e65e8b73f4c48bfb271a89a75d2027aff51419f1a4b7a3ebe0b17",
+  "baseline": ".workflow/core-workbench/runs/implement-p2.6-20260927/cw05-test-checkpoint.json",
+  "requirements_sha256": "903f1d732f9a1223dd65ebad4bfa95d6636fe21ad6909a1db468ee81f85dbbd4",
+  "after_snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw05-g4-test-after.json",
+  "scope_audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/scope-audit-cw05-g4-test.json",
+  "changed_files": [
+    "tests/contracts/test_ports_v2_independent.py",
+    "tests/gates/g4_evidence/test_aggregate_independent.py",
+    "tests/gates/g4_lifetime/test_independent_boundaries.py"
+  ],
+  "new_independent_test_methods": 13,
+  "checks": [
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g4_lifetime:tests/gates/g3_omp /tmp/cw02-g1-venv/bin/python tests/gates/g4_lifetime/live_detach_probe.py",
+      "exit_code": 0,
+      "candidate": "64966787656971b9d1c588358e30becdeaee4d52af523990bb1837c5c8658339",
+      "evidence_level": "runtime",
+      "elapsed_detached_seconds": 62.08245431794785
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g4_lifetime:tests/gates/g3_omp /tmp/cw02-g1-venv/bin/python tests/gates/g4_lifetime/live_detach_probe.py --paused",
+      "exit_code": 0,
+      "candidate": "64966787656971b9d1c588358e30becdeaee4d52af523990bb1837c5c8658339",
+      "evidence_level": "runtime",
+      "elapsed_detached_seconds": 62.06037111696787
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g4_lifetime /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/gates/g4_lifetime -v",
+      "exit_code": 1,
+      "tests": 8,
+      "failures": 7,
+      "duration_seconds": 0.135
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g4_evidence /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/gates/g4_evidence -v",
+      "exit_code": 1,
+      "tests": 8,
+      "failures": 3,
+      "duration_seconds": 0.049
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g4_lifetime /tmp/cw02-g1-venv/bin/python -m unittest -v tests/gates/g4_lifetime/test_independent_boundaries.py",
+      "exit_code": 1,
+      "tests": 6,
+      "failures": 7,
+      "duration_seconds": 0.133
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g4_evidence /tmp/cw02-g1-venv/bin/python -m unittest -v tests/gates/g4_evidence/test_aggregate_independent.py",
+      "exit_code": 1,
+      "tests": 4,
+      "failures": 3,
+      "duration_seconds": 0.015
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/contracts -v",
+      "exit_code": 0,
+      "tests": 19,
+      "duration_seconds": 0.246
+    },
+    {
+      "command": "node --experimental-strip-types --test tests/gates/harness/contracts.test.ts tests/gates/harness/ports-v2.test.ts",
+      "exit_code": 0,
+      "tests": 14,
+      "duration_seconds": 0.101
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest -v tests/gates/g2_shell/test_return_deadline.py",
+      "exit_code": 0,
+      "tests": 2,
+      "duration_seconds": 5.486
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0
+    },
+    {
+      "command": "pgrep -af '[/]tmp/cw05-(g4|deadline)-'",
+      "exit_code": 1,
+      "meaning": "Expected no matching process."
+    }
+  ],
+  "runtime_observations": {
+    "normal": {
+      "after": {
+        "agent_end": 1,
+        "agent_start": 1,
+        "attached": true,
+        "backend_pid": 3977584,
+        "control_mode": "managed_control_wait",
+        "deliveries": 1,
+        "experiment_pid": 3977592,
+        "host_main_exit": null,
+        "host_observations": 1239,
+        "host_running": true,
+        "host_unknowns": [],
+        "omp_pids": {
+          "manager": 3977593,
+          "worker": 3977595
+        },
+        "omp_sessions": {
+          "manager": [
+            "01a0e47d-c28b-7381-94b0-0783b66a3512",
+            1
+          ],
+          "worker": [
+            "01a0e47d-c28e-70a1-98ec-702494bbc960",
+            1
+          ]
+        },
+        "owned_alive": true,
+        "owner": "manager",
+        "owner_epoch": 1,
+        "parent_shell_pid": 3977589,
+        "provider_requests": {
+          "manager": 0,
+          "worker": 1
+        },
+        "semantic_match": true,
+        "supervisor_pid": 3977591,
+        "ticks": 1,
+        "user_owner": "user",
+        "user_owner_epoch": 1,
+        "wake_status": "api_returned"
+      },
+      "backend_cleanup": {
+        "backend_pid": 3977584,
+        "delivered": {
+          "ack": {
+            "kind": "api_ack",
+            "messageId": "2a592e9e-aec7-4a01-89f6-60f310e83a7c",
+            "modelProcessed": false,
+            "requestId": "22fe0890-54b1-4165-9fa9-8da83e3cbb81",
+            "status": "api_accepted"
+          },
+          "message_id": "2a592e9e-aec7-4a01-89f6-60f310e83a7c"
+        },
+        "last": {
+          "agent_end": 1,
+          "agent_start": 1,
+          "attached": true,
+          "backend_pid": 3977584,
+          "control_mode": "managed_control_wait",
+          "deliveries": 1,
+          "experiment_pid": 3977592,
+          "host_main_exit": null,
+          "host_observations": 1240,
+          "host_running": true,
+          "host_unknowns": [],
+          "omp_pids": {
+            "manager": 3977593,
+            "worker": 3977595
+          },
+          "omp_sessions": {
+            "manager": [
+              "01a0e47d-c28b-7381-94b0-0783b66a3512",
+              1
+            ],
+            "worker": [
+              "01a0e47d-c28e-70a1-98ec-702494bbc960",
+              1
+            ]
+          },
+          "owned_alive": true,
+          "owner": "manager",
+          "owner_epoch": 1,
+          "parent_shell_pid": 3977589,
+          "provider_requests": {
+            "manager": 0,
+            "worker": 1
+          },
+          "semantic_match": true,
+          "supervisor_pid": 3977591,
+          "ticks": 1,
+          "user_owner": "user",
+          "user_owner_epoch": 1,
+          "wake_status": "api_returned"
+        },
+        "owned_pids": [
+          3977589,
+          3977591,
+          3977592,
+          3977593,
+          3977595
+        ],
+        "paused": false,
+        "pty_drain": [
+          {
+            "bytes": 129051,
+            "role": "manager"
+          },
+          {
+            "bytes": 133208,
+            "role": "worker"
+          }
+        ],
+        "residue": [],
+        "result": "observed"
+      },
+      "backend_exit": 0,
+      "before": {
+        "agent_end": 0,
+        "agent_start": 0,
+        "attached": true,
+        "backend_pid": 3977584,
+        "control_mode": "managed_control_wait",
+        "deliveries": 0,
+        "experiment_pid": 3977592,
+        "host_main_exit": null,
+        "host_observations": 1,
+        "host_running": true,
+        "host_unknowns": [],
+        "omp_pids": {
+          "manager": 3977593,
+          "worker": 3977595
+        },
+        "omp_sessions": {
+          "manager": [
+            "01a0e47d-c28b-7381-94b0-0783b66a3512",
+            1
+          ],
+          "worker": [
+            "01a0e47d-c28e-70a1-98ec-702494bbc960",
+            1
+          ]
+        },
+        "owned_alive": true,
+        "owner": "manager",
+        "owner_epoch": 1,
+        "parent_shell_pid": 3977589,
+        "provider_requests": {
+          "manager": 0,
+          "worker": 0
+        },
+        "semantic_match": false,
+        "supervisor_pid": 3977591,
+        "ticks": 0,
+        "user_owner": "user",
+        "user_owner_epoch": 1,
+        "wake_status": "unarmed"
+      },
+      "detached": {
+        "agent_end": 0,
+        "agent_start": 0,
+        "attached": false,
+        "backend_pid": 3977584,
+        "control_mode": "managed_control_wait",
+        "deliveries": 0,
+        "experiment_pid": 3977592,
+        "host_main_exit": null,
+        "host_observations": 3,
+        "host_running": true,
+        "host_unknowns": [],
+        "omp_pids": {
+          "manager": 3977593,
+          "worker": 3977595
+        },
+        "omp_sessions": {
+          "manager": [
+            "01a0e47d-c28b-7381-94b0-0783b66a3512",
+            1
+          ],
+          "worker": [
+            "01a0e47d-c28e-70a1-98ec-702494bbc960",
+            1
+          ]
+        },
+        "owned_alive": true,
+        "owner": "manager",
+        "owner_epoch": 1,
+        "parent_shell_pid": 3977589,
+        "provider_requests": {
+          "manager": 0,
+          "worker": 0
+        },
+        "semantic_match": false,
+        "supervisor_pid": 3977591,
+        "ticks": 0,
+        "user_owner": "user",
+        "user_owner_epoch": 1,
+        "wake_status": "armed"
+      },
+      "elapsed_detached_seconds": 62.08245431794785,
+      "paused": false,
+      "result": "passed",
+      "same_identities": true,
+      "stderr_bytes": 0,
+      "version": "omp/18.2.10",
+      "wake_ok": true
+    },
+    "paused": {
+      "after": {
+        "agent_end": 0,
+        "agent_start": 0,
+        "attached": true,
+        "backend_pid": 3977678,
+        "control_mode": "managed_control_wait",
+        "deliveries": 0,
+        "experiment_pid": 3977689,
+        "host_main_exit": null,
+        "host_observations": 1241,
+        "host_running": true,
+        "host_unknowns": [],
+        "omp_pids": {
+          "manager": 3977690,
+          "worker": 3977692
+        },
+        "omp_sessions": {
+          "manager": [
+            "01a0e47d-c880-7013-9f11-d7084ea99121",
+            1
+          ],
+          "worker": [
+            "01a0e47d-c84f-7744-a6b4-186d08dbbf96",
+            1
+          ]
+        },
+        "owned_alive": true,
+        "owner": "manager",
+        "owner_epoch": 1,
+        "parent_shell_pid": 3977686,
+        "provider_requests": {
+          "manager": 0,
+          "worker": 0
+        },
+        "semantic_match": false,
+        "supervisor_pid": 3977688,
+        "ticks": 1,
+        "user_owner": "user",
+        "user_owner_epoch": 1,
+        "wake_status": "held_paused"
+      },
+      "backend_cleanup": {
+        "backend_pid": 3977678,
+        "delivered": {},
+        "last": {
+          "agent_end": 0,
+          "agent_start": 0,
+          "attached": true,
+          "backend_pid": 3977678,
+          "control_mode": "managed_control_wait",
+          "deliveries": 0,
+          "experiment_pid": 3977689,
+          "host_main_exit": null,
+          "host_observations": 1242,
+          "host_running": true,
+          "host_unknowns": [],
+          "omp_pids": {
+            "manager": 3977690,
+            "worker": 3977692
+          },
+          "omp_sessions": {
+            "manager": [
+              "01a0e47d-c880-7013-9f11-d7084ea99121",
+              1
+            ],
+            "worker": [
+              "01a0e47d-c84f-7744-a6b4-186d08dbbf96",
+              1
+            ]
+          },
+          "owned_alive": true,
+          "owner": "manager",
+          "owner_epoch": 1,
+          "parent_shell_pid": 3977686,
+          "provider_requests": {
+            "manager": 0,
+            "worker": 0
+          },
+          "semantic_match": false,
+          "supervisor_pid": 3977688,
+          "ticks": 1,
+          "user_owner": "user",
+          "user_owner_epoch": 1,
+          "wake_status": "held_paused"
+        },
+        "owned_pids": [
+          3977686,
+          3977688,
+          3977689,
+          3977690,
+          3977692
+        ],
+        "pause_ack": "paused",
+        "paused": true,
+        "pty_drain": [
+          {
+            "bytes": 135868,
+            "role": "manager"
+          },
+          {
+            "bytes": 138853,
+            "role": "worker"
+          }
+        ],
+        "residue": [],
+        "result": "observed"
+      },
+      "backend_exit": 0,
+      "before": {
+        "agent_end": 0,
+        "agent_start": 0,
+        "attached": true,
+        "backend_pid": 3977678,
+        "control_mode": "managed_control_wait",
+        "deliveries": 0,
+        "experiment_pid": 3977689,
+        "host_main_exit": null,
+        "host_observations": 1,
+        "host_running": true,
+        "host_unknowns": [],
+        "omp_pids": {
+          "manager": 3977690,
+          "worker": 3977692
+        },
+        "omp_sessions": {
+          "manager": [
+            "01a0e47d-c880-7013-9f11-d7084ea99121",
+            1
+          ],
+          "worker": [
+            "01a0e47d-c84f-7744-a6b4-186d08dbbf96",
+            1
+          ]
+        },
+        "owned_alive": true,
+        "owner": "manager",
+        "owner_epoch": 1,
+        "parent_shell_pid": 3977686,
+        "provider_requests": {
+          "manager": 0,
+          "worker": 0
+        },
+        "semantic_match": false,
+        "supervisor_pid": 3977688,
+        "ticks": 0,
+        "user_owner": "user",
+        "user_owner_epoch": 1,
+        "wake_status": "unarmed"
+      },
+      "detached": {
+        "agent_end": 0,
+        "agent_start": 0,
+        "attached": false,
+        "backend_pid": 3977678,
+        "control_mode": "managed_control_wait",
+        "deliveries": 0,
+        "experiment_pid": 3977689,
+        "host_main_exit": null,
+        "host_observations": 3,
+        "host_running": true,
+        "host_unknowns": [],
+        "omp_pids": {
+          "manager": 3977690,
+          "worker": 3977692
+        },
+        "omp_sessions": {
+          "manager": [
+            "01a0e47d-c880-7013-9f11-d7084ea99121",
+            1
+          ],
+          "worker": [
+            "01a0e47d-c84f-7744-a6b4-186d08dbbf96",
+            1
+          ]
+        },
+        "owned_alive": true,
+        "owner": "manager",
+        "owner_epoch": 1,
+        "parent_shell_pid": 3977686,
+        "provider_requests": {
+          "manager": 0,
+          "worker": 0
+        },
+        "semantic_match": false,
+        "supervisor_pid": 3977688,
+        "ticks": 0,
+        "user_owner": "user",
+        "user_owner_epoch": 1,
+        "wake_status": "armed"
+      },
+      "elapsed_detached_seconds": 62.06037111696787,
+      "paused": true,
+      "result": "passed",
+      "same_identities": true,
+      "stderr_bytes": 0,
+      "version": "omp/18.2.10",
+      "wake_ok": true
+    }
+  },
+  "defects": [
+    {
+      "id": "G4-LIFETIME-IDENTITY-FALSE-PASS",
+      "location": "tests/gates/g4_lifetime/live_detach_probe.py:run",
+      "evidence": "Frontend protocol doubles returned passed with same manager/worker PID, same parent/supervisor PID, substituted backend PID differing from Popen.pid, or missing worker PID. The otherwise-valid evidence preserves all before/detached/after values; equality alone is insufficient.",
+      "test": "LifetimeEvidenceBoundaryTests.test_distinct_and_bound_process_identities_are_required",
+      "failing_subcases": 4,
+      "required_boundary": "Exactly distinct valid backend/OMP/parent/supervisor/experiment identities, actual backend PID binding."
+    },
+    {
+      "id": "G4-LIFETIME-LEASE-FALSE-PASS",
+      "location": "tests/gates/g4_lifetime/live_detach_probe.py:run",
+      "evidence": "Passed despite detached.attached=true or reattached.attached=false.",
+      "test": "LifetimeEvidenceBoundaryTests.test_frontend_detach_and_reattach_must_really_change_display_lease",
+      "failing_subcases": 2,
+      "required_boundary": "Actual detach and reattach lease states, not identity equality alone."
+    },
+    {
+      "id": "G4-LIFETIME-RESIDUE-MASKING",
+      "location": "tests/gates/g4_lifetime/live_detach_probe.py:run",
+      "evidence": "A real test-owned sleep process remained alive and was explicitly named in backend_cleanup.owned_pids; empty residue=[] still yielded passed. The adversarial sleep was terminated/waited in finally.",
+      "test": "LifetimeEvidenceBoundaryTests.test_live_owned_residue_cannot_be_masked_by_empty_backend_residue_flag",
+      "required_boundary": "Independent OS cleanup verification instead of trusting an empty residue field."
+    },
+    {
+      "id": "G4-EVIDENCE-EMPTY-REQUIRED-CONTEXT",
+      "location": "tests/gates/harness/aggregate.py:validate",
+      "evidence": "With empty required items/evidence context, validate([], expected=context) returns [] without rejection.",
+      "test": "AggregateAdversarialTests.test_empty_required_context_cannot_be_a_gate_certificate",
+      "required_boundary": "Invalid empty verifier context cannot certify the approved required gate set."
+    },
+    {
+      "id": "G4-EVIDENCE-EMPTY-SCHEMA-ONLY",
+      "location": "tests/gates/harness/aggregate.py:validate",
+      "evidence": "All 25 records are accepted with their pinned evidence file empty or containing only schemaVersion, despite runtime item labels; digests match the intentionally invalid pinned context.",
+      "test": "AggregateAdversarialTests.test_empty_or_schema_only_pinned_evidence_is_not_observed_runtime_evidence",
+      "failing_subcases": 2,
+      "required_boundary": "Reject empty/schema-only certificates at the verifier-context/evidence boundary. Do not mistake provenance-only fixture validation for runtime semantics."
+    }
+  ],
+  "coverage": {
+    "lifetime_new": "Independent frontend protocol adversarial controls reject PID changes, attach owner side effects, <60s reported detach, nonsemantic delivery, paused provider leak, stopped host/observation and explicit residue. Newly discovered alias/substitution/lease/residue-masking gaps remain failing.",
+    "store_new": "Real file and first-directory fsync failures prevent new dispatch, consume tick without replay, retain live existing run; successful dispatch requires both fsyncs; callback failure remains unknown with no replay.",
+    "contracts_new": "109 malformed/required-field/version cases reject in both Python/TypeScript; unsafe JSON integer boundary agrees; preserved optional v1 task/revision/run omissions and adapter rejection remain equivalent.",
+    "aggregate_new": "Extra required item, boolean exit, stale candidate/requirements/approval and escaped source paths reject; empty context and empty/schema-only evidence remain failing.",
+    "existing_named": [
+      "AggregateTests.test_missing_duplicate_and_owned_item",
+      "AggregateTests.test_identity_level_check_unknown_and_provenance_negatives",
+      "AggregateTests.test_current_input_or_evidence_bytes_changed",
+      "PortTests.test_cross_language_roundtrip_and_v1_adapter",
+      "PortTests.test_old_versions_extra_fields_and_unknown_evidence_rejected_or_held",
+      "ReturnDeadlineTests.test_default_wire_and_invalid_bounds",
+      "ReturnDeadlineTests.test_explicit_long_main_and_expiry_unknown"
+    ]
+  },
+  "test_expectation_correction": "Initial new adapter matrix incorrectly marked optional v1 taskId/revisionId/runId omission invalid. Corrected to the approved preserved v1 contract; final 19 Python contracts pass. This is not an implementation defect.",
+  "cleanup": {
+    "actual_runtime_owned_pids_checked": [
+      3977584,
+      3977589,
+      3977591,
+      3977592,
+      3977593,
+      3977595,
+      3977678,
+      3977686,
+      3977688,
+      3977689,
+      3977690,
+      3977692
+    ],
+    "actual_runtime_residue": [],
+    "normal_backend_exit": 0,
+    "paused_backend_exit": 0,
+    "normal_stderr_bytes": 0,
+    "paused_stderr_bytes": 0,
+    "test_owned_sleep_cleanup": "Every real sleep subprocess is terminated and wait()ed in finally, including failing residue control.",
+    "temp_path_process_matches": 0,
+    "active_owned_checks": 0
+  },
+  "scope": {
+    "outside_scope": [],
+    "index_changed": [],
+    "head_unchanged": true,
+    "all_1129_baseline_files_unchanged": true,
+    "product_source_modified": false,
+    "docs_modified": false,
+    "workflow_ledger_modified": false,
+    "graphify_modified": false,
+    "workflow_artifacts_excluded_by_baseline": true
+  },
+  "unknowns": [
+    "Protocol doubles are failure-decision controls, not runtime acceptance evidence; actual 62s normal/paused probes are separate and passed.",
+    "Aggregate tests intentionally challenge invalid verifier contexts. The validator currently declares provenance-only semantics; Root must close the approved empty/schema-only boundary without converting synthetic fixture validation into runtime authorization.",
+    "Durable write tests prove dispatch ordering/failure atomicity, not transaction rollback, WAL, corruption recovery or concurrent writers.",
+    "Only relevant G2 return-deadline tests were re-run in this independent unit; full prior G1/G2/G3 runtime certificates were not recreated.",
+    "Overall acceptance and production frontier remain Root-owned."
+  ],
+  "needs_oracle": false,
+  "commit_created": false
+}

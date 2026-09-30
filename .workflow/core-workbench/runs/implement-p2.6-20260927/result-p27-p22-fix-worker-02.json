@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-p22-fix-worker-02",
+  "status": "candidate_ready",
+  "candidate_id": "20440fcc35de5cab607701f01b140bcacdd9ceacfd342010009a98dc1338b589",
+  "after_snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-p22fix-after.json",
+  "scope_audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-p22fix.json",
+  "scope_disposition": "Outside scope only graphify-out/** (80 generated index/cache files; worker ran `graphify update .` per project CLAUDE.md). Derived navigation output, not product/test input; accepted by Root, will be regenerated at unit integration. Future packets forbid graphify update by leaves.",
+  "changed_paths": {"src/workbench/backend/panes.py": "cbf5780df0bd75a28bf549e20b76b5c5a293cfc5cf30dd0dad32c2d184796b6c", "tests/backend/test_panes.py": "4b6b57ab2a147670321e5a37724c40f029ebdadae57ab711d18eb6476b93af62"},
+  "independent_test_unmodified": "tests/backend/test_pane_identity_independent_p27c.py c1a6ca84a07d466bee549395f21a15ce9995ae5f6c9ac71bdedec0d46369c338",
+  "checks": [
+    ["pane identity independent (pre-fix red)", 1, "4 ran F1"],
+    ["test_panes + pane identity independent x3", 0, "14 OK x3"],
+    ["terminal", 0, "70 OK 541s"], ["g2_shell", 0, "142 OK skip=1"], ["canonical", 0, "3 OK"],
+    ["backend", 0, "60 OK"], ["backend independent", 0, "26 OK"], ["contracts", 0, "43 OK"], ["lifecycle", 0, "38 OK"],
+    ["g4", 0, "8 OK"], ["g4 independent", 0, "6 OK"], ["workflow", 0, "46 OK"], ["observation", 0, "95 OK"]
+  ],
+  "design": "poll(): waitid(P_PID, WEXITED|WNOHANG|WNOWAIT) -> while zombie pins pid/sid, pin session members by pidfd (stat before/after equal, live) -> waitpid reap. /proc scan only when ownership proven by unreaped leader (ppid==backend, start ticks) or a pinned anchor member live and in-session before and after the scan. close(): killpg only on unreaped proven child; grace wait uses WNOWAIT; SIGKILL only through pinned pidfds; anchor kept until last; all pin fds closed. SESSION_PIN_LIMIT=256.",
+  "known_limits": "After reap, if all pinned members die and only unpinned members remain, they are left (unprovable -> skip, C-D45); a child forked by the last anchor just before its kill may also remain.",
+  "residue": "no processes; /tmp/cw03-g2-* 11 -> 13 (g2 suite, unattributed pattern, untouched)",
+  "observed_model": "opus (Agent general-purpose, inherited)"
+}

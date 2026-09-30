@@ -1,0 +1,20 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 1178,
+  "event": {
+    "id": "reserve-cw15-takeover-final-review-01",
+    "kind": "reserve",
+    "data": {
+      "invocation": "cw15-takeover-final-review-01",
+      "role": "reviewer",
+      "unit": "V-CW-15-p2.6-current",
+      "incident": "",
+      "purpose": "Fresh final corrected CW-15 lifecycle acceptance review",
+      "model": "gpt-6-sol",
+      "effort": "high",
+      "buckets": ["total", "role:reviewer", "unit:V-CW-15-p2.6-current"],
+      "writer": false,
+      "workspace": "/home/dwchoo/ai-exp-assistant"
+    }
+  }
+}

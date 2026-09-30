@@ -1,0 +1,17 @@
+{
+  "invocation":"cw11-positive-incarnation-test-01",
+  "role":"test_designer",
+  "unit":"V-CW-11-p2.6-current",
+  "objective":"Independently verify positive initial run incarnation and all source-activation/public-event invariants.",
+  "candidate_manifest":".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw11-positive-incarnation.json",
+  "candidate":"335cc6e019a479cefd9da7b54ffe53dc40ee2c82d06b7838403fbd128248c5d5",
+  "prior_test":".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw11-source-activation-test-01.json",
+  "write_scope":["tests/observation/**"],
+  "must_test":[
+    "Make both prior positive-incarnation public callback assertions pass for success and retry.",
+    "Verify None constructor=0, active constructor=1, first activation=1, idempotent set unchanged, A->None->A monotonic, token/event incarnation exactness and positivity.",
+    "Rerun late-first-bind/source-activation, ticket/schedule/exit-incarnation, concurrency/retry, full observation and current actual OMP probe."
+  ],
+  "constraints":["Tests only; apply_patch only; no product/workflow edits; graphify update; no uv/local env/package artifacts or destructive git actions."],
+  "report":["coverage","exact results/runtime","candidate_ready or needs_reroute"]
+}

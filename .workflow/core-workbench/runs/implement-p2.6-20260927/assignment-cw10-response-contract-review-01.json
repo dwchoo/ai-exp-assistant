@@ -1,0 +1,28 @@
+{
+  "invocation": "cw10-response-contract-review-01",
+  "role": "reviewer",
+  "unit": "V-CW-10-p2.6-current",
+  "objective": "Fresh final review of complete CW-10 after exact production response-contract delivery and independent mutation tests.",
+  "candidate_manifest": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw10-response-contract-final.json",
+  "candidate": "679237e11f9f4cfd73c780f9ed7a431c0812437bcd006ace428207c8a37bc0a0",
+  "requirements": ".workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw10.json",
+  "ticket": "docs/features/core-workbench/tickets/CW-10.md",
+  "must_review": [
+    "Full approved CW-10 behavior and every prior finding: worker role/public response causality, production adapter, contract delivery to general Worker OMP, current authority, direct request approval boundary, secret privacy, evidence indeterminate, no auto-return, worktree/local commit/push-merge separation.",
+    "Parser and injected response contract truly share one ordered descriptor source and cannot silently drift; contract fully specifies marker/schema/identity/decisions/UUID/no-prose-tools-thinking.",
+    "Actual providers derive output only from the delivered contract with no hardcoded fallback; independent mutation tests are meaningful.",
+    "Frozen manifest hashes match current source/tests/guide and no raw content leaks or replay path remains."
+  ],
+  "constraints": [
+    "Review-only, no edits or mutating actions.",
+    "Inspect code/tests directly and report severity-ordered findings or explicit no findings.",
+    "Treat arbitrary external model compliance as a runtime qualification, not proof of a product defect if the protocol is fully specified and fail-closed.",
+    "No commit/push/merge/stash/reset/clean."
+  ],
+  "report": [
+    "candidate hash validation",
+    "findings",
+    "runtime qualifications",
+    "candidate_ready or needs_reroute"
+  ]
+}

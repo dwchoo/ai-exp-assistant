@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "invocation": "cw13-test-01",
+  "role": "test_designer",
+  "unit": "V-CW-13-p2.6-current",
+  "authority": "User $implement docs/features/core-workbench request; approved PLAN p2.6 CW-13",
+  "objective": "Independently challenge the frozen CW-13 recovery policy and add requirement-derived fixture tests without production changes.",
+  "candidate": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw13-worker.json",
+    "candidate_id": "57ef5c7125185bf97fce0bfd1148f35612a27d7d6588e8637777bebd370f512a"
+  },
+  "required_tests": [
+    "Validate exact Task/revision/run, approval/criteria/settings and worker-report provenance; malformed, missing, stale, cross-run or changed-artifact evidence must fail closed to investigation/blocked, never completion or retry.",
+    "Cover exit 0 criteria failure, nonzero failure, success evidence, empty/missing logs/results, unknown/full termination distinctions, main exit with descendants or input/control return unknown, and no elapsed-time cutoff.",
+    "Exercise recovery attempts 1-3 and fourth blocked, initial/normal improvement exclusion, and retry preservation across commit/name/revision/settings changes.",
+    "Independently simulate atomic reserve_recovery races/stale CAS/malicious or inconsistent port results so at most one retry is admitted and count cannot reset or skip unsafely.",
+    "Cover next-run revision default, current-run stop-confirm-mutate-relaunch plan, immediate revocation, pause/cancel/metadata failure, and authority revalidation markers.",
+    "Cover force termination delegated/undelegated, exact/ambiguous/wrong target, fresh post-force observation sequence, and prohibition on mutation/relaunch until full termination."
+  ],
+  "allowed_write_paths": ["tests/policy/recovery_manager/**", "graphify-out/**"],
+  "constraints": [
+    "Independent test-only owner; production files and workflow/docs/PLAN/state are read-only.",
+    "Use apply_patch; run the full recovery suite, relevant CW-10/11/12 regressions, and graphify update . after test edits.",
+    "No delegation, commit, publish, deploy, Docker, or live destructive process termination."
+  ],
+  "report": "Return candidate_ready/needs_reroute, new tests and any finding with acceptance ID, exact counts/commands, production snapshot match, and residual CW-15 integration risks."
+}

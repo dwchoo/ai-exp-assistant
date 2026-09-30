@@ -1,0 +1,1265 @@
+{
+  "schema_version": 1,
+  "invocation": "cw02-g1-tmux-correction-01",
+  "ticket": "CW-02",
+  "unit": "V-CW-02-p2.6-current",
+  "task_result": "candidate_ready",
+  "candidate": "5122497882ed757f33e4ae5171ac8908e7f02181f5fc2503d39f4aae9aef160a",
+  "base_candidate": "a3eae7024ca8b9180d6d33281890de80ae688e90ae0214b991938b59419fd544",
+  "baseline": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw02-g1-wide-correction-after.json",
+  "after_snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw02-g1-tmux-correction-after.json",
+  "scope_audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/scope-audit-cw02-g1-tmux-correction.json",
+  "changed_files": [
+    "tests/gates/g1_vt/live_outer_tmux_probe.py",
+    "tests/gates/g1_vt/test_outer_tmux_predicates.py"
+  ],
+  "generated_files": [
+    "graphify-out/.graphify_labels.json",
+    "graphify-out/.graphify_labels.json.sig",
+    "graphify-out/2026-09-28/.graphify_labels.json",
+    "graphify-out/2026-09-28/GRAPH_REPORT.md",
+    "graphify-out/2026-09-28/graph.json",
+    "graphify-out/2026-09-28/manifest.json",
+    "graphify-out/GRAPH_REPORT.md",
+    "graphify-out/cache/ast/v0.9.67-s4/230502062fa1cb299ef12561c40a0c754df3fcf61f99d74b3046646edeebedb3.json",
+    "graphify-out/cache/ast/v0.9.67-s4/eb39cf4d5f6e49d19994aea1154a186a316f8d27b7c71274fcc3e60d46d35b40.json",
+    "graphify-out/cache/ast/v0.9.67-s4/fffe84ac95f84a1cf0100c87d5418cddd70e70669a98181a720155021e61724a.json",
+    "graphify-out/cache/last_query_stamp",
+    "graphify-out/cache/stat-index.json",
+    "graphify-out/graph.html",
+    "graphify-out/graph.json",
+    "graphify-out/manifest.json"
+  ],
+  "delta": "Probe-only stage evidence and bounded 3-second complete-frame barrier. Every initial/small/restored stage retains first and final title/target/cross-route/PID/geometry facts plus settled verdict. Product renderer and independent clipping/PID/geometry tests unchanged.",
+  "diagnosis": {
+    "status": "demonstrated_probe_premature_partial_frame_snapshot",
+    "before": "After two diagnostic passes, a further exact-argv run reproduced input_routed=false: small target=[false,false,true], titles all true, cross_routed all false, exact child geometry and stable PIDs, all fresh input after flags true. The original probe stopped at the host marker, then sampled while the two OMP redraws were incomplete; restored stage had all markers again.",
+    "after": "Final code waits at the same geometry for one frame satisfying the already-required complete stage evidence. In final run01, restored first target=[true,false,true] recovered to [true,true,true] within the bounded barrier, without extra input, paste replay or resize. Final run02 also observed with all stages settled.",
+    "classification": "Observed defect is the probe's premature snapshot boundary, not demonstrated product rendering/routing regression. Underlying terminal/OMP scheduling that makes partial redraw timing vary remains unmeasured.",
+    "semantic_weakening": false,
+    "preserved": "All original freshness/target-only normal marker/title/cross-route/paste/geometry/stable PID/alternate restore/cleanup predicates remain; stage_settled is an additional required condition. Missing or contradictory evidence persisting through the bound still fails.",
+    "regression": "Two new focused tests: host echo before OMP complete redraw requires a complete same-size frame; persistent missing target/title, cross-route, wrong geometry or changed PIDs cannot settle. Existing negative tests and independent file hashes preserved."
+  },
+  "historical_evidence": [
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/check-cw02-tmux.log",
+      "check_id": "cw02-tmux-final-01",
+      "result": "inconclusive_predicates",
+      "input_routed": false,
+      "unchanged": true
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/check-cw02-tmux-02.log",
+      "check_id": "cw02-tmux-final-02",
+      "result": "inconclusive_predicates",
+      "input_routed": false,
+      "unchanged": true
+    },
+    {
+      "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw02-g1-closure-01.json",
+      "evidence_key": "runtime_evidence.tmux",
+      "result": "observed"
+    }
+  ],
+  "checks": [
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g1_vt /tmp/cw02-g1-venv/bin/python tests/gates/g1_vt/live_outer_tmux_probe.py",
+      "exit_code": 0,
+      "evidence_key": "diagnostic_direct",
+      "scope": "Contains inherited stale HERDR context; not a replacement for formal invocation."
+    },
+    {
+      "command": "/usr/bin/env -u HERDR_BIN_PATH -u HERDR_ENV -u HERDR_PANE_ID -u HERDR_SOCKET_PATH -u HERDR_TAB_ID -u HERDR_WORKSPACE_ID PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g1_vt /tmp/cw02-g1-venv/bin/python tests/gates/g1_vt/live_outer_tmux_probe.py",
+      "exit_code": 0,
+      "evidence_key": "diagnostic_exact_formal_argv"
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g1_vt /tmp/cw02-g1-venv/bin/python -m unittest -v tests/gates/g1_vt/test_outer_tmux_predicates.py",
+      "exit_code": 0,
+      "tests": 7,
+      "duration_seconds": 0.02
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g1_vt /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/gates/g1_vt -p 'test_*.py' -v",
+      "exit_code": 0,
+      "tests": 61,
+      "duration_seconds": 1.436
+    },
+    {
+      "command": "graphify update .",
+      "exit_code": 0,
+      "nodes": 3160,
+      "edges": 5725,
+      "communities": 377,
+      "LLM_used": false
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0
+    },
+    {
+      "command": "pgrep -af '[/]tmp/cw02-g1-outer-tmux-'",
+      "exit_code": 1,
+      "meaning": "Expected empty match"
+    },
+    {
+      "command": "/usr/bin/env -u HERDR_BIN_PATH -u HERDR_ENV -u HERDR_PANE_ID -u HERDR_SOCKET_PATH -u HERDR_TAB_ID -u HERDR_WORKSPACE_ID PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g1_vt /tmp/cw02-g1-venv/bin/python tests/gates/g1_vt/live_outer_tmux_probe.py",
+      "exit_code": 1,
+      "evidence_key": "pre_barrier_exact_failure",
+      "meaning": "Third diagnostic run reproduced the formal composite failure, now with failing small-stage details."
+    },
+    {
+      "command": "/usr/bin/env -u HERDR_BIN_PATH -u HERDR_ENV -u HERDR_PANE_ID -u HERDR_SOCKET_PATH -u HERDR_TAB_ID -u HERDR_WORKSPACE_ID PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g1_vt /tmp/cw02-g1-venv/bin/python tests/gates/g1_vt/live_outer_tmux_probe.py",
+      "exit_code": 0,
+      "evidence_key": "final_exact_run01"
+    },
+    {
+      "command": "/usr/bin/env -u HERDR_BIN_PATH -u HERDR_ENV -u HERDR_PANE_ID -u HERDR_SOCKET_PATH -u HERDR_TAB_ID -u HERDR_WORKSPACE_ID PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g1_vt /tmp/cw02-g1-venv/bin/python tests/gates/g1_vt/live_outer_tmux_probe.py",
+      "exit_code": 0,
+      "evidence_key": "final_exact_run02"
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g1_vt /tmp/cw02-g1-venv/bin/python -m unittest -v tests/gates/g1_vt/test_outer_tmux_predicates.py",
+      "exit_code": 0,
+      "tests": 9,
+      "duration_seconds": 0.021,
+      "final_code": true
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g1_vt /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/gates/g1_vt -p 'test_*.py' -v",
+      "exit_code": 0,
+      "tests": 63,
+      "duration_seconds": 1.523,
+      "final_code": true
+    },
+    {
+      "command": "graphify update .",
+      "exit_code": 0,
+      "nodes": 3169,
+      "edges": 5746,
+      "communities": 386,
+      "LLM_used": false,
+      "final_code": true,
+      "warning": "377 saved labels vs386 communities,30 renamed by hub; no semantic relabel"
+    },
+    {
+      "command": "SHA256 compare renderer and clipping/independent PID/geometry files against assignment baseline",
+      "exit_code": 0,
+      "unchanged_paths": [
+        "src/workbench/ui/terminal_g1/app.py",
+        "tests/gates/g1_vt/test_closure_independent.py",
+        "tests/gates/g1_vt/live_outer_compat_probe.py",
+        "tests/gates/g1_vt/test_closure_predicates.py",
+        "tests/gates/g1_vt/test_wide_boundary.py"
+      ]
+    }
+  ],
+  "runtime_evidence": {
+    "diagnostic_direct": {
+      "alternate_before_quit": true,
+      "child_pids": [
+        3916271,
+        3916272,
+        3916273
+      ],
+      "fresh_input_after": {
+        "host": true,
+        "manager": true,
+        "manager_append": true,
+        "worker": true,
+        "worker_append": true
+      },
+      "fresh_input_before": {
+        "host": true,
+        "manager": true,
+        "manager_append": true,
+        "worker": true,
+        "worker_append": true
+      },
+      "input_routed": true,
+      "local_vt_restored": true,
+      "paste_absent_before": true,
+      "paste_visible": true,
+      "post_exit_bytes": 130,
+      "post_exit_drain": "eof",
+      "processes_cleaned": true,
+      "pty_bytes_drained": 605977,
+      "resize_observed": true,
+      "result": "observed",
+      "stages": {
+        "initial": {
+          "child_pids": [
+            3916271,
+            3916272,
+            3916273
+          ],
+          "child_sizes": [
+            [
+              78,
+              40
+            ],
+            [
+              78,
+              40
+            ],
+            [
+              78,
+              40
+            ]
+          ],
+          "cross_routed": [
+            false,
+            false,
+            false
+          ],
+          "target": [
+            true,
+            true,
+            false
+          ],
+          "titles": [
+            true,
+            true,
+            true
+          ]
+        },
+        "restored": {
+          "child_pids": [
+            3916271,
+            3916272,
+            3916273
+          ],
+          "child_sizes": [
+            [
+              78,
+              40
+            ],
+            [
+              78,
+              40
+            ],
+            [
+              78,
+              40
+            ]
+          ],
+          "cross_routed": [
+            false,
+            false,
+            false
+          ],
+          "target": [
+            true,
+            true,
+            true
+          ],
+          "titles": [
+            true,
+            true,
+            true
+          ]
+        },
+        "small": {
+          "child_pids": [
+            3916271,
+            3916272,
+            3916273
+          ],
+          "child_sizes": [
+            [
+              68,
+              34
+            ],
+            [
+              68,
+              34
+            ],
+            [
+              68,
+              34
+            ]
+          ],
+          "cross_routed": [
+            false,
+            false,
+            false
+          ],
+          "target": [
+            true,
+            true,
+            true
+          ],
+          "titles": [
+            true,
+            true,
+            true
+          ]
+        }
+      },
+      "startup_at_18s": [
+        true,
+        true,
+        true
+      ],
+      "startup_ready": true,
+      "tmux_client_cleaned": true,
+      "tmux_new_session_exit": 0,
+      "tmux_pane_pid": 3916263,
+      "tmux_pane_term": "tmux-256color",
+      "tmux_server_pid": 3916262,
+      "tmux_socket_removed": true,
+      "tmux_window_initial": "240x44",
+      "tmux_window_restored": "240x44",
+      "tmux_window_small": "210x38",
+      "versions": {
+        "omp": "omp/18.2.10",
+        "tmux": "tmux 3.4"
+      }
+    },
+    "diagnostic_exact_formal_argv": {
+      "alternate_before_quit": true,
+      "child_pids": [
+        3916663,
+        3916664,
+        3916665
+      ],
+      "fresh_input_after": {
+        "host": true,
+        "manager": true,
+        "manager_append": true,
+        "worker": true,
+        "worker_append": true
+      },
+      "fresh_input_before": {
+        "host": true,
+        "manager": true,
+        "manager_append": true,
+        "worker": true,
+        "worker_append": true
+      },
+      "input_routed": true,
+      "local_vt_restored": true,
+      "paste_absent_before": true,
+      "paste_visible": true,
+      "post_exit_bytes": 130,
+      "post_exit_drain": "eof",
+      "processes_cleaned": true,
+      "pty_bytes_drained": 585606,
+      "resize_observed": true,
+      "result": "observed",
+      "stages": {
+        "initial": {
+          "child_pids": [
+            3916663,
+            3916664,
+            3916665
+          ],
+          "child_sizes": [
+            [
+              78,
+              40
+            ],
+            [
+              78,
+              40
+            ],
+            [
+              78,
+              40
+            ]
+          ],
+          "cross_routed": [
+            false,
+            false,
+            false
+          ],
+          "target": [
+            true,
+            true,
+            false
+          ],
+          "titles": [
+            true,
+            true,
+            true
+          ]
+        },
+        "restored": {
+          "child_pids": [
+            3916663,
+            3916664,
+            3916665
+          ],
+          "child_sizes": [
+            [
+              78,
+              40
+            ],
+            [
+              78,
+              40
+            ],
+            [
+              78,
+              40
+            ]
+          ],
+          "cross_routed": [
+            false,
+            false,
+            false
+          ],
+          "target": [
+            true,
+            true,
+            true
+          ],
+          "titles": [
+            true,
+            true,
+            true
+          ]
+        },
+        "small": {
+          "child_pids": [
+            3916663,
+            3916664,
+            3916665
+          ],
+          "child_sizes": [
+            [
+              68,
+              34
+            ],
+            [
+              68,
+              34
+            ],
+            [
+              68,
+              34
+            ]
+          ],
+          "cross_routed": [
+            false,
+            false,
+            false
+          ],
+          "target": [
+            true,
+            true,
+            true
+          ],
+          "titles": [
+            true,
+            true,
+            true
+          ]
+        }
+      },
+      "startup_at_18s": [
+        true,
+        true,
+        true
+      ],
+      "startup_ready": true,
+      "tmux_client_cleaned": true,
+      "tmux_new_session_exit": 0,
+      "tmux_pane_pid": 3916655,
+      "tmux_pane_term": "tmux-256color",
+      "tmux_server_pid": 3916654,
+      "tmux_socket_removed": true,
+      "tmux_window_initial": "240x44",
+      "tmux_window_restored": "240x44",
+      "tmux_window_small": "210x38",
+      "versions": {
+        "omp": "omp/18.2.10",
+        "tmux": "tmux 3.4"
+      }
+    },
+    "pre_barrier_exact_failure": {
+      "alternate_before_quit": true,
+      "child_pids": [
+        3919669,
+        3919670,
+        3919671
+      ],
+      "fresh_input_after": {
+        "host": true,
+        "manager": true,
+        "manager_append": true,
+        "worker": true,
+        "worker_append": true
+      },
+      "fresh_input_before": {
+        "host": true,
+        "manager": true,
+        "manager_append": true,
+        "worker": true,
+        "worker_append": true
+      },
+      "input_routed": false,
+      "local_vt_restored": true,
+      "paste_absent_before": true,
+      "paste_visible": true,
+      "post_exit_bytes": 130,
+      "post_exit_drain": "eof",
+      "processes_cleaned": true,
+      "pty_bytes_drained": 594549,
+      "resize_observed": true,
+      "result": "inconclusive_predicates",
+      "stages": {
+        "initial": {
+          "child_pids": [
+            3919669,
+            3919670,
+            3919671
+          ],
+          "child_sizes": [
+            [
+              78,
+              40
+            ],
+            [
+              78,
+              40
+            ],
+            [
+              78,
+              40
+            ]
+          ],
+          "cross_routed": [
+            false,
+            false,
+            false
+          ],
+          "target": [
+            true,
+            true,
+            false
+          ],
+          "titles": [
+            true,
+            true,
+            true
+          ]
+        },
+        "restored": {
+          "child_pids": [
+            3919669,
+            3919670,
+            3919671
+          ],
+          "child_sizes": [
+            [
+              78,
+              40
+            ],
+            [
+              78,
+              40
+            ],
+            [
+              78,
+              40
+            ]
+          ],
+          "cross_routed": [
+            false,
+            false,
+            false
+          ],
+          "target": [
+            true,
+            true,
+            true
+          ],
+          "titles": [
+            true,
+            true,
+            true
+          ]
+        },
+        "small": {
+          "child_pids": [
+            3919669,
+            3919670,
+            3919671
+          ],
+          "child_sizes": [
+            [
+              68,
+              34
+            ],
+            [
+              68,
+              34
+            ],
+            [
+              68,
+              34
+            ]
+          ],
+          "cross_routed": [
+            false,
+            false,
+            false
+          ],
+          "target": [
+            false,
+            false,
+            true
+          ],
+          "titles": [
+            true,
+            true,
+            true
+          ]
+        }
+      },
+      "startup_at_18s": [
+        true,
+        true,
+        true
+      ],
+      "startup_ready": true,
+      "tmux_client_cleaned": true,
+      "tmux_new_session_exit": 0,
+      "tmux_pane_pid": 3919661,
+      "tmux_pane_term": "tmux-256color",
+      "tmux_server_pid": 3919660,
+      "tmux_socket_removed": true,
+      "tmux_window_initial": "240x44",
+      "tmux_window_restored": "240x44",
+      "tmux_window_small": "210x38",
+      "versions": {
+        "omp": "omp/18.2.10",
+        "tmux": "tmux 3.4"
+      }
+    },
+    "final_exact_run01": {
+      "alternate_before_quit": true,
+      "child_pids": [
+        3920739,
+        3920740,
+        3920741
+      ],
+      "fresh_input_after": {
+        "host": true,
+        "manager": true,
+        "manager_append": true,
+        "worker": true,
+        "worker_append": true
+      },
+      "fresh_input_before": {
+        "host": true,
+        "manager": true,
+        "manager_append": true,
+        "worker": true,
+        "worker_append": true
+      },
+      "input_routed": true,
+      "local_vt_restored": true,
+      "paste_absent_before": true,
+      "paste_visible": true,
+      "post_exit_bytes": 130,
+      "post_exit_drain": "eof",
+      "processes_cleaned": true,
+      "pty_bytes_drained": 624896,
+      "resize_observed": true,
+      "result": "observed",
+      "stage_first": {
+        "initial": {
+          "child_pids": [
+            3920739,
+            3920740,
+            3920741
+          ],
+          "child_sizes": [
+            [
+              78,
+              40
+            ],
+            [
+              78,
+              40
+            ],
+            [
+              78,
+              40
+            ]
+          ],
+          "cross_routed": [
+            false,
+            false,
+            false
+          ],
+          "target": [
+            true,
+            true,
+            false
+          ],
+          "titles": [
+            true,
+            true,
+            true
+          ]
+        },
+        "restored": {
+          "child_pids": [
+            3920739,
+            3920740,
+            3920741
+          ],
+          "child_sizes": [
+            [
+              78,
+              40
+            ],
+            [
+              78,
+              40
+            ],
+            [
+              78,
+              40
+            ]
+          ],
+          "cross_routed": [
+            false,
+            false,
+            false
+          ],
+          "target": [
+            true,
+            false,
+            true
+          ],
+          "titles": [
+            true,
+            true,
+            true
+          ]
+        },
+        "small": {
+          "child_pids": [
+            3920739,
+            3920740,
+            3920741
+          ],
+          "child_sizes": [
+            [
+              68,
+              34
+            ],
+            [
+              68,
+              34
+            ],
+            [
+              68,
+              34
+            ]
+          ],
+          "cross_routed": [
+            false,
+            false,
+            false
+          ],
+          "target": [
+            true,
+            true,
+            true
+          ],
+          "titles": [
+            true,
+            true,
+            true
+          ]
+        }
+      },
+      "stage_settled": {
+        "initial": true,
+        "restored": true,
+        "small": true
+      },
+      "stages": {
+        "initial": {
+          "child_pids": [
+            3920739,
+            3920740,
+            3920741
+          ],
+          "child_sizes": [
+            [
+              78,
+              40
+            ],
+            [
+              78,
+              40
+            ],
+            [
+              78,
+              40
+            ]
+          ],
+          "cross_routed": [
+            false,
+            false,
+            false
+          ],
+          "target": [
+            true,
+            true,
+            false
+          ],
+          "titles": [
+            true,
+            true,
+            true
+          ]
+        },
+        "restored": {
+          "child_pids": [
+            3920739,
+            3920740,
+            3920741
+          ],
+          "child_sizes": [
+            [
+              78,
+              40
+            ],
+            [
+              78,
+              40
+            ],
+            [
+              78,
+              40
+            ]
+          ],
+          "cross_routed": [
+            false,
+            false,
+            false
+          ],
+          "target": [
+            true,
+            true,
+            true
+          ],
+          "titles": [
+            true,
+            true,
+            true
+          ]
+        },
+        "small": {
+          "child_pids": [
+            3920739,
+            3920740,
+            3920741
+          ],
+          "child_sizes": [
+            [
+              68,
+              34
+            ],
+            [
+              68,
+              34
+            ],
+            [
+              68,
+              34
+            ]
+          ],
+          "cross_routed": [
+            false,
+            false,
+            false
+          ],
+          "target": [
+            true,
+            true,
+            true
+          ],
+          "titles": [
+            true,
+            true,
+            true
+          ]
+        }
+      },
+      "startup_at_18s": [
+        true,
+        true,
+        true
+      ],
+      "startup_ready": true,
+      "tmux_client_cleaned": true,
+      "tmux_new_session_exit": 0,
+      "tmux_pane_pid": 3920731,
+      "tmux_pane_term": "tmux-256color",
+      "tmux_server_pid": 3920730,
+      "tmux_socket_removed": true,
+      "tmux_window_initial": "240x44",
+      "tmux_window_restored": "240x44",
+      "tmux_window_small": "210x38",
+      "versions": {
+        "omp": "omp/18.2.10",
+        "tmux": "tmux 3.4"
+      }
+    },
+    "final_exact_run02": {
+      "alternate_before_quit": true,
+      "child_pids": [
+        3921306,
+        3921307,
+        3921308
+      ],
+      "fresh_input_after": {
+        "host": true,
+        "manager": true,
+        "manager_append": true,
+        "worker": true,
+        "worker_append": true
+      },
+      "fresh_input_before": {
+        "host": true,
+        "manager": true,
+        "manager_append": true,
+        "worker": true,
+        "worker_append": true
+      },
+      "input_routed": true,
+      "local_vt_restored": true,
+      "paste_absent_before": true,
+      "paste_visible": true,
+      "post_exit_bytes": 130,
+      "post_exit_drain": "eof",
+      "processes_cleaned": true,
+      "pty_bytes_drained": 595944,
+      "resize_observed": true,
+      "result": "observed",
+      "stage_first": {
+        "initial": {
+          "child_pids": [
+            3921306,
+            3921307,
+            3921308
+          ],
+          "child_sizes": [
+            [
+              78,
+              40
+            ],
+            [
+              78,
+              40
+            ],
+            [
+              78,
+              40
+            ]
+          ],
+          "cross_routed": [
+            false,
+            false,
+            false
+          ],
+          "target": [
+            true,
+            true,
+            false
+          ],
+          "titles": [
+            true,
+            true,
+            true
+          ]
+        },
+        "restored": {
+          "child_pids": [
+            3921306,
+            3921307,
+            3921308
+          ],
+          "child_sizes": [
+            [
+              78,
+              40
+            ],
+            [
+              78,
+              40
+            ],
+            [
+              78,
+              40
+            ]
+          ],
+          "cross_routed": [
+            false,
+            false,
+            false
+          ],
+          "target": [
+            true,
+            true,
+            true
+          ],
+          "titles": [
+            true,
+            true,
+            true
+          ]
+        },
+        "small": {
+          "child_pids": [
+            3921306,
+            3921307,
+            3921308
+          ],
+          "child_sizes": [
+            [
+              68,
+              34
+            ],
+            [
+              68,
+              34
+            ],
+            [
+              68,
+              34
+            ]
+          ],
+          "cross_routed": [
+            false,
+            false,
+            false
+          ],
+          "target": [
+            true,
+            true,
+            true
+          ],
+          "titles": [
+            true,
+            true,
+            true
+          ]
+        }
+      },
+      "stage_settled": {
+        "initial": true,
+        "restored": true,
+        "small": true
+      },
+      "stages": {
+        "initial": {
+          "child_pids": [
+            3921306,
+            3921307,
+            3921308
+          ],
+          "child_sizes": [
+            [
+              78,
+              40
+            ],
+            [
+              78,
+              40
+            ],
+            [
+              78,
+              40
+            ]
+          ],
+          "cross_routed": [
+            false,
+            false,
+            false
+          ],
+          "target": [
+            true,
+            true,
+            false
+          ],
+          "titles": [
+            true,
+            true,
+            true
+          ]
+        },
+        "restored": {
+          "child_pids": [
+            3921306,
+            3921307,
+            3921308
+          ],
+          "child_sizes": [
+            [
+              78,
+              40
+            ],
+            [
+              78,
+              40
+            ],
+            [
+              78,
+              40
+            ]
+          ],
+          "cross_routed": [
+            false,
+            false,
+            false
+          ],
+          "target": [
+            true,
+            true,
+            true
+          ],
+          "titles": [
+            true,
+            true,
+            true
+          ]
+        },
+        "small": {
+          "child_pids": [
+            3921306,
+            3921307,
+            3921308
+          ],
+          "child_sizes": [
+            [
+              68,
+              34
+            ],
+            [
+              68,
+              34
+            ],
+            [
+              68,
+              34
+            ]
+          ],
+          "cross_routed": [
+            false,
+            false,
+            false
+          ],
+          "target": [
+            true,
+            true,
+            true
+          ],
+          "titles": [
+            true,
+            true,
+            true
+          ]
+        }
+      },
+      "startup_at_18s": [
+        true,
+        true,
+        true
+      ],
+      "startup_ready": true,
+      "tmux_client_cleaned": true,
+      "tmux_new_session_exit": 0,
+      "tmux_pane_pid": 3921298,
+      "tmux_pane_term": "tmux-256color",
+      "tmux_server_pid": 3921297,
+      "tmux_socket_removed": true,
+      "tmux_window_initial": "240x44",
+      "tmux_window_restored": "240x44",
+      "tmux_window_small": "210x38",
+      "versions": {
+        "omp": "omp/18.2.10",
+        "tmux": "tmux 3.4"
+      }
+    }
+  },
+  "cleanup": {
+    "owned_pids_checked": [
+      3916262,
+      3916263,
+      3916271,
+      3916272,
+      3916273,
+      3916654,
+      3916655,
+      3916663,
+      3916664,
+      3916665,
+      3919660,
+      3919661,
+      3919669,
+      3919670,
+      3919671,
+      3920730,
+      3920731,
+      3920739,
+      3920740,
+      3920741,
+      3921297,
+      3921298,
+      3921306,
+      3921307,
+      3921308
+    ],
+    "owned_pids_remaining": [],
+    "temporary_directories_remaining": [],
+    "temporary_process_path_matches": 0,
+    "active_owned_checks_or_writers": 0,
+    "client_closed": true,
+    "socket_removed": true
+  },
+  "needs_oracle": false,
+  "unknowns": [
+    "The specific failed stage in the two old aggregate-only formal logs cannot be retrospectively established; logs retained unchanged.",
+    "Variation in scheduling/OMP/tmux partial redraw delivery is not attributed to the wide-clipping change; no product renderer fix was necessary.",
+    "No product source change: extra color/plain/Herdr runtime reruns were not required by the assignment.",
+    "Graph generated community label changes are retained as warning; no LLM relabel.",
+    "Historical concurrent plain unknown, physical pixel/font/terminal-version limits and internal query semantic interpretation remain.",
+    "Root will perform formal reexecution/fresh delta review; this candidate does not declare overall G1 completion."
+  ],
+  "scope_audit_summary": {
+    "changed": [
+      "graphify-out/.graphify_labels.json",
+      "graphify-out/.graphify_labels.json.sig",
+      "graphify-out/2026-09-28/.graphify_labels.json",
+      "graphify-out/2026-09-28/GRAPH_REPORT.md",
+      "graphify-out/2026-09-28/graph.json",
+      "graphify-out/2026-09-28/manifest.json",
+      "graphify-out/GRAPH_REPORT.md",
+      "graphify-out/cache/ast/v0.9.67-s4/230502062fa1cb299ef12561c40a0c754df3fcf61f99d74b3046646edeebedb3.json",
+      "graphify-out/cache/ast/v0.9.67-s4/eb39cf4d5f6e49d19994aea1154a186a316f8d27b7c71274fcc3e60d46d35b40.json",
+      "graphify-out/cache/ast/v0.9.67-s4/fffe84ac95f84a1cf0100c87d5418cddd70e70669a98181a720155021e61724a.json",
+      "graphify-out/cache/last_query_stamp",
+      "graphify-out/cache/stat-index.json",
+      "graphify-out/graph.html",
+      "graphify-out/graph.json",
+      "graphify-out/manifest.json",
+      "tests/gates/g1_vt/live_outer_tmux_probe.py",
+      "tests/gates/g1_vt/test_outer_tmux_predicates.py"
+    ],
+    "index_changed": [],
+    "outside_scope": [],
+    "comparable": true
+  },
+  "product_source_modified": false,
+  "independent_tests_modified": false,
+  "commit_created": false
+}

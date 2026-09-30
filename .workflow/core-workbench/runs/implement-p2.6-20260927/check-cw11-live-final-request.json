@@ -1,0 +1,17 @@
+{
+  "root": "/home/dwchoo/ai-exp-assistant",
+  "requirements": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw11.json",
+  "argv": [
+    "/usr/bin/env",
+    "PYTHONDONTWRITEBYTECODE=1",
+    "PYTHONPATH=src:tests/observation:tests/bridge:tests/gates/g3_omp:tests/workflow",
+    "/tmp/cw02-g1-venv/bin/python",
+    "tests/observation/live_worker_review_independent.py"
+  ],
+  "environment": {"description": "Linux; frozen CW-11 candidate; actual OMP 18.2.10 worker TUI peer; real 60-second clock, real Git WorkflowRun and persistent host shell"},
+  "log": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/check-cw11-live-final.log",
+  "check_id": "cw11-live-final-01",
+  "watch": [],
+  "exclude": [".workflow/core-workbench/runs/implement-p2.6-20260927/**"],
+  "timeout": 180
+}

@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-p22-rerun-test-01",
+  "role": "test_designer",
+  "unit": "V-CW-17-p2.7",
+  "approved_bundle_digest": "a521acdc3838b43a26e277afc233bab695c8b02ce0d42392c3678931b2e3f027",
+  "routing": {"planned_role": "test_designer", "selected_role": "test_designer (wb-test-rerun, Sonnet high)", "reason_codes": ["correction_reverification"], "evidence_refs": ["behaviors defined by review P2-2 and result-p27-review-fix-test-01.json; user-approved model routing 2026-09-29"]},
+  "frozen_candidate": "20440fcc35de5cab607701f01b140bcacdd9ceacfd342010009a98dc1338b589",
+  "checkpoint_ref": [".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-p22fix-checkpoint.json", ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-p22fix-delta-backup/"],
+  "frozen_production_files": {"src/workbench/backend/panes.py": "cbf5780df0bd75a28bf549e20b76b5c5a293cfc5cf30dd0dad32c2d184796b6c"},
+  "inputs": {
+    "finding": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-review-cw17-01.json (P2-2)",
+    "prior_fail": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-review-fix-test-01.json",
+    "fix_result": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-p22-fix-worker-02.json",
+    "contracts": "C-D45 / C-AC-34 in docs/features/core-workbench/DECISIONS.md, BRIEF.md and SPEC.md section '관리된 shell과 인수'"
+  },
+  "required_verdicts": [
+    "P2-2: tests/backend/test_pane_identity_independent_p27c.py (unmodified) passes, including the previously failing leader-exited case; repeat it 5x to show stability.",
+    "Add NEW adversarial tests only in tests/backend/test_pane_pin_independent_p27d.py for behaviors the fix newly relies on, derived from C-D45 before reading panes.py: (a) OMP exits while its own orphans are alive; all pinned own members later exit before close, and the pane's session number then names a foreign session (simulate reuse as in the p27c file by pointing pane.pid at a test-owned foreign session) -> close sends zero foreign signals; (b) own orphans that fork grandchildren after the OMP reap are cleaned at close while an anchor is alive; (c) no pidfd leak after close (count /proc/self/fd before/after); (d) the pin limit path (more members than SESSION_PIN_LIMIT is acceptable to sample with a smaller count if 256+ is too slow - state what you did) never signals an unpinned/unproven process; (e) live-OMP close still terminates its own group and session (no regression). Do not duplicate p27c tests.",
+    "Regression: tests/backend (all, incl. *_independent*), tests/contracts, tests/lifecycle. Other suites were green on this candidate per worker; rerun them only if your new tests reveal an impact."
+  ],
+  "allowed_write_paths": ["tests/backend/test_pane_pin_independent_p27d.py"],
+  "prohibited": "Any other path; production code frozen; no graphify update; no docs/.workflow edits; no commits; no tmux/herdr; no credentials. Do not touch /tmp/cw03-g2-* dirs.",
+  "result_format": "checks table first, status candidate_ready/needs_reroute, per-requirement verdicts (P2-2 and a..e) with failure classification, files added with sha256, frozen hash start/end, residue."
+}

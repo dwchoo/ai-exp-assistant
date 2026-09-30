@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "invocation": "cw10-missing-log-test-01",
+  "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/workflow /tmp/cw02-g1-venv/bin/python tests/workflow/live_workflow_independent.py",
+  "exit_code": 0,
+  "status": "passed",
+  "cases": [
+    {"case": "success", "shell": "bash", "exit_status": 0, "judgment": "success", "reason_codes": ["criteria_met"], "explicit_commit_matched": true, "source_status_unchanged": true, "parent_pid_residue": false},
+    {"case": "nonzero", "shell": "bash", "exit_status": 9, "judgment": "failure", "reason_codes": ["nonzero_exit"], "explicit_commit_matched": true, "source_status_unchanged": true, "parent_pid_residue": false},
+    {"case": "exit_zero_wrong_result", "shell": "sh", "exit_status": 0, "judgment": "failure", "reason_codes": ["exit_zero_criteria_failed"], "explicit_commit_matched": true, "source_status_unchanged": true, "parent_pid_residue": false},
+    {"case": "no_log", "shell": "sh", "exit_status": 0, "judgment": "indeterminate", "reason_codes": ["insufficient_raw_log"], "explicit_commit_matched": true, "source_status_unchanged": true, "parent_pid_residue": false}
+  ],
+  "all_cases_exit_confirmed": true,
+  "all_cases_recorded_raw_log_and_result_locations": true,
+  "all_cases_shell_events": ["sent", "accepted", "started", "ended"],
+  "temporary_directory_residue": [],
+  "owned_process_residue": []
+}

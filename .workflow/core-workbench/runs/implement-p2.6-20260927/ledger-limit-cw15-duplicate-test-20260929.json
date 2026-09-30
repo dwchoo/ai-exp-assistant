@@ -1,0 +1,23 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 1230,
+  "event": {
+    "id": "limit-cw15-duplicate-test-20260929",
+    "kind": "limit",
+    "data": {
+      "bucket": "role:test_designer",
+      "origin": "operating",
+      "value": 151,
+      "authority": "C-D55 plus workflow-contract section 8 and current $implement authorization",
+      "reason": "Independent CW-15 duplicate-generation rerun plus CW-16 final verification",
+      "decision_owner": "Root",
+      "remaining_work_estimate": 2,
+      "expected_previous": {
+        "value": 149,
+        "authority": "C-D55 plus workflow-contract section 8 and current $implement authorization",
+        "reason": "Independent CW-15 handoff/new-takeover generation regression plus CW-16 final verification"
+      },
+      "scope_basis": null
+    }
+  }
+}

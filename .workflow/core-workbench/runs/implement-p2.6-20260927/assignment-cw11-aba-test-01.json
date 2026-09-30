@@ -1,0 +1,18 @@
+{
+  "invocation":"cw11-aba-test-01",
+  "role":"test_designer",
+  "unit":"V-CW-11-p2.6-current",
+  "objective":"Independently verify the owner-issued ticket correction for A-B-A stale review reauthorization.",
+  "candidate_manifest":".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw11-aba-correction.json",
+  "candidate":"e2d467490e24040ef685899be809e2aeae908b919bdfa2f3565c081403021868",
+  "prior_test":".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw11-atomic-test-01.json",
+  "requirements":".workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw11.json",
+  "write_scope":["tests/observation/**"],
+  "must_test":[
+    "Confirm the prior failing A-B-A retained-request test passes without weakening writer/dispatch linearization.",
+    "Attack forged nonce, ticket from another owner, stale issuance epoch, duplicate consume, coalesced/discarded ticket, pause-held ticket across same identity versus a new incarnation, and the removed legacy ReviewRequest+current-epoch call shape.",
+    "Run all observation and relevant regressions. Rerun the current actual OMP probe if needed to validate the final ticket path; otherwise explicitly scope evidence reuse."
+  ],
+  "constraints":["Tests only; apply_patch only; no product/workflow edits; graphify update after edits; no uv/local env/package artifacts or destructive git actions."],
+  "report":["independent adversarial coverage","exact results","runtime qualification","candidate_ready or needs_reroute"]
+}

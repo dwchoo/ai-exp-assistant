@@ -1,0 +1,17 @@
+{
+  "invocation": "cw08-readiness-correction-01",
+  "role": "worker",
+  "unit": "V-CW-08-p2.6-current",
+  "objective": "Correct the independently reproduced CW-08 fail-closed readiness type bug where inFlightToolCount=false is accepted as zero.",
+  "candidate_manifest": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw08-test-after.json",
+  "requirements": ".workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw08.json",
+  "defect_evidence": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw08-test-01.json",
+  "allowed_files": ["src/workbench/ipc/bridge_g3/mailbox.py"],
+  "constraints": [
+    "Make the smallest fail-closed type-validation correction; do not edit independent tests.",
+    "Run all bridge tests including the independent regression plus relevant regressions.",
+    "Do not modify docs, workflow, graphify, storage schema, or downstream tickets.",
+    "No commit/reset/clean/stash/push/deploy and no Docker."
+  ],
+  "report": ["fix and rationale", "commands/results", "snapshot/scope audit", "candidate_ready or needs_reroute"]
+}

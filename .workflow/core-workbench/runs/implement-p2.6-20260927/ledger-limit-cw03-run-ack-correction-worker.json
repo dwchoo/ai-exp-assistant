@@ -1,0 +1,23 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 146,
+  "event": {
+    "id": "limit-cw03-run-ack-correction-worker-20260928",
+    "kind": "limit",
+    "data": {
+      "bucket": "role:worker_senior",
+      "origin": "operating",
+      "value": 94,
+      "authority": "C-D55 plus workflow-contract section 8 and current implementation authorization",
+      "reason": "One bounded correction for the independent pre-exec normal-exit false acknowledgement",
+      "decision_owner": "Root",
+      "remaining_work_estimate": 1,
+      "expected_previous": {
+        "value": 93,
+        "authority": "C-D55 plus workflow-contract section 8 and current implementation authorization",
+        "reason": "One bounded senior adapter integration call plus one correction contingency"
+      },
+      "scope_basis": null
+    }
+  }
+}

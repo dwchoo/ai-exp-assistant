@@ -1,0 +1,29 @@
+{
+  "invocation": "cw14-branch-test-01",
+  "outcome": "complete",
+  "candidate_ready": true,
+  "candidate_id": "86678925ab72e3a689a5d0dee78011547d192a02aba79504e4a838fa95de6719",
+  "files_modified": false,
+  "focused": {
+    "same_run_two_store": "A abc; A failed de -> (3,5,2,2); B durable f -> (3,4,1,1); A recovery g -> (3,7,4,4), raw abc, status equality",
+    "malformed_status": "sentinel preserved; status plus failed 2B append -> (3,5,2,2); removal plus 1B append -> (4,6,2,2), raw abcf, status equality"
+  },
+  "checks": {
+    "storage": "29 tests passed",
+    "terminal": "10 tests passed",
+    "tasks": "22 tests passed",
+    "workflow": "44 tests passed",
+    "hashes": "production and test files match frozen snapshot"
+  },
+  "sha256": {
+    "src/workbench/storage/log_raw/__init__.py": "2c336e18a75ffc5dea247054094766f9e0aea9512c0ebbe5169012ba1531feb6",
+    "src/workbench/storage/log_raw/admission.py": "4ce23cbaa06c4a0b0d79f5e1081b16fb72cd381aeffc104c15985bdc2dd57345",
+    "src/workbench/storage/log_raw/store.py": "fb562dac0f19240f99a8069b713b202b4ccffd6420ceebcd8d20a064fe5bd3a1",
+    "tests/storage/test_log_raw.py": "2ee2149e33972fcb2d8fb9faa038de0499da8d2e3b24144cf0bf46ed379904ee"
+  },
+  "acceptance": {
+    "C-AC-24": "candidate_ready at fixture level",
+    "C-AC-28": "candidate_ready at fixture level"
+  },
+  "mutation_owner": null
+}

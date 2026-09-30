@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-delta-review-cw06-02",
+  "ticket_id": "CW-06 (+ CW-17 ui_server overflow fix)",
+  "role": "reviewer",
+  "unit": "V-CW-06-p2.7",
+  "approved_bundle_digest": "a521acdc3838b43a26e277afc233bab695c8b02ce0d42392c3678931b2e3f027",
+  "routing": {"planned_role": "reviewer", "selected_role": "reviewer (wb-delta-reviewer, Sonnet high)", "reason_codes": ["bounded_delta_after_full_review"], "evidence_refs": ["full frozen review p27-review-cw06-01 (Opus) block on P2-1 with P3-1..6"]},
+  "frozen_candidate": "660411cd47a7ce8d11f619e21740a933c80e0e1b4b37a597c4ddf73add6e2dc5 (manifest p27-snapshot-cw06-rerun4-after.json)",
+  "original_review": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-review-cw06-01-agent.json (reviewed candidate 101b87f5...)",
+  "root_dispositions": [".workflow/core-workbench/runs/implement-p2.6-20260927/root-adjudication-p27-review-cw06-01.json", ".workflow/core-workbench/runs/implement-p2.6-20260927/root-adjudication-p27-cw06-flood.json"],
+  "delta_under_review": [
+    {"attempt": "p27-cw06-fix-worker-03", "base_bytes": "reviewed state = union of .workflow/core-workbench/runs/implement-p2.6-20260927/p27-cw06-worker-delta-backup/ overlaid by p27-cw06-fix-delta-backup/ (input.py, model.py, test_product_model.py) - that is the reviewed candidate's src/workbench/ui/product/*", "result": "result-p27-cw06-fix-worker-03.json"},
+    {"attempt": "p27-cw06-flood-worker-04", "base_bytes": "p27-cw06-fix3-delta-backup/ (UI after fix3) and p27-cw06-flood-pre-backup/src/workbench/backend/ui_server.py (CW-17 integrated ui_server)", "result": "result-p27-cw06-flood-worker-04.json"},
+    {"attempt": "test deltas", "files": ["tests/ui/test_product_flood_independent_p27f.py", "tests/ui/live_product_flood_independent_p27f.py", "tests/ui/test_product_rerun_independent_p27e.py", "tests/ui/live_product_omp_independent.py", "tests/ui/live_product_rerun_independent_p27e.py", "tests/backend/test_ui_server_overflow_independent_p27g.py"], "results": ["result-p27-cw06-rerun-test-03-agent.json", "result-p27-cw06-rerun-test-04-agent.json"]}
+  ],
+  "focus": [
+    "P2-1 fixed: bounded intake/feed/draw, catch-up correctness (screen reset + tail + 2004 tracking + no stale query replies + resize nudge), connection-loss path shows reason.",
+    "CW-17 ui_server overflow: framing never corrupted (in-flight frame remainder kept, whole unsent frames dropped), CLOSING last, nothing after closing, amortized cost, attached/detach state consistent, no regression of CW-17 invariants (single attachment, detach semantics, paste admission).",
+    "P3-1..4 fixed; P3-5 test maintenance does not weaken assertions (live probes opt-in model turns; hash pin removal; F2 post-assertion replacement preserves intent).",
+    "Note: a separate diagnostic (p27-cw06-ctrlc-diag-05) is running on a 1/13 Ctrl-C-under-flood anomaly; review the input path under flood for a plausible cause (UI stdin servicing, prefix/Esc hold, backend manual-input admission under flood) and report any concrete defect."
+  ],
+  "scratch": "/tmp/claude-1000/-home-dwchoo-ai-exp-assistant/dd5e2cee-e10d-41c4-8ebb-7c00b50dd465/scratchpad/cw06-delta2/",
+  "rules": "Strictly read-only in the repo except the result JSON .workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-delta-review-cw06-02-agent.json. Tests only with pattern test_*.py and PYTHONDONTWRITEBYTECODE=1; never run live_* files; unique temp dirs (a diagnostic runs concurrently). No graphify update.",
+  "result_format": "Findings first P0..P3 (file:line, scenario, clause, fix direction); per prior finding verdict (P2-1, P3-1..6) and ui_server verdict; overall integrate/block. Write JSON; reply <=20 lines. Korean."
+}

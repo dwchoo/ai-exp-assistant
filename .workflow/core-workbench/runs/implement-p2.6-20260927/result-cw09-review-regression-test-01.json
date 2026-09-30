@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "invocation": "cw09-review-regression-test-01",
+  "unit": "V-CW-09-p2.6-current",
+  "task_result": "needs_reroute",
+  "candidate_before": "eaf34b612ed53f12df03fc13ea0e599f28222eb7d8a57b707a402649427f0a17",
+  "candidate_after": "420a44a10bfdc17f4467ab0829b36914085322b847a211a8a2e5684e999f3926",
+  "requirements_sha256": "ce80ee1ddd377af0e1234b4f61f957b86136ab3cc97d2cd908186eea3f612db3",
+  "changed_paths": [
+    "tests/tasks/test_repository_independent.py"
+  ],
+  "new_tests": 2,
+  "existing_tests_preserved": true,
+  "checks": [
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest -v tests.tasks.test_repository_independent.RepositoryInvariantTests.test_insert_or_replace_cannot_overwrite_existing_task_spec_revision tests.tasks.test_repository_independent.RepositoryInvariantTests.test_v1_migration_rejects_scope_approval_invalidation_atomically",
+      "exit_code": 1,
+      "tests": 2,
+      "failures": 2,
+      "seconds": 0.163
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/tasks -v",
+      "exit_code": 1,
+      "tests": 22,
+      "failures": 2,
+      "seconds": 1.818
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0
+    },
+    {
+      "command": "find /tmp -maxdepth 1 -type d -name 'cw09-independent-*'",
+      "exit_code": 0,
+      "output": ""
+    }
+  ],
+  "implementation_defects": [
+    {
+      "id": "CW09-REPLACE-IMMUTABLE-TASKSPEC",
+      "severity": "P2",
+      "test": "test_insert_or_replace_cannot_overwrite_existing_task_spec_revision",
+      "observed": "Direct INSERT OR REPLACE under unmodified repository pragmas persisted unauthorized replacement spec_json and created_at after reopen.",
+      "expected": "IntegrityError and original TaskSpec row retained."
+    },
+    {
+      "id": "CW09-V1-WRONG-KIND-MIGRATION",
+      "severity": "P2",
+      "test": "test_v1_migration_rejects_scope_approval_invalidation_atomically",
+      "observed": "Same-Task scope_approved invalidation with valid v1 foreign keys migrated successfully to user_version=2.",
+      "expected": "DatabaseError, user_version=1, unchanged sqlite_master and all legacy table rows."
+    }
+  ],
+  "not_run": {
+    "G4_and_contracts": "Classification suites not repeated: no production changes in this test-only turn; full tasks suite isolates exactly the accepted two findings."
+  },
+  "cleanup": {
+    "owned_processes_spawned": false,
+    "temporary_directory_residue": [],
+    "sqlite_connections_closed": true
+  },
+  "needs_oracle": false,
+  "overall_completion_claimed": false
+}

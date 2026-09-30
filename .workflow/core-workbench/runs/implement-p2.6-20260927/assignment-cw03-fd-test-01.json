@@ -1,0 +1,31 @@
+{
+  "invocation": "cw03-fd-test-01",
+  "role": "test_designer",
+  "unit": "V-CW-03",
+  "candidate": "cac1bf9fcfd2298704a7c1c93ca95470595a95647874d7a8bde2131902c687ac",
+  "requirements": [
+    "Derive coverage from the approved rule that an experiment program cannot read later automatic requests or recovery traffic.",
+    "Add an independent runtime regression proving shell control FD8, recovery FD7, and injected aliases are absent/EBADF in the payload while explicit fixture channels remain usable.",
+    "Prove queued TAKEOVER and recovery sentinel frames remain available to the parent and are not consumed by the payload.",
+    "Include a controlled negative mutation or equivalent discriminating demonstration that the test fails when a host-only descriptor is deliberately leaked."
+  ],
+  "allowed_files": [
+    "tests/gates/g2_shell/test_common_run_protocol_independent.py"
+  ],
+  "forbidden": [
+    "Do not modify production code or any other test/file.",
+    "Do not commit, reset, clean, or stash."
+  ],
+  "checks": [
+    "python3 -m unittest tests.gates.g2_shell.test_common_run_protocol_independent -v",
+    "python3 -m unittest discover -s tests/gates/g2_shell -p 'test_*.py' -v",
+    "git diff --check"
+  ],
+  "report": [
+    "changed files",
+    "test intent and negative-control evidence",
+    "commands and exact results",
+    "remaining unknowns",
+    "candidate_ready or needs_reroute"
+  ]
+}

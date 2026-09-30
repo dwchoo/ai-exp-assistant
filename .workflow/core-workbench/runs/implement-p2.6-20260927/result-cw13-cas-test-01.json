@@ -1,0 +1,32 @@
+{
+  "invocation": "cw13-cas-test-01",
+  "outcome": "complete",
+  "candidate_ready": true,
+  "product_mutation": false,
+  "test_only_changed_paths": ["tests/policy/recovery_manager/test_recovery_policy.py", "graphify-out/**"],
+  "candidate": "022a1c5d0ad3a3b20d814a317c0ed6a431906ccadf9d22e274380abf39354fec",
+  "production_snapshot_match": {
+    "path": "src/workbench/policy/recovery_manager/policy.py",
+    "sha256": "d234b6614ba6cb0d09956f806d60617ac17368beaac391cf13660b4b0d096793"
+  },
+  "coverage": [
+    "25 post-CAS drift variants plus prior-history replacement",
+    "valid exact append preserving initial, normal-improvement, other-task and recovery attempts with ordinal/usage two",
+    "concurrent one-winner ordinal/usage one",
+    "in-place paused drift and post-read failure followed by same-request replay denial"
+  ],
+  "checks": {
+    "recovery_manager": "19 tests passed",
+    "workflow": "44 tests passed",
+    "observation": "95 tests passed",
+    "pause_automation": "129 tests passed",
+    "graphify_update": "exit 0"
+  },
+  "acceptance": {
+    "C-AC-07": "passed",
+    "C-AC-13": "passed",
+    "C-AC-04/C-AC-10/C-AC-31/C-AC-34": "prior fixture coverage preserved"
+  },
+  "residual_risk": "Actual durable adapter CAS, fresh read consistency and side-effect ordering remain CW-15 integration responsibilities.",
+  "mutation_owner": "/root/cw12_post_review_test"
+}

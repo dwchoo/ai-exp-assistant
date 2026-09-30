@@ -1,0 +1,32 @@
+{
+  "invocation": "cw03-resume-correction-worker-01",
+  "ticket_id": "CW-03",
+  "status": "needs_oracle",
+  "actual_workspace": "/home/dwchoo/ai-exp-assistant",
+  "base_snapshot": "58ddecdbbc44cad4810ef4aa4eebf02b8712fa8c09f7153664f867378fd32f04",
+  "candidate_id": "c9ec5ed63ef04b3f0be19d17c75ca48193da3cea02ba0c905f27d532ff73fb3d",
+  "attributable_output_bundle": "working-tree delta audited by resume-correction-scope-audit.json",
+  "changed_paths": [
+    "tests/gates/g2_shell/live_combined_boundary_probe.py",
+    "tests/gates/g2_shell/test_control_lifecycle.py",
+    "tests/gates/g2_shell/test_g2_shell.py",
+    "tests/gates/g2_shell/test_live_combined_boundary_predicates.py"
+  ],
+  "scope_audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/resume-correction-scope-audit.json",
+  "checks": [
+    "targeted legacy/current regressions: 4 passed in 4.376s",
+    "broad G2 suite: 107 tests, 5 failures, 1 error, 6 delegated-cgroup skips; native TSTP findings only",
+    "live_combined_boundary_probe.py: exit 1; Bash foreground PG restoration failure after native TSTP",
+    "git diff --check: passed"
+  ],
+  "active_or_stopped_subprocesses": "all owned subprocesses stopped; no owned fixture/suite residue",
+  "remaining_gaps": [
+    "Bash start/return TSTP exposes READY before INPUT_BARRIER after resume",
+    "dash start/return reports RETURN:148 and WAIT while supervisor remains alive",
+    "parent WAIT native TSTP remains unknown with TSTP ignored in the PTY session leader"
+  ],
+  "gate_result_refs": [],
+  "original_review_ref": null,
+  "delta_review_scope": null,
+  "oracle_question": "How should the control contract handle child native suspend/resume and the parent shell stopped-job return while keeping the supervisor observable and preserving the approved user-facing Ctrl-Z semantics?"
+}

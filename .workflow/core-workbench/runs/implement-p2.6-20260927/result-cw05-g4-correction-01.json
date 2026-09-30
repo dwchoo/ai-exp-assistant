@@ -1,0 +1,683 @@
+{
+  "schema_version": 1,
+  "invocation": "cw05-g4-correction-01",
+  "unit": "V-CW-05-p2.6-current",
+  "task_result": "candidate_ready",
+  "candidate": "0831a633e310975f60856c89198a3ea833288c64249057fc96deed55fa2b5d93",
+  "baseline_candidate": "0e9e6a1bed9e65e8b73f4c48bfb271a89a75d2027aff51419f1a4b7a3ebe0b17",
+  "baseline_ref": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw05-g4-test-after.json",
+  "failure_evidence_ref": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/result-cw05-g4-test-01.json",
+  "assignment_ref": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/assignment-cw05-g4-correction-01.json",
+  "snapshot_ref": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw05-g4-correction-after.json",
+  "scope_audit_ref": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/scope-audit-cw05-g4-correction.json",
+  "requirements_file_sha256": "903f1d732f9a1223dd65ebad4bfa95d6636fe21ad6909a1db468ee81f85dbbd4",
+  "cwd": "/home/dwchoo/ai-exp-assistant",
+  "environment": {
+    "python": "3.12.3",
+    "node": "22.23.2",
+    "omp": "18.2.10",
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "venv": "/tmp/cw02-g1-venv",
+    "runtime": "private UDS + unique temp config/profile/session/cwd + private local scripted providers; inherited HERDR_* removed"
+  },
+  "changed_paths": [
+    "tests/gates/g4_evidence/test_aggregate.py",
+    "tests/gates/g4_lifetime/live_detach_probe.py",
+    "tests/gates/harness/aggregate.py"
+  ],
+  "predicate_corrections": [
+    "All six backend/parent/supervisor/experiment/manager/worker PIDs must be distinct positive non-boolean integers; manager/worker map must contain exactly those two roles, backend PID must equal actual Popen.pid.",
+    "Display lease must be explicitly True before, False detached, True after reattach; identity equality alone is not acceptance.",
+    "Cleanup list must be exactly the five observed backend-owned PIDs, with optional reported backend PID bound to Popen.pid. Inspect /proc independently for the observed plus any reported positive PIDs; a claimed empty residue flag cannot mask a living process.",
+    "Verifier context requires nonempty required items and input manifest plus exact pinned evidence coverage.",
+    "Reject empty bytes, null/empty/false JSON observations and schema-only JSON (including schema aliases), even if the invalid content is deliberately re-pinned.",
+    "Synthetic evidence is accepted only with explicit validation_mode=provenance_only_fixture; this validates fixture provenance, not runtime semantic authorization."
+  ],
+  "before": {
+    "lifetime_tests": 8,
+    "lifetime_false_passes": 7,
+    "evidence_tests": 8,
+    "aggregate_false_passes": 3,
+    "reproduced": true,
+    "evidence_ref": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/result-cw05-g4-test-01.json"
+  },
+  "checks": [
+    {
+      "name": "g4_lifetime_including_independent",
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g4_lifetime /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/gates/g4_lifetime -q",
+      "result": "passed",
+      "exit_code": 0,
+      "count": 8,
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "candidate": "0831a633e310975f60856c89198a3ea833288c64249057fc96deed55fa2b5d93",
+      "environment": {
+        "python": "3.12.3",
+        "node": "22.23.2",
+        "omp": "18.2.10",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "venv": "/tmp/cw02-g1-venv",
+        "runtime": "private UDS + unique temp config/profile/session/cwd + private local scripted providers; inherited HERDR_* removed"
+      }
+    },
+    {
+      "name": "g4_evidence_including_independent",
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g4_evidence /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/gates/g4_evidence -q",
+      "result": "passed",
+      "exit_code": 0,
+      "count": 10,
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "candidate": "0831a633e310975f60856c89198a3ea833288c64249057fc96deed55fa2b5d93",
+      "environment": {
+        "python": "3.12.3",
+        "node": "22.23.2",
+        "omp": "18.2.10",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "venv": "/tmp/cw02-g1-venv",
+        "runtime": "private UDS + unique temp config/profile/session/cwd + private local scripted providers; inherited HERDR_* removed"
+      }
+    },
+    {
+      "name": "python_contracts_including_independent",
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/contracts -q",
+      "result": "passed",
+      "exit_code": 0,
+      "count": 19,
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "candidate": "0831a633e310975f60856c89198a3ea833288c64249057fc96deed55fa2b5d93",
+      "environment": {
+        "python": "3.12.3",
+        "node": "22.23.2",
+        "omp": "18.2.10",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "venv": "/tmp/cw02-g1-venv",
+        "runtime": "private UDS + unique temp config/profile/session/cwd + private local scripted providers; inherited HERDR_* removed"
+      }
+    },
+    {
+      "name": "node_contracts",
+      "command": "node --experimental-strip-types --test tests/gates/harness/contracts.test.ts tests/gates/harness/ports-v2.test.ts",
+      "result": "passed",
+      "exit_code": 0,
+      "count": 14,
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "candidate": "0831a633e310975f60856c89198a3ea833288c64249057fc96deed55fa2b5d93",
+      "environment": {
+        "python": "3.12.3",
+        "node": "22.23.2",
+        "omp": "18.2.10",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "venv": "/tmp/cw02-g1-venv",
+        "runtime": "private UDS + unique temp config/profile/session/cwd + private local scripted providers; inherited HERDR_* removed"
+      }
+    },
+    {
+      "name": "g2_deadline",
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest -q tests/gates/g2_shell/test_return_deadline.py",
+      "result": "passed",
+      "exit_code": 0,
+      "count": 2,
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "candidate": "0831a633e310975f60856c89198a3ea833288c64249057fc96deed55fa2b5d93",
+      "environment": {
+        "python": "3.12.3",
+        "node": "22.23.2",
+        "omp": "18.2.10",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "venv": "/tmp/cw02-g1-venv",
+        "runtime": "private UDS + unique temp config/profile/session/cwd + private local scripted providers; inherited HERDR_* removed"
+      }
+    },
+    {
+      "name": "normal_runtime",
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g4_lifetime:tests/gates/g3_omp /tmp/cw02-g1-venv/bin/python tests/gates/g4_lifetime/live_detach_probe.py",
+      "result": "passed",
+      "exit_code": 0,
+      "evidence_level": "runtime",
+      "evidence_ref": "runtime_observations.normal",
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "candidate": "0831a633e310975f60856c89198a3ea833288c64249057fc96deed55fa2b5d93",
+      "environment": {
+        "python": "3.12.3",
+        "node": "22.23.2",
+        "omp": "18.2.10",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "venv": "/tmp/cw02-g1-venv",
+        "runtime": "private UDS + unique temp config/profile/session/cwd + private local scripted providers; inherited HERDR_* removed"
+      }
+    },
+    {
+      "name": "paused_runtime",
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests/gates/g4_lifetime:tests/gates/g3_omp /tmp/cw02-g1-venv/bin/python tests/gates/g4_lifetime/live_detach_probe.py --paused",
+      "result": "passed",
+      "exit_code": 0,
+      "evidence_level": "runtime",
+      "evidence_ref": "runtime_observations.paused",
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "candidate": "0831a633e310975f60856c89198a3ea833288c64249057fc96deed55fa2b5d93",
+      "environment": {
+        "python": "3.12.3",
+        "node": "22.23.2",
+        "omp": "18.2.10",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "venv": "/tmp/cw02-g1-venv",
+        "runtime": "private UDS + unique temp config/profile/session/cwd + private local scripted providers; inherited HERDR_* removed"
+      }
+    },
+    {
+      "name": "diff_check",
+      "command": "git diff --check",
+      "result": "passed",
+      "exit_code": 0,
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "candidate": "0831a633e310975f60856c89198a3ea833288c64249057fc96deed55fa2b5d93",
+      "environment": {
+        "python": "3.12.3",
+        "node": "22.23.2",
+        "omp": "18.2.10",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "venv": "/tmp/cw02-g1-venv",
+        "runtime": "private UDS + unique temp config/profile/session/cwd + private local scripted providers; inherited HERDR_* removed"
+      }
+    },
+    {
+      "name": "process_pattern_residue",
+      "command": "pgrep -af '[/]tmp/cw05-(g4|deadline)-'",
+      "result": "passed",
+      "exit_code": 1,
+      "meaning": "Expected no matching owned probe process.",
+      "cwd": "/home/dwchoo/ai-exp-assistant",
+      "candidate": "0831a633e310975f60856c89198a3ea833288c64249057fc96deed55fa2b5d93",
+      "environment": {
+        "python": "3.12.3",
+        "node": "22.23.2",
+        "omp": "18.2.10",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "venv": "/tmp/cw02-g1-venv",
+        "runtime": "private UDS + unique temp config/profile/session/cwd + private local scripted providers; inherited HERDR_* removed"
+      }
+    }
+  ],
+  "runtime_observations": {
+    "normal": {
+      "after": {
+        "agent_end": 1,
+        "agent_start": 1,
+        "attached": true,
+        "backend_pid": 3986261,
+        "control_mode": "managed_control_wait",
+        "deliveries": 1,
+        "experiment_pid": 3986269,
+        "host_main_exit": null,
+        "host_observations": 1240,
+        "host_running": true,
+        "host_unknowns": [],
+        "omp_pids": {
+          "manager": 3986270,
+          "worker": 3986272
+        },
+        "omp_sessions": {
+          "manager": [
+            "01a0e489-d68b-703a-90a7-a5fa6d31e1e1",
+            1
+          ],
+          "worker": [
+            "01a0e489-d68b-7701-80bc-ffc9817d1e80",
+            1
+          ]
+        },
+        "owned_alive": true,
+        "owner": "manager",
+        "owner_epoch": 1,
+        "parent_shell_pid": 3986266,
+        "provider_requests": {
+          "manager": 0,
+          "worker": 1
+        },
+        "semantic_match": true,
+        "supervisor_pid": 3986268,
+        "ticks": 1,
+        "user_owner": "user",
+        "user_owner_epoch": 1,
+        "wake_status": "api_returned"
+      },
+      "backend_cleanup": {
+        "backend_pid": 3986261,
+        "delivered": {
+          "ack": {
+            "kind": "api_ack",
+            "messageId": "e99193df-9b6a-4b06-9a41-1688c41d1c68",
+            "modelProcessed": false,
+            "requestId": "12f78031-e22d-4158-8eb4-0d6666416300",
+            "status": "api_accepted"
+          },
+          "message_id": "e99193df-9b6a-4b06-9a41-1688c41d1c68"
+        },
+        "last": {
+          "agent_end": 1,
+          "agent_start": 1,
+          "attached": true,
+          "backend_pid": 3986261,
+          "control_mode": "managed_control_wait",
+          "deliveries": 1,
+          "experiment_pid": 3986269,
+          "host_main_exit": null,
+          "host_observations": 1241,
+          "host_running": true,
+          "host_unknowns": [],
+          "omp_pids": {
+            "manager": 3986270,
+            "worker": 3986272
+          },
+          "omp_sessions": {
+            "manager": [
+              "01a0e489-d68b-703a-90a7-a5fa6d31e1e1",
+              1
+            ],
+            "worker": [
+              "01a0e489-d68b-7701-80bc-ffc9817d1e80",
+              1
+            ]
+          },
+          "owned_alive": true,
+          "owner": "manager",
+          "owner_epoch": 1,
+          "parent_shell_pid": 3986266,
+          "provider_requests": {
+            "manager": 0,
+            "worker": 1
+          },
+          "semantic_match": true,
+          "supervisor_pid": 3986268,
+          "ticks": 1,
+          "user_owner": "user",
+          "user_owner_epoch": 1,
+          "wake_status": "api_returned"
+        },
+        "owned_pids": [
+          3986266,
+          3986268,
+          3986269,
+          3986270,
+          3986272
+        ],
+        "paused": false,
+        "pty_drain": [
+          {
+            "bytes": 114947,
+            "role": "manager"
+          },
+          {
+            "bytes": 137848,
+            "role": "worker"
+          }
+        ],
+        "residue": [],
+        "result": "observed"
+      },
+      "backend_exit": 0,
+      "before": {
+        "agent_end": 0,
+        "agent_start": 0,
+        "attached": true,
+        "backend_pid": 3986261,
+        "control_mode": "managed_control_wait",
+        "deliveries": 0,
+        "experiment_pid": 3986269,
+        "host_main_exit": null,
+        "host_observations": 1,
+        "host_running": true,
+        "host_unknowns": [],
+        "omp_pids": {
+          "manager": 3986270,
+          "worker": 3986272
+        },
+        "omp_sessions": {
+          "manager": [
+            "01a0e489-d68b-703a-90a7-a5fa6d31e1e1",
+            1
+          ],
+          "worker": [
+            "01a0e489-d68b-7701-80bc-ffc9817d1e80",
+            1
+          ]
+        },
+        "owned_alive": true,
+        "owner": "manager",
+        "owner_epoch": 1,
+        "parent_shell_pid": 3986266,
+        "provider_requests": {
+          "manager": 0,
+          "worker": 0
+        },
+        "semantic_match": false,
+        "supervisor_pid": 3986268,
+        "ticks": 0,
+        "user_owner": "user",
+        "user_owner_epoch": 1,
+        "wake_status": "unarmed"
+      },
+      "cleanup_identity_ok": true,
+      "detached": {
+        "agent_end": 0,
+        "agent_start": 0,
+        "attached": false,
+        "backend_pid": 3986261,
+        "control_mode": "managed_control_wait",
+        "deliveries": 0,
+        "experiment_pid": 3986269,
+        "host_main_exit": null,
+        "host_observations": 3,
+        "host_running": true,
+        "host_unknowns": [],
+        "omp_pids": {
+          "manager": 3986270,
+          "worker": 3986272
+        },
+        "omp_sessions": {
+          "manager": [
+            "01a0e489-d68b-703a-90a7-a5fa6d31e1e1",
+            1
+          ],
+          "worker": [
+            "01a0e489-d68b-7701-80bc-ffc9817d1e80",
+            1
+          ]
+        },
+        "owned_alive": true,
+        "owner": "manager",
+        "owner_epoch": 1,
+        "parent_shell_pid": 3986266,
+        "provider_requests": {
+          "manager": 0,
+          "worker": 0
+        },
+        "semantic_match": false,
+        "supervisor_pid": 3986268,
+        "ticks": 0,
+        "user_owner": "user",
+        "user_owner_epoch": 1,
+        "wake_status": "armed"
+      },
+      "elapsed_detached_seconds": 62.07272031810135,
+      "lease_ok": true,
+      "os_residue": [],
+      "paused": false,
+      "result": "passed",
+      "same_identities": true,
+      "stderr_bytes": 0,
+      "valid_process_identities": true,
+      "version": "omp/18.2.10",
+      "wake_ok": true
+    },
+    "paused": {
+      "after": {
+        "agent_end": 0,
+        "agent_start": 0,
+        "attached": true,
+        "backend_pid": 3986352,
+        "control_mode": "managed_control_wait",
+        "deliveries": 0,
+        "experiment_pid": 3986364,
+        "host_main_exit": null,
+        "host_observations": 1240,
+        "host_running": true,
+        "host_unknowns": [],
+        "omp_pids": {
+          "manager": 3986365,
+          "worker": 3986367
+        },
+        "omp_sessions": {
+          "manager": [
+            "01a0e489-dc33-735e-aecf-376620e4b1c0",
+            1
+          ],
+          "worker": [
+            "01a0e489-dcc9-761c-ab23-9b7293a80687",
+            1
+          ]
+        },
+        "owned_alive": true,
+        "owner": "manager",
+        "owner_epoch": 1,
+        "parent_shell_pid": 3986357,
+        "provider_requests": {
+          "manager": 0,
+          "worker": 0
+        },
+        "semantic_match": false,
+        "supervisor_pid": 3986359,
+        "ticks": 1,
+        "user_owner": "user",
+        "user_owner_epoch": 1,
+        "wake_status": "held_paused"
+      },
+      "backend_cleanup": {
+        "backend_pid": 3986352,
+        "delivered": {},
+        "last": {
+          "agent_end": 0,
+          "agent_start": 0,
+          "attached": true,
+          "backend_pid": 3986352,
+          "control_mode": "managed_control_wait",
+          "deliveries": 0,
+          "experiment_pid": 3986364,
+          "host_main_exit": null,
+          "host_observations": 1241,
+          "host_running": true,
+          "host_unknowns": [],
+          "omp_pids": {
+            "manager": 3986365,
+            "worker": 3986367
+          },
+          "omp_sessions": {
+            "manager": [
+              "01a0e489-dc33-735e-aecf-376620e4b1c0",
+              1
+            ],
+            "worker": [
+              "01a0e489-dcc9-761c-ab23-9b7293a80687",
+              1
+            ]
+          },
+          "owned_alive": true,
+          "owner": "manager",
+          "owner_epoch": 1,
+          "parent_shell_pid": 3986357,
+          "provider_requests": {
+            "manager": 0,
+            "worker": 0
+          },
+          "semantic_match": false,
+          "supervisor_pid": 3986359,
+          "ticks": 1,
+          "user_owner": "user",
+          "user_owner_epoch": 1,
+          "wake_status": "held_paused"
+        },
+        "owned_pids": [
+          3986357,
+          3986359,
+          3986364,
+          3986365,
+          3986367
+        ],
+        "pause_ack": "paused",
+        "paused": true,
+        "pty_drain": [
+          {
+            "bytes": 122682,
+            "role": "manager"
+          },
+          {
+            "bytes": 127972,
+            "role": "worker"
+          }
+        ],
+        "residue": [],
+        "result": "observed"
+      },
+      "backend_exit": 0,
+      "before": {
+        "agent_end": 0,
+        "agent_start": 0,
+        "attached": true,
+        "backend_pid": 3986352,
+        "control_mode": "managed_control_wait",
+        "deliveries": 0,
+        "experiment_pid": 3986364,
+        "host_main_exit": null,
+        "host_observations": 1,
+        "host_running": true,
+        "host_unknowns": [],
+        "omp_pids": {
+          "manager": 3986365,
+          "worker": 3986367
+        },
+        "omp_sessions": {
+          "manager": [
+            "01a0e489-dc33-735e-aecf-376620e4b1c0",
+            1
+          ],
+          "worker": [
+            "01a0e489-dcc9-761c-ab23-9b7293a80687",
+            1
+          ]
+        },
+        "owned_alive": true,
+        "owner": "manager",
+        "owner_epoch": 1,
+        "parent_shell_pid": 3986357,
+        "provider_requests": {
+          "manager": 0,
+          "worker": 0
+        },
+        "semantic_match": false,
+        "supervisor_pid": 3986359,
+        "ticks": 0,
+        "user_owner": "user",
+        "user_owner_epoch": 1,
+        "wake_status": "unarmed"
+      },
+      "cleanup_identity_ok": true,
+      "detached": {
+        "agent_end": 0,
+        "agent_start": 0,
+        "attached": false,
+        "backend_pid": 3986352,
+        "control_mode": "managed_control_wait",
+        "deliveries": 0,
+        "experiment_pid": 3986364,
+        "host_main_exit": null,
+        "host_observations": 3,
+        "host_running": true,
+        "host_unknowns": [],
+        "omp_pids": {
+          "manager": 3986365,
+          "worker": 3986367
+        },
+        "omp_sessions": {
+          "manager": [
+            "01a0e489-dc33-735e-aecf-376620e4b1c0",
+            1
+          ],
+          "worker": [
+            "01a0e489-dcc9-761c-ab23-9b7293a80687",
+            1
+          ]
+        },
+        "owned_alive": true,
+        "owner": "manager",
+        "owner_epoch": 1,
+        "parent_shell_pid": 3986357,
+        "provider_requests": {
+          "manager": 0,
+          "worker": 0
+        },
+        "semantic_match": false,
+        "supervisor_pid": 3986359,
+        "ticks": 0,
+        "user_owner": "user",
+        "user_owner_epoch": 1,
+        "wake_status": "armed"
+      },
+      "elapsed_detached_seconds": 62.064046221086755,
+      "lease_ok": true,
+      "os_residue": [],
+      "paused": true,
+      "result": "passed",
+      "same_identities": true,
+      "stderr_bytes": 0,
+      "valid_process_identities": true,
+      "version": "omp/18.2.10",
+      "wake_ok": true
+    }
+  },
+  "independent_tests_preserved": {
+    "tests/contracts/test_ports_v2_independent.py": {
+      "kind": "file",
+      "mode": 436,
+      "sha256": "a963cf196bf3435dbb3232c08451840a0bae84630a41c0213aa497136ad7e3ff"
+    },
+    "tests/gates/g4_evidence/test_aggregate_independent.py": {
+      "kind": "file",
+      "mode": 436,
+      "sha256": "69bca7b65e76c3bd944803c185707aacbdb8708ae5cf5dbcd203d99cab70bf06"
+    },
+    "tests/gates/g4_lifetime/test_independent_boundaries.py": {
+      "kind": "file",
+      "mode": 436,
+      "sha256": "9dfe556d532da2109951a1fab5c529c5b2675d0a23de6fbd8f76023ce6a08593"
+    }
+  },
+  "candidate_stability": {
+    "before": "0831a633e310975f60856c89198a3ea833288c64249057fc96deed55fa2b5d93",
+    "after": "0831a633e310975f60856c89198a3ea833288c64249057fc96deed55fa2b5d93",
+    "stable": true,
+    "unknowns": []
+  },
+  "scope": {
+    "changed": [
+      "tests/gates/g4_evidence/test_aggregate.py",
+      "tests/gates/g4_lifetime/live_detach_probe.py",
+      "tests/gates/harness/aggregate.py"
+    ],
+    "index_changed": [],
+    "outside_scope": [],
+    "comparable": true
+  },
+  "cleanup": {
+    "owned_pids": [
+      3986261,
+      3986266,
+      3986268,
+      3986269,
+      3986270,
+      3986272,
+      3986352,
+      3986357,
+      3986359,
+      3986364,
+      3986365,
+      3986367
+    ],
+    "os_residue": [],
+    "backend_reported_residue": [],
+    "temp_cw05_g4_residue": [],
+    "active_owned_checks": 0,
+    "pty_and_pipe_drain": "continuously drained, byte observations retained in runtime JSON; stderr=0 in both runs",
+    "mutation_subprocess_state": "none running at handoff"
+  },
+  "attempts": [
+    "Independent pre-fix 7 lifetime / 3 aggregate failures reproduced unchanged.",
+    "While adding two extra own regression methods, an insertion temporarily displaced the old test tail and raised NameError. Restored the original test body, retained both assertions, and reran all evidence tests successfully; no independent test changed."
+  ],
+  "unknowns": [
+    "Aggregate validation remains provenance/coverage validation. The explicit fixture mode never certifies synthetic evidence as real runtime; Root must supply pinned actual runs and approve reuse.",
+    "Display-user ownership is a fixture lease, separate from actual shell manager ownership; production frontend screen replay and production durability/recovery remain outside this unit."
+  ],
+  "needs_oracle": false,
+  "remaining_required_worker_checks": [],
+  "overall_acceptance_claim": false,
+  "commit_created": false
+}

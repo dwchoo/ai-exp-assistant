@@ -1,0 +1,39 @@
+{
+  "invocation": "cw11-correction-01",
+  "role": "worker",
+  "unit": "V-CW-11-p2.6-current",
+  "objective": "Correct all four accepted CW-11 review findings without expanding the ticket scope.",
+  "base_candidate_manifest": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw11-final-review.json",
+  "base_candidate": "d5c3b8127b60f5d32df5eae21514a26faaf8516ab4ba6ebaa4346c87bd92a11c",
+  "review_evidence": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw11-review-01.json",
+  "requirements": ".workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw11.json",
+  "ticket": "docs/features/core-workbench/tickets/CW-11.md",
+  "write_scope": [
+    "src/workbench/observation/**",
+    "tests/observation/**"
+  ],
+  "required_corrections": [
+    "Immediately before dispatch, re-read automation authority and active-run identity after every potentially blocking priority/readiness/fact callback. Do not dispatch if paused, cancelled, unhealthy, unauthorized, inactive, or replaced; retain only policy-valid latest pending state.",
+    "Once a confirmed exit has been surfaced for a run identity, fence all later periodic review dispatch for that same run even if upstream active-run or collected facts are temporarily stale. A genuinely new immutable run identity must remain independent.",
+    "Connect hang suspicion to a production scheduler path that invokes bounded non-model process/lifecycle investigation and supplies its provenance-preserving result to review/status behavior. Silence alone must remain unknown and must never imply confirmed hang.",
+    "Connect usage collection to the production scheduler result/status path with observed, estimated, and unknown provenance preserved. Actual absence of usage must display unknown, not zero or estimated; no secret/private raw content may be included.",
+    "Add focused worker tests for the exact TOCTOU, stale-running-after-confirmed-exit, hang integration, and usage integration regressions."
+  ],
+  "verification": [
+    "Run the observation unit suite with /tmp/cw02-g1-venv/bin/python and PYTHONDONTWRITEBYTECODE=1.",
+    "Run the existing actual OMP 18.2.10 live probe if compatible; otherwise report the exact reason and preserve it for independent verification.",
+    "Run relevant workflow/bridge/contracts/G4 regressions.",
+    "Run graphify update . after code/test changes; do not restore or clean generated graphify output."
+  ],
+  "constraints": [
+    "Use apply_patch for edits. Do not use uv, create a local .venv, or create packaging artifacts.",
+    "Do not modify workflow records, PLAN, approval, ticket, or requirements files.",
+    "Do not commit, push, merge, stash, reset, clean, or delete pre-existing user files."
+  ],
+  "report": [
+    "changed files and correction mapping",
+    "commands and exact results",
+    "remaining unknowns",
+    "candidate_ready or needs_reroute"
+  ]
+}

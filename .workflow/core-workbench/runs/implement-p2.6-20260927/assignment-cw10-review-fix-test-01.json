@@ -1,0 +1,15 @@
+{
+  "invocation":"cw10-review-fix-test-01","role":"test_designer","unit":"V-CW-10-p2.6-current","objective":"Independently regress all four CW-10 fresh-review corrections and actual worker-role response binding.",
+  "candidate_manifest":".workflow/core-workbench/runs/implement-p2.6-20260927/cw10-review-fix-test-checkpoint.json","requirements":".workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw10.json",
+  "required_tests":[
+    "Attack WorkerRolePort evidence with wrong task/revision/run/message/attempt/session/generation/event sequence, stale/replayed responses, OMP_PROCESSED-only evidence, missing assistant response, and mismatched judgment; no shell dispatch/report may occur.",
+    "Force pause/cancel/revoke/proceed changes during worktree preparation and immediately before shell dispatch and judgment/report; every new automated action must re-read current authority and hold.",
+    "Exercise direct worker request routing for existing Task, bounded small new spec, and scope expansion; assert durable Task/revision linkage and no execution before manager approval+proceed.",
+    "Inject secret sentinel environment values and recursively scan run artifacts, SQLite content, reports and logs; only names may persist. Ensure transient execution still receives allowed values.",
+    "Independently run actual OMP 18.2.10 two-response vertical path plus Git worktree/real shell and verify exact identities and residue."
+  ],
+  "allowed_files":["tests/workflow/test_run_independent.py","tests/workflow/live_workflow_independent.py"],
+  "constraints":["Do not modify product, worker tests, guide, docs, workflow artifacts, graphify, or dependencies.","No private bridge-state shortcuts and no model text persistence.","No shared repo commit/push/merge/stash/reset/clean."],
+  "checks":["All workflow and dependency suites, actual runtime, git diff --check, residue scan."],
+  "report":["new tests/defects","actual response identity evidence","checks/results","snapshot/scope audit","candidate_ready or needs_reroute"]
+}

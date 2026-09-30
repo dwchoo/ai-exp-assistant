@@ -1,0 +1,28 @@
+{
+  "invocation": "cw03-fd-test-01",
+  "unit": "V-CW-03",
+  "status": "candidate_ready",
+  "candidate": "e96d6ef7ff0d16e3090a2cd9ba94b3d60563202aa5315a4e22f3e469d8748333",
+  "test_sha256": "4746ee7ac74070799c1a914f6b21df88e2f0978b8fbef41f6ea3012f87c65d7b",
+  "production_sha256": "a4af203b4fe9e8a5f090b5c8bcc057ea16385cc2785c279638fb314cd29c7e03",
+  "changed_files": [
+    "tests/gates/g2_shell/test_common_run_protocol_independent.py"
+  ],
+  "scope_audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/scope-audit-cw03-fd-test-01.json",
+  "scope_note": "graphify-out/cache/last_query_stamp was an automatic graphify query side effect outside the test assignment and will be reconciled by the required root graphify update before freezing the review candidate.",
+  "checks": [
+    {"name": "independent common RUN tests", "result": "passed", "tests": 6, "elapsed_seconds": 2.026},
+    {"name": "full G2 discovery", "result": "passed", "tests": 126, "skipped": 6, "elapsed_seconds": 101.713},
+    {"name": "git diff --check", "result": "passed"}
+  ],
+  "observations": [
+    "Bash and sh payloads observed EBADF for FD7, FD8, and injected aliases 37/38.",
+    "Explicit fixture FD9 and WB_RELEASE_FD remained usable.",
+    "Queued TAKEOVER and recovery sentinel frames remained readable by the parent.",
+    "Removing the child allowlist made the payload consume both queued frames and fail the closed-FD assertion.",
+    "No owned parent, supervisor, payload, descendant, fixture, wrapper, or unittest process remained."
+  ],
+  "unknowns": [
+    "Coverage is for the bounded fixture protocol and does not establish a general custom-FD API or process sandbox."
+  ]
+}

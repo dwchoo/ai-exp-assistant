@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "invocation": "cw09-review-regression-test-01",
+  "role": "test_designer",
+  "unit": "V-CW-09-p2.6-current",
+  "workspace": "/home/dwchoo/ai-exp-assistant",
+  "writer": true,
+  "checkpoint": ".workflow/core-workbench/runs/implement-p2.6-20260927/cw09-review-regression-checkpoint.json",
+  "requirements": ".workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw09.json",
+  "ticket": "docs/features/core-workbench/tickets/CW-09.md",
+  "review": ".workflow/core-workbench/runs/implement-p2.6-20260927/review-cw09-01.json",
+  "allowed_write_scope": [
+    "tests/tasks/test_repository_independent.py"
+  ],
+  "instructions": "Independently add focused regressions for both accepted P2 findings without modifying production code or existing worker-owned tests: (1) direct INSERT OR REPLACE must not overwrite an existing immutable TaskSpec revision under the repository connection's real pragma settings; (2) a schema-v1 database containing invalidated_revisions linked to a same-Task scope_approved decision must fail v2 migration atomically, preserving user_version=1 and legacy data. Confirm each new regression fails on the current candidate for the intended reason. Preserve all existing independent tests. Run the full tests/tasks suite and relevant G4/contracts only as useful classification checks. Produce result, after snapshot, and scope audit artifacts under the run directory, then return the writer lease."
+}

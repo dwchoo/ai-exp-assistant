@@ -1,0 +1,12 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 271,
+  "event": {"id": "limit-cw05-current-test-20260928", "kind": "limit", "data": {
+    "bucket": "role:test_designer", "origin": "operating", "value": 89,
+    "authority": "C-D55 plus workflow-contract section 8 and current implementation authorization",
+    "reason": "One independent CW-05 G4 test-design and execution turn",
+    "decision_owner": "Root", "remaining_work_estimate": 1,
+    "expected_previous": {"value": 88, "authority": "C-D55 plus workflow-contract section 8 and current implementation authorization", "reason": "One independent CW-02 G1 color/outer-runtime test turn"},
+    "scope_basis": null
+  }}
+}

@@ -1,0 +1,56 @@
+{
+  "feature_id": "core-workbench",
+  "ticket_id": "CW-03",
+  "attempt_id": "split-pg-frozen-review-01",
+  "invocation": "cw03-split-pg-review-01",
+  "approved_bundle_digest": "64bcf577a30e7c6bbff3e4e775f8e6c17ca212ce3bf79b5bc5be31196a792b07",
+  "actual_workspace": "/home/dwchoo/ai-exp-assistant",
+  "repository_identity": "git HEAD 7b2048c50e0794da847ad8674d4dc0433d643c33 on main",
+  "baseline_snapshot": "HEAD plus approved p2.6 documents and pre-existing preserved dirty workspace",
+  "candidate_id": "1747ca33388580d8c4fcecf616a6a8dbe24372900dd49fa7aede3719857095ba",
+  "candidate_manifest": ".workflow/core-workbench/runs/implement-p2.6-20260927/split-pg-frozen-candidate.json",
+  "acceptance_ids": ["C-AC-03", "C-AC-08", "C-AC-10", "C-AC-26", "C-AC-34"],
+  "relevant_contracts": ["G2-CONTROL", "G2-INPUT-JOBS", "G2-HOOK-ENV", "G2-TAKEOVER", "G2-LIFECYCLE", "G2-LAUNCH", "ADR-0002", "C-D55"],
+  "review_paths": [
+    "src/workbench/terminal/shell_g2/**",
+    "tests/gates/g2_shell/live_combined_boundary_probe.py",
+    "tests/gates/g2_shell/test_control_lifecycle.py",
+    "tests/gates/g2_shell/test_g2_shell.py",
+    "tests/gates/g2_shell/test_live_combined_boundary_predicates.py",
+    "tests/gates/g2_shell/test_split_pg_control.py"
+  ],
+  "read_only": true,
+  "evidence_refs": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw03-resume-correction-worker-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/oracle-cw03-native-tstp-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw03-split-pg-worker-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw03-split-pg-test-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/split-pg-worker-scope-audit.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/split-pg-test-scope-audit.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/split-pg-graphify-scope-audit.json"
+  ],
+  "review_questions": [
+    "Do the split-PG state machine and tests actually prove supervisor observation, raw stopped/continued semantics, terminal foreground restore-before-continue, descendant lifetime and input-return causality for Bash/dash?",
+    "Do the rewritten legacy tests remain valid explicit negative controls rather than accepting unsafe behavior?",
+    "Does any path conflate exit 148, native stop, main return, supervisor transport status, lifetime completion, or parent control return?",
+    "Can missing/forged events, failed tcsetpgrp, stale PG/generation, no-target stages, FD/supervisor failure, or input flush omission create false completion or replay?",
+    "Are cleanup, test isolation, and skip/unknown classifications sound, with no user-facing policy change?"
+  ],
+  "known_results": [
+    "Independent full G2 discovery: 111 tests, exit 0, six delegated-cgroup skips",
+    "Split-PG standalone differential: Bash/dash split positive and shared-PG negative observations, exit 0",
+    "No owned process residue",
+    "graphify update succeeded; generated delta scope-clean"
+  ],
+  "stop_conditions": ["Report concrete P0-P2 findings with file/line and contract impact; do not edit files or rerun mutating checks"],
+  "configured_model": "gpt-6-sol",
+  "configured_effort": "high",
+  "host_observed_model": "unverified",
+  "host_observed_effort": "unverified",
+  "routing": {
+    "planned_role": "reviewer",
+    "selected_role": "reviewer",
+    "reason_codes": ["fresh_frozen_candidate_review"],
+    "evidence_refs": ["change-verification frozen review requirement"]
+  }
+}

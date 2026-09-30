@@ -1,0 +1,20 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 1043,
+  "event": {
+    "id": "reserve-cw14-review-01",
+    "kind": "reserve",
+    "data": {
+      "invocation": "cw14-review-01",
+      "role": "reviewer",
+      "unit": "V-CW-14-p2.6-current",
+      "incident": "",
+      "purpose": "Fresh read-only final CW-14 acceptance review",
+      "model": "gpt-6-sol",
+      "effort": "high",
+      "buckets": ["total", "role:reviewer", "unit:V-CW-14-p2.6-current"],
+      "writer": false,
+      "workspace": "/home/dwchoo/ai-exp-assistant"
+    }
+  }
+}

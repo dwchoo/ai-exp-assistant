@@ -1,0 +1,23 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 352,
+  "event": {
+    "id": "limit-cw07-test-20260928",
+    "kind": "limit",
+    "data": {
+      "bucket": "role:test_designer",
+      "origin": "operating",
+      "value": 92,
+      "authority": "C-D55 plus workflow-contract section 8 and current implementation authorization",
+      "reason": "One independent CW-07 shell runtime test turn",
+      "decision_owner": "Root",
+      "remaining_work_estimate": 1,
+      "expected_previous": {
+        "value": 91,
+        "authority": "C-D55 plus workflow-contract section 8 and current implementation authorization",
+        "reason": "One independent CW-09 regression-test turn for fresh-review findings"
+      },
+      "scope_basis": null
+    }
+  }
+}

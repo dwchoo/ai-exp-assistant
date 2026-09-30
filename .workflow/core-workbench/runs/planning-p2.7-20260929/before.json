@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "purpose": "p2.7 planning change: pre-edit originals",
+  "recorded_at_utc": "2026-09-29T04:41:04.176415+00:00",
+  "files_sha256": {
+    "docs/features/core-workbench/PLAN.json": "0cb30bc29132f9605985dd2771940e0eef03252c715e3986c7f38fe4086873cc",
+    "docs/features/core-workbench/SPEC.md": "76bccccae835443147281344e1e44c8aa3e21c44f79243297cc84e54151475a7",
+    "docs/features/core-workbench/DECISIONS.md": "992126d0f4a1c48b61173c7a9dd9f4aae31d413e4dd221d28ca6e55b92bdf32d",
+    "docs/features/core-workbench/tickets/CW-06.md": "b82102216931ab650052eabae6dc6b4e14af6102d61ab6df4078e299ef7f6c39",
+    "docs/features/core-workbench/tickets/CW-16.md": "9fe88300ffed4c5ca3e6786b0f503d4ff3c3437611e7cb5e4e9cd00e0f093469",
+    ".workflow/core-workbench/state.json": "f3a0445b764e64d4da693ce17f06e75a9110e11690accd943cd05c33a00ecb92"
+  },
+  "archive": "before-documents.tar.gz",
+  "archive_sha256": "abbbcf9203b3cf484c960e5532bea9d3c84a4a6f981995863f9369d613b98deb"
+}

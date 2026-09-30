@@ -1,0 +1,36 @@
+{
+  "feature_id": "core-workbench",
+  "ticket_id": "CW-03",
+  "attempt_id": "common-run-protocol-test-01",
+  "invocation": "cw03-run-protocol-test-01",
+  "approved_bundle_digest": "64bcf577a30e7c6bbff3e4e775f8e6c17ca212ce3bf79b5bc5be31196a792b07",
+  "actual_workspace": "/home/dwchoo/ai-exp-assistant",
+  "repository_identity": "git HEAD 7b2048c50e0794da847ad8674d4dc0433d643c33 on main",
+  "baseline_snapshot": "bd8d3b443456b632dfbe7e59810a26d1da48b6ad9219eab537c42752efde9775",
+  "effective_write_capability": "shared workspace; sole mutation owner while dispatched",
+  "acceptance_ids": ["C-AC-03", "C-AC-10", "C-AC-20", "C-AC-26", "C-AC-34"],
+  "required_gate_items": ["G2-CONTROL", "G2-LIFECYCLE", "G2-LAUNCH"],
+  "allowed_write_paths": ["tests/gates/g2_shell/test_common_run_protocol_independent.py"],
+  "prohibited_paths": ["src/**", "docs/**", ".workflow/**", ".codex/**", "graphify-out/**", "tests/gates/g2_shell/test_common_run_protocol.py", "tests/gates/g2_shell/test_split_pg_control.py"],
+  "resource_claims": [{"resource": "host:shell-fixture", "mode": "exclusive"}],
+  "mutation_owner": "cw03-run-protocol-test-01",
+  "candidate_ref": ".workflow/core-workbench/runs/implement-p2.6-20260927/cw03-run-protocol-candidate.json",
+  "implementation_result_ref": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw03-run-protocol-01.json",
+  "test_focus": [
+    "Prove literal argv and complex script cannot be reinterpreted by the parent controller.",
+    "Prove a missing or failed foreground read-back cannot release the prepared child or emit experiment start.",
+    "Prove missing, forged, or exec-error acknowledgement fails closed without replacement execution or false lifecycle completion.",
+    "Prove supervisor/control loss maps to UNKNOWN and blocks replay/new automatic execution."
+  ],
+  "exact_checks": [
+    "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest tests.gates.g2_shell.test_common_run_protocol_independent -v",
+    "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest tests.gates.g2_shell.test_common_run_protocol tests.gates.g2_shell.test_split_pg_control -v",
+    "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/gates/g2_shell -p 'test_*.py' -v",
+    "git diff --check"
+  ],
+  "reserved_budget": 1,
+  "configured_model": "gpt-6-sol",
+  "configured_effort": "high",
+  "host_observed_model": "unverified",
+  "host_observed_effort": "unverified"
+}

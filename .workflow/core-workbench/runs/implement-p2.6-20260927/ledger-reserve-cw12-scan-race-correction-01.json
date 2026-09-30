@@ -1,0 +1,20 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 888,
+  "event": {
+    "id": "reserve-cw12-scan-race-correction-01",
+    "kind": "reserve",
+    "data": {
+      "invocation": "cw12-scan-race-correction-01",
+      "role": "worker_senior",
+      "unit": "V-CW-12-p2.6-current",
+      "incident": "",
+      "purpose": "Close in-flight baseline, ignored output, and fd-safe scan findings",
+      "model": "gpt-6-sol",
+      "effort": "high",
+      "buckets": ["total", "role:worker_senior", "unit:V-CW-12-p2.6-current"],
+      "writer": true,
+      "workspace": "/home/dwchoo/ai-exp-assistant"
+    }
+  }
+}

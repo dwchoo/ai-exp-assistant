@@ -1,0 +1,20 @@
+{
+  "invocation": "cw11-token-retention-test-01",
+  "outcome": "complete",
+  "candidate_ready": true,
+  "independent_tests": {
+    "active_ticks": "12,000 no-review ticks retained exactly one internal token and no historical ticket/source growth",
+    "source_churn": "500 external WorkflowRun incarnations retained only the 10 live bindings and pruned to zero after collection",
+    "identity_reuse": "forced stale object-id registration did not authorize a new source",
+    "retirement": "exit cleared current tokens, rejected retired activation, and allowed a fresh incarnation"
+  },
+  "checks": {
+    "observation": "91/91 passed",
+    "workflow": "44/44 passed",
+    "bridge": "18/18 passed",
+    "contracts": "20/20 passed",
+    "actual_omp_18_2_10": "60.0-second review, 13 wakes, provider 15, WorkflowRun exit in 0.054 seconds, secret absent, zero residue"
+  },
+  "graphify_updated": true,
+  "write_scope": ["tests/observation/test_token_retention_independent.py", "graphify-out/**"]
+}

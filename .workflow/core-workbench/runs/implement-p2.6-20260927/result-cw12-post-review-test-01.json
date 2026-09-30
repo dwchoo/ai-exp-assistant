@@ -1,0 +1,30 @@
+{
+  "invocation": "cw12-post-review-test-01",
+  "outcome": "complete",
+  "candidate_ready": true,
+  "test_only_changed_paths": [
+    "tests/policy/pause_automation/test_pause_policy.py",
+    "tests/observation/test_atomic_admission_independent.py",
+    "graphify-out/**"
+  ],
+  "checks": {
+    "pause": "67 passed",
+    "observation": "95 passed",
+    "tasks": "22 passed",
+    "bridge": "22 passed",
+    "workflow": "44 passed",
+    "status": "2 passed",
+    "contracts": "20 passed",
+    "g3_python": "117 passed",
+    "g3_node": "45 passed",
+    "actual_omp": "omp/18.2.10 exit 0; result=passed; zero_residue=true"
+  },
+  "coverage": [
+    "revoked exact run blocks local and bound automatic dispatch",
+    "manager and worker peer cwd observations participate in resume and unavailable observations fail closed",
+    "late callback after pause, rebind, or exit does not increment the current review_count"
+  ],
+  "environment_note": "System Python lacked pyte; the existing /tmp/cw02-g1-venv environment supplied the declared test dependency and all 67 pause tests passed.",
+  "unknowns": [],
+  "mutation_owner": "/root/cw12_post_review_test"
+}

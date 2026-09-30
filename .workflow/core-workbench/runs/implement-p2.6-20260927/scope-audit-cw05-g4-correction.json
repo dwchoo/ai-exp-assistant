@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "invocation": "cw05-g4-correction-01",
+  "baseline_ref": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw05-g4-test-after.json",
+  "after_ref": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw05-g4-correction-after.json",
+  "changed": [
+    "tests/gates/g4_evidence/test_aggregate.py",
+    "tests/gates/g4_lifetime/live_detach_probe.py",
+    "tests/gates/harness/aggregate.py"
+  ],
+  "index_changed": [],
+  "outside_scope": [],
+  "comparable": true
+}

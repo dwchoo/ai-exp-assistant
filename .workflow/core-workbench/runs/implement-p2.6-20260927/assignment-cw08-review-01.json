@@ -1,0 +1,28 @@
+{
+  "invocation": "cw08-review-01",
+  "role": "reviewer",
+  "unit": "V-CW-08-p2.6-current",
+  "objective": "Fresh independent review of the frozen CW-08 mailbox candidate against approved acceptance and runtime evidence.",
+  "candidate_manifest": ".workflow/core-workbench/runs/implement-p2.6-20260927/cw08-frozen-candidate.json",
+  "requirements": ".workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw08.json",
+  "evidence": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw08-worker-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw08-test-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw08-readiness-correction-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/raw-runtime-cw08-worker-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/raw-cw08-independent-runtime.json"
+  ],
+  "review_focus": [
+    "Task/revision/run/message linkage, role direction, question-answer/report reply linkage, and logical message versus delivery-attempt separation.",
+    "Strict just-before-injection readiness/session/generation validation including malformed values.",
+    "Separation of API return, exact OMP processing, agent completion and work completion.",
+    "Unknown/lost-ACK/reconnect/reopen/new-process no automatic replay and dedupe behavior.",
+    "Unix-socket authentication/cleanup, race behavior, fail-closed error handling, and evidence sufficiency for P-C-AC-02."
+  ],
+  "constraints": [
+    "Read-only review: do not modify any files or rerun destructive commands.",
+    "Verify frozen manifest hashes for reviewed files.",
+    "Report findings with severity and precise file/line evidence; distinguish scope exclusions from defects."
+  ],
+  "report": ["pass or needs_reroute", "P0-P3 findings", "candidate identity", "evidence gaps", "needs_oracle"]
+}

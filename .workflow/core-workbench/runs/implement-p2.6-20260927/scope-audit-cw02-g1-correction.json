@@ -1,0 +1,10 @@
+{
+  "changed": [
+    "tests/gates/g1_vt/live_outer_compat_probe.py",
+    "tests/gates/g1_vt/test_closure_independent.py",
+    "tests/gates/g1_vt/test_closure_predicates.py"
+  ],
+  "index_changed": [],
+  "outside_scope": [],
+  "comparable": true
+}

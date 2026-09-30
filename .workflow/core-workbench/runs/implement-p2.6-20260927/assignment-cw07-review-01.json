@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "invocation": "cw07-review-01",
+  "role": "reviewer",
+  "unit": "V-CW-07-p2.6-current",
+  "workspace": "/home/dwchoo/ai-exp-assistant",
+  "writer": false,
+  "candidate_manifest": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw07-review-candidate.json",
+  "candidate": "9868eff50a732257c8143a097e5a7ea37a33cf99224ada39ef387c5790eaf9e6",
+  "requirements": ".workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw07.json",
+  "ticket": "docs/features/core-workbench/tickets/CW-07.md",
+  "worker_result": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw07-worker-01.json",
+  "worker_runtime": ".workflow/core-workbench/runs/implement-p2.6-20260927/raw-cw07-bash-sh.json",
+  "independent_result": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw07-test-01.json",
+  "independent_runtime": ".workflow/core-workbench/runs/implement-p2.6-20260927/raw-cw07-independent-runtime.json",
+  "instructions": "Fresh read-only P0-P3 review of the entire frozen CW-07 candidate. Do not modify files. Inspect the production adapter, the underlying G2 deltas, worker tests, independent tests, and both raw Bash/sh evidence sets. Verify: takeover request blocks dispatch immediately while confirmation stays distinct and does not depend on exit/prompt; live foreground identity is revalidated before input; stopped/stale/unknown identities fail closed without replay; wb-handoff re-arms the same parent control wait with input barrier and no stale request replay; parent PID/cwd/PATH/export survive while child-local and app-only env do not propagate; dirty input, jobs, REPL, hook/trap, and FD-loss states hold automation explicitly; cleanup is bounded. Look for PID reuse/race, incorrect shell mode inference, state conflation, replay, environment leakage, and scope creep into downstream tickets. Confirm product/test files match manifest. Report exact findings with severity/path/line or explicit approval and residual limitations."
+}

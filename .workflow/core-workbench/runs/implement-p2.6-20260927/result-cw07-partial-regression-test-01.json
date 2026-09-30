@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "invocation": "cw07-partial-regression-test-01",
+  "unit": "V-CW-07-p2.6-current",
+  "task_result": "needs_reroute",
+  "candidate_before": "5d50853a90d2bd12eb7c828f2a4defe6c51e0281ee0231326d387e46456c15af",
+  "candidate_after": "319dbd7c87fa1e1508e1cf5df5ab140ea57ea2129a85c617b38e4ed5fd2c1179",
+  "requirements_sha256": "55631496c4af5c47c7bf932c8f0e574b56ea0ef4f59bcdfbb0bf03f3c72e792a",
+  "changed_paths": [
+    "tests/terminal/test_persistent_shell_independent.py"
+  ],
+  "new_test_methods": 1,
+  "new_shell_subcases": 2,
+  "checks": [
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest -v tests.terminal.test_persistent_shell_independent.PersistentShellIndependentRuntimeTests.test_partial_manual_write_rechecks_unknown_before_remaining_bytes",
+      "exit_code": 1,
+      "tests": 1,
+      "failed_subtests": 2,
+      "observed": "For Bash and sh, low-level writes were [full offered payload, remaining payload after one-byte short write]; expected only first call."
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/terminal -v",
+      "exit_code": 1,
+      "tests": 9,
+      "failures": 2,
+      "classification": "Prior eight methods passed; new Bash and sh subtests alone failed."
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0
+    },
+    {
+      "command": "find /tmp -maxdepth 1 -type d -name 'cw07-independent-*'",
+      "exit_code": 0,
+      "output": ""
+    }
+  ],
+  "implementation_defects": [
+    {
+      "id": "CW07-PARTIAL-MANUAL-SECOND-WRITE",
+      "severity": "P2",
+      "observed": "On valid clean manual-parent Bash/sh adapter state, injected first os.write accepted only one prefix byte and marked the current boundary unknown. send_user then attempted a second os.write of the remaining payload.",
+      "expected": "Public send_user refuses after first write, no second low-level write, emitted prefix only."
+    }
+  ],
+  "test_notes": [
+    "Deterministic injected low-level write avoids relying on nondeterministic kernel partial writes.",
+    "No detached daemon/cgroup scope expansion."
+  ],
+  "cleanup": {
+    "temporary_directory_residue": [],
+    "owned_processes_running": false
+  },
+  "needs_oracle": false,
+  "overall_completion_claimed": false
+}

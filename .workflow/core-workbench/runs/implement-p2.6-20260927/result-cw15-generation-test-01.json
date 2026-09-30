@@ -1,0 +1,23 @@
+{
+  "invocation": "cw15-generation-test-01",
+  "outcome": "complete",
+  "candidate_ready": false,
+  "candidate_id": "c58b390ddeda38511b48e8005d9670ef23b408af71d8dd1e19d326288b580a81",
+  "production_frozen": true,
+  "finding": {
+    "severity": "P1",
+    "summary": "A duplicate takeover request is correctly rejected without external replay but advances fence epoch 1 to 2 without updating the active takeover generation. The later valid handoff calls reopen(1), receives false at epoch 2, and leaves automatic admission permanently fenced.",
+    "evidence": "Durable control committed manager/control_wait at lifecycle generation 5; review and send stay zero; lifecycle focused test fails at the expected fence-clear assertion."
+  },
+  "passing_new_schedules": "New intent before and after reopen both remain fenced through their own takeover and reopen only after their own handoff; action counts remain zero until then and become tick 1/send 1 afterward.",
+  "checks": {
+    "lifecycle": "34/35 passed; one intentional duplicate-boundary failure",
+    "predecessors": "360 non-live tests passed",
+    "production_hashes": "42/42 source and omp_bridge hashes match",
+    "graphify_update": "passed",
+    "residue": "zero relevant process or temporary residue",
+    "excluded": "full/live G3, scripted/external OMP and reboot not run"
+  },
+  "sha256": {"tests/lifecycle/test_lifecycle_runtime.py": "8cc98ed0f409004b988276ab08ff4ba381d358168ec8744229b286b0632b263c"},
+  "mutation_owner": "/root/cw12_post_review_test"
+}

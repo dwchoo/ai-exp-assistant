@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-deadline-test-01",
+  "role": "test_designer",
+  "unit": "V-CW-07-p2.7-deadline",
+  "authority": "p2.7a approval; F-P27-DEADLINE correction verification; RA-P27-HOOK-REJECTED; RA-P27-RETURN-DEADLINE-TEST",
+  "candidate": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-deadline-fix-after.json",
+    "candidate_id": "f0bbdabe6077900135904beeb67d0a554704a674afe89465f16d98bd54a26e2e"
+  },
+  "checkpoint_ref": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-deadline-test-checkpoint.json",
+  "objective": "Independently verify removal of elapsed-time experiment termination and follow-ups, and update the one independent expectation superseded by Root adjudication.",
+  "required_tests": [
+    "Runtime (bash, dash) via PersistentShell AND via the production workflow path (TaskWorkflow.start with default arguments if constructible in tests; else the exact PersistentShell.submit call it makes): an experiment running > 90 s is never killed/marked unknown; it completes with its real exit status; failing exit also recorded as confirmed termination.",
+    "Descendants: main returns while a managed descendant lives (e.g. background sleep 20, and a double-forked/setsid descendant): lifecycle not complete while any managed descendant lives; completes after they exit; never killed by elapsed time; unknown only on real observation loss.",
+    "Explicit stop/force still works on an unbounded run (existing close/stop path) and cleans descendants; no replay afterwards.",
+    "Start handshake is still bounded: a launch whose exec/ready handshake never completes fails within start_timeout with a visible reason and leaves no residue.",
+    "INPUT_BARRIER: run ends between collect cycles -> no SUPERVISOR_FAILURE; barrier visible; release/close both work.",
+    "Update RejectedHandoffTests::test_rejected_handoff_without_any_prompt_ready_keeps_input_held_with_reason to the Root adjudication (.workflow/core-workbench/runs/implement-p2.6-20260927/root-adjudication-p27-hook-rejected.json): rejected handoff outside the control loop without READY -> manual input delivered to the observed prompt, automation (submit/claim_manager/HANDOFF) still held. Keep the test name meaning clear (rename allowed within the same file) and note the change.",
+    "dash ENV: user/experiment environment does not contain the Workbench shell-init ENV unless the user set ENV.",
+    "Regressions: tests/terminal, tests/gates/g2_shell (PYTHONPATH=src:.), canonical matrix, tests/backend, tests/contracts, tests/lifecycle, tests/gates/g4_lifetime (PYTHONPATH=src:.), tests/workflow, tests/observation."
+  ],
+  "allowed_write_paths": [
+    "tests/terminal/test_*_independent.py",
+    "tests/terminal/test_*_independent_p27b.py",
+    "tests/gates/g2_shell/test_*_independent_p27b.py",
+    "tests/workflow/test_*_independent_p27b.py"
+  ],
+  "constraints": [
+    "production frozen; no docs/workflow edits; no tmux/herdr; no credentials; exact-identity cleanup; leaks fail; do not weaken tests"
+  ],
+  "report": "checks table first; per-requirement verdicts; files changed/added; frozen hashes start=end; residue."
+}

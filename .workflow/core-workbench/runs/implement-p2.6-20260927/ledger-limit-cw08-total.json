@@ -1,0 +1,23 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 401,
+  "event": {
+    "id": "limit-cw08-total-20260928",
+    "kind": "limit",
+    "data": {
+      "bucket": "total",
+      "origin": "operating",
+      "value": 297,
+      "authority": "C-D55 plus workflow-contract section 8 and current implementation authorization",
+      "reason": "Three-call bounded CW-08 mailbox implementation, independent runtime testing, and fresh review batch",
+      "decision_owner": "Root",
+      "remaining_work_estimate": 3,
+      "expected_previous": {
+        "value": 294,
+        "authority": "C-D55 plus workflow-contract section 8 and current implementation authorization",
+        "reason": "Independent regression, bounded correction, and second delta review for CW-07 partial-write P2"
+      },
+      "scope_basis": null
+    }
+  }
+}

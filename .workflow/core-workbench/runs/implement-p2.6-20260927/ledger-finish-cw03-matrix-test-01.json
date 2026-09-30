@@ -1,0 +1,9 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 183,
+  "event": {"id": "finish-cw03-matrix-test-01", "kind": "transition", "data": {
+    "invocation": "cw03-matrix-test-01", "state": "finished",
+    "evidence": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw03-matrix-test-01.json",
+    "outcome": "partial", "observed_model": "unverified", "observed_effort": "unverified", "not_started_evidence": null
+  }}
+}

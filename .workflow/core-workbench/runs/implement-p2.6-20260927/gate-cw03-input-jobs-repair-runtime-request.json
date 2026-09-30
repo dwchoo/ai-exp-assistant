@@ -1,0 +1,7 @@
+{
+  "requirements": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw03.json",
+  "candidate": "b890f5a4748a1d9b87ca0428edd05009e40af43ef224742a28e1a038be2ba263",
+  "checks": [
+    "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/check-input-jobs-repair-runtime-observed.json"
+  ]
+}

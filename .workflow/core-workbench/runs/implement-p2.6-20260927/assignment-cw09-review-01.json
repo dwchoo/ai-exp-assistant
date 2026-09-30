@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "invocation": "cw09-review-01",
+  "role": "reviewer",
+  "unit": "V-CW-09-p2.6-current",
+  "workspace": "/home/dwchoo/ai-exp-assistant",
+  "writer": false,
+  "candidate_manifest": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw09-review-candidate.json",
+  "candidate": "9a33af1e38649fe49ad32cb9e2006f650946c7968dc4d7bd0195fa2f1032cd11",
+  "requirements": ".workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw09.json",
+  "ticket": "docs/features/core-workbench/tickets/CW-09.md",
+  "prior_evidence": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw09-worker-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw09-test-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw09-correction-01.json"
+  ],
+  "review_focus": [
+    "Stable Task identity and immutable sequential TaskSpec revisions",
+    "Persisted approval and proceed authority, one-time consumption, and transactional rollback",
+    "Cancellation and revocation against current runs without replay",
+    "Session settings revision linkage and historical retry preservation",
+    "Logical message identity versus delivery-attempt history",
+    "Shell and takeover append-only history",
+    "Schema v1 to v2 migration, composite authority foreign keys, decision-kind enforcement, and direct SQLite bypass attempts",
+    "Close/reopen durability and foreign-key enforcement",
+    "No implementation of downstream CW-08 behavior"
+  ],
+  "instructions": "Read-only fresh P0-P3 fault-finding review of the frozen CW-09 candidate. Do not modify files. Inspect implementation and tests, including the unchanged independent test. Report findings with severity and precise paths/lines. If no actionable findings remain, explicitly approve the candidate and state residual test limitations."
+}

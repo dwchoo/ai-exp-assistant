@@ -1,0 +1,5 @@
+{
+  "before": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw10-public-response-final2.json",
+  "after": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw10-response-contract-verified.json",
+  "allowed": ["omp_bridge/g3/bridge.ts", "tests/gates/g3_omp/bridge.test.ts", "tests/gates/g3_omp/bridge_public_response_independent.test.ts", "tests/workflow/live_workflow_probe.py", "tests/workflow/live_workflow_independent.py", "tests/workflow/test_worker_port.py", "tests/workflow/test_worker_port_independent.py"]
+}

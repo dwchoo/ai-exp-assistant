@@ -1,0 +1,20 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 932,
+  "event": {
+    "id": "reserve-cw12-execution-flags-review-01",
+    "kind": "reserve",
+    "data": {
+      "invocation": "cw12-execution-flags-review-01",
+      "role": "reviewer",
+      "unit": "V-CW-12-p2.6-current",
+      "incident": "",
+      "purpose": "Fresh final review of execution-worktree flags and complete CW-12 candidate",
+      "model": "gpt-6-sol",
+      "effort": "high",
+      "buckets": ["total", "role:reviewer", "unit:V-CW-12-p2.6-current"],
+      "writer": false,
+      "workspace": "/home/dwchoo/ai-exp-assistant"
+    }
+  }
+}

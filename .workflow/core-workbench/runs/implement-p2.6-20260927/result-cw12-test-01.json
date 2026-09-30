@@ -1,0 +1,22 @@
+{
+  "invocation": "cw12-test-01",
+  "outcome": "needs_reroute",
+  "candidate_ready": false,
+  "candidate_validated": "e5fcd4ad296d15e5479a859f9d048a0613a0988ccfdc9a340e84fadcdc3b0494",
+  "policy_tests": "9/15 passed, 6 failed",
+  "findings": [
+    {"severity": "P1", "summary": "pause leaves a gap before CW-11 review admission is fenced, allowing a new review dispatch"},
+    {"severity": "P1", "summary": "dispatch_automatic checks under the coordinator lock but executes outside it, allowing action after pause linearizes"},
+    {"severity": "P1", "summary": "repository cancellation is not observed or journaled; an unpaused cancelled run may still dispatch automatic work"},
+    {"severity": "P2", "summary": "binding a different run leaks prior pause acknowledgement/status fields"},
+    {"severity": "P1", "summary": "PauseJournal.read blocks indefinitely when its path is a FIFO because open occurs without O_NONBLOCK"}
+  ],
+  "passed": [
+    "partial resume re-pauses both peers",
+    "session and scope replacement rejects resume",
+    "journal corruption, symlink, concurrent append, and fsync failure fail closed",
+    "existing status projection 2/2"
+  ],
+  "actual_omp_18_2_10": "inconclusive before policy execution due manager extension connection timeout; no product conclusion",
+  "graphify_updated": true
+}

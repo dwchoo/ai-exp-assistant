@@ -1,0 +1,56 @@
+{
+  "invocation": "cw10-public-response-fix-01",
+  "unit": "V-CW-10-p2.6-current",
+  "status": "candidate_ready",
+  "candidate_before": "82fe863b91eda2fe71258b54d1769f5fb686bb1882c9dc220733b76a91fb5cc8",
+  "candidate_after": "a52be4dcbfe224ec5e0aa0565c0e77a5189acec2c4c625327e181ce0e0cb8716",
+  "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw10-public-response-verified.json",
+  "scope_audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/scope-audit-cw10-public-response-verified.json",
+  "changed_paths": [
+    "omp_bridge/g3/bridge.ts",
+    "src/workbench/workflow/__init__.py",
+    "src/workbench/workflow/worker_port.py",
+    "tests/gates/g3_omp/bridge.test.ts",
+    "tests/workflow/live_workflow_independent.py",
+    "tests/workflow/live_workflow_probe.py",
+    "tests/workflow/test_worker_port.py"
+  ],
+  "design": {
+    "bridge": "For worker TASK/execute and QUESTION/analysis only, parse one exact WB_WORKER_RESPONSE: flat allowlisted JSON object from public OMP message_end; require canonical UUIDs, positive safe revision/generation, exact delivery/stage/kind/decision, stopReason stop, and no extra content. Store a candidate without publishing it. At terminal agent_end with matching session/provider evidence and no rejection, publish allowlisted assistant_message_end then delivery_omp_processed linked by workerResponseId. Other delivery_omp_processed semantics remain unchanged.",
+    "port": "Production G3WorkerResponsePort consumes only G3BridgeServer public events with one-shot arm/observe, a shared deadline, exact receipt/message/session correlation, strict field/type checks, event ordering, linked response ID and duplicate-ID rejection.",
+    "probes": "Both actual OMP probes now use G3WorkerResponsePort. The scripted provider emits a response in the public OMP content stream only; no provider private response dictionary or expected-marker environment dependency remains in either workflow probe."
+  },
+  "checks": [
+    {"command": "node --experimental-strip-types --test tests/gates/g3_omp/bridge.test.ts", "result": "22 passed, 0 failed"},
+    {"command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/workflow -p 'test_*.py'", "result": "37 passed"},
+    {"command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/bridge -p 'test_*.py'", "result": "18 passed"},
+    {"command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/gates/g3_omp -p 'test_*.py'", "result": "117 passed"},
+    {"command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/tasks -p 'test_*.py'", "result": "22 passed"},
+    {"command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/terminal -p 'test_*.py'", "result": "10 passed"},
+    {"command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/gates/g2_shell -p 'test_*.py'", "result": "132 run, 126 passed, 6 skipped"},
+    {"command": "graphify update .", "result": "exit 0 after final code/test changes"},
+    {"command": "git diff --check", "result": "exit 0"},
+    {"command": "rg -n 'provider\\.responses|server\\.responses|OmpWorkerResponsePort|IndependentResponseObserver' tests/workflow src/workbench/workflow", "result": "no matches"}
+  ],
+  "runtime_evidence": {
+    "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python tests/workflow/live_workflow_probe.py",
+    "omp_version": "omp/18.2.10",
+    "result": "passed",
+    "worker_decisions": ["execute", "success"],
+    "independent_command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python tests/workflow/live_workflow_independent.py --actual-omp",
+    "independent_result": "passed",
+    "independent_worker_decisions": ["execute", "success"],
+    "privacy": "Both probes report secret sentinel absent from durable files",
+    "cleanup": "Both probes report zero OMP child/cwd process and provider-thread residue; bridge socket removed. Final ps pattern check found no owned runtime process."
+  },
+  "scope_attribution": {
+    "audit_comparable": true,
+    "product_test_paths_in_scope": 7,
+    "outside_scope_count": 16,
+    "outside_scope_classification": "Only graphify-out generated AST/cache/backup/graph files from required graphify update; no other outside-scope path changed relative to checkpoint."
+  },
+  "remaining_unknowns": [
+    "The provider remains a scripted local model fixture inside real OMP 18.2.10; behavior of arbitrary external models is not established by this runtime probe.",
+    "Final Root independent test/review and combined-candidate verification have not yet run."
+  ]
+}

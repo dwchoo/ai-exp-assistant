@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw06-test-01",
+  "ticket_id": "CW-06",
+  "role": "test_designer",
+  "unit": "V-CW-06-p2.7",
+  "approved_bundle_digest": "a521acdc3838b43a26e277afc233bab695c8b02ce0d42392c3678931b2e3f027",
+  "routing": {"planned_role": "test_designer", "selected_role": "test_designer (Opus, general-purpose)", "reason_codes": ["first_adversarial_independent_verification"], "evidence_refs": ["user-approved routing 2026-09-29: first independent test of a new ticket stays Opus"]},
+  "frozen_candidate": "158a6a6ca10f43fcaa42f6c52615c3316efea8e1a391a28c57cfc905c2b52297",
+  "checkpoint_ref": [".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-cw17-integrated-checkpoint.json", ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-cw06-worker-delta-backup/"],
+  "frozen_production_files": "src/workbench/ui/product/*.py and src/workbench/backend/cli.py - record sha256 at start and end; must match",
+  "derive_expectations_from": ["docs/features/core-workbench/tickets/CW-06.md", "BRIEF.md C-AC-01, C-AC-06, C-AC-14 (and C-AC-19 paste rejection visibility)", "SPEC.md 'Production 조합'", "PLAN.json gate_items P-C-AC-01/06/14 (runtime)", "tickets/CW-17.md (L-CW17-*)", ".workflow/core-workbench/runs/implement-p2.6-20260927/root-adjudication-p27-cw06-entry-wiring.json", "docs/features/core-workbench/gates/G1.md (256-color approximation accepted as partial; OMP TUI fidelity items)"],
+  "worker_result": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw06-worker-01.json (read AFTER deriving expectations; not coverage)",
+  "required": [
+    "P-C-AC-01 runtime: real entrypoint (`python -m workbench start` in a plain PTY you own, isolated --data-dir and project dir) with the REAL OMP (/home/dwchoo/.local/bin/omp, 18.2.10, user's existing OMP configuration; never read/copy/print credentials). Through the product UI, type a short goal/code question into the manager OMP pane and observe the model's reply rendered in that pane. Keep it to 1-2 tiny turns. Record only non-sensitive evidence (screen excerpts of your own prompt, reply presence/length, timings).",
+    "P-C-AC-14 runtime: in both manager and worker OMP panes, original TUI keys/commands still work through the UI: at least one slash command (e.g. /help or /model listing without changing settings), composer editing (typing, backspace, multi-line if OMP supports), Esc/Ctrl-C cancel semantics reaching OMP, and an approval/confirmation prompt if one can be triggered harmlessly. The UI prefix must not swallow OMP keys; prefix-prefix sends the literal byte.",
+    "P-C-AC-06 runtime: three areas visible at once; focus indicator and host input owner shown separately; switching focus does not change input owner (verify via `status --json` / snapshot); takeover request/confirm/handoff visibly change owner state; last-confirmed time advances.",
+    "Paste (C-AC-19 via UI): Korean multi-line paste arrives intact in the host shell; >2 MiB paste is rejected as a whole with a visible reason and zero bytes delivered; queue_full/input_owner_manager rejections visible.",
+    "Resize/restore: SIGWINCH changes per-pane sizes (verify each OMP/shell sees its pane size, e.g. `stty size` in shell); UI exit = detach (backend, both OMP and shell identities unchanged, no shutdown); reattach restores all three panes' screens from replay without duplicate input; abrupt UI kill (SIGKILL of the UI process) leaves backend intact and the outer terminal restorable.",
+    "Adapt CW-17 independent tests that intentionally exercise the minimal client: add `--plain` to the start/attach argv ONLY (e.g. tests/backend/test_live_detach_independent.py); no other change; show L-CW17-DETACH/START still pass.",
+    "Write new adversarial tests in tests/ui/test_product_*_independent.py (fixture-level: key collision, prefix handling, Esc timing, paste framing, rejection notice, focus vs owner, terminal restore on exceptions/backend close, replay without DSR/DA echo) and a live runtime probe tests/ui/live_product_omp_independent.py for the real-OMP items (skip with an explicit reason if OMP unavailable; it is available here).",
+    "Regression: tests/ui, tests/backend (all), tests/contracts, tests/gates/g1_vt (PYTHONPATH=src:.), tests/gates/g4_lifetime (PYTHONPATH=src:.)."
+  ],
+  "allowed_write_paths": ["tests/ui/test_product_*_independent.py", "tests/ui/live_product_omp_independent.py", "tests/ui/independent_support_cw06.py", "tests/backend/test_live_detach_independent.py (argv --plain only)", "tests/backend/test_live_start_independent.py (argv --plain only, if needed)"],
+  "prohibited": "Production code frozen (src/**); other tests; docs/.workflow; pyproject; no graphify update; no commits; no tmux/herdr; never read/copy OMP credentials (~/.omp); do not change OMP settings/model; do not touch /tmp/cw03-g2-*.",
+  "resource_claims": [{"resource": "host:omp-runtime", "mode": "exclusive"}, {"resource": "host:interactive-terminal", "mode": "exclusive"}],
+  "cleanup": "Own every backend/OMP/shell/UI process via its data dir and exact identity (pidfd + start time); use `shutdown --yes` on your data dirs, then verify zero residue. Leaks on the normal path are failures.",
+  "result_format": "checks table first (command, exit, counts, duration); status candidate_ready/needs_reroute; per gate item verdict (P-C-AC-01/06/14, L-CW17-DETACH/START after --plain) with evidence level; findings classified implementation/test/environment/contract with repro; files added/changed + sha256; frozen hashes start/end; residue. Korean, concise."
+}

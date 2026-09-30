@@ -1,0 +1,12 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 292,
+  "event": {"id": "limit-cw05-contract-unit-20260928", "kind": "limit", "data": {
+    "bucket": "unit:V-CW-05-p2.6-current", "origin": "operating", "value": 6,
+    "authority": "Approved PLAN p2.6 CW-05, workflow-contract section 8, current implementation authorization, and fresh-review P2 evidence",
+    "reason": "One bounded cross-language contract correction and one delta review",
+    "decision_owner": "Root", "remaining_work_estimate": 2,
+    "expected_previous": {"value": 4, "authority": "Approved PLAN p2.6 CW-05, workflow-contract section 8, current implementation authorization, and independent test failures", "reason": "One correction call and one fresh delta review after independent false-pass findings"},
+    "scope_basis": null
+  }}
+}

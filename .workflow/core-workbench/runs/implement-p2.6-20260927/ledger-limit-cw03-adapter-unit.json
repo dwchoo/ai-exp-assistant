@@ -1,0 +1,23 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 129,
+  "event": {
+    "id": "limit-cw03-adapter-integration-unit-20260928",
+    "kind": "limit",
+    "data": {
+      "bucket": "unit:V-CW-03",
+      "origin": "operating",
+      "value": 33,
+      "authority": "Approved PLAN p2.6, C-D55, workflow-contract section 8, and current implementation authorization",
+      "reason": "Bounded split-PG adapter integration, independent tests, fresh review, and one correction contingency",
+      "decision_owner": "Root",
+      "remaining_work_estimate": 4,
+      "expected_previous": {
+        "value": 29,
+        "authority": "Approved PLAN p2.6, C-D55, workflow-contract section 8, and current implementation authorization",
+        "reason": "One reviewer-required split-PG correction, one independent delta test, and one fresh delta review"
+      },
+      "scope_basis": null
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 1048,
+  "event": {
+    "id": "reserve-cw14-correction-01",
+    "kind": "reserve",
+    "data": {
+      "invocation": "cw14-correction-01",
+      "role": "worker",
+      "unit": "V-CW-14-p2.6-current",
+      "incident": "",
+      "purpose": "Bounded C-AC-28 repeated-failure and malformed-entry correction",
+      "model": "gpt-6-luna",
+      "effort": "max",
+      "buckets": ["total", "role:worker", "unit:V-CW-14-p2.6-current"],
+      "writer": true,
+      "workspace": "/home/dwchoo/ai-exp-assistant"
+    }
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "invocation": "cw03-matrix-test-01",
+  "role": "test_designer",
+  "unit": "V-CW-03",
+  "candidate": "9970d25c747b922a2efb40c27e2903697a6947b5d0511b8307503a10c47a685c",
+  "objective": "Independently test that all remaining G2 live matrices use the same canonical split-PG RUN boundary without weakening their matrix-specific negative controls.",
+  "derive_from_requirements": [
+    "An accepted input/jobs, hook/env, or takeover run must exhibit ACCEPT, SUPERVISOR, CHILD_PREPARED, EXEC_READY, CHILD, and EXPERIMENT_START in causal order with distinct supervisor/experiment process groups in one session.",
+    "A second automatic run is allowed only after verified prior completion, manual ACK/prompt return, fresh same-parent handoff, and a new WAIT observation; prior unknown or missing boundary cannot replay/rearm.",
+    "Takeover blocks new automatic requests immediately, preserves already-started work, distinguishes request from ACK (including lost/delayed ACK), and only permits confirmed foreground manual input.",
+    "Input/jobs and hook/env retain always-deny/always-allow and marker/state leakage discrimination; tests must fail if a probe silently returns to raw legacy base64/direct eval."
+  ],
+  "allowed_files": [
+    "tests/gates/g2_shell/test_canonical_matrix_integration.py"
+  ],
+  "constraints": [
+    "Do not modify production code or existing tests/probes.",
+    "Use bounded runtime, cleanup, and residue assertions; do not rely only on source-string assertions.",
+    "Include at least one discriminating negative mutation/control showing legacy transport or missing boundary would be detected.",
+    "Do not modify workflow, docs, graphify, or commit/reset/clean/stash."
+  ],
+  "checks": [
+    "python3 -m unittest tests.gates.g2_shell.test_canonical_matrix_integration -v",
+    "python3 -m unittest discover -s tests/gates/g2_shell -p 'test_*.py' -v",
+    "git diff --check"
+  ]
+}

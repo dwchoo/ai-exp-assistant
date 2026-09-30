@@ -1,0 +1,19 @@
+{
+  "invocation":"cw09-test-01",
+  "role":"test_designer",
+  "unit":"V-CW-09-p2.6-current",
+  "objective":"Independently test CW-09 durable delegation and Task revision invariants without modifying product code.",
+  "candidate_manifest":".workflow/core-workbench/runs/implement-p2.6-20260927/cw09-test-checkpoint.json",
+  "requirements":".workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw09.json",
+  "required_tests":[
+    "Attack approval/proceed ordering, scope/revision mismatch, reuse of consumed proceed, cancellation and revocation replay, and transaction failure between decision consumption and run creation.",
+    "Verify stable Task ID, immutable sequential revisions, current-run revision isolation, foreign-key integrity, append-only histories, reopen persistence, and invalid/cross-Task links.",
+    "Attack settings/retry linkage: changes during a run cannot terminate it or reset retry count, later decisions must link the new settings revision, and retries must be monotonic.",
+    "Verify stable logical message ID is separate from delivery attempt/status history, API acceptance differs from confirmed OMP processing, and duplicate/cross-run delivery data is rejected or represented without overwriting.",
+    "Verify shell lifecycle and takeover request/confirmation events append in order without overwriting prior run state, and closed/error behavior fails safely."
+  ],
+  "allowed_files":["tests/tasks/**"],
+  "constraints":["Do not modify product source, docs, workflow, graphify, or worker-authored tests to weaken them.","No commit/reset/clean/stash/push/deploy and no Docker."],
+  "checks":["Run all tests/tasks with the approved venv.","Run relevant G4 lifetime/evidence and Python/Node contract regressions.","Run git diff --check."],
+  "report":["new independent tests and defects","commands/results","candidate before/after, scope audit","candidate_ready or needs_reroute"]
+}

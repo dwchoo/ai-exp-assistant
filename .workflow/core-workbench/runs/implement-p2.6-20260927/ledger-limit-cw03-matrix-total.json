@@ -1,0 +1,12 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 171,
+  "event": {"id": "limit-cw03-matrix-total-20260928", "kind": "limit", "data": {
+    "bucket": "total", "origin": "operating", "value": 262,
+    "authority": "C-D55 plus workflow-contract section 8 and current implementation authorization",
+    "reason": "Five-call bounded batch for remaining CW-03 canonical matrix migration, independent test, fresh review, and one correction/delta-review pair",
+    "decision_owner": "Root", "remaining_work_estimate": 5,
+    "expected_previous": {"value": 260, "authority": "C-D55 plus workflow-contract section 8 and current implementation authorization", "reason": "Initial finite p2.6 batch: 40 calls beyond cumulative usage 220, retaining later reassessment"},
+    "scope_basis": null
+  }}
+}

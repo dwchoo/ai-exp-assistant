@@ -1,0 +1,12 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 293,
+  "event": {"id": "limit-cw05-contract-worker-20260928", "kind": "limit", "data": {
+    "bucket": "role:worker_senior", "origin": "operating", "value": 105,
+    "authority": "C-D55 plus workflow-contract section 8 and current implementation authorization",
+    "reason": "One bounded correction for fresh-review TypeScript exact-key collision",
+    "decision_owner": "Root", "remaining_work_estimate": 1,
+    "expected_previous": {"value": 104, "authority": "C-D55 plus workflow-contract section 8 and current implementation authorization", "reason": "One bounded correction turn for independent CW-05 probe and aggregate-validator false-pass findings"},
+    "scope_basis": null
+  }}
+}

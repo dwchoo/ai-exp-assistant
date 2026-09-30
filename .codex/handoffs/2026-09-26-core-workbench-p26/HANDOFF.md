@@ -1,0 +1,73 @@
+# 작업 인계: Core Workbench p2.6 — C-D55 결정 반영 후 다음 세션 구현 재개
+
+인계 목적: 확정된 제품 경계·예산 위임과 기존 검증/사용량을 보존하고, 다음 세션의 명시적 implement에서 현재 상태를 대조한 뒤 남은 core를 구현한다.
+
+## 시작 요약
+
+2026-09-26 사용자 요청으로 결정 문서와 다음 세션 프롬프트를 작성했다. 현재 요구는 BRIEF r1.13 / SPEC s2.6 / PLAN p2.6이며 이전 r1.12/s2.5/p2.5 승인에 C-D55만 반영했다. HEAD 79808a78fb9eaca8a43caddf2fce268fade542ec. Core/CW-03은 미완료다. 이번 세션은 제품 코드·테스트 수정, 제품/runtime test 실행, child 호출, 실제 ledger 전환을 하지 않았다. START-IMPLEMENT.md의 프롬프트가 다음 세션의 실행 진입점이다.
+
+## 사용자 결정과 권한
+
+사용자는 '호출은 알아서 더 늘리면 되고.', 'conda는 점검하지마.'와 terminal에서 직접 환경을 준비하겠다는 방향을 밝혔다. 관리 대상 후손 추적·수동 daemon 소급 관리 비보장·unknown 시 자동 후속 실행 보류·cgroup 비필수 제안에 '좋아 그렇게 결정하면 좋겠는데? 그러면 개발하는데 문제 없나?'라고 동의했고, 결정 문서화와 다른 세션 implement 프롬프트를 요청했다. 사용자 발언과 적용 범위는 DECISION-2026-09-26.md, 승인 byte/digest는 decisions-cd55-20260926/approval.json에 보존한다. 기존 구현 승인과 Docker runtime 검증 생략은 유지한다.
+
+환경 설정은 사용자가 직접 한다. Core는 cwd·PATH·exported environment의 상속/부모 유지와 실험 내부 상태 비전파를 검증한다. conda 전용 점검과 환경 관리자별 activation/deactivation 보장은 완료 조건에서 제외한다. 일반 hook/trap·입력·suspend/resume 검증은 유지한다. 수명/대상이 불명확하면 unknown을 표시하고 자동 후속 실행을 보류한다. 사용자 확인만으로 종료 완료로 승격하거나 귀속 불명 프로세스를 자동 종료하지 않는다. cgroup 필수화/선택 기능 추가는 이번 범위가 아니다.
+
+과거 220회 user cap은 후속 개발의 고정 상한이 아니며 Root가 유한 operating budget을 산정·증액할 권한을 받았다. 누적 사용량 220회와 기존 ledger·실패 이력은 유지한다. 이 결정은 host 제한·concurrency·모델 설정·게시 권한을 바꾸지 않는다. 한국어 응답, 기술 식별자 원문, Python/Linux 우선, 내부 tmux 의존 금지, Phase 2 후순위, Docker 기반 MCP 금지를 유지한다. Commit/push/게시/배포 승인은 없다. 현재 문서화 요청만으로 구현을 시작하지 않았다.
+
+## 구현·검증 상태
+
+정적 문서 검증에서 16 ticket ID·의존·자원·scope·acceptance, 64 gate ID·소유·supplier·required evidence level, scheduling/path ownership/dependency artifacts/verification units를 보존했다. 바뀐 gate 설명은 G2-HOOK-ENV/G2-LIFECYCLE/P-C-AC-32/I-SHELL이다. PLAN의 BRIEF/SPEC hash와 승인 bundle 25개 파일 hash를 대조했다. CW-16의 최종 I-SHELL에도 conda 제외를 반영했다. 새 approval/state는 r1.13/s2.6/p2.6을 가리키며 과거 approval/planning 이력은 보존했다. document-validation.json은 문서 정합성 기록이며 runtime check가 아니다.
+
+p2.5의 네 probe/test는 final-root-check.json hash와 동일하다. 당시 env/launch predicates 8개, combined/lifecycle predicates 25개 통과 및 env/launch live 10개 exit 0 기록을 보존한다. Combined live는 44 case records, TSTP unknown 6개, hard failure 0, exit 2 inconclusive였다. 전체 G2 통과나 제품 adapter 완성이 아니다. conda unavailable은 C-D55 이후 완료 차단 사유에서 제외하되 conda 지원 통과로 바꾸지 않는다. Docker는 skipped다.
+
+남은 범위는 CW-03 input-jobs, takeover/ACK-loss/no-replay/foreground-exit race, supervisor·FD·flush 장애, 수동 잔존·관측 밖 생성에서 unknown 보류, 실제 suspend/resume과 전체 G2 통합이다. exec/pipeline/명령 치환, 빠른 spawn/exit·추가 spawn, terminal reply/입력 반환 사례의 coverage도 전체 acceptance와 대조한다. CW-02/04는 기존 부분 검증이며 CW-05~16 dependency release는 없다. 과거 journal의 check event는 0이고 final-root-check는 수기 집계이므로 정식 gate pass로 간주하지 않는다. shared gate validator가 현재 PLAN의 모든 항목을 처리한다고 이번 문서 검사만으로 주장하지 않는다.
+
+## 진행 중인 작업
+
+최신 collaboration.list_agents에서 Root만 관측했다. 실제 ledger-read는 revision 150, used 220, reserved 0, active_calls {}, unresolved [], next_action review_limits다. 이 값은 변경 전 원본 journal의 현재 사실이며 승인 위임이 자동 반영된 것은 아니다. Ledger SHA-256은 11940d1c4e4569a71ef4341a10f72e571184a0726b621ecb8dead8bbe89982be로 이전 handoff와 동일하다. 이 thread에 새 worker는 배정하지 않았다. 외부 OS writer/probe residue의 전면 검사는 하지 않았으므로 재개 때 확인한다.
+
+Workspace는 staged/unstaged/untracked가 섞여 있다. 사전 상태와 index byte는 decisions-cd55-20260926/before.json checkpoint에 보존했다. 사용자 AGENTS/workflow/skills/config·graphify 변경을 보존하고 reset/clean/stash/일괄 stage 금지. 이번 변경 범위는 C-D55 관련 문서·PLAN·CW-02/03/04/05/07/16·G2 역사적 결과 안내·중앙 state·새 승인/인계 자료와 graphify 조회 cache/메모리/회고다. 제품 코드와 네 probe/test는 변경하지 않았다.
+
+Graphify query/path/explain으로 BRIEF→CW-03 및 BRIEF/SPEC/동작 규약/CW-03/G2→ADR 연결을 확인하고 연결 문서의 모순을 수정했다. reflect/save-result를 수행했으나 semantic graph를 재생성하지 않았다. 새 결정/프롬프트가 이미 graph.json에 반영됐다고 가정하지 말고 실제 원문을 대조한다.
+
+## 시도와 배운 점
+
+앞선 구현에서는 부모 직접 eval의 return/Signal 이탈과 입력 유출을 겪어 고정 supervisor/subreaper 아래 별도 실험 실행을 선택했다. SCRIPT_READY 이전 signal, signal.pause missed wakeup, Bash/dash SIGQUIT 기대 차이, waitpid 후손 회수, 부모 FD8 read의 SIGINT 탈출과 set -e/trap 복원, 실제 executable/starttime/단일 CHILD_READY false-pass를 제한된 후보에서 보완했다. TSTP 정지가 관측되지 않은 결과는 unknown으로 유지한다. 단독 probe 통과 수를 합산하거나 예상 LAUNCH 문자열만으로 실제 executable을 증명하지 않는다. 공유 foreground PG 후보를 유지하고 관측자 정지/job-control 충돌 증거 없이 분리 PG를 확정하지 않는다.
+
+이번 문서 대조에서는 stale state/PLAN의 승인 전 표기, conda 필수 검증 문구, CW-16 최종 통합의 누락을 수정했다. 이전 handoff 검증 중 graphify query의 last_query_stamp 변경이 workspace candidate 차이를 만든 사실을 확인했으므로, 그래프 조회 후 새 candidate를 수집한다. Graph 관계는 탐색 근거이며 최신 source나 runtime 성공을 대신하지 않는다.
+
+## 다음 행동
+
+1. 사용자 프롬프트의 $implement를 진입 권한으로 삼고 현재 AGENTS/workflow-contract/implement 및 이 handoff·C-D55·BRIEF/SPEC/PLAN/관련 ticket/ADR을 읽는다. handoff-validate는 stdin 요청으로 수행한다. 기존 승인 재질문 없이 current files/hash·host assignments·프로세스·lease·부분 산출물을 대조한다.
+2. 이전 p2.5 ledger를 재읽고 누적 220회·role/unit 사용량·예약·실패 이력을 보존한다. 현재 helper의 limit event는 이미 기록된 user/host limit 변경·제거를 거부하므로 operating limit 추가만으로 해결하지 않는다. C-D55 권한에 따른 명시적 supersession, 원본 bytes/hash와 매핑·중복 없는 누적 회계를 보존하는 전환 경로를 확인한다. ledger-convert가 이 변경을 지원한다고 미리 가정하지 않는다. 필요한 도구 보완은 구현 세션에서 범위·독립 검증을 갖춰 처리한다. 기술적 미지원은 새 사용자 예산 승인을 요구할 이유가 아니다. 회계 전환이 검증되기 전 dispatch하지 않고 사용량을 0으로 재설정하지 않는다.
+3. 남은 필수 구현·독립 test/review·수정·통합을 위한 유한 operating budget을 Root가 추산·예약한다. 현행 host 제한은 유지한다. 예산 증액마다 사용자 재승인을 받지 않는다.
+4. 기존 제한된 판별 근거를 재사용 가능한 범위로 분류한 뒤 CW-03 남은 acceptance의 가장 작은 단위를 선택한다. conda 전용 점검을 실행하지 않으며 Docker runtime은 계속 생략한다. 환경 상속·입력 반환·signal·수명·unknown 보류는 계속 검증한다. CW-02/04도 실제 근거를 대조하고 CW-05 선행 gate를 충족하기 전 production frontier를 해제하지 않는다.
+5. 한 workspace 한 writer, 검증된 격리에서만 병렬 writer, 독립 test_designer와 fresh reviewer, 필요한 수정·Root 통합·최종 검증을 수행한다. 제품 코드를 변경하면 graphify update .를 실행한다. 바뀐 승인 문서 digest로 과거 pass를 재발급하지 말고 현재 requirement identity/candidate/item/log와 연결한다. 전체 완료 기준은 PLAN의 모든 acceptance와 최종 통합이며 현재 partial이다.
+
+## 읽기 경로
+
+- `AGENTS.md` — 현재 지침
+- `.codex/workflow-contract.md` — 승인·예산·독립 검증·회계·재개
+- `.agents/skills/implement/SKILL.md` — 다음 세션 구현 절차
+- `.agents/skills/handoff/SKILL.md` — 수신 검증; 자체 실행 권한 아님
+- `.agents/skills/workflow-ledger/SKILL.md` — 원본 회계 보존 및 helper 제약
+- `docs/features/core-workbench/DECISION-2026-09-26.md` — C-D55 사용자 발언·범위·예산 전환
+- `docs/features/core-workbench/START-IMPLEMENT.md` — 복사할 다음 세션 프롬프트
+- `docs/features/core-workbench/BRIEF.md` — r1.13 요구
+- `docs/features/core-workbench/SPEC.md` — s2.6 실행 계약
+- `docs/features/core-workbench/PLAN.json` — p2.6 canonical graph·gate·예산 위임
+- `docs/features/core-workbench/tickets/CW-03.md` — 남은 G2 acceptance
+- `docs/features/core-workbench/tickets/CW-07.md` — 환경·수동 제어 production 계약
+- `docs/features/core-workbench/tickets/CW-16.md` — 최종 통합 환경 검증 범위
+- `docs/adr/0002-managed-shell-control-wait.md` — 실행 구조·관측 경계
+- `.workflow/core-workbench/state.json` — 새 승인 pointer; 상태 flag는 증거 아님
+- `.workflow/core-workbench/runs/decisions-cd55-20260926/approval.json` — 사용자 승인과 문서 hash
+- `.workflow/core-workbench/runs/decisions-cd55-20260926/document-validation.json` — 정적 문서 검증; runtime check 아님
+- `.workflow/core-workbench/runs/implement-p2.5-20260925/final-root-check.json` — 제한된 과거 결과/네 파일 hash; 수기 집계
+- `.workflow/core-workbench/runs/implement-p2.5-20260925/final-snapshot.json` — 과거 runtime candidate
+- `tests/gates/g2_shell/live_combined_boundary_probe.py` — 재사용 가능한 제한된 probe
+- `tests/gates/g2_shell/test_live_combined_boundary_predicates.py` — 기존 독립 테스트
+- `tests/gates/g2_shell/live_env_launch_probe.py` — 과거 env/launch probe; conda 점검 경로는 재실행 전에 제외
+- `tests/gates/g2_shell/test_live_env_launch_predicates.py` — 기존 독립 predicates
+- `.workflow/core-workbench/runs/implement-p2.5-20260925/ledger.json` — ledger reconciliation
+- `.codex/handoffs/2026-09-26-core-workbench-p25/HANDOFF.md` — 이전 인계 이력; 현재 정본을 우선

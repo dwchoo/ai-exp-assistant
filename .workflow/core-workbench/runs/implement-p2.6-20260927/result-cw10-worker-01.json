@@ -1,0 +1,44 @@
+{
+  "invocation": "cw10-worker-01",
+  "unit": "V-CW-10-p2.6-current",
+  "status": "candidate_ready",
+  "implementation": {
+    "changed_paths": [
+      "src/workbench/workflow/__init__.py",
+      "src/workbench/workflow/worktree.py",
+      "src/workbench/workflow/run.py",
+      "tests/workflow/test_run.py",
+      "tests/workflow/live_workflow_probe.py",
+      "docs/features/core-workbench/WORKTREE-GUIDE.md"
+    ],
+    "public_boundaries": ["CW-07 PersistentShell", "CW-08 TaskMailbox", "CW-09 TaskRepository"],
+    "scope": "Approved immutable TaskSpec execution and persisted matching scope approval; explicit full commit and one detached worktree; no shared-repository commit, push, merge, stash, reset, clean, or auto worktree removal.",
+    "report_protocol": "A preparation failure after a processed TASK sends one linked worker REPORT requiring manager resolution. A judgment REPORT delivery attempt is persisted before delivery; ambiguous delivery cannot be replayed."
+  },
+  "runtime_evidence": {
+    "raw": ".workflow/core-workbench/runs/implement-p2.6-20260927/raw-cw10-live-worker-01.json",
+    "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python tests/workflow/live_workflow_probe.py",
+    "exit_code": 0,
+    "omp_version": "omp/18.2.10",
+    "facts": ["Two real OMP sessions and G3BridgeServer exchanged TASK and REPORT with omp_processed receipts", "A temporary dirty/untracked Git source produced a verified detached worktree at the explicit commit without source changes", "The persistent Bash host shell recorded sent, accepted, started, ended and confirmed exit 0", "Durable raw log and result record yielded evidence judgment success", "No OMP child, provider thread, socket, owned process, or temporary fixture residue remained"],
+    "gate_mapping": {
+      "P-C-AC-03": "actual OMP request, host shell lifecycle, confirmed exit and durable raw log/result locations",
+      "P-C-AC-05": "four real Bash/sh host-shell outcomes in focused tests; actual two-OMP success report; pause and code-change no-return tests",
+      "P-C-AC-09": "explicit-commit detached worktree, dirty/untracked preservation, existing-target failure and linked manager report",
+      "P-C-AC-11": "guide and implementation perform no shared-repository commit, push or merge; fixture-only commit is isolated"
+    }
+  },
+  "checks": [
+    {"command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/workflow -v", "exit_code": 0, "result": "7 tests passed, including four real Bash/sh outcome cases and ambiguous report no-replay"},
+    {"command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/terminal -p 'test_*.py'", "exit_code": 0, "result": "10 tests passed"},
+    {"command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/bridge -p 'test_*.py'", "exit_code": 0, "result": "18 tests passed"},
+    {"command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/tasks -p 'test_*.py'", "exit_code": 0, "result": "22 tests passed"},
+    {"command": "git diff --check", "exit_code": 0, "result": "no whitespace error"},
+    {"command": "pgrep -af '[/]tmp/cw10-(live|workflow)-' || true; find /tmp -maxdepth 1 -type d \\( -name 'cw10-live-*' -o -name 'cw10-workflow-*' \\) -print", "exit_code": 0, "result": "no owned process or fixture directory residue"}
+  ],
+  "candidate_snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw10-worker-after-final.json",
+  "candidate_digest": "bc3cfabe7cde2c01ce92626e27323f4fd3d6bb51287a09edc388375af3fc30b1",
+  "scope_audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/scope-audit-cw10-worker-final.json",
+  "scope_audit_facts": {"comparable": true, "outside_scope": [], "index_changed": []},
+  "remaining_unknowns": ["Independent test_designer and fresh reviewer evaluation belong to Root's next verification turn", "Worktree lifecycle after this one preparation step and shared-resource isolation remain outside CW-10; no automatic cleanup or deployment is claimed"]
+}

@@ -1,0 +1,25 @@
+{
+  "invocation": "cw03-matrix-test-01",
+  "unit": "V-CW-03",
+  "status": "needs_reroute",
+  "candidate": "84338ecbfd0005bad6c554b976a88f18da54e3830db599515073c74d242aaf0e",
+  "test_sha256": "fcb89120a7c7657bfc1ddd2d3fa495f6dbe3f4b7dab3d34bb238ba3a8d288c68",
+  "scope_audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/scope-audit-cw03-matrix-test.json",
+  "scope_note": "graphify-out/cache/last_query_stamp is an automatic query side effect to be reconciled by the required root graphify update before review freeze.",
+  "checks": [
+    {"name": "independent canonical matrix tests", "result": "failed", "tests": 3, "failing_subtests": 2, "elapsed_seconds": 4.279},
+    {"name": "full G2 discovery", "result": "failed", "tests": 130, "failing_subtests": 2, "skipped": 6, "elapsed_seconds": 108.883},
+    {"name": "git diff --check", "result": "passed"}
+  ],
+  "finding": {
+    "severity": "required_failure",
+    "behavior": "Removing EXEC_READY observation is rejected by input/jobs and takeover but hook/env returns success for Bash and dash.",
+    "evidence": "hook/env produced exec_ready=false, returned=false, and lifecycle unknown while same_parent_recheck_proceeded=true.",
+    "required_fix": "Make hook/env success and same-parent recheck fail closed on incomplete/unknown canonical lifecycle evidence; preserve pre-ACCEPT typed manual denial and no replay."
+  },
+  "positive_evidence": [
+    "Normal three-matrix causal order and live PPID/PGID/SID/foreground identity passed.",
+    "Second RUN ACK/prompt/fresh handoff/WAIT and lost/delayed ACK distinctions passed.",
+    "No fixture, wrapper, daemon, or unittest process residue remained."
+  ]
+}

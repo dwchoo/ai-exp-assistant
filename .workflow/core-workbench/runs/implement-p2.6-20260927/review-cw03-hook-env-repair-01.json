@@ -1,0 +1,12 @@
+{
+  "invocation": "cw03-hook-env-repair-review-01",
+  "candidate": "be8d060e1c2ac170a64c5f91adbbe88a61b4c53048092d30aca704a435b242f7",
+  "disposition": "approved",
+  "needs_oracle": false,
+  "findings": [],
+  "resolution": "The prior P2 is resolved: nested finally attempts restoration for proc_fields, kill, and waitpid failures; the original exception remains observable and restoration failure raises OSError with the cleanup error in context.",
+  "independent_test_assessment": "The regression checks real libc.prctl kernel state, exception identity, all three cleanup failures, and detects the pre-repair-equivalent mutation.",
+  "scope_assessment": "Fixture PID/start-time ownership, unknown persistence, user-confirmation no-clear, and no arbitrary daemon discovery/auto-kill boundaries remain intact.",
+  "manifest": "All 1042 file SHA/mode entries matched candidate be8d060e1c2ac170a64c5f91adbbe88a61b4c53048092d30aca704a435b242f7.",
+  "residue": "none observed"
+}

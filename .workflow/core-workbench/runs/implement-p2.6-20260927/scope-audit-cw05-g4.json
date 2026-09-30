@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "invocation": "cw05-g4-01",
+  "baseline_ref": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw05-worker-checkpoint.json",
+  "after_ref": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw05-g4-after.json",
+  "changed": [
+    "docs/features/core-workbench/gates/G4.md",
+    "omp_bridge/contract/ports_v2.ts",
+    "pyproject.toml",
+    "src/workbench/contracts/ports_v2.py",
+    "src/workbench/runtime/g4.py",
+    "src/workbench/terminal/shell_g2/lifecycle.py",
+    "tests/contracts/fixtures/ports-v2.json",
+    "tests/contracts/test_ports_v2.py",
+    "tests/gates/g2_shell/test_return_deadline.py",
+    "tests/gates/g4_evidence/test_aggregate.py",
+    "tests/gates/g4_lifetime/live_detach_probe.py",
+    "tests/gates/g4_lifetime/test_ports.py",
+    "tests/gates/harness/aggregate.py",
+    "tests/gates/harness/ports-v2.test.ts",
+    "tests/gates/harness/run-contracts.sh"
+  ],
+  "index_changed": [],
+  "outside_scope": [],
+  "comparable": true
+}

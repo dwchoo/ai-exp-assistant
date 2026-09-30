@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "invocation": "cw12-post-review-test-01",
+  "role": "test_designer",
+  "unit": "V-CW-12-p2.6-current",
+  "authority": "User $implement docs/features/core-workbench request; approved PLAN p2.6 CW-12 and fresh-review correction evidence",
+  "objective": "Independently verify the corrected frozen CW-12 candidate, including all three fresh-review findings and actual OMP runtime behavior.",
+  "candidate": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw12-post-review-correction.json",
+    "candidate_id": "4128485ddb9363d42727f57c4f10fd2e8d295e5b4de2cdc4f62d8e08518c429f",
+    "scope_audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/audit-cw12-post-review-correction.json"
+  },
+  "requirements": {
+    "ticket": "docs/features/core-workbench/tickets/CW-12.md",
+    "acceptance_ids": ["C-AC-25", "C-AC-30", "C-AC-33"],
+    "review_findings": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-run-permit-review-01.json"
+  },
+  "must_verify": [
+    "complete_run, fail_run, cancel, and revocation races cannot start a local action or emit bound transport bytes for a no-longer-current persisted run, while normal delivery remains live",
+    "production resume observation derives file/tool/process/task/approval facts, covers actual manager and worker peer cwd manifests, and fails closed when peer/cwd/scan evidence is unavailable or unstable",
+    "late CW-11 callback completion after pause/rebind/exit preserves historical status without current tick attribution or review_count increment",
+    "existing pause, observation, TaskRepository, bridge, workflow, contract, status, and G3 regressions remain green",
+    "actual omp/18.2.10 live_pause_runtime_probe passes with bounded cleanup and zero residue"
+  ],
+  "allowed_write_paths": [
+    "tests/policy/pause_automation/**",
+    "tests/observation/**",
+    "tests/tasks/**",
+    "tests/bridge/**",
+    "graphify-out/**"
+  ],
+  "constraints": [
+    "Independent test-only mutation owner; do not edit production code, .workflow, docs, PLAN/state, or approved requirements.",
+    "Use apply_patch for any test edits; do not commit, publish, deploy, use Docker, or delegate.",
+    "Record exact commands, counts, environment limitations, failures, unknowns, and residue checks.",
+    "If the candidate is defective, return needs_reroute with a minimal reproduction; do not repair production code."
+  ],
+  "report": "Return candidate_ready or needs_reroute, test-only changed paths, exact checks/results, acceptance assessment, and residual risks."
+}

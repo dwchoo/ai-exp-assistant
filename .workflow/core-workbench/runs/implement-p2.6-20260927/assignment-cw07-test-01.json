@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "invocation": "cw07-test-01",
+  "role": "test_designer",
+  "unit": "V-CW-07-p2.6-current",
+  "workspace": "/home/dwchoo/ai-exp-assistant",
+  "writer": true,
+  "checkpoint": ".workflow/core-workbench/runs/implement-p2.6-20260927/cw07-test-checkpoint.json",
+  "baseline_candidate": "c0e000a2e06773dd973f8e7d7fb1113f9dbe62a73fbf792cf3721225b2397362",
+  "requirements": ".workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw07.json",
+  "ticket": "docs/features/core-workbench/tickets/CW-07.md",
+  "worker_result": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw07-worker-01.json",
+  "allowed_write_scope": [
+    "tests/terminal/test_persistent_shell_independent.py",
+    "tests/terminal/live_persistent_shell_independent.py"
+  ],
+  "protected_worker_files": [
+    "src/workbench/terminal/shell_g2/lifecycle.py",
+    "src/workbench/terminal/shell_g2/prototype.py",
+    "src/workbench/terminal/shell_persistent/adapter.py",
+    "tests/terminal/live_persistent_shell.py",
+    "tests/terminal/test_persistent_shell.py"
+  ],
+  "instructions": "Independently derive and add meaningful tests for P-C-AC-08, P-C-AC-26, and P-C-AC-32. Do not modify production or worker-owned tests. Exercise public PersistentShell behavior rather than duplicating internal computations. At minimum cover: takeover request immediately holds dispatch and request/confirmation separation; a live foreground target can be confirmed and receive input before exit/prompt; unknown/stale identity holds input and no replay occurs after handoff/rearm; parent cwd/PATH/exported env survive while experiment-local and app-only env do not leak; dirty input/manual jobs/unsupported hook or trap/FD loss fail closed with explicit stage. Use bounded actual Bash and /bin/sh runtime where required, check cleanup and PID residue, and state unsupported boundaries. Run all tests/terminal plus relevant G2/G4 compatibility checks proportionate to the delta. Return pass/fail classification; if valid failures exist, do not modify production to fix them. Write result, raw runtime evidence, snapshot, and scope audit artifacts under the run directory, then return writer lease. Do not run graphify update."
+}

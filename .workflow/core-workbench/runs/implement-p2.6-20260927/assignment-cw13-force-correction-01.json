@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "invocation": "cw13-force-correction-01",
+  "role": "worker_senior",
+  "unit": "V-CW-13-p2.6-current",
+  "authority": "User $implement docs/features/core-workbench request; approved PLAN p2.6 CW-13 and fresh P1 C-AC-34 review finding",
+  "objective": "Require a proven ordinary stop attempt and a later fresh non-termination observation before any forced-termination plan.",
+  "base": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw13-cas-test.json",
+    "candidate_id": "0934631203e4733523f94a343960288a2d724ee680b15c167382243e4061e945",
+    "finding": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw13-review-01.json"
+  },
+  "required_corrections": [
+    "Add a typed, validated ordinary-stop observation sequence (or an equivalently strong immutable proof) to RunObservation; a boolean stop_requested without an ordering proof is insufficient.",
+    "For a force request, require ordinary stop was issued, current observation is strictly later than that stop sequence, the target remains not fully terminated, force is delegated, and the exact current owned target identity still matches the run.",
+    "When no ordinary stop was issued, return only a normal stop-and-observe plan, never force_requested. When no later observation exists, wait/request fresh observation with no force step. Unknown or changed target remains confirmation-required/blocked.",
+    "Do not add an elapsed-time cutoff. Non-response is established only by a later fresh observation after the stop request.",
+    "After force, preserve the existing requirement for another strictly later observation proving full termination before any mutation, worker instruction or relaunch.",
+    "Reverse the existing fixture that expects force with stop_requested false and add sequence equality/ordering, stop success, target drift and authority/pause/revocation tests."
+  ],
+  "allowed_write_paths": ["src/workbench/policy/recovery_manager/**", "tests/policy/recovery_manager/**", "graphify-out/**"],
+  "constraints": [
+    "Sole writer; use apply_patch and preserve CAS/other acceptance regressions.",
+    "No existing CW-10/11/12 production changes, dependencies, workflow/docs/PLAN/state edits, delegation, commit, publish, deploy, Docker or live process kill.",
+    "Run focused force tests, full recovery suite, predecessor regressions, and graphify update ."
+  ],
+  "report": "Return stop-proof schema and outcomes, changed paths, before/after regression, test counts, candidate_ready/blocker, and CW-15 adapter obligations."
+}

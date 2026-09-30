@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "invocation": "cw12-file-mode-test-01",
+  "role": "test_designer",
+  "unit": "V-CW-12-p2.6-current",
+  "authority": "User $implement docs/features/core-workbench request; approved PLAN p2.6 CW-12",
+  "objective": "Independently verify mode-aware file reconciliation and final CW-12 runtime.",
+  "candidate": {"snapshot":".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw12-file-mode-correction.json","candidate_id":"01ee9848ee006f3bd2705e7fbbc1bb7b889a2334a8efe92b3ed48ec6e8710040"},
+  "must_verify": [
+    "chmod-only and mid-scan chmod changes reject resume for peer Git untracked, execution untracked/tracked, and non-Git paths",
+    "v2 identities, missing state, legacy baseline and core.filemode=false fail-closed behavior are correct",
+    "all prior index-flag, large repo, fd, persisted-run, late-result and pause regressions remain green",
+    "actual omp/18.2.10 reject-cleanup-reconcile-resume passes with zero residue"
+  ],
+  "allowed_write_paths": ["tests/policy/pause_automation/**", "graphify-out/**"],
+  "constraints": ["Test-only mutation owner; no production/.workflow/docs/PLAN/state edits.", "Use apply_patch; no delegation, commit, publish, deploy, or Docker.", "Return needs_reroute for product defects; do not fix production."],
+  "report": "Return candidate_ready/needs_reroute, exact checks/counts, actual OMP cleanup, test-only changes, and residual risks."
+}

@@ -1,0 +1,12 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 270,
+  "event": {"id": "limit-cw05-current-worker-20260928", "kind": "limit", "data": {
+    "bucket": "role:worker_senior", "origin": "operating", "value": 103,
+    "authority": "C-D55 plus workflow-contract section 8 and current implementation authorization",
+    "reason": "One bounded CW-05 G4 integrated implementation turn",
+    "decision_owner": "Root", "remaining_work_estimate": 1,
+    "expected_previous": {"value": 102, "authority": "C-D55 plus workflow-contract section 8 and current implementation authorization", "reason": "One bounded formal-tmux regression diagnosis/correction after wide-glyph delta"},
+    "scope_basis": null
+  }}
+}

@@ -1,0 +1,31 @@
+{
+  "invocation": "cw10-response-contract-test-01",
+  "role": "test_designer",
+  "unit": "V-CW-10-p2.6-current",
+  "objective": "Independently verify that a general Worker OMP receives a complete response contract and that actual probes construct responses only from that delivered contract.",
+  "candidate_manifest": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw10-response-contract-verified.json",
+  "candidate": "28edcfae307926a81aa384a54a2774a09c26c716c3d4071f0fd00b0c9e312cdc",
+  "requirements": ".workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw10.json",
+  "finding": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw10-public-response-review-01.json",
+  "allowed_write_scope": [
+    "tests/workflow/test_worker_port_independent.py",
+    "tests/gates/g3_omp/bridge_public_response_independent.test.ts"
+  ],
+  "required_attacks": [
+    "Inspect delivered execute and analysis messages for exact marker, version, compact-frame instruction, field order/descriptors/types/values, allowed decisions, response_id UUID generation rule, and no prose/tool/thinking instruction.",
+    "Prove parser and contract cannot drift under reordered/missing/extra descriptor, marker mutation, identity mutation, decision-set mutation, response-id rule mutation, or natural-language-only instructions.",
+    "Prove the actual scripted provider has no hardcoded marker/response identity/schema fallback: it must fail or emit the contract mutation when contract data changes.",
+    "Run actual OMP 18.2.10 two-stage flow with contract-derived frames, all public response attacks, regressions, privacy and residue checks."
+  ],
+  "constraints": [
+    "Do not modify product, existing worker tests/probes, docs, workflow artifacts, dependencies, or unrelated files.",
+    "Use apply_patch for independent test changes. Preserve failing product evidence and report needs_reroute rather than fixing product.",
+    "No commit/push/merge/stash/reset/clean. Run graphify update . after test changes and report generated drift separately."
+  ],
+  "report": [
+    "new independent tests/findings",
+    "contract-derived probe proof",
+    "commands/results",
+    "snapshot/scope audit and candidate_ready or needs_reroute"
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "invocation": "cw13-review-01",
+  "role": "reviewer",
+  "unit": "V-CW-13-p2.6-current",
+  "authority": "User $implement docs/features/core-workbench request; approved PLAN p2.6 CW-13",
+  "objective": "Perform a fresh read-only review of the complete CW-13 recovery policy candidate and its independent fixtures.",
+  "candidate": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw13-cas-test.json",
+    "candidate_id": "0934631203e4733523f94a343960288a2d724ee680b15c167382243e4061e945"
+  },
+  "acceptance_ids": ["C-AC-04", "C-AC-07", "C-AC-10", "C-AC-13", "C-AC-31", "C-AC-34"],
+  "review_focus": [
+    "Exact identity, criteria, approval, worker provenance/artifact and full termination reconciliation; exit zero alone must not complete.",
+    "Recovery retry semantics: initial/normal exclusion, task-wide three-retry maximum across revision/settings/commit/name, exact durable CAS and post-read fail-closed behavior under concurrency or inconsistent ports.",
+    "No source/config mutation, new worker instruction or relaunch before confirmed full termination; no elapsed-time cutoff.",
+    "Next-run revision default, current-run stop-confirm-relaunch, immediate revocation, pause/cancel/metadata/terminal-owner gates.",
+    "Force termination delegation, exact owned target, fresh post-force observation and no input-owner/replay bypass.",
+    "Whether package-only policy scope provides complete fixture evidence for CW-13 while correctly leaving host side effects and durable adapter integration to CW-15."
+  ],
+  "constraints": [
+    "Read-only; do not edit files or run mutating graphify commands.",
+    "No delegation, commit, publish, deploy, Docker, or destructive process actions."
+  ],
+  "report": "Return candidate_ready true/false, findings by severity with paths/lines, acceptance judgment for all six IDs, fixture adequacy, and residual CW-15 integration risks."
+}

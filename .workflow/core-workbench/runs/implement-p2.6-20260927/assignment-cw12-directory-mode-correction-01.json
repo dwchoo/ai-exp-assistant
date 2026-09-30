@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "invocation": "cw12-directory-mode-correction-01",
+  "role": "worker_senior",
+  "unit": "V-CW-12-p2.6-current",
+  "authority": "User $implement docs/features/core-workbench request; approved PLAN p2.6 CW-12 and fresh P2 directory-mode review finding",
+  "objective": "Close C-AC-33 by reconciling directory mode-only changes across Git and non-Git peer/execution scopes without regressing bounded, fd-safe, large-repository behavior.",
+  "base": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw12-tracked-mode-test.json",
+    "candidate_id": "d94a041b433e8fb9ebf617dd5657d5d2cb70ee67f42946b9064ca3de7f584a73",
+    "finding": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-tracked-mode-review-01.json"
+  },
+  "required_corrections": [
+    "First add and run failing regressions for an empty non-Git peer cwd and Git execution/peer directory changed from 0755 to 0555 while paused.",
+    "Capture bounded full st_mode metadata for each observed root and traversed directory needed to make Git tracked, changed, flagged, untracked/ignored and non-Git manifests sensitive to directory mode-only deltas; do not hash clean file contents.",
+    "At resume, compare baseline/current directory metadata, map deltas through the existing approved-path policy, and fail closed on missing, symlink, special, unreadable, overflow, traversal error, or unstable observations.",
+    "Preserve fd-relative no-follow traversal, descendant cwd support, sparse/skip-worktree handling, tracked-mode and sidecar bounds, and the 2050-file/over-64MiB liveness regressions.",
+    "Cover approved directory chmod, out-of-scope root/ancestor/nested directory chmod, empty directories, directory replacement/removal, and bounds/version compatibility."
+  ],
+  "allowed_write_paths": ["src/workbench/policy/pause_automation/**", "tests/policy/pause_automation/**", "graphify-out/**"],
+  "constraints": [
+    "Sole product mutation owner; preserve all prior CW-12 fixes and tests.",
+    "Use apply_patch; no workflow/docs/PLAN/state edits, delegation, commit, publish, deploy, or Docker.",
+    "Run failing regressions before correction, focused directory-mode tests, full pause_automation suite, and graphify update ."
+  ],
+  "report": "Return changed paths, directory baseline format/bounds and approval semantics, before/after regressions, suite counts, candidate_ready/blocker, and residual risks."
+}

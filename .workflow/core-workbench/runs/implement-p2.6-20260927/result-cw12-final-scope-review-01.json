@@ -1,0 +1,32 @@
+{
+  "invocation": "cw12-final-scope-review-01",
+  "outcome": "needs_correction",
+  "candidate_ready": false,
+  "candidate": "2f04f7410a07ae2340f42fc68b18cb930cba5d181052fd023933306ea8cab2e2",
+  "findings": [
+    {
+      "severity": "P1",
+      "confidence": "high",
+      "summary": "Peer baseline is captured after manager abort/worker pause waits, so an in-flight out-of-scope write completed during pause can be absorbed as baseline.",
+      "evidence": ["src/workbench/policy/pause_automation/controller.py:971", "src/workbench/policy/pause_automation/controller.py:1255"],
+      "acceptance_ids": ["C-AC-33"]
+    },
+    {
+      "severity": "P1",
+      "confidence": "high",
+      "summary": "Git ignored untracked outputs are omitted by --exclude-standard and can escape resume reconciliation when peer cwd differs from the worktree.",
+      "evidence": ["src/workbench/policy/pause_automation/controller.py:1071"],
+      "acceptance_ids": ["C-AC-33"]
+    },
+    {
+      "severity": "P2",
+      "confidence": "medium",
+      "summary": "Directory lstat followed by later path-based scandir permits a symlink-swap race that can hash outside the peer cwd.",
+      "evidence": ["src/workbench/policy/pause_automation/controller.py:1127"],
+      "acceptance_ids": ["C-AC-33"]
+    }
+  ],
+  "closed_findings": ["descendant child cwd", "streaming byte/count limits", "persisted run guard", "late CW-11 attribution"],
+  "requirement_assessment": {"C-AC-25": "met", "C-AC-30": "met", "C-AC-33": "not_met"},
+  "tests_run": false
+}

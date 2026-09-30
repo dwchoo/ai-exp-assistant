@@ -1,0 +1,23 @@
+{
+  "invocation": "cw03-adapter-integration-01",
+  "status": "needs_reroute",
+  "candidate_ready": false,
+  "changed_paths": [],
+  "reason_code": "coupled_invariants",
+  "smallest_remaining_seam": "A common RUN launch/ready/exec-error protocol and host lifecycle mapping must unify tagged raw parent-eval scripts, untagged base64 helper controllers, and the validated JSON plus prepared-child split supervisor before the six G2 matrix items can share one split-PG path.",
+  "runtime_discriminator": "Routing existing Bash/dash launch_case(argv) directly to the split supervisor produced START -> RETURN:1 -> WAIT with no SUPERVISOR or CHILD event.",
+  "next_bounded_work": [
+    "Normalize script and argv requests at one source boundary without parent eval.",
+    "Connect a prepared child barrier and verified foreground ownership before payload execution.",
+    "Emit explicit exec success/failure acknowledgement and map it into host lifecycle state.",
+    "Migrate focused lifecycle/launch coverage to the common seam before the remaining matrix helpers."
+  ],
+  "new_product_decision_required": false,
+  "checks": [
+    {"command": "PYTHONDONTWRITEBYTECODE=1 python3 tests/gates/g2_shell/live_combined_boundary_probe.py", "exit_code": 0, "summary": "30 cases observed"},
+    {"command": "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest tests.gates.g2_shell.test_split_pg_control -v", "exit_code": 0, "summary": "4 tests passed in 12.387s"},
+    {"command": "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/gates/g2_shell -p 'test_*.py' -v", "exit_code": 0, "summary": "116 tests passed in 96.394s; 6 existing skips"},
+    {"command": "git diff --check", "exit_code": 0, "summary": "clean"}
+  ],
+  "owned_processes_remaining": false
+}

@@ -1,0 +1,23 @@
+{
+  "path": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 62,
+  "event": {
+    "id": "limit-cw03-hook-env-repair-20260927",
+    "kind": "limit",
+    "data": {
+      "bucket": "unit:V-CW-03",
+      "origin": "operating",
+      "value": 19,
+      "authority": "Approved PLAN p2.6, C-D55, workflow-contract section 8, and current implementation authorization",
+      "reason": "Bounded G2-HOOK-ENV P2 correction plus mandatory independent regression test and fresh delta review, retaining one contingency call",
+      "decision_owner": "Root",
+      "expected_previous": {
+        "value": 15,
+        "authority": "Approved PLAN p2.6, C-D55, workflow-contract section 8, and current implementation authorization",
+        "reason": "Bounded P1/P2 takeover correction plus mandatory independent delta tests and fresh delta review, retaining two contingency calls"
+      },
+      "remaining_work_estimate": 3,
+      "scope_basis": null
+    }
+  }
+}

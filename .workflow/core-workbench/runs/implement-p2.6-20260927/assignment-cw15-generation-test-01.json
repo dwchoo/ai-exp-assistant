@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "invocation": "cw15-generation-test-01",
+  "role": "test_designer",
+  "unit": "V-CW-15-p2.6-current",
+  "authority": "User $implement request; approved CW-15/C-D52; change-verification independent test stage",
+  "objective": "Independently verify generation-aware conditional handoff reopen prevents lost newer takeover intent without regressing final submission claims.",
+  "candidate": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw15-generation-correction.json",
+    "candidate_id": "2eb436bdfd173a6172b7c2d7fc908132507b312204405a6fd99bd5aa8df2c11f"
+  },
+  "requirements": [
+    "Construct independent deterministic three-thread handoff/new-takeover/command-or-review schedules. Cover new intent before, during and after the conditional reopen point; any request generation newer than handoff's captured generation must remain fenced and durably process later.",
+    "Verify ordinary handoff reopens once after durable commit, old permits remain invalid across every generation transition, duplicate/stale takeover/handoff cannot reopen or clear a newer intent, and external/commit failure remains closed.",
+    "Re-run revoke-before-claim and claim-before-revoke, token negatives, pending ACK cleanup, no token-unaware send, shutdown/action and positive production binding tests without launching external/scripted OMP suites.",
+    "Run allowed non-live regressions, check frozen production hashes and graph/residue. Add test-only coverage only for a material gap."
+  ],
+  "allowed_write_paths": ["tests/lifecycle/**", "tests/integration/**", "graphify-out/**"],
+  "constraints": ["Production frozen. Do not run full/live g3_omp or any external/scripted OMP, reboot, install dependencies, modify production/docs/workflow/PLAN/state, delegate, commit, publish, deploy or Docker. Use apply_patch for tests."],
+  "report": "Return candidate_ready/needs_reroute, exact generations/thread order/action and durable-state counts, claim regressions, suite totals/hashes/test changes/residue/pending."
+}

@@ -1,0 +1,33 @@
+{
+  "invocation": "cw14-causal-test-01",
+  "outcome": "complete",
+  "candidate_ready": true,
+  "base_candidate": "77057a428d9e8804cd7af8e0e2ed626a4d7c1fe94806738facbd79aa43546804",
+  "added_test": "test_two_recovered_failure_cycles_apply_each_local_delta_once",
+  "focused": {
+    "causal_trace": "A 3B; A failed 2B (3,5,2,2); B durable 10B (3,13,10,10); A status (3,15,12,12); A failed/recovered 1B (3,16,13,13); empty retry no double count",
+    "two_cycles": "first reconciliation (3,5,2,2), B durable (3,6,3,3), second failure/reconciliation (3,8,5,5) exactly once"
+  },
+  "checks": {
+    "storage": "33 tests passed",
+    "recovery": "26 tests passed",
+    "observation": "95 tests passed",
+    "workflow": "44 tests passed",
+    "terminal": "10 tests passed",
+    "tasks": "22 tests passed",
+    "graphify_update": "exit 0",
+    "production_hashes": "frozen snapshot match"
+  },
+  "sha256": {
+    "src/workbench/storage/log_raw/__init__.py": "2c336e18a75ffc5dea247054094766f9e0aea9512c0ebbe5169012ba1531feb6",
+    "src/workbench/storage/log_raw/admission.py": "4ce23cbaa06c4a0b0d79f5e1081b16fb72cd381aeffc104c15985bdc2dd57345",
+    "src/workbench/storage/log_raw/store.py": "949c8cbb02fa2713ee82c60a92596edc0f7d43bf4667f64ecc95c882f37f9018",
+    "tests/storage/test_log_raw.py": "4af3d07084097ea8fbf0576df8e78ddf14d39475efd3d35d4e5a44b46b99647d"
+  },
+  "risk": "Process death before durable reconciliation can lose in-memory pending failure-observation counts; outside the CW-14 fixture contract and deferred to integration crash semantics.",
+  "acceptance": {
+    "C-AC-24": "candidate_ready at fixture level",
+    "C-AC-28": "candidate_ready at fixture level"
+  },
+  "mutation_owner": "/root/cw12_post_review_test"
+}

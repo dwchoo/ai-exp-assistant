@@ -1,0 +1,17 @@
+{
+  "invocation": "cw10-public-response-oracle-01",
+  "role": "oracle",
+  "outcome": "complete",
+  "finding_confirmed": true,
+  "recommendation": "Production bridge must strictly parse and validate one marker-framed flat worker control response from the public assistant message_end, settle it only at terminal agent_end, emit only an allowlisted structured workerResponse bound to exact delivery identity, and a production G3WorkerResponsePort must consume only those public events plus the exact delivery_omp_processed event.",
+  "critical_invariants": [
+    "Never expose raw assistant text, malformed content, reasoning, or errors; use fixed reason codes.",
+    "Exact field set, canonical UUIDs, positive safe revision, stage/kind and decision constraints, current authenticated role/session/generation.",
+    "One valid response per delivery; duplicate/conflict/retry/tool/error/abort/continuation/session switch fail closed.",
+    "message_end supplies validated candidate; terminal agent_end with willContinue not true settles it; after_provider_response alone is insufficient.",
+    "Production adapter uses only public bridge events and a common deadline; no provider object or private response dictionary.",
+    "Existing authority rechecks remain required after response verification."
+  ],
+  "runtime_unknown": "The installed OMP 18.2.10 message_end to terminal agent_end sequence and final-history semantics must be proven by an actual probe with private provider state removed.",
+  "needs_oracle_senior": false
+}

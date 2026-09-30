@@ -1,0 +1,24 @@
+{
+  "invocation": "cw02-g1-tmux-correction-01",
+  "ticket": "CW-02",
+  "unit": "V-CW-02-p2.6-current",
+  "role": "worker_senior",
+  "workspace": "/home/dwchoo/ai-exp-assistant",
+  "baseline": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw02-g1-wide-correction-after.json",
+  "candidate": "a3eae7024ca8b9180d6d33281890de80ae688e90ae0214b991938b59419fd544",
+  "authority": "User $implement docs/features/core-workbench; formal checks cw02-tmux-final-01 and -02 both inconclusive",
+  "objective": "Diagnose and minimally correct the deterministic external-tmux routing invariant failure on the post-wide-glyph candidate.",
+  "requirements": [
+    "Read both formal tmux logs, live_outer_tmux_probe.py, relevant predicates, app wide-clipping delta, and prior passing worker evidence. First reproduce once with stage-level initial/small/restored titles/target/cross-route diagnostics without weakening pass criteria.",
+    "Determine whether the failure is an actual Workbench rendering/routing regression or an evidence-probe defect. Fix only the demonstrated cause. Preserve exact wide-boundary clipping and all independent PID/geometry negative tests.",
+    "A passing tmux result must still require fresh manager/worker/host input, correct target-only routing at each stage, normal and bracketed paste, exact window/child geometry, stable distinct PIDs, alternate-screen restoration, and complete cleanup. Do not convert missing title/marker evidence to pass.",
+    "Add a regression for the demonstrated cause. Run focused regression, full G1 suite, external tmux at least once on the final code, and color/plain/isolated Herdr if product renderer changes. Keep both earlier inconclusive formal records as historical evidence.",
+    "Use apply_patch only. Touch only src/workbench/ui/terminal_g1/app.py if actually required, tests/gates/g1_vt/**, plus named result/snapshot/audit artifacts. Do not edit docs/PLAN/ledger or commit/push. Run graphify update . after code changes.",
+    "Return result-cw02-g1-tmux-correction-01.json, compact after snapshot, and scope audit with root cause, before/after predicate evidence, checks, cleanup, and unknowns."
+  ],
+  "deliverables": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw02-g1-tmux-correction-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw02-g1-tmux-correction-after.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/scope-audit-cw02-g1-tmux-correction.json"
+  ]
+}

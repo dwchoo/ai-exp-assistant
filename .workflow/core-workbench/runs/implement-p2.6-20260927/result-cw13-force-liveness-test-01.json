@@ -1,0 +1,29 @@
+{
+  "invocation": "cw13-force-liveness-test-01",
+  "outcome": "complete",
+  "candidate_ready": true,
+  "product_mutation": false,
+  "test_only_changed_paths": ["tests/policy/recovery_manager/test_recovery_policy.py", "graphify-out/**"],
+  "candidate": "c5eb7a731daf74f87ee38974c4171d946c22849f28a7ccce9213dff282db7f5b",
+  "production_snapshot_match": {
+    "path": "src/workbench/policy/recovery_manager/policy.py",
+    "sha256": "0dad5e088409b5d99b6032b115277eb30a2fc18f99771db728b7bd1302b77b1f"
+  },
+  "coverage": [
+    "no-stop, stale proof and inconsistent lifecycle preserved regressions",
+    "TargetLiveness missing, false, stale sequence, wrong target and schema validation",
+    "positive main-return with known exit status but managed running/exit_confirmed false and fresh live target",
+    "delegated/observed/ownership/terminal-owner drift",
+    "post-force input/control return barriers"
+  ],
+  "checks": {
+    "recovery_manager": "26 tests passed",
+    "workflow": "44 tests passed",
+    "observation": "95 tests passed",
+    "pause_automation": "129 tests passed",
+    "graphify_update": "exit 0"
+  },
+  "acceptance": {"C-AC-34": "passed", "other_CW13_acceptance": "prior fixture coverage preserved"},
+  "residual_risk": "CW-15 must physically collect fresh owner/source/sequence/target liveness and verify full managed termination after force; no live signal was executed in this fixture ticket.",
+  "mutation_owner": "/root/cw12_post_review_test"
+}

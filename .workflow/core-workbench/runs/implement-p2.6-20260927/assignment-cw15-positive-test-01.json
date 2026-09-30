@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "invocation": "cw15-positive-test-01",
+  "role": "test_designer",
+  "unit": "V-CW-15-p2.6-current",
+  "authority": "User $implement docs/features/core-workbench request; approved PLAN p2.6 CW-15; independent evidence-gap reroute",
+  "objective": "Close only the positive production-composition evidence gap with a valid temporary Git execution baseline; keep production frozen.",
+  "candidate": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw15-binding-correction.json",
+    "candidate_id": "35a10c000ed43187c9fa25eba29a3c0b5618a4dbb35cea0eabc49e743f929f5d"
+  },
+  "required_test": [
+    "Inside the test fixture, create an isolated temporary Git repository with local user config, a committed clean baseline, valid file modes and the minimal execution/task files required by PauseCoordinator. Do not use or mutate the dirty product repository as the execution root.",
+    "Instantiate bind_production with actual authenticated G3BridgeServer manager/worker clients, TaskMailbox, PersistentShell, PauseCoordinator, WorkerReviewScheduler, RecoveryCoordinator, RawLogStore, MetadataAdmissionGate and FrontendLease.",
+    "Drive one positive current-session automatic dispatch through PauseCoordinator.dispatch_bound_automatic and TaskMailbox.deliver to the authenticated expected peer, observe its acknowledgement/delivery state exactly once, and prove reconnect/duplicate invocation does not replay it.",
+    "Also retain the fail-closed identity/session/owner paths and shutdown action-count tests, run lifecycle plus related focused regressions, verify frozen production hashes, and clean all temp repositories/sockets/threads/shells/processes."
+  ],
+  "allowed_write_paths": ["tests/lifecycle/**", "graphify-out/**"],
+  "constraints": [
+    "Test-only; no production/workflow/docs/PLAN/state/ledger edits and no commit to the product repository. A commit inside the disposable fixture repository is allowed only to create its baseline.",
+    "No real reboot, uncontrolled external OMP, tmux, delegation, publish, deploy or Docker."
+  ],
+  "report": "Return candidate_ready/needs_reroute, exact positive dispatch/ack and replay counts, baseline evidence, suite counts/residue, frozen hashes, per-acceptance sufficiency and remaining environment-only pending items."
+}

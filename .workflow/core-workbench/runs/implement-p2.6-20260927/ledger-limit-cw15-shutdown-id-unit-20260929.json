@@ -1,0 +1,23 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 1244,
+  "event": {
+    "id": "limit-cw15-shutdown-id-unit-20260929",
+    "kind": "limit",
+    "data": {
+      "bucket": "unit:V-CW-15-p2.6-current",
+      "origin": "operating",
+      "value": 29,
+      "authority": "Approved PLAN p2.6 CW-15, fresh shutdown identity finding, workflow-contract section 8, and current $implement authorization",
+      "reason": "One bounded shutdown identity correction, independent regression, and fresh final review",
+      "decision_owner": "Root",
+      "remaining_work_estimate": 3,
+      "expected_previous": {
+        "value": 26,
+        "authority": "Approved PLAN p2.6 CW-15, independent duplicate-request generation finding, workflow-contract section 8, and current $implement authorization",
+        "reason": "One bounded duplicate-generation correction, independent rerun, and fresh final review"
+      },
+      "scope_basis": null
+    }
+  }
+}

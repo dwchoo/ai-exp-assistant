@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "invocation": "cw12-post-review-correction-01",
+  "authority": "Root scope adjustment under the current $implement authorization, PLAN p2.6 CW-12, and the fresh P1 review evidence",
+  "reason": "The persisted-run admission and TaskMailbox delivery-attempt write share SQLite state. Holding a SQLite write transaction through transport blocks the mailbox's own write, so terminal-run transition and transport admission require a narrow shared guard at the repository/mailbox boundary.",
+  "additional_allowed_write_paths": [
+    "src/workbench/tasks/repository.py",
+    "src/workbench/ipc/bridge_g3/mailbox.py",
+    "tests/tasks/**",
+    "tests/bridge/**"
+  ],
+  "constraints": [
+    "Use the smallest internal hook that linearizes complete/fail/cancel terminal transitions against automatic dispatch admission without holding a conflicting SQLite write transaction through transport.",
+    "Do not broaden public behavior, schema, or ticket scope.",
+    "Prefer changing repository.py alone if mailbox.py is not required; add focused race and zero-byte tests.",
+    "All original assignment constraints remain in force."
+  ]
+}

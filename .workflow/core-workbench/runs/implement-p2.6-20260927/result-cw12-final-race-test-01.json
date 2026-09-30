@@ -1,0 +1,25 @@
+{
+  "invocation": "cw12-final-race-test-01",
+  "outcome": "complete",
+  "candidate_ready": true,
+  "manifest": "candidate ce1cd03968188365c43d32c5eb1f3dcf6c5cf28b8f7246723c015aef16e0337c matched with unknowns 0",
+  "test_only_additions": [
+    "Run A to B admission final-state consistency",
+    "Twenty-cycle concurrent pause/resume stress",
+    "False-positive rejection for file, process, unknown-result, and manual-activity evidence"
+  ],
+  "checks": {
+    "pause": "38/38 passed in four runs",
+    "status": "2/2 passed",
+    "observation": "91/91 passed",
+    "workflow": "44/44 passed",
+    "tasks": "22/22 passed",
+    "contracts": "20/20 passed",
+    "bridge": "18/18 passed",
+    "g3_python": "117/117 passed with isolated temporary PI_CONFIG_DIR; default shared config produced three pre-start KeyError pids errors",
+    "g3_typescript": "30/30 passed",
+    "actual_omp_18_2_10": "passed with real file/process/unknown rows, paused direct TUI manual turn, automatic hold, no replay, and zero process residue"
+  },
+  "scope_audit": "outside_scope=[]; production unchanged",
+  "durability_boundary": "Zero-evidence crash recovery remains CW15 responsibility and is not claimed as CW12 success."
+}

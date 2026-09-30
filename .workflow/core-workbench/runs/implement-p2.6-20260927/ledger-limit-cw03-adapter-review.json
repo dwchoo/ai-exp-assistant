@@ -1,0 +1,23 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 132,
+  "event": {
+    "id": "limit-cw03-adapter-integration-review-20260928",
+    "kind": "limit",
+    "data": {
+      "bucket": "role:reviewer",
+      "origin": "operating",
+      "value": 54,
+      "authority": "C-D55 plus workflow-contract section 8 and current implementation authorization",
+      "reason": "One fresh review turn for the integrated CW-03 split-PG adapter candidate",
+      "decision_owner": "Root",
+      "remaining_work_estimate": 1,
+      "expected_previous": {
+        "value": 53,
+        "authority": "C-D55 plus workflow-contract section 8 and current implementation authorization",
+        "reason": "Two bounded fresh review calls for remaining control/lifecycle candidate and delta if required"
+      },
+      "scope_basis": null
+    }
+  }
+}

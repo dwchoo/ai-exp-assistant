@@ -1,0 +1,28 @@
+{
+  "invocation": "cw13-test-01",
+  "outcome": "needs_reroute",
+  "candidate_ready": false,
+  "product_mutation": false,
+  "test_only_changed_paths": ["tests/policy/recovery_manager/test_recovery_policy.py", "graphify-out/**"],
+  "candidate": "57ef5c7125185bf97fce0bfd1148f35612a27d7d6588e8637777bebd370f512a",
+  "production_snapshot_match": {
+    "path": "src/workbench/policy/recovery_manager/policy.py",
+    "sha256": "2c8ac5c90de2b1fd0b137162c0bc9ab774a607638e453396370a396638151009"
+  },
+  "finding": {
+    "severity": "P1",
+    "acceptance_ids": ["C-AC-07", "C-AC-13"],
+    "summary": "RecoveryCoordinator authorizes retry when reserve_recovery returns non-boolean 1 or True without durably appending the exact recovery attempt; no post-reservation read verifies the CAS result.",
+    "reproduction": "test_inconsistent_reservation_result_never_authorizes_retry",
+    "observed": "bounded_recovery_retry with relaunch steps",
+    "expected": "blocked_unresolved with no steps"
+  },
+  "checks": {
+    "recovery_manager": "15 tests; 14 passed and 1 test failed in two subcases",
+    "workflow": "44 tests passed",
+    "observation": "95 tests passed",
+    "pause_automation": "129 tests passed",
+    "graphify_update": "exit 0"
+  },
+  "mutation_owner": "/root/cw12_post_review_test"
+}

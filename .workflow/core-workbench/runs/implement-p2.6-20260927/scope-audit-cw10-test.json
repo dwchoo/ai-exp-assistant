@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "invocation": "cw10-test-01",
+  "before": "73e5935017ed580d153183995bde7219d2f7db7374f8e17e772c75699a292dea",
+  "after": "b445f8dd2570503ee3f46c83a9f6194531cf108231c9f3fad188bad1c0d82626",
+  "allowed": ["tests/workflow/test_run_independent.py", "tests/workflow/live_workflow_independent.py"],
+  "changed": ["tests/workflow/test_run_independent.py", "tests/workflow/live_workflow_independent.py"],
+  "outside_scope": [],
+  "head_unchanged": true,
+  "index_changed": [],
+  "baseline_file_count": 1206,
+  "unchanged_baseline_file_count": 1206,
+  "added_file_count": 2,
+  "baseline_candidate_digest_verified": true,
+  "workflow_artifacts_excluded_by_assigned_baseline": true,
+  "comparable": true,
+  "snapshot_format": "compact identity delta; apply files_added to base_manifest identity before canonical digest"
+}

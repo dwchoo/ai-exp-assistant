@@ -1,0 +1,24 @@
+{
+  "invocation": "cw03-hook-env-repair-test-01",
+  "role": "test_designer",
+  "unit": "V-CW-03",
+  "purpose": "Independently add regression coverage for G2-HOOK-ENV subreaper restoration",
+  "write_scope": [
+    "tests/gates/g2_shell/test_live_hook_env_predicates.py"
+  ],
+  "production_scope_read_only": [
+    "tests/gates/g2_shell/live_hook_env_probe.py"
+  ],
+  "requirements": [
+    "Add an independent failure-injection regression proving the prior subreaper state is restored when cleanup proc_fields, kill, or waitpid raises an unhandled exception.",
+    "Prove the cleanup exception is still propagated rather than hidden by the restoration path.",
+    "Prove the regression fails against the pre-repair structure or an equivalent restore-omitting mutation.",
+    "Preserve and rerun the existing hook/env predicates and Bash/dash runtime cases.",
+    "Do not modify the production/probe implementation file."
+  ],
+  "constraints": [
+    "One mutation owner in the shared workspace.",
+    "No commit, push, publish, or deploy.",
+    "Report exact commands, results, and process residue."
+  ]
+}

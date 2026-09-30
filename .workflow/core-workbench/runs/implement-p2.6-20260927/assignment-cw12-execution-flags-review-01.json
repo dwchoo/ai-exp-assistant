@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "invocation": "cw12-execution-flags-review-01",
+  "role": "reviewer",
+  "unit": "V-CW-12-p2.6-current",
+  "authority": "User $implement docs/features/core-workbench request; approved PLAN p2.6 CW-12",
+  "purpose": "Fresh final review of execution-worktree index flags and the complete CW-12 candidate.",
+  "candidate": {
+    "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw12-execution-flags-test.json",
+    "candidate_id": "69d2445690982c42ddb2b7cad34e449399a6e984ade7fc5925c183386321d155"
+  },
+  "inputs": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-index-flags-review-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-execution-flags-correction-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-execution-flags-test-01.json",
+    "docs/features/core-workbench/tickets/CW-12.md",
+    "docs/features/core-workbench/BRIEF.md",
+    "docs/features/core-workbench/SPEC.md"
+  ],
+  "review_scope": [
+    "Confirm execution worktree and separate peer cwd paths both bind bounded index flags and hidden file/missing state at the correct early baseline and resume snapshots.",
+    "Confirm assume-unchanged, skip-worktree, flag change, legacy baseline, observation failure and large-repo/non-Git liveness behavior.",
+    "Recheck all prior P1/P2 blockers and actual reject-cleanup-reconcile semantics for C-AC-25/30/33.",
+    "Treat the 2048 changed-path cap, mocked-only fsmonitor environment, and post-validation filesystem TOCTOU as explicit residual risks and decide whether any is a gate blocker."
+  ],
+  "constraints": {
+    "read_only": true,
+    "allowed_write_paths": [],
+    "run_tests": false,
+    "no_commit": true,
+    "no_publish": true,
+    "report_format": "State candidate_ready, severity-ordered findings with file:line evidence, acceptance assessment for C-AC-25/30/33, and residual risks."
+  }
+}

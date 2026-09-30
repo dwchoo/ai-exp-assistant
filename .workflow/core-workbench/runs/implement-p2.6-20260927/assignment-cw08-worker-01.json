@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "invocation": "cw08-worker-01",
+  "role": "worker",
+  "unit": "V-CW-08-p2.6-current",
+  "workspace": "/home/dwchoo/ai-exp-assistant",
+  "writer": true,
+  "checkpoint": ".workflow/core-workbench/runs/implement-p2.6-20260927/cw08-worker-checkpoint.json",
+  "baseline_candidate": "cddee3c12dba1dcf610f88d49f4050d4ff7a3eb87385410594ced55f3838ec6c",
+  "requirements": ".workflow/core-workbench/runs/implement-p2.6-20260927/requirements-cw08.json",
+  "ticket": "docs/features/core-workbench/tickets/CW-08.md",
+  "dependencies": [
+    "src/workbench/tasks/repository.py",
+    "src/workbench/ipc/bridge_g3/protocol.py",
+    "omp_bridge/**",
+    "src/workbench/contracts/ports_v2.py"
+  ],
+  "allowed_write_scope": [
+    "src/workbench/ipc/**",
+    "omp_bridge/**",
+    "tests/bridge/**"
+  ],
+  "instructions": "Implement the smallest production Task-linked two-role mailbox consuming CW-05/G3 public bridge contracts and CW-09 TaskRepository public message/delivery APIs without changing the storage schema. Support task/question/answer/report in the correct manager↔worker direction and require durable task_id/revision/run_id/message_id linkage. Use stable logical message_id with separate append-only delivery attempts. Immediately before injection, fail closed unless role/session generation, pending/approval/busy/composer readiness are current. Record API method return separately from matching OMP processing observation; never treat method return as delivered or Task completion. Dedupe a logical message on a live connection, preserve unknown/asynchronous error evidence, do not auto-replay unknown attempts or inject prior-process/session requests after reopen, and do not disturb user composer input. Reuse existing public extension seams; do not introduce mutable native-tool wrappers. Add deterministic tests plus a bounded actual two-OMP runtime probe using the pinned OMP setup that establishes task/question/answer/report roundtrip and duplicate suppression with cleanup/residue evidence. Include negative cases for pending/approval/composer/busy, session generation changes, ACK loss/async error, and restart/reopen no-replay. Do not implement downstream CW-10/CW-15 orchestration. Run bridge tests, relevant task/contracts/G3/G4 compatibility checks, real runtime, and git diff --check. Produce result/raw runtime/snapshot/scope audit and return writer lease. Root owns graphify update."
+}

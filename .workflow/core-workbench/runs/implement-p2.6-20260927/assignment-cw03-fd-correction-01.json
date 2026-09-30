@@ -1,0 +1,19 @@
+{
+  "feature_id": "core-workbench", "ticket_id": "CW-03", "attempt_id": "common-run-fd-correction-01", "invocation": "cw03-fd-correction-01",
+  "approved_bundle_digest": "64bcf577a30e7c6bbff3e4e775f8e6c17ca212ce3bf79b5bc5be31196a792b07",
+  "actual_workspace": "/home/dwchoo/ai-exp-assistant", "baseline_snapshot": "84d6c56c3203edc6ba8129ca09594cfb1dd1e2dd2ef28220ce518f00fdd95f9d",
+  "effective_write_capability": "shared workspace; sole mutation owner while dispatched",
+  "allowed_write_paths": ["src/workbench/terminal/shell_g2/lifecycle.py"],
+  "prohibited_paths": ["tests/**", "docs/**", ".workflow/**", ".codex/**", "graphify-out/**"],
+  "resource_claims": [{"resource": "host:shell-fixture", "mode": "exclusive"}], "mutation_owner": "cw03-fd-correction-01",
+  "review_ref": ".workflow/core-workbench/runs/implement-p2.6-20260927/review-cw03-run-protocol-01.json",
+  "required_correction": "Before payload exec, close every inherited persistent control, request, recovery, and host-only descriptor including shell FDs 7/8 unless explicitly required by the experiment. Preserve only standard streams and the minimum exec-ack/tracing descriptors. Ensure a payload cannot read, consume, or retain later TAKEOVER/RUN/recovery frames and that cleanup remains bounded.",
+  "exact_checks": [
+    "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest tests.gates.g2_shell.test_common_run_protocol_independent tests.gates.g2_shell.test_common_run_protocol tests.gates.g2_shell.test_split_pg_control -v",
+    "PYTHONDONTWRITEBYTECODE=1 python3 tests/gates/g2_shell/live_control_lifecycle_probe.py",
+    "PYTHONDONTWRITEBYTECODE=1 python3 tests/gates/g2_shell/live_env_launch_probe.py",
+    "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/gates/g2_shell -p 'test_*.py' -v",
+    "git diff --check"
+  ],
+  "reserved_budget": 1, "configured_model": "gpt-6-sol", "configured_effort": "high", "host_observed_model": "unverified", "host_observed_effort": "unverified"
+}

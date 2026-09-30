@@ -1,0 +1,31 @@
+{
+  "invocation": "cw14-final-review-01",
+  "outcome": "complete",
+  "candidate_ready": false,
+  "candidate_id": "4b093e9b5f25e5f8aa84274d3756fc0085b9a766c165cc05988ee840d30caa00",
+  "snapshot_hashes_match": true,
+  "prior_findings": {
+    "repeated_failure_monotonicity": "closed",
+    "malformed_log_exception": "closed",
+    "same_store_recovery": "closed only for the single-writer case"
+  },
+  "findings": [
+    {
+      "severity": "P1",
+      "path": "src/workbench/storage/log_raw/store.py",
+      "lines": "639-656,705-718",
+      "summary": "Volatile reconciliation compares counters but not the durable base from which it branched, so a stale writer can overwrite a concurrent same-run durable observation."
+    },
+    {
+      "severity": "P2",
+      "path": "src/workbench/storage/log_raw/store.py",
+      "lines": "543-546",
+      "summary": "Malformed status .json run IDs still raise ValueError through append/status instead of becoming an immutable failure snapshot."
+    }
+  ],
+  "acceptance": {
+    "C-AC-24": "accepted at fixture level",
+    "C-AC-28": "not accepted until branch-safe same-run reconciliation and malformed status handling are corrected"
+  },
+  "mutation_owner": null
+}

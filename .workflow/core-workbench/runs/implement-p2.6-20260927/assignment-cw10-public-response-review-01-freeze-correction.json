@@ -1,0 +1,10 @@
+{
+  "supersedes_candidate_only": ".workflow/core-workbench/runs/implement-p2.6-20260927/assignment-cw10-public-response-review-01.json",
+  "reason": "The earlier named final manifest was a preexisting snapshot observed before the worker completed; it was stale, not current-tree drift.",
+  "candidate_manifest": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw10-public-response-final2.json",
+  "candidate": "75469017afe9b029fe07810497fc12a66494acc7208485001c4a34fd21e9c6c7",
+  "stable": true,
+  "unknowns": [],
+  "bridge_sha256": "59fb92fbd949004db0ebaf3ffe9909122987cd4b3731e8cbc9d4a4c9ff3d3bd9",
+  "review_scope_and_constraints": "unchanged"
+}

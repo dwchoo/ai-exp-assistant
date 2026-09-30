@@ -1,0 +1,33 @@
+{
+  "invocation": "cw12-runtime-correction-01",
+  "role": "worker_senior",
+  "unit": "V-CW-12-p2.6-current",
+  "objective": "Close CW-12 restart/session/durability findings and add actual integrated pause→reconcile→resume runtime evidence.",
+  "candidate_manifest": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw12-delta-test-after.json",
+  "candidate": "1c2f03de80c76421aa59b64606182fabfb1b6eac43a6f91e81cf1d22578c3cf0",
+  "review_evidence": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-cw12-review-01.json",
+  "write_scope": [
+    "src/workbench/policy/pause_*/**",
+    "src/workbench/ui/status_*/**",
+    "tests/policy/pause_*/**",
+    "tests/ui/status_*/**",
+    "graphify-out/**"
+  ],
+  "must_fix": [
+    "Journal replay must treat resume_failed after resumed as paused/cancelled-safe; add restart regression for the real failure ordering and ensure automatic dispatch remains closed after rebind.",
+    "refresh must never promote stop_observed from an uncorrelated public snapshot. Require exact bound manager session/generation and current abort request evidence; if request ID cannot be proven from public state, preserve requested/unknown and use only exact wait_event evidence for confirmation.",
+    "On first journal creation, durably publish its directory entry by fsyncing the regular file and containing directory with safe no-follow/directory checks; fail closed on directory fsync failure and test it.",
+    "Add a reusable actual omp/18.2.10 integration probe under tests/policy/pause_automation that uses managed PI_CONFIG_DIR and drives current production PauseCoordinator with actual manager/worker G3 peers, persisted Task/run/approval, CW11 admission, host observation, three-area status projection, explicit file/tool/process/task/approval reconciliation, resume, no replay of held requests, and one fresh post-resume delivery.",
+    "The live probe must distinguish abort request/stop/unknown tool outcome, keep existing host experiment/non-model collection alive while paused, verify zero provider/agent starts during pause, and leave no child/thread/socket/cwd residue. Do not claim tool rollback or completion from abort ack."
+  ],
+  "verification": [
+    "All policy/status/adversarial tests including prior 20/20 and new restart/session/durability tests.",
+    "Run the new actual integration probe successfully at least once; if public OMP seams make this impossible, return precise evidence rather than weakening the gate.",
+    "Run relevant observation/workflow/tasks/contracts/bridge/G3 regressions and graphify update ."
+  ],
+  "constraints": [
+    "Apply_patch only; no edits outside assigned production/test scopes; do not modify existing G3/workflow/observation/contracts, tickets, PLAN, or workflow records.",
+    "No uv/local environment artifacts, commit/push/deploy, or destructive git. Use /tmp/cw02-g1-venv/bin/python."
+  ],
+  "report": ["correction design", "runtime topology and exact observations", "checks", "residual unknowns", "candidate_ready or needs_reroute"]
+}

@@ -1,0 +1,18 @@
+{
+  "invocation": "cw02-g1-tmux-review-01",
+  "ticket": "CW-02",
+  "unit": "V-CW-02-p2.6-current",
+  "role": "reviewer",
+  "workspace": "/home/dwchoo/ai-exp-assistant",
+  "candidate_manifest": ".workflow/core-workbench/runs/implement-p2.6-20260927/snapshot-cw02-g1-tmux-correction-after.json",
+  "candidate": "5122497882ed757f33e4ae5171ac8908e7f02181f5fc2503d39f4aae9aef160a",
+  "authority": "User $implement docs/features/core-workbench; delta review after formal tmux correction",
+  "objective": "Read-only delta review of the external-tmux complete-frame barrier and final combined G1 candidate.",
+  "requirements": [
+    "Verify changed tmux probe/test hashes against the candidate manifest and compare with the prior candidate.",
+    "Confirm the reproduced failure truly reflects a premature partial-frame snapshot and that the bounded barrier waits only for the already-required title/target/cross-route/PID/geometry facts at unchanged geometry, without replaying input/resize or weakening failure semantics.",
+    "Check timeout/cleanup behavior, startup distinction, negative tests for persistent missing/cross-route/PID/geometry defects, and preservation of paste/resize/alternate restore predicates.",
+    "Confirm product renderer, wide-boundary fix, outer compatibility probe, and independent PID/geometry tests are unchanged; report any P0-P3 regression in the final combined G1 delta.",
+    "Do not run runtime tests or modify files. Return pass/needs_fix and findings in final payload; Root will record review-cw02-g1-tmux-01.json."
+  ]
+}
