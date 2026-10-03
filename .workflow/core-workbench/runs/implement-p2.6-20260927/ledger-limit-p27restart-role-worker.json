@@ -1,0 +1,23 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 1643,
+  "event": {
+    "id": "limit-p27restart-role-worker",
+    "kind": "limit",
+    "data": {
+      "authority": "Approved PLAN p2.7d (.workflow/core-workbench/runs/planning-p2.7-20260929/approval-amendment-d.json, bundle c28a63fd...), C-D62, C-D55 budget delegation, workflow-contract section 8",
+      "bucket": "role:worker",
+      "decision_owner": "Root",
+      "expected_previous": {
+        "authority": "C-D55 budget delegation, workflow-contract section 8; C-D57 feedback routing; user answer 2026-09-30 '\uc790\ubaa8 \uc790\ub3d9 \ubcc0\ud658 + Space'",
+        "reason": "jamo worker + one correction",
+        "value": 41
+      },
+      "origin": "operating",
+      "reason": "C-D62 copy worker, Enter-restart UI worker, one correction",
+      "remaining_work_estimate": 3,
+      "scope_basis": null,
+      "value": 44
+    }
+  }
+}

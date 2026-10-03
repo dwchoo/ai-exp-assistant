@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-shell-test-01",
+  "status": "complete",
+  "agent_result": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-shell-test-01-agent.json",
+  "frozen_candidate": "04223625d0c35c2bfb00b7195ba47456a21667a41e1c9a2628d4229a927470a6",
+  "candidate_after": "1fb35c1b8476a4dc43fd7555de4927a6e7d70fa8ca552dda1a0e645545cca2a0",
+  "checks": {
+    "tests/backend": "214 OK (27 skip)",
+    "tests/contracts": "48 OK",
+    "g1_vt": "85 OK",
+    "tests/ui": "686 run, 1 FAIL (F1 intended red)",
+    "live WB_LIVE_SHELL": "real OMP 18.4.5 + real Bash via product UI, 0 model calls: confirm x cancels; k kills bg/TERM-ignoring/fg jobs in 1.06 s, survivors []; setsid daemon survives and is not signalled; Enter -> gen 2, owner user, same cwd; wb-handoff + prefix h hands to manager; OMP/backend unchanged; shutdown verified"
+  },
+  "adapted": [
+    "p27q backend x3: live host_shell restart -> pane_alive; kept 'backend never restarts on its own' and 'OMP restart alone does not make ready'",
+    "p27q UI x1: exited host -> Enter restart; live panes unaffected",
+    "p27o x1: ㅏ opens kill confirm, next key only cancels, rest unchanged"
+  ],
+  "new_tests": {
+    "backend": 16,
+    "ui": 21
+  },
+  "findings": {
+    "F1 P3": "model.py:1327 resize while the kill confirmation is open does not close it (red: tests/ui/test_product_shell_kill_independent_p27s.py:169); no kill, nothing forwarded"
+  },
+  "notes": [
+    "left_session reports only setsid processes still under the shell; double-fork daemons are neither killed nor reported",
+    "backend chdir to start cwd on restart (harmless)",
+    "observed OMP 18.4.5 installed (was 18.4.4) - compatibility note for CW-16"
+  ],
+  "cleanup": "a leftover sleep daemon from an earlier own run was verified by pidfd+cmdline and killed; /tmp/p27-in-jhixl07c pre-existing, untouched",
+  "observed_model": "opus"
+}

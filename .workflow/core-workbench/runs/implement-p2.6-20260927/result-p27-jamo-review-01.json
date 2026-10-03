@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-jamo-review-01",
+  "verdict": "integrate",
+  "frozen_candidate": "c0adbe1a88bc7c7c3f82d2e55eeb483b1ab722a7139353cb7c443e2693692b46",
+  "agent_result": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-jamo-review-01-agent.json",
+  "findings": {
+    "P3-1": "input.py:218-230 single jamo after prefix runs immediately; an accidental Ctrl-] then ㅅ/ㅊ runs takeover request/confirm; consistent with the user decision; low likelihood (Mac IME commits syllables)",
+    "P3-2": "model.py _send_input shows the Ctrl-d hold notice even when the user is not the input owner; no loss/duplication"
+  },
+  "focus": {
+    "jamo": "PASS",
+    "detach": "PASS",
+    "ctrl_d_guard": "PASS",
+    "test_adaptation": "PASS (invariants kept)",
+    "regression": "tests/ui 544 OK, contracts 43 OK"
+  },
+  "observed_model": "sonnet"
+}

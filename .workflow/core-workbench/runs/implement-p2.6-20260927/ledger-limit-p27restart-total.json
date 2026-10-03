@@ -1,0 +1,23 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 1637,
+  "event": {
+    "id": "limit-p27restart-total",
+    "kind": "limit",
+    "data": {
+      "authority": "C-D55 budget delegation, workflow-contract section 8; user request 2026-09-30 'skills \ud558\uae30 \uc804\uc5d0 2\uac00\uc9c0 \ubb38\uc81c (OMP resume, drag copy)'",
+      "bucket": "total",
+      "decision_owner": "Root",
+      "expected_previous": {
+        "authority": "Approved PLAN p2.7c (bundle 91fe05dc...), C-D57 feedback routing, user request 2026-09-30 '\ud55c\uae00 \uc785\ub825 \ubc29\uc2dd \uadf8\ub300\ub85c \uc9c4\ud589', C-D55 budget delegation, workflow-contract section 8",
+        "reason": "IME-neutral prefix commands: worker, test, review, one correction reserve",
+        "value": 540
+      },
+      "origin": "operating",
+      "reason": "OMP restart/resume unit (6) + drag-copy unit (5)",
+      "remaining_work_estimate": 11,
+      "scope_basis": null,
+      "value": 552
+    }
+  }
+}

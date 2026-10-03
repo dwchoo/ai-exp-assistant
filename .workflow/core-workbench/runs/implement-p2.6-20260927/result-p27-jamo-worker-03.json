@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-jamo-worker-03",
+  "status": "candidate_ready",
+  "candidate": "c0adbe1a88bc7c7c3f82d2e55eeb483b1ab722a7139353cb7c443e2693692b46",
+  "audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-jamo3.json",
+  "checks": {
+    "tests/ui discover (no pipe)": "544 OK exit 0 incl. p27p",
+    "tests/contracts": "43 OK",
+    "tests/gates/g1_vt": "85 OK",
+    "own red->green": "CtrlDGuardTests.test_alt_ctrl_d_is_one_key_held_and_delivered_whole"
+  },
+  "summary": "ESC 0x04 held/delivered whole in the OMP Ctrl-d confirmation; help line moved under prefix q detach",
+  "residue": "none",
+  "observed_model": "sonnet"
+}

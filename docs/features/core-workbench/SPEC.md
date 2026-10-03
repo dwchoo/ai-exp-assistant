@@ -206,11 +206,12 @@ p2.6 최종 gate는 local 부품 gate가 모두 통과했음에도 `passed: fals
   - 단일 진입점(`python -m workbench`/`[project.scripts]`)을 둔다.
   - backend process는 `setsid`로 분리하고 data dir마다 하나만 실행한다.
   - data dir은 CLI·환경 변수·XDG state 순으로 정하고 권한은 0700이다.
-  - bridge extension을 주입한 OMP launcher를 제공한다. 두 OMP는 사용자 주변 설정(skill, context 파일, rules, 자동 발견 extension·MCP·memory)에서 격리하고 인증·provider·모델 설정만 쓴다([C-D59](DECISIONS.md#C-D59)).
+  - bridge extension을 주입한 OMP launcher를 제공한다. 두 OMP는 사용자 주변 설정(skill, context 파일, rules, 자동 발견 extension·MCP·memory)에서 격리하고 인증·provider·모델 설정만 쓴다([C-D59](DECISIONS.md#C-D59)). 종료된 OMP pane은 UI 요청(Enter)으로 새 OMP 세션을 시작한다([C-D62](DECISIONS.md#C-D62)).
   - backend가 `PersistentShell`을 소유한다.
   - UDS 위의 versioned framed `ui_v1`을 둔다. 다룰 메시지는 attach/detach/snapshot, `DisplayChunk` stream, input/paste/resize, focus·입력 owner, 인수·handoff, 자동화 상태, 전체 종료, `confirm_boot`이다.
+  - 종료된 host shell은 UI 요청(Enter)으로 새 persistent shell을 시작하고, 사용자는 확인을 거쳐 host shell을 강제 종료할 수 있다([C-D63](DECISIONS.md#C-D63)).
   - 기존 v1/ports_v2는 바꾸지 않는다.
-- **CW-06 세 영역 UI:** `ui_v1` client다. UI 종료는 detach이며 세 PTY를 종료하지 않는다. 기존 `terminal_g1`의 `PtySession` 직접 소유는 제품 경로에서 쓰지 않는다.
+- **CW-06 세 영역 UI:** `ui_v1` client다. pane 안 드래그 선택·clipboard 복사(OSC 52)와 종료된 OMP pane 재시작 조작을 제공한다([C-D62](DECISIONS.md#C-D62)). UI 종료는 detach이며 세 PTY를 종료하지 않는다. 기존 `terminal_g1`의 `PtySession` 직접 소유는 제품 경로에서 쓰지 않는다.
 - **CW-18 흐름·정책 조합:**
   - manager 전용 Task 초안·revision 작성 extension 도구를 추가한다.
   - Workbench가 확인한 사용자 승인·진행 조작만 승인으로 인정한다.

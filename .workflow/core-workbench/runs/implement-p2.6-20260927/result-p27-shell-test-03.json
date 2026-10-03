@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-shell-test-03",
+  "status": "complete",
+  "agent_result": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-shell-test-03-agent.json",
+  "candidate": "dcc3efde55cb5ceaf1328ac5279cb5877153f9544d9cf10a21c051a6afe1fc05",
+  "checks": {
+    "tests/backend": "235 OK (27 skip)",
+    "tests/contracts": "48 OK",
+    "tests/ui": "696 OK",
+    "g1_vt": "85 OK",
+    "live WB_LIVE_SHELL": "1 OK"
+  },
+  "verdicts": {
+    "R1 kill/shell restart/OMP restart/shutdown": "pass",
+    "ui_server internal_error": "pass",
+    "R4": "pass",
+    "R3 variants": "pass",
+    "negative control": "pre-fix _send makes 3 EPERM tests fail"
+  },
+  "note": "zombie [bash] 1811252 belongs to the user's sandbox backend (exited host shell under pre-C-D63 code), not to tests",
+  "observed_model": "sonnet"
+}

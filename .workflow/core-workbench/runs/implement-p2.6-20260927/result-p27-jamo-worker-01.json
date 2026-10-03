@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-jamo-worker-01",
+  "status": "candidate_ready",
+  "candidate": "b9bb80502feb3b38dc8c7c6b8aaf67d819c3a1abec2594881a42c4efc576be69",
+  "audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-jamo.json",
+  "checks": {
+    "tests/ui/test_product_model.py": "188 OK (red before: 115 fail, 2 error)",
+    "tests/ui/test_product_pty.py": "36 OK",
+    "tests/ui discover": "479 run, 26 fail all in test_product_ime_independent_p27o.py (superseded rule)",
+    "tests/contracts": "43 OK",
+    "tests/gates/g1_vt": "85 OK"
+  },
+  "design": "JAMO_KEYS (33) in input.py; single mapped jamo after prefix -> Command(ascii); syllables/multi/unmapped keep hint+swallow; commit key swallowed via _run window; prefix waits indefinitely for split UTF-8; scroll mode maps prefix-less single jamo via parser.jamo_keys; HANGUL_HINT/help updated",
+  "failing_independent": {
+    "test_single_hangul_key_after_the_prefix_is_hinted_never_forwarded_never_guessed": "24 subtests",
+    "test_state_is_clean_afterwards_english_and_commands_work_normally": 1,
+    "test_footer_shows_the_hint_after_the_hangul_key": 1
+  },
+  "gaps": [
+    "prefix+jamo then a following Hangul char in a separate read: command already ran, following char silently dropped",
+    "prefix [ and jamo in the same read: scroll conversion not applied to that jamo"
+  ],
+  "residue": "none",
+  "observed_model": "sonnet",
+  "audit_note": "outside_scope DECISIONS.md is the Root-authored C-D61 record written after the base snapshot, not a worker change"
+}

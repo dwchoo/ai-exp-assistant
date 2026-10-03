@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-shell-senior-02",
+  "ticket_id": "CW-17 (C-D63 review block R1 + R4)",
+  "role": "worker_senior",
+  "unit": "V-CW-17-p2.7-shell-restart",
+  "approved_bundle_digest": "f2084a7ccc5e5a6af7ca5bde6bc19b7d64052f43504b58549e587d379d121a43",
+  "routing": {
+    "planned_role": "worker_senior",
+    "selected_role": "worker_senior (Opus general-purpose)",
+    "reason_codes": [
+      "process_lifetime",
+      "review_block"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd63-review-01-agent.json"
+    ]
+  },
+  "base_candidate": "959ea1a4c80c660a2923b5be47ac3c546b3fb8349743ab92336172ed85cb0394",
+  "required_behavior": [
+    "R1 (P1): no signalling error may escape into the backend loop. In panes.py _signal_pins / _kill_owned_session and every caller that signals pinned session members (host shell kill, shell restart close, OMP restart close, shutdown/close paths of all panes - audit them all), treat EPERM (PermissionError) like an unsignallable survivor: skip it, keep going with the others, report it in survivors with a reason (e.g. 'permission_denied'), never raise. Any remaining unexpected OSError in kill_pane maps to Reason.KILL_FAILED (and in restart to RESTART_FAILED) with detail; UiServer request handling must also never let a handler exception stop the backend (respond with an error result instead). Restart of an exited shell whose old session still has unsignallable members must still start the new shell (report the leftovers), not loop on restart_failed.",
+    "R4: after the host shell is killed or exits, its in-flight shell_request is no longer active work for shutdown_request (it is closed as unknown per C-D63)."
+  ],
+  "acceptance": [
+    "red->green tests in tests/backend: EPERM from pidfd_send_signal/os.kill mocked for one member during kill_pane -> ok result with survivors incl. permission_denied, backend alive, OMPs alive; same during shell restart -> new shell starts; same during OMP restart close and shutdown -> no exception escapes; a handler raising an unexpected exception -> error result, backend keeps serving; R4 shutdown_request after kill lists no active shell work",
+    "run tests/backend, tests/contracts, tests/ui (pattern test_*.py, no pipe), tests/gates/g1_vt (PYTHONPATH=src:.); live WB_LIVE_SHELL=1 tests.ui.live_shell_kill_independent_p27s once"
+  ],
+  "allowed_write_paths": [
+    "src/workbench/backend/**",
+    "src/workbench/contracts/ui_v1.py",
+    "tests/backend/test_shell_kill_restart.py",
+    "tests/backend/test_restart_pane.py",
+    "tests/backend/test_ui_server.py",
+    "tests/backend/test_panes.py"
+  ],
+  "prohibited_paths": [
+    "src/workbench/ui/**",
+    "tests/**/*_independent*.py",
+    "tests/ui/**",
+    "docs/**",
+    ".workflow/**"
+  ],
+  "rules": "Use /tmp/cw02-g1-venv/bin/python, short unique TMPDIR removed afterwards; robust teardown; no graphify update, no commits; never pkill or pattern kills (only PIDs you started); never run sudo/su/pkexec for real - simulate EPERM with mocks or by targeting a process you cannot signal only via mocks; never touch ~/wb-urux-sandbox or the user's Workbench/herdr/tmux processes or configs; no model prompts; zero residue. A parallel worker edits src/workbench/ui/product - do not touch it.",
+  "result_format": "checks table first, status, changed paths + sha256, residue. Korean, <=15 lines."
+}

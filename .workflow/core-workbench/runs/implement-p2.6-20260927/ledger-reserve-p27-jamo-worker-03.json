@@ -1,0 +1,24 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 1628,
+  "event": {
+    "id": "reserve-p27-jamo-worker-03",
+    "kind": "reserve",
+    "data": {
+      "buckets": [
+        "total",
+        "role:worker",
+        "unit:V-CW-06-p2.7-jamo"
+      ],
+      "effort": "high",
+      "incident": "",
+      "invocation": "p27-jamo-worker-03",
+      "model": "claude-sonnet-5-5",
+      "purpose": "Ctrl-d guard correction (Alt+Ctrl-d, help line)",
+      "role": "worker",
+      "unit": "V-CW-06-p2.7-jamo",
+      "workspace": "/home/dwchoo/ai-exp-assistant",
+      "writer": true
+    }
+  }
+}

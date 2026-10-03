@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-jamo-test-01",
+  "role": "test_designer",
+  "unit": "V-CW-06-p2.7-jamo",
+  "frozen_candidate": "59cab4d5c9a1fbc8819943e566e2e040f1057ec0f04b5a37f10ed480609d8f24",
+  "status": "done_with_findings (1 red test kept: P3 Alt+Ctrl-d split)",
+  "checks": [
+    {"check": "tests/ui discover -p test_*.py (adapted tree, new file included; before the Alt+Ctrl-d test was added)", "result": "542 run, OK", "exit": 0},
+    {"check": "tests/ui/test_product_jamo_detach_independent_p27p.py (final)", "result": "43 run, 1 test FAIL (2 subtests) = the intended red test test_alt_ctrl_d_is_one_key_never_split_into_a_lone_esc", "exit": 1},
+    {"check": "tests/contracts", "result": "43 OK", "exit": 0},
+    {"check": "tests/gates/g1_vt (PYTHONPATH=src:.)", "result": "85 OK", "exit": 0},
+    {"check": "live WB_LIVE_IME=1 live_ime_independent_p27o LiveIme.test_tmux_mouse_off + test_zz_no_residue (isolated tmux -L, stub OMP, no model)", "result": "2 OK, 30/30 live checks ok, left_after=[]", "exit": 0},
+    {"check": "herdr live case", "result": "not run (optional; avoided touching any herdr server)"},
+    {"check": "pre-adaptation baseline tests/ui", "result": "aborted by 900 s timeout (failing detach PTY tests wait out their timeouts); worker-02 result lists the 100 failures"}
+  ],
+  "adapted_files": {
+    "tests/ui/test_product_ime_independent_p27o.py": "LETTERS/NEEDED d->q; old prefix d/D/Ctrl-d asserted to send nothing, not detach, notice mentions q; HANGUL split into syllables (still hint in every 1..3-read split, gaps 0/0.2 s) and JAMO (ㅇ ㅏ ㅠ ㅂ ㅋ: effect+notice must equal prefix+2-set key in every split, nothing forwarded); Ctrl-d detach -> Ctrl-q in model and PTY tests; footer hint test uses a syllable plus ㅇ->notice check; direct Ctrl-byte test: host shell gets all bytes unchanged incl. Ctrl-d and Ctrl-q, OMP pane gets the identical bytes when Ctrl-d is confirmed by a second press.",
+    "tests/ui/test_product_keys_independent.py": "every-key-unchanged: Ctrl-d on manager/worker must reach nothing on the first press and exactly the original byte after the second; byte-by-byte order test on host (as is) and on manager with Ctrl-d doubled (must equal the original stream); detach test checks prefix q and Ctrl-q.",
+    "tests/ui/test_product_layout_scroll_independent_p27j.py": "prefix-commands-in-scroll-mode: d -> q and Ctrl-q; detach sends d -> q.",
+    "tests/ui/test_product_pty_independent.py, test_product_mux_independent_p27n.py, test_product_resize_independent_p27l.py, test_product_direct_scroll_independent_p27k.py, test_product_entrypoint.py (lines 89, 97)": "detach key sends P+d -> P+q only (the invariant each test protects is unchanged).",
+    "tests/ui/live_ime_independent_p27o.py": "tap bytes include Ctrl-q, raw Ctrl-d, jamo+Space; product: prefix d notice only, prefix ㅋ Space zoom with the Space swallowed, single Ctrl-d held with notice + second within window delivered once to the stub OMP, Ctrl-] Ctrl-q detach, extra reattach + Ctrl-] ㅂ Space detach; docstring updated.",
+    "tests/ui/live_product_flood/rerun/omp/state/mux_independent + live_mux_scroll_probe.py": "detach sends PREFIX+d -> PREFIX+q (existing raw Ctrl-d sends there go to the host shell and are unchanged)."
+  },
+  "new_tests": {
+    "file": "tests/ui/test_product_jamo_detach_independent_p27p.py",
+    "count": 43,
+    "classes": {
+      "JamoTableTests": "own 33-key 2-set table; every jamo x Space/CR/LF/Tab == prefix+key (full effect incl. notice/frames), nothing forwarded; shifted jamo; compound/archaic jamo only hint; syllables and multi-char runs starting with a command jamo (ㅂ녕, ㅂㅂ, ㅃ안) only hint, also split; Hangul/all jamo without prefix unchanged on every pane in 1/2/3/7-byte reads",
+      "JamoTimingTests": "prefix armed through many flushes up to 30 s; UTF-8 byte-by-byte with 0.4 s pauses; commit key swallowed exactly once (one read and split); non-commit key forwarded; new prefix after commit works; Space never opens the menu; jamo in the open menu swallowed",
+      "JamoScrollModeTests": "ㅏ/ㅓ/ㅎ == k/j/g; ㅂ/ㅃ Space leave scroll without detaching and the Space never reaches the pane; prefix ㅂ Space detaches in scroll mode; split jamo/syllables in scroll reach no pane",
+      "DetachKeyTests": "9 new forms (q, Q, Ctrl-q, ㅂ Space/Enter, ㅃ Space, menu 0, menu Up Enter, Down x9 Enter) on all 3 panes quit and send nothing; 6 old forms (d, D, Ctrl-d, ㅇ Space/Enter/alone) never quit, send nothing, footer names q; bare Ctrl-q is input; only menu 0 detaches; scroll q vs prefix q; no visible text names d as detach",
+      "CtrlDGuardTests": "single held + footer notice (both OMP panes); second within 0.05..1.999 s delivers exactly one; timeout (with and without an intermediate flush) and re-arm; 1..5 presses in one read; bytes around it in one read; cancel by other keys, focus change (prefix, mouse click to another pane and back, backend snapshot), paste, menu, help, scroll mode, Shift+PgUp, prefix Ctrl-d/d/r/jamo; prefix Ctrl-d never confirms and is not a first press; held on manager not confirmed on worker; host shell immediate (also right after a held manager Ctrl-d); Ctrl-d inside pastes unchanged and arms nothing; wheel keeps the hold (documented design); resize-repeat; notice in footer under zoom and direct scroll; 400 randomised streams/splits vs a reference of the rule (nothing lost/reordered/duplicated); RED: Alt+Ctrl-d",
+      "RealLoopTests": "real backend + `python -m workbench attach` on an owned PTY with a stub OMP that logs every byte it reads and exits on Ctrl-d like OMP: first Ctrl-d never read by the OMP (notice on screen), other key cancels, late Ctrl-d after 2.6 s not read, confirming Ctrl-d read exactly once and the stub exits, UI stays attached, Ctrl-] q exits 0, backend survives, worker read nothing, terminal modes restored",
+      "ScriptedPtyTests": "real loop: host shell Ctrl-d immediate; prefix, 1.5 s pause, ㅂ split across writes, Space -> detach exit 0 with nothing forwarded; prefix Ctrl-d and prefix ㅇ Space show the notice and keep running"
+    }
+  },
+  "findings": [
+    {"id": "P3-1", "severity": "P3", "status": "red test kept",
+     "where": "src/workbench/ui/product/model.py:293-311 (_send_input); test tests/ui/test_product_jamo_detach_independent_p27p.py:445",
+     "summary": "Alt+Ctrl-d (ESC 0x04, one key) to an OMP pane is split: the ESC is forwarded alone and the 0x04 held; a second press sends another lone ESC and re-holds, so the key can never be delivered and each press sends a bare Esc (which OMP uses to interrupt/cancel). Repro: focus manager, type b'\\x1b\\x04' -> input b'\\x1b'; twice -> b'\\x1b\\x1b'."},
+    {"id": "P3-2", "severity": "P3", "status": "observation (no test)",
+     "where": "src/workbench/ui/product/model.py:38-69 HELP_LINES / view.py:100-107 _draw_help",
+     "summary": "HELP_LINES has 30 lines and the overlay shows rows-4 of them; the new Ctrl-d confirmation line is the last one, so it is cut off on terminals shorter than 34 rows (e.g. 24/30-row panes in herdr/tmux)."},
+    {"id": "P3-3", "severity": "P3", "status": "observation (no test)",
+     "where": "src/workbench/ui/product/model.py:287",
+     "summary": "The guard matches only raw 0x04. If an outer terminal is configured to send modified keys as CSI-u / modifyOtherKeys (\\x1b[100;5u, \\x1b[27;5;100~) the Ctrl-d reaches OMP unguarded. The UI itself never enables these modes, so this is outside the C-D61 'raw 0x04' scope; noted for Root."},
+    {"id": "note", "severity": "none",
+     "summary": "Mouse wheel / click on the same pane do not cancel a held Ctrl-d (worker-02 design); tested as documented behaviour, not as a defect."}
+  ],
+  "prohibited_paths_touched": false,
+  "residue": "none: scratch dirs /tmp/jt2..jt5 and logs removed; two dirs left by the aborted baseline run (/tmp/cw06-indep-9gx_hdx5, /tmp/cw06-p27l-ovrsuf2g, created by this run) removed; no process naming cw06-/wbp27/jt* alive; live tmux left_after=[]; tests/ui/__pycache__ is gitignored; no commits, no graphify update; ~/wb-urux-sandbox untouched"
+}

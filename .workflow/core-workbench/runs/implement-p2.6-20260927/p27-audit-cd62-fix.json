@@ -1,0 +1,1 @@
+{"changed":["src/workbench/backend/ui_server.py","src/workbench/ui/product/model.py","tests/backend/test_ui_server.py","tests/ui/test_product_model.py"],"comparable":true,"index_changed":[],"outside_scope":[]}

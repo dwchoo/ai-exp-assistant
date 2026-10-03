@@ -1,0 +1,24 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 1706,
+  "event": {
+    "id": "reserve-p27-shell-senior-02",
+    "kind": "reserve",
+    "data": {
+      "buckets": [
+        "total",
+        "role:worker_senior",
+        "unit:V-CW-17-p2.7-shell-restart"
+      ],
+      "effort": "high",
+      "incident": "",
+      "invocation": "p27-shell-senior-02",
+      "model": "claude-opus-5-5",
+      "purpose": "C-D63 review block corrections",
+      "role": "worker_senior",
+      "unit": "V-CW-17-p2.7-shell-restart",
+      "workspace": "/home/dwchoo/ai-exp-assistant",
+      "writer": true
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "record": "root-adjudication-p27-cd63-resize",
+  "decided_by": "Root",
+  "date": "2026-10-01",
+  "issue": "p27s:169 (resize cancels the kill confirmation) and p27s:176 (after two resizes an Esc must not reach a pane) cannot both hold without swallowing an ordinary key after a resize",
+  "decision": "Resize cancels the confirmation (169, consistent with C-D63 'anything else cancels' and the spec that only k-forms confirm). Once closed, the next key is ordinary input to the focused pane; swallowing a key after a resize would be a surprising hidden mode. Test 176's protected invariant is kept: a resize never confirms (no kill_pane) and the resize itself sends nothing to a pane. Its trailing Esc step is corrected to expect ordinary delivery (or removed) by the test_designer path.",
+  "authority": "workflow-contract Root adjudication of conflicting independent expectations; C-D63"
+}

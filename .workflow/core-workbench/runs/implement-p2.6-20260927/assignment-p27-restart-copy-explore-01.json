@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-restart-copy-explore-01",
+  "role": "code_explorer",
+  "unit": "V-CW-17-p2.7-restart",
+  "purpose": "facts for OMP pane restart with --resume and drag-to-copy (user request 2026-09-30 before CW-18)",
+  "prompt": "see host Agent call restart-copy-explore (A1-A4 restart/resume/bridge/ui_v1; B5-B7 mouse/render/OSC52)",
+  "rules": "read-only"
+}

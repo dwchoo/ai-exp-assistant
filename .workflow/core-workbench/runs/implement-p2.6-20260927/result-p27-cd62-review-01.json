@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cd62-review-01",
+  "verdict": "integrate",
+  "frozen_candidate": "815496f8ecdf470cd8c66884fdd77a195d7396dfe97a3eda1a4461196ce0f5ff",
+  "agent_result": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd62-review-01-agent.json",
+  "checks": {
+    "tests/ui": "645 OK",
+    "tests/backend": "190 OK (27 skip)",
+    "tests/contracts": "45 OK",
+    "live restart": "OK",
+    "live copy (isolated tmux, herdr)": "4 OK, 0 provider requests"
+  },
+  "focus": "process lifetime, isolation, contract, UI restart, drag-to-copy, tests: all pass; independent test changes only reflect C-D61/jamo (not weakened)",
+  "findings": {
+    "R1 P3": "service.py:212 isolation check exception leaves _isolation_results stale; another role's successful recheck may show 'ok' with a missing/old result",
+    "R2 P3": "service.py:226 while one role rechecks the summary is 'pending', hiding the other role's leak warning for up to the recheck timeout",
+    "R3 P3": "service.py:567 Enter-restart old.close() SIGKILLs processes left in the old OMP session (e.g. nohup experiments) and blocks the UI loop up to ~2 s; same rule as shutdown, tested, intended; not in user guidance",
+    "R4 P3": "model.py:42 tmux needs set-clipboard on or allow-passthrough on; document it"
+  },
+  "observed_model": "opus"
+}

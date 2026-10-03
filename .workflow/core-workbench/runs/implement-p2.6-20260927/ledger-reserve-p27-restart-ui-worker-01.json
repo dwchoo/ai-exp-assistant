@@ -1,0 +1,24 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 1655,
+  "event": {
+    "id": "reserve-p27-restart-ui-worker-01",
+    "kind": "reserve",
+    "data": {
+      "buckets": [
+        "total",
+        "role:worker",
+        "unit:V-CW-17-p2.7-restart"
+      ],
+      "effort": "high",
+      "incident": "",
+      "invocation": "p27-restart-ui-worker-01",
+      "model": "claude-sonnet-5-5",
+      "purpose": "Enter restarts an exited OMP pane (UI)",
+      "role": "worker",
+      "unit": "V-CW-17-p2.7-restart",
+      "workspace": "/home/dwchoo/ai-exp-assistant",
+      "writer": true
+    }
+  }
+}

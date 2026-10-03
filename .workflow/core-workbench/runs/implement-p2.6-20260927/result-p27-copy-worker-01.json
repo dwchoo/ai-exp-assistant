@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-copy-worker-01",
+  "status": "candidate_ready",
+  "changed": {
+    "src/workbench/ui/product/model.py": "863a8a17e031c9f122728e123a523710913cf6628cfafde76e63e4e22ed3dd38",
+    "src/workbench/ui/product/app.py": "328b65d9fdc03086f1d9fe1651081e3338a4247ce6cf417a929e47ddab18f578",
+    "src/workbench/ui/product/view.py": "a6cf2d11a245156657f4c7ecbc9494cbe498e4d6b8787d737b7db6b80fa99f91",
+    "tests/ui/test_product_model.py": "254be9f9431bb5d4a3498f31ceee5c065bac192404818a351d674e4155738130",
+    "tests/ui/test_product_pty.py": "b36c17ff42f6e40cc27e383c7d4dc8a524b846ab77821df7866287a9434618ac"
+  },
+  "candidate_with_senior": "7b3fb2b3812ccf7fc17745a601504fb5a36216b37c5a0b3b29d34ff075483304",
+  "audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-cd62-workers.json",
+  "checks": {
+    "DragToCopyTests": "25 red -> 25 OK",
+    "PTY drag->OSC52": "OK",
+    "tests/ui": "570 OK x2 (first full run had 1 unidentified failure, output truncated; suspected load flake)",
+    "tests/contracts": "45 OK",
+    "tests/gates/g1_vt": "85 OK",
+    "live tmux isolated": "set-clipboard on -> show-buffer 'COPYME-xyz한' ; external+allow-passthrough on -> OSC 52 payload on tmux client stream (buffer empty); passthrough off control -> nothing"
+  },
+  "design": "absolute-row anchored selection (history.pushed - offset + row); click without move = focus only; motion/release before divider handling; clamp to origin pane; autoscroll 0.05 s via autoscroll_tick; reverse XOR highlight cleared on key/click/new selection/focus/reset/alt-screen/resize (not wheel); OSC 52 via model.take_output written by app loop; tmux passthrough duplicate when TMUX set; MAX_COPY_BYTES 1 MiB; empty selection not copied; HELP_LINES 31",
+  "gaps": [
+    "X10 motion reports unsupported by parser",
+    "Shift+drag native selection unchanged",
+    "selection starting on a wide char trailing cell includes the lead cell",
+    "no live check on a real OMP pane"
+  ],
+  "residue": "none",
+  "observed_model": "sonnet"
+}

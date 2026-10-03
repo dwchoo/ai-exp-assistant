@@ -87,6 +87,52 @@
       "date": "2026-09-30",
       "user": "한글 입력 방식 그대로 진행하고 커밋해줘",
       "decision": "proceed with the proposal (CW-06 UI delta, keys-level per C-D57); commit done (a3cc5e6, 3339db6, 480f26f)"
+    },
+    {
+      "date": "2026-09-30",
+      "user": "아니 ctrl ] + ㅇ(d)를 했는데 아무 변화 없어 한글키 안먹어. 다시 점검해봐.",
+      "root_analysis": "Mac 2-set Korean IME holds a lone jamo in preedit (marked text); cmux sends nothing over SSH until the IME commits it, so the UI never received ㅇ. Ctrl combos bypass the IME (Ctrl-] Ctrl-d works).",
+      "question": "Ctrl-] 뒤에서 한글 키를 어떻게 처리할까요?",
+      "options": [
+        "자모 자동 변환 + Space",
+        "Mac 쪽 입력기 자동 전환",
+        "둘 다",
+        "현재 유지"
+      ],
+      "answer": "자모 자동 변환 + Space",
+      "decision": "after the prefix, a single Hangul compatibility jamo is converted to its 2-set (dubeolsik) QWERTY key and runs that command; the IME commit key right after it (Space/Enter) is swallowed; supersedes the earlier 'no 1:1 mapping' constraint for command keys at the user's request",
+      "routing": "CW-06 delta (keys level per C-D57)"
+    },
+    {
+      "date": "2026-09-30",
+      "user": "그리고 order-worker 스킬즈도 설치가 안되었다고 나와.",
+      "root_analysis": "not implemented yet: omp_bridge/skills has only a README; ambient skills are isolated (C-D59)",
+      "question": "order-worker는 어떻게 동작해야 하나요? (CW-18 구현)",
+      "answer": "(나) 승인된 범위 안에서 직접",
+      "decision": "C-D60",
+      "routing": "CW-18 (ticket/PLAN amendment at CW-18 start)"
+    },
+    {
+      "date": "2026-09-30",
+      "user": "ctrl 누른채로 ]+d는 잘 돼.",
+      "observation": "Ctrl alias detach confirmed working in Hangul mode on Mac"
+    },
+    {
+      "date": "2026-09-30",
+      "user": "문제가 있어. ctrl d가 omp 종료 shortcut이라서 이거 위험성이 커. 지금도 omp가 종료되고 다시 실행이 안돼.",
+      "root_analysis": "sandbox backend phase degraded (pane_exited:manager_omp); manager_omp and worker_omp exit_status 0; no pane restart before CW-19",
+      "questions": {
+        "Ctrl-d 보호": "detach key를 q로 바꿔서 herdr와 통일성을 맞추고 확인 기능도 넣자.",
+        "OMP 재시작": "계획대로 CW-19 (Recommended)"
+      },
+      "decision": "C-D61 (1)(2)",
+      "routing": "CW-06 delta (detach q / Ctrl-q, Ctrl-d confirmation for OMP panes); OMP restart CW-19"
+    },
+    {
+      "date": "2026-09-30",
+      "user": "그리고 터미널도 강제 종료 기능이 있어야 할거 같아. 강제로 종료하고 다시 자동으로 터미널이 뜨게.",
+      "decision": "C-D61 (3)",
+      "routing": "CW-19 with restart flow (ticket/PLAN amendment at CW-19 start)"
     }
   ]
 }

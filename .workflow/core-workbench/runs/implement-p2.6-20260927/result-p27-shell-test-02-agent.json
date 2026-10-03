@@ -1,0 +1,10 @@
+{"schema_version":1,"invocation":"p27-shell-test-02","status":"candidate_ready",
+"checks":[
+{"cmd":"unittest discover -s tests/ui -p test_*.py","exit":0,"tests":687,"skipped":0,"sec":190},
+{"cmd":"unittest discover -s tests/backend -p test_*.py","exit":0,"tests":214,"skipped":27,"sec":231},
+{"cmd":"unittest discover -s tests/contracts -p test_*.py","exit":0,"tests":48,"skipped":0,"sec":1},
+{"cmd":"PYTHONPATH=src:. unittest discover -s tests/gates/g1_vt -p test_*.py","exit":0,"tests":85,"skipped":0,"sec":2},
+{"cmd":"WB_LIVE_SHELL=1 unittest tests.ui.live_shell_kill_independent_p27s","exit":0,"tests":1,"sec":11,"residue":[]}],
+"diff_summary":"test_a_resize_never_confirms_and_nothing_reaches_a_pane: after two resizes assert confirmation closed and no kill_pane/pane frames; the trailing Esc is now asserted as ordinary input delivered to the focused pane (one input frame {pane: manager_omp}, b'\\x1b'), still no kill_pane. No other test changed.",
+"frozen_src_hashes":"8 changed production files unchanged (start == end)",
+"residue":"TMPDIR /tmp/p27t2.gDSf removed; no processes left; live probe teardown residue []"}

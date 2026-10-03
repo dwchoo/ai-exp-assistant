@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-shell-test-03",
+  "ticket_id": "CW-17/CW-06 (C-D63 review block re-verification)",
+  "role": "test_designer",
+  "unit": "V-CW-17-p2.7-shell-restart",
+  "approved_bundle_digest": "f2084a7ccc5e5a6af7ca5bde6bc19b7d64052f43504b58549e587d379d121a43",
+  "routing": {
+    "planned_role": "test_designer",
+    "selected_role": "test_designer (wb-test-rerun, Sonnet high)",
+    "reason_codes": [
+      "rerun_defined_by_findings_and_adjudication"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd63-review-01-agent.json",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/root-adjudication-p27-cd63-r3.json"
+    ]
+  },
+  "frozen_candidate": "5d0ece140d5c63c9df41b4c2c0058bb99aa8de69e8322848d955ff2dbbca26d3",
+  "task": [
+    "1. Correct tests/ui/test_product_shell_kill_independent_p27s.py KillConfirmTests.test_split_reads_and_keys_after_the_confirming_k_in_the_same_read per root-adjudication-p27-cd63-r3: 'kls -la\\r' in one chunk after the confirmation opened -> cancelled, no kill_pane, nothing to any pane; keep the parts where k arrives alone in a split read (confirms) and P+'kk' in one read (confirms). Do not weaken other tests.",
+    "2. Add independent tests for the review findings in a new file tests/backend/test_shell_kill_eperm_independent_p27t.py (and tests/ui/test_product_shell_kill_r3_independent_p27t.py if needed): EPERM from signalling one session member during kill_pane -> ok result, survivor with permission_denied, others dead, backend + both OMPs alive and serving; EPERM during shell restart close and OMP restart close -> new process starts, survivors reported; EPERM during shutdown -> no exception escapes, shutdown completes; a ui_server handler raising -> internal_error result, server keeps serving the next request; R4 shutdown_request after a kill lists no active shell work; R3 variants (kk, kkk, kill, k+Enter, unbracketed paste starting with k, Ctrl-k Ctrl-k, ㅏㅏ -> cancel; k, K, Ctrl-k, ㅏ+Space, prefix+k -> confirm). Simulate EPERM with mocks; never run sudo/su/pkexec.",
+    "3. Run tests/backend, tests/contracts, tests/ui (pattern test_*.py, no pipe, real exit), tests/gates/g1_vt (PYTHONPATH=src:.), live WB_LIVE_SHELL=1 tests.ui.live_shell_kill_independent_p27s once."
+  ],
+  "allowed_write_paths": [
+    "tests/ui/test_product_shell_kill_independent_p27s.py",
+    "tests/backend/test_shell_kill_eperm_independent_p27t.py",
+    "tests/ui/test_product_shell_kill_r3_independent_p27t.py",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-shell-test-03-agent.json"
+  ],
+  "rules": "Never modify production code; keep a failing test red and report it as a finding P0..P3 with file:line. /tmp/cw02-g1-venv/bin/python, PYTHONPATH=src, short unique TMPDIR removed afterwards; robust teardown; no model prompts; never pkill or pattern kills; never touch ~/wb-urux-sandbox or the user's Workbench/herdr/tmux processes or configs; no commits, no graphify update; zero residue.",
+  "result_format": "Write the result JSON (checks table, changes, new tests, findings, residue). Reply in Korean, <=12 lines."
+}

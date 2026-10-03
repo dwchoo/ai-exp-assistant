@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-copy-test-01",
+  "status": "complete",
+  "agent_result": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-copy-test-01-agent.json",
+  "frozen_candidate": "f86ac0ce084cc7efbd5da3e755c7c12d80b6842dcd9251658b43e9abfd39e104",
+  "checks": {
+    "test_product_copy_independent_p27r.py": "41: 39 OK, 2 intended red (F1, F2)",
+    "tests/ui x3 (no pipe)": "627/639/639; only deterministic failures (F1, F2, restart p27q ExitedPaneEnterTests x2 from the parallel designer); no intermittent failure reproduced",
+    "tests/contracts": "45 OK",
+    "tests/gates/g1_vt": "85 OK",
+    "live WB_LIVE_COPY": "isolated tmux + real OMP 18.4.4: set-clipboard on -> show-buffer exact; external+passthrough -> OSC 52 on client stream; both off -> notice; real OMP screen text exact; isolated herdr (own HOME/XDG/HERDR_SOCKET_PATH): OSC 52 reached client stream; residue {}"
+  },
+  "findings": {
+    "F1 P3": "model.py:1030 (:1001, :937) selection rows pushed out of the 1000-line scrollback during drag copy ~590 blank/unrelated rows",
+    "F2 P3": "model.py:937-941 RIS (ESC c) from the pane app leaves the highlight over the blank screen (same history deque cleared)",
+    "F3 P3": "model.py:1512, :846, :99 footer/notice/help still only mention Shift+drag"
+  },
+  "observed_model": "opus"
+}

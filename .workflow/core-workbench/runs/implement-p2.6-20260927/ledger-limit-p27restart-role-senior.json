@@ -1,0 +1,23 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 1644,
+  "event": {
+    "id": "limit-p27restart-role-senior",
+    "kind": "limit",
+    "data": {
+      "authority": "Approved PLAN p2.7d (.workflow/core-workbench/runs/planning-p2.7-20260929/approval-amendment-d.json, bundle c28a63fd...), C-D62, C-D55 budget delegation, workflow-contract section 8",
+      "bucket": "role:worker_senior",
+      "decision_owner": "Root",
+      "expected_previous": {
+        "authority": "Approved PLAN p2.7c (.workflow/core-workbench/runs/planning-p2.7-20260929/approval-amendment-c.json, bundle 91fe05dc...), C-D59 user request, C-D55 budget delegation, workflow-contract section 8",
+        "reason": "OMP isolation in launcher + reserve",
+        "value": 162
+      },
+      "origin": "operating",
+      "reason": "C-D62 OMP pane restart backend + one correction",
+      "remaining_work_estimate": 2,
+      "scope_basis": null,
+      "value": 164
+    }
+  }
+}

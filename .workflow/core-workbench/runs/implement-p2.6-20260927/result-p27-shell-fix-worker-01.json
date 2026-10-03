@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-shell-fix-worker-01",
+  "status": "needs_reroute",
+  "candidate": "f13d7618833aba2b248d92c2cadc8c516c095af5fdefb5acb301cadd5a4875b9",
+  "audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-cd63-fix.json",
+  "change": "model.resize() sets kill_confirm_open False; own test (3 sizes)",
+  "checks": {
+    "test_product_model": "274 OK",
+    "p27s": "169 green; 176 now red (sends Esc after the resize-cancelled confirmation and expects no pane frame)",
+    "other tests/ui modules": "OK",
+    "backend/contracts/gates": "not run"
+  },
+  "residue": "none",
+  "observed_model": "sonnet"
+}

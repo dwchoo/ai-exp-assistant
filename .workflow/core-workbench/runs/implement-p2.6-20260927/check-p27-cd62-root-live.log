@@ -1,0 +1,13 @@
+.
+----------------------------------------------------------------------
+Ran 1 test in 12.685s
+
+OK
+{"mux": "tmux", "check": "tmux_server_gone", "ok": true, "socket": "wbp27r-7514e72a"}
+{"mux": "tmux", "check": "backend_shutdown_no_residue", "ok": true, "residue": {}, "fallback": {}}
+..{"step": "residue", "class": "LiveCopyTmux", "left_before_kill": [], "left_after": []}
+
+----------------------------------------------------------------------
+Ran 4 tests in 23.460s
+
+OK

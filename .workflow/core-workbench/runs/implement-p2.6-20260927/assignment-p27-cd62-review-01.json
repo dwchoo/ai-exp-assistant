@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cd62-review-01",
+  "ticket_id": "CW-17/CW-06 (C-D62 OMP pane restart + drag-to-copy)",
+  "role": "reviewer",
+  "unit": "V-CW-17-p2.7-restart + V-CW-06-p2.7-copy",
+  "approved_bundle_digest": "c28a63fd7f96d92fb481ec7df46290c23943622a8d4ab8237c6fe6c6e247a396",
+  "routing": {
+    "planned_role": "reviewer",
+    "selected_role": "reviewer (fresh Opus general-purpose)",
+    "reason_codes": [
+      "new_backend_lifecycle_behaviour",
+      "fresh_review_of_frozen_candidate"
+    ],
+    "evidence_refs": []
+  },
+  "frozen_candidate": "815496f8ecdf470cd8c66884fdd77a195d7396dfe97a3eda1a4461196ce0f5ff",
+  "criteria": [
+    "docs/features/core-workbench/DECISIONS.md#C-D62",
+    "docs/features/core-workbench/tickets/CW-17.md 'OMP pane 재시작'",
+    "docs/features/core-workbench/tickets/CW-06.md C-D62 paragraph",
+    "docs/features/core-workbench/DECISIONS.md#C-D59 (isolation must hold after restart)"
+  ],
+  "delta": {
+    "base": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-cd62-pre/ (backend, contracts, ui/product before C-D62)",
+    "files": [
+      "src/workbench/backend/service.py",
+      "src/workbench/backend/panes.py",
+      "src/workbench/backend/ui_server.py",
+      "src/workbench/contracts/ui_v1.py",
+      "src/workbench/ui/product/model.py",
+      "src/workbench/ui/product/view.py",
+      "src/workbench/ui/product/app.py"
+    ],
+    "tests": "git diff HEAD for tests/backend, tests/contracts, tests/ui (new: test_restart_pane.py, *_independent_p27q.py, *_independent_p27r.py, live_restart_independent_p27q.py, live_copy_independent_p27r.py)"
+  },
+  "evidence": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-restart-senior-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-restart-ui-worker-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-copy-worker-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-restart-test-01-agent.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-copy-test-01-agent.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd62-fix-worker-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/check-p27-cd62-root-live.log (Root live rerun on the frozen candidate: restart OK, copy tmux/herdr OK)"
+  ],
+  "focus": [
+    "Process lifetime and identity of restart: reaping, old PTY/children cleanup, pidfd/session pins from the earlier P2-2 design, ProcessRef/record consistency, token handling, lock/serialisation, failure paths, interaction with shutdown and with detach/attach of UIs, phase transitions (degraded<->ready) not masking other degradations.",
+    "Isolation after restart identical to start (C-D59), isolation re-check reporting.",
+    "Contract change is additive and versioning rules hold; refusals.",
+    "UI restart trigger: only exited OMP panes, Enter semantics, blocked input to exited panes, state push + display-based revival without reviving on stale output.",
+    "Drag-to-copy correctness, OSC 52 emission path (never during restore, no subprocess), tmux wrapper, interaction with scroll/catch-up/replay/resize/zoom/mouse tracking panes, performance of highlight rendering on large panes.",
+    "Tests assert behaviour (not implementation trivia) and independent tests were not weakened."
+  ],
+  "scratch": "/tmp/claude-1000/-home-dwchoo-ai-exp-assistant/dd5e2cee-e10d-41c4-8ebb-7c00b50dd465/scratchpad/cd62-review/",
+  "rules": "Read-only; write only .workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd62-review-01-agent.json. You may run tests (/tmp/cw02-g1-venv/bin/python, PYTHONPATH=src, short unique TMPDIR removed after) and the opt-in live probes (WB_LIVE_RESTART=1, WB_LIVE_COPY=1; they start only isolated servers); no model prompts; never pkill or pattern kills; never touch ~/wb-urux-sandbox or the user's Workbench/herdr/tmux processes or configs.",
+  "result_format": "Findings P0..P3 with file:line and a concrete failure scenario; verdict per focus; overall integrate/block. Write JSON; reply in Korean <=15 lines."
+}

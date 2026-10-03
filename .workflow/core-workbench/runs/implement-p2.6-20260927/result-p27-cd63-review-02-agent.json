@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cd63-review-02",
+  "role": "reviewer",
+  "unit": "V-CW-17-p2.7-shell-restart",
+  "frozen_candidate": "dcc3efde55cb5ceaf1328ac5279cb5877153f9544d9cf10a21c051a6afe1fc05",
+  "candidate_check": "1800 files of p27-snapshot-cd63-test3-after.json sha256 equal to the working tree (0 diffs)",
+  "overall": "integrate",
+  "checks": [
+    {
+      "cmd": "unittest discover tests/backend",
+      "result": "235 OK, 27 skipped"
+    },
+    {
+      "cmd": "tests/contracts",
+      "result": "48 OK"
+    },
+    {
+      "cmd": "tests/ui",
+      "result": "696 OK"
+    },
+    {
+      "cmd": "PYTHONPATH=src:. tests/gates/g1_vt",
+      "result": "85 OK"
+    }
+  ],
+  "findings": [
+    {
+      "id": "N1",
+      "severity": "P3",
+      "file": "src/workbench/backend/ui_server.py:308",
+      "summary": "handler_errors is counted only in the in-memory UiServer.stats (not in the backend record/snapshot) and the traceback goes to stderr; a programming error behind internal_error is logged but not visible to the UI/diagnostics.",
+      "fix_hint": "Optionally surface the counter in the backend record or snapshot."
+    },
+    {
+      "id": "N2",
+      "severity": "P3",
+      "file": "src/workbench/backend/service.py:626",
+      "summary": "R2 (restart SIGKILLs members left in the exited shell's session without notice) is unchanged; survivors are reported in the result only. Not part of this delta's scope; keep as noted."
+    }
+  ],
+  "prior_findings": {
+    "R1": "closed: _OwnedSession._send records any OSError per member as unsignallable (permission_denied / signal_failed:ERRNO); kill/_kill_owned_session/close/_survivors never raise; unsignallable members are not waited on and serve as KILL anchor; shell leader refusing -> UnsafeShellState -> Held KILL_FAILED; restart close() problem -> still starts; OMP close killpg EPERM handled; launcher _stop_group breaks on OSError; UiServer maps Exception to INTERNAL_ERROR, logs traceback, counts, keeps serving. p27t tests use real shells with a per-pidfd EPERM patch (kill, restart host/OMP, shutdown, all-refuse, handler failure).",
+    "R4": "closed: _active_work skips an exited shell; p27t tests for killed manager command, foreground, exited unfinished request.",
+    "R3": "closed per adjudication: a confirmation chunk confirms only as exactly one confirm event of exactly one confirm key; extra bytes cancel and the rest of the chunk is dropped only while kill_chunk (open at chunk start); opener+confirm together (P+'kk') confirms, P+'kkk'/'kls' cancel; resize cancels, then ordinary input; no accidental-confirm path found."
+  },
+  "focus_verdicts": {
+    "R1": "pass (N1)",
+    "R4": "pass",
+    "R3": "pass",
+    "regression": "pass: C-D62 OMP restart and p27q suites green, INTERNAL_ERROR additive only",
+    "tests": "pass: p27s corrected per adjudications, p27t invariants kept"
+  },
+  "residue": "none (TMPDIR removed, no processes started/killed, live probe not run)"
+}

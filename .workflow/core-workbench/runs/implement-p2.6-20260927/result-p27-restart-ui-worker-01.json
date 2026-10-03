@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-restart-ui-worker-01",
+  "status": "candidate_ready",
+  "candidate": "f86ac0ce084cc7efbd5da3e755c7c12d80b6842dcd9251658b43e9abfd39e104",
+  "audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-cd62-ui.json",
+  "checks": {
+    "tests/ui": "586 OK",
+    "tests/backend": "171 OK (27 skipped)",
+    "tests/contracts": "45 OK",
+    "tests/gates/g1_vt": "85 OK",
+    "RestartExitedOmpTests": "15 OK (feature-off mutant: 14/15 fail)",
+    "RestartExitedOmpPtyTests": "OK x3 (real Backend + fake OMP: exit -> notice -> Enter -> new pid -> echo works)"
+  },
+  "design": "exited = snapshot alive falsy for manager/worker; last screen kept, reverse notice on bottom inner rows, title '종료됨 (Enter: 다시 시작)'; Enter -> one RESTART_PANE; other bytes/paste/wheel arrows/terminal query replies blocked in _send for exited pane; pending dedupe; refusals in footer; menu not added; help +1 line",
+  "gaps": [
+    "restarted OMP env WORKBENCH_G3_GENERATION stays 1 while pane generation is 2 (backend, from senior change)",
+    "no live OMP 18.4.4 Enter restart (fake OMP only)"
+  ],
+  "residue": "none",
+  "observed_model": "sonnet"
+}

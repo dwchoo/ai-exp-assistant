@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cd63-review-02",
+  "verdict": "integrate",
+  "frozen_candidate": "dcc3efde55cb5ceaf1328ac5279cb5877153f9544d9cf10a21c051a6afe1fc05",
+  "agent_result": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd63-review-02-agent.json",
+  "checks": {
+    "tests/backend": "235 OK (27 skip)",
+    "contracts": "48 OK",
+    "ui": "696 OK",
+    "g1_vt": "85 OK",
+    "snapshot match": "1800 files"
+  },
+  "closed": [
+    "R1 (P1)",
+    "R3",
+    "R4"
+  ],
+  "findings": {
+    "N1 P3": "ui_server.py:308 handler_errors only in in-memory stats (not in record/snapshot)",
+    "N2 P3": "R2 unchanged: restart SIGKILLs leftovers of an exited shell session silently (survivors only in result); documented in UR-UX guide by Root"
+  },
+  "observed_model": "sonnet"
+}

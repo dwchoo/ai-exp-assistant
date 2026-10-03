@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-shell-test-01",
+  "ticket_id": "CW-17/CW-06 (C-D63 host shell restart + confirmed kill)",
+  "role": "test_designer",
+  "unit": "V-CW-17-p2.7-shell-restart",
+  "approved_bundle_digest": "f2084a7ccc5e5a6af7ca5bde6bc19b7d64052f43504b58549e587d379d121a43",
+  "routing": {
+    "planned_role": "test_designer",
+    "selected_role": "test_designer (Opus general-purpose)",
+    "reason_codes": [
+      "first_independent_verification_of_new_behaviour",
+      "process_lifetime"
+    ],
+    "evidence_refs": []
+  },
+  "frozen_candidate": "04223625d0c35c2bfb00b7195ba47456a21667a41e1c9a2628d4229a927470a6",
+  "criteria_sources": [
+    "docs/features/core-workbench/DECISIONS.md#C-D63",
+    "docs/features/core-workbench/tickets/CW-17.md 'Host shell 재시작·강제 종료'",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/assignment-p27-shell-senior-01.json required_behavior",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/assignment-p27-shell-ui-worker-01.json required_behavior",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-shell-senior-01.json contract_for_ui"
+  ],
+  "task": [
+    "1. Adapt the 5 independent tests that encode superseded rules, without weakening the invariants they protect: tests/backend/test_restart_pane_independent_p27q.py (3: host_shell restart now allowed after exit; keep 'live host shell refused' etc.), tests/ui/test_product_restart_independent_p27q.py ExitedPaneEnterTests.test_live_panes_and_host_shell_exit_are_unaffected, tests/ui/test_product_ime_independent_p27o.py HangulAfterPrefixTests.test_state_is_clean_afterwards_english_and_commands_work_normally (ㅏ now maps to k = kill confirm).",
+    "2. New adversarial independent tests: tests/backend/test_shell_kill_restart_independent_p27s.py and tests/ui/test_product_shell_kill_independent_p27s.py. Backend: kill terminates the shell and its foreground job, background jobs, stopped jobs, nested subshell pipelines, children that ignore SIGHUP/SIGTERM (escalation), process groups created by job control; a setsid daemon is NOT killed and is reported; no recycled-PID signalling; kill during a manager-owned command closes it as unknown (never success) and resets owner to user after restart; kill_pane refusals (OMP, exited, in progress, shutdown, not attached); restart only after exit; fresh shell like start (rcfile/hooks, wb-handoff works, cwd, env); repeated kill/restart cycles with no fd/process/thread leak; interaction with detach/attach and shutdown; concurrent kill+restart. UI: confirmation modal (nothing reaches panes), confirm forms k/Ctrl-k/ㅏ/prefix k, every other input cancels (Esc, Enter, paste, mouse, wheel, resize), manager warning content, exited-host Enter restart, refusals visible, menu row.",
+    "3. Live (opt-in WB_LIVE_SHELL=1) tests/ui/live_shell_kill_independent_p27s.py: real backend + real Bash (fake or real OMP, no model prompt) driven through the real product UI in a PTY: start long + background jobs, Ctrl-] k then k, verify all job PIDs gone (and a setsid daemon you started survives; kill it yourself afterwards), Enter restarts, wb-handoff works; cleanup everything you started.",
+    "4. Run tests/backend, tests/contracts, tests/ui (pattern test_*.py, no pipe, real exit), tests/gates/g1_vt (PYTHONPATH=src:.), the live probe once."
+  ],
+  "allowed_write_paths": [
+    "tests/backend/test_restart_pane_independent_p27q.py",
+    "tests/ui/test_product_restart_independent_p27q.py",
+    "tests/ui/test_product_ime_independent_p27o.py",
+    "tests/backend/test_shell_kill_restart_independent_p27s.py",
+    "tests/ui/test_product_shell_kill_independent_p27s.py",
+    "tests/ui/live_shell_kill_independent_p27s.py",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-shell-test-01-agent.json"
+  ],
+  "rules": "Draft expectations from the criteria before reading the implementation. Never modify production code: keep a failing test red and report it as a finding P0..P3 with file:line. Use /tmp/cw02-g1-venv/bin/python, PYTHONPATH=src, short unique TMPDIR under /tmp removed afterwards; robust teardown (try/finally); no model prompts; never pkill or pattern kills (only PIDs you started, verified by pidfd/cmdline); never touch ~/wb-urux-sandbox, the user's Workbench/herdr/tmux servers or configs, credential stores, ~/.omp ~/.agents ~/.claude ~/.codex; no commits, no graphify update; zero residue.",
+  "result_format": "Write the result JSON (checks table, adapted tests with reasons, new tests, findings P0..P3, live result, residue). Reply in Korean, <=20 lines."
+}

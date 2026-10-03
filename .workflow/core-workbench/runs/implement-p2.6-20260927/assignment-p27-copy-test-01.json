@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-copy-test-01",
+  "ticket_id": "CW-06 (C-D62 (2) drag-to-copy)",
+  "role": "test_designer",
+  "unit": "V-CW-06-p2.7-copy",
+  "approved_bundle_digest": "c28a63fd7f96d92fb481ec7df46290c23943622a8d4ab8237c6fe6c6e247a396",
+  "routing": {
+    "planned_role": "test_designer",
+    "selected_role": "test_designer (Opus general-purpose)",
+    "reason_codes": [
+      "first_independent_verification_of_new_behaviour"
+    ],
+    "evidence_refs": []
+  },
+  "frozen_candidate": "f86ac0ce084cc7efbd5da3e755c7c12d80b6842dcd9251658b43e9abfd39e104",
+  "criteria_sources": [
+    "docs/features/core-workbench/DECISIONS.md#C-D62 (2) (tmux and herdr are mandatory)",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/assignment-p27-copy-worker-01.json required_behavior and facts"
+  ],
+  "focus": [
+    "Selection model: one pane only (never crosses borders/other panes), click-without-move = focus only, divider drag/wheel/click-to-focus unchanged, mouse-tracking panes (1000/1002/1003) still receive their mouse and get no Workbench selection; auto-scroll above/below; scrolled-back selection anchored while new output arrives (and when history is trimmed or the pane is reset/replayed/catch-up); resize/alt-screen/zoom/focus change clear it; highlight correct on wide chars, colors and reverse cells.",
+    "Extraction: exact text for single-row substring, multi-row, wide chars (start/end on either half), combining chars, emoji, tabs rendered as spaces, trailing trim, empty selection, 1 MiB cap boundary.",
+    "OSC 52 bytes: exact format, base64 correctness, tmux passthrough wrapper only with TMUX, ESC doubling, never written during terminal restore, not interleaved/corrupting a frame being drawn, no clipboard program or tmux executed (assert no subprocess).",
+    "Live: an ISOLATED tmux server you start (tmux -L <unique> -f /dev/null): set-clipboard on -> show-buffer equals the selection; set-clipboard external + allow-passthrough on -> OSC 52 reaches the tmux client stream; both off -> notice explains. herdr: only if you can start a fully separate herdr server with its own socket/config/state (check herdr --help and env such as HERDR_SOCKET_PATH) without touching the user's running herdr server; otherwise record 'not run' with the reason. Use a real OMP pane (no model prompt) for at least one live drag if feasible.",
+    "Flake: run tests/ui 3 times (no pipe); identify any test that fails intermittently (the copy worker saw one unidentified failure once) and report it with its output."
+  ],
+  "deliverables": [
+    "tests/ui/test_product_copy_independent_p27r.py",
+    "tests/ui/live_copy_independent_p27r.py (opt-in env WB_LIVE_COPY=1)",
+    "result JSON .workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-copy-test-01-agent.json"
+  ],
+  "allowed_write_paths": [
+    "tests/ui/test_product_copy_independent_p27r.py",
+    "tests/ui/live_copy_independent_p27r.py",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-copy-test-01-agent.json"
+  ],
+  "run": "tests/ui (pattern test_*.py, no pipe, x3), tests/contracts, tests/gates/g1_vt (PYTHONPATH=src:.), the live probe once",
+  "rules": "Draft expectations from the criteria before reading the implementation. Never modify production code (src/**, omp_bridge/**): keep a failing test red and report it as a finding P0..P3 with file:line. Use /tmp/cw02-g1-venv/bin/python, PYTHONPATH=src, short unique TMPDIR under /tmp removed afterwards; no model prompts; never pkill or pattern kills (only PIDs/servers you started); never touch ~/wb-urux-sandbox, the user's Workbench/herdr/tmux servers or configs, credential stores, ~/.omp ~/.agents ~/.claude ~/.codex; no --profile; no commits, no graphify update; zero residue. A parallel test_designer works on the other C-D62 item: only create/edit the files allowed to you.",
+  "result_format": "Write the result JSON (checks table, new tests, findings P0..P3, flake report, live results, residue). Reply in Korean, <=20 lines."
+}

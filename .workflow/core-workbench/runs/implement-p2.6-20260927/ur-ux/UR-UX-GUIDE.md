@@ -7,41 +7,46 @@
 
 ## 1. 실행 방법
 
-일반 terminal에서 가로 160열·세로 40행 이상을 권장한다. tmux·Herdr 안에서도 실행할 수 있다.
+설치 없이 sandbox 폴더에서 실행한다. 일반 terminal, tmux, herdr 안에서 모두 실행할 수 있다.
 
 ```bash
-mkdir -p ~/wb-urux-sandbox && cd ~/wb-urux-sandbox        # OMP 작업 디렉터리(검토용 빈 디렉터리)
-PYTHONPATH=/home/dwchoo/ai-exp-assistant/src \
-  /tmp/cw02-g1-venv/bin/python -m workbench start --data-dir ~/.local/state/omp-workbench-urux
+cd ~/wb-urux-sandbox
+./wb            # 시작 (이미 실행 중이면 다시 붙기)
+./wb status     # 상태 보기
+./wb down       # 전체 종료 (확인 질문에 y)
 ```
 
-- backend가 따로 뜨고 제품 UI가 붙는다. 사용자의 기존 OMP 설정과 인증을 그대로 쓴다. OMP에 말을 걸면 실제 모델 호출이 일어난다.
-- UI만 닫기(detach): `Ctrl-]` 다음 `d`. backend, 두 OMP, host shell은 계속 실행된다.
-- 다시 붙기: `PYTHONPATH=… /tmp/cw02-g1-venv/bin/python -m workbench attach --data-dir ~/.local/state/omp-workbench-urux`
-- 상태 보기: `… -m workbench status --data-dir ~/.local/state/omp-workbench-urux`
-- 전체 종료: `… -m workbench shutdown --data-dir ~/.local/state/omp-workbench-urux` (확인 질문에 y). 지금은 CLI로만 종료할 수 있다.
-- 최소 client로 비교하기: `attach --plain`
+- backend가 따로 뜨고 제품 UI가 붙는다. 두 OMP는 사용자 주변 설정에서 격리되고(C-D59) 인증·provider·모델 설정만 쓴다. OMP에 말을 걸면 실제 모델 호출이 일어난다.
+- UI만 닫기(detach): `Ctrl-] q`. backend, 두 OMP, host shell은 계속 실행된다. 다시 붙기는 `./wb`.
+- 새 코드는 backend를 새로 시작해야 적용된다(`./wb down` 뒤 `./wb`).
 
-## 2. 키 (임시 배치, 이번 검토 대상)
+## 2. 키
 
-| 키 | 동작 |
+prefix는 `Ctrl-]`다. 한글 입력 상태에서도 되도록 Ctrl 조합(Ctrl을 누른 채 `]` 다음 글자), `Ctrl-] Space` 메뉴, 자모+Space를 함께 쓸 수 있다.
+
+| 동작 | 키 |
 |---|---|
-| `Ctrl-]` 뒤 `1` / `2` / `3` | manager OMP / worker OMP / host shell로 focus |
-| `Ctrl-]` 뒤 `Tab` | 다음 pane |
-| `Ctrl-]` 뒤 `t` / `c` | host shell 사용자 인수 요청 / 확인 |
-| `Ctrl-]` 뒤 `h` | host shell을 manager에게 되돌리기(handoff). 먼저 shell에서 `wb-handoff` 실행 |
-| `Ctrl-]` 뒤 `r` | focus pane 다시 그리기 |
-| 마우스 휠 | 포인터 아래 pane 바로 스크롤(한 칸 3줄). 텍스트 선택은 Shift+드래그 |
-| Shift+PgUp / Shift+PgDn | focus pane 한 페이지 스크롤(일부 terminal은 이 키를 자체 스크롤에 사용) |
-| 스크롤 중 아무 키·붙여넣기 | 자동으로 live 복귀 후 그대로 전달 |
-| pane 클릭 | 그 pane으로 focus |
-| `Ctrl-]` 뒤 `m` | 마우스 캡처 켜기/끄기 |
-| `Ctrl-]` 뒤 `[` (또는 `Ctrl-]` 뒤 `PgUp`) | 명시적 스크롤 모드(예비): PgUp/PgDn, ↑/↓(k/j), Home/End(g/G), q/Esc 종료. 모드 중 키는 전달되지 않음 |
-| `Ctrl-]` 뒤 `d` | detach |
-| `Ctrl-]` 뒤 `?` | 도움말 |
-| `Ctrl-]` 두 번 | `Ctrl-]` 문자 자체를 pane에 전송 |
+| detach | `Ctrl-] q` / Ctrl 누른 채 `]`+`q` / `Ctrl-] ㅂ Space` / 메뉴 0 |
+| 명령 메뉴 | `Ctrl-] Space` 뒤 번호·화살표·Enter |
+| pane focus | `Ctrl-]` 뒤 `1` / `2` / `3`, `Tab`, 또는 pane 클릭 |
+| 확대(zoom) | `Ctrl-] z` / Ctrl 누른 채 `]`+`z` / `Ctrl-] ㅋ Space` |
+| host shell 인수 요청 / 확인 | `Ctrl-] t` / `Ctrl-] c` (Ctrl 조합 `Ctrl-t` / `Ctrl-y`) |
+| handoff | `Ctrl-] h` (Ctrl 조합 `Ctrl-o`). 먼저 shell에서 `wb-handoff` |
+| 다시 그리기 / 마우스 캡처 | `Ctrl-] r` / `Ctrl-] m` (Ctrl 조합 `Ctrl-r` / `Ctrl-e`) |
+| 창 크기 조절 | 경계선 드래그, `Ctrl-]` 뒤 화살표(이어서 화살표 반복), `Ctrl-] =` 기본값 |
+| 스크롤 | 마우스 휠, Shift+PgUp/PgDn, `Ctrl-] [` 스크롤 모드(q/Esc 종료) |
+| **복사** | pane 안에서 드래그 → 놓으면 clipboard로 복사("복사됨" 표시). 한 pane 안만 선택되고, 위·아래 끝을 넘으면 자동 스크롤 |
+| **종료된 OMP 다시 시작** | 그 pane에서 Enter → 새 OMP 세션. 이전 대화는 새 OMP에서 `/resume` |
+| **종료된 host terminal 다시 시작** | 그 pane에서 Enter → 새 shell (처음 시작과 같은 설정, 입력 권한은 사용자) |
+| **host terminal 강제 종료** | `Ctrl-] k`(Ctrl 조합 `Ctrl-k`, 한글 `ㅏ Space`) → 확인 창에서 `k` 한 번만. 다른 키·여러 키·붙여넣기·창 크기 변경은 취소. manager가 쓰는 중이면 경고 표시 |
+| OMP에 Ctrl-d 보내기 | 2초 안에 두 번 (한 번은 경고만). host shell은 바로 전달 |
+| 도움말 | `Ctrl-] ?` |
+| `Ctrl-]` 문자 자체 | `Ctrl-]` 두 번 |
 
-그 밖의 키는 focus된 pane으로 그대로 전달된다. OMP의 `/` 명령, `Esc`, `Ctrl-C`, `Alt-Enter`도 여기에 포함된다.
+- 복사는 바깥 terminal의 clipboard로 OSC 52를 보낸다. herdr는 그대로 된다. tmux는 `set -s set-clipboard on` 또는 `set -g allow-passthrough on`이 필요하다(현재 사용자 설정은 둘 다 켜져 있음).
+- mouse를 직접 쓰는 pane 프로그램(예: mouse를 켠 vim)에는 드래그를 그대로 전달한다. 그때 terminal 자체 선택은 Shift+드래그다.
+- 종료된 OMP나 host terminal을 다시 시작하면 이전 세션에 남아 있던 process(예: 그 OMP가 백그라운드로 띄운 명령, 종료된 shell에 남은 `nohup` job)는 정리된다. 다시 시작하기 전에 필요한 process인지 확인한다.
+- host terminal 강제 종료는 shell과 그 job을 모두 종료한다. 스스로 session을 분리한 daemon(`setsid`, double-fork)은 종료하지 않는다. 권한이 없어 종료할 수 없는 process(예: `sudo`로 실행 중인 명령)는 남은 process로 보고된다.
 
 ## 3. 확인 목록 (UR-UX 범위, 1차 답변 완료)
 

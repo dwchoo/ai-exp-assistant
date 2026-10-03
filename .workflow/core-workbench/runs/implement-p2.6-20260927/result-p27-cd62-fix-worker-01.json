@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cd62-fix-worker-01",
+  "status": "candidate_ready",
+  "candidate": "815496f8ecdf470cd8c66884fdd77a195d7396dfe97a3eda1a4461196ce0f5ff",
+  "audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-cd62-fix.json",
+  "changed": {
+    "src/workbench/ui/product/model.py": "96f2e7a1d165e24f123fd568d7b2651ab749adc923622974dd3a956af83e237d",
+    "src/workbench/backend/ui_server.py": "b273dae23d4ed21266cf4795caaba58d0124e0070f8f80f8daa2c275f8ec7f27",
+    "tests/ui/test_product_model.py": "f64855fa2b55d3c18ac602353dcffde2ad4485fd4f1a489d0f4a142535abe0c3",
+    "tests/backend/test_ui_server.py": "5bac6f03946476d65259ddb86559b2b7c8dadb9e750e7a08df52f75b7b41401f"
+  },
+  "checks": {
+    "restart p27q": "12 OK",
+    "copy p27r": "41 OK",
+    "tests/ui": "645 OK",
+    "tests/backend": "190 OK (27 skip)",
+    "tests/contracts": "45 OK",
+    "tests/gates/g1_vt": "85 OK"
+  },
+  "design": "ui_server pushes state after restart ok; model._note_new_session on display of a newer session/generation clears exited/_restarting; selection clamped to history (cancel + notice when gone); PaneScreen.reset counter clears selection (RIS); texts '드래그: 복사' + keep 'Shift+드래그: 터미널 선택'",
+  "gaps": [
+    "state-push backend test red not observed before implementation",
+    "live probes not run by worker"
+  ],
+  "residue": "none",
+  "observed_model": "sonnet"
+}

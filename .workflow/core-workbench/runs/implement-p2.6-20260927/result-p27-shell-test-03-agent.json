@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-shell-test-03",
+  "role": "test_designer",
+  "unit": "V-CW-17-p2.7-shell-restart",
+  "status": "candidate_ready",
+  "frozen_candidate": "5d0ece140d5c63c9df41b4c2c0058bb99aa8de69e8322848d955ff2dbbca26d3",
+  "frozen_src_sha256": {"method": "sha256sum of every src/**/*.py (55 files, sorted), then sha256 of that listing", "start": "69546718fcf663efca4707d6fa9b0e39efcacbe60adb3a285a2a8bb860f9ad8d", "end": "69546718fcf663efca4707d6fa9b0e39efcacbe60adb3a285a2a8bb860f9ad8d", "equal": true},
+  "checks": [
+    {"cmd": "unittest discover -s tests/backend -p test_*.py", "exit": 0, "result": "235 OK, 27 skipped", "duration_s": 253, "note": "first full run: 2 failures (zombie of my own all-refuse shutdown test, see findings F-test-1); fixed, rerun green"},
+    {"cmd": "unittest discover -s tests/contracts -p test_*.py", "exit": 0, "result": "48 OK", "duration_s": 0.3},
+    {"cmd": "unittest discover -s tests/ui -p test_*.py", "exit": 0, "result": "696 OK", "duration_s": 190},
+    {"cmd": "PYTHONPATH=src:. unittest discover -s tests/gates/g1_vt", "exit": 0, "result": "85 OK", "duration_s": 1.6},
+    {"cmd": "WB_LIVE_SHELL=1 unittest tests.ui.live_shell_kill_independent_p27s", "exit": 0, "result": "1 OK", "duration_s": 10.5},
+    {"cmd": "unittest tests/backend/test_shell_kill_eperm_independent_p27t.py", "exit": 0, "result": "12 OK", "duration_s": 17},
+    {"cmd": "unittest tests/ui/test_product_shell_kill_r3_independent_p27t.py", "exit": 0, "result": "7 OK", "duration_s": 0.2},
+    {"cmd": "negative control (scratch, production untouched): _OwnedSession._send patched to the pre-fix behaviour (only ProcessLookupError caught)", "exit": 1, "result": "3 of 3 targeted EPERM tests fail as expected (kill_failed PermissionError; shutdown panes with error entries; restart_failed)"}
+  ],
+  "changes": [
+    {"file": "tests/ui/test_product_shell_kill_independent_p27s.py", "what": "KillConfirmTests split-read test renamed and corrected per root-adjudication-p27-cd63-r3: 'kls -la\\r' in one read after the modal opened -> cancelled, no kill_pane, nothing to a pane; lone k in its own read confirms once; P+'kk' still confirms. No other test touched."}
+  ],
+  "new_tests": [
+    {"file": "tests/backend/test_shell_kill_eperm_independent_p27t.py", "count": 12, "covers": ["R1 kill_pane with one EPERM member: ok, survivor permission_denied, others dead, backend loop + both OMPs alive and answering, record has survivors", "all non-leader members EPERM", "signal_failed:EINVAL reason, no exception", "restart after an EPERM kill", "R1 host-shell restart close with unsignallable leftover -> new shell, survivors reported", "R1 OMP restart close with unsignallable member -> new OMP, survivors reported", "R1 shutdown (pidfd and killpg refuse) -> no exception, no pane error entry, survivors reported, verified", "shutdown where every pidfd signal refuses -> returns", "UiServer handler raising PermissionError/RuntimeError/OSError -> internal_error, same connection serves next request, real kill afterwards ok", "R4 shutdown_request lists no shell_request/shell_foreground after kill, after restart, after external shell death"]},
+    {"file": "tests/ui/test_product_shell_kill_r3_independent_p27t.py", "count": 7, "covers": ["R3 cancel chunks (kk, kkk, kill, k+Enter/LF, k+text, Kx, unbracketed paste starting with k, Ctrl-k Ctrl-k, mixed Ctrl-k/k/jamo, jamo jamo, jamo+Space+extra) x 5 openers x 3 focuses: modal closed, no kill_pane, s.sent empty", "opener + extra bytes in one read (P+kkk, P+kls\\r, P+k\\r) cancel", "confirm chunks (k, K, Ctrl-k, jamo, jamo+Space, prefix+k/Ctrl-k/jamo) x openers x focuses: exactly one kill_pane, no pane bytes", "split opener then lone k; lone prefix keeps modal"]}
+  ],
+  "requirement_verdicts": {
+    "p27s_correction": "pass",
+    "R1_kill_eperm": "pass (implementation fixed)",
+    "R1_restart_eperm": "pass",
+    "R1_shutdown_eperm": "pass",
+    "ui_server_handler_internal_error": "pass",
+    "R4_shutdown_request": "pass",
+    "R3_variants": "pass",
+    "R2": "not a test item (disclosure/decision), untested"
+  },
+  "findings": [
+    {"id": "F-test-1", "class": "test", "severity": "P3", "file": "tests/backend/test_shell_kill_eperm_independent_p27t.py (shutdown where every pidfd refuses)", "summary": "first version left a zombie child of the test process (backend could not reap leaders it was refused to signal), tripping the existing p27s zombie assertions later in the same discover run; fixed by pidfd-exact waitid reaping in the test cleanup. Not an implementation defect (a root-owned shell leader cannot occur)."}
+  ],
+  "observations": ["With all pidfd signals refused, PTY hang-up still ends the shell/OMP leaders, so result.verified stays true; the test only asserts no exception and a report.", "bash resends SIGHUP to its jobs on hang-up, so EPERM fixtures use nohup'd members; p27t tests type through the UiServer socket when the loop thread runs (direct admit from the test thread races the loop's _flush with a BufferError, a test-threading matter)."],
+  "residue": {"processes": "none (pidfd+ticks cleanup; no pkill/pattern kills)", "tmp": "/tmp/p27t removed; p27q-* temp dirs auto-removed", "user_processes_touched": false, "pre_existing_zombies_not_mine": ["[codex] 3776", "[bash] 1811252"]}
+}

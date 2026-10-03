@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cd63-review-01",
+  "ticket_id": "CW-17/CW-06 (C-D63 host shell restart + confirmed kill)",
+  "role": "reviewer",
+  "unit": "V-CW-17-p2.7-shell-restart",
+  "approved_bundle_digest": "f2084a7ccc5e5a6af7ca5bde6bc19b7d64052f43504b58549e587d379d121a43",
+  "routing": {
+    "planned_role": "reviewer",
+    "selected_role": "reviewer (fresh Opus general-purpose)",
+    "reason_codes": [
+      "new_backend_lifecycle_behaviour",
+      "fresh_review_of_frozen_candidate"
+    ],
+    "evidence_refs": []
+  },
+  "frozen_candidate": "959ea1a4c80c660a2923b5be47ac3c546b3fb8349743ab92336172ed85cb0394",
+  "criteria": [
+    "docs/features/core-workbench/DECISIONS.md#C-D63",
+    "docs/features/core-workbench/tickets/CW-17.md 'Host shell 재시작·강제 종료'",
+    "docs/features/core-workbench/tickets/CW-06.md C-D63 sentence",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/root-adjudication-p27-cd63-resize.json"
+  ],
+  "delta": {
+    "base": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-cd63-pre/ (backend, contracts, ui/product before C-D63)",
+    "files": [
+      "src/workbench/backend/panes.py",
+      "src/workbench/backend/service.py",
+      "src/workbench/backend/ui_server.py",
+      "src/workbench/contracts/ui_v1.py",
+      "src/workbench/ui/product/model.py",
+      "src/workbench/ui/product/view.py"
+    ],
+    "tests": "git diff HEAD plus new files: tests/backend/test_shell_kill_restart.py, tests/backend/test_shell_kill_restart_independent_p27s.py, tests/ui/test_product_shell_kill_independent_p27s.py, tests/ui/live_shell_kill_independent_p27s.py; adapted p27q/p27o tests"
+  },
+  "evidence": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-shell-senior-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-shell-ui-worker-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-shell-test-01-agent.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-shell-fix-worker-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-shell-test-02-agent.json"
+  ],
+  "focus": [
+    "Kill semantics: only the host shell session/jobs, escalation, pinned identities (no recycled PID), setsid/double-fork daemons untouched, bounded waits, no UI/backend loop stalls beyond bounds, behaviour while the manager owns the shell or has a command in flight (closed as unknown, never success), refusals.",
+    "Restart: fresh shell like start (shell selection, rcfile/hooks, env, cwd), owner user, control/handoff/takeover state reset, records, phase; interaction with detach/attach, shutdown, concurrent kill/restart; shared _OwnedSession refactor did not regress OMP restart or the P2-2 pinning design.",
+    "Contract additions are additive; snapshot fields; old clients unaffected.",
+    "UI: confirmation modal cannot be confirmed accidentally (paste, mouse, resize, IME), manager warning, exited host Enter restart, menu row placement keeps the digit/wrap contract, texts.",
+    "Independent test adaptations (p27q x4, p27o x1, p27s resize) keep their invariants."
+  ],
+  "scratch": "/tmp/claude-1000/-home-dwchoo-ai-exp-assistant/dd5e2cee-e10d-41c4-8ebb-7c00b50dd465/scratchpad/cd63-review/",
+  "rules": "Read-only; write only .workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd63-review-01-agent.json. You may run tests (/tmp/cw02-g1-venv/bin/python, PYTHONPATH=src, short unique TMPDIR removed after) and the opt-in live probe WB_LIVE_SHELL=1 (it starts only its own processes); no model prompts; never pkill or pattern kills; never touch ~/wb-urux-sandbox or the user's Workbench/herdr/tmux processes or configs.",
+  "result_format": "Findings P0..P3 with file:line and a concrete failure scenario; verdict per focus; overall integrate/block. Write JSON; reply in Korean <=15 lines."
+}

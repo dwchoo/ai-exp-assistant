@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-restart-test-01",
+  "ticket_id": "CW-17/CW-06 (C-D62 (1) OMP pane restart)",
+  "role": "test_designer",
+  "unit": "V-CW-17-p2.7-restart",
+  "approved_bundle_digest": "c28a63fd7f96d92fb481ec7df46290c23943622a8d4ab8237c6fe6c6e247a396",
+  "routing": {
+    "planned_role": "test_designer",
+    "selected_role": "test_designer (Opus general-purpose)",
+    "reason_codes": [
+      "first_independent_verification_of_new_behaviour",
+      "process_lifetime"
+    ],
+    "evidence_refs": []
+  },
+  "frozen_candidate": "f86ac0ce084cc7efbd5da3e755c7c12d80b6842dcd9251658b43e9abfd39e104",
+  "criteria_sources": [
+    "docs/features/core-workbench/DECISIONS.md#C-D62 (1)",
+    "docs/features/core-workbench/tickets/CW-17.md 'OMP pane 재시작'",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/assignment-p27-restart-senior-01.json required_behavior",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/assignment-p27-restart-ui-worker-01.json required_behavior"
+  ],
+  "focus": [
+    "Contract: restart_pane parse/validation, refusals (host_shell, live pane, unknown, in progress, during shutdown, not attached) with reasons; no payload.",
+    "Backend: only a reaped OMP pane restarts; same argv (isolation overlays, --no-extensions, --append-system-prompt \"\", --no-title, bridge -e; no --resume/--continue), env (same role token, PI_AUTO_QA stripped) and cwd; new pid registers via bridge; phase degraded->ready only when everything is healthy; isolation re-check for that role; concurrent requests serialised; spawn failure leaves a sane exited state and a later retry works; old pane PTY/children cleaned; other panes and the backend untouched; restart history recorded; repeated exit/restart cycles (e.g. 5x) leak no fds/processes; worker and manager both.",
+    "Bridge generation: the restarted OMP gets WORKBENCH_G3_GENERATION 1 while the pane generation is 2 - check whether any identity/fencing (mailbox registration, pid match, stale peer from the old process, late messages from the old session) can confuse the two processes.",
+    "UI: exited notice + title, Enter (CR/LF, alone or mixed in a read, Hangul IME commit) sends exactly one restart; other bytes, pastes, wheel arrows, terminal query replies not sent to an exited pane; pending dedupe; refusals visible; notice cleared when the new generation arrives; host shell exit unaffected.",
+    "Live (real OMP 18.4.4, no model prompt): backend in a temp data dir, SIGKILL the manager OMP PID you started, drive restart through the real product UI in a PTY by pressing Enter on the manager pane; verify new pid, bridge ready, isolation ok, the pane redraws a fresh OMP, the worker OMP and shell PIDs unchanged, clean shutdown verified."
+  ],
+  "deliverables": [
+    "tests/backend/test_restart_pane_independent_p27q.py",
+    "tests/ui/test_product_restart_independent_p27q.py",
+    "tests/ui/live_restart_independent_p27q.py (opt-in env WB_LIVE_RESTART=1)",
+    "result JSON .workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-restart-test-01-agent.json"
+  ],
+  "allowed_write_paths": [
+    "tests/backend/test_restart_pane_independent_p27q.py",
+    "tests/ui/test_product_restart_independent_p27q.py",
+    "tests/ui/live_restart_independent_p27q.py",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-restart-test-01-agent.json"
+  ],
+  "run": "tests/backend, tests/contracts, tests/ui (pattern test_*.py, no pipe, real exit code), tests/gates/g1_vt (PYTHONPATH=src:.), the live probe once",
+  "rules": "Draft expectations from the criteria before reading the implementation. Never modify production code (src/**, omp_bridge/**): keep a failing test red and report it as a finding P0..P3 with file:line. Use /tmp/cw02-g1-venv/bin/python, PYTHONPATH=src, short unique TMPDIR under /tmp removed afterwards; no model prompts; never pkill or pattern kills (only PIDs/servers you started); never touch ~/wb-urux-sandbox, the user's Workbench/herdr/tmux servers or configs, credential stores, ~/.omp ~/.agents ~/.claude ~/.codex; no --profile; no commits, no graphify update; zero residue. A parallel test_designer works on the other C-D62 item: only create/edit the files allowed to you.",
+  "result_format": "Write the result JSON (checks table, new tests, findings P0..P3, residue). Reply in Korean, <=20 lines."
+}

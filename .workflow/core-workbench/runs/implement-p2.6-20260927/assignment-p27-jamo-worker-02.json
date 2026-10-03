@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-jamo-worker-02",
+  "ticket_id": "CW-06 (detach key q, Ctrl-d confirmation for OMP panes)",
+  "role": "worker",
+  "unit": "V-CW-06-p2.7-jamo",
+  "approved_bundle_digest": "91fe05dc882d8c00ab0eb28c30e2b6cabcbfacb0f0fee3f0eaeecfaff5b7d3e8",
+  "routing": {
+    "planned_role": "worker",
+    "selected_role": "worker (wb-worker, Sonnet high)",
+    "reason_codes": [
+      "bounded_pattern"
+    ],
+    "evidence_refs": [
+      "docs/features/core-workbench/DECISIONS.md#C-D61 (1)"
+    ]
+  },
+  "base_candidate": "b9bb80502feb3b38dc8c7c6b8aaf67d819c3a1abec2594881a42c4efc576be69",
+  "checkpoint_ref": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-jamo-worker01-after/"
+  ],
+  "background": "User lost both OMPs: a Ctrl-d reached the OMP panes (OMP exits on Ctrl-d) while using the detach alias Ctrl-] Ctrl-d. User decision C-D61 (1): detach key becomes q (same as herdr) and Ctrl-d to OMP panes needs confirmation.",
+  "required_behavior": [
+    "Detach: prefix q (letter), Ctrl alias Ctrl-q (0x11) and menu item 0 detach. Update CTRL_ALIASES, MENU_ITEMS, help overlay, footer default text, HANGUL_HINT example (use ㅂ Space = q detach, the 2-set key for q) and any other user-visible text mentioning d/Ctrl-d as detach.",
+    "Old keys: prefix d and prefix Ctrl-d no longer detach; they send nothing to any pane and show a short notice such as 'detach는 이제 Ctrl-] q (Ctrl-q)'. With the jamo table, prefix ㅇ (->d) behaves the same (notice, nothing sent).",
+    "Scroll mode keeps q as exit (different context); prefix q only applies right after the prefix.",
+    "Ctrl-d confirmation: when a raw 0x04 key (not inside a bracketed paste, not the prefix command) is going to manager_omp or worker_omp, do not send it; show a notice like 'Ctrl-d는 OMP를 종료할 수 있습니다 — 2초 안에 Ctrl-d를 한 번 더 누르면 전달'. A second 0x04 to the same pane within 2.0 s (module constant) sends exactly one 0x04. Any other key, a focus change, a paste or the timeout cancels the pending confirmation (the first Ctrl-d is dropped, the other key is handled normally). Bytes before/after the 0x04 in the same read are handled normally. host_shell Ctrl-d is sent immediately as before. Pastes containing 0x04 are unchanged.",
+    "Keep everything else (Ctrl aliases for other commands, menu, jamo conversion, scroll, mouse, paste) unchanged."
+  ],
+  "acceptance": [
+    "red->green tests in tests/ui/test_product_model.py for: prefix q / Ctrl-q / menu 0 / prefix ㅂ Space detach; prefix d / Ctrl-d / ㅇ Space -> no detach, nothing sent, notice; Ctrl-d guard (single held, double within 2 s forwards one, timeout, other key cancels, focus change cancels, host shell immediate, paste unchanged, split reads)",
+    "update PTY tests in tests/ui/test_product_pty.py that detach with d/Ctrl-d to q/Ctrl-q; add one PTY test: real loop, Ctrl-d on manager pane is not delivered to the fake OMP until pressed twice",
+    "tests/ui/*_independent*.py must NOT be edited: report which of them now fail because they encode detach=d / Ctrl-d or immediate Ctrl-d delivery to OMP; all other tests/ui test_*.py, tests/contracts and tests/gates/g1_vt (PYTHONPATH=src:.) pass. Run discover without piping so the exit code is real."
+  ],
+  "allowed_write_paths": [
+    "src/workbench/ui/product/**",
+    "tests/ui/test_product_model.py",
+    "tests/ui/test_product_pty.py"
+  ],
+  "prohibited_paths": [
+    "tests/**/*_independent*.py",
+    "tests/ui/live_*.py",
+    "src/workbench/backend/**",
+    "docs/**",
+    ".workflow/**",
+    "~/wb-urux-sandbox/**"
+  ],
+  "rules": "Use /tmp/cw02-g1-venv/bin/python, short unique TMPDIR under /tmp removed afterwards; no graphify update, no commits, never pkill or pattern kills; the user has a live Workbench session (backend in ~/wb-urux-sandbox/.state) - never touch it or its processes; zero residue.",
+  "result_format": "checks table first, status, changed paths + sha256, failing independent tests list with reason, residue. Korean, concise (<=20 lines)."
+}

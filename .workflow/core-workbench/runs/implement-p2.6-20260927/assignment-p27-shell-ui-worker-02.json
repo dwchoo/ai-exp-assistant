@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-shell-ui-worker-02",
+  "ticket_id": "CW-06 (C-D63 review R3)",
+  "role": "worker",
+  "unit": "V-CW-17-p2.7-shell-restart",
+  "approved_bundle_digest": "f2084a7ccc5e5a6af7ca5bde6bc19b7d64052f43504b58549e587d379d121a43",
+  "routing": {
+    "planned_role": "worker",
+    "selected_role": "worker (wb-worker, Sonnet high)",
+    "reason_codes": [
+      "bounded_pattern"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd63-review-01-agent.json R3"
+    ]
+  },
+  "base_candidate": "959ea1a4c80c660a2923b5be47ac3c546b3fb8349743ab92336172ed85cb0394",
+  "required_behavior": [
+    "R3: while the kill confirmation is open, only a single confirm key on its own confirms: exactly one confirm form (k, Ctrl-k, ㅏ with at most its single IME commit key, or prefix+k) and nothing else in that input chunk. A chunk with extra bytes (e.g. 'kkk' auto-repeat, an unbracketed paste starting with k, 'k' followed by other text) cancels the confirmation and sends nothing to any pane (show a notice like '확인이 취소되었습니다 — k 한 번만 눌러 확인'). Keep all existing behaviour and tests."
+  ],
+  "acceptance": [
+    "red->green tests in tests/ui/test_product_model.py for kk, kkk, 'kill', k+Enter, unbracketed paste starting with k, Ctrl-k Ctrl-k, ㅏ+Space (still confirms), prefix+k (still confirms)",
+    "all tests/ui test_*.py pass (no pipe, real exit) incl. p27s; list any *_independent* failure without editing it"
+  ],
+  "allowed_write_paths": [
+    "src/workbench/ui/product/**",
+    "tests/ui/test_product_model.py"
+  ],
+  "prohibited_paths": [
+    "src/workbench/backend/**",
+    "src/workbench/contracts/**",
+    "tests/**/*_independent*.py",
+    "tests/ui/live_*.py",
+    "docs/**",
+    ".workflow/**"
+  ],
+  "rules": "Use /tmp/cw02-g1-venv/bin/python, short unique TMPDIR removed afterwards; no graphify update, no commits, never pkill or pattern kills; never touch ~/wb-urux-sandbox or the user's Workbench/herdr/tmux processes or configs; zero residue. A parallel senior worker edits src/workbench/backend - do not touch it; if a backend test fails due to their in-progress files, rerun later or report it.",
+  "result_format": "checks table first, status, changed paths + sha256, residue. Korean, <=10 lines."
+}

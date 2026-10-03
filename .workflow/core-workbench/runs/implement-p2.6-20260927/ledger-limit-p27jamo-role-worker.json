@@ -1,0 +1,23 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 1614,
+  "event": {
+    "id": "limit-p27jamo-role-worker",
+    "kind": "limit",
+    "data": {
+      "authority": "C-D55 budget delegation, workflow-contract section 8; C-D57 feedback routing; user answer 2026-09-30 '\uc790\ubaa8 \uc790\ub3d9 \ubcc0\ud658 + Space'",
+      "bucket": "role:worker",
+      "decision_owner": "Root",
+      "expected_previous": {
+        "authority": "C-D55 budget delegation, workflow-contract section 8; Root flake repro",
+        "reason": "flaky PTY test readiness fix",
+        "value": 39
+      },
+      "origin": "operating",
+      "reason": "jamo worker + one correction",
+      "remaining_work_estimate": 2,
+      "scope_basis": null,
+      "value": 41
+    }
+  }
+}

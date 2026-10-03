@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-copy-worker-01",
+  "ticket_id": "CW-06 (C-D62 (2) drag-to-copy)",
+  "role": "worker",
+  "unit": "V-CW-06-p2.7-copy",
+  "approved_bundle_digest": "c28a63fd7f96d92fb481ec7df46290c23943622a8d4ab8237c6fe6c6e247a396",
+  "routing": {
+    "planned_role": "worker",
+    "selected_role": "worker (wb-worker, Sonnet high)",
+    "reason_codes": [
+      "bounded_pattern"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-restart-copy-explore-01.md B5-B7"
+    ]
+  },
+  "base_candidate": "4ce969cb0925b05a245d7a42d43d20256a5f9831e932a9a6ab13cfffcdb6c9de",
+  "checkpoint_ref": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-cd62-pre/"
+  ],
+  "facts": [
+    "OMP 18.4.4 does NOT enable mouse tracking (startup DECSETs observed by Root: ?1l ?2004h ?2026h ?2031h ?25h ?5522h ?7h), so OMP panes and a plain host shell receive no mouse; apps like vim with mouse=a do.",
+    "The user's tmux has set -s set-clipboard on and allow-passthrough on; tmux default is set-clipboard external (app OSC 52 ignored). herdr 0.9.2 (ghostty_vt) captures pane OSC 52 and forwards it to its client. The user runs Mac cmux -> ssh -> herdr or tmux -> wb."
+  ],
+  "required_behavior": [
+    "In a pane that does not track the mouse (no 1000/1002/1003 from the pane app): left press inside the pane content starts a selection; motion extends it (clamped to that pane only, never crossing into other panes or borders); release copies. A click without movement keeps today's behaviour (focus). Divider drags, wheel, click-to-focus and forwarding to mouse-tracking panes stay as they are.",
+    "Selection is anchored in pane content coordinates that include the scrollback view: the user can scroll (wheel/Shift+PgUp) and select past output; dragging above the top / below the bottom inner edge auto-scrolls that pane's history while extending the selection.",
+    "Highlight the selected cells (reverse video) while dragging and after the copy until the next key, click, new selection, focus change or pane content reset.",
+    "Text extraction: rows in order, wide characters once, trailing spaces trimmed per row, rows joined with \\n; a selection inside one row is a substring; cap at 1 MiB of UTF-8 (larger: copy refused with a notice).",
+    "Copy via OSC 52 written to the UI's own stdout: ESC ] 52 ; c ; <base64> BEL. When the UI runs inside tmux (TMUX env set) also write the same OSC 52 wrapped for tmux passthrough (ESC P tmux; ... ESC \\ with inner ESC doubled) so it works with set-clipboard on or allow-passthrough on. Never execute tmux or any clipboard program. Footer notice e.g. '복사됨: 123자 (tmux는 set-clipboard on 또는 allow-passthrough on 필요)' - keep the tmux hint only when TMUX is set.",
+    "Output path: model queues the bytes, app.py loop writes them (like the mouse re-assert); nothing is written while the terminal is being restored.",
+    "Help overlay: one short line about drag-to-copy; keep HELP_LINES count <= current + 1."
+  ],
+  "acceptance": [
+    "red->green tests in tests/ui/test_product_model.py: selection in each pane type, clamping, no cross-pane, auto-scroll, scrolled-back selection, wide chars, trailing trim, single-row substring, click-without-move = focus, tracking pane still gets mouse, cap, OSC 52 bytes exact incl. tmux wrapper only with TMUX",
+    "one PTY test in tests/ui/test_product_pty.py: real loop, SGR drag in the host pane after printing known text -> OSC 52 with the expected base64 on the UI stdout",
+    "live check in an ISOLATED tmux server you start yourself (tmux -L <unique> -f /dev/null, set -s set-clipboard on): run the product UI against a backend in a temp data dir, send SGR drag via the pane, then `tmux -L <unique> show-buffer` contains the selected text; repeat with set-clipboard external + allow-passthrough on if feasible; kill only that tmux server (tmux -L <unique> kill-server) and processes you started",
+    "tests/ui/*_independent*.py must NOT be edited: list any that fail and why; all other tests/ui test_*.py (no pipe), tests/contracts, tests/gates/g1_vt pass"
+  ],
+  "allowed_write_paths": [
+    "src/workbench/ui/product/**",
+    "tests/ui/test_product_model.py",
+    "tests/ui/test_product_pty.py"
+  ],
+  "prohibited_paths": [
+    "src/workbench/backend/**",
+    "src/workbench/contracts/**",
+    "tests/**/*_independent*.py",
+    "tests/ui/live_*.py",
+    "docs/**",
+    ".workflow/**"
+  ],
+  "rules": "Use /tmp/cw02-g1-venv/bin/python, short unique TMPDIR under /tmp removed afterwards; no graphify update, no commits, never pkill or pattern kills (kill only PIDs you started); the user has a live Workbench session (backend in ~/wb-urux-sandbox/.state) and live herdr/tmux servers - never touch them or their processes; never read credential stores; never edit ~/.omp ~/.agents ~/.claude ~/.codex or tmux/herdr configs; no --profile; zero residue. A parallel senior worker edits src/workbench/backend and contracts at the same time: do not touch them; if a test failure comes from their in-progress files, rerun later or report it.",
+  "result_format": "checks table first, status, changed paths + sha256, live tmux result, failing independent tests with reason, residue. Korean, <=20 lines."
+}

@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cd63-review-01",
+  "role": "reviewer",
+  "unit": "V-CW-17-p2.7-shell-restart",
+  "frozen_candidate": "959ea1a4c80c660a2923b5be47ac3c546b3fb8349743ab92336172ed85cb0394",
+  "candidate_check": "src/** and tests/** sha256 equal to p27-snapshot-cd63-test2-after.json (0 diffs, no new files)",
+  "overall": "block",
+  "checks": [
+    {"cmd": "unittest discover -s tests/backend -p test_*.py", "exit": 0, "result": "214 OK, 27 skipped"},
+    {"cmd": "unittest discover -s tests/contracts -p test_*.py", "exit": 0, "result": "48 OK"},
+    {"cmd": "unittest discover -s tests/ui -p test_*.py", "exit": 0, "result": "687 OK"},
+    {"cmd": "PYTHONPATH=src:. unittest discover -s tests/gates/g1_vt", "exit": 0, "result": "85 OK"},
+    {"cmd": "WB_LIVE_SHELL=1 unittest tests.ui.live_shell_kill_independent_p27s", "exit": 0, "result": "1 OK, 10.4 s, kill 1.07 s, residue []"},
+    {"cmd": "scratch repro (scratchpad/repro/test_eperm_repro.py, on the p27s _ShellCase fixture; pidfd_send_signal mocked to raise EPERM once)", "exit": 0,
+     "result": "kill_pane -> ESCAPED PermissionError (not Held), shell still alive; restart after exit with a pinned nohup leftover -> Held restart_failed '[Errno 1] Operation not permitted'"},
+    {"cmd": "python: pidfd_open(1) + pidfd_send_signal(fd, 0)", "exit": 0, "result": "PermissionError: pidfd_open succeeds on a root process, signalling it raises EPERM (not ProcessLookupError)"}
+  ],
+  "findings": [
+    {
+      "id": "R1",
+      "severity": "P1",
+      "file": "src/workbench/backend/panes.py:642",
+      "related": ["src/workbench/backend/panes.py:199", "src/workbench/backend/service.py:672", "src/workbench/backend/ui_server.py:300", "src/workbench/backend/service.py:133", "src/workbench/backend/service.py:622"],
+      "summary": "ShellPane._signal_pins (and _OwnedSession._kill_owned_session) catch only ProcessLookupError. A session member the user may not signal (EPERM) makes kill() raise PermissionError; kill_pane only maps UnsafeShellState, UiServer._handle only catches Held, so the exception leaves ui.poll -> _tick -> _loop and run() treats it as 'backend failure' and closes every pane.",
+      "failure_scenario": "Host shell runs `sudo apt upgrade` / `sudo tail -f ...` (sudo's own process becomes full root and stays in the caller's session), an interactive `su -`/`su otheruser` shell (same session without --pty), `pkexec cmd`, or sudo with !use_pty. User presses Ctrl-] k, k. pidfd_open pins the root member (no permission needed), pidfd_send_signal(SIGHUP) -> EPERM -> PermissionError escapes -> backend exits and both OMP sessions are terminated, contrary to C-D63 'backend, OMP pane은 그대로다'. The remaining pins after the failing one are never signalled in that round. Same root cause on the restart path: a pinned unsignalable leftover makes old.close() raise in _restart_shell, so restart_pane returns restart_failed on every retry while that process lives (shell cannot be restarted). Reproduced with a one-shot EPERM mock: kill_pane raised PermissionError (not Held).",
+      "fix_hint": "Treat PermissionError (EPERM) per member as 'not signalable': skip it, keep going with the other pins, report it in survivors/left reasons; never let OSError escape kill()/close()/_kill_owned_session; kill_pane maps any remaining OSError to Held(KILL_FAILED). Add a test with an EPERM member (mock) for kill, restart-after-exit and close."
+    },
+    {
+      "id": "R2",
+      "severity": "P3",
+      "file": "src/workbench/backend/service.py:622",
+      "summary": "Restart of an exited host shell SIGKILLs the members still left in the old session (pinned at exit, e.g. `nohup job &` then Ctrl-d) without the user being told; C-D63 (1) only says 'Enter로 새 shell 시작' and the UI notice/contract text do not mention it.",
+      "failure_scenario": "User runs `nohup long_build >log 2>&1 &`, exits the shell with Ctrl-d, later presses Enter in the exited pane: the build is SIGKILLed by old.close() -> _kill_owned_session. Consistent with the OMP restart (C-D62) and with pre-change shutdown, but it is an undisclosed user-visible effect of the restart.",
+      "fix_hint": "Either disclose it (notice/contract/ticket text) or have Root confirm the intended behaviour."
+    },
+    {
+      "id": "R3",
+      "severity": "P3",
+      "file": "src/workbench/ui/product/model.py:904",
+      "summary": "While the confirmation is open, any Passthrough whose first byte is k/K/Ctrl-k confirms and drops the rest, so a multi-byte unbracketed read (typeahead, auto-repeat, a paste delivered without bracketed-paste markers by an outer multiplexer) beginning with 'k' confirms the kill.",
+      "failure_scenario": "Ctrl-] k opens the modal; the outer terminal/multiplexer pastes 'kubectl get pods' without ESC[200~ markers (or k is held/auto-repeats): event Passthrough(b'kubectl...') -> data[:1]==b'k' -> kill_pane sent. Bracketed paste, mouse, resize and IME paths are correctly safe; this follows the Root-specified 'k-forms confirm' rule, so it is a residual-risk note.",
+      "fix_hint": "Optionally confirm only when the event is exactly one key (b'k', b'K', b'\\x0b' or the jamo form) and cancel on longer Passthrough data."
+    },
+    {
+      "id": "R4",
+      "severity": "P3",
+      "file": "src/workbench/backend/service.py:496",
+      "summary": "After a kill that closed a manager request, the dead shell's state keeps request_id with phase 'unknown', so _active_work/shutdown_request still list a 'shell_request' as active work until the shell is restarted.",
+      "failure_scenario": "Manager command in flight -> kill_pane -> before Enter-restart the user detaches and runs shutdown: the shutdown prompt reports an active shell_request for a shell that no longer exists (cosmetic; the record correctly says outcome unknown).",
+      "fix_hint": "Skip shell active work when self.shell.exited()."
+    }
+  ],
+  "focus_verdicts": {
+    "kill_semantics": "block (R1). Otherwise sound: signals only through pidfds pinned while the unreaped parent proves the session (no recycled PID), HUP/TERM/CONT to all members incl. ones forked meanwhile, KILL after 1 s grace via _kill_owned_session, setsid processes never targeted and reported in left_session, unprovable identity -> kill_failed with nothing signalled, manager in-flight request closed as unknown (fail_unknown, never control_returned) before any signal, refusals correct. Loop stall bounded (~1 s grace + <=2 s KILL rounds + <=1 s reap wait; observed 1.07 s live); UI shows 'host terminal 강제 종료 중…' meanwhile.",
+    "restart": "pass with R1 (EPERM leftover path) and R2. Fresh PersistentShell with the same ShellChoice, the start-up shell_environment copy and start-up cwd (chdir back), owner user, new control/handoff/takeover state, generation+1 and new session_id, restart record/history, phase re-evaluated; refused while alive or during shutdown; failure keeps the exited pane and is retryable. _OwnedSession extraction is a verbatim move; OMP restart/C-D45 pinning unchanged (p27q/restart suites green). Single-threaded loop makes kill/restart strictly ordered; detach/attach keeps the exited state; shutdown closes the new shell (live probe verified).",
+    "contract": "pass. kill_pane type, 4 new Reason values and snapshot fields (alive, exit_status, input_owner, manager_command_in_flight, manager_command, restart, kill) are additive; version unchanged; old clients only see pane_alive instead of pane_not_restartable for a live host shell, which the docstring records.",
+    "ui": "pass with R3. Modal is checked before menu/scroll/help, nothing reaches a pane while open; paste/PasteRejected/mouse/PageScroll/resize/prefix-other cancel, lone prefix keeps it, IME jamo ㅏ (+Space) confirms with commit key swallowed; manager warning recomputed from state pushes; pending kill deduped; exited host shows notice, only Enter sends one restart_pane; menu keeps the 10 digit items, kill row reached by Ctrl-k opens (not executes) the confirmation; help line added.",
+    "test_adaptations": "pass. p27q backend x3 keep 'never restarted by the backend itself', 'OMP restart does not make an exited-host backend ready', 'host restart starts no OMP', 'refusal touches the live shell'; p27q UI keeps live panes untouched and exited host gets no bytes; p27o keeps the clean-state/English/command checks after an explicit cancel; p27s:176 keeps 'resize never confirms and sends nothing', trailing Esc per Root adjudication."
+  },
+  "residue": "none (scratch TMPDIRs removed; live probe residue []; no processes left by this review)",
+  "observed_model": "opus"
+}

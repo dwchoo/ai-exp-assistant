@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-shell-ui-worker-01",
+  "ticket_id": "CW-06 (C-D63 host shell Enter restart + Ctrl-] k confirmed kill)",
+  "role": "worker",
+  "unit": "V-CW-17-p2.7-shell-restart",
+  "approved_bundle_digest": "f2084a7ccc5e5a6af7ca5bde6bc19b7d64052f43504b58549e587d379d121a43",
+  "routing": {
+    "planned_role": "worker",
+    "selected_role": "worker (wb-worker, Sonnet high)",
+    "reason_codes": [
+      "bounded_pattern"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-shell-senior-01.json contract_for_ui"
+    ]
+  },
+  "base_candidate": "7bdfe2102cc8449c18628a36a2360df181e4440ba538eaf5b6bfba437db28d67",
+  "criteria": [
+    "docs/features/core-workbench/DECISIONS.md#C-D63",
+    "backend contract: .workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-shell-senior-01.json contract_for_ui",
+    "existing UI pattern for exited OMP panes (C-D62) in src/workbench/ui/product/model.py/view.py"
+  ],
+  "required_behavior": [
+    "Exited host shell (snapshot host_shell alive falsy): same UX as an exited OMP pane: keep last screen, notice 'host terminal 종료됨 (exit N) — Enter: 새 shell 시작', title marked; Enter sends restart_pane host_shell once (pending dedupe), other input/paste not sent; revive on state push or new-generation output; refusals shown.",
+    "Force kill: prefix k (letter), Ctrl alias Ctrl-k (0x0b; check no collision with existing aliases), Hangul jamo ㅏ (2-set k) via the existing jamo conversion. First press opens a confirmation (modal like the command menu, nothing reaches panes): 'host terminal을 강제 종료합니다. 실행 중인 process가 모두 종료됩니다. k: 종료 · Esc/다른 키: 취소'; when the snapshot says the manager owns the shell input or a manager command is in flight, add a warning line ('manager가 사용 중입니다 — 진행 중인 명령은 결과 불명으로 남습니다'). Confirm with k (or Ctrl-k / ㅏ / Enter? -> use k and Ctrl-k and ㅏ only; Enter cancels? no: only k-forms confirm, anything else cancels). On confirm send kill_pane{pane:host_shell}; show result ('host terminal 강제 종료됨 — Enter로 새 shell') or refusal reason. Works whatever pane has focus.",
+    "Add 'host terminal 강제 종료' to the prefix Space command menu (respect the existing digit layout: append without renumbering existing items if possible, or document the change) and one help line; update texts consistently.",
+    "Unchanged: OMP restart, drag copy, Ctrl-d guard, detach q, jamo, scroll, mouse."
+  ],
+  "acceptance": [
+    "red->green tests in tests/ui/test_product_model.py (exited host notice/Enter/dedupe/blocked input, k confirm flow incl. Ctrl-k and ㅏ Space, cancel by Esc/other key/paste/mouse, manager warning, refusals, menu item)",
+    "one PTY test in tests/ui/test_product_pty.py: real backend; run `sleep 1000 &` and `sleep 1000` in host shell, Ctrl-] k then k, pane shows exited, the sleeps are gone, Enter -> fresh prompt accepting input",
+    "all tests/ui test_*.py (no pipe, real exit), tests/backend, tests/contracts, tests/gates/g1_vt pass except the 3 known independent p27q tests listed in the senior result; list any other *_independent* failures without editing them"
+  ],
+  "allowed_write_paths": [
+    "src/workbench/ui/product/**",
+    "tests/ui/test_product_model.py",
+    "tests/ui/test_product_pty.py"
+  ],
+  "prohibited_paths": [
+    "src/workbench/backend/**",
+    "src/workbench/contracts/**",
+    "tests/**/*_independent*.py",
+    "tests/ui/live_*.py",
+    "docs/**",
+    ".workflow/**"
+  ],
+  "rules": "Use /tmp/cw02-g1-venv/bin/python, short unique TMPDIR removed afterwards; no graphify update, no commits, never pkill or pattern kills (only PIDs you started); test teardown must be robust (try/finally); never touch ~/wb-urux-sandbox or the user's Workbench/herdr/tmux processes or configs; zero residue.",
+  "result_format": "checks table first, status, changed paths + sha256, residue. Korean, <=15 lines."
+}

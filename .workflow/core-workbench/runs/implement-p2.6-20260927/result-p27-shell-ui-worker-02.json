@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-shell-ui-worker-02",
+  "status": "candidate_ready",
+  "changed": {
+    "src/workbench/ui/product/model.py": "cc5bcfd9c000d8b02c02eac1e60667ce0068b51e706375c4fa807e80d1e6de29",
+    "tests/ui/test_product_model.py": "4fcc6d5e5c86a9a8e7140d8f291ce9d3dde20f55daed91934f42f27458b22e2f"
+  },
+  "checks": {
+    "KillHostTerminalTests": "11/14 red -> 14 OK",
+    "tests/ui": "689: 1 FAIL p27s KillConfirmTests.test_split_reads_and_keys_after_the_confirming_k_in_the_same_read (expects 'kls -la\\r' in one chunk to confirm; conflicts with R3)"
+  },
+  "design": "confirmation chunk confirms only when it is a single event; Passthrough data exactly k/K/\\x0b; multi-event or longer data cancels, rest of chunk dropped, notice; opener+confirm in the same read (P+'kk') still confirms",
+  "residue": "none",
+  "observed_model": "sonnet"
+}

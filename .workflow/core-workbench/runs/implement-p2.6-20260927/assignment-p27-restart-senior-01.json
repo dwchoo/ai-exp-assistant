@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-restart-senior-01",
+  "ticket_id": "CW-17 (C-D62 (1) OMP pane restart)",
+  "role": "worker_senior",
+  "unit": "V-CW-17-p2.7-restart",
+  "approved_bundle_digest": "c28a63fd7f96d92fb481ec7df46290c23943622a8d4ab8237c6fe6c6e247a396",
+  "routing": {
+    "planned_role": "worker_senior",
+    "selected_role": "worker_senior (Opus general-purpose)",
+    "reason_codes": [
+      "process_lifetime",
+      "bridge_identity"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-restart-copy-explore-01.md"
+    ]
+  },
+  "base_candidate": "4ce969cb0925b05a245d7a42d43d20256a5f9831e932a9a6ab13cfffcdb6c9de",
+  "checkpoint_ref": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-cd62-pre/"
+  ],
+  "criteria": [
+    "docs/features/core-workbench/DECISIONS.md#C-D62 (1)",
+    "docs/features/core-workbench/tickets/CW-17.md 'OMP pane 재시작'",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-restart-copy-explore-01.md (facts and insertion points A1-A4)"
+  ],
+  "required_behavior": [
+    "ui_v1: new client request restart_pane with a pane field (manager_omp|worker_omp). Accept only when that OMP pane has exited (process reaped, alive False); refuse with a clear reason for host_shell, a live pane, an unknown pane, during shutdown, or while a restart of that pane is in progress. Update contracts/ui_v1.py (enum + parse), ui_server dispatch + Controller protocol, and the minimal attach client only if needed.",
+    "Backend.restart_pane: spawn a NEW OMP process for the same role with exactly the start-time argv (isolation --config overlays incl. the per-role overlay file, --no-extensions, --append-system-prompt \"\", --no-title, plan omp_args, bridge -e), env (same role token - keep it for the backend lifetime instead of deleting it, bridge socket, PI_AUTO_QA stripped) and cwd; no --resume/--continue (new session by user decision). The new pane gets a new pane session_id/generation so the UI resets that pane's screen; keep the old pane's durable record/raw logs consistent with how pane identity is recorded (ProcessRef etc.).",
+    "Bridge: the new OMP re-registers with the same role token; readiness requires the new pid; phase returns from degraded to ready when all panes are alive and both bridges connected (only if nothing else is degraded); snapshot/status reflect it; the isolation check runs again for that role and its result is shown like at start.",
+    "Never signals or restarts a live OMP, the host shell or the backend; concurrent restart requests are serialised; failure to spawn leaves the pane exited with a reason (no crash, no half state).",
+    "Add a CLI-free path only via ui_v1 (UI trigger is done by a separate worker: Enter in an exited OMP pane)."
+  ],
+  "acceptance": [
+    "red->green tests: tests/contracts/test_ui_v1.py (restart_pane parse/validation), tests/backend (ui_server dispatch with FakeController; service-level restart with the existing fake OMP used by backend tests: exited pane restarts with same argv/env/cwd, new pid registered, phase ready, isolation re-check invoked; refusals for live/host/unknown/in-progress)",
+    "update fixtures that enumerate ClientType (e.g. FakeController, extras tables) that are NOT *_independent* files; list independent tests that fail because they enumerate the contract and why (do not edit them)",
+    "run tests/backend, tests/contracts, tests/ui (pattern test_*.py, no pipe, real exit code), tests/gates/g1_vt (PYTHONPATH=src:.)",
+    "optional live check with the real OMP (no model prompt): start a backend in a temp data dir with WB start in a PTY, kill the manager OMP PID you started, request restart_pane through ui_v1, observe bridge re-registration and isolation ok; clean up everything you started"
+  ],
+  "allowed_write_paths": [
+    "src/workbench/backend/**",
+    "src/workbench/contracts/ui_v1.py",
+    "omp_bridge/**",
+    "tests/backend/**",
+    "tests/contracts/test_ui_v1.py"
+  ],
+  "prohibited_paths": [
+    "src/workbench/ui/**",
+    "tests/**/*_independent*.py",
+    "tests/ui/**",
+    "docs/**",
+    ".workflow/**"
+  ],
+  "rules": "Use /tmp/cw02-g1-venv/bin/python, short unique TMPDIR under /tmp removed afterwards; no graphify update, no commits, never pkill or pattern kills (kill only PIDs you started); the user has a live Workbench session (backend in ~/wb-urux-sandbox/.state) and live herdr/tmux servers - never touch them or their processes; never read credential stores; never edit ~/.omp ~/.agents ~/.claude ~/.codex or tmux/herdr configs; no --profile; zero residue.",
+  "result_format": "checks table first, status, changed paths + sha256, failing independent tests with reason, residue. Korean, <=20 lines."
+}

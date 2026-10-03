@@ -1,0 +1,24 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 1636,
+  "event": {
+    "id": "limit-p27restart-unit",
+    "kind": "limit",
+    "data": {
+      "authority": "C-D55 budget delegation, workflow-contract section 8; user request 2026-09-30 'skills \ud558\uae30 \uc804\uc5d0 2\uac00\uc9c0 \ubb38\uc81c (OMP resume, drag copy)'",
+      "bucket": "unit:V-CW-17-p2.7-restart",
+      "decision_owner": "Root",
+      "expected_previous": null,
+      "origin": "operating",
+      "reason": "New unit: OMP pane restart with resume (explore, senior worker, independent test, review, 2 correction reserve)",
+      "remaining_work_estimate": 6,
+      "scope_basis": {
+        "evidence_refs": [
+          ".workflow/core-workbench/runs/implement-p2.6-20260927/ur-ux/ur-ux-request.json follow_ups"
+        ],
+        "status": "known-empty"
+      },
+      "value": 6
+    }
+  }
+}

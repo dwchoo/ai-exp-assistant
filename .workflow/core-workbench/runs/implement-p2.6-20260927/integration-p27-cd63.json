@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "units": [
+    "V-CW-17-p2.7-shell-restart"
+  ],
+  "status": "integrated",
+  "recorded_at": "2026-10-01",
+  "approved_bundle_digest": "f2084a7ccc5e5a6af7ca5bde6bc19b7d64052f43504b58549e587d379d121a43",
+  "decision": "C-D63 (plan amendment p2.7e: .workflow/core-workbench/runs/planning-p2.7-20260929/approval-amendment-e.json)",
+  "integrated_candidate": "3c95f279a1377c9054a7fd6fdaefd33aadbb74fd661dd1a84bc7152999503ab8",
+  "manifest": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-cd63-integrated-checkpoint.json (milestone, full blobs)",
+  "delta_vs_verified": "graphify-out/** and Root state.json only (.workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-cd63-integrated.json)",
+  "behaviour": {
+    "backend": "restart_pane host_shell after exit (fresh persistent shell like start, owner user, control/handoff/takeover reset, manager in-flight command closed unknown); kill_pane host_shell (HUP/TERM/CONT then KILL via pinned pidfds; setsid daemons untouched; unsignallable members reported as survivors permission_denied, never raise); shared _OwnedSession pinning for OMP and shell; handler exceptions -> internal_error, server continues; exited shell not active work for shutdown",
+    "ui": "exited host shell notice + Enter restart; Ctrl-] k / Ctrl-k / ㅏ opens a modal confirmation (manager warning); only a single confirm key confirms; anything else (other keys, multi-byte chunks, paste, mouse, resize) cancels; menu row below digits (Ctrl-k in menu)"
+  },
+  "verification_chain": [
+    "p27-shell-senior-01 (Opus; live real Bash)",
+    "p27-shell-ui-worker-01",
+    "p27-shell-test-01 (Opus; adapted 5 independent tests, new p27s 37, live real OMP 18.4.5 + Bash)",
+    "p27-shell-fix-worker-01 + root-adjudication-p27-cd63-resize",
+    "p27-shell-test-02",
+    "p27-cd63-review-01 (Opus; BLOCK R1 EPERM)",
+    "p27-shell-senior-02 (R1, R4)",
+    "p27-shell-ui-worker-02 (R3) + root-adjudication-p27-cd63-r3",
+    "p27-shell-test-03 (p27t 19 tests, negative control)",
+    "p27-cd63-review-02 (integrate)"
+  ],
+  "carried_forward": {
+    "polish": [
+      "N1 handler_errors not exposed in record/snapshot",
+      "left_session does not report double-fork daemons",
+      "backend chdir to start cwd on restart (harmless)"
+    ],
+    "docs": [
+      "R2/N2 leftover SIGKILL on restart documented in ur-ux/UR-UX-GUIDE.md"
+    ],
+    "CW-16": [
+      "OMP 18.4.5 now installed (evidence mostly 18.4.4/18.2.10) - compatibility recheck"
+    ],
+    "CW-18": [
+      "C-D60 order-worker"
+    ]
+  }
+}

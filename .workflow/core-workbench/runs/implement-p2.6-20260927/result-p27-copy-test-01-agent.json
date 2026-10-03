@@ -1,0 +1,92 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-copy-test-01",
+  "role": "test_designer",
+  "unit": "V-CW-06-p2.7-copy",
+  "status": "findings",
+  "tested_tree": {
+    "src/workbench/ui/product/model.py": "5007d863683d4ffcebe81d4ef60188dcafe7661e531affc28727d5494ab53223",
+    "src/workbench/ui/product/app.py": "328b65d9fdc03086f1d9fe1651081e3338a4247ce6cf417a929e47ddab18f578",
+    "src/workbench/ui/product/view.py": "00901a32648276a475c0ebf8c5a6a8f8e77b8b0a58ee888898942cc746bcf585",
+    "note": "model.py differs from the copy worker's recorded hash because the parallel C-D62 (1) restart work also edits it"
+  },
+  "method": "expectations E1-E15 drafted from DECISIONS C-D62 (2) + worker packet before reading src; then implementation read; production code untouched",
+  "new_tests": {
+    "tests/ui/test_product_copy_independent_p27r.py": {
+      "sha256": "1796342b0910774f37fb479efeef0e1b29a7f6cd1aeef6e44dccb247477a8c52",
+      "tests": 41,
+      "result": "39 OK, 2 FAIL (kept red: F1, F2)",
+      "covers": [
+        "extraction: single-row substring, multi-row + per-row trim (also coloured trailing spaces), empty rows kept, wide chars start/end on either half incl. row boundaries, combining chars, emoji, tabs as spaces, empty selection, notice counts chars",
+        "real 1 MiB cap: exactly 1 048 576 bytes copied (text verified), +1 byte refused with notice",
+        "selection: clamped to the start pane across other panes/borders, host->manager over the divider, click-without-move = focus only (only a focus frame), moved-and-back = no copy, divider drag, wheel, X10 1000 pane (press/release forwarded, no motion), 1003+1006 pane (all forwarded), tracking turned off gives selection back",
+        "anchoring: autoscroll tick to the oldest line, scrolled-back drag while 50 new lines arrive, kept highlight follows text into history; history eviction (F1); catch-up, replaced-session replay, RIS (F2), resize, zoom, alt-screen 47/1047/1049, backend focus change, click elsewhere all end it",
+        "OSC 52: exact bytes for multi-row UTF-8, strict base64, tmux wrapper only for non-empty TMUX with all inner ESC doubled, taken once, no subprocess/fork/exec/os.write during a copy, no clipboard program named in product sources",
+        "PTY (real curses loop): highlight toggles reverse on plain, red (colour kept) and already-reverse cells and both halves of wide chars, key ends it; OSC 52 written once, not inside an escape sequence, before the terminal restore (release + prefix q in one read); SIGTERM right after a copy never writes it after restore; TMUX in the UI env adds the passthrough copy + hint"
+      ]
+    },
+    "tests/ui/live_copy_independent_p27r.py": {
+      "sha256": "17312ec5bba5a69a7e993f0a399a6b3b40ebda718c79840045bc88a93663a638",
+      "opt_in": "WB_LIVE_COPY=1",
+      "result": "4 OK (second run; the first run failed only on the probe's own residue check, see live.note)"
+    }
+  },
+  "checks": [
+    {"check": "tests/ui test_*.py run 1", "result": "627 run, 2 FAIL = F1,F2 (p27q file not yet present)"},
+    {"check": "tests/ui test_*.py run 2", "result": "639 run, 4 FAIL = F1,F2 + 2 in the parallel designer's new tests/ui/test_product_restart_independent_p27q.py (ExitedPaneEnterTests keys/queries before next state push; their C-D62 (1) scope)"},
+    {"check": "tests/ui test_*.py run 3", "result": "639 run, same 4 FAIL"},
+    {"check": "tests/contracts", "result": "45 OK"},
+    {"check": "tests/gates/g1_vt (PYTHONPATH=src:.)", "result": "85 OK"},
+    {"check": "live probe", "result": "all copy checks OK (tmux A-D, herdr)"}
+  ],
+  "findings": [
+    {
+      "id": "F1", "severity": "P3", "test": "SelectionModelTests.test_evicted_history_under_a_selection_is_never_copied_as_other_text",
+      "where": "src/workbench/ui/product/model.py:1030 (_selection_text returns {} for evicted lines) with :1001 (only a blank check) and :937 (_selection validates only the queue identity)",
+      "defect": "When scrollback trimming (1000-line OMP history) evicts the selected lines during a scrolled-back drag, release copies ~590 empty lines plus unrelated later lines ('old 0588\\nold 0589') instead of the selected 'manager_omp-row0\\nmanager_omp-row1' or nothing; the clipboard silently gets wrong text. Rare (full scrollback rolling over mid-drag) but listed in the focus.",
+      "expect": "copy the originally selected text or refuse/clear when its lines were evicted (anchor < history.pushed - len(history))"
+    },
+    {
+      "id": "F2", "severity": "P3", "test": "SelectionModelTests.test_terminal_reset_by_the_pane_app_ends_the_highlight",
+      "where": "src/workbench/ui/product/model.py:937-941 (_selection); pyte HistoryScreen.reset clears the same history deque, so the identity check never fires",
+      "defect": "RIS (ESC c) from the pane app wipes content and history, but the kept highlight stays on the blank rows ({0:(0,117),1:(0,8)}); a drag in progress would copy blanks/other text. Required: highlight ends on pane content reset.",
+      "expect": "clear the selection on RIS (e.g. when history.pushed/len shrink or on screen.reset)"
+    },
+    {
+      "id": "F3", "severity": "P3", "test": "none (text consistency)",
+      "where": "src/workbench/ui/product/model.py:1512 (default footer), :846 (prefix m notice), :99 (help prefix m line)",
+      "defect": "With capture on, footer/notice/help still say '선택은 Shift+드래그' only; plain drag now selects+copies (the new help line at HELP_LINES says so). Mildly misleading, no behaviour issue."
+    }
+  ],
+  "not_defects_observed": [
+    "empty rows inside/at the end of a selection become empty lines (xterm-like)",
+    "a selection of exactly one cell is impossible (press+release in the same cell = focus click), by design",
+    "already-reverse cells are shown non-reverse when selected (XOR), visibly distinct"
+  ],
+  "flake_report": {
+    "runs": 3,
+    "intermittent_failures": [],
+    "summary": "Identical deterministic failure set in all runs (F1,F2 + the parallel designer's red p27q tests once that file existed); the copy worker's one-off unidentified failure did not reproduce in 3 sequential full runs (~190 s each, no pipe, no other load of mine running)."
+  },
+  "live": {
+    "tmux": {
+      "setup": "tmux 3.4, tmux -L wbp27r-<hex> -f <own conf>, TMUX_TMPDIR in scratch root; real entrypoint start --no-attach + attach inside tmux; real OMP 18.4.4 in manager/worker with scratch HOME + PI_CODING_AGENT_DIR (local 503 counting provider), no prompt typed, provider requests = 0; omp_isolation ok",
+      "A_set_clipboard_on": "show-buffer == 'CLIPON-<hex> 한글 end' (exact); footer '복사됨: 20자 (tmux는 set-clipboard on 또는 allow-passthrough on 필요)'; tmux also forwarded OSC 52 to its client",
+      "B_external_plus_passthrough_on": "OSC 52 with exact payload (BEL form) on the tmux client stream; tmux buffer stays empty",
+      "C_both_off": "no OSC 52 on client, empty buffer; footer notice names both options",
+      "D_real_OMP_pane": "drag over 11 cells of OMP's own start screen text in the manager pane -> show-buffer equals exactly the shown cells",
+      "server": "kill-server on own socket; pid+start ticks gone"
+    },
+    "herdr": {
+      "setup": "herdr 0.9.2 own server: HOME, XDG_CONFIG/STATE/DATA/CACHE/RUNTIME, HERDR_SOCKET_PATH, HERDR_CONFIG_PATH under scratch; 'herdr status server' confirmed 'not running' + our socket before launch; no DISPLAY/WAYLAND/DBUS passed (desktop clipboard unreachable); UI against scripted ui_v1 fixture",
+      "result": "OSC 52 payload 'HERDR-COPY 한글 end' reached the herdr client stream; footer '복사됨: 17자' without tmux hint; no input sent to panes; herdr server stop OK"
+    },
+    "note": "first live run: every copy check OK, but the probe's own residue check read LiveBackend.cleanup() immediately after shutdown and saw the backend still exiting (it was gone moments later, temp root removed). Probe fixed to stop_and_verify (wait) first; the rerun was fully green with residue {}."
+  },
+  "residue": {
+    "processes": "none (owned_processes on scratch roots empty; backend/OMP/host identities gone; tmux and herdr servers stopped by their own commands)",
+    "files": "scratch TMPDIRs /tmp/wbp27r, /tmp/wbp27r-u1..3, /tmp/wbp27r-c, /tmp/wbp27rl and LiveBackend /tmp/cw17-* roots removed; my .pyc removed",
+    "user_state": "user's tmux/herdr servers, configs, ~/wb-urux-sandbox, ~/.omp etc. not touched; no commits, no graphify update"
+  },
+  "observed_model": "opus"
+}

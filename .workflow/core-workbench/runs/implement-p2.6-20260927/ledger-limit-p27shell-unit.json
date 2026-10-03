@@ -1,0 +1,24 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 1675,
+  "event": {
+    "id": "limit-p27shell-unit",
+    "kind": "limit",
+    "data": {
+      "authority": "Approved PLAN p2.7e (.workflow/core-workbench/runs/planning-p2.7-20260929/approval-amendment-e.json, bundle f2084a7c...), C-D63, C-D55 budget delegation, workflow-contract section 8",
+      "bucket": "unit:V-CW-17-p2.7-shell-restart",
+      "decision_owner": "Root",
+      "expected_previous": null,
+      "origin": "operating",
+      "reason": "New unit: host shell restart + confirmed force-kill (senior, UI worker, independent test, review, 2 correction reserve)",
+      "remaining_work_estimate": 6,
+      "scope_basis": {
+        "evidence_refs": [
+          "docs/features/core-workbench/DECISIONS.md#C-D63"
+        ],
+        "status": "known-empty"
+      },
+      "value": 6
+    }
+  }
+}

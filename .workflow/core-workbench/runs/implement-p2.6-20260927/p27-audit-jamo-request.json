@@ -1,0 +1,1 @@
+{"before": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-jamo-base.json", "after": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-jamo-after.json", "allowed": ["src/workbench/ui/product/**", "tests/ui/test_product_model.py", "tests/ui/test_product_pty.py"]}

@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-jamo-worker-03",
+  "ticket_id": "CW-06 (Ctrl-d guard correction)",
+  "role": "worker",
+  "unit": "V-CW-06-p2.7-jamo",
+  "approved_bundle_digest": "91fe05dc882d8c00ab0eb28c30e2b6cabcbfacb0f0fee3f0eaeecfaff5b7d3e8",
+  "routing": {
+    "planned_role": "worker",
+    "selected_role": "worker (wb-worker, Sonnet high)",
+    "reason_codes": [
+      "bounded_pattern"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-jamo-test-01-agent.json P3-1, P3-2"
+    ]
+  },
+  "base_candidate": "129d056c72dd219de38858a6ce3ce60ce4318b5d40dc81773728f1c5e4f335d9",
+  "required_behavior": [
+    "P3-1: in ProductModel._send_input (model.py ~636-662) treat ESC immediately followed by 0x04 (Alt+Ctrl-d) as ONE key for the OMP Ctrl-d confirmation: the first press holds the whole key (no lone ESC is sent), a second Ctrl-d form (plain or Alt) to the same pane within the window delivers the key that was pressed second, whole. Plain Ctrl-d behaviour unchanged. Make tests/ui/test_product_jamo_detach_independent_p27p.py::test_alt_ctrl_d_is_one_key_never_split_into_a_lone_esc green without editing it.",
+    "P3-2: make the Ctrl-d confirmation help line visible on small terminals by moving it up next to the detach/Hangul lines in HELP_LINES (keep the total line count, wording may shorten)."
+  ],
+  "acceptance": [
+    "own red->green test in tests/ui/test_product_model.py for Alt+Ctrl-d",
+    "all tests/ui test_*.py (run discover without a pipe, real exit code), tests/contracts, tests/gates/g1_vt (PYTHONPATH=src:.) pass"
+  ],
+  "allowed_write_paths": [
+    "src/workbench/ui/product/**",
+    "tests/ui/test_product_model.py"
+  ],
+  "prohibited_paths": [
+    "tests/**/*_independent*.py",
+    "tests/ui/live_*.py",
+    "src/workbench/backend/**",
+    "docs/**",
+    ".workflow/**",
+    "~/wb-urux-sandbox/**"
+  ],
+  "rules": "Use /tmp/cw02-g1-venv/bin/python, short unique TMPDIR under /tmp removed afterwards; no graphify update, no commits, never pkill or pattern kills; never touch ~/wb-urux-sandbox or the user's Workbench processes; zero residue.",
+  "result_format": "checks table first, status, changed paths + sha256, residue. Korean, <=12 lines."
+}

@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-jamo-test-01",
+  "status": "complete",
+  "agent_result": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-jamo-test-01-agent.json",
+  "candidate": "129d056c72dd219de38858a6ce3ce60ce4318b5d40dc81773728f1c5e4f335d9",
+  "audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-jamo-test.json",
+  "checks": {
+    "tests/ui": "542 OK exit 0 (before adding the Alt+Ctrl-d red test); new p27p file 43 tests, 1 intended red (2 subtests)",
+    "tests/contracts": "43 OK",
+    "tests/gates/g1_vt": "85 OK",
+    "live_ime p27o (tmux only)": "30 checks ok, left_after=[]"
+  },
+  "findings": {
+    "P3-1": "model.py:636-662 Alt+Ctrl-d (ESC 0x04) split: lone ESC reaches OMP, 0x04 held; key unreachable (red test p27p test_alt_ctrl_d_is_one_key_never_split_into_a_lone_esc)",
+    "P3-2": "HELP_LINES 30 lines, Ctrl-d line last: cut off below 34 rows",
+    "P3-3": "CSI-u/modifyOtherKeys Ctrl-d bypasses guard (UI never enables those modes; observation, outside C-D61)"
+  },
+  "observed_model": "opus"
+}

@@ -1,0 +1,23 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 1646,
+  "event": {
+    "id": "limit-p27restart-role-review",
+    "kind": "limit",
+    "data": {
+      "authority": "Approved PLAN p2.7d (.workflow/core-workbench/runs/planning-p2.7-20260929/approval-amendment-d.json, bundle c28a63fd...), C-D62, C-D55 budget delegation, workflow-contract section 8",
+      "bucket": "role:reviewer",
+      "decision_owner": "Root",
+      "expected_previous": {
+        "authority": "Approved PLAN p2.7c (bundle 91fe05dc...), C-D57 feedback routing, user request 2026-09-30 '\ud55c\uae00 \uc785\ub825 \ubc29\uc2dd \uadf8\ub300\ub85c \uc9c4\ud589', C-D55 budget delegation, workflow-contract section 8",
+        "reason": "IME delta review + reserve",
+        "value": 129
+      },
+      "origin": "operating",
+      "reason": "C-D62 restart + copy reviews + reserve",
+      "remaining_work_estimate": 4,
+      "scope_basis": null,
+      "value": 131
+    }
+  }
+}

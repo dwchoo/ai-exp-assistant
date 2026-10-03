@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-shell-test-02",
+  "status": "complete",
+  "agent_result": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-shell-test-02-agent.json",
+  "candidate": "959ea1a4c80c660a2923b5be47ac3c546b3fb8349743ab92336172ed85cb0394",
+  "checks": {
+    "tests/ui": "687 OK",
+    "tests/backend": "214 OK (27 skip)",
+    "tests/contracts": "48 OK",
+    "g1_vt": "85 OK",
+    "live WB_LIVE_SHELL": "1 OK, residue []"
+  },
+  "change": "p27s resize test: resizes close the confirmation, no kill_pane/pane frame; following Esc is ordinary input to the focused pane, no kill_pane",
+  "observed_model": "sonnet"
+}

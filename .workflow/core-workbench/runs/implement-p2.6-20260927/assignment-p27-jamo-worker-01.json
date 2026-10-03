@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-jamo-worker-01",
+  "ticket_id": "CW-06 (Hangul jamo auto-conversion after prefix)",
+  "role": "worker",
+  "unit": "V-CW-06-p2.7-jamo",
+  "approved_bundle_digest": "91fe05dc882d8c00ab0eb28c30e2b6cabcbfacb0f0fee3f0eaeecfaff5b7d3e8",
+  "routing": {
+    "planned_role": "worker",
+    "selected_role": "worker (wb-worker, Sonnet high)",
+    "reason_codes": [
+      "bounded_pattern"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/ur-ux/ur-ux-request.json follow_ups (2026-09-30 '자모 자동 변환 + Space')"
+    ]
+  },
+  "base_candidate": "727eb4b74a72ef06381c44075767d89ba7dd7accb793a424f984fe00817c74b7",
+  "checkpoint_ref": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-jamo-pre/"
+  ],
+  "background": "User on Mac (cmux over SSH, Korean 2-set IME) pressed Ctrl-] then ㅇ expecting detach (d). The Mac IME holds a lone jamo in preedit and sends it only on commit (usually the user then presses Space or Enter, so the bytes arrive as 'ㅇ ' or 'ㅇ\\r', possibly split across reads and possibly seconds after the prefix). User decision: convert the jamo automatically to its 2-set QWERTY key; commit with Space.",
+  "required_behavior": [
+    "Standard 2-set (dubeolsik) table, compatibility jamo -> key: ㅂq ㅈw ㄷe ㄱr ㅅt ㅛy ㅕu ㅑi ㅐo ㅔp ㅁa ㄴs ㅇd ㄹf ㅎg ㅗh ㅓj ㅏk ㅣl ㅋz ㅌx ㅊc ㅍv ㅠb ㅜn ㅡm ㅃQ ㅉW ㄸE ㄲR ㅆT ㅒO ㅖP. Keep it as one module-level table in src/workbench/ui/product/input.py (or model.py) with a short comment.",
+    "Prefix command context: when the key after the prefix is exactly ONE mapped compatibility jamo (the whole non-ASCII run is that single character, UTF-8 possibly split across reads), run the command of the mapped ASCII key exactly as if that key had been typed (e.g. ㅇ->d detach, ㅋ->z zoom, ㅅ->t, ㅊ->c, ㅗ->h, ㄱ->r, ㅡ->m; unmapped results behave like any unknown command key). The single IME commit key right after it (Space, CR/LF, Tab, C0 per the existing rule) is still swallowed, so 'ㅇ ' detaches and the Space opens no menu and reaches no pane.",
+    "The prefix state must stay armed until the jamo arrives however long it takes (the IME may hold it for seconds); verify there is no timeout that drops it.",
+    "Scroll mode (prefix [): the same conversion applies to its letter keys (ㅓ->j, ㅏ->k, ㅎ->g, shift has no jamo for G so only g, ㅂ->q), with the following commit key swallowed.",
+    "Unchanged: Hangul syllables or multi-character runs after the prefix keep the hint + swallow; Hangul while the command menu is open is swallowed; Hangul without the prefix reaches the pane unchanged; Ctrl aliases, prefix Space menu, pastes and mouse unchanged.",
+    "Hint/help text: update HANGUL_HINT and the help overlay line so they state the new usage briefly in Korean, e.g. '한글 입력 상태: Ctrl-] 뒤 자모 + Space (예: ㅇ Space = d), Ctrl 조합(Ctrl-] Ctrl-d), Ctrl-] Space 메뉴'. Keep within existing width handling."
+  ],
+  "acceptance": [
+    "red->green tests in tests/ui/test_product_model.py: prefix+ㅇ+Space / +CR / split UTF-8 / arriving 5 s later -> detach (quit) with nothing forwarded; prefix+ㅋ -> zoom; prefix+ㅆ (T) behaves like T; scroll mode ㅓ/ㅏ/ㅂ; prefix+'안' still hint only; Hangul without prefix unchanged",
+    "update your own tests in tests/ui/test_product_model.py and tests/ui/test_product_pty.py that asserted the old 'jamo after prefix is never a command' behaviour; add one PTY test: real loop, prefix + 'ㅇ ' detaches with exit 0",
+    "tests/ui/test_product_ime_independent_p27o.py encodes the superseded rule (e.g. test_single_hangul_key_after_the_prefix_is_hinted_never_forwarded_never_guessed): do NOT edit it; report exactly which of its tests now fail and why. All other tests/ui test_*.py, tests/contracts and tests/gates/g1_vt (PYTHONPATH=src:.) must pass."
+  ],
+  "allowed_write_paths": [
+    "src/workbench/ui/product/**",
+    "tests/ui/test_product_model.py",
+    "tests/ui/test_product_pty.py"
+  ],
+  "prohibited_paths": [
+    "tests/**/*_independent*.py",
+    "tests/ui/live_*.py",
+    "src/workbench/backend/**",
+    "docs/**",
+    ".workflow/**",
+    "~/wb-urux-sandbox/**"
+  ],
+  "rules": "Use /tmp/cw02-g1-venv/bin/python, short unique TMPDIR under /tmp removed afterwards; no graphify update, no commits, never pkill or pattern kills; the user has a live Workbench session (backend in ~/wb-urux-sandbox/.state) - never touch it or its processes; zero residue.",
+  "result_format": "checks table first, status, changed paths + sha256, failing independent tests list, residue. Korean, concise (<=20 lines)."
+}

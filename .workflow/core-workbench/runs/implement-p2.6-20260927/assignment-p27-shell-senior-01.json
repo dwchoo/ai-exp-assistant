@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-shell-senior-01",
+  "ticket_id": "CW-17 (C-D63 host shell restart + confirmed force-kill)",
+  "role": "worker_senior",
+  "unit": "V-CW-17-p2.7-shell-restart",
+  "approved_bundle_digest": "f2084a7ccc5e5a6af7ca5bde6bc19b7d64052f43504b58549e587d379d121a43",
+  "routing": {
+    "planned_role": "worker_senior",
+    "selected_role": "worker_senior (Opus general-purpose)",
+    "reason_codes": [
+      "process_lifetime",
+      "shell_control_state",
+      "handoff_owner_state"
+    ],
+    "evidence_refs": []
+  },
+  "base_candidate": "ad990949912134126215438d99f2edad74fc84cd77d38fe16414a072e271e14b",
+  "checkpoint_ref": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-cd63-pre/"
+  ],
+  "criteria": [
+    "docs/features/core-workbench/DECISIONS.md#C-D63",
+    "docs/features/core-workbench/tickets/CW-17.md 'Host shell 재시작·강제 종료'",
+    "existing OMP restart pattern (C-D62): Backend.restart_pane / _respawn in src/workbench/backend/service.py, ui_v1 RESTART_PANE and reasons, state push after ok in ui_server.py"
+  ],
+  "required_behavior": [
+    "First read how the backend owns the host shell (PersistentShell, shell selection Bash->sh, rcfile/hooks incl. wb-handoff, cwd, PTY, pidfd/session pinning from the P2-2 design, input owner user/manager, control modes, held handoff, takeover state, manager in-flight shell commands, records) and how its exit is detected today.",
+    "Restart: extend restart_pane to host_shell. Accept only when the host shell has exited (reaped). Start a new persistent shell exactly like at backend start (same shell selection, rcfile/hooks, env, cwd = the start cwd), new pane session_id/generation, input owner = user, control mode/handoff/takeover state reset to the fresh-start state, any manager in-flight shell command or pending result is closed as failed/unknown (never success) with a reason, phase recomputed (ready when everything else is healthy), state pushed to UIs, restart history recorded. Same refusals as OMP restart (pane_alive, restart_in_progress, restart_failed).",
+    "Force-kill: new ui_v1 client request kill_pane with pane field; only host_shell is accepted (OMP panes refused with a reason; OMP exit stays via the OMP itself). The UI performs the two-step confirmation; the backend executes immediately on the request. Terminate the host shell and every process in its session/process groups/jobs (escalate SIGHUP/SIGTERM -> SIGKILL with a bounded wait, using the pinned identities so no recycled PID is signalled); processes that setsid'd away are not targeted. Allowed whatever the input owner is; the result reports whether the manager owned the shell and whether a manager command was in flight. Afterwards the pane is exited (UI then offers Enter restart). Never touch OMP panes or the backend. Refuse during shutdown.",
+    "Snapshot exposes for host_shell: alive, exit_status, and enough to let the UI warn (input owner, manager command in flight)."
+  ],
+  "acceptance": [
+    "red->green tests: tests/contracts/test_ui_v1.py (kill_pane parse; restart_pane host_shell), tests/backend (ui_server dispatch, service-level kill and restart with the real PersistentShell in a temp dir: child jobs and background jobs die, a setsid daemon survives and is reported/left, owner/mode reset, manager in-flight command closed not-success, refusals, concurrent requests, repeated kill/restart cycles without fd/process leaks)",
+    "list *_independent* tests that fail because they enumerate the contract or assume the old host-shell rules (do not edit them)",
+    "run tests/backend, tests/contracts, tests/ui (pattern test_*.py, no pipe, real exit code), tests/gates (g1_vt with PYTHONPATH=src:.)",
+    "live: backend in a temp data dir with the real shell (no model prompt), run a long job and a background job in the host shell, kill_pane via ui_v1, verify they are gone, restart_pane host_shell, verify a fresh prompt, wb-handoff available, owner user; clean up everything you started"
+  ],
+  "allowed_write_paths": [
+    "src/workbench/backend/**",
+    "src/workbench/contracts/ui_v1.py",
+    "tests/backend/**",
+    "tests/contracts/test_ui_v1.py"
+  ],
+  "prohibited_paths": [
+    "src/workbench/ui/**",
+    "tests/**/*_independent*.py",
+    "tests/ui/**",
+    "docs/**",
+    ".workflow/**"
+  ],
+  "rules": "Use /tmp/cw02-g1-venv/bin/python, short unique TMPDIR under /tmp removed afterwards; no graphify update, no commits; never pkill or pattern kills (only PIDs you started); the user has a live Workbench session (backend in ~/wb-urux-sandbox/.state) and live herdr/tmux servers - never touch them; never read credential stores; never edit ~/.omp ~/.agents ~/.claude ~/.codex or shell/tmux/herdr configs; no --profile; no model prompts; zero residue.",
+  "result_format": "checks table first, status, changed paths + sha256, contract summary for the UI worker (request/field/reasons/snapshot fields), failing independent tests with reason, residue. Korean, <=25 lines."
+}

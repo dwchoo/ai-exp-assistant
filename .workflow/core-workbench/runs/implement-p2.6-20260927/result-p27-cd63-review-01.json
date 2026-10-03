@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cd63-review-01",
+  "verdict": "block",
+  "frozen_candidate": "959ea1a4c80c660a2923b5be47ac3c546b3fb8349743ab92336172ed85cb0394",
+  "agent_result": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd63-review-01-agent.json",
+  "findings": {
+    "R1 P1": "panes.py:642 _signal_pins and :199 _kill_owned_session catch only ProcessLookupError; an unsignallable session member (sudo/su/pkexec running as root in the shell session) raises PermissionError (EPERM) through kill_pane (service.py:672) and UiServer._handle (:300) into run() 'backend failure' -> whole backend and both OMPs stop; restart of an exited shell with such a pinned member repeats restart_failed",
+    "R2 P3": "service.py:622 restarting an exited shell SIGKILLs leftovers of the old session (nohup jobs); not in user guidance",
+    "R3 P3": "model.py:904 a multi-byte Passthrough whose first byte is k (unbracketed paste, auto-repeat) confirms the kill",
+    "R4 P3": "service.py:496 after kill, before restart, shutdown_request lists the dead shell's shell_request as active work"
+  },
+  "checks": {
+    "tests/backend": "214 OK",
+    "contracts": "48",
+    "ui": "687",
+    "g1_vt": "85",
+    "live": "1 OK"
+  },
+  "observed_model": "opus"
+}

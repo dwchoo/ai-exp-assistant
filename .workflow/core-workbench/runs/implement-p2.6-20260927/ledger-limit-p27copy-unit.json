@@ -1,0 +1,24 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 1642,
+  "event": {
+    "id": "limit-p27copy-unit",
+    "kind": "limit",
+    "data": {
+      "authority": "Approved PLAN p2.7d (.workflow/core-workbench/runs/planning-p2.7-20260929/approval-amendment-d.json, bundle c28a63fd...), C-D62, C-D55 budget delegation, workflow-contract section 8",
+      "bucket": "unit:V-CW-06-p2.7-copy",
+      "decision_owner": "Root",
+      "expected_previous": null,
+      "origin": "operating",
+      "reason": "New unit: in-pane drag selection + OSC 52 copy (worker, independent test, review, 2 correction reserve)",
+      "remaining_work_estimate": 5,
+      "scope_basis": {
+        "evidence_refs": [
+          "docs/features/core-workbench/DECISIONS.md#C-D62"
+        ],
+        "status": "known-empty"
+      },
+      "value": 5
+    }
+  }
+}

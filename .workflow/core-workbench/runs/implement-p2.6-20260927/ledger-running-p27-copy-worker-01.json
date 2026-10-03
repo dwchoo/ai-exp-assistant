@@ -1,0 +1,17 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 1652,
+  "event": {
+    "id": "running-p27-copy-worker-01",
+    "kind": "transition",
+    "data": {
+      "evidence": "host: Claude Code Agent spawn requested (name copy-worker, wb-worker sonnet), 2026-09-30",
+      "invocation": "p27-copy-worker-01",
+      "not_started_evidence": null,
+      "observed_effort": "unverified",
+      "observed_model": "unverified",
+      "outcome": null,
+      "state": "running"
+    }
+  }
+}

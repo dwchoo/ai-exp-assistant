@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "units": [
+    "V-CW-17-p2.7-restart",
+    "V-CW-06-p2.7-copy"
+  ],
+  "status": "integrated",
+  "recorded_at": "2026-10-01",
+  "approved_bundle_digest": "c28a63fd7f96d92fb481ec7df46290c23943622a8d4ab8237c6fe6c6e247a396",
+  "decision": "C-D62 (plan amendment p2.7d: .workflow/core-workbench/runs/planning-p2.7-20260929/approval-amendment-d.json)",
+  "integrated_candidate": "89f2c493771f2c3c40ce473cfb66c629b4cc30abdeb147ab64ac00de6fb91fda",
+  "manifest": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-cd62-integrated-checkpoint.json (milestone, full blobs)",
+  "delta_vs_verified": "graphify-out/** and Root state.json only (.workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-cd62-integrated.json)",
+  "behaviour": {
+    "backend": "ui_v1 restart_pane (pane; refusals pane_alive, pane_not_restartable, restart_in_progress, restart_failed); only a reaped OMP pane; new OMP with the start-time argv/env/token/cwd/overlay (no --resume); old pane PTY and leftover session members closed; generation+1, new session id; bridge re-registration; degraded->ready; isolation re-check per role; restart history in backend.json; state pushed to UIs after ok",
+    "ui": "exited OMP pane keeps last screen with notice + title; Enter sends one restart; other input/paste blocked; revived on state push or new-generation output; drag inside a pane selects (one pane, scrollback-anchored, autoscroll, reverse highlight) and copies via OSC 52 (+ tmux passthrough wrapper when TMUX); 1 MiB cap; mouse-tracking panes keep their mouse; help/footer '드래그: 복사'"
+  },
+  "verification_chain": [
+    "p27-restart-copy-explore-01",
+    "p27-restart-senior-01 (Opus; live real OMP restart)",
+    "p27-copy-worker-01 (live isolated tmux)",
+    "p27-restart-ui-worker-01",
+    "p27-restart-test-01 (Opus; p27q + live Enter restart on real OMP)",
+    "p27-copy-test-01 (Opus; p27r + live isolated tmux and isolated herdr)",
+    "p27-cd62-fix-worker-01 (restart F1, copy F1-F3)",
+    "Root live rerun (check-p27-cd62-root-live.log)",
+    "p27-cd62-review-01 (Opus fresh; integrate)"
+  ],
+  "carried_forward": {
+    "polish": [
+      "R1 isolation check exception leaves stale per-role result",
+      "R2 'pending' summary hides the other role's leak warning during a recheck",
+      "R3 Enter-restart SIGKILLs leftovers of the old OMP session and blocks the UI loop up to ~2 s (intended; documented in UR-UX guide)",
+      "copy gaps: X10 motion reports; wide-char trailing-cell start",
+      "earlier jamo/IME P3s (integration-p27-jamo.json, integration-p27-ime.json)"
+    ],
+    "docs": [
+      "R4 tmux clipboard requirement documented in ur-ux/UR-UX-GUIDE.md"
+    ],
+    "CW-18": [
+      "C-D60 order-worker"
+    ],
+    "CW-19": [
+      "C-D61 (3) host terminal force restart"
+    ]
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-shell-fix-worker-01",
+  "ticket_id": "CW-06 (C-D63 correction F1)",
+  "role": "worker",
+  "unit": "V-CW-17-p2.7-shell-restart",
+  "approved_bundle_digest": "f2084a7ccc5e5a6af7ca5bde6bc19b7d64052f43504b58549e587d379d121a43",
+  "routing": {
+    "planned_role": "worker",
+    "selected_role": "worker (wb-worker, Sonnet high)",
+    "reason_codes": [
+      "bounded_pattern"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-shell-test-01-agent.json F1"
+    ]
+  },
+  "base_candidate": "1fb35c1b8476a4dc43fd7555de4927a6e7d70fa8ca552dda1a0e645545cca2a0",
+  "required_behavior": [
+    "A terminal resize while the host-shell kill confirmation is open cancels (closes) it, like any other non-confirm input; nothing is killed or forwarded. Make tests/ui/test_product_shell_kill_independent_p27s.py:169 green without editing it."
+  ],
+  "acceptance": [
+    "own red->green test in tests/ui/test_product_model.py",
+    "all tests/ui test_*.py (no pipe, real exit), tests/backend, tests/contracts, tests/gates/g1_vt pass"
+  ],
+  "allowed_write_paths": [
+    "src/workbench/ui/product/**",
+    "tests/ui/test_product_model.py"
+  ],
+  "prohibited_paths": [
+    "src/workbench/backend/**",
+    "src/workbench/contracts/**",
+    "tests/**/*_independent*.py",
+    "tests/ui/live_*.py",
+    "docs/**",
+    ".workflow/**"
+  ],
+  "rules": "Use /tmp/cw02-g1-venv/bin/python, short unique TMPDIR removed afterwards; no graphify update, no commits, never pkill or pattern kills; never touch ~/wb-urux-sandbox or the user's Workbench/herdr/tmux processes or configs; zero residue.",
+  "result_format": "checks table first, status, changed paths + sha256, residue. Korean, <=10 lines."
+}

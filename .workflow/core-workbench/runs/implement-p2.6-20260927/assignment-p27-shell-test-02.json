@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-shell-test-02",
+  "ticket_id": "CW-06 (C-D63 resize adjudication test correction)",
+  "role": "test_designer",
+  "unit": "V-CW-17-p2.7-shell-restart",
+  "approved_bundle_digest": "f2084a7ccc5e5a6af7ca5bde6bc19b7d64052f43504b58549e587d379d121a43",
+  "routing": {
+    "planned_role": "test_designer",
+    "selected_role": "test_designer (wb-test-rerun, Sonnet high)",
+    "reason_codes": [
+      "rerun_defined_by_adjudication"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/root-adjudication-p27-cd63-resize.json"
+    ]
+  },
+  "frozen_candidate": "f13d7618833aba2b248d92c2cadc8c516c095af5fdefb5acb301cadd5a4875b9",
+  "task": [
+    "Correct tests/ui/test_product_shell_kill_independent_p27s.py test_a_resize_never_confirms_and_nothing_reaches_a_pane per the Root adjudication: keep asserting that the resizes never send kill_pane and send nothing to a pane; after the confirmation is closed by the resize, an Esc is ordinary input (assert it goes to the focused pane, still no kill_pane). Do not change any other test.",
+    "Run tests/ui (pattern test_*.py, no pipe, real exit code), tests/backend, tests/contracts, tests/gates/g1_vt (PYTHONPATH=src:.), and the live probe WB_LIVE_SHELL=1 tests.ui.live_shell_kill_independent_p27s once."
+  ],
+  "allowed_write_paths": [
+    "tests/ui/test_product_shell_kill_independent_p27s.py",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-shell-test-02-agent.json"
+  ],
+  "rules": "Never modify production code. /tmp/cw02-g1-venv/bin/python, PYTHONPATH=src, short unique TMPDIR removed afterwards; no model prompts; never pkill or pattern kills; never touch ~/wb-urux-sandbox or the user's Workbench/herdr/tmux processes or configs; no commits, no graphify update; zero residue.",
+  "result_format": "Write the result JSON (checks table, diff summary, residue). Reply in Korean, <=10 lines."
+}

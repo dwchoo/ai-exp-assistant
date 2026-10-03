@@ -1,0 +1,24 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 1667,
+  "event": {
+    "id": "reserve-p27-cd62-fix-worker-01",
+    "kind": "reserve",
+    "data": {
+      "buckets": [
+        "total",
+        "role:worker",
+        "unit:V-CW-06-p2.7-copy"
+      ],
+      "effort": "high",
+      "incident": "",
+      "invocation": "p27-cd62-fix-worker-01",
+      "model": "claude-sonnet-5-5",
+      "purpose": "C-D62 corrections: copy F1-F3 + restart F1 (restart unit correction charged here; one invocation)",
+      "role": "worker",
+      "unit": "V-CW-06-p2.7-copy",
+      "workspace": "/home/dwchoo/ai-exp-assistant",
+      "writer": true
+    }
+  }
+}

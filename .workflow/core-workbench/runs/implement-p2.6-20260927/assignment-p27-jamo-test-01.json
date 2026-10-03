@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-jamo-test-01",
+  "ticket_id": "CW-06 (jamo conversion, detach q, Ctrl-d confirmation)",
+  "role": "test_designer",
+  "unit": "V-CW-06-p2.7-jamo",
+  "approved_bundle_digest": "91fe05dc882d8c00ab0eb28c30e2b6cabcbfacb0f0fee3f0eaeecfaff5b7d3e8",
+  "routing": {
+    "planned_role": "test_designer",
+    "selected_role": "test_designer (Opus general-purpose)",
+    "reason_codes": [
+      "first_independent_verification_of_new_behaviour"
+    ],
+    "evidence_refs": [
+      "docs/features/core-workbench/DECISIONS.md#C-D61",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/ur-ux/ur-ux-request.json follow_ups"
+    ]
+  },
+  "frozen_candidate": "59cab4d5c9a1fbc8819943e566e2e040f1057ec0f04b5a37f10ed480609d8f24",
+  "criteria_sources": [
+    "docs/features/core-workbench/DECISIONS.md C-D61 (1)",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/ur-ux/ur-ux-request.json follow_ups dated 2026-09-30 ('자모 자동 변환 + Space', detach q + 확인)",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/assignment-p27-jamo-worker-01.json required_behavior",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/assignment-p27-jamo-worker-02.json required_behavior"
+  ],
+  "task": [
+    "1. Adapt existing tests that encode superseded rules, WITHOUT weakening what they protect: detach is now prefix q / Ctrl-q (0x11) / menu 0 / ㅂ Space (old prefix d / Ctrl-d / ㅇ Space: nothing sent + notice); a single Hangul compatibility jamo after the prefix is now converted to its 2-set key (syllables/multi-char still hint + swallow); a raw Ctrl-d to manager_omp/worker_omp needs a second Ctrl-d within 2 s (host_shell immediate). Files currently failing (see .workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-jamo-worker-02.json): tests/ui/test_product_ime_independent_p27o.py, test_product_resize_independent_p27l.py, test_product_pty_independent.py, test_product_mux_independent_p27n.py, test_product_keys_independent.py, test_product_direct_scroll_independent_p27k.py, test_product_layout_scroll_independent_p27j.py, tests/ui/test_product_entrypoint.py (lines ~89, ~97), plus any tests/ui/live_*.py that detach with d or send Ctrl-d to an OMP pane expecting delivery. For each adapted assertion, keep an equivalent check of the original invariant (e.g. 'every original key reaches every pane unchanged' becomes: unchanged for all keys except the documented Ctrl-d confirmation on OMP panes, which is delivered after the confirmation).",
+    "2. Write a NEW independent adversarial test file tests/ui/test_product_jamo_detach_independent_p27p.py from the criteria (read the implementation only after drafting expectations): all 33 jamo mappings after the prefix incl. shifted ones, jamo arriving seconds later and UTF-8 split byte-by-byte, commit key Space/CR/LF/Tab swallowed exactly once, jamo in scroll mode, syllable/multi-char/unmapped cases, Hangul without prefix unchanged; detach forms and old forms; Ctrl-d guard: single, double within window, timeout at the boundary, cancel by other key/focus change/paste/menu/help/scroll/mouse click on another pane, same-read bytes around 0x04, host_shell immediate, Ctrl-d inside paste, Ctrl-d after prefix (old detach alias -> notice), guard never loses or duplicates other keys, notices visible in footer. Include at least one real-loop PTY test with a fake OMP proving the first Ctrl-d never reaches the OMP and the second does.",
+    "3. Run: tests/ui (pattern test_*.py, no pipe; report the real exit code), tests/contracts, tests/gates/g1_vt (PYTHONPATH=src:.). Optional live probes only if they need no model call and no sandbox: WB_LIVE_IME=1 tests.ui.live_ime_independent_p27o after adaptation."
+  ],
+  "allowed_write_paths": [
+    "tests/ui/*_independent*.py",
+    "tests/ui/live_*.py",
+    "tests/ui/test_product_entrypoint.py",
+    "tests/ui/independent_support_cw06.py",
+    "tests/ui/support.py",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-jamo-test-01-agent.json"
+  ],
+  "prohibited_paths": [
+    "src/**",
+    "tests/ui/test_product_model.py",
+    "tests/ui/test_product_pty.py",
+    "docs/**",
+    "~/wb-urux-sandbox/**"
+  ],
+  "rules": "Do not change production code; if a test reveals a defect, keep the test red and report it as a finding (P0..P3 with file:line). Use /tmp/cw02-g1-venv/bin/python, PYTHONPATH=src, short unique TMPDIR under /tmp removed afterwards; no live model calls; never pkill or pattern kills; the user has a live Workbench session in ~/wb-urux-sandbox/.state - never touch it or its processes; no commits, no graphify update; zero residue.",
+  "result_format": "Write .workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-jamo-test-01-agent.json with: checks table, adapted files with what changed and why, new tests list, findings P0..P3, residue. Reply in Korean, <=20 lines."
+}

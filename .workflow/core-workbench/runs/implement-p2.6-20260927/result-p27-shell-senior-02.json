@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-shell-senior-02",
+  "status": "done",
+  "candidate_with_ui2": "5d0ece140d5c63c9df41b4c2c0058bb99aa8de69e8322848d955ff2dbbca26d3",
+  "audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-cd63-corr.json",
+  "checks": {
+    "red": "8 new tests fail/error before",
+    "green": "8 OK x3",
+    "tests/backend": "223 OK (27 skip)",
+    "tests/contracts": "48 OK",
+    "tests/ui": "689: 1 FAIL p27s:115 (R3 adjudication pending test correction)",
+    "g1_vt": "85 OK",
+    "live WB_LIVE_SHELL": "1 OK, residue []"
+  },
+  "design": "all signals via _send; EPERM/OSError member skipped, pin kept, reason recorded, never raise; survivors [{pid, reason: permission_denied|did_not_exit}]; no waiting on unsignallable members; OmpPane killpg EPERM -> pidfd KILL; close() returns survivors; kill_pane OSError -> KILL_FAILED; restarts report old survivors and start the new process; R4 exited shell excluded from _active_work; ui_server handler exception -> internal_error result, server continues, stats.handler_errors; Reason.INTERNAL_ERROR additive; launcher _stop_group killpg EPERM no raise",
+  "residue": "none",
+  "observed_model": "opus"
+}

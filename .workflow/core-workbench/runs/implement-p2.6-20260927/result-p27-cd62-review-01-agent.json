@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cd62-review-01",
+  "role": "reviewer",
+  "unit": "V-CW-17-p2.7-restart + V-CW-06-p2.7-copy",
+  "frozen_candidate": "815496f8ecdf470cd8c66884fdd77a195d7396dfe97a3eda1a4461196ce0f5ff",
+  "candidate_check": "sha256 of model.py, ui_server.py, tests/ui/test_product_model.py, tests/backend/test_ui_server.py equal the fix-worker candidate hashes (result-p27-cd62-fix-worker-01.json)",
+  "method": "C-D62/C-D59/CW-17/CW-06 criteria read first; production delta = diff -u against p27-cd62-pre for the 7 listed files; test delta = git diff HEAD + new untracked files; bridge re-registration, OmpPane reap/pin/close, isolation summary and ui_v1 old-server behaviour read in context; tests and isolated live probes run. Read-only; no code modified; no model prompts.",
+  "checks": [
+    {"check": "focused modules (test_restart_pane, *_p27q, *_p27r, test_ui_server, test_ui_v1)", "result": "104 OK"},
+    {"check": "tests/ui discover test_*.py", "result": "645 OK"},
+    {"check": "tests/backend discover test_*.py", "result": "190 OK (27 skipped live/version gates)"},
+    {"check": "tests/contracts discover", "result": "45 OK"},
+    {"check": "WB_LIVE_RESTART=1 live_restart_independent_p27q (real OMP, fake HOME, no prompt)", "result": "OK: SIGKILL manager -> degraded pane_exited:manager_omp + notice; Enter -> new pid, generation 2, new session, bridge pid match, isolation re-check ok, argv/token same; fresh OMP drawn, typed echo; worker/shell/backend identities unchanged; phase ready; shutdown verified; residue []"},
+    {"check": "WB_LIVE_COPY=1 live_copy_independent_p27r (isolated tmux + isolated herdr)", "result": "4 OK: tmux set-clipboard on -> buffer exact; external+allow-passthrough -> OSC 52 on client stream; both off -> nothing + hint; real OMP pane text exact; herdr OSC 52 reaches client; provider requests 0; residue none"}
+  ],
+  "findings": [
+    {
+      "id": "R1", "severity": "P3", "file": "src/workbench/backend/service.py", "line": 212,
+      "summary": "An isolation check that raises (failure path) does not update or invalidate _isolation_results, so a later successful re-check of the other role is summarised with a stale or missing result for this role.",
+      "scenario": "Start-up check raises unexpectedly (failure set, _isolation_results stays {}), UI shows 'failed'; manager is restarted and its re-check succeeds -> _isolation_summary() = summarize_isolation({manager: ok}) -> state 'ok' although worker was never verified. Likewise a failed manager re-check followed by a worker restart reports manager's pre-restart result. check_isolation normally returns an error dict instead of raising, so this needs an unexpected exception.",
+      "suggestion": "On failure record an error entry for each role in checks (e.g. results[role] = {'state':'failed','error':failure}) and update _isolation_results with it."
+    },
+    {
+      "id": "R2", "severity": "P3", "file": "src/workbench/backend/service.py", "line": 226,
+      "summary": "While one role is re-checked the whole omp_isolation summary is 'pending' with empty top-level leaks/warning, so a known leak/warning of the other role is not shown in the header until the re-check ends.",
+      "scenario": "Worker start-up check reported 'leak'; user restarts manager -> for up to ISOLATION_CHECK_TIMEOUT the snapshot/record show state pending, leaks [] (worker leak only inside roles{}), header warning disappears, then returns. Bounded and self-healing; disclosure-level only.",
+      "suggestion": "Keep the other roles' leaks/warnings at top level while pending (or a 'pending+leak' presentation)."
+    },
+    {
+      "id": "R3", "severity": "P3", "file": "src/workbench/backend/service.py", "line": 567,
+      "summary": "Restart runs old.close() synchronously on the UI loop: remaining members of the exited OMP's session (e.g. a nohup'd job the OMP's bash tool left running) are SIGKILLed at Enter, and the loop can block up to ~2 s while they die.",
+      "scenario": "Worker OMP started 'nohup long_experiment &' via its bash tool, then the user exits OMP with Ctrl-d Ctrl-d and presses Enter -> the experiment process (same session, pinned at reap) is killed by _kill_owned_session; other panes' output is not pumped during the kill window. Same ownership rule as shutdown (C-D45) and tested intentionally (p27q 'in-session helper killed'), but the exited-pane notice does not tell the user that pressing Enter ends leftovers of the old OMP.",
+      "suggestion": "Record as accepted behaviour (or mention in the notice/help) rather than change code now."
+    },
+    {
+      "id": "R4", "severity": "P3", "file": "src/workbench/ui/product/model.py", "line": 42,
+      "summary": "Inside tmux the copy only reaches the clipboard with set-clipboard on or allow-passthrough on; tmux defaults (set-clipboard external, allow-passthrough off) drop it.",
+      "scenario": "A user with a default ~/.tmux.conf drags text: footer says '복사됨' plus the hint, nothing reaches the clipboard. The requesting user's tmux has both options on (assignment-p27-copy-worker-01), live probe case C confirms the hint; so C-D62 is met for this user, but the requirement is conditional on tmux options and should be stated in docs/help.",
+      "suggestion": "Note the tmux option dependency in CW-06 evidence/SPEC; no code change needed."
+    }
+  ],
+  "verdicts": {
+    "process_lifetime_identity": "pass - only a reaped OMP (poll() reaps after pinning the session) is replaced; old PTY closed and session leftovers killed via pidfd pins; new OmpPane is a direct child with its own session/ProcessRef, record/process_refs follow self.panes; token only in memory (_launch), not in record/snapshot; restart serialised on the loop thread plus non-blocking lock and per-role recheck guard; spawn failure leaves the exited pane with restart.state=failed and restart_failed; shutdown/signal refused with backend_shutdown and a restart racing a signal is closed by _close; recheck thread chain joined via cancel. degraded is now recomputed (pane_exited incl. host shell, bridge_unconnected) - the only degraded reasons that exist, so no other degradation is masked (see R1/R2 for isolation reporting nuances). Bridge replaces the role peer on re-registration with the same token.",
+    "isolation_after_restart": "pass with P3 notes - identical overlay content rewritten, identical argv/env/check tuple, role re-check started for that role and summary combined with the other role (R1, R2).",
+    "contract": "pass - restart_pane and four reasons are additive in ui_v1 v1, pane validated, payload refused; an old backend answers invalid_message without dropping the connection and the UI clears its pending restart.",
+    "ui_restart_trigger": "pass - pane_exited only for manager/worker OMP; only Enter (CR/LF) sends one restart_pane, other keys/paste/mouse/terminal-query input to an exited pane are dropped with a notice; pending restart dedups; refusal clears it; server pushes state right after an ok result; display revival only for a newer generation or a different session than the state's exited one, so replay/stale old-session output never revives.",
+    "drag_to_copy": "pass with R4 - selection in absolute history coordinates, clamped to its pane, autoscroll is view-only (never arrow keys), cleared on reset/RIS, alt-screen swap, catch-up, resize/zoom, focus change and keys; tracking panes still get the mouse; OSC 52 queued in the model and written by the app loop only (no subprocess), tmux passthrough wrapper doubles ESC, 1 MiB cap; highlight cost O(visible cells) per frame, text extraction once on release.",
+    "tests": "pass - new tests assert observable behaviour (argv/env/identity, bridge pid, record, screen text, bytes on the wire); modified independent tests only carry the earlier C-D61/jamo key changes (d->q, Ctrl-d confirm) with invariants kept or strengthened; no C-D62 assertion weakened."
+  },
+  "overall": "integrate",
+  "blocking": [],
+  "residue": "none (unique TMPDIRs removed; live probes reported residue [])"
+}

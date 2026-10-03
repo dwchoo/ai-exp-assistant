@@ -1,0 +1,24 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 1638,
+  "event": {
+    "id": "reserve-p27-restart-copy-explore-01",
+    "kind": "reserve",
+    "data": {
+      "buckets": [
+        "total",
+        "role:code_explorer",
+        "unit:V-CW-17-p2.7-restart"
+      ],
+      "effort": "high",
+      "incident": "",
+      "invocation": "p27-restart-copy-explore-01",
+      "model": "claude-sonnet-5-5",
+      "purpose": "restart/resume + drag-copy facts (reserve recorded right after spawn: Root ordering slip)",
+      "role": "code_explorer",
+      "unit": "V-CW-17-p2.7-restart",
+      "workspace": "/home/dwchoo/ai-exp-assistant",
+      "writer": false
+    }
+  }
+}

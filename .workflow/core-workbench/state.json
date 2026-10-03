@@ -425,7 +425,7 @@
   "implementation_p27": {
     "run_record": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
     "approved_bundle_sha256": "91fe05dc882d8c00ab0eb28c30e2b6cabcbfacb0f0fee3f0eaeecfaff5b7d3e8",
-    "status": "C-D59 + IME-neutral prefix commands integrated; awaiting user trial (Hangul mode) + order-worker decision; UR-UX open",
+    "status": "C-D63 (host shell Enter restart + Ctrl-] k confirmed kill) integrated on top of C-D62; awaiting user trial; UR-UX open; C-D60 -> CW-18",
     "resumed_from": ".codex/handoffs/2026-09-29-core-workbench-p27-cw17/HANDOFF.md",
     "units": {
       "V-CW-17-p2.7": {
@@ -458,6 +458,22 @@
       "V-CW-06-p2.7-ime": {
         "status": "integrated",
         "record": ".workflow/core-workbench/runs/implement-p2.6-20260927/integration-p27-ime.json"
+      },
+      "V-CW-06-p2.7-jamo": {
+        "status": "integrated",
+        "record": ".workflow/core-workbench/runs/implement-p2.6-20260927/integration-p27-jamo.json"
+      },
+      "V-CW-17-p2.7-restart": {
+        "status": "integrated",
+        "record": ".workflow/core-workbench/runs/implement-p2.6-20260927/integration-p27-cd62.json"
+      },
+      "V-CW-06-p2.7-copy": {
+        "status": "integrated",
+        "record": ".workflow/core-workbench/runs/implement-p2.6-20260927/integration-p27-cd62.json"
+      },
+      "V-CW-17-p2.7-shell-restart": {
+        "status": "integrated",
+        "record": ".workflow/core-workbench/runs/implement-p2.6-20260927/integration-p27-cd63.json"
       }
     },
     "user_review_checkpoints": {
@@ -469,6 +485,7 @@
     "minor_findings": [
       "workbench status creates the data dir as a side effect (P3, record for CW-16)"
     ],
-    "environment_note": "OMP upgraded by user to 18.4.4 (was 18.2.10 during CW-02..CW-06 evidence) - compatibility re-check needed (CW-16 I-COMPAT)"
+    "environment_note": "OMP upgraded by user to 18.4.4 (was 18.2.10 during CW-02..CW-06 evidence) - compatibility re-check needed (CW-16 I-COMPAT)",
+    "approved_bundle_digest": "f2084a7ccc5e5a6af7ca5bde6bc19b7d64052f43504b58549e587d379d121a43"
   }
 }

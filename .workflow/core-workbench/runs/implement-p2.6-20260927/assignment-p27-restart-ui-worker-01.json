@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-restart-ui-worker-01",
+  "ticket_id": "CW-06 (C-D62 (1) Enter restarts an exited OMP pane)",
+  "role": "worker",
+  "unit": "V-CW-17-p2.7-restart",
+  "approved_bundle_digest": "c28a63fd7f96d92fb481ec7df46290c23943622a8d4ab8237c6fe6c6e247a396",
+  "routing": {
+    "planned_role": "worker",
+    "selected_role": "worker (wb-worker, Sonnet high)",
+    "reason_codes": [
+      "bounded_pattern"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-restart-senior-01.json"
+    ]
+  },
+  "base_candidate": "7b3fb2b3812ccf7fc17745a601504fb5a36216b37c5a0b3b29d34ff075483304",
+  "criteria": [
+    "docs/features/core-workbench/DECISIONS.md#C-D62 (1): '종료됨' notice; Enter in that pane starts a new OMP session; previous conversation via OMP resume by the user",
+    "backend contract already implemented: ui_v1 ClientType.RESTART_PANE with pane field; reasons pane_alive, pane_not_restartable, restart_in_progress, restart_failed (see src/workbench/contracts/ui_v1.py and .workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-restart-senior-01.json)"
+  ],
+  "required_behavior": [
+    "When manager_omp or worker_omp is exited according to the backend snapshot (alive False), draw a clear notice inside that pane area (keep the last screen content visible if possible, e.g. a bottom line or centered box): 'OMP 종료됨 (exit N) — Enter: 새 세션으로 다시 시작 · 이전 대화는 새 OMP에서 /resume'. Pane title/header also shows it exited.",
+    "With focus on an exited OMP pane, Enter (CR or LF, alone or as part of typed input) sends one RESTART_PANE for that pane and shows '다시 시작 중…'; other typed bytes to an exited OMP pane are not sent (notice explains Enter). Repeated Enter while a restart is pending is ignored (no duplicate request). Pastes to an exited pane are not sent.",
+    "Results: ok -> notice until the new pane generation arrives (existing session/generation reset logic clears the old screen); refusals (pane_alive, restart_in_progress, restart_failed with detail, not attached) are shown in the footer like other refusals.",
+    "Also reachable from the prefix Space menu? NO - Enter only (user decision). Help overlay: one line about it (keep line count <= current + 1). Live panes, host shell, Ctrl-d guard, jamo, detach q, drag-to-copy unchanged."
+  ],
+  "acceptance": [
+    "red->green tests in tests/ui/test_product_model.py (notice drawn, Enter sends exactly one RESTART_PANE, other keys/paste not sent, pending dedupe, ok/refusal handling, new generation clears notice, host shell exit unaffected)",
+    "one PTY test in tests/ui/test_product_pty.py: real backend with the fake OMP used by existing PTY tests; make the manager fake OMP exit, see the notice, press Enter, the pane comes back (new generation) and accepts input",
+    "all tests/ui test_*.py (no pipe, real exit), tests/backend, tests/contracts, tests/gates/g1_vt pass; list any *_independent* failures without editing them"
+  ],
+  "allowed_write_paths": [
+    "src/workbench/ui/product/**",
+    "tests/ui/test_product_model.py",
+    "tests/ui/test_product_pty.py"
+  ],
+  "prohibited_paths": [
+    "src/workbench/backend/**",
+    "src/workbench/contracts/**",
+    "tests/**/*_independent*.py",
+    "tests/ui/live_*.py",
+    "docs/**",
+    ".workflow/**"
+  ],
+  "rules": "Use /tmp/cw02-g1-venv/bin/python, short unique TMPDIR removed afterwards; no graphify update, no commits, never pkill or pattern kills (only PIDs you started); never touch ~/wb-urux-sandbox or the user's Workbench/herdr/tmux processes or configs; zero residue.",
+  "result_format": "checks table first, status, changed paths + sha256, residue. Korean, <=15 lines."
+}

@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-shell-ui-worker-01",
+  "status": "candidate_ready",
+  "candidate": "04223625d0c35c2bfb00b7195ba47456a21667a41e1c9a2628d4229a927470a6",
+  "audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-cd63-ui.json",
+  "changed": {
+    "src/workbench/ui/product/model.py": "ec372ba015a4da8ae00df4ad077267d765842fc0eecdfeb6a4ab7de5f57da954",
+    "src/workbench/ui/product/view.py": "0ab68bca8cf621d4dacecb286ac1796455f7e49378862d53d8866cb955b471f9",
+    "tests/ui/test_product_model.py": "73830defa612756daffe74edfa8a6ce5cc837c9fb43b403ba636ab3441a562db",
+    "tests/ui/test_product_pty.py": "8514267e0a35e29be1ef75f947b46c539560e6bccfc986379f099724b917bd95"
+  },
+  "checks": {
+    "test_product_model": "273 OK",
+    "PTY KillRestartHostShell + RestartExitedOmp": "2 OK (real backend + bash)",
+    "tests/ui": "665: 2 FAIL (independent, superseded rules)",
+    "tests/backend": "198: 3 known p27q FAIL, 27 skip",
+    "tests/contracts": "48 OK",
+    "g1_vt": "85 OK"
+  },
+  "design": "RESTARTABLE widened to all panes (same exited UX for host shell); kill_confirm_open modal (_draw_box); open: prefix k/K, Ctrl-k, ㅏ(+Space); confirm: k, Ctrl-k, ㅏ, prefix k; any other input cancels; manager warning line; works from any focus; menu: kill row below the 10 numbered items, run with Ctrl-k inside the menu (keeps p27o digit/wrap contract)",
+  "failing_independent": [
+    "tests/ui/test_product_restart_independent_p27q.py ExitedPaneEnterTests.test_live_panes_and_host_shell_exit_are_unaffected (old: host exit shows no notice)",
+    "tests/ui/test_product_ime_independent_p27o.py HangulAfterPrefixTests.test_state_is_clean_afterwards_english_and_commands_work_normally (P+ㅏ now opens kill confirm)",
+    "tests/backend/test_restart_pane_independent_p27q.py x3 (from senior)"
+  ],
+  "gaps": [
+    "red not run separately (mixed uncommitted file)",
+    "3 existing model tests updated (host exit replaced, alias list, help line cap +3)"
+  ],
+  "residue": "none",
+  "observed_model": "sonnet"
+}

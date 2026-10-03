@@ -1,0 +1,24 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 1632,
+  "event": {
+    "id": "reserve-p27-jamo-review-01",
+    "kind": "reserve",
+    "data": {
+      "buckets": [
+        "total",
+        "role:reviewer",
+        "unit:V-CW-06-p2.7-jamo"
+      ],
+      "effort": "high",
+      "incident": "",
+      "invocation": "p27-jamo-review-01",
+      "model": "claude-sonnet-5-5",
+      "purpose": "jamo/detach q/Ctrl-d confirmation delta review",
+      "role": "reviewer",
+      "unit": "V-CW-06-p2.7-jamo",
+      "workspace": "/home/dwchoo/ai-exp-assistant",
+      "writer": false
+    }
+  }
+}

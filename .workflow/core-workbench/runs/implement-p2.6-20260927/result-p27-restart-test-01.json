@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-restart-test-01",
+  "status": "complete",
+  "agent_result": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-restart-test-01-agent.json",
+  "frozen_candidate": "f86ac0ce084cc7efbd5da3e755c7c12d80b6842dcd9251658b43e9abfd39e104",
+  "checks": {
+    "tests/backend": "189 OK (27 skip) incl. 18 new p27q",
+    "tests/contracts": "45 OK",
+    "tests/gates/g1_vt": "85 OK",
+    "tests/ui": "639: 4 fail = 2 intended red (F1) + 2 copy p27r reds",
+    "live WB_LIVE_RESTART": "real OMP 18.4.4, fake HOME, 0 prompts: SIGKILL manager -> exited notice -> Enter -> new pid, gen 2, bridge pid match, isolation ok; argv/env/token digest/cwd identical, no PI_AUTO_QA/--resume; redraw + input; worker/shell/backend pids unchanged; shutdown verified; residue 0"
+  },
+  "verified": [
+    "5x2 restarts no fd/child/thread leak",
+    "8 concurrent requests -> 1 spawn",
+    "old in-session helpers cleaned",
+    "token not on disk/snapshot",
+    "fork failure then retry ok",
+    "bridge gen 1 vs pane gen 2 no confusion; old (session,gen) -> BridgeBoundMismatch; stale peer cannot make ready; late frames ignored",
+    "UI CR/LF/CRLF/mixed/Hangul commit+Enter -> 1 request; other bytes not sent"
+  ],
+  "findings": {
+    "F1 P3": "model.py:347,:535,:1403; ui_server.py:351 after restart ok the UI keeps the pane exited until the next state push (<=~0.25 s) and drops the new session's terminal query replies and keys (red: test_product_restart_independent_p27q.py:178,:189); not reproduced live"
+  },
+  "observed_model": "opus"
+}

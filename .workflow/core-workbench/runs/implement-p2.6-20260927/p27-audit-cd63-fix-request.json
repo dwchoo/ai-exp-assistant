@@ -1,0 +1,1 @@
+{"before": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-cd63-test-after.json", "after": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-cd63-fix-after.json", "allowed": ["src/workbench/ui/product/**", "tests/ui/test_product_model.py", "graphify-out/**"]}

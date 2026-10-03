@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "record": "root-adjudication-p27-cd63-r3",
+  "decided_by": "Root",
+  "date": "2026-10-01",
+  "issue": "p27s:115 expects 'kls -la\\r' arriving in one chunk after the confirmation opened to confirm the kill once; review R3 (P3) found that multi-byte input starting with k (auto-repeat, unbracketed paste) confirms a destructive kill",
+  "decision": "Adopt R3: a confirmation chunk confirms only when it is exactly one confirm key (k, K, Ctrl-k, ㅏ with its single IME commit key, prefix+k), including the case where the opener and the confirm arrive together (P+'kk'); any chunk with extra bytes cancels and nothing reaches a pane. The p27s:115 expectation for 'kls -la\\r' is corrected to: cancelled, no kill_pane, nothing sent to a pane; split reads where k arrives alone still confirm.",
+  "authority": "workflow-contract Root adjudication; C-D63 (confirmation must prevent accidental kills); result-p27-cd63-review-01 R3"
+}

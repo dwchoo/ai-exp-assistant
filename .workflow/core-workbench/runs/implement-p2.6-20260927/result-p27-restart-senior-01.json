@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-restart-senior-01",
+  "status": "complete",
+  "changed": {
+    "src/workbench/backend/service.py": "7884d1a6579ae56728b320d28587f50e227cc0536e1f67177ef4da36678d93fb",
+    "src/workbench/backend/panes.py": "1bcea257c993a532b51c896dab95b741e78d80297d0a674e4893f1313975fe0c",
+    "src/workbench/backend/ui_server.py": "0bfae68b0463dcec8abaa686a6faa0e856a847c09c52ceae47ece8eefc63de10",
+    "src/workbench/contracts/ui_v1.py": "63acb6ffd81b2d8c79cfc131b26ef318267d8cfdf7fbe7c2cf6ba02eaa9aa157",
+    "tests/backend/test_restart_pane.py": "3982a37278f0a4f25e6d9fbc581da658aacb7e18612d40fe7fa6b0269a5db30d",
+    "tests/backend/test_ui_server.py": "e04a32e27941522fa1adbfff115d8cef67e7f54160ded5474cb7661a0cbbddeb",
+    "tests/contracts/test_ui_v1.py": "58521418e2c5924262b065acffafd1d0fdf80efd97ca4cd375d659e42a50318e"
+  },
+  "checks": {
+    "red->green": "8 red before -> 32/32 OK (test_ui_v1, test_ui_server, new test_restart_pane)",
+    "tests/contracts": "45 OK",
+    "tests/backend": "171 OK (27 skipped live/version gates)",
+    "tests/ui": "570 OK",
+    "tests/gates/g1_vt": "85 OK",
+    "live omp/18.4.4": "live manager -> pane_alive; host_shell -> pane_not_restartable; SIGKILL own manager -> degraded pane_exited:manager_omp; restart_pane ok -> new pid, generation 2, new session_id, bridge pid match, phase ready, isolation re-check ok (leak 0); no resume/continue in argv; worker/shell PIDs unchanged; shutdown verified"
+  },
+  "design": "ui_v1 RESTART_PANE (pane, no payload); reasons pane_alive, pane_not_restartable, restart_in_progress, restart_failed; start-time argv/env/cwd/overlay kept (role token in memory only); only reaped OMP; old pane close(); generation+1; restart history in pane info/backend.json; non-blocking lock; isolation recheck shows pending/rechecking; spawn failure leaves exited + restart_failed; degraded->ready general rule",
+  "independent_failures": "none",
+  "residue": "none",
+  "observed_model": "opus",
+  "root_note": "sha256 captured by Root at receipt; the parallel copy worker was still editing src/workbench/ui/product"
+}

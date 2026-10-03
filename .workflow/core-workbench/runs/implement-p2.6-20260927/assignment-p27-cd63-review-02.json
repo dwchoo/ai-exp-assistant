@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cd63-review-02",
+  "ticket_id": "CW-17/CW-06 (C-D63 corrections after review block)",
+  "role": "reviewer",
+  "unit": "V-CW-17-p2.7-shell-restart",
+  "approved_bundle_digest": "f2084a7ccc5e5a6af7ca5bde6bc19b7d64052f43504b58549e587d379d121a43",
+  "routing": {
+    "planned_role": "reviewer",
+    "selected_role": "reviewer (wb-delta-reviewer, Sonnet high)",
+    "reason_codes": [
+      "bounded_delta_after_full_review"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd63-review-01-agent.json"
+    ]
+  },
+  "frozen_candidate": "dcc3efde55cb5ceaf1328ac5279cb5877153f9544d9cf10a21c051a6afe1fc05",
+  "criteria": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd63-review-01-agent.json findings R1 (P1), R3, R4",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/root-adjudication-p27-cd63-r3.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/root-adjudication-p27-cd63-resize.json",
+    "docs/features/core-workbench/DECISIONS.md#C-D63"
+  ],
+  "delta": {
+    "base": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-cd63-test2-after.json is the reviewed candidate 959ea1a4; compare current files with git diff plus the evidence of what changed: .workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-cd63-corr.json and p27-audit-cd63-test3.json",
+    "files": [
+      "src/workbench/backend/panes.py",
+      "src/workbench/backend/service.py",
+      "src/workbench/backend/ui_server.py",
+      "src/workbench/backend/launcher.py",
+      "src/workbench/contracts/ui_v1.py",
+      "src/workbench/ui/product/model.py"
+    ]
+  },
+  "focus": [
+    "R1 closed: no OSError from signalling escapes anywhere (kill, restart close, OMP restart, shutdown, launcher _stop_group); unsignallable members reported, not waited on forever; restart still starts; handler exceptions become internal_error and the server continues - check this does not mask programming errors silently (logged, counted).",
+    "R4 closed.",
+    "R3 closed per adjudication; no new accidental-confirm path; cancel drops the rest of the chunk only while the confirmation was open.",
+    "No regression of C-D62 OMP restart and P2-2 pinning; contract change additive (INTERNAL_ERROR).",
+    "Test changes keep invariants (p27s rename/correction, new p27t files)."
+  ],
+  "rules": "Read-only; write only .workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd63-review-02-agent.json. Tests with /tmp/cw02-g1-venv/bin/python, PYTHONPATH=src, short unique TMPDIR removed after; optional live WB_LIVE_SHELL=1 probe; no model prompts; never pkill or pattern kills; never touch ~/wb-urux-sandbox or the user's processes.",
+  "result_format": "Findings P0..P3 with file:line; verdict per focus; overall integrate/block. Write JSON; reply in Korean <=12 lines."
+}

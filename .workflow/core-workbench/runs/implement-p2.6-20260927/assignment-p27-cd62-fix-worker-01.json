@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cd62-fix-worker-01",
+  "ticket_id": "CW-06/CW-17 (C-D62 corrections)",
+  "role": "worker",
+  "unit": "V-CW-06-p2.7-copy + V-CW-17-p2.7-restart",
+  "approved_bundle_digest": "c28a63fd7f96d92fb481ec7df46290c23943622a8d4ab8237c6fe6c6e247a396",
+  "routing": {
+    "planned_role": "worker",
+    "selected_role": "worker (wb-worker, Sonnet high)",
+    "reason_codes": [
+      "bounded_pattern"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-copy-test-01-agent.json",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-restart-test-01-agent.json"
+    ]
+  },
+  "base_candidate": "5fb9573b8c4f25c62ecab4ba51c17e30316ae3fca75f159cef1a81036ba3af32",
+  "required_behavior": [
+    "restart F1: after a restart_pane ok, the UI must not keep treating the pane as exited until the next periodic state push. Make the pane live as soon as the backend reports it: the backend pushes a state snapshot to attached UIs right after a successful restart (ui_server.py ~351 / service restart path), and the UI also clears the exited state when a display chunk of the new pane session/generation arrives. The new session's terminal query replies and typed keys are then delivered. Make tests/ui/test_product_restart_independent_p27q.py :178 and :189 green without editing them.",
+    "copy F1: if rows of an active selection are trimmed out of the scrollback while dragging/before copy, never copy blank/unrelated rows: clamp the selection to rows that still exist; if none remain cancel it with a notice ('선택한 내용이 스크롤 기록에서 밀려나 복사하지 않았습니다'). Make the p27r red test green.",
+    "copy F2: a full terminal reset (RIS, ESC c) or any pyte reset of the pane clears the selection and its highlight. Make the p27r red test green.",
+    "copy F3: footer/notice/help text: mention drag-to-copy as the primary way (e.g. '드래그: 복사') and keep the existing 'Shift+드래그' wording where independent tests require it (terminal's own selection when mouse capture is off)."
+  ],
+  "acceptance": [
+    "own red->green tests in tests/ui/test_product_model.py (and tests/backend for the state push)",
+    "tests/ui/test_product_copy_independent_p27r.py and tests/ui/test_product_restart_independent_p27q.py fully green unmodified",
+    "all tests/ui test_*.py (no pipe, real exit), tests/backend, tests/contracts, tests/gates/g1_vt pass"
+  ],
+  "allowed_write_paths": [
+    "src/workbench/ui/product/**",
+    "src/workbench/backend/ui_server.py",
+    "src/workbench/backend/service.py",
+    "tests/ui/test_product_model.py",
+    "tests/ui/test_product_pty.py",
+    "tests/backend/test_restart_pane.py",
+    "tests/backend/test_ui_server.py"
+  ],
+  "prohibited_paths": [
+    "tests/**/*_independent*.py",
+    "tests/ui/live_*.py",
+    "src/workbench/contracts/**",
+    "docs/**",
+    ".workflow/**"
+  ],
+  "rules": "Use /tmp/cw02-g1-venv/bin/python, short unique TMPDIR removed afterwards; no graphify update, no commits, never pkill or pattern kills; never touch ~/wb-urux-sandbox or the user's Workbench/herdr/tmux processes or configs; zero residue.",
+  "result_format": "checks table first, status, changed paths + sha256, residue. Korean, <=15 lines."
+}

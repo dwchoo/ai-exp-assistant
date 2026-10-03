@@ -1,0 +1,113 @@
+{
+ "schema_version": 1,
+ "invocation": "p27-shell-test-01",
+ "role": "test_designer",
+ "unit": "V-CW-17-p2.7-shell-restart",
+ "frozen_candidate": "04223625d0c35c2bfb00b7195ba47456a21667a41e1c9a2628d4229a927470a6",
+ "status": "done_with_findings",
+ "expectations_drafted_first": "scratchpad expectations.md (E1-E10 backend, U1-U7 UI) written before reading src",
+ "checks": {
+  "tests/backend (discover test_*.py, PYTHONPATH=src)": "exit 0: 214 run OK, 27 skipped",
+  "tests/contracts": "exit 0: 48 OK",
+  "tests/ui (discover test_*.py)": "exit 1: 686 run, 1 FAIL = test_product_shell_kill_independent_p27s.KillConfirmTests.test_a_window_resize_cancels_the_confirmation (finding F1, kept red)",
+  "tests/gates/g1_vt (PYTHONPATH=src:.)": "exit 0: 85 OK",
+  "new backend p27s": "16 OK",
+  "new ui p27s": "21 run, 1 FAIL (F1)",
+  "live WB_LIVE_SHELL=1": "OK (1 test, 10.3 s, real OMP omp/18.4.5, isolation ok, zero model calls)"
+ },
+ "adapted_tests": [
+  {
+   "test": "tests/backend/test_restart_pane_independent_p27q.py RestartRefusalAndFailureTests.test_refusals_carry_reasons_and_touch_nothing",
+   "reason": "C-D63: live host_shell restart now refused as pane_alive (was pane_not_restartable); added assertion that the live shell is untouched"
+  },
+  {
+   "test": "... RestartRefusalAndFailureTests.test_host_shell_exit_is_never_restarted -> test_host_shell_exit_is_restarted_only_on_request",
+   "reason": "exit now restartable on explicit request; kept invariants: backend never restarts it by itself, an OMP restart does not make phase ready while host is exited, host restart starts no OMP; then explicit restart -> gen+1, owner user, ready, live -> pane_alive"
+  },
+  {
+   "test": "... UiSocketRestartTests.test_not_attached_host_live_invalid_then_ok_with_new_display_identity",
+   "reason": "socket refusal for live host_shell is pane_alive"
+  },
+  {
+   "test": "tests/ui/test_product_restart_independent_p27q.py ExitedPaneEnterTests.test_live_panes_and_host_shell_exit_are_unaffected -> test_live_panes_are_unaffected_and_an_exited_host_shell_follows_c_d63",
+   "reason": "exited host now shows notice and Enter sends one restart_pane host_shell with no pane bytes; kept: live OMP gets its Enter as input, live host shell gets 'exit\\r' as input and no restart"
+  },
+  {
+   "test": "tests/ui/test_product_ime_independent_p27o.py HangulAfterPrefixTests.test_state_is_clean_afterwards_english_and_commands_work_normally",
+   "reason": "prefix ㅏ = prefix k opens the kill confirmation; the next plain key only cancels it (no kill, nothing to a pane); then the original clean-state/English/command checks run unchanged"
+  }
+ ],
+ "new_tests": {
+  "tests/backend/test_shell_kill_restart_independent_p27s.py": [
+   "kill ends bg, nested subshell pipelines, HUP/TERM-ignoring member (escalation, bounded <8 s), member respawning on HUP/TERM, self-made process group, kill -STOP'd job, Ctrl-Z job-control stop, fg job; session and all job pgids empty; zombie-free",
+   "setsid -w child (descendant) and setsid -f daemon not signalled; descendant reported in left_session (result + record); restart doesn't touch them",
+   "only pidfd signals to members of the shell session, no bare kill/killpg",
+   "unprovable shell identity (recycled-PID shape) -> kill_failed, nothing signalled",
+   "manager-owned idle shell: manager_owned true; restart -> owner user, fresh control/handoff",
+   "pending takeover does not survive kill+restart",
+   "manager command killed right after launch -> unknown, task_success None, never control_returned, record + restart.previous",
+   "refusals (OMP pane_not_killable, restart pane_alive, shutdown/stop backend_shutdown) touch nothing",
+   "kill_in_progress / restart_in_progress during a running kill",
+   "fresh shell probe equal to first start (cwd, HOME, hook, functions, env names, no leaked export/alias/noclobber) even with backend cwd moved; wb-handoff works",
+   "restart refused while alive, accepted after exit and kill",
+   "8 kill/exit cycles: no fd/child/zombie/thread leak, pins empty, init dirs removed",
+   "socket: not_attached, pane_not_killable, invalid_message, kill ok + state push, input pane_unavailable, pane_exited, detach/reattach keeps exited, restart ok + new display identity + input reaches new pid",
+   "pipelined kill+restart and kill+kill in order",
+   "shutdown confirmed -> kill/restart backend_shutdown; close verified, jobs dead",
+   "6-way concurrent kills / restarts -> exactly one each"
+  ],
+  "tests/ui/test_product_shell_kill_independent_p27s.py": [
+   "5 open forms x 3 focuses -> modal, nothing sent",
+   "5 open x 8 confirm forms (k K Ctrl-k ㅏ ㅏSpace prefix k/Ctrl-k/ㅏ) -> exactly one kill_pane{host_shell}, no pane bytes",
+   "split reads; keys after confirming k dropped",
+   "27 cancel forms (Esc Enter keys Hangul alt-k paste-with-k click release wheel shift-PgUp prefix q/Space/1) -> no kill, no pane bytes, no quit, next k is plain input",
+   "no-prefix Ctrl-k/k/ㅏ are pane input; scroll-mode jamo never kill",
+   "lone prefix keeps modal",
+   "resize cancels (F1, red) / resize never confirms (green)",
+   "state push updates warning",
+   "manager warning matrix + kill allowed",
+   "pending dedupe, result notice, survivors count, 7 refusal reasons visible",
+   "exited host notice/title, only Enter -> one restart, refusal + retry, revive on new generation, kill->exited->Enter",
+   "menu row + unchanged digit items + help",
+   "real UI on PTY with scripted server: modal drawn with warning, x cancels, Ctrl-] Ctrl-k + ㅏ confirms, exited notice, Enter -> restart_pane, typed bytes not sent, detach exit 0"
+  ],
+  "tests/ui/live_shell_kill_independent_p27s.py": "opt-in WB_LIVE_SHELL=1"
+ },
+ "findings": [
+  {
+   "id": "F1",
+   "severity": "P3",
+   "file": "src/workbench/ui/product/model.py:1327",
+   "summary": "A window resize (ProductModel.resize) leaves the host-terminal kill confirmation open; the test packet lists resize among the inputs that cancel it. Safe either way: resize never confirms and nothing reaches a pane (green test); a later k still confirms. Same behaviour as the command menu. Red test: tests/ui/test_product_shell_kill_independent_p27s.py:169. Fix: close kill_confirm_open (and notice) in resize(), or Root decides resize is not a cancel and the red test is dropped."
+  }
+ ],
+ "observations": [
+  "left_session lists only setsid processes that are still descendants of the shell (panes.py:633); a double-forked daemon (setsid -f) is correctly not signalled but not reported (no attribution possible once reparented)",
+  "restart chdirs the backend process itself to the start cwd (service.py:624) - harmless, noted",
+  "takeover_request on a manager-owned idle shell returns owner user with takeover_requested true (pre-existing behaviour, outside this unit)"
+ ],
+ "live": {
+  "result": "pass",
+  "omp": "omp/18.4.5 (bystander; probe accepts 18.4.x)",
+  "kill_seconds": 1.06,
+  "signalled": "shell + bg + TERM-ignoring + fg",
+  "survivors": [],
+  "daemon": "survived, not signalled, killed by probe via pidfd",
+  "restart": "gen 2, new pid, owner user, same cwd, wb-handoff + Ctrl-] h -> owner manager",
+  "omps_backend": "unchanged",
+  "shutdown": "verified",
+  "residue": []
+ },
+ "changed_paths": {
+  "tests/backend/test_restart_pane_independent_p27q.py": "e693275883723d9867a9d353ef6bc03cf680fbb4029e582a26f751ffa166ebb4",
+  "tests/ui/test_product_restart_independent_p27q.py": "4c391213aa6a154ed96edbb3204dc6146ea3ff7a928235db09bf6bb4f11daf56",
+  "tests/ui/test_product_ime_independent_p27o.py": "df2c0094b0443b69baf6fe60859ffcab88e009a2a457a2591de5e79bd1075747",
+  "tests/backend/test_shell_kill_restart_independent_p27s.py": "e77acb0e37132a69f5e5af8ddf875db1d078cab64f5075e8cc8d64f8be1fc322",
+  "tests/ui/test_product_shell_kill_independent_p27s.py": "c06fa83c36e7d181179d79e781717bed935e002ff4e77023b12c84ffa5b7467a",
+  "tests/ui/live_shell_kill_independent_p27s.py": "6f01761d296662036efeb0695ca6d017974327390019de7bc90ad9e282a3bb58"
+ },
+ "residue": "none (one earlier own run leaked a sleep 7302 daemon after a pid-file name collision; verified by pidfd+cmdline and killed; cleanup now adopts registered pid files late). /tmp/p27-in-jhixl07c is pre-existing (2026-09-29, another suite), untouched.",
+ "production_code_modified": false,
+ "commits": false,
+ "graphify_update": false
+}

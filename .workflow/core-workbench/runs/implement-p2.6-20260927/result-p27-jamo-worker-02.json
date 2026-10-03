@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-jamo-worker-02",
+  "status": "needs_reroute (implementation done; tests outside worker scope need adaptation)",
+  "candidate": "59cab4d5c9a1fbc8819943e566e2e040f1057ec0f04b5a37f10ed480609d8f24",
+  "audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-jamo2.json",
+  "checks": {
+    "test_product_model + test_product_pty": "244 OK",
+    "tests/ui discover": "499 run, 100 FAIL (99 in *_independent* files + tests/ui/test_product_entrypoint.py:89,97 detach P+b'd')",
+    "tests/contracts": "43 OK",
+    "tests/gates/g1_vt": "85 OK"
+  },
+  "design": "detach: prefix q/Q, Ctrl-q, menu 0, ㅂ Space; prefix d/D/Ctrl-d and ㅇ Space -> DETACH_MOVED notice, nothing sent; scroll q unchanged; Ctrl-d guard in ProductModel._send_input with _ctrl_d=(pane, deadline), CTRL_D_CONFIRM_SECONDS=2.0; cancel on other key/command/paste/menu/help/scroll/focus change/timeout; host_shell and paste unchanged; mouse report does not cancel",
+  "failing_independent": {
+    "ime_p27o": 37,
+    "resize_p27l": 35,
+    "pty_independent": 7,
+    "mux_p27n": 10,
+    "keys": 4,
+    "direct_scroll_p27k": 3,
+    "layout_scroll_p27j": 3
+  },
+  "root_note": "src/workbench/backend/client.py:226 'Ctrl-] d detaches' belongs to the --plain comparison client, which still detaches with d (client.py:264): text is accurate; left unchanged (plain client out of C-D61 scope).",
+  "residue": "none",
+  "observed_model": "sonnet"
+}

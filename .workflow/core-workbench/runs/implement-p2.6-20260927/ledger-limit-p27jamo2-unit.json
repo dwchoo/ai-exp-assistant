@@ -1,0 +1,23 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 1627,
+  "event": {
+    "id": "limit-p27jamo2-unit",
+    "kind": "limit",
+    "data": {
+      "authority": "C-D55 budget delegation, workflow-contract section 8; result-p27-jamo-test-01 P3-1/P3-2",
+      "bucket": "unit:V-CW-06-p2.7-jamo",
+      "decision_owner": "Root",
+      "expected_previous": {
+        "authority": "C-D55 budget delegation, workflow-contract section 8; C-D57 feedback routing; user answer 2026-09-30 '\uc790\ubaa8 \uc790\ub3d9 \ubcc0\ud658 + Space'",
+        "reason": "New unit: Hangul jamo auto-conversion after prefix (worker, independent test adaptation, delta review, 2 correction reserve)",
+        "value": 5
+      },
+      "origin": "operating",
+      "reason": "P3-1 correction + review + one reserve",
+      "remaining_work_estimate": 3,
+      "scope_basis": null,
+      "value": 7
+    }
+  }
+}

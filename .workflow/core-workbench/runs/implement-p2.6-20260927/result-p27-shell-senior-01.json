@@ -1,0 +1,75 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-shell-senior-01",
+  "status": "done",
+  "candidate": "7bdfe2102cc8449c18628a36a2360df181e4440ba538eaf5b6bfba437db28d67",
+  "audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-cd63-senior.json",
+  "checks": {
+    "red": "13 new test errors on pre-change src",
+    "tests/contracts": "48 OK",
+    "tests/backend": "198 run, 3 FAIL (independent p27q asserting old rule), 27 skip",
+    "tests/ui": "645 OK",
+    "gates g1_vt": "85 OK",
+    "live real Bash + fake OMP": "bg + long job -> kill_pane ok, all dead, survivors []; OMP kill refused pane_not_killable; restart -> gen 2, fresh prompt, owner user, takeover false, wb-handoff present, cwd project, handoff ok; shutdown verified"
+  },
+  "design": "shared _OwnedSession pidfd session pinning for OmpPane and ShellPane; kill HUP/TERM/CONT then KILL after 1 s via pinned pidfds while leader is unreaped; setsid processes untouched; _shell_lock serialises; history in record restarts/kills",
+  "contract_for_ui": {
+    "kill_pane": {
+      "request": "kill_pane{pane} (attached)",
+      "ok_fields": [
+        "pane",
+        "killed",
+        "process",
+        "session_id",
+        "generation",
+        "input_owner",
+        "manager_owned",
+        "manager_command_in_flight",
+        "manager_command{request_id,outcome:'unknown',task_success:null,reason}",
+        "exit_status",
+        "signalled",
+        "survivors",
+        "left_session[{pid,session}]"
+      ],
+      "refusals": [
+        "pane_not_killable (OMP)",
+        "pane_exited",
+        "kill_in_progress",
+        "kill_failed",
+        "backend_shutdown",
+        "not_attached",
+        "pane_unavailable"
+      ],
+      "after": "state push"
+    },
+    "restart_pane host_shell": {
+      "accepted": "only after the shell exited",
+      "ok_includes": "input_owner",
+      "refusals": [
+        "pane_alive",
+        "restart_in_progress",
+        "restart_failed",
+        "backend_shutdown"
+      ],
+      "note": "pane_not_restartable no longer returned"
+    },
+    "snapshot panes.host_shell adds": [
+      "alive",
+      "exit_status",
+      "input_owner",
+      "manager_command_in_flight",
+      "manager_command",
+      "restart",
+      "kill"
+    ],
+    "after_exit": "input/paste/takeover/handoff -> pane_unavailable"
+  },
+  "failing_independent": [
+    "tests/backend/test_restart_pane_independent_p27q.py RestartRefusalAndFailureTests.test_host_shell_exit_is_never_restarted",
+    "...test_refusals_carry_reasons_and_touch_nothing",
+    "UiSocketRestartTests.test_not_attached_host_live_invalid_then_ok_with_new_display_identity"
+  ],
+  "incident": "red run teardown left 25 worker-started processes; worker verified each by pidfd+cmdline and killed them; teardown fixed with try/finally",
+  "residue": "none",
+  "observed_model": "opus"
+}

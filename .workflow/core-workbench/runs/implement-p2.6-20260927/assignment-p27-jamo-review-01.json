@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-jamo-review-01",
+  "ticket_id": "CW-06 (jamo conversion, detach q, Ctrl-d confirmation)",
+  "role": "reviewer",
+  "unit": "V-CW-06-p2.7-jamo",
+  "approved_bundle_digest": "91fe05dc882d8c00ab0eb28c30e2b6cabcbfacb0f0fee3f0eaeecfaff5b7d3e8",
+  "routing": {
+    "planned_role": "reviewer",
+    "selected_role": "reviewer (wb-delta-reviewer, Sonnet high)",
+    "reason_codes": [
+      "bounded_delta_after_full_review"
+    ],
+    "evidence_refs": [
+      "CW-06 full review done earlier; UI input delta"
+    ]
+  },
+  "frozen_candidate": "c0adbe1a88bc7c7c3f82d2e55eeb483b1ab722a7139353cb7c443e2693692b46",
+  "criteria": [
+    "docs/features/core-workbench/DECISIONS.md#C-D61 (1)",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/ur-ux/ur-ux-request.json follow_ups dated 2026-09-30",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/assignment-p27-jamo-worker-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/assignment-p27-jamo-worker-02.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/assignment-p27-jamo-worker-03.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-jamo-test-01-agent.json"
+  ],
+  "delta": {
+    "production": [
+      "src/workbench/ui/product/input.py",
+      "src/workbench/ui/product/model.py"
+    ],
+    "base": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-jamo-pre/ (state before this unit)",
+    "tests": "test_product_model.py, test_product_pty.py (worker); adapted independent tests and new test_product_jamo_detach_independent_p27p.py (see .workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-jamo-test.json); compare with git diff HEAD"
+  },
+  "focus": [
+    "Jamo conversion only after the prefix and in scroll mode; never converts Hangul typed without the prefix; syllables/multi-char keep hint+swallow; commit key swallowed exactly once; prefix waiting indefinitely cannot swallow later ordinary typing in a surprising way (e.g. user presses Ctrl-] then types a Korean sentence).",
+    "Detach: q / Ctrl-q / menu 0 / ㅂ Space; old d / Ctrl-d / ㅇ Space do nothing but notice; no remaining user-visible text says d detaches (except the --plain client, which is out of scope).",
+    "Ctrl-d guard: never loses or duplicates other bytes, no lone ESC, window/cancel logic, host_shell immediate, pastes unchanged, notice cleanup; cannot leave the UI in a state where a later ordinary key is dropped.",
+    "Test adaptations did not weaken the invariants they protected (spot-check the diffs of the adapted independent files).",
+    "No regression: run tests/ui (pattern test_*.py, no pipe), tests/contracts."
+  ],
+  "scratch": "/tmp/claude-1000/-home-dwchoo-ai-exp-assistant/dd5e2cee-e10d-41c4-8ebb-7c00b50dd465/scratchpad/jamo-review/",
+  "rules": "Read-only; write only .workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-jamo-review-01-agent.json. Tests with /tmp/cw02-g1-venv/bin/python, PYTHONPATH=src, short unique TMPDIR removed after; no live model; never pkill or pattern kills; never touch ~/wb-urux-sandbox or the user's processes.",
+  "result_format": "Findings P0..P3 with file:line; verdict per focus; overall integrate/block. Write JSON; reply <=12 lines. Korean."
+}

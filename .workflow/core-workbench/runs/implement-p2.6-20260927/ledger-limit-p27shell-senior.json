@@ -1,0 +1,23 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 1677,
+  "event": {
+    "id": "limit-p27shell-senior",
+    "kind": "limit",
+    "data": {
+      "authority": "Approved PLAN p2.7e (.workflow/core-workbench/runs/planning-p2.7-20260929/approval-amendment-e.json, bundle f2084a7c...), C-D63, C-D55 budget delegation, workflow-contract section 8",
+      "bucket": "role:worker_senior",
+      "decision_owner": "Root",
+      "expected_previous": {
+        "authority": "Approved PLAN p2.7d (.workflow/core-workbench/runs/planning-p2.7-20260929/approval-amendment-d.json, bundle c28a63fd...), C-D62, C-D55 budget delegation, workflow-contract section 8",
+        "reason": "C-D62 OMP pane restart backend + one correction",
+        "value": 164
+      },
+      "origin": "operating",
+      "reason": "C-D63 backend + one correction",
+      "remaining_work_estimate": 2,
+      "scope_basis": null,
+      "value": 165
+    }
+  }
+}

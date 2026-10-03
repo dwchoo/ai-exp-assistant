@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-restart-test-01",
+  "role": "test_designer",
+  "unit": "V-CW-17-p2.7-restart",
+  "frozen_candidate": "f86ac0ce084cc7efbd5da3e755c7c12d80b6842dcd9251658b43e9abfd39e104",
+  "status": "complete_with_findings",
+  "method": "expectations E1-E13 drafted from C-D62 (1), CW-17 'OMP pane 재시작' and the senior/UI worker required_behavior before reading src; production code not modified; failing tests kept red",
+  "checks": [
+    {"check": "tests/backend (pattern test_*.py)", "result": "exit 0, 189 OK (27 skipped live/version gates); includes 18 new p27q tests"},
+    {"check": "tests/contracts", "result": "exit 0, 45 OK"},
+    {"check": "tests/gates/g1_vt (PYTHONPATH=src:.)", "result": "exit 0, 85 OK"},
+    {"check": "tests/ui (pattern test_*.py)", "result": "exit 1, 639 run, 4 failures: 2 intended red p27q (finding F1) + 2 in test_product_copy_independent_p27r (the parallel copy test_designer's unit, not this one)"},
+    {"check": "new backend tests test_restart_pane_independent_p27q.py", "result": "18/18 OK"},
+    {"check": "new UI tests test_product_restart_independent_p27q.py", "result": "12 run: 10 OK, 2 FAIL (F1, intended red)"},
+    {"check": "live probe live_restart_independent_p27q.py (WB_LIVE_RESTART=1, omp/18.4.4, fake HOME, no prompt)", "result": "OK: SIGKILL manager pid -> exit -9, phase degraded pane_exited:manager_omp, UI notice; Enter -> new pid, generation 2, new session, bridge pid match (bridge generation 1), isolation re-check ok, argv/env/role token (digest) identical, no PI_AUTO_QA, no --resume/--continue, cwd = project; fresh OMP drawn (18 rows) and typed text shown (never submitted); worker/shell/backend pid+ticks unchanged; detach 0; shutdown verified; residue []"}
+  ],
+  "covered": {
+    "contract": "restart_pane parse (3 PaneIds), missing/unknown/non-string pane, payload, missing id, before hello rejected; reasons in contract",
+    "ui_server_socket": "real UiServer: not_attached before attach; host_shell pane_not_restartable; live pane_alive (both); bogus/missing pane and payload invalid_message; ok result (pane/restarted/generation/session_id/process); display frames under new session/generation; state push with restart.previous; immediate second request refused",
+    "backend": "both roles: exact start argv/env/cwd, new session, own session leader; token only in memory (not in data dir files nor snapshot); other OMP/shell/backend identity unchanged; in-session helper (SIGHUP-ignoring) of the old OMP killed and PTY master count unchanged, no zombies; 5 cycles x 2 roles: fd/child/thread counts stable, generation 6, restart.count 5, 10 history entries chained; phase ready only when all panes live and both bridges match (worker exited, non-registering new OMP -> bridge_unconnected, host shell exited); 8 concurrent calls -> exactly one spawn; SIGTERM-in-progress -> backend_shutdown; fork failure keeps loop sane then retry ok; unexecutable OMP exits again and is restartable later; isolation re-check for that role only with the start-time command/env, leak shown in snapshot and record",
+    "bridge_generation": "restarted OMP bridge generation 1 vs pane generation 2: readiness uses pid match; request bound to the old (session, generation) raises BridgeBoundMismatch; an escaped old-session process keeping the bridge connection does not make the new pane ready, is replaced when the new OMP registers, and its late state/omp_event frames are ignored afterwards",
+    "ui": "notice + title per pane; CR, LF, CRLF, mixed, Hangul IME commit + Enter (one read, separate reads, split UTF-8) -> exactly one restart_pane, no pane bytes; manager/worker pendings independent; other keys/Hangul/arrows/Ctrl-d x2/paste (with CR, with Hangul) send nothing; wheel (alt screen), app mouse reports, old-session terminal queries (sync and queued) send nothing; pending dedupe through ok + stale state; refusals (not_attached, pane_alive, restart_in_progress, restart_failed, backend_shutdown) in footer and retry allowed; new generation snapshot clears notice/screen and input + query replies flow; host shell exit unaffected; PTY test with real Backend: stray bytes/Hangul/wheel/paste/Ctrl-d reach no process, Hangul+CR restarts once, Enter on the live pane is input, worker received nothing"
+  },
+  "new_tests": {
+    "tests/backend/test_restart_pane_independent_p27q.py": "2a720524b1130d836e087c8cf9942d0df7cfdc96e550a9d1d245c8baddb83b73",
+    "tests/ui/test_product_restart_independent_p27q.py": "6f8d8afaf74eb2a0ecfc0c7c296ebc3b3c35a7300dfc5061191dbb233e9d7c66",
+    "tests/ui/live_restart_independent_p27q.py": "4f7f87cf6201c37b881eaadf1ebdd97cf1ab6f9f0b8a4c0ff1d4532a8c620c71"
+  },
+  "findings": [
+    {
+      "id": "F1",
+      "severity": "P3",
+      "title": "Restarted OMP is treated as exited until the next state push: its first terminal-query replies and keys are dropped",
+      "where": "src/workbench/ui/product/model.py:347 (_send drops INPUT/PASTE while pane_exited), :1403 (pane_exited reads only the last snapshot), :535 (an ok RESTART_PANE result does not mark the pane live); src/workbench/backend/ui_server.py:351 (the restart result carries no snapshot); STATE_INTERVAL 0.25 s (service.py:48)",
+      "evidence": "tests/ui/test_product_restart_independent_p27q.py:178 test_queries_of_the_new_session_are_answered_before_the_next_state_push and :189 test_keys_typed_on_the_new_session_before_the_next_state_push_are_not_lost (red): after ok + a display frame of the new session/generation, a DSR query of the new OMP gets no reply and a typed key is dropped until the next state push",
+      "impact": "window is <= ~0.25 s after the restart; real OMP 18.4.4 draws later than that, so the live probe did not hit it; a fast-starting pane program would lose its start-up query replies",
+      "suggestion": "treat a display frame whose (session_id, generation) is newer than the one recorded at the restart request (or the ok result's session_id/generation) as live for that pane"
+    }
+  ],
+  "observations": [
+    "Bridge accepts state/omp_event frames of the OLD OMP session while the old peer is still registered (only possible when a process escaped the OMP session with the bridge socket); they stop once the new OMP registers. Not a defect of this unit (pre-existing bridge design).",
+    "Live: with a fresh fake HOME, OMP opens its first-run setup wizard; keys typed before the restarted OMP finished drawing are ignored by OMP itself (scratch check: typing after the draw and after re-attach works; UI attached from start works). The probe therefore disables the wizard in the fake HOME and waits for the redraw; P27Q_WIZARD=1 keeps it.",
+    "Restart of the same role is refused with restart_in_progress while its isolation re-check runs (real OMP: several seconds); visible in the footer."
+  ],
+  "run_notes": "live probe executed 4x during development (2 wizard/timing iterations, 1 wizard-off diagnostic, 1 final) plus 2 scratch wizard diagnostics; all with fake HOME and fake key, zero prompts submitted",
+  "residue": "none (all temp roots removed; no process naming /tmp/p27q*, /tmp/wbp27q*; exact-identity cleanup reported residue [] every run)",
+  "observed_model": "opus"
+}

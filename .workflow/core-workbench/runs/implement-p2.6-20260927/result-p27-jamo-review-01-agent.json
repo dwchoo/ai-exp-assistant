@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-jamo-review-01",
+  "unit": "V-CW-06-p2.7-jamo",
+  "frozen_candidate": "c0adbe1a88bc7c7c3f82d2e55eeb483b1ab722a7139353cb7c443e2693692b46",
+  "verdict": "integrate",
+  "findings": [
+    {"severity": "P3", "where": "src/workbench/ui/product/input.py:218-230 (prefix branch)", "issue": "prefix 뒤 단일 자모는 즉시 명령 실행. 이후 별도 read로 한글이 이어져도(예: 'ㅂ' 다음 read에 'ㅏ') 이미 detach/명령이 실행된 뒤라 run-swallow만 적용됨. 사용자가 실수로 Ctrl-] 후 자모 하나만 입력하면 ㅅ→t(takeover request), ㅊ→c 등이 실행될 수 있음. 실제 Mac IME는 commit 시 음절로 보내므로 발생 가능성 낮고 사용자 결정('자모 자동 변환 + Space')에 부합.", "fix_direction": "조치 불필요; 필요시 takeover류(t/c/h)는 jamo 경로에서 hint로 강등하는 옵션 검토"},
+    {"severity": "P3", "where": "model.py _send_input", "issue": "첫 Ctrl-d 보류 notice는 입력 owner 아님/전송 불가 상태에서도 표시됨(경미한 UX). 데이터 손실·중복 없음.", "fix_direction": "선택 사항"}
+  ],
+  "focus_verdicts": {
+    "jamo_conversion": "PASS - prefix 직후와 scroll mode에서만 변환(probe 확인: prefix 없이 전달되는 한글은 그대로 pane, 음절/다중문자는 hint+swallow, commit key 1회 swallow, prefix는 timeout 없이 30s 후 ㅂ도 detach, 분할 UTF-8은 prefix 유지, 문장 입력은 hint+swallow 후 ASCII 정상 전달)",
+    "detach": "PASS - q/Ctrl-q(0x11)/menu 0/ㅂ Space만 detach; d/D/Ctrl-d/ㅇ는 notice만, 전송 없음. src 사용자 표시 텍스트에 d=detach 잔재 없음(curses.raw로 IXON 꺼져 Ctrl-q 도달)",
+    "ctrl_d_guard": "PASS - probe: 단일 보류, 2초 내 2회는 정확히 1바이트, 'a\\x04b\\x04\\x04c'→'ab\\x04c', ESC+0x04 단일 키, 다른 키/명령/포커스 변경/timeout/paste 취소, host_shell 즉시, paste 내 0x04 불변, flush_input(50ms select)로 notice 정리, 이후 일반 키 유실 없음",
+    "test_adaptations": "PASS - p27o/keys/pty/mux 독립 테스트 diff 확인: d→q 교체, jamo→변환 기대로 갱신하되 'pane 미전달·split=단일 read·prefix 해제·나머지 키 불변' 불변식 유지, 원래 기대(음절 hint, Ctrl-d 바이트 도달)는 OMP 2회 입력/host_shell로 보존",
+    "regression": "PASS - tests/ui discover 544 tests OK(exit 0), tests/contracts 43 tests OK"
+  },
+  "tests_run": ["tests/ui test_*.py (544 OK)", "tests/contracts (43 OK)", "scratch probes under session scratchpad"],
+  "residue": "TMPDIR /tmp/jr7q 삭제; 저장소 파일 변경 없음(결과 JSON 제외)"
+}

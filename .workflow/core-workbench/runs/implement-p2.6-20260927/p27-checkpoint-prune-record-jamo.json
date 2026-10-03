@@ -1,0 +1,15 @@
+{
+ "schema_version": 1,
+ "keep_latest": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-jamo-integrated-checkpoint.json",
+ "entries": [
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-ime-integrated-checkpoint.json",
+   "action": "pruned",
+   "bytes_before": 848347874,
+   "sha256_before": "4f10c0debbb0ee86bb50e82188bd800895ae4ebf6844385f3191cc4ca94f5266",
+   "candidate": "8637d226a70816e92fd8202c7eb422fbf78afa1b4ce3136f5d2c331bb0adcc69",
+   "blob_count": 1626,
+   "bytes_after": 580535
+  }
+ ]
+}

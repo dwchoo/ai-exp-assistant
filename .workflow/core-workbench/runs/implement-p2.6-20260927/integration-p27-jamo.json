@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "units": [
+    "V-CW-06-p2.7-jamo"
+  ],
+  "status": "integrated",
+  "recorded_at": "2026-09-30",
+  "approved_bundle_digest": "91fe05dc882d8c00ab0eb28c30e2b6cabcbfacb0f0fee3f0eaeecfaff5b7d3e8",
+  "decision": "user answers 2026-09-30: '자모 자동 변환 + Space'; C-D61 (1) detach q + Ctrl-d confirmation",
+  "integrated_candidate": "55397452e4bb9a5c3895a28ebeb7293cd4b9d96479277cca92dfa8f0a4f490af",
+  "manifest": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-jamo-integrated-checkpoint.json (milestone, full blobs)",
+  "delta_vs_verified": "graphify-out/** and Root state.json only (.workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-jamo-integrated.json)",
+  "behaviour": {
+    "ui": "after Ctrl-]: a single Hangul compatibility jamo runs its 2-set key's command (IME commit key swallowed once; prefix waits indefinitely); same conversion for scroll-mode letter keys; detach = prefix q / Ctrl-q / menu 0 / ㅂ Space; old d / Ctrl-d / ㅇ Space show a notice and send nothing; raw Ctrl-d (and Alt+Ctrl-d) to manager/worker OMP is held and delivered only on a second press within 2 s; host shell and pastes unchanged; help/hint text updated"
+  },
+  "verification_chain": [
+    "p27-jamo-worker-01 (jamo)",
+    "p27-jamo-worker-02 (detach q, Ctrl-d guard)",
+    "p27-jamo-test-01 (Opus: adapted 7 independent files + entrypoint + live, new p27p 43 tests; P3-1 Alt+Ctrl-d red)",
+    "p27-jamo-worker-03 (Alt+Ctrl-d whole, help line)",
+    "p27-jamo-review-01 (integrate; tests/ui 544 OK, contracts 43 OK)"
+  ],
+  "carried_forward": {
+    "UI polish (later CW-06 delta)": [
+      "review P3-1 accidental Ctrl-] + jamo runs a command immediately (by decision)",
+      "review P3-2 Ctrl-d hold notice shown when not input owner",
+      "test P3-3 CSI-u/modifyOtherKeys Ctrl-d not guarded (UI never enables those modes)",
+      "--plain comparison client still detaches with d",
+      "earlier IME P3b/P3c/P3d/P3-1/P3-2 (integration-p27-ime.json)"
+    ],
+    "CW-18": [
+      "C-D60 order-worker"
+    ],
+    "CW-19": [
+      "C-D61 (2) OMP restart",
+      "C-D61 (3) host terminal force restart"
+    ]
+  }
+}
