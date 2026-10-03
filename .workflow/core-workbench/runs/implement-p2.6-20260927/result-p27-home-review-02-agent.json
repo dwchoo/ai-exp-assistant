@@ -1,0 +1,45 @@
+{
+ "schema_version": 1,
+ "invocation": "p27-home-review-02",
+ "role": "reviewer",
+ "unit": "V-CW-17-p2.7-home",
+ "frozen_candidate": "144b40957f604a51bc936f4a161717119241f304eb0d0ad923faa7e0b2c7e3a8",
+ "method": "Diffed omp_home.py (609 lines, sha a934a66b...), cli.py, launcher.py, omp-isolation.yml; compared user_omp_locations with the OMP 18.4.5 binary dirs.ts (KK/$ct/NMo/edt/Xge) read as source text; checked binary for handoff-variable semantics; no credential/environ reads.",
+ "checks": [
+  {
+   "cmd": "unittest test_omp_home, p27u, p27v, test_omp_isolation, p27m, p27n, ui p27p (TMPDIR=/tmp/rv02-*, removed)",
+   "result": "57+43+26+20+40+25+43 all OK"
+  },
+  {
+   "cmd": "WB_LIVE_HOME=1 live_omp_home_independent_p27u (TMPDIR removed)",
+   "result": "3 OK; ~/.omp/browser-state absent before/after"
+  }
+ ],
+ "findings": [
+  {
+   "id": "N1",
+   "severity": "P3",
+   "file": "src/workbench/backend/cli.py:195-200 (cmd_start -> omp_home_location -> config_dir_value -> user_omp_locations)",
+   "summary": "F3's refuse-on-unresolvable-env (relative PI_CODING_AGENT_DIR, invalid OMP_PROFILE, relative XDG_DATA_HOME) is evaluated before the running-backend check, so even attaching to an already running backend via 'start' is refused for an env that only matters for a new start.",
+   "fix": "Run omp_home_location only when no backend is running (move after _running_snapshot) or catch the unresolvable case for attach."
+  },
+  {
+   "id": "N2",
+   "severity": "P3",
+   "file": "src/workbench/backend/omp_home.py:81-96 (HOME_ENV_FORBIDDEN)",
+   "summary": "OMP_WORKTREE_DIR / OMP_*_CACHE_DB / OMP_AUTH_BROKER_SNAPSHOT_CACHE are user-tunable locations, not handoff vars; dropping them moves worker worktrees/caches into the Workbench home (intended by C-D64) but is a user-visible behaviour change not mentioned in the yml/status note.",
+   "fix": "One doc/note line; no code change required."
+  }
+ ],
+ "verdicts": {
+  "F1": "closed. The four named vars plus the audited handoff/cache vars are dropped and flagged as env:<KEY> leaks. Dropped vars are OMP internal handoff (PI_SESSION_FILE, PI_ARTIFACTS_DIR, PI_TOOL_BRIDGE_*, PI_EVAL_LOCAL_ROOTS, *_SOCKET, DAEMON/LSP_MUX dirs, IDA/BLOB broker config: confirmed in the binary as values OMP sets for its children) or state-location overrides. PATH/LANG/TERM/provider keys/OMP_AUTH_BROKER_URL/_TOKEN/_ACCOUNT_POOL_FILE are kept; none of the dropped names is needed for normal operation (N2 note only).",
+  "browser": "ok. browser.enabled=false in omp-isolation.yml (--config, beats project config) and in the home config.yml; leak detection (dumpTools name 'browser', xd://eval/browser in tool description or prompt) is unit-tested and the live run shows 0 leaks; other tools untouched; ~/.omp/browser-state not created.",
+  "F2": "resolved by turning the browser off (user decision 2026-10-03), no residual write path left except natives (adjudicated).",
+  "F3": "closed. user_omp_locations mirrors the binary: OMP_PROFILE ?? PI_PROFILE with ''/'default' = none, invalid = refused, profile ignores PI_CODING_AGENT_DIR, a stale-profile agent dir override is ignored, absolute override replaces <root>/agent, XDG data only for the default agent dir, relative values refused naming the variable. Refusals create nothing (omp_home_location runs before _layout(create=False)); the user's values travel only as WORKBENCH_USER_* in the check env and are stripped before Popen. Fixture adjudication (profile-fixture) is consistent: complementary refusal case added. Only N1 (P3).",
+  "F4": "closed. No store + non-empty provider key var starts without creating/keeping a link (existing link removed); notes carry variable names only, never values; store with other states (symlink, directory, foreign owner) still refused. Local wb agent.db created by OMP is moved aside when a store appears.",
+  "F5": "closed by documentation plus a per-start isolation note (XDG_BASH_NOTE).",
+  "tests": "adaptations keep the invariants (profile/redirect env never reaches OMP, wb home used, refusal creates nothing, check env == pane env for home keys); new p27v tests exercise real prepare/launch/check paths rather than mocks."
+ },
+ "overall": "integrate",
+ "overall_reason": "No P0/P1/P2. F1-F5 and the browser decision are fixed and tested; two P3 notes only."
+}

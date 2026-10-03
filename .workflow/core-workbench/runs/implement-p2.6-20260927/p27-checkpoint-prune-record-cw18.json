@@ -1,0 +1,15 @@
+{
+ "schema_version": 1,
+ "keep_latest": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-cw18-integrated-checkpoint.json",
+ "entries": [
+  {
+   "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-home-integrated-checkpoint.json",
+   "action": "pruned",
+   "bytes_before": 1021338133,
+   "sha256_before": "d864960262a75c522af272918b0c13a131b0eb265244a81cffa441916c195bc8",
+   "candidate": "e5db72f2c32b944c7c1299d8e9a594701bfed43571bbdada76e8cf7508bf913a",
+   "blob_count": 1809,
+   "bytes_after": 625316
+  }
+ ]
+}

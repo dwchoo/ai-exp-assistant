@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw18-u4-02",
+  "status": "complete",
+  "changed": {
+    "src/workbench/terminal/shell_g2/prototype.py": "08c96e8a2d66865fd66346afa64ccb67768db4adeefd4117b4b5c98166416abc",
+    "tests/terminal/test_job_review_latch.py": "9076b56a6fdfed6c184f65f70d3649bc59f8fc65802d0f31c7a228204169ffe6",
+    "tests/terminal/test_held_handoff_control.py": "294ff6e925a4b44aef7a139c79e5cb7387c272c3286bc78066fa87f0ae1c7f97",
+    "tests/backend/test_c_d58_handoff.py": "281a91cb50412bc5245da3ed79f038f4b68c07470ff589939ab6a556bcf3a5ad"
+  },
+  "checks": {
+    "red->green": "on a HEAD-prototype copy: terminal unit 3 tests (5 subtests), real Bash/dash 3 tests (6 subtests), backend c_d58 1 fail; all pass after; guard passes both",
+    "suites": "terminal 88 (2 skip), backend 415 (27 skip), ui 696, g1_vt 85, g2_shell 142 (1 skip)",
+    "live": "real Backend + Bash + fake OMP, 0 model: 3 episodes job-held -> takeover -> clean -> new wb-handoff accepted -> run -> returned: 19/19 after, 3/19 on HEAD"
+  },
+  "design": "InputBoundary.needs_review property split into _review_jobs/_review_other; jobs latch cleared only when a new verified handoff is accepted (CONTROL_READY / JOBS_END:READY) with an empty jobs probe and no other cause; other latches, unaccepted handoffs and uncleaned jobs stay held; adapter/backend unchanged",
+  "note": "live script kept only in session scratchpad (not in repo)",
+  "residue": "none",
+  "observed_model": "opus"
+}

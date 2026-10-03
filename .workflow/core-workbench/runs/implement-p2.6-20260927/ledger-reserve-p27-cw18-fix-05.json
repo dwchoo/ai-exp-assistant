@@ -1,0 +1,24 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 1852,
+  "event": {
+    "id": "reserve-p27-cw18-fix-05",
+    "kind": "reserve",
+    "data": {
+      "buckets": [
+        "total",
+        "role:worker",
+        "unit:V-CW-18-p2.7"
+      ],
+      "effort": "high",
+      "incident": "",
+      "invocation": "p27-cw18-fix-05",
+      "model": "claude-sonnet-5-5",
+      "purpose": "CW-18 skill text D1",
+      "role": "worker",
+      "unit": "V-CW-18-p2.7",
+      "workspace": "/home/dwchoo/ai-exp-assistant",
+      "writer": true
+    }
+  }
+}

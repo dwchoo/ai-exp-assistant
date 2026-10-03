@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-home-senior-01",
+  "ticket_id": "CW-17 (C-D64 Workbench-owned OMP home)",
+  "role": "worker_senior",
+  "unit": "V-CW-17-p2.7-home",
+  "approved_bundle_digest": "7c77b03ce61fb65c256b4dd9a4ea2977e1a32452c032ab9dc65249b6d3748bb5",
+  "routing": {
+    "planned_role": "worker_senior",
+    "selected_role": "worker_senior (Opus general-purpose)",
+    "reason_codes": [
+      "launcher_isolation",
+      "credential_store_adjacent"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-home-probe-01.md"
+    ]
+  },
+  "base_candidate": "4564d216428a4f0875a45fc6a2f7c2810a1c61999aefd7157a5d56c184bef81b",
+  "checkpoint_ref": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-home-pre/"
+  ],
+  "criteria": [
+    "docs/features/core-workbench/DECISIONS.md#C-D64 (incl. the probe facts and the user's choices appended to it)",
+    "docs/features/core-workbench/tickets/CW-17.md 'Workbench 전용 OMP 홈'",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-home-probe-01.md (recommended launcher design, E8 configuration)"
+  ],
+  "required_behavior": [
+    "Launcher: both OMPs (and the startup isolation RPC check) run with PI_CONFIG_DIR = the Workbench config root under the data dir (expressed as OMP expects - the probe found it is HOME-relative; verify and handle data dirs outside HOME safely, e.g. refuse with a clear message or use a supported absolute form if one exists) and PI_CODING_AGENT_DIR = <config root>/agent; OMP_PROFILE and PI_PROFILE removed from the env; never --profile; BUN_RUNTIME_TRANSPILER_CACHE_PATH pointed inside the config root if the probe says it is needed. Keep the C-D59 argv (--config static overlay + per-role overlay, --no-extensions, --append-system-prompt \"\", --no-title, -e bridge).",
+    "Home setup at every backend start: create the root (0700); write <agent dir>/config.yml from Workbench content each start (setupVersion: 2, startup.setupWizard: false, the minimal isolation settings from the probe, skills.customDirectories = Workbench skills dir); agent.db is a symlink to the user's ~/.omp/agent/agent.db (resolve the user's real OMP agent dir the way OMP does without PI_* overrides). Create/repair only the symlink; if a regular file named agent.db exists in the wb home (e.g. an older run), move it aside, never into the user's home. Never open/read/copy the user's agent.db yourself (lstat only).",
+    "No user auth store (lstat fails or the user agent dir is missing): do not create anything in the user's home; the backend starts the panes so the user can see a clear notice, OR refuses with guidance - choose the safer option and report it: the guidance must say to run `omp` once and /login outside Workbench (or set provider API key env vars).",
+    "Per-role overlay: keep it, but drop unions that read the user's ~/.omp config (the wb home no longer reads it); project agents disabling (task.disabledAgents) stays as the probe recommends.",
+    "Isolation check (startup + after restart): add checks that the running OMP's resolved config/agent dirs are the Workbench ones (if observable via RPC) and that no ambient source is loaded; report ok/warning/leak like now. Keep the existing personality warning logic only if still meaningful (the user's PERSONALITY.md is no longer read) - remove obsolete warnings.",
+    "Existing data dirs (the user's sandbox has an older .state without the home): the new layout must be created on the next start without manual steps.",
+    "Restart paths (C-D62 OMP restart) reuse the same env/home."
+  ],
+  "acceptance": [
+    "red->green unit tests in tests/backend (launcher env/argv, home setup idempotence, symlink create/repair, regular-file move-aside, no-auth-store behaviour, overlay content, isolation-check criteria) using temp HOME fixtures - never the real ~/.omp",
+    "run tests/backend, tests/contracts, tests/ui (pattern test_*.py, no pipe, real exit), tests/gates/g1_vt (PYTHONPATH=src:.)",
+    "live (real OMP, no model prompt): start a backend in a temp data dir, verify both OMPs authenticated via the symlink (non-secret signals only), isolation ok with zero ambient sources, a metadata inventory of ~/.omp before/after shows changes only in agent.db* (and natives mtime if unavoidable) - no new logs/run/sessions files; restart a pane and recheck; shutdown verified; clean up everything"
+  ],
+  "allowed_write_paths": [
+    "src/workbench/backend/**",
+    "omp_bridge/omp-isolation.yml",
+    "omp_bridge/skills/**",
+    "tests/backend/**"
+  ],
+  "prohibited_paths": [
+    "src/workbench/ui/**",
+    "tests/**/*_independent*.py",
+    "tests/ui/**",
+    "docs/**",
+    ".workflow/**"
+  ],
+  "rules": "Never read, print, copy or hash the contents of agent.db*, auth files, tokens or other credential stores (metadata only); no strace buffer capture (use -s 0 if strace is needed); no model prompts; no omp token/auth-broker/auth-gateway/config set/login/logout; temp dirs only under /tmp (unique) and removed afterwards; kill only PIDs you started; never touch ~/wb-urux-sandbox or the user's running Workbench/OMP/herdr/tmux processes; never edit ~/.omp ~/.agents ~/.claude ~/.codex or shell configs; if any OMP run you start without the new env writes into ~/.omp (logs/run), list those files in the result (do not delete them); no commits, no graphify update.",
+  "result_format": "checks table first, status, design summary, changed paths + sha256, ~/.omp before/after evidence, failing independent tests with reason, residue. Korean, <=25 lines."
+}

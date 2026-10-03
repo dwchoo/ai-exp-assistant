@@ -1,0 +1,1 @@
+{"before": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-home-test-after.json", "after": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-home-senior2-after.json", "allowed": ["src/workbench/backend/**", "omp_bridge/omp-isolation.yml", "tests/backend/test_omp_home.py", "tests/backend/test_omp_isolation.py", "graphify-out/**"]}

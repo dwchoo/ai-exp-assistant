@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw18-fix-05",
+  "status": "candidate_ready",
+  "changed": {
+    "omp_bridge/skills/to-worker/SKILL.md": "62f3ac1678662f15fdde22d0860bcb23cc26d63d8cb5ba85ece2116b037c9478",
+    "omp_bridge/skills/to-manager/SKILL.md": "92374f87d83bcd5e8ffbed744d5b585736776b7eb4709cd0f3e895009efe623b",
+    "tests/backend/test_workbench_skills.py": "601c558c82515268ee60bb7d3ab55653273023b17e556c42074c622c20db1c12"
+  },
+  "checks": {
+    "test_workbench_skills": "3/18 red -> 18 OK",
+    "tests/bridge": "47 OK",
+    "isolation/home/launcher/skills incl. independent": "248 OK"
+  },
+  "design": "to-worker: same-turn dispatch after a report; Notices section (report_outcome_unknown, report_not_delivered, task_cancelled, task_not_started, run_start_failed); to-manager: Results section incl. rejected:task_not_delivered and other emitted names; tests extract emitted names from flow_tasks.py/flow.py and compare with the docs",
+  "root_read": "Root read both skills in full: consistent with C-D66 and the review findings",
+  "residue": "none",
+  "observed_model": "sonnet"
+}

@@ -1644,9 +1644,23 @@
       "write_scope_hint": [
         "src/workbench/app/**",
         "src/workbench/backend/flow*.py",
+        "src/workbench/backend/service.py",
+        "src/workbench/backend/ui_server.py",
+        "src/workbench/backend/launcher.py",
+        "src/workbench/backend/omp_home.py",
+        "src/workbench/contracts/ui_v1.py",
+        "src/workbench/ui/product/**",
+        "src/workbench/ipc/bridge_g3/mailbox.py",
+        "src/workbench/workflow/run.py",
+        "src/workbench/terminal/shell_persistent/adapter.py",
         "omp_bridge/g3/bridge.ts",
+        "omp_bridge/skills/**",
         "tests/app/**",
-        "tests/bridge/test_manager_task_tool*"
+        "tests/bridge/**",
+        "tests/backend/**",
+        "tests/ui/**",
+        "tests/workflow/**",
+        "tests/terminal/**"
       ],
       "write_owner": "CW-18 worker workspace",
       "resource_claims": [
@@ -1688,7 +1702,7 @@
         "L-CW18-FLOW",
         "L-CW18-POLICY"
       ],
-      "acceptance_note": "조합 공급 범위(local composition item)만 담당한다. acceptance_trace의 owner_ticket과 최종 판정(CW-16 I-*)은 바뀌지 않는다."
+      "acceptance_note": "조합 공급 범위(local composition item)만 담당한다. acceptance_trace의 owner_ticket과 최종 판정(CW-16 I-*)은 바뀌지 않는다. C-D65 (p2.7h): to_worker/to_manager bridge tools, experiment + free-work Tasks, UI approval card, idle-only host run, skills to-worker/to-manager."
     },
     {
       "id": "CW-19",

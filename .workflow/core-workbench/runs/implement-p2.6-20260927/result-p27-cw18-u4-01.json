@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw18-u4-01",
+  "status": "complete",
+  "changed": {
+    "src/workbench/terminal/shell_persistent/adapter.py": "1fedd22c25106ecb7b02252806431251dcbd70d4d2ed7c69ef82af306a155956",
+    "tests/terminal/test_held_handoff_control.py": "ddca35c8679f3526f80f29aecb76186655cb49689a908a6f8ceee5b1b697bb60",
+    "tests/backend/test_c_d58_handoff.py": "9b96263afea7f13c3a7559a901319be7a91a9fea7204395cda2809f6dbd550c1"
+  },
+  "checks": {
+    "red->green": "7 new tests; 6 fail on HEAD adapter, pass now; guard test_one_takeover_per_held_episode passes both",
+    "suites": "terminal 74 (2 skip), backend 415 (27 skip), ui 696, g1_vt 85",
+    "live": "real backend + real Bash + fake OMP, 0 model calls: 24/24 after fix, 19/24 on HEAD (ep2/ep3 dead end reproduced)"
+  },
+  "cause_and_fix": "adapter _takeover_sent latch only cleared in claim_manager; fixed with _Transport.handoff_episode: an explicit request_takeover sends TAKEOVER once per new held episode (release_idle / release_control); confirm unchanged (manual_prompt succeeds), clearer failure text; widening confirm without a request reverted (conflicts with p27s independent test)",
+  "open": {
+    "1 needs_review latch": "CW-07 needs_review latch set by a job-held handoff stays until the shell generation ends, so after cleaning jobs a new wb-handoff is still held (takeover works each time) - conflicts with C-D58 'clean up and wb-handoff again'; proposal: on a fresh verified handoff with an empty jobs probe clear only the job-caused latch",
+    "2 backend defect (U3 area)": "panes.py automation_busy reads life.get('returned') but asdict(life) lacks the property -> after one returned run HostShellPort.hold always refuses ('a managed request is still in flight'); fix: compute from lifetime=='ended' and input_returned and control_returned and not unknown (or add returned to the snapshot)"
+  },
+  "residue": "none",
+  "observed_model": "opus"
+}

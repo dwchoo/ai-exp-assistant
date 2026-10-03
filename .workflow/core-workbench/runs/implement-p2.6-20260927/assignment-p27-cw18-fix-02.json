@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw18-fix-02",
+  "ticket_id": "CW-18 corrections F4, F6",
+  "role": "worker",
+  "unit": "V-CW-18-p2.7",
+  "approved_bundle_digest": "4f4a016424bafe78c2c23437706e206bce3a3c770d13610785564a4a93f00a93",
+  "routing": {
+    "planned_role": "worker",
+    "selected_role": "worker (wb-worker, Sonnet high)",
+    "reason_codes": [
+      "bounded_pattern"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-test-01-agent.json"
+    ]
+  },
+  "base_candidate": "4ff19f7621a34384780ae3a08a0ebf614f11800f832c523381183c91c1493650",
+  "required_behavior": [
+    "F4: to-worker skill documents every to_worker result status incl. held:* reasons (paused, host_terminal_busy, backend_restarted, retry_limit, ...) and what the manager should do for each; keep it about one page; make the red bridge independent test green without editing it.",
+    "F6: when the host shell handoff is held because of user jobs, the UI shows a short hint on how to clear it (take over, finish/kill the jobs, run wb-handoff again) based on the existing state fields; no backend change."
+  ],
+  "acceptance": [
+    "red independent bridge test green unmodified; own UI tests red->green",
+    "run tests/bridge, tests/backend/test_workbench_skills.py, tests/ui (test_*.py, no pipe, venv)"
+  ],
+  "allowed_write_paths": [
+    "omp_bridge/skills/**",
+    "src/workbench/ui/product/**",
+    "tests/ui/test_product_model.py",
+    "tests/backend/test_workbench_skills.py"
+  ],
+  "prohibited_paths": [
+    "src/workbench/backend/**",
+    "omp_bridge/g3/**",
+    "tests/**/*_independent*",
+    "docs/**",
+    ".workflow/**"
+  ],
+  "rules": "Use /tmp/cw02-g1-venv/bin/python, short unique TMPDIR removed afterwards; no model prompts; never pkill/pattern kills; never touch ~/wb-urux-sandbox or the user's processes or configs; no commits, no graphify update. A parallel senior worker edits backend/workflow/terminal - do not touch them.",
+  "result_format": "checks table first, status, changed paths + sha256, residue. Korean, <=12 lines."
+}

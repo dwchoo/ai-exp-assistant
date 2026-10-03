@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-home-review-01",
+  "role": "reviewer",
+  "unit": "V-CW-17-p2.7-home",
+  "frozen_candidate": "f76ac6ebb893234d30c690abcc8836da9355b1bdc2598488a23d6629a8046589",
+  "frozen_production_hashes_start_eq_end": {
+    "src/workbench/backend/cli.py": "4b19cac75e075b6e285db5932f600c31b4c61efcc3a010ec161884d560a85b6c",
+    "src/workbench/backend/launcher.py": "83df2585edbd386f10ebee9962ffc11ea84d922c936c9554d042c94d216fa257",
+    "src/workbench/backend/paths.py": "a5f4bf91225b35d46fe601bb49e6a6a6cce21e1e5fa9c3a9db8599c0e217c680",
+    "src/workbench/backend/service.py": "6cf2b0835173b3d9f3aef3466bdc3180a8795c8ba267164c6eda3b375f1f0cbc",
+    "src/workbench/backend/omp_home.py": "af45bd296b15c2000ce09f4d7b57c4f582ffc777936dd67084a59fe1eb40db1d",
+    "omp_bridge/omp-isolation.yml": "70c64a8618efab8ef37fbb516a7f46d6983449bda11692e412f7b48b0f845b72"
+  },
+  "method": "Read C-D64 (+appended facts/user choice), CW-17 'Workbench 전용 OMP 홈', root-adjudication-p27-home-natives, probe-01 report and the four evidence results; diffed cli/launcher/paths/service/omp-isolation.yml against p27-home-pre, read omp_home.py in full, git diff HEAD for adapted tests; OMP 18.4.5 binary inspected with strings for env/path names only (no credential content, no strace); omp --help once under blocked proxies (no side effects: no new dir, natives mtime unchanged).",
+  "checks": [
+    {"cmd": "unittest test_omp_home, test_omp_home_independent_p27u, test_omp_isolation, p27m, p27n, ui p27p (venv, PYTHONPATH=src, TMPDIR=/tmp/rv64-* removed)", "result": "211 OK"},
+    {"cmd": "WB_LIVE_HOME=1 live_omp_home_independent_p27u (TMPDIR=/tmp/rv64l-* removed, report in scratchpad)", "result": "3 OK: isolation ok, leaks/warnings 0, providers [openai-codex] both roles, ~/.omp inventory 2315/2315, new/deleted 0, changed only agent/agent.db{,-shm,-wal} and natives/18.4.5 (adjudicated), store inode/mode same, shutdown exit 0, survivors 0, root removed"},
+    {"cmd": "home_environment() with user PI_CONFIG_FILES/PI_CODING_AGENT_SESSION_DIR/OMP_TEXT_PREDICT_AGENT_DIR/OMP_AUTORESEARCH_DB_DIR", "result": "all four passed through to the OMP env (see F1)"}
+  ],
+  "findings": [
+    {
+      "id": "F1",
+      "severity": "P2",
+      "file": "src/workbench/backend/omp_home.py:71-75 (HOME_ENV_DROP), used by launcher.py omp_environment/isolation_check_environment",
+      "summary": "Env sanitisation misses OMP 18.4.5 overrides that point a Workbench OMP back at user config/locations: PI_CONFIG_FILES (extra config overlays, loaded before --config: binary 'process.env.PI_CONFIG_FILES?.split(...)' then configFiles pushed), PI_CODING_AGENT_SESSION_DIR (default --session-dir), OMP_TEXT_PREDICT_AGENT_DIR, OMP_AUTORESEARCH_DB_DIR.",
+      "failure_scenario": "User's shell exports PI_CONFIG_FILES=~/.omp/agent/extra.yml (or PI_CODING_AGENT_SESSION_DIR=~/.omp/agent/sessions). Both Workbench OMPs load the user's overlay (every key not also set by omp-isolation.yml/role overlay applies, e.g. model/personality/tool settings) and write their session files into the user's sessions dir; the isolation check runs with --no-session and only checks skills/context/etc., so it stays 'ok'. Not hit in the current environment (none of these set). Fix: add these names to HOME_ENV_DROP (+ unit test); consider a test that scans the binary's PI_/OMP_ *_DIR/*_DB/*_FILES names against the drop list on version drift."
+    },
+    {
+      "id": "F2",
+      "severity": "P3",
+      "file": "omp_bridge/omp-isolation.yml:33-34",
+      "summary": "A second residual write to ~/.omp is documented but not adjudicated/disclosed: OMP's browser tool saves state to path.join(os.homedir(), '.omp', 'browser-state', '<n>.json') when no path is given (confirmed in the 18.4.5 binary; ignores PI_CONFIG_DIR).",
+      "failure_scenario": "A worker asked to save browser state without a path creates ~/.omp/browser-state/<n>.json in the user's OMP dir, contrary to C-D64 '사용자 ~/.omp에 기록하지 않는다'. Root adjudication covers only natives; needs the same adjudication + user disclosure (or a mitigation), not a code block on this unit."
+    },
+    {
+      "id": "F3",
+      "severity": "P3",
+      "file": "src/workbench/backend/omp_home.py:109-114 (user_auth_store), 88-98, 176-180",
+      "summary": "The user's auth store and OMP root are resolved ignoring the user's own PI_CODING_AGENT_DIR/PI_CONFIG_DIR/OMP_PROFILE, so a user whose own omp runs with those overrides is linked to (or refused for) ~/.omp/agent/agent.db, which is not their live store.",
+      "failure_scenario": "User exports PI_CODING_AGENT_DIR=~/omp-agent for their own omp: `start` refuses with 'run omp once and /login', but running omp updates ~/omp-agent/agent.db, so the refusal repeats forever; if a stale ~/.omp/agent/agent.db exists, Workbench links to stale credentials and logins/refresh no longer propagate. Also the overlap check does not protect ~/omp-agent. Not hit today (default layout). At least mention it in the guidance or resolve the store like the user's own omp would."
+    },
+    {
+      "id": "F4",
+      "severity": "P3",
+      "file": "src/workbench/backend/omp_home.py:77-81 (AUTH_GUIDANCE) with cli.py omp_home_requirements",
+      "summary": "Guidance says '(or set your provider API key environment variables)' but the start gate only checks that agent.db exists, so env-key-only users are still refused.",
+      "failure_scenario": "A user who has never run omp sets ANTHROPIC_API_KEY as advised and starts again: exit 2 with the same guidance. Running omp once (which creates agent.db) is the only way through; the text should say that."
+    },
+    {
+      "id": "F5",
+      "severity": "P3",
+      "file": "src/workbench/backend/omp_home.py:339-341 (home_environment)",
+      "summary": "For XDG-layout users the withheld XDG_DATA_HOME/XDG_STATE_HOME/XDG_CACHE_HOME are also missing from every command the OMP bash tool runs inside the Workbench panes (host shell is unaffected).",
+      "failure_scenario": "XDG user with $XDG_DATA_HOME/omp present: a worker runs a tool that honours XDG_DATA_HOME (e.g. pip/uv caches, gh, app data); inside the Workbench OMP it falls back to ~/.local/share / ~/.cache and behaves differently than in the user's shell. Behavioural divergence only; worth a status note or doc line."
+    }
+  ],
+  "verdicts": {
+    "credential_safety": "pass. Workbench only lstat()s the store (auth_store_state) and readlink/symlink/os.replace on the link; never opens it. Link replacement is atomic (temp symlink + os.replace, rename never follows); move-aside is os.rename inside the 0700 agent dir; ensure_private_dir refuses symlinked dirs (O_NOFOLLOW + uid); config.yml written via O_NOFOLLOW|O_EXCL temp + rename (0600). Missing store: link removed, never created. Remaining TOCTOU windows need a same-uid actor (out of threat model). Logs/notes/isolation output carry paths and provider ids only.",
+    "isolation_completeness": "pass with F1. PI_CONFIG_DIR (HOME-relative, lexical+physical check) + PI_CODING_AGENT_DIR + BUN cache set; profile env dropped and --profile refused (build_plan) and flagged as leak in the check; XDG withheld when $XDG_*/omp exists; config.yml regenerated each start/restart; --config overlays kept for project precedence; check adds get_login_providers and open-fd classification; WORKBENCH_USER_* only in the check env and stripped before Popen (without_user_values), not in pane env; restart reuses launch env and re-prepares the home; recheck wraps verify_omp_home. Gap: PI_CONFIG_FILES/PI_CODING_AGENT_SESSION_DIR/OMP_TEXT_PREDICT_AGENT_DIR/OMP_AUTORESEARCH_DB_DIR (F1).",
+    "no_user_impact": "pass with F2 residual. Live: no new/deleted entries under ~/.omp, only agent.db* and natives/18.4.5 mtime; refused starts validate before any mkdir (cli omp_home_location before _layout(create=False)); shared agent.db relies on OMP's WAL/lease design (unchanged user omp usage). browser-state residual needs adjudication (F2).",
+    "migration": "pass. Existing data dir gets omp-root/agent on next backend start (_open -> prepare_omp_home); a local agent.db/companions are moved aside inside the wb agent dir; running pre-C-D64 backends are attached, not migrated, until restarted. Store missing at start: refused with guidance (F4 wording); store removed while running: link removed at next OMP restart, OMP then uses a wb-local store (no user write), relinked at next start. Note: earlier Workbench OMP sessions remain in ~/.omp and are not resumable from the Workbench home (consequence of C-D64).",
+    "tests": "pass. New p27u (unit+live) and test_omp_home assert behaviour (link/move-aside/refusal/XDG/classification/restart/env no-leak); p27m/p27n/p27p adaptations replace superseded C-D59 expectations (PI_CODING_AGENT_DIR now required, no user-config union, PERSONALITY no warning, fake store in fake HOME) and add stronger assertions (check env == pane env for home keys, zero config_get, 0600 config, refusal creates nothing). No test covers PI_CONFIG_FILES/session-dir env (F1)."
+  },
+  "overall": "block",
+  "overall_reason": "One P2 (F1) is a small bounded delta (extend HOME_ENV_DROP + unit test) suitable for a delta review; everything else passes. F2 needs a Root adjudication/user disclosure like the natives residual; F3-F5 are P3 and may be deferred or folded into the delta.",
+  "residue": "none: TMPDIRs /tmp/rv64-*, /tmp/rv64l-* removed; live report only in the session scratchpad; no code modified; no user process, config or ~/wb-urux-sandbox touched; no environ of other processes read; no strace.",
+  "observed_model": "opus"
+}

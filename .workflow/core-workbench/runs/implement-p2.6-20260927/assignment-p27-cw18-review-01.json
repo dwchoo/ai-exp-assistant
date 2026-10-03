@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw18-review-01",
+  "ticket_id": "CW-18 (fresh full review)",
+  "role": "reviewer",
+  "unit": "V-CW-18-p2.7",
+  "approved_bundle_digest": "4f4a016424bafe78c2c23437706e206bce3a3c770d13610785564a4a93f00a93",
+  "routing": {
+    "planned_role": "reviewer",
+    "selected_role": "reviewer (fresh Opus general-purpose)",
+    "reason_codes": [
+      "fresh_review_of_frozen_candidate",
+      "authority_boundary",
+      "process_lifetime",
+      "shared_user_shell"
+    ],
+    "evidence_refs": []
+  },
+  "frozen_candidate": "d081a064d974bfc152a03a5710fd1a7f51cefb01c9a8c4be5fd821e7c2c77297",
+  "criteria": [
+    "docs/features/core-workbench/DECISIONS.md C-D58, C-D60, C-D64, C-D65, C-D66 (C-D66 supersedes UI approval)",
+    "docs/features/core-workbench/tickets/CW-18.md",
+    "docs/features/core-workbench/BRIEF.md (automation, checks, pause, retry, handoff, no replay)",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/root-adjudication-p27-cw18-needs-review.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/root-adjudication-p27-cw18-u3-open.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/root-adjudication-p27-cw18-f5.json"
+  ],
+  "delta": {
+    "base": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-cw18-pre/ (src/workbench and omp_bridge before CW-18)",
+    "files": "git diff against the base dir for src/workbench/** and omp_bridge/** (new: backend/flow.py, flow_tasks.py, automation.py, omp_bridge/skills/to-*); tests: git status / new files"
+  },
+  "evidence": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-u1-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-u2-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-u2-02.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-u3-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-u4-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-u4-02.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-u5-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-u6-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-test-01-agent.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-fix-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-fix-02.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-test-02-agent.json"
+  ],
+  "focus": [
+    "Authority: only the manager can dispatch via to_worker (token role), no other path starts runs; the standing delegation is recorded as such; worker cannot dispatch; tools cannot impersonate the user (pause/resume/kill stay UI-only).",
+    "One task at a time and worker_busy without queueing; cancel semantics; no replay (outcome_unknown, deferred-only resend, restart behaviour).",
+    "Shared user shell safety: Workbench never types into the user's shell unless verified idle (prompt, partial line, jobs via /proc), user input refused only while held and always returned, cwd restored, C-D58/held handoff escape, job latch adjudication.",
+    "Lifecycle: 60 s checks, pause/resume reconciliation, run_closed_while_paused, retry limit, delivery serialization (no two deliveries into one OMP turn), thread safety of the new threads (outbox lanes, tick thread, transition thread), backend shutdown/restart cleanliness.",
+    "Records: journals 0600/fsync, no secrets/env values; ui_v1 additive/removal handled per versioning rules; UI rendering robust.",
+    "Skills match the tool schemas and C-D66 rules; isolation still holds.",
+    "Tests assert behaviour; independent adaptations kept invariants; xfail only for the adjudicated F5."
+  ],
+  "scratch": "/tmp/claude-1000/-home-dwchoo-ai-exp-assistant/dd5e2cee-e10d-41c4-8ebb-7c00b50dd465/scratchpad/cw18-review/",
+  "rules": "Read-only; write only .workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-review-01-agent.json. You may run tests (/tmp/cw02-g1-venv/bin/python, PYTHONPATH=src, short unique TMPDIR removed after) and the opt-in live probe WB_LIVE_CW18=1 (scripted provider only). No model prompts; OMP only with the Workbench home or a fake HOME; never read credential contents or other processes' environ; never pkill or pattern kills; never touch ~/wb-urux-sandbox or the user's processes or configs.",
+  "result_format": "Findings P0..P3 with file:line and a concrete failure scenario; verdict per focus; overall integrate/block. Write JSON; reply in Korean <=15 lines."
+}

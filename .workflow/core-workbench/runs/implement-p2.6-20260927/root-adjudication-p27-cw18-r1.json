@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "record": "root-adjudication-p27-cw18-r1",
+  "decided_by": "Root",
+  "date": "2026-10-03",
+  "issue": "independent p27w CompletionTests.test_done_that_does_not_reach_the_manager_keeps_the_worker_busy fixes the pre-R1 behaviour (unknown report -> worker stays busy), which review finding R1 (P1) required to change",
+  "decision": "R1 is the intended behaviour: a report whose delivery outcome is unknown before acceptance closes the Task as report_outcome_unknown, frees the worker and is announced in the manager's next tool notices; nothing is resent. The test is corrected to assert that rule (worker free, Task closed report_outcome_unknown, no resend, notice present); its no-replay invariant stays.",
+  "authority": "workflow-contract Root adjudication; result-p27-cw18-review-01 R1 (P1)"
+}

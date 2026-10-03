@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw18-test-03",
+  "status": "complete",
+  "agent_result": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-test-03-agent.json",
+  "candidate": "fad89b8e57d9b30441b61b51cc24fcf8e4c981ee0d1088042954f9e19a7ceae0",
+  "checks": {
+    "p27x+p27w+review_corrections": "82 OK (1 xfail F5)",
+    "backend": "524 OK (27 skip)",
+    "bridge": "47",
+    "workflow": "1st run 1 fail + 1 error in test_workflow_unbounded_independent_p27b (child_pid None, 3 children left after close, gone later); rerun 52 OK; alone 2 OK",
+    "lifecycle": "38",
+    "terminal": "108 (2 skip)",
+    "contracts": "52",
+    "ui": "740",
+    "g1_vt/g2_shell": "85/142",
+    "TS": "37/37",
+    "live": "2 OK"
+  },
+  "verdicts": {
+    "R1": "pass",
+    "R2": "pass",
+    "R3": "pass",
+    "R5": "pass",
+    "R6": "pass"
+  },
+  "mutations": "5 mutants (accept timing, withdraw, keep_across_pause, full hold, R6 guards) each caught",
+  "limit": "experiment report path via fake Run; live has no same-turn to_worker scenario",
+  "note": "p27b flake seen 3 times under load across CW-18 runs (child_pid None / children after close) - delta reviewer to check relation with run.py shell injection",
+  "observed_model": "sonnet"
+}

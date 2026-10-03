@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw18-u4-02",
+  "ticket_id": "CW-18 U4b (job-caused needs_review latch per adjudication)",
+  "role": "worker_senior",
+  "unit": "V-CW-18-p2.7",
+  "approved_bundle_digest": "4f4a016424bafe78c2c23437706e206bce3a3c770d13610785564a4a93f00a93",
+  "routing": {
+    "planned_role": "worker_senior",
+    "selected_role": "worker_senior (Opus general-purpose)",
+    "reason_codes": [
+      "shell_control_state"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/root-adjudication-p27-cw18-needs-review.json",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-u4-01.json"
+    ]
+  },
+  "required_behavior": [
+    "Per root-adjudication-p27-cw18-needs-review: clear only the job-caused needs_review latch on a fresh verified handoff whose jobs probe is empty; keep unknown/manual-residue latches and every other CW-07 invariant."
+  ],
+  "acceptance": [
+    "red->green tests in tests/terminal (job held -> clean jobs -> wb-handoff accepted; unknown residue still held; repeated cycles)",
+    "run tests/terminal, tests/backend, tests/ui (test_*.py, no pipe, venv), tests/gates/g1_vt; extend the real-Bash live check with the clean-and-retry episode"
+  ],
+  "allowed_write_paths": [
+    "src/workbench/terminal/**",
+    "tests/terminal/**",
+    "tests/backend/test_c_d58_handoff.py"
+  ],
+  "prohibited_paths": [
+    "src/workbench/backend/**",
+    "src/workbench/ui/**",
+    "tests/**/*_independent*.py",
+    "docs/**",
+    ".workflow/**"
+  ],
+  "rules": "No model prompts; never read/print/copy/hash credential contents or other processes' environ; temp dirs only under /tmp; kill only PIDs you started; never touch ~/wb-urux-sandbox or the user's processes or configs; no commits, no graphify update. A parallel worker (U3) edits src/workbench/backend - do not touch it.",
+  "result_format": "checks table first, status, changed paths + sha256, residue. Korean, <=12 lines."
+}

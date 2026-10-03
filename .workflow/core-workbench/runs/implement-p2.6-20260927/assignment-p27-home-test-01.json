@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-home-test-01",
+  "ticket_id": "CW-17 (C-D64 Workbench-owned OMP home)",
+  "role": "test_designer",
+  "unit": "V-CW-17-p2.7-home",
+  "approved_bundle_digest": "7c77b03ce61fb65c256b4dd9a4ea2977e1a32452c032ab9dc65249b6d3748bb5",
+  "routing": {
+    "planned_role": "test_designer",
+    "selected_role": "test_designer (Opus general-purpose)",
+    "reason_codes": [
+      "first_independent_verification_of_new_behaviour",
+      "credential_store_adjacent"
+    ],
+    "evidence_refs": []
+  },
+  "frozen_candidate": "3fc2a357aa866ad163ebbfc1cfd0cbd092094d0f74047f195d7955e5d2832cd7",
+  "criteria_sources": [
+    "docs/features/core-workbench/DECISIONS.md#C-D64 (incl. appended probe facts and user choices)",
+    "docs/features/core-workbench/tickets/CW-17.md 'Workbench 전용 OMP 홈'",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-home-probe-01.md",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/assignment-p27-home-senior-01.json required_behavior"
+  ],
+  "task": [
+    "1. Adapt the 17 independent tests broken by the new rules without weakening them (see .workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-home-senior-01.json failing_independent): give their fake HOME a fake agent.db regular file (NOT a real credential; any bytes) so the entrypoint starts, and add an explicit test that start refuses without it; replace the PERSONALITY-warning expectations with the new rule (user PERSONALITY.md is not read at all); re-examine p27m's assertion that PI_CODING_AGENT_DIR is forbidden and replace it with the C-D64 rule (it must be the wb agent dir).",
+    "2. New adversarial independent tests tests/backend/test_omp_home_independent_p27u.py: env construction (PI_CONFIG_DIR/PI_CODING_AGENT_DIR/BUN cache; OMP_PROFILE/PI_PROFILE/PI_* /OMP_*_DIR/XDG redirects removed; --profile refused); data dir inside/outside HOME, symlinked HOME, overlap with ~/.omp refused; config.yml rewritten each start with 0600 and required keys even if the user edited it; symlink create/repair/replace of wrong target, regular-file/dir/-wal/-shm move-aside never touching the user's home; user store resolution incl. XDG_DATA_HOME/omp/agent.db; no store -> start exit 2 with guidance and nothing created in the user's home; running backend with a vanished store removes the link; overlay never reads user omp config; restart reuses the env; isolation-check classification (leak when a user OMP dir file other than agent.db* is opened, warning when home use is not observed or no provider/model, link/inode drift).",
+    "3. Live (opt-in WB_LIVE_HOME=1) tests/backend/live_omp_home_independent_p27u.py with the real OMP and the REAL user auth store via symlink (metadata only, never read contents; no model prompt; block network for providers if feasible like the probe did): backend in a temp data dir, both OMPs isolation ok, authenticated provider ids only, lstat inventory of ~/.omp before/after shows only agent.db*/natives mtime changes (no new/deleted files), wb root contains logs/run/cache, restart a pane and recheck, shutdown verified, cleanup.",
+    "4. Run tests/backend, tests/contracts, tests/ui (pattern test_*.py, no pipe, real exit, venv python), tests/gates/g1_vt (PYTHONPATH=src:.), the live probe once."
+  ],
+  "allowed_write_paths": [
+    "tests/backend/*_independent*.py",
+    "tests/ui/*_independent*.py",
+    "tests/backend/live_omp_home_independent_p27u.py",
+    "tests/ui/independent_support_cw06.py",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-home-test-01-agent.json"
+  ],
+  "rules": "Draft expectations from the criteria before reading the implementation. Never modify production code: keep a failing test red and report it as a finding P0..P3 with file:line. Never read/print/copy/hash credential contents (agent.db*, auth files, tokens) - metadata only; no strace buffer capture; no model prompts; no omp token/auth-broker/auth-gateway/config set/login/logout; temp dirs only under /tmp, removed afterwards; kill only PIDs you started; never touch ~/wb-urux-sandbox or the user's running Workbench/OMP/herdr/tmux processes; never edit ~/.omp ~/.agents ~/.claude ~/.codex or shell configs; if any OMP you start writes into ~/.omp outside agent.db*/natives, list those files (do not delete); no commits, no graphify update; zero residue.",
+  "result_format": "Write the result JSON (checks table, adapted tests with reasons, new tests, findings, live result incl. ~/.omp inventory diff, residue). Reply in Korean, <=20 lines."
+}

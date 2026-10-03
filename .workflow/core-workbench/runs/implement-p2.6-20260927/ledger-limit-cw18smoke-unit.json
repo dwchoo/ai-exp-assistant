@@ -1,0 +1,24 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 1856,
+  "event": {
+    "id": "limit-cw18smoke-unit",
+    "kind": "limit",
+    "data": {
+      "authority": "user 2026-10-03 '\uacc4\uc18d \uc9c4\ud589\ud574\uc918' after the smoke question (C-D65 (4)); C-D55 budget delegation, workflow-contract section 8",
+      "bucket": "unit:V-CW-18-smoke",
+      "decision_owner": "Root",
+      "expected_previous": null,
+      "origin": "operating",
+      "reason": "one real-model end-to-end smoke + one rerun reserve",
+      "remaining_work_estimate": 1,
+      "scope_basis": {
+        "evidence_refs": [
+          ".workflow/core-workbench/runs/implement-p2.6-20260927/integration-p27-cw18.json"
+        ],
+        "status": "known-empty"
+      },
+      "value": 2
+    }
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-home-senior-03",
+  "ticket_id": "CW-17 (C-D64 review block corrections)",
+  "role": "worker_senior",
+  "unit": "V-CW-17-p2.7-home",
+  "approved_bundle_digest": "7c77b03ce61fb65c256b4dd9a4ea2977e1a32452c032ab9dc65249b6d3748bb5",
+  "routing": {
+    "planned_role": "worker_senior",
+    "selected_role": "worker_senior (Opus general-purpose)",
+    "reason_codes": [
+      "launcher_isolation",
+      "credential_store_adjacent",
+      "review_block"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-home-review-01-agent.json"
+    ]
+  },
+  "base_candidate": "f76ac6ebb893234d30c690abcc8836da9355b1bdc2598488a23d6629a8046589",
+  "required_behavior": [
+    "F1 (P2): drop PI_CONFIG_FILES, PI_CODING_AGENT_SESSION_DIR, OMP_TEXT_PREDICT_AGENT_DIR, OMP_AUTORESEARCH_DB_DIR from the OMP env; re-audit the OMP 18.4.5 binary strings for every other PI_*/OMP_* env that redirects config/data/session/db/cache paths and drop them too (list them in the result); make the isolation check flag any such env still present as a leak.",
+    "Browser tool off (user decision 2026-10-03): disable OMP's browser tool for Workbench OMPs by a supported config/argv (find the exact key in OMP 18.4.5; verify with get_state dumpTools that the tool is absent and that ~/.omp/browser-state is never touched); other tools (web search/fetch) unchanged. If no supported switch exists, stop and report.",
+    "F3: resolve the user's auth store the way the user's own omp would: honour the user's PI_CODING_AGENT_DIR / PI_CONFIG_DIR / OMP_PROFILE / PI_PROFILE / XDG_DATA_HOME when computing the symlink TARGET (never for the wb OMP env); if it cannot be resolved unambiguously, refuse with a clear message naming the variable.",
+    "F4: when the user has no auth store but provider API key env vars are present, start without the symlink (keys pass through the env as before); the guidance text must match the behaviour.",
+    "F5: document (omp-isolation.yml + isolation note for XDG users) that the OMP bash tool runs commands without the user's XDG_* values; no behaviour change."
+  ],
+  "acceptance": [
+    "own red->green tests in tests/backend/test_omp_home.py for F1 (each env), browser tool absent in the generated config/argv, F3 resolution cases, F4 env-key start",
+    "tests/backend/test_omp_home_independent_p27u.py and all other independent tests stay green unmodified",
+    "run tests/backend, tests/contracts, tests/ui (test_*.py, no pipe, venv), tests/gates/g1_vt; live WB_LIVE_HOME=1 once (dumpTools without the browser tool, ~/.omp inventory unchanged except agent.db* and natives mtime)"
+  ],
+  "allowed_write_paths": [
+    "src/workbench/backend/**",
+    "omp_bridge/omp-isolation.yml",
+    "tests/backend/test_omp_home.py",
+    "tests/backend/test_omp_isolation.py"
+  ],
+  "prohibited_paths": [
+    "src/workbench/ui/**",
+    "tests/**/*_independent*.py",
+    "tests/ui/**",
+    "docs/**",
+    ".workflow/**"
+  ],
+  "rules": "Never read/print/copy/hash credential contents or other processes' environ (metadata only); no strace buffer capture; no model prompts; no omp token/auth-broker/auth-gateway/config set/login/logout; temp dirs only under /tmp; kill only PIDs you started; never touch ~/wb-urux-sandbox or the user's running processes; never edit ~/.omp ~/.agents ~/.claude ~/.codex or shell configs; list (do not delete) any file an OMP you start writes into ~/.omp; no commits, no graphify update.",
+  "result_format": "checks table first, status, resolution per item with evidence, extra env list, changed paths + sha256, residue. Korean, <=20 lines."
+}

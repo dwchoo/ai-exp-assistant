@@ -1,0 +1,33 @@
+{
+ "schema_version": 1,
+ "invocation": "p27-home-test-02",
+ "status": "candidate_ready",
+ "frozen_candidate": "78315bd17ac96baa48b1cfaf6fa30bdc5dc1228b4cd96c61feef3a90bca02174",
+ "frozen_hashes_start_eq_end": {
+  "src/workbench/backend/cli.py": "4b19cac75e075b6e285db5932f600c31b4c61efcc3a010ec161884d560a85b6c",
+  "src/workbench/backend/launcher.py": "83df2585edbd386f10ebee9962ffc11ea84d922c936c9554d042c94d216fa257",
+  "src/workbench/backend/paths.py": "a5f4bf91225b35d46fe601bb49e6a6a6cce21e1e5fa9c3a9db8599c0e217c680",
+  "src/workbench/backend/service.py": "6cf2b0835173b3d9f3aef3466bdc3180a8795c8ba267164c6eda3b375f1f0cbc",
+  "src/workbench/backend/omp_home.py": "af45bd296b15c2000ce09f4d7b57c4f582ffc777936dd67084a59fe1eb40db1d",
+  "omp_bridge/omp-isolation.yml": "70c64a8618efab8ef37fbb516a7f46d6983449bda11692e412f7b48b0f845b72"
+ },
+ "checks": [
+  {"cmd": "tests/backend test_*.py", "exit": 0, "counts": "319 OK (skipped 27)", "duration_s": 304},
+  {"cmd": "tests/contracts test_*.py", "exit": 0, "counts": "48 OK", "duration_s": 1},
+  {"cmd": "tests/ui test_*.py", "exit": 0, "counts": "696 OK", "duration_s": 191},
+  {"cmd": "tests/gates/g1_vt test_*.py (PYTHONPATH=src:.)", "exit": 0, "counts": "85 OK", "duration_s": 1},
+  {"cmd": "WB_LIVE_HOME=1 live_omp_home_independent_p27u", "exit": 0, "counts": "3 OK (LiveRealStore, LiveFakeHomeXdg x2)", "duration_s": 8},
+  {"cmd": "WB_LIVE_OMP=1 live_omp_isolation_independent_p27n (TMPDIR=/tmp/wbt2n)", "exit": 0, "counts": "10 OK (before: 4 fail)", "duration_s": 87},
+  {"cmd": "WB_LIVE_OMP=1 live_omp_isolation_independent_p27m", "exit": 0, "counts": "9 OK", "duration_s": 35}
+ ],
+ "changes": [
+  "tests/backend/live_omp_home_independent_p27u.py: LiveFakeHomeXdg rewritten per root-adjudication-p27-home-natives: only natives/<installed ver>/*.node (+dirs on the way) may be created in fake ~/.omp or $XDG_DATA_HOME/omp; store companions allowed; everything else fails (negative controls verified by hand); asserts natives_status predicted it (split/dir/note); XDG and default layouts; fake ANTHROPIC_API_KEY only so OMP answers get_state",
+  "tests/backend/test_omp_isolation_independent_p27m.py: test_version_drift_is_visible_in_the_summary uses 18.4.5 for 'same' and asserts isolation absent from same drift / present in newer",
+  "tests/backend/live_omp_isolation_independent_p27n.py: fake HOME gets an empty regular agent.db; version check 18.4.5 (EVIDENCE_OMP_VERSIONS); PERSONALITY.md expectations changed to ok/no warning (C-D64, mirrors unit p27n)",
+  "tests/backend/live_omp_isolation_independent_p27m.py: version check 18.4.5 (EVIDENCE_OMP_VERSIONS)",
+  "tests/backend/test_omp_home_independent_p27u.py: new WithheldUserValuesNeverLeakTests (F2): real backend with XDG_{DATA,STATE,CACHE}_HOME set, wrapper omp dumps full env of panes + isolation checks: no WORKBENCH_USER_*, no user XDG path, Workbench home env intact"
+ ],
+ "verdicts": {"F1/F2 existing p27u tests": "green", "F2 env leak": "not leaking (new test passes)", "F3 natives": "predicted and bounded (live)", "live p27m/p27n": "repaired and green"},
+ "real_omp_dir_writes": "metadata-only inventory before/after: no new/deleted files in ~/.omp; changed only agent/agent.db*, agent/models.db*, cache/legacy-pi-extension-cache.db*, logs dir mtime (OMP processes started by live p27m/p27u RealStore and the user's own running sandbox OMPs)",
+ "residue": "none from this run; /tmp/p27-in-jhixl07c predates (2026-09-29, not mine, left); wb-urux-sandbox processes untouched; /tmp/p27u-live-report.json and temp roots removed"
+}

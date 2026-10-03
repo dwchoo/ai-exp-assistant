@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw18-review-01",
+  "verdict": "block",
+  "frozen_candidate": "d081a064d974bfc152a03a5710fd1a7f51cefb01c9a8c4be5fd821e7c2c77297",
+  "agent_result": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-review-01-agent.json",
+  "checks": {
+    "snapshot match": "1921 files",
+    "targeted": "272 OK (1 xfail F5)",
+    "node": "7/7",
+    "live": "2 OK"
+  },
+  "findings": {
+    "R1 P1": "flow_tasks.py:565-605, flow.py:489/770, run.py:358: the worker is released only after the manager's report turn is processed (OMP_PROCESSED) within 20 s; to_worker/re-run sent from that same turn gets worker_busy; turns over 20 s leave the Task busy/held until cancel",
+    "R2 P2": "cancel does not withdraw an undelivered (DEFERRED) work TASK; worker receives [A task, A cancel, B task] and runs the cancelled task; a task_id-less done closes B",
+    "R3 P2": "a deferred done report is dropped while paused and not resent after resume; Task stays busy (never created message -> resend is not replay)",
+    "R4 P3": "job-held hint (UI/skill) misses the re-takeover step after wb-handoff",
+    "R5 P3": "host input held up to ~65 s+ during TASK delivery and the worker decision",
+    "R6 P3": "after a fast cancel automation stays bound to the closed run",
+    "R7 P3": "cancel after shell_unknown -> CW-19 (same family as F5)"
+  },
+  "focus": {
+    "authority": "pass",
+    "shared shell": "pass",
+    "records": "pass",
+    "skills/isolation": "pass",
+    "tests": "pass",
+    "no-replay/lifecycle": "safe but liveness defects R1-R3"
+  },
+  "observed_model": "opus"
+}

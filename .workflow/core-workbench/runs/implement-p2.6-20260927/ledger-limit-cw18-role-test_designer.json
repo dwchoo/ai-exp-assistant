@@ -1,0 +1,23 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 1774,
+  "event": {
+    "id": "limit-cw18-role-test_designer",
+    "kind": "limit",
+    "data": {
+      "authority": "Approved PLAN p2.7h (approval-amendment-h, bundle 1addfa60...), C-D65, C-D55 budget delegation, workflow-contract section 8",
+      "bucket": "role:test_designer",
+      "decision_owner": "Root",
+      "expected_previous": {
+        "authority": "Approved PLAN p2.7d (.workflow/core-workbench/runs/planning-p2.7-20260929/approval-amendment-d.json, bundle c28a63fd...), C-D62, C-D55 budget delegation, workflow-contract section 8",
+        "reason": "C-D62 restart + copy independent tests + reserve",
+        "value": 184
+      },
+      "origin": "operating",
+      "reason": "CW-18 independent tests",
+      "remaining_work_estimate": 3,
+      "scope_basis": null,
+      "value": 187
+    }
+  }
+}

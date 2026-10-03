@@ -1,0 +1,24 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 1722,
+  "event": {
+    "id": "limit-p27home-unit",
+    "kind": "limit",
+    "data": {
+      "authority": "C-D64 (user 2026-10-03), C-D55 budget delegation, workflow-contract section 8",
+      "bucket": "unit:V-CW-17-p2.7-home",
+      "decision_owner": "Root",
+      "expected_previous": null,
+      "origin": "operating",
+      "reason": "New unit: Workbench-owned OMP home with auth symlink (probe, senior impl, independent test, review, 2 reserve)",
+      "remaining_work_estimate": 6,
+      "scope_basis": {
+        "evidence_refs": [
+          "docs/features/core-workbench/DECISIONS.md#C-D64"
+        ],
+        "status": "known-empty"
+      },
+      "value": 6
+    }
+  }
+}

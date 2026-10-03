@@ -1,0 +1,23 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 1750,
+  "event": {
+    "id": "limit-p27home2-total",
+    "kind": "limit",
+    "data": {
+      "authority": "C-D64, C-D55 budget delegation, workflow-contract section 8; result-p27-home-review-01 block F1; user answer 2026-10-03 'wb\uc5d0\uc11c \ube0c\ub77c\uc6b0\uc800 \ub3c4\uad6c \ub044\uae30'",
+      "bucket": "total",
+      "decision_owner": "Root",
+      "expected_previous": {
+        "authority": "C-D64 (user 2026-10-03), C-D55 budget delegation, workflow-contract section 8",
+        "reason": "C-D64 home isolation unit",
+        "value": 570
+      },
+      "origin": "operating",
+      "reason": "C-D64 review block corrections",
+      "remaining_work_estimate": 3,
+      "scope_basis": null,
+      "value": 573
+    }
+  }
+}

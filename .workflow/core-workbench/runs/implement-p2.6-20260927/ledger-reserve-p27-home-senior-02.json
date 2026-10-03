@@ -1,0 +1,24 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 1737,
+  "event": {
+    "id": "reserve-p27-home-senior-02",
+    "kind": "reserve",
+    "data": {
+      "buckets": [
+        "total",
+        "role:worker_senior",
+        "unit:V-CW-17-p2.7-home"
+      ],
+      "effort": "high",
+      "incident": "",
+      "invocation": "p27-home-senior-02",
+      "model": "claude-opus-5-5",
+      "purpose": "C-D64 corrections F1-F4",
+      "role": "worker_senior",
+      "unit": "V-CW-17-p2.7-home",
+      "workspace": "/home/dwchoo/ai-exp-assistant",
+      "writer": true
+    }
+  }
+}

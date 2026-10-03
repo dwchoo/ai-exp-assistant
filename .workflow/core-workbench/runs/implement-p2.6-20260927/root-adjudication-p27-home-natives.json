@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "record": "root-adjudication-p27-home-natives",
+  "decided_by": "Root",
+  "date": "2026-10-03",
+  "issue": "OMP 18.4.5 extracts its native modules (pi_natives *.node) into ~/.omp/natives/<version> (or $XDG_DATA_HOME/omp/natives) regardless of PI_CONFIG_DIR; the only redirect (XDG_DATA_HOME) would also move agent data and break the C-D64 layout. A Workbench-started OMP can therefore create ~/.omp/natives/<installed version> files when they are missing (after an OMP upgrade before the user's own omp ran, or for XDG users).",
+  "decision": "Accept as a documented residual of C-D64: the files are OMP's own version-keyed runtime binaries, byte-identical to what the user's omp extracts for the same installed version, they carry no Workbench or user data, and OMP itself prunes old versions. Workbench reports when this will happen (isolation note) and never writes anything else to the user's OMP locations. The independent live expectation is corrected to allow only ~/.omp/natives/<installed omp version>/*.node creation (or $XDG_DATA_HOME/omp/natives/<ver>) and nothing else; p27m's drift test is corrected to the 18.4.5 evidence value. Disclosed to the user.",
+  "authority": "workflow-contract Root adjudication; C-D64; result-p27-home-senior-02"
+}

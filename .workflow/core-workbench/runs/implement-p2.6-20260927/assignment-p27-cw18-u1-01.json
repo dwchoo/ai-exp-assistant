@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw18-u1-01",
+  "ticket_id": "CW-18 U1 (bridge tools + handoff service)",
+  "role": "worker_senior",
+  "unit": "V-CW-18-p2.7",
+  "approved_bundle_digest": "1addfa60ef32e80d2ed2110f902e3b069ac872d38b675c13fbbb14ec4b549316",
+  "routing": {
+    "planned_role": "worker_senior",
+    "selected_role": "worker_senior (Opus general-purpose)",
+    "reason_codes": [
+      "bridge_protocol",
+      "identity_and_idempotence"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-design-01.md sections 2, 7"
+    ]
+  },
+  "base_candidate": "77f5fc6d6ae9da5010df704e9cace4dfebd8a3d49de15b4696db6a8ec8127da0",
+  "checkpoint_ref": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-cw18-pre/"
+  ],
+  "criteria": [
+    "docs/features/core-workbench/DECISIONS.md C-D60, C-D64, C-D65",
+    "docs/features/core-workbench/tickets/CW-18.md (C-D65 설계 확정)",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-design-01.md (sections 2.1-2.4, 6)"
+  ],
+  "required_behavior": [
+    "Step 0 probe: determine the exact OMP 18.4.5 extension API for registering tools (pi.registerTool signature, parameter schema format, execute signature, how a tool returns text/JSON, abort/timeouts) with a throwaway extension in a temp dir and a scripted/no-network provider (no model prompt) - record the facts in the result.",
+    "bridge.ts: register `to_worker` only for role manager and `to_manager` only for role worker (role from the authenticated env), with JSON-schema parameters per the design (to_worker: task_id?, kind 'experiment'|'work', message, spec? {goal, paths[], instructions?, execution?{source, commit, command, criteria, environment names, shell}}, run?; to_manager: kind 'answer'|'progress'|'done'|'blocked'|'report', message, task_id?, in_reply_to?, requires_code_change?, reason?, request?). execute sends {kind:'tool_request', requestId, toolCallId, tool, args, sessionId, generation} over the existing socket and waits for the matching tool_result up to 10 s; on timeout/disconnect returns {status:'outcome_unknown'} and never resends. Results are returned immediately (no waiting for the other OMP).",
+    "backend: mailbox _receive accepts tool_request from authenticated peers only; role comes from the peer's hello token (never from the frame); tool/role mismatch -> rejected; idempotence key (role, session_id, generation, toolCallId) returns the first result again. New src/workbench/backend/flow.py HandoffService with a clear interface used by later units: handle(role, request) -> result; an outbox that delivers queued messages through the existing TaskMailbox/bridge deliver path (resend only DEFERRED, never unknown/rejected); journal workflow/handoffs.jsonl (fsync, 0600) of every request/result (reject environment variable values in messages/specs). For U1 the policy is a placeholder: to_worker without an approved active Task returns approval_pending with a stub approval record (U2 implements approvals/scope/run); to_manager without an active Task returns rejected:no_active_task; free-text delivery inside an active Task is queued. Pause state hook: when paused -> held:paused (U3 wires the real pause).",
+    "Keep the existing worker marker contract (response_contract deliveries) unchanged; a to_manager call while a staged delivery is pending is rejected by the bridge as today (tool_activity)."
+  ],
+  "acceptance": [
+    "red->green tests: tests/bridge (fake peer: role-specific tool presence, frame shape, timeout -> outcome_unknown without resend), tests/backend or tests/app for HandoffService (auth/role from token, idempotence, journal, env-value rejection, outbox deferred-only resend, placeholder statuses)",
+    "a real-OMP no-model probe proving both tools are registered per role and a tool call round-trips through the backend (use the existing scripted provider approach if available; otherwise a direct extension self-call harness) - document how",
+    "run tests/bridge, tests/backend, tests/contracts, tests/ui (test_*.py, no pipe, venv), tests/gates/g1_vt; list any *_independent* failures (do not edit them)"
+  ],
+  "allowed_write_paths": [
+    "omp_bridge/g3/bridge.ts",
+    "src/workbench/backend/flow.py",
+    "src/workbench/backend/service.py",
+    "src/workbench/ipc/bridge_g3/**",
+    "tests/bridge/**",
+    "tests/backend/**",
+    "tests/app/**"
+  ],
+  "prohibited_paths": [
+    "src/workbench/ui/**",
+    "src/workbench/contracts/ui_v1.py",
+    "src/workbench/workflow/run.py",
+    "src/workbench/terminal/**",
+    "tests/**/*_independent*.py",
+    "docs/**",
+    ".workflow/**"
+  ],
+  "rules": "No model prompts (no provider requests; block network for OMP runs like earlier probes); OMP runs only with the Workbench-owned home (C-D64) or a fake HOME; never read/print/copy/hash credential contents or other processes' environ; temp dirs only under /tmp, removed afterwards; kill only PIDs you started; never touch ~/wb-urux-sandbox or the user's processes or configs; no commits, no graphify update.",
+  "result_format": "checks table first, status, probe facts (API), interface of HandoffService for U2/U3, changed paths + sha256, failing independent tests, residue. Korean, <=25 lines."
+}

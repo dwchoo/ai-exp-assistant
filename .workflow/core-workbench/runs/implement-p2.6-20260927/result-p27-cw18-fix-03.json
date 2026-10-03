@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw18-fix-03",
+  "status": "complete_with_independent_conflict",
+  "candidate_with_fix04": "9a337a6c67f1919dd178463442e871ca669afbea4f482d0a530573eb98adebdc",
+  "audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-cw18-fix34.json",
+  "checks": {
+    "backend": "506: 1 FAIL independent p27w CompletionTests.test_done_that_does_not_reach_the_manager_keeps_the_worker_busy (encodes the pre-R1 rule), 27 skip, 1 xfail F5",
+    "bridge/workflow/lifecycle/contracts": "47/52/38/52 OK",
+    "terminal/ui": "108 / 740 OK",
+    "g1_vt/g2_shell": "85/142 OK",
+    "TS": "37/37",
+    "live WB_LIVE_CW18": "2 OK",
+    "new red->green": "backend 16, bridge 4, workflow 3"
+  },
+  "fixes": {
+    "R1": "TaskMailbox.deliver on_submitted at api_accepted; worker freed when done/blocked or experiment report is submitted (run closed there via judge(on_report)); same-turn to_worker dispatched; late unknown receipt changes nothing; unknown before acceptance -> Task closed report_outcome_unknown, rejected -> report_not_delivered (no resend, notices); to_worker racing the ack waits up to 2 s",
+    "R2": "HandoffService.withdraw removes unsubmitted messages before the cancel notice; in-flight items dropped by the lane; no cancel notice for a never-received TASK; task_id-less to_manager before the TASK reached the worker -> rejected:task_not_delivered",
+    "R3": "free-work TASK and done/blocked reports keep_across_pause, delivered once after resume; other messages still dropped held_paused",
+    "R5": "TaskWorkflow.start(before_shell_input) re-checks idle and holds right before the first typing; user typing in between -> start_failed:host_terminal_busy, nothing typed",
+    "R6": "AutomationController remembers ended run_ids, never re-binds, stays idle"
+  },
+  "out_of_scope_notes": [
+    "to-worker SKILL.md wording vs same-turn dispatch and report_outcome_unknown notices (check)",
+    "pre-existing: a later message can overtake a deferred one in the same lane",
+    "worker analysis delivery over 20 s holds the Task"
+  ],
+  "residue": "none",
+  "observed_model": "opus"
+}

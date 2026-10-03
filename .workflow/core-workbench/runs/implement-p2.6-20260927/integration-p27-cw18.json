@@ -1,0 +1,64 @@
+{
+  "schema_version": 1,
+  "units": [
+    "V-CW-18-p2.7"
+  ],
+  "status": "integrated",
+  "recorded_at": "2026-10-03",
+  "approved_bundle_digest": "4f4a016424bafe78c2c23437706e206bce3a3c770d13610785564a4a93f00a93",
+  "decision": "C-D58 (held handoff), C-D60/C-D65 (design), C-D66 (standing delegation, one task at a time); plan amendments p2.7h/p2.7i",
+  "integrated_candidate": "ba4c0d44658c81b94eabdb559c9a847c9e8af7a3cea63b3a7a8ddf0671ec4436",
+  "manifest": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-cw18-integrated-checkpoint.json (milestone, full blobs)",
+  "delta_vs_verified": "graphify-out/**, Root state.json, and the doc-only skill fix p27-cw18-fix-05 (omp_bridge/skills/**, tests/backend/test_workbench_skills.py) after review-02 (.workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-cw18-integrated.json)",
+  "behaviour": {
+    "bridge": "to_worker (manager) / to_manager (worker) registered as essential tools; tool_request frames over the authenticated socket; role from the hello token; idempotent per (role, session, generation, toolCallId); 10 s bridge timeout -> outcome_unknown, no resend",
+    "backend": "HandoffService (journal 0600/fsync, env values rejected, outbox lanes, single delivery path per target via delivery_lock, withdraw on cancel, keep_across_pause for TASK and done/blocked); TaskFlow (C-D66 immediate dispatch under standing delegation, one active Task, worker_busy without queueing, follow-up QUESTION, cancel, experiment idle-only host run via /proc session check and before_shell_input hold, cwd restore, retry limit 3, worker freed on report submission, report_outcome_unknown/report_not_delivered notices, restart handling, retired old approvals); AutomationController (LifecycleRecord/bind_production, 1 s tick, 60 s WorkerReviewScheduler, pause/resume reconciled, run_closed_while_paused -> idle); C-D58 adapter delta (one TAKEOVER per held episode) and job-caused latch release on a verified clean handoff",
+    "ui": "status lines with worker/task/automation state, prefix p pause/resume modal (Ctrl-p, ㅔ), job-held hints",
+    "skills": "to-worker (manager), to-manager (worker) via ROLE_SKILL_PATTERNS; isolation allows only the role's skill"
+  },
+  "verification_chain": [
+    "p27-cw18-design-01 (Opus)",
+    "U1 p27-cw18-u1-01",
+    "U2 p27-cw18-u2-01",
+    "U3 p27-cw18-u3-01",
+    "U4 p27-cw18-u4-01",
+    "U4b p27-cw18-u4-02 (root-adjudication-p27-cw18-needs-review)",
+    "C-D66 + U2b p27-cw18-u2-02",
+    "U5 p27-cw18-u5-01",
+    "U6 p27-cw18-u6-01",
+    "p27-cw18-test-01 (Opus; P1 F1)",
+    "p27-cw18-fix-01/02",
+    "p27-cw18-test-02 (root-adjudication-p27-cw18-f5)",
+    "p27-cw18-review-01 (Opus; BLOCK R1)",
+    "p27-cw18-fix-03/04",
+    "root-adjudication-p27-cw18-r1",
+    "p27-cw18-test-03 (p27x 18 + mutations)",
+    "p27-cw18-review-02 (integrate)",
+    "p27-cw18-fix-05 (skill text D1, doc-only)"
+  ],
+  "carried_forward": {
+    "CW-19": [
+      "F5/R7 cancel after restart or shell_unknown (xfail marker in p27w)",
+      "bound stop/force needs RecoveryFacts/RecoveryPort",
+      "takeover during a run holds reviews for the rest of the run",
+      "pending cwd restore lost on backend restart",
+      "backend restart during an experiment run leaves the run current"
+    ],
+    "CW-16": [
+      "p27b workflow timing flake (3 s pwd wait, concurrent shells)",
+      "UI timing flake test_last_fed_chunk_is_drawn_promptly",
+      "p27c DefaultPipeXfszTests load flake",
+      "OMP 18.4.5 compatibility recheck"
+    ],
+    "polish": [
+      "D2 handle holds _lock during _settle (<=2 s)",
+      "D3 delivering item can be submitted after the last withdrawn check (cancel notice follows)",
+      "a later message can overtake a deferred one in the same lane",
+      "worker analysis delivery over 20 s holds the Task"
+    ],
+    "next": [
+      "real-model end-to-end smoke (needs user confirmation)",
+      "UR-USABILITY"
+    ]
+  }
+}

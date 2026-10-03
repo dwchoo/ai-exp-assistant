@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-home-senior-02",
+  "ticket_id": "CW-17 (C-D64 corrections F1-F4)",
+  "role": "worker_senior",
+  "unit": "V-CW-17-p2.7-home",
+  "approved_bundle_digest": "7c77b03ce61fb65c256b4dd9a4ea2977e1a32452c032ab9dc65249b6d3748bb5",
+  "routing": {
+    "planned_role": "worker_senior",
+    "selected_role": "worker_senior (Opus general-purpose)",
+    "reason_codes": [
+      "launcher_isolation",
+      "credential_store_adjacent"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-home-test-01-agent.json"
+    ]
+  },
+  "base_candidate": "3546c93cbd4c7d125ccbde7daa826fbcecf4fc680c9a2048c63ce81a872cdc7e",
+  "required_behavior": [
+    "F1: validate the data dir against ~/.omp (and the user store dir) BEFORE creating anything; a refused start leaves no new directory anywhere.",
+    "F2: isolation classification resolves the user's OMP data locations with the user's original env (incl. XDG_DATA_HOME), not the stripped check env, so $XDG_DATA_HOME/omp files opened by a wb OMP count as leaks.",
+    "F3: Workbench OMPs must not create new files in the user's OMP locations. Find how OMP chooses the natives extraction dir (and any other install-level cache) and point it inside the wb root if a supported env/setting exists; if OMP offers no way, keep the user's natives dir readable but ensure no new natives are written there by Workbench-started OMPs where avoidable, and document precisely what remains (e.g. OMP upgrade extracting a new natives version) in the isolation notes - report which option you took with evidence (fake HOME tests incl. XDG user).",
+    "F4: update EVIDENCE_OMP_VERSIONS isolation to 18.4.5 with the live evidence reference, keeping the drift mechanism."
+  ],
+  "acceptance": [
+    "make tests/backend/test_omp_home_independent_p27u.py fully green without editing it; own red->green tests in tests/backend/test_omp_home.py for F1-F3",
+    "run tests/backend, tests/contracts, tests/ui (test_*.py, no pipe, venv), tests/gates/g1_vt; live WB_LIVE_HOME=1 tests.backend.live_omp_home_independent_p27u once"
+  ],
+  "allowed_write_paths": [
+    "src/workbench/backend/**",
+    "omp_bridge/omp-isolation.yml",
+    "tests/backend/test_omp_home.py",
+    "tests/backend/test_omp_isolation.py"
+  ],
+  "prohibited_paths": [
+    "src/workbench/ui/**",
+    "tests/**/*_independent*.py",
+    "tests/ui/**",
+    "docs/**",
+    ".workflow/**"
+  ],
+  "rules": "Never read/print/copy/hash credential contents (metadata only); no strace buffer capture; no model prompts; no omp token/auth-broker/auth-gateway/config set/login/logout; temp dirs only under /tmp, removed afterwards; kill only PIDs you started; never touch ~/wb-urux-sandbox or the user's running processes; never edit ~/.omp ~/.agents ~/.claude ~/.codex or shell configs; list (do not delete) any file an OMP you start writes into ~/.omp; no commits, no graphify update.",
+  "result_format": "checks table first, status, F1-F4 resolution with evidence, changed paths + sha256, residue. Korean, <=20 lines."
+}

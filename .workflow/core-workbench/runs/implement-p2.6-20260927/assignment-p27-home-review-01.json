@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-home-review-01",
+  "ticket_id": "CW-17 (C-D64 Workbench-owned OMP home)",
+  "role": "reviewer",
+  "unit": "V-CW-17-p2.7-home",
+  "approved_bundle_digest": "7c77b03ce61fb65c256b4dd9a4ea2977e1a32452c032ab9dc65249b6d3748bb5",
+  "routing": {
+    "planned_role": "reviewer",
+    "selected_role": "reviewer (fresh Opus general-purpose)",
+    "reason_codes": [
+      "credential_store_adjacent",
+      "launcher_isolation",
+      "fresh_review_of_frozen_candidate"
+    ],
+    "evidence_refs": []
+  },
+  "frozen_candidate": "f76ac6ebb893234d30c690abcc8836da9355b1bdc2598488a23d6629a8046589",
+  "criteria": [
+    "docs/features/core-workbench/DECISIONS.md#C-D64 (incl. appended facts and user choices)",
+    "docs/features/core-workbench/tickets/CW-17.md 'Workbench 전용 OMP 홈'",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/root-adjudication-p27-home-natives.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-home-probe-01.md"
+  ],
+  "delta": {
+    "base": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-home-pre/ (backend + omp_bridge before C-D64)",
+    "files": [
+      "src/workbench/backend/omp_home.py (new)",
+      "src/workbench/backend/launcher.py",
+      "src/workbench/backend/service.py",
+      "src/workbench/backend/cli.py",
+      "src/workbench/backend/paths.py",
+      "omp_bridge/omp-isolation.yml"
+    ],
+    "tests": "git diff HEAD + new tests/backend/test_omp_home.py, test_omp_home_independent_p27u.py, live_omp_home_independent_p27u.py; adapted p27m/p27n/p27p"
+  },
+  "evidence": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-home-senior-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-home-test-01-agent.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-home-senior-02.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-home-test-02-agent.json"
+  ],
+  "focus": [
+    "Credential safety: Workbench never opens/reads/copies the user's auth store (only lstat + symlink); symlink target resolution and replacement are race-safe (no TOCTOU leading to writing into or deleting user files); moved-aside files stay inside the wb home; permissions 0700/0600; no secret in logs/records/snapshots/isolation output.",
+    "Isolation completeness: env sanitisation (profiles, PI_*, OMP_* dir/db, XDG redirects) and argv; config.yml rewrite; project config precedence handled by --config; isolation check classification (leak/warning) incl. XDG users and the WORKBENCH_USER_* handoff not leaking to OMP/pane envs; restart paths reuse the same env.",
+    "No user impact: nothing created in the user's OMP locations except the adjudicated natives residual; refused starts create nothing; the user's own omp keeps working (shared agent.db with OMP's own locking).",
+    "Migration: an existing data dir (the user's sandbox) gets the new layout on next start without manual steps; behaviour when the user's auth store is missing or later removed.",
+    "Tests assert behaviour and the adaptations (p27m/p27n/p27p/p27u) keep their invariants. Note: during test runs the user's sandbox backend (started before C-D64, still running pre-C-D64 code) keeps its OMPs on ~/.omp; do not attribute its ~/.omp writes to the candidate without evidence and do not read other processes' environ."
+  ],
+  "scratch": "/tmp/claude-1000/-home-dwchoo-ai-exp-assistant/dd5e2cee-e10d-41c4-8ebb-7c00b50dd465/scratchpad/home-review/",
+  "rules": "Read-only; write only .workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-home-review-01-agent.json. You may run tests (/tmp/cw02-g1-venv/bin/python, PYTHONPATH=src, short unique TMPDIR removed after) and the opt-in live probe WB_LIVE_HOME=1 (real OMP, no model prompt). Never read/print/copy/hash credential contents or other processes' environ; no strace buffer capture; no model prompts; never pkill or pattern kills; never touch ~/wb-urux-sandbox or the user's processes or configs.",
+  "result_format": "Findings P0..P3 with file:line and a concrete failure scenario; verdict per focus; overall integrate/block. Write JSON; reply in Korean <=15 lines."
+}

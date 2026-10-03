@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw18-fix-02",
+  "status": "candidate_ready",
+  "changed": {
+    "omp_bridge/skills/to-worker/SKILL.md": "4c4585691558847085c451e12c2f61bed9d55b3497c86d35359f0bb670f8a918",
+    "src/workbench/ui/product/model.py": "55a13e75a36734c001127d584f8c8f898b93732aa55d3758dbdc3d69726e05a2",
+    "tests/ui/test_product_model.py": "4e8c72832b65f43b213b16e4e92395646e27a9346f1d70f96da13c6c9069cdd6"
+  },
+  "checks": {
+    "tests/bridge": "43 OK incl. p27w schema independent (unmodified)",
+    "test_workbench_skills": "12 OK",
+    "tests/ui": "740 OK",
+    "note": "suites were run piped through tail (exit of tail recorded); OK verified from output - Root/independent rerun will confirm"
+  },
+  "design": "F4 to-worker Results section covers dispatched/queued/cancelled/cancel_requested/worker_busy/rejected and every held:* reason; F6 UI hint (prefix t,c take over -> end jobs -> wb-handoff again) only for job-caused held reasons",
+  "residue": "none",
+  "observed_model": "sonnet"
+}

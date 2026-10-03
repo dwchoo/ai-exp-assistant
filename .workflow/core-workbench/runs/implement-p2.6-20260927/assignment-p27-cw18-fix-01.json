@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw18-fix-01",
+  "ticket_id": "CW-18 corrections F1, F2, F3, F7",
+  "role": "worker_senior",
+  "unit": "V-CW-18-p2.7",
+  "approved_bundle_digest": "4f4a016424bafe78c2c23437706e206bce3a3c770d13610785564a4a93f00a93",
+  "routing": {
+    "planned_role": "worker_senior",
+    "selected_role": "worker_senior (Opus general-purpose)",
+    "reason_codes": [
+      "shared_user_shell",
+      "lifecycle_invariants"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-test-01-agent.json"
+    ]
+  },
+  "base_candidate": "4ff19f7621a34384780ae3a08a0ebf614f11800f832c523381183c91c1493650",
+  "required_behavior": [
+    "F1 (P1): before Workbench types anything into the user's host shell for an experiment run, verify there are no user jobs: use the pinned shell session/process-group membership (or an equivalent non-intrusive check that does not type into the shell) - any running or stopped process in the shell's session other than the shell itself means busy -> held:host_terminal_busy (job), nothing typed, no retry consumed; re-check later. Make the red independent tests green without editing them.",
+    "F2: after a run returns the shell to the user, the user's shell cwd is back to where it was before Workbench typed `cd` (record it from the shell's state, restore safely; never leave the user in the worktree).",
+    "F3: a resume must always be able to leave the paused state: if the run bound at pause time is no longer current (closed while paused), resume reconciles to idle (no run) and unpauses Workbench, with an explicit result; keep reconciled-only semantics for active runs. Turn the expectedFailure into a passing test (do not edit the independent file; it should flip to an unexpected success - report it so the test owner can remove the decorator).",
+    "F7: role_skill_allowlist fails closed for unknown roles."
+  ],
+  "acceptance": [
+    "red->green own tests; tests/terminal/*_independent* F1/F2 and tests/backend F3 red tests green unmodified (F3 expectedFailure becomes unexpected success - report)",
+    "run tests/backend, tests/bridge, tests/workflow, tests/lifecycle, tests/terminal, tests/contracts, tests/ui (test_*.py, no pipe, venv), tests/gates (g1_vt, g2_shell); live WB_LIVE_CW18=1 tests.backend.live_cw18_independent_p27w once"
+  ],
+  "allowed_write_paths": [
+    "src/workbench/backend/**",
+    "src/workbench/workflow/**",
+    "src/workbench/terminal/**",
+    "src/workbench/app/**",
+    "tests/backend/test_*.py",
+    "tests/terminal/test_*.py",
+    "tests/workflow/test_*.py"
+  ],
+  "prohibited_paths": [
+    "src/workbench/ui/**",
+    "omp_bridge/**",
+    "tests/**/*_independent*",
+    "docs/**",
+    ".workflow/**"
+  ],
+  "rules": "No model prompts (scripted provider only, outbound blocked); OMP only with the Workbench home or a fake HOME (never the real HOME, not even --version); never read/print/copy/hash credential contents or other processes' environ; temp dirs only under /tmp; robust teardown; kill only PIDs you started; never touch ~/wb-urux-sandbox or the user's processes or configs; no commits, no graphify update. A parallel worker edits omp_bridge/skills and src/workbench/ui/product - do not touch them.",
+  "result_format": "checks table first, status, fix summary per finding, changed paths + sha256, residue. Korean, <=20 lines."
+}

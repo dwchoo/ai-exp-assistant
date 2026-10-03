@@ -1,0 +1,110 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw18-review-01",
+  "role": "reviewer",
+  "unit": "V-CW-18-p2.7",
+  "frozen_candidate": "d081a064d974bfc152a03a5710fd1a7f51cefb01c9a8c4be5fd821e7c2c77297",
+  "candidate_verified": "working tree == p27-snapshot-cw18-test2-after.json identity (1921 files, 0 sha256 mismatches, no extra files under src/tests/omp_bridge)",
+  "overall": "block",
+  "overall_reason": "One P1: under C-D66 a Task frees the worker only after the manager's turn that processes the report has ENDED (OMP_PROCESSED after agent_end, within the 20 s deliver timeout). The manager therefore cannot dispatch the next Task or re-run in the turn that reads the done/experiment report (worker_busy), and a manager turn longer than 20 s leaves the Task busy/held until a cancel. Scripted-provider evidence never exercises a same-turn to_worker or a >20 s manager turn. Safety invariants (authority, idle-only start, no replay, records) hold.",
+  "findings": [
+    {
+      "id": "R1",
+      "severity": "P1",
+      "title": "Worker is freed only after the manager's report turn ends: same-turn next to_worker -> worker_busy; >20 s manager turn -> Task stuck busy/held",
+      "locations": [
+        "src/workbench/backend/flow_tasks.py:565-571 (work done/blocked: listener only; Task stays busy)",
+        "src/workbench/backend/flow_tasks.py:581-584 (any outbox event other than 'delivered' -> held_reason <kind>_report_<event>, Task never closes)",
+        "src/workbench/backend/flow.py:489-490 (_TERMINAL_STATES: 'delivered' only for OMP_PROCESSED/API_RETURNED; real deliver returns OMP_PROCESSED only after agent_end, bridge.ts:323-341)",
+        "src/workbench/backend/flow.py:503,770 (deliver_timeout 20 s covers the whole manager turn; timeout -> UNKNOWN)",
+        "src/workbench/backend/flow_tasks.py:946-1003 + src/workbench/workflow/run.py:358 (experiment: status waiting_report (busy) until the report is OMP_PROCESSED within the default 20 s; else run stays current, Task held run_reported)",
+        "src/workbench/backend/flow_tasks.py:437-438 (re-run while waiting_report -> worker_busy)",
+        "omp_bridge/skills/to-worker/SKILL.md:36 (tells the manager to decide follow-up/re-run/new Task after a report, which is refused in that turn)"
+      ],
+      "failure_scenario": "Real provider: worker calls to_manager {kind: done}. The lane delivers the report; the manager's turn starts and, as the skill instructs, calls to_worker for the next Task -> {status: worker_busy, task.status: held:done_report_pending}; BUSY_DETAIL tells it to wait for the done report it is reading. The turn ends, the Task closes, nobody prompts the manager again: the C-D66 chain stalls until the user types. If that manager turn lasts > 20 s (normal for a model that verifies the result), the receipt is UNKNOWN -> held_reason done_report_unknown, the Task never closes, every later to_worker is worker_busy until the manager cancels a Task whose work is actually done. Same for experiments: run.judge() report > 20 s -> run not completed, Task held run_reported; re-run in the report turn -> worker_busy. Reproduced in scratch (FlowFixture + gated FakeMailbox modelling OMP_PROCESSED-after-turn): in-turn next to_worker -> worker_busy held:done_report_pending; deliver_timeout 0.3 -> Task 'running' done_report_unknown, worker busy.",
+      "suggestion": "Free the worker when the report is submitted to the manager (api_accepted / created+submitted), not when the manager's turn ends; treat a post-submission UNKNOWN as 'report submitted, processing unknown' for the Task (no replay needed). Add a test where the manager calls to_worker inside the report turn and one with a manager turn longer than deliver_timeout (also in the live probe with a scripted manager that dispatches in the report turn)."
+    },
+    {
+      "id": "R2",
+      "severity": "P2",
+      "title": "Cancel does not withdraw a not-yet-delivered free-work TASK: the worker still receives and performs the cancelled Task",
+      "locations": [
+        "src/workbench/backend/flow_tasks.py:497-521 (_finish_cancel closes the Task and enqueues a cancel notice, but leaves the queued TASK entry)",
+        "src/workbench/backend/flow.py:757-779 (_deliver_once never checks that the outbound run is still its Task's current run)",
+        "src/workbench/backend/flow_tasks.py:687-720 (_start_work only checks that the worker is connected, so the TASK is often DEFERRED while the worker is in a turn)"
+      ],
+      "failure_scenario": "Manager dispatches work Task A while the worker OMP is still in a turn (TASK deferred), then cancels A and dispatches B. When the worker becomes idle the lane delivers, in order: TASK A (cancelled run), the cancel notice for A, TASK B. The worker starts working on A (may edit files in the allowed paths) before it sees the cancel. A later done report without task_id is attributed to the active Task. Reproduced in scratch: delivered to worker = [A task, A cancel, B task]; an untagged done report closed Task B as done.",
+      "suggestion": "On cancel/supersede, drop pending (not yet created/submitted) outbox entries of that run, and re-check in the lane before create/deliver that the run is still current (repository.get_current_run); test cancel-while-deferred."
+    },
+    {
+      "id": "R3",
+      "severity": "P2",
+      "title": "A pause drops a worker's queued done/blocked report (never created); after resume the work Task stays busy with no path but a blind cancel",
+      "locations": [
+        "src/workbench/backend/flow.py:757-760 (paused -> held_paused, entry finished, never resent)",
+        "src/workbench/backend/flow_tasks.py:577-584 (held_paused -> held_reason done_report_held_paused, Task stays running)"
+      ],
+      "failure_scenario": "Worker reports done while the manager is in a turn (report DEFERRED in the lane). The user pauses (plausible exactly while the manager works), then resumes (reconciled). The report was never created or submitted, so the manager never learns the work is done; the worker believes it reported; worker_view stays busy; every to_worker -> worker_busy. Reproduced in scratch: after resume Task 'running' held done_report_held_paused, manager got report False, next to_worker worker_busy. The same applies to a free-work TASK paused before creation (run started, no TASK message, worker's to_manager -> no_task_message).",
+      "suggestion": "A message never created/submitted is not a replay: keep it pending (held) across the pause and deliver after a reconciled resume, or notify the sender/manager and free the Task. Add a pause-during-deferred-report test."
+    },
+    {
+      "id": "R4",
+      "severity": "P3",
+      "title": "Job-held recovery hint is incomplete for an experiment start",
+      "locations": [
+        "src/workbench/ui/product/model.py:103,1803",
+        "omp_bridge/skills/to-worker/SKILL.md:35"
+      ],
+      "failure_scenario": "Task shows held:host_terminal_busy with manual_jobs/unknown_or_manual_residue; the UI says 'jobs 정리 후 wb-handoff'. After the user kills the jobs and runs wb-handoff the parent is in control_wait (or manager-owned after accept), which automation_busy also treats as busy; the run starts only after another takeover (t, c) back to a user-owned clean prompt (as tests/terminal/test_cw18_host_shell_independent_p27w.py:349-385 does). The hint stops one step short.",
+      "suggestion": "Add '→ 다시 인수(t,c)' to the hint / skill text for host_terminal_busy."
+    },
+    {
+      "id": "R5",
+      "severity": "P3",
+      "title": "User input on the host shell is refused for the whole TASK delivery + worker decision + worktree preparation, not only while Workbench types",
+      "locations": [
+        "src/workbench/backend/flow_tasks.py:771-778 (hold before workflow.start)",
+        "src/workbench/workflow/run.py:550-583 (deliver TASK (20 s) + worker_port.observe (45 s) + prepare_execution_worktree before the first send_user)"
+      ],
+      "failure_scenario": "With a real worker model the user's keystrokes in the host pane are refused (host_shell_automation) for up to ~65 s+ before anything is typed. Bounded and fail-safe (input never mixed, hold always released), but longer than the ticket's 'held only while Workbench types the start'.",
+      "suggestion": "Check idle, run the TASK/worker/worktree steps, then re-check idle and hold just before the cd; or document the bound."
+    },
+    {
+      "id": "R6",
+      "severity": "P3",
+      "title": "Quick cancel of a free-work run can leave AutomationController bound to the closed run",
+      "locations": ["src/workbench/backend/automation.py:325-391", "src/workbench/backend/flow_tasks.py:520,736"],
+      "failure_scenario": "Cancel between the TASK 'created' event and work_started's _bind: run_ended (spawned thread) finds no bound run and returns, then _bind binds the cancelled run; automation shows state active/run for a closed run until the next bind (pause/resume still fail safe via the F3 path).",
+      "suggestion": "In _bind, drop the binding when the run is no longer current (or remember ended run_ids)."
+    },
+    {
+      "id": "R7",
+      "severity": "P3",
+      "title": "Cancel after shell_unknown closes the run as cancelled while the host command may still be running (no restart needed)",
+      "locations": ["src/workbench/backend/flow_tasks.py:933-939,486-495"],
+      "failure_scenario": "collect() returns shell_state unknown -> runner leaves, _following cleared; a later cancel takes the immediate path and cancel_run()s while the command may still run. Next starts stay protected by the idle-only check; records only. Same class as F5 (root-adjudication-p27-cw18-f5); carry with it to CW-19.",
+      "suggestion": "Record with the F5 carry-forward."
+    }
+  ],
+  "focus_verdicts": {
+    "authority": "pass - role comes from the authenticated hello peer (service.py set_tool_handler, mailbox.py _accept_tool_request checks frame session/generation); TOOL_ROLES rejects cross-role tools; only TaskFlow calls approve_scope/proceed/start_run (grep); decisions carry actor user_standing_delegation / authority C-D66; worker 'request' is classified with dispatch_authorized false; pause/resume exist only as ui_v1 client types.",
+    "one_task_no_replay": "pass with defects - worker_busy without queue and outcome_unknown/no-resend hold; but R1 (worker freed only after the report turn ends), R2 (stale TASK after cancel), R3 (paused report dropped, Task stuck).",
+    "shared_user_shell": "pass - start only under io_lock when user-owned manual_prompt, no pending/partial line, no held job/residue reasons, no in-flight request and no live session member via /proc (no typing); input refused only while held and the hold is always released; cwd restore F2; C-D58 dead end removed and job latch cleared only by a fresh clean handoff per adjudication. P3: R4, R5.",
+    "lifecycle": "pass with defects - 60 s review via WorkerReviewScheduler, pause flag shared, resume only reconciled, run_closed_while_paused path, retry limit consistent with CW-13 (retries_used >= 3 blocks), per-target delivery lock across all mailboxes, shutdown order sound. R1 is a lifecycle liveness defect; R6 minor.",
+    "records": "pass - handoffs.jsonl/tasks-flow.jsonl 0600, O_NOFOLLOW, owner check, fsync per record and dir fsync; env values rejected and journaled as field names only; ui_v1 changes additive (pause/resume, new reasons, task/worker/automation fields); UI text sanitized (_plain/_clip).",
+    "skills_isolation": "pass with note - to-worker/to-manager match the TO_WORKER/TO_MANAGER schemas and C-D66; role skill filter fails closed; isolation tests green. Skill text affected by R1 (line 36) and R4 (line 35).",
+    "tests": "pass - behaviour-asserting; only xfail is F5 with the adjudication reason; independent p27w suites green. Gap: no test for in-turn dispatch after a report, >deliver_timeout manager turn, cancel-while-deferred TASK, pause-while-deferred report."
+  },
+  "checks": [
+    {"cmd": "snapshot identity vs working tree (sha256 of 1921 files)", "exit": 0, "result": "match"},
+    {"cmd": "PYTHONPATH=src unittest (23 CW-18 related modules: backend task_flow/handoff/automation/cw18_*/c_d58/roundtrip/skills/isolation/paths_launcher, bridge cw18/delivery_serialization/tool_request/handoff_tools, terminal cw18/held_handoff/job_latch, ui cw18, contracts ui_v1, workflow run)", "exit": 0, "result": "272 OK, expected failures=1 (F5)"},
+    {"cmd": "node --test tests/bridge/*.test.ts", "exit": 0, "result": "7/7 pass"},
+    {"cmd": "WB_LIVE_CW18=1 unittest tests/backend/live_cw18_independent_p27w.py (scripted provider, fake HOME)", "exit": 0, "result": "2 OK (end_to_end, background-job wait), 46 s, temp dir empty after"},
+    {"cmd": "scratch repro_inturn.py (R1)", "exit": 0, "result": "in-turn to_worker -> worker_busy held:done_report_pending; deliver_timeout 0.3 -> Task running done_report_unknown, worker busy"},
+    {"cmd": "scratch repro_cancel.py (R2)", "exit": 0, "result": "worker received [A task, A cancel, B task]; untagged done closed Task B"},
+    {"cmd": "scratch repro_pause.py (R3)", "exit": 0, "result": "after resume Task running done_report_held_paused; manager never got the report; next to_worker worker_busy"}
+  ],
+  "not_run": "full discover of tests/backend, tests/terminal, tests/ui, tests/gates (covered by result-p27-cw18-test-02-agent.json at the same candidate); real-model smoke (needs user confirmation).",
+  "scratch": "/tmp/claude-1000/-home-dwchoo-ai-exp-assistant/5021627f-b787-4630-9a89-e401e5ed3935/scratchpad/cw18-review/ (repro scripts and logs; no repository files changed)",
+  "residue": "none: test temp dirs removed; no owned process left; no model prompts; OMP only via the live probe's fake HOME; ~/wb-urux-sandbox and user processes untouched; no commits, no graphify update"
+}

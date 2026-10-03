@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw18-fix-04",
+  "status": "candidate_ready",
+  "changed": {
+    "src/workbench/ui/product/model.py": "42739b58623a5724417946307dd89a258531271e232db48646924b8d0a924afc",
+    "omp_bridge/skills/to-worker/SKILL.md": "889a1e7c8960abd9232e2998f78acc2bf28a77869b62c53b53e4567deb0cfc3b",
+    "tests/ui/test_product_model.py": "907921df79c89c7e21a4b2d0884cf7021983ce9f3af31e2880a54b25cb3b8f97",
+    "tests/backend/test_workbench_skills.py": "b3b294c200f1fee98b5e802f2a03c50bc8ad62f947eb2b9d88ada07a2a505990"
+  },
+  "checks": {
+    "red": "tests.ui.test_product_model 4 FAIL (new assertions)",
+    "green": "tests.ui (21 modules incl. independent) + test_workbench_skills: 753 OK, exit 0"
+  },
+  "design": "hint sequence per C-D58 test test_held_handoff_user_recovers_and_the_next_run_can_start: prefix t,c take over -> end jobs -> wb-handoff -> prefix h back to manager -> prefix t,c re-take over (as the reviewer's R4 noted); full text in the refusal notice (JOB_HELD_HINT), short form in the Task status line (JOB_HELD_TASK_NOTE); to-manager unchanged",
+  "gaps": [
+    "skill test red not observed separately",
+    "sequence derived from code/test reading, not re-run",
+    "narrow-terminal truncation of the status note unchecked"
+  ],
+  "residue": "none",
+  "observed_model": "sonnet"
+}

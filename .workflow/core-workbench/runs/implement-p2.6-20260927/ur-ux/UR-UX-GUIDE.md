@@ -45,6 +45,9 @@ prefix는 `Ctrl-]`다. 한글 입력 상태에서도 되도록 Ctrl 조합(Ctrl�
 
 - 복사는 바깥 terminal의 clipboard로 OSC 52를 보낸다. herdr는 그대로 된다. tmux는 `set -s set-clipboard on` 또는 `set -g allow-passthrough on`이 필요하다(현재 사용자 설정은 둘 다 켜져 있음).
 - mouse를 직접 쓰는 pane 프로그램(예: mouse를 켠 vim)에는 드래그를 그대로 전달한다. 그때 terminal 자체 선택은 Shift+드래그다.
+- wb가 띄우는 OMP는 wb 전용 OMP 홈(`<data dir>/omp-root`)을 쓴다(C-D64). 사용자 전역 설정·skill·agent·세션·memory를 보지 않고 사용자 `~/.omp`에 기록하지 않는다. 인증만 사용자 OMP 인증 파일(`agent.db`)을 symlink로 공유하므로 login/logout은 일반 omp와 함께 적용된다. 인증 파일이 없고 provider API key 환경 변수도 없으면 wb는 시작하지 않고 안내만 보인다(밖에서 `omp` 실행 후 `/login`).
+- wb OMP에서는 OMP 브라우저 도구가 꺼져 있다(사용자 결정). worktree·cache도 wb 홈 안에 생긴다.
+- 예외: OMP 실행 부품(`~/.omp/natives/<버전>`)은 OMP가 항상 그 위치에 푼다. OMP 업그레이드 직후 일반 omp보다 wb를 먼저 켜면 wb OMP가 그 버전의 부품을 풀 수 있다(일반 omp와 같은 파일).
 - 종료된 OMP나 host terminal을 다시 시작하면 이전 세션에 남아 있던 process(예: 그 OMP가 백그라운드로 띄운 명령, 종료된 shell에 남은 `nohup` job)는 정리된다. 다시 시작하기 전에 필요한 process인지 확인한다.
 - host terminal 강제 종료는 shell과 그 job을 모두 종료한다. 스스로 session을 분리한 daemon(`setsid`, double-fork)은 종료하지 않는다. 권한이 없어 종료할 수 없는 process(예: `sudo`로 실행 중인 명령)는 남은 process로 보고된다.
 

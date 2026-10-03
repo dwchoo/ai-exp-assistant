@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw18-u5-01",
+  "ticket_id": "CW-18 U5 (product UI: task/worker/automation state, pause/resume)",
+  "role": "worker",
+  "unit": "V-CW-18-p2.7",
+  "approved_bundle_digest": "4f4a016424bafe78c2c23437706e206bce3a3c770d13610785564a4a93f00a93",
+  "routing": {
+    "planned_role": "worker",
+    "selected_role": "worker (wb-worker, Sonnet high)",
+    "reason_codes": [
+      "bounded_pattern"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-u2-02.json ui_v1_for_U5",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-u3-01.json ui_v1_automation_for_U5"
+    ]
+  },
+  "base_candidate": "98351a6888f3ed33562e9b568053dc18249faf8d7d3ccccf4bef3d3054bbc1d3",
+  "criteria": [
+    "docs/features/core-workbench/DECISIONS.md#C-D66 (UI shows current Task and worker state instead of approval cards)",
+    "ui_v1 state fields task{...}, worker{...}, automation{...} (see the evidence results)",
+    "existing product UI conventions (IME-neutral prefix commands, Ctrl aliases, jamo, menu, confirmation modal like the host-shell kill)"
+  ],
+  "required_behavior": [
+    "Status area (top lines): show worker state (대기/작업 중), the active Task (kind 실험/작업, short summary, status incl. held reasons like host terminal 사용 중, waiting for report, cancelling), and automation state (idle/active/paused/pausing/resuming, 60 s review next due / held reason, interruption state). Keep within the existing two status lines where possible; truncate safely on narrow terminals.",
+    "Pause/resume: prefix p (Ctrl alias Ctrl-p if no collision; jamo ㅔ via the existing conversion) opens a small confirmation like the kill modal: when running -> '자동화를 일시정지합니다 (p: 확인)'; when paused -> '대조 후 재개합니다 (p: 확인)' which sends resume{reconciled:true}; any other input cancels; show results/refusals (resume_not_reconciled etc.) in the footer. Add both to the prefix Space menu (below the numbered items like the kill row) and one help line.",
+    "Remove any leftover UI for approvals (if any) and make the UI tolerant of unknown/absent fields (older/newer backend)."
+  ],
+  "acceptance": [
+    "red->green tests in tests/ui/test_product_model.py for rendering of each task/worker/automation state, narrow width truncation, pause/resume modal flows incl. cancel paths, refusals",
+    "one PTY test in tests/ui/test_product_pty.py with a fake backend state push showing a busy worker and a paused automation",
+    "all tests/ui test_*.py pass (no pipe, real exit); list any *_independent* failures without editing them"
+  ],
+  "allowed_write_paths": [
+    "src/workbench/ui/product/**",
+    "tests/ui/test_product_model.py",
+    "tests/ui/test_product_pty.py"
+  ],
+  "prohibited_paths": [
+    "src/workbench/backend/**",
+    "src/workbench/contracts/**",
+    "omp_bridge/**",
+    "tests/**/*_independent*.py",
+    "tests/ui/live_*.py",
+    "docs/**",
+    ".workflow/**"
+  ],
+  "rules": "Use /tmp/cw02-g1-venv/bin/python, short unique TMPDIR removed afterwards; no model prompts; OMP only with the Workbench home or a fake HOME (never the real HOME, not even --version); never read/print/copy/hash credential contents or other processes' environ; kill only PIDs you started; never touch ~/wb-urux-sandbox or the user's processes or configs; no commits, no graphify update; zero residue. A parallel worker (U6) edits omp_bridge/skills and backend launcher/omp_home - do not touch them.",
+  "result_format": "checks table first, status, changed paths + sha256, residue. Korean, <=15 lines."
+}

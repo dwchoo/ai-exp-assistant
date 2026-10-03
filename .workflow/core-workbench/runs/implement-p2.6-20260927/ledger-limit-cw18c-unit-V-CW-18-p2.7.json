@@ -1,0 +1,23 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 1829,
+  "event": {
+    "id": "limit-cw18c-unit-V-CW-18-p2.7",
+    "kind": "limit",
+    "data": {
+      "authority": "C-D55 budget delegation, workflow-contract section 8; result-p27-cw18-review-01 block R1",
+      "bucket": "unit:V-CW-18-p2.7",
+      "decision_owner": "Root",
+      "expected_previous": {
+        "authority": "Approved PLAN p2.7h (approval-amendment-h, bundle 1addfa60...), C-D65, C-D55 budget delegation, workflow-contract section 8",
+        "reason": "CW-18: U1-U6 workers, 2 independent tests, 2 reviews, 3 corrections",
+        "value": 14
+      },
+      "origin": "operating",
+      "reason": "review block: senior + worker corrections, rerun, delta review",
+      "remaining_work_estimate": 4,
+      "scope_basis": null,
+      "value": 18
+    }
+  }
+}

@@ -1,0 +1,135 @@
+{
+ "schema_version": 1,
+ "invocation": "p27-cw18-test-01",
+ "role": "test_designer",
+ "unit": "V-CW-18-p2.7",
+ "frozen_candidate": "b3ba285c8152322c4a3843a2af0dd1554916591f965b8c32ef4d2ca1cb25d30f",
+ "status": "findings (P1 x1, P2 x2, P3 x4); live e2e passes",
+ "method": "expectations drafted from C-D58/C-D60/C-D64/C-D65/C-D66, CW-18 ticket, root adjudications and unit required_behavior before reading flow.py/flow_tasks.py/automation.py/panes.py; production code untouched",
+ "adapted_tests": {
+  "test_omp_isolation_independent_p27m.py": "x3: skills dir holds exactly to-manager/to-worker (front matter = dir); default role filter manager ['to-worker'], worker ['to-manager']; role_skill_allowlist exact even with look-alike skills (to-worker-extra, x-to-worker, to-managers, orca-cli); +1 new: real allow-lists accept only the role's own skill, the other role's skill and orca-cli are leaks",
+  "test_omp_isolation_independent_p27n.py": "x1: default overlay includeSkills per role exact, ignoredSkills []",
+  "test_paths_launcher.py": "x2: worker overlay includeSkills ['to-manager']; repo ships exactly the two skills; allow-lists exact",
+  "live_omp_isolation_independent_p27n.py": "check() uses role_skill_allowlist(role) instead of () (opt-in live; not run)",
+  "result": "the 6 previously failing tests now pass (32 OK in the targeted classes)"
+ },
+ "new_tests": {
+  "tests/backend/test_cw18_flow_independent_p27w.py": "48 total with automation file; roles/spoof/idempotence(+restart)/8-way concurrent dispatch, env values (5 forms, never journaled), symlinked journal refused, 0600, C-D66 dispatch work+experiment (decisions actor/authority/tool_call_id), worker_busy in all 6 active states with nothing created/queued, follow-up, cancel phases, done/blocked/unknown-report, retry 1+3, revision, pause (held, no replay, held start, collect(paused=True), outbox held_paused not resent), restart (unstarted closed, work held backend_restarted, experiment held, approvals retired once), ui_v1 (approval_decide/approvals -> unsupported_type, resume reconciled non-bool refused, vocabularies). 1 red (F6)",
+  "tests/backend/test_cw18_automation_independent_p27w.py": "review not at 59.9 s, due at 60.0 s (injected clock), one per interval, none after run_ended; single paused source holds HandoffService at once, resume replays nothing; pause-while-closing pinned as expectedFailure (F3)",
+  "tests/bridge/test_cw18_bridge_independent_p27w.py": "real G3 socket + HandoffService + TaskFlow + TaskMailbox: work round trip, worker_busy, duplicate call, frame role/actor ignored, session_mismatch, no overlapping deliveries into the worker (handoff lane + direct TaskMailbox), handoff for an old worker session not delivered into the new one. all green",
+  "tests/bridge/test_cw18_schema_independent_p27w.py (+ cw18_schema_dump_independent_p27w.ts)": "bridge.ts schemas vs flow.validate_arguments (keys, kinds, required, limits, env-name rule, request shape, valid examples accepted); skills: front matter, every field, one-task rule, marker, no approval wording. 1 red (F4)",
+  "tests/terminal/test_cw18_host_shell_independent_p27w.py": "real ShellPane/HostShellPort/TaskWorkflow: partial line never overwritten, foreground program busy, manager-owned/handoff busy, hold refuses user input and releases, two runs on the same shell with typing between, cancel during host command never kills, C-D58 held handoff recovery + adjudicated latch clearing, residue latch not a dead end. 4 red (F1 x3, F2)",
+  "tests/ui/test_cw18_ui_independent_p27w.py": "all ui_v1 statuses/kinds/worker states and flow held reasons have text, control-sequence injection stripped, wrong types tolerated, worker/Task/held reason visible at 80 cols, p/Ctrl-p/ㅔ pause, resume reconciled=true, no double request in pausing/resuming, k modal intact. all green",
+  "tests/backend/live_cw18_independent_p27w.py": "opt-in WB_LIVE_CW18=1; see live"
+ },
+ "hashes": {
+  "tests/backend/test_cw18_flow_independent_p27w.py": "845a194693ed453073da4f4de6b7ec039714841b6c87233fa35b83402a75b44a",
+  "tests/backend/test_cw18_automation_independent_p27w.py": "b8f65b24f1949ce915916a9e90000981c14b629f86475be99561d9117759d977",
+  "tests/backend/live_cw18_independent_p27w.py": "9e340388b0284521b4f49f269c3596176ffe65129bd856f7f4c6b75fe3ca2665",
+  "tests/bridge/test_cw18_bridge_independent_p27w.py": "57156ec09daf4abc7a7ffb8904a43eb45c838437e8a7d1555c922bf142f6b12e",
+  "tests/bridge/test_cw18_schema_independent_p27w.py": "87e1162296c5260ff154f2291efd94eb8f4ee0d43121e1d6b27c98fb6f8951bf",
+  "tests/bridge/cw18_schema_dump_independent_p27w.ts": "d7acd4bdbc5c7d80b0e0d19c3b6f6ca068b56a3c278713cbf6117ad753ac90e7",
+  "tests/terminal/test_cw18_host_shell_independent_p27w.py": "fc4e380efbc3ed10c4c3e74ad0fa09421a34a973c31d68d966c6aaa46e877b84",
+  "tests/ui/test_cw18_ui_independent_p27w.py": "c1b602ead824e10c507050a4b952ac1985801299b209182cc087806919e65f64",
+  "tests/backend/test_omp_isolation_independent_p27m.py": "f7689b2abdb0ba7ebdb36b1c94ed3f340353f7e441cc8313ac4e651c602610bb",
+  "tests/backend/test_omp_isolation_independent_p27n.py": "e0b406d1cc9de2cdf6012f88ac1116e3c6e663482c545fe2df5403f22308f735",
+  "tests/backend/test_paths_launcher.py": "e0d80f6963be77d79f943251d1e46d94239f986bce9e73a5928968464e0cbaa6",
+  "tests/backend/live_omp_isolation_independent_p27n.py": "327711909e788c09c4506a81e9ad1c6483a6e49a84d0837caa68e9dbda22413f"
+ },
+ "findings": [
+  {
+   "id": "F1",
+   "severity": "P1",
+   "title": "user background/suspended job at a plain prompt is not detected; Workbench types into the user's shell",
+   "where": "src/workbench/backend/panes.py:700-735 (automation_busy: jobs only via held_reasons manual_jobs, which only a wb-handoff probe sets); src/workbench/backend/flow_tasks.py:753 (hold), 788-803 (start failure path), 819-829 (_give_back only when input_owner==manager)",
+   "observed": "with `sleep N &` (or a Ctrl-Z job) at a clean prompt busy() is None; the experiment start holds the shell, types `cd <worktree> && pwd -P > ...` and `wb-handoff`, the handoff is held (manual_jobs), start fails UnsafeShellState 'no clean direct same-parent handoff'; Task -> finished start_failed (runs_started 1, a retry consumed); the user's shell is left in control_wait (held manual_jobs/unknown_or_manual_residue), input refused until a takeover. Reproduced live through python -m workbench start.",
+   "criteria": "C-D65 (2), C-D66 (3): start only when user-owned clean prompt AND no job, else held:host_terminal_busy and retry; user keystrokes/shell never taken",
+   "tests": [
+    "test_cw18_host_shell_independent_p27w.IdleOnlyTests.test_background_job_at_a_plain_prompt_keeps_the_shell_busy",
+    "...test_experiment_never_starts_while_a_user_background_job_runs",
+    "...test_suspended_job_keeps_the_shell_busy",
+    "live_cw18_independent_p27w.test_experiment_waits_while_the_user_has_a_background_job"
+   ]
+  },
+  {
+   "id": "F2",
+   "severity": "P2",
+   "title": "after a run the user's host shell is left in the Workbench worktree",
+   "where": "src/workbench/workflow/run.py:584-585 (cd typed into the injected product shell); flow_tasks._give_back restores nothing",
+   "observed": "user at /tmp before the run; `pwd` after give-back = <data>/workflow/worktrees/<task>-r1-<id>",
+   "tests": [
+    "test_cw18_host_shell_independent_p27w.ConsecutiveRunsTests.test_the_users_working_directory_is_unchanged_after_a_run"
+   ]
+  },
+  {
+   "id": "F3",
+   "severity": "P2",
+   "title": "pause while the run closes strands the whole Workbench in paused (documented U3 limit, impact wider than recorded)",
+   "where": "src/workbench/backend/automation.py:355 (keep bound), 643-666 (_resume); policy/pause_automation/controller.py:1956",
+   "observed": "run closed during a pause -> every resume refused 'only an uncancelled paused run can be resumed'; paused stays true, so every to_worker is held:paused and TaskFlow starts nothing until a backend restart; reachable when the closing report/judge is in flight at pause time",
+   "note": "root-adjudication-p27-cw18-u3-open carried 'pause-while-closing' as a limit; pinned as expectedFailure, not red",
+   "tests": [
+    "test_cw18_automation_independent_p27w.PauseNeverStrandsTests (expectedFailure)"
+   ]
+  },
+  {
+   "id": "F4",
+   "severity": "P3",
+   "title": "to-worker skill does not explain held results (held:paused, held:retry_limit, held:no_active_run)",
+   "where": "omp_bridge/skills/to-worker/SKILL.md:23 (Results lists dispatched/queued/cancelled/cancel_requested/worker_busy/rejection only)",
+   "tests": [
+    "test_cw18_schema_independent_p27w.SkillContentTests.test_to_worker_explains_every_result_status_the_backend_returns"
+   ]
+  },
+  {
+   "id": "F5",
+   "severity": "P3",
+   "title": "cancel after a backend restart closes an experiment Task as cancelled at once while its host command may still run",
+   "where": "src/workbench/backend/flow_tasks.py:472-481 (_following is None after restart -> _finish_cancel)",
+   "note": "criteria 'running host command -> no kill, cancelled after'; reconcile is CW-19 scope -> candidate carry",
+   "tests": [
+    "test_cw18_flow_independent_p27w.RestartTests.test_cancel_after_restart_never_claims_cancelled_while_the_host_command_may_still_run"
+   ]
+  },
+  {
+   "id": "F6",
+   "severity": "P3",
+   "title": "after recovering from a job-held wb-handoff, automation stays held:host_terminal_busy until a fresh clean wb-handoff AND a takeover back",
+   "where": "panes.py:724-730 (latched manual_jobs/unknown_or_manual_residue)",
+   "note": "fail-safe and per the needs-review adjudication; the UI/skill give no hint how to clear it. Test asserts the adjudicated sequence (green)."
+  },
+  {
+   "id": "F7",
+   "severity": "P3",
+   "title": "role_skill_allowlist(unknown role) returns every skill (fail-open, unreachable: callers pass manager/worker)",
+   "where": "src/workbench/backend/launcher.py:520-521"
+  },
+  {
+   "id": "known",
+   "severity": "info",
+   "title": "paused -> cancel answers held:paused (U2b open item); OMP text-predict helper writes into <data>/omp-root/agent/predict shortly after confirmed shutdown (live cleanup retries rmtree)"
+  }
+ ],
+ "checks": {
+  "tests/backend": "482 OK (skipped 27, expected failures 1) - discovered before F5 test was added; independent backend files rerun: 48, 1 FAIL (F5), 1 expected failure (F3)",
+  "tests/bridge": "43: 1 FAIL (F4) else OK",
+  "tests/workflow": "49: test_workflow_unbounded_independent_p27b intermittent (suite run: ERROR child_pid None + survivors cleaned by its fallback; rerun 1: WorkflowHeld 'parent shell cwd could not be verified'; rerun 2: OK). Default (non-injected) path unchanged by the run.py diff; looks load/timing related - not attributed, Root may rerun",
+  "tests/lifecycle": "OK",
+  "tests/terminal": "100: 4 FAIL (F1 x3, F2), skipped 2",
+  "tests/contracts": "52 OK",
+  "tests/ui": "737 OK",
+  "tests/gates/g1_vt (PYTHONPATH=src:.)": "85 OK",
+  "tests/gates/g2_shell": "142 OK (skipped 1)",
+  "TS bridge (node --test tests/bridge/*.test.ts tests/gates/g3_omp/*.test.ts)": "37/37 pass",
+  "commands": "/tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/<dir> -p 'test_*.py' (PYTHONPATH=src, TMPDIR=/tmp, output to file, real exit codes)"
+ },
+ "live": {
+  "command": "WB_LIVE_CW18=1 PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest tests/backend/live_cw18_independent_p27w.py -v",
+  "omp": "omp/18.4.5 (run only with the fake HOME)",
+  "setup": "fake HOME under /tmp with empty fake agent.db; models.yml (scripted 127.0.0.1 provider) in <data>/omp-root/agent; proxies -> 127.0.0.1:9; --omp-arg=--model wbp27w/scripted",
+  "test_end_to_end": "PASS twice (16 s): start ready, isolation ok; work Task dispatched, second to_worker -> worker_busy (same task_id), UI showed 'worker: 작업 중' and '작업: 작업 \"write the p27w note\" [실행 중]'; worker wrote notes/p27w.txt with its own write tool, to_manager done delivered to the manager, Task closed done, worker idle, 1 TASK delivery only; experiment ran in the product host shell (P27W_HOST_RAN PASS on screen), judgment success, run_closed, shell given back; pause/resume from UI (p,p) -> paused, to_worker held:paused, resume reconciled -> resumed, nothing replayed; provider requests manager 9 / worker 5, unknown 0; tools: manager to_worker only, worker to_manager only; confirmed shutdown, no residue",
+  "test_experiment_waits_while_the_user_has_a_background_job": "FAIL (F1): task finished start_failed:UnsafeShellState runs_started 1; shell control_wait held [user_owner, unsubmitted_or_unconsumed_input, manual_jobs, unknown_or_manual_residue]"
+ },
+ "residue": "none: /tmp listing identical to the start, no new process names, no process referencing the test roots; the one late OMP helper write was removed by the test cleanup; no commits, no graphify update, ~/wb-urux-sandbox and user processes untouched",
+ "observed_model": "claude-opus-5-5"
+}

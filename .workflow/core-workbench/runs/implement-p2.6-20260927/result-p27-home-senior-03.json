@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-home-senior-03",
+  "status": "blocked_on_test_fixture",
+  "candidate": "24c9d8669042310be1875981b05000902e400fbca5c80a68d55f67db9e618ea1",
+  "audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-home-senior3.json",
+  "checks": {
+    "test_omp_home": "57 OK x3",
+    "tests/backend": "335: 1 FAIL p27u EntrypointHomeTests.test_profile_env_never_reaches_omp_and_the_home_is_used (fixture store at ~/.omp/agent while user env OMP_PROFILE=work, PI_CONFIG_DIR=.nope -> F3 resolves ~/.nope/profiles/work/agent/agent.db -> refused)",
+    "contracts/ui/g1_vt": "48/696/85 OK",
+    "live WB_LIVE_HOME": "3 OK, isolation ok, leaks 0; ~/.omp 0 new/deleted",
+    "browser": "dumpTools without browser; browser.enabled true via --config detected as tool:browser leak; ~/.omp/browser-state absent before/after"
+  },
+  "resolution": {
+    "F1": "4 envs + binary audit list dropped; leftover redirect env flagged env:<KEY> leak",
+    "browser": "browser.enabled false in home config.yml and omp-isolation.yml; check flags browser tool or xd://eval/browser",
+    "F3": "user store resolved per OMP dirs rules (PI_CONFIG_DIR, OMP_PROFILE/PI_PROFILE, absolute PI_CODING_AGENT_DIR, XDG_DATA_HOME/omp[/profiles/p]); ambiguous -> refuse naming the variable; user values only as WORKBENCH_USER_*",
+    "F4": "no store + provider key env non-empty -> start without link (key names only in notes)",
+    "F5": "documented + note"
+  },
+  "extra_dropped_env": [
+    "PI_SESSION_FILE",
+    "PI_ARTIFACTS_DIR",
+    "PI_EVAL_LOCAL_ROOTS",
+    "PI_TOOL_BRIDGE_URL/TOKEN/SESSION",
+    "OMP_DAEMON_PROJECT_DIR/RUNTIME_DIR",
+    "OMP_LSP_MUX_SOCKET/PROJECT_DIR",
+    "OMP_TEXT_PREDICT_SOCKET",
+    "OMP_TINY_WORKER_SOCKET",
+    "OMP_BLOB_BROKER_SOCKET/CONFIG",
+    "OMP_IDA_HOST_CONFIG"
+  ],
+  "residue": "none",
+  "observed_model": "opus"
+}

@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw18-u6-01",
+  "ticket_id": "CW-18 U6 (Workbench skills to-worker / to-manager)",
+  "role": "worker",
+  "unit": "V-CW-18-p2.7",
+  "approved_bundle_digest": "4f4a016424bafe78c2c23437706e206bce3a3c770d13610785564a4a93f00a93",
+  "routing": {
+    "planned_role": "worker",
+    "selected_role": "worker (wb-worker, Sonnet high)",
+    "reason_codes": [
+      "bounded_pattern"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-design-01.md section 5",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-u2-02.json"
+    ]
+  },
+  "base_candidate": "98351a6888f3ed33562e9b568053dc18249faf8d7d3ccccf4bef3d3054bbc1d3",
+  "criteria": [
+    "docs/features/core-workbench/DECISIONS.md C-D64, C-D65 (3), C-D66",
+    "omp_bridge/g3/bridge.ts tool schemas and descriptions for to_worker / to_manager (read them; the skill must match exactly)",
+    "the experiment marker contract for staged worker deliveries (response_contract: answer with the marker line only, no tools)"
+  ],
+  "required_behavior": [
+    "Create omp_bridge/skills/to-worker/SKILL.md (manager) and omp_bridge/skills/to-manager/SKILL.md (worker) in English, each about one page, in the OMP skill format (front matter name/description as OMP 18.4.5 expects; check how OMP discovers skills in customDirectories).",
+    "to-worker: how to hand work to the worker with to_worker (kind experiment vs work, message, spec fields, run:true for re-runs, follow-up with task_id, cancel); the worker does ONE task at a time - on worker_busy wait for the to_manager report or cancel; experiments run in the host terminal only when it is idle (held:host_terminal_busy otherwise); retry limit 3; never put environment variable values in messages/specs; no push/merge; report results to the user after checking the worker's report.",
+    "to-manager: staged deliveries with a response_contract -> answer with the marker line only, no tools; for work Tasks do the work inside the given paths with your own tools and report with to_manager (progress/done/blocked/answer/report, requires_code_change); answer questions with to_manager(kind answer, in_reply_to); do not operate the host terminal directly; stay inside the task's paths.",
+    "Role filtering: set ROLE_SKILL_PATTERNS (backend/launcher.py) so manager loads only to-worker and worker only to-manager; update the isolation check so these Workbench skills count as expected (not leaks) and any other skill is still a leak; make sure the wb home config's customDirectories points at omp_bridge/skills."
+  ],
+  "acceptance": [
+    "tests in tests/backend (role filter, isolation expectations) red->green",
+    "a no-model live check (fake HOME/Workbench home, outbound blocked) that the manager OMP lists only to-worker and the worker only to-manager (get_available_commands or the skill listing RPC), isolation ok",
+    "run tests/backend, tests/bridge, tests/contracts (test_*.py, no pipe, venv)"
+  ],
+  "allowed_write_paths": [
+    "omp_bridge/skills/**",
+    "src/workbench/backend/launcher.py",
+    "src/workbench/backend/omp_home.py",
+    "tests/backend/test_omp_isolation.py",
+    "tests/backend/test_omp_home.py",
+    "tests/backend/test_workbench_skills.py"
+  ],
+  "prohibited_paths": [
+    "src/workbench/ui/**",
+    "omp_bridge/g3/**",
+    "tests/**/*_independent*.py",
+    "docs/**",
+    ".workflow/**"
+  ],
+  "rules": "Use /tmp/cw02-g1-venv/bin/python, short unique TMPDIR removed afterwards; no model prompts; OMP only with the Workbench home or a fake HOME (never the real HOME, not even --version); never read/print/copy/hash credential contents or other processes' environ; kill only PIDs you started; never touch ~/wb-urux-sandbox or the user's processes or configs; no commits, no graphify update; zero residue. A parallel worker (U5) edits src/workbench/ui/product - do not touch it.",
+  "result_format": "checks table first, status, skill texts summary, changed paths + sha256, residue. Korean, <=15 lines."
+}

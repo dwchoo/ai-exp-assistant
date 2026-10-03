@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw18-u4-01",
+  "ticket_id": "CW-18 U4 (C-D58 held handoff user control)",
+  "role": "worker_senior",
+  "unit": "V-CW-18-p2.7",
+  "approved_bundle_digest": "1addfa60ef32e80d2ed2110f902e3b069ac872d38b675c13fbbb14ec4b549316",
+  "routing": {
+    "planned_role": "worker_senior",
+    "selected_role": "worker_senior (Opus general-purpose)",
+    "reason_codes": [
+      "pty_input_owner",
+      "shell_control_state"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-design-01.md section 4 (C-D58)"
+    ]
+  },
+  "base_candidate": "ff00c2c09d2a963447a992aebdb2a999f765b5826015ba88d127135cf79adef6",
+  "criteria": [
+    "docs/features/core-workbench/DECISIONS.md#C-D58",
+    "docs/features/core-workbench/tickets/CW-18.md (held handoff user control, L-CW18-FLOW)",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-design-01.md (adapter.py:344-381,409-421 dead end)",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-u2-01.json (HostShellPort.hold / request_takeover usage that must keep working)"
+  ],
+  "required_behavior": [
+    "First pin the current dead end with a reproduction test: wb-handoff held (user background/suspended job or unknown residue) -> control_wait -> manual input refused and takeover_confirm fails.",
+    "Fix in the shell adapter (CW-07 delta): while a handoff is held, automatic sending/acceptance stays held (fail-safe), but the user can stay/become the input owner: request_takeover in control_wait without request_id returns the parent prompt to the user (release_idle); confirm_takeover succeeds when already manual_prompt; the user can clean up and run wb-handoff again.",
+    "Keep U2's HostShellPort.hold / release semantics and all existing shell control invariants (no double send, no lost bytes)."
+  ],
+  "acceptance": [
+    "red->green tests in tests/terminal (and tests/backend if the backend path is involved)",
+    "run tests/terminal, tests/backend, tests/ui (test_*.py, no pipe, venv), tests/gates (g1_vt with PYTHONPATH=src:.); a real-Bash live check of the C-D58 scenario through the backend (no model)"
+  ],
+  "allowed_write_paths": [
+    "src/workbench/terminal/**",
+    "tests/terminal/**",
+    "tests/backend/test_shell_kill_restart.py",
+    "tests/backend/test_c_d58_handoff.py"
+  ],
+  "prohibited_paths": [
+    "src/workbench/ui/**",
+    "src/workbench/backend/**",
+    "tests/**/*_independent*.py",
+    "docs/**",
+    ".workflow/**"
+  ],
+  "rules": "No model prompts (scripted provider only, outbound blocked); OMP only with the Workbench home or a fake HOME (never run omp with the real HOME, not even --version); never read/print/copy/hash credential contents or other processes' environ; temp dirs only under /tmp; kill only PIDs you started; never touch ~/wb-urux-sandbox or the user's processes or configs; no commits, no graphify update. If a requirement conflicts with an existing verified contract, stop and report. A parallel senior worker (U3) edits src/workbench/backend at the same time: do not touch it; if the fix needs a backend change, stop and report the exact change.",
+  "result_format": "checks table first, status, before/after behaviour, changed paths + sha256, failing independent tests, residue. Korean, <=20 lines."
+}

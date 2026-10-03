@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-home-senior-01",
+  "status": "complete",
+  "candidate": "3fc2a357aa866ad163ebbfc1cfd0cbd092094d0f74047f195d7955e5d2832cd7",
+  "audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-home-senior.json",
+  "checks": {
+    "test_omp_home": "29 red (ImportError) -> green",
+    "tests/backend": "264: 16 FAIL (independent, superseded), 27 skip",
+    "tests/contracts": "48 OK",
+    "tests/ui": "696: 1 FAIL (independent p27p, fake HOME without agent.db)",
+    "g1_vt": "85 OK",
+    "live real OMP 18.4.5 x2": "both OMPs isolation ok, leaks/warnings 0, skills/context 0, authenticated [openai-codex], pane fds in wb root/agent, no login prompt/setup wizard; worker restart gen 2 recheck ok; shutdown verified; ~/.omp lstat inventory (2292 entries, x3): only agent.db/-shm/-wal and natives/18.4.5 mtimes changed, 0 new/deleted"
+  },
+  "design": "omp_home.py: <data>/omp-root (0700) as HOME-relative PI_CONFIG_DIR (.. allowed; reject if not the same dir lexically/physically or overlapping ~/.omp); PI_CODING_AGENT_DIR=<root>/agent; BUN_RUNTIME_TRANSPILER_CACHE_PATH in root; env drops OMP_PROFILE/PI_PROFILE/user PI_*/OMP_*_DIR/DB/PI_AUTO_QA and XDG vars that would redirect; --profile refused; config.yml rewritten 0600 atomically each start/restart; user store resolved like OMP (XDG_DATA_HOME/omp/agent.db else ~/.omp/agent/agent.db), lstat same-uid regular file, symlink create/repair, stale files moved aside inside wb agent dir; no auth store -> start refuses (exit 2) with guidance, running backend removes stale link; overlay no longer reads user omp config; isolation check adds get_login_providers + /proc fd paths (user OMP dir files open -> leak), link/inode drift warning; PERSONALITY warning removed",
+  "failing_independent": {
+    "fake HOME without agent.db -> start refused": "p27m RealEntrypoint x7, HungCheck x1, p27n RealEntrypointSummary x5, p27p test_first_ctrl_d... x1",
+    "PERSONALITY warning removed": "p27n personality x3 subtests"
+  },
+  "notes": [
+    "EVIDENCE isolation version kept 18.4.4 though evidence is from 18.4.5",
+    "p27m asserts PI_CODING_AGENT_DIR is forbidden but did not fail"
+  ],
+  "residue": "none",
+  "observed_model": "opus"
+}

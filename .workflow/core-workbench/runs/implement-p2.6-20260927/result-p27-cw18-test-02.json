@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw18-test-02",
+  "status": "complete",
+  "agent_result": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-test-02-agent.json",
+  "candidate": "d081a064d974bfc152a03a5710fd1a7f51cefb01c9a8c4be5fd821e7c2c77297",
+  "checks": {
+    "p27w": "67 OK + 1 expected failure (F5)",
+    "backend": "489 OK (27 skip, 1 xfail)",
+    "bridge": "43",
+    "workflow": "49",
+    "lifecycle": "38",
+    "terminal": "108 (2 skip)",
+    "contracts": "52",
+    "ui": "740",
+    "g1_vt": "85",
+    "g2_shell": "142 (1 skip)",
+    "TS": "37/37",
+    "live WB_LIVE_CW18": "2 OK",
+    "exit codes": "all 0, recorded without pipes"
+  },
+  "verdicts": {
+    "F1": "fixed",
+    "F2": "fixed",
+    "F3": "fixed (marker removed)",
+    "F4": "fixed",
+    "F5": "xfail -> CW-19",
+    "F6": "fail-safe; UI hint added by fix-02",
+    "F7": "fixed (unreachable path; no test)"
+  },
+  "observed_model": "sonnet"
+}

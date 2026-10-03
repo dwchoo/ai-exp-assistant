@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw18-fix-01",
+  "status": "complete",
+  "candidate_with_fix02": "73493854655b432eaca6468d0195b78f733138ac3d05950309d6e743aa07c4b8",
+  "audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-cw18-fix.json",
+  "checks": {
+    "independent F1x3/F2": "4 red -> green (files unchanged)",
+    "independent F3": "unexpected success (expectedFailure decorator must be removed by the test owner)",
+    "own": "14 OK; 12 red on reverted copy",
+    "tests/backend": "489: 1 FAIL F5 (CW-19 carry) + F3 unexpected success",
+    "bridge/workflow/lifecycle/terminal/contracts/ui": "43/49/38/108/52/740 OK",
+    "g1_vt/g2_shell": "85/142 OK",
+    "live WB_LIVE_CW18": "2/2 OK (end_to_end, experiment waits for background job)"
+  },
+  "fixes": {
+    "F1": "/proc session membership check, no typing; any live non-shell process in the shell's session (running/stopped, disowned too; zombies ignored) -> held:host_terminal_busy; unprovable -> busy; no latch, no retry consumed",
+    "F2": "record /proc/<pid>/cwd before typing cd; on give-back hold user input, type ' builtin cd -- <quoted>' only at an idle job-free prompt, verify cwd/prompt, release; skip if user already moved out of the worktree; retry when idle; journal host_cwd_restore",
+    "F3": "resume with a non-current bound run sends resume reconciled to both OMPs and returns to idle/unpaused (resumed, reason run_closed_while_paused); refused with reason if OMP pause not released, retried next resume",
+    "F7": "role_skill_allowlist returns () for unknown roles"
+  },
+  "limit": "pending cwd restore is memory-only (lost on backend restart)",
+  "residue": "none",
+  "observed_model": "opus"
+}

@@ -1,0 +1,24 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 1821,
+  "event": {
+    "id": "reserve-p27-cw18-test-02",
+    "kind": "reserve",
+    "data": {
+      "buckets": [
+        "total",
+        "role:test_designer",
+        "unit:V-CW-18-p2.7"
+      ],
+      "effort": "high",
+      "incident": "",
+      "invocation": "p27-cw18-test-02",
+      "model": "claude-sonnet-5-5",
+      "purpose": "CW-18 re-verification",
+      "role": "test_designer",
+      "unit": "V-CW-18-p2.7",
+      "workspace": "/home/dwchoo/ai-exp-assistant",
+      "writer": true
+    }
+  }
+}

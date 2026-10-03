@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw18-design-01",
+  "ticket_id": "CW-18 (design investigation)",
+  "role": "code_explorer",
+  "unit": "V-CW-18-design",
+  "approved_bundle_digest": "dafc9f2d0fb3c71197003c594cbb69b562815a04e177ac08aa229878a48c1395",
+  "routing": {
+    "planned_role": "code_explorer",
+    "selected_role": "code_explorer (Opus general-purpose, read-only design)",
+    "reason_codes": [
+      "cross_module_design",
+      "workflow_semantics"
+    ],
+    "evidence_refs": []
+  },
+  "goal": "Produce a concrete, minimal CW-18 implementation design for the user's priority: manager and worker OMPs hand work to each other reliably through bridge extension tools to_worker (manager only) and to_manager (worker only), with user approval of the Task scope in the product UI (C-D60, C-D64), backed by the existing core components.",
+  "read": [
+    "docs/features/core-workbench/tickets/CW-18.md",
+    "docs/features/core-workbench/SPEC.md (s2.7 CW-18, C-AC list relevant to CW-18)",
+    "docs/features/core-workbench/BRIEF.md (C-AC-29 and the automation/approval/pause/check items)",
+    "docs/features/core-workbench/DECISIONS.md C-D58, C-D60, C-D64",
+    "docs/features/core-workbench/PLAN.json CW-18 entry (local items like L-CW18-FLOW)",
+    "omp_bridge/g3/bridge.ts and omp_bridge/contract (delivery protocol, roleAllows, worker stages, decisions)",
+    "src/workbench/** components for TaskRepository, TaskWorkflow, WorkflowRun collect/judge, LifecycleCoordinator tick/check/pause, mailbox/bridge server, backend service and ui_v1 contract; use `graphify query` for orientation"
+  ],
+  "deliver": [
+    "What already exists vs missing (file:line).",
+    "Proposed tool schemas for to_worker and to_manager (inputs/outputs, errors) and how they map onto the existing delivery protocol (or why a simpler path is better), including how the worker receives an instruction (sendUserMessage?) and how its to_manager report reaches the manager.",
+    "Approval model: what a Task scope is, how the first to_worker becomes an approval request in the UI (ui_v1 additions, UI element), how later to_worker calls are checked against the approved scope, how the user approves/rejects/pauses; what is recorded.",
+    "Automation pieces required by CW-18 acceptance (60 s check, pause, held handoff user control C-D58) and which can be minimal now.",
+    "A Workbench skill text outline (where it lives in the wb home, what it says).",
+    "A test and live-verification plan, incl. a real two-OMP end-to-end scenario that needs model calls (estimate number of calls) and fake-OMP coverage that needs none.",
+    "Work breakdown into units (backend, bridge.ts, UI, skill) with risk notes and which need Opus.",
+    "Open questions that need the user's decision (keep few, each with a recommended default)."
+  ],
+  "rules": "Read-only: do not modify any file; write only .workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-design-01.md. No model prompts; do not start OMP; never touch ~/wb-urux-sandbox, the user's processes, ~/.omp or credential stores.",
+  "result_format": "Write the design report (Korean, concise, structured) to the result file. Reply in Korean <=20 lines summarising the design and the open questions."
+}

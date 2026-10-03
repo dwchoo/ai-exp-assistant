@@ -1,0 +1,107 @@
+{
+ "schema_version": 1,
+ "invocation": "p27-cw18-review-02",
+ "role": "reviewer",
+ "unit": "V-CW-18-p2.7",
+ "frozen_candidate": "fad89b8e57d9b30441b61b51cc24fcf8e4c981ee0d1088042954f9e19a7ceae0",
+ "candidate_verified": "src/tests/omp_bridge 286 files == p27-snapshot-cw18-test3-after.json (0 sha256 mismatches)",
+ "overall": "integrate",
+ "overall_reason": "P0/P1/P2 없음. R1-R3,R5,R6 수정은 코드·테스트로 확인됐고 R4 힌트는 실제 시퀀스와 일치. p27b flake는 run.py 변경과 무관한 기존 타이밍 flake. P3 3건만 남음.",
+ "findings": [
+  {
+   "id": "D1",
+   "severity": "P3",
+   "title": "to-worker SKILL.md가 same-turn 디스패치와 notices 결과를 설명하지 않음; to-manager SKILL.md에 task_not_delivered 없음",
+   "locations": [
+    "omp_bridge/skills/to-worker/SKILL.md:24-36 (Results)",
+    "omp_bridge/skills/to-manager/SKILL.md"
+   ],
+   "failure_scenario": "R1 이후 report를 읽는 같은 턴의 to_worker는 허용된다. 그런데 skill은 보고 후 '다시 시도'만 말한다. tool result의 notices 필드(report_outcome_unknown / report_not_delivered / task_cancelled / task_not_started / run_start_failed)가 어디에도 문서화돼 있지 않다. 모델은 닫힌 Task를 계속 기다릴 수 있다. worker가 task_id 없이 보고했을 때 오는 rejected:task_not_delivered 도 worker skill에 없다.",
+   "violated": "C-D66 / R1 후속 문서 정확성 (focus 3)",
+   "suggestion": "to-worker: 'report를 읽는 같은 턴에 새 Task / run:true 가능; notices[]를 읽어라(report_outcome_unknown=보고 전달 결과 불명, 재전송 안 됨; report_not_delivered=보고가 manager에 도달 안 함); worker는 이미 free'. to-manager: 'rejected:task_not_delivered = 지시가 아직 도달 안 함, 턴을 끝내고 TASK를 기다려라'."
+  },
+  {
+   "id": "D2",
+   "severity": "P3",
+   "title": "_settle 대기(최대 2 s)가 HandoffService._lock을 잡은 채 수행되어 모든 tool 호출을 직렬화",
+   "locations": [
+    "src/workbench/backend/flow.py:643 (handle holds _lock through _decide)",
+    "src/workbench/backend/flow_tasks.py:288-294,_to_worker/_to_manager _settle"
+   ],
+   "failure_scenario": "manager의 to_worker가 ack race로 2 s 대기하는 동안 worker의 to_manager도 같은 lock에 막힌다(10 s tool 제한 안이라 실패는 아님, 데드락 없음: lane 리스너는 flow lock만 쓰고 wait가 flow lock을 놓음). 지연만 늘어난다.",
+   "violated": "liveness 예산(no-wait handle 원칙)",
+   "suggestion": "문서화하거나 settle을 HandoffService lock 밖(정책 pre-hook)에서 수행."
+  },
+  {
+   "id": "D3",
+   "severity": "P3",
+   "title": "withdraw는 'delivering' 항목의 마지막 withdrawn 검사 이후(mailbox.deliver 내부의 probe ≤5 s / delivery lock 대기) 구간을 막지 못함",
+   "locations": [
+    "src/workbench/backend/flow.py:836-844 (check -> mailbox.deliver)",
+    "src/workbench/backend/flow.py:~680 withdraw()"
+   ],
+   "failure_scenario": "취소 직전 lane이 TASK를 deliver에 넘긴 뒤 delivery lock을 기다리는 동안(예: workflow 단계 delivery가 worker lock 점유) cancel이 오면 TASK는 취소 후에도 제출될 수 있다. flow 상태가 'delivering'이라 never_sent=False -> cancel notice가 뒤따르므로 worker는 TASK 다음 cancel을 받는다. R2 시나리오(deferred TASK)는 닫혔고 이 구간은 좁고 안전 측.",
+   "violated": "R2 'worker never gets a cancelled TASK' 문구가 절대적이지 않음",
+   "suggestion": "문서에 잔여 창을 명시하거나 on_submitted 전에 withdrawn을 재검사(deliver 직전 hook)."
+  }
+ ],
+ "prior_findings": {
+  "R1": "closed. mailbox.deliver on_submitted가 api_accepted 직후(ledger.finish 뒤, _record 앞) 호출되고 예외는 삼킴. done/blocked는 submitted에서 worker를 해제(flow_tasks._report_accepted), 실험 보고는 WorkflowRun.judge(on_report)->close at acceptance. 수락 전 unknown/rejected는 report_outcome_unknown/report_not_delivered로 닫고 재전송 없음, 이후 unknown은 settled 플래그로 무시. 2 s ack wait는 flow lock을 놓고 대기(RLock Condition)하며 lane 리스너와 데드락 없음(리스너는 outbox lock 밖에서 호출, mailbox/delivery lock 보유 중 flow lock만 획득, flow lock 보유 스레드가 delivery lock을 기다리는 경로 없음). 신규 hole 없음(D2/D3은 P3).",
+  "R2": "closed (D3 잔여 창 P3). withdraw가 pending/deferred를 즉시 제거, delivering은 표식 후 다음 단계에서 drop, TASK 미전달이면 cancel notice 생략, task_id 없는 보고는 task_not_delivered.",
+  "R3": "closed. keep_across_pause 항목은 pause 중 pending 유지(_hold_paused, 제출 전이라 replay 아님), resume 후 1회 전달; 그 외 메시지는 held_paused 드롭 유지. 취소 withdraw와도 정합.",
+  "R4": "closed. JOB_HELD_HINT/TASK_NOTE(model.py:103-105)가 tests/terminal/test_cw18_host_shell_independent_p27w.py HeldHandoffTests 및 test_c_d58 시퀀스(t,c 인수 -> jobs 종료 -> wb-handoff -> prefix h -> t,c 재인수)와 일치, prefix h 존재 확인.",
+  "R5": "closed. before_shell_input이 타이핑 직전에만 idle 재검사+hold, 사용자 입력 시 WorkflowHeld로 아무것도 타이핑 안 함. 기본 경로(shell=None, before_shell_input=None) 동작 불변.",
+  "R6": "closed. _ended_runs(64개 상한)로 closed run은 _bind/_bind_failed에서 재바인딩 안 됨; 다음 run bind는 막지 않음.",
+  "R7": "CW-19로 이월(F5와 동일 부류), 본 델타 범위 밖."
+ },
+ "focus_verdicts": {
+  "R1_R3_R5_R6": "pass",
+  "R4": "pass",
+  "skill_md": "P3 (D1)",
+  "p27b_flake": "기존 타이밍 flake, run.py 델타와 무관",
+  "regression": "none found"
+ },
+ "p27b_investigation": {
+  "classification": "pre-existing environment/timing flake; not attributable to run.py/before_shell_input/shell injection",
+  "evidence": [
+   "tests/workflow/test_workflow_unbounded_independent_p27b.py는 델타에서 미수정(마지막 변경 9b3ea72)이고 shell=None, before_shell_input=None, RecordingMailbox.deliver(message) 경로만 사용 -> 새 코드는 'host_shell, shell = shell, None', _release_shell(shell,True)=shell.close() 외 동작 동일.",
+   "현재 트리 단독 2 OK(120 s). 12개 busy loop 부하 + 현재/기준 동시 실행 2라운드: 현재 2 OK x2, 기준 2 OK x2.",
+   "tests/workflow 전체 discover를 현재/기준(run.py만 HEAD로 교체) 동시 실행: 현재 p27b ERROR 'parent shell cwd could not be verified', 기준도 p27b child_pid None(TypeError)+survivors.",
+   "순차 단독 discover: 현재 52 OK(130 s); 기준 run.py(HEAD)에서도 같은 'parent shell cwd could not be verified' (run.py:521 기준 / 현재 644) 로 p27b 실패(나머지 5 오류는 기준에 on_report가 없는 test_run 신규 테스트로 예상됨). 즉 델타를 빼도 재현.",
+   "원인 후보: run.py의 고정 3 s pwd 파일 대기(변경 없음)와 4개 shell 동시 기동 시 lifecycle child_pid 설정 지연(test line 186 stat(None)) -> 부하/타이밍 의존. 이전 CW-18 test-01의 'cwd could not be verified' 와 test-03의 child_pid None은 같은 계열."
+  ],
+  "suggestion": "CW-18 게이트 블로커로 보지 않음. 필요하면 별 티켓으로 p27b의 3 s 대기 상수 완화 또는 test 안에서 child_pid None 재시도."
+ },
+ "checks": [
+  {
+   "cmd": "snapshot identity (286 files src/tests/omp_bridge)",
+   "result": "0 mismatch"
+  },
+  {
+   "cmd": "unittest discover tests/backend -p '*cw18*'",
+   "result": "90 OK, skipped 2, expected failures 1 (F5)"
+  },
+  {
+   "cmd": "unittest discover tests/bridge",
+   "result": "47 OK"
+  },
+  {
+   "cmd": "unittest tests.ui.test_product_model",
+   "result": "308 OK"
+  },
+  {
+   "cmd": "tests.workflow p27b alone x1, loaded x2 current + x2 base",
+   "result": "all OK"
+  },
+  {
+   "cmd": "tests/workflow discover: current alone",
+   "result": "52 OK"
+  },
+  {
+   "cmd": "tests/workflow discover: current ‖ base concurrently",
+   "result": "p27b fails on both (flake reproduces without delta)"
+  }
+ ],
+ "not_run": "live WB_LIVE_CW18 (선택), tests/terminal·gates 전체(test-03에서 동일 후보 통과 기록 참조)",
+ "residue": "none: temp dirs removed, own busy-loop PIDs terminated by PID, no repo files changed, no model prompts, ~/wb-urux-sandbox and user processes untouched"
+}

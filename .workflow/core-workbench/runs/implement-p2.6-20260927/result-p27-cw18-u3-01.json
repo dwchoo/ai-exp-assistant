@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw18-u3-01",
+  "status": "complete",
+  "candidate_with_u4": "ae57fe7dec307a6d81a9d173d814263b252538783626cadb3a078907943a9ffe",
+  "audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-cw18-u34.json",
+  "checks": {
+    "red->green": "new tests fail on the pre-change copy; 7 new + 1 contract pass",
+    "suites": "lifecycle 38, backend 415 (27 skip), workflow 49, bridge 32, contracts 51, ui 696, g1_vt 85",
+    "live (no model)": "two OMP 18.4.5, fake HOME, scripted provider, real ShellPane: 60 s reviews at 61.2 s and 121.6 s after bind; pause during a slow manager turn -> interruption confirmed, 0 reviews for 65 s while raw.log grows; reconciled:false refused, true -> reconciled resume, held review ran once; run success -> automation idle; rerun with 10 s interval 26/26"
+  },
+  "wiring": "backend/automation.py AutomationController: set_active_run, PauseCoordinator.bind_run, first LifecycleRecord (next generation, CAS), bind_production; 1 s tick thread -> LifecycleCoordinator.tick; WorkerReviewScheduler unchanged; shared pause flag for HandoffService/TaskFlow/AutomationState; TaskFlow lifecycle hooks (experiment_started/work_started/run_ended); not_configured removed; free-work minimal mode (FreeWorkProcess; no 60 s review; tick held user_owner_or_control_hold)",
+  "ui_v1_automation_for_U5": "automation{state, source, detail, paused, transition, run{...}, tick{...}, review{applies, interval_seconds, status, reason, review_count, last_review_at, next_due_in_seconds, pending, coalesced_count, exit}, interruption{state,...}, resume{...}, retry_limit, persistence_error}",
+  "open": {
+    "force stop": "no CW-13 RecoveryFacts port in production -> bound stop/force always unapproved (closed); only real force path is C-D63 shell kill",
+    "takeover during run": "record control diverges -> automatic review held for the rest of that run"
+  },
+  "limits": [
+    "pause while the run closes: binding kept, resume refused, OMPs stay paused",
+    "large checkout: peer manifest over limit -> resume refused (CW-12 semantics)"
+  ],
+  "residue": "none",
+  "observed_model": "opus"
+}

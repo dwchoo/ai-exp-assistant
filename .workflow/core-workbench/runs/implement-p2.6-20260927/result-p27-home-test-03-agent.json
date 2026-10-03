@@ -1,0 +1,77 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-home-test-03",
+  "role": "test_designer",
+  "unit": "V-CW-17-p2.7-home",
+  "status": "candidate_ready",
+  "checks": [
+    {
+      "cmd": "unittest discover -s tests/backend -p 'test_*.py' (venv, PYTHONPATH=src)",
+      "exit": 0,
+      "result": "362 OK (skipped=27)",
+      "duration_s": 377
+    },
+    {
+      "cmd": "unittest discover -s tests/contracts",
+      "exit": 0,
+      "result": "48 OK",
+      "duration_s": 0
+    },
+    {
+      "cmd": "unittest discover -s tests/ui",
+      "exit": 0,
+      "result": "696 OK",
+      "duration_s": 190
+    },
+    {
+      "cmd": "unittest discover -s tests/gates/g1_vt (PYTHONPATH=src:.)",
+      "exit": 0,
+      "result": "85 OK",
+      "duration_s": 1.5
+    },
+    {
+      "cmd": "WB_LIVE_HOME=1 unittest tests.backend.live_omp_home_independent_p27u (TMPDIR in scratchpad)",
+      "exit": 0,
+      "result": "3 OK; isolation ok, leaks/warnings 0, providers openai-codex both roles, shutdown exit 0, survivors 0",
+      "duration_s": 8
+    },
+    {
+      "cmd": "p27v new tests alone (17 unit + 9 e2e)",
+      "exit": 0,
+      "result": "26 OK",
+      "duration_s": "~70+2"
+    },
+    {
+      "cmd": "mutation spot-checks (in-process patches, production untouched): shorter HOME_ENV_DROP/FORBIDDEN, browser on, store ignores env, provider_key_names empty",
+      "result": "7/1/61/6 failures -> tests have teeth"
+    }
+  ],
+  "changes": [
+    "tests/backend/test_omp_home_independent_p27u.py: EntrypointHomeTests profile test fixture moved to ~/.nope/profiles/work/agent/agent.db (per adjudication, asserts link target) + new complementary refused case (store only at ~/.omp/agent -> exit 2, guidance names the ~/.nope/profiles/work store, nothing created, no OMP started)"
+  ],
+  "files_added": [
+    "tests/backend/test_omp_home_review_independent_p27v.py"
+  ],
+  "new_tests": {
+    "F1": "all review+senior+earlier redirect env absent from pane/check env of both roles and from all 4 OMP processes of a real start; WORKBENCH_USER_* only location keys in check env; host shell keeps them; injected key => env:<KEY> leak (PI_AUTO_QA excluded: detected via prompt marker)",
+    "browser": "static overlay/home config/argv browser off; browser tool/prelude => tool:browser; e2e: --config browser.enabled true => state leak with tool:browser; ~/.omp/browser-state absent",
+    "F3": "25-row resolution matrix (PI_CONFIG_DIR, OMP_/PI_PROFILE incl ''/default/shadowing, abs/rel PI_CODING_AGENT_DIR, XDG_DATA_HOME/omp[/profiles/p]) incl. decoy default store never linked; 13 refusals name the variable, create nothing (unit + real entrypoint); isolation check watches redirected user dir",
+    "F4": "provider key + no store: no link, nothing created, key value absent from stdout/stderr/status/data files, key still reaches OMPs; empty key/no key refused; store+key links; stale link removed"
+  },
+  "findings": [],
+  "notes": [
+    "Guidance text for a missing store names the resolved store path (e.g. ~/.nope/profiles/work/agent/agent.db), not the variable; the adjudication's 'naming the variable' is satisfied only for ambiguity refusals. Not asserted as P-level finding (path is the actionable info) — Root may decide if wording must name the variable.",
+    "Profile+absolute PI_CODING_AGENT_DIR (profile wins) and OMP_PROFILE ''-overrides-PI_PROFILE are asserted from the documented rule / OMP 18.4.5 binary ($ct: e!==undefined?e:t)."
+  ],
+  "failures_during_work": "test-side only, fixed: PI_AUTO_QA injection expectation, WORKBENCH_USER_* value scan, wrapper newline escaping, invalid-profile sentinel in e2e, status call creating data dir. No implementation failure.",
+  "frozen_hashes_start_eq_end": {
+    "src/workbench/backend/cli.py": "a653e8a4c8774f04318632553d21624138b3b7c7f465108a1d3e3b5daf8d7bbf",
+    "src/workbench/backend/launcher.py": "72bab4cfbc5169eb527e26c4f2fa47baed2a35f18e786d45edff47be5a0f19d6",
+    "src/workbench/backend/paths.py": "a5f4bf91225b35d46fe601bb49e6a6a6cce21e1e5fa9c3a9db8599c0e217c680",
+    "src/workbench/backend/service.py": "6cf2b0835173b3d9f3aef3466bdc3180a8795c8ba267164c6eda3b375f1f0cbc",
+    "src/workbench/backend/omp_home.py": "a934a66b7cc6a914e3286b96abbc6902177f8c81dbcac0301a0429716cac996d",
+    "omp_bridge/omp-isolation.yml": "e4da7e9489cf7df2d64f9edd9f71faf1f1a64ddde864329b874311fad5c4dfe1"
+  },
+  "residue": "none: no leaked processes (p27v finds its own by cmdline/cwd only, never environ; asserts none survive), no /tmp dirs left, live report /tmp/p27u-live-report.json removed, ~/.omp/browser-state absent, no pycache",
+  "observed_model": "sonnet"
+}

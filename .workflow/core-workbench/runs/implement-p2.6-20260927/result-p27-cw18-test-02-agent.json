@@ -1,0 +1,97 @@
+{
+ "schema_version": 1,
+ "invocation": "p27-cw18-test-02",
+ "role": "test_designer",
+ "unit": "V-CW-18-p2.7",
+ "status": "candidate_ready",
+ "edits": {
+  "tests/backend/test_cw18_automation_independent_p27w.py": "F3 expectedFailure marker removed (test now passes; sha256 ec80653375814cab190d0d35ae34d06e41c92c29f78afdbfdfa782988b20e80b)",
+  "tests/backend/test_cw18_flow_independent_p27w.py": "F5 test marked expectedFailure, reason: root-adjudication-p27-cw18-f5 / CW-19 RecoveryPort; assertions unchanged (sha256 678009d6e0f596f4b1bb5d98085cb12a4f899d70f51dfc70c69a0f728515e3af)"
+ },
+ "checks": [
+  {
+   "cmd": "unittest 4 independent p27w modules (-v)",
+   "exit": 0,
+   "result": "67 OK, expected failures=1 (F5)",
+   "sec": 24
+  },
+  {
+   "cmd": "discover tests/backend",
+   "exit": 0,
+   "result": "489 OK, skipped 27, expected failures 1",
+   "sec": 404
+  },
+  {
+   "cmd": "discover tests/bridge",
+   "exit": 0,
+   "result": "43 OK",
+   "sec": 39
+  },
+  {
+   "cmd": "discover tests/workflow",
+   "exit": 0,
+   "result": "49 OK",
+   "sec": 131
+  },
+  {
+   "cmd": "discover tests/lifecycle",
+   "exit": 0,
+   "result": "38 OK",
+   "sec": 4
+  },
+  {
+   "cmd": "discover tests/terminal",
+   "exit": 0,
+   "result": "108 OK, skipped 2",
+   "sec": 541
+  },
+  {
+   "cmd": "discover tests/contracts",
+   "exit": 0,
+   "result": "52 OK",
+   "sec": 0
+  },
+  {
+   "cmd": "discover tests/ui",
+   "exit": 0,
+   "result": "740 OK",
+   "sec": 192
+  },
+  {
+   "cmd": "discover tests/gates/g1_vt (PYTHONPATH=src:.)",
+   "exit": 0,
+   "result": "85 OK",
+   "sec": 1
+  },
+  {
+   "cmd": "discover tests/gates/g2_shell (PYTHONPATH=src:.)",
+   "exit": 0,
+   "result": "142 OK, skipped 1",
+   "sec": 119
+  },
+  {
+   "cmd": "node --test tests/bridge/*.test.ts tests/gates/g3_omp/*.test.ts",
+   "exit": 0,
+   "result": "37/37 pass",
+   "sec": 11
+  },
+  {
+   "cmd": "WB_LIVE_CW18=1 unittest tests/backend/live_cw18_independent_p27w.py",
+   "exit": 0,
+   "result": "2 OK (end_to_end, background-job wait)",
+   "sec": 46
+  }
+ ],
+ "findings": {
+  "F1": "fixed (host_shell IdleOnlyTests + live background-job test pass)",
+  "F2": "fixed (ConsecutiveRunsTests pass)",
+  "F3": "fixed (marker removed, passes)",
+  "F4": "fixed (skill content test passes)",
+  "F5": "carried to CW-19 per root-adjudication-p27-cw18-f5, expectedFailure",
+  "F6": "unchanged fail-safe; adjudicated sequence test green",
+  "F7": "unchanged, unreachable fail-open (info); no test"
+ },
+ "prod_hash_check": "sha256 of 23 changed/new files under src/ and omp_bridge/ identical at start and end (list in /tmp/cw18t02_prod_start.sha, removed after)",
+ "failures": "none; no flake observed",
+ "residue": "none: no owned process; live fake HOME/data removed by test; sandbox omp PIDs 631293/631294 belong to the user and were untouched; no commits/graphify"
+}

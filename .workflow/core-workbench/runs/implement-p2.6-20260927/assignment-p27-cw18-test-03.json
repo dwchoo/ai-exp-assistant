@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw18-test-03",
+  "ticket_id": "CW-18 (re-verification after review block)",
+  "role": "test_designer",
+  "unit": "V-CW-18-p2.7",
+  "approved_bundle_digest": "4f4a016424bafe78c2c23437706e206bce3a3c770d13610785564a4a93f00a93",
+  "routing": {
+    "planned_role": "test_designer",
+    "selected_role": "test_designer (wb-test-rerun, Sonnet high)",
+    "reason_codes": [
+      "rerun_defined_by_findings_and_adjudication"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-review-01-agent.json",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/root-adjudication-p27-cw18-r1.json"
+    ]
+  },
+  "frozen_candidate": "9a337a6c67f1919dd178463442e871ca669afbea4f482d0a530573eb98adebdc",
+  "task": [
+    "1. Correct tests/backend/test_cw18_flow_independent_p27w.py CompletionTests.test_done_that_does_not_reach_the_manager_keeps_the_worker_busy per root-adjudication-p27-cw18-r1 (rename to match the new rule).",
+    "2. Add independent tests for the review findings in tests/backend/test_cw18_review_independent_p27x.py: R1 same-turn to_worker after the report is accepted; long manager turn does not leave the Task busy; unknown-before-accept -> report_outcome_unknown + notice, no resend; R2 cancel never lets the worker receive the cancelled TASK, no task attribution to a later Task; R3 report queued while paused delivered exactly once after resume; R5 host input not held during TASK delivery/worker decision, held only from typing; R6 automation idle after a fast cancel.",
+    "3. Run every suite with real exit codes (no pipes): tests/backend, tests/bridge, tests/workflow, tests/lifecycle, tests/terminal, tests/contracts, tests/ui, gates g1_vt/g2_shell, TS bridge tests; live WB_LIVE_CW18=1 once."
+  ],
+  "allowed_write_paths": [
+    "tests/**/*_independent*",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-test-03-agent.json"
+  ],
+  "rules": "Never modify production code; keep failing tests red and report findings. No model prompts (scripted provider only); OMP only with the Workbench home or a fake HOME; never read credential contents or other processes' environ; temp dirs only under /tmp; kill only PIDs you started; never touch ~/wb-urux-sandbox or the user's processes or configs; no commits, no graphify update; zero residue.",
+  "result_format": "Write the result JSON (checks table with exit codes, verdict per finding, new tests, residue). Reply in Korean, <=12 lines."
+}

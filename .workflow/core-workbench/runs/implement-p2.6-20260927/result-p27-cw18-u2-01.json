@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw18-u2-01",
+  "status": "complete",
+  "candidate": "ff00c2c09d2a963447a992aebdb2a999f765b5826015ba88d127135cf79adef6",
+  "audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-cw18-u2.json",
+  "checks": {
+    "red->green": "7 new tests fail/err on a reverted copy, test_task_flow import fails; green now",
+    "suites": "backend 406 (27 skip), bridge 32, workflow 49, contracts 50, ui 696, g1_vt 85",
+    "live": "24/24: two OMP 18.4.5, fake HOME, scripted provider, real ShellPane; free-work approval->approve->worker->to_manager done->manager->run complete; experiment execute marker->host shell->collect/analysis->success->complete->shell returned to user; provider requests manager 6, worker 4"
+  },
+  "design": "single delivery path G3BridgeServer.delivery_lock(role); outbox lanes per target with own repo/mailbox; run.py start(shell=) CW-10 delta (env values rejected, names only; shell kind must match spec; workflow detaches, never closes); ShellPane io_lock + tee to UI and raw log; HostShellPort.hold only when user-owned, clean prompt, no pending input/partial line/jobs/requests; user input refused host_shell_automation while held; returned via request_takeover; TaskFlow tasks-flow.jsonl (0600, fsync), pending approvals survive restart (held:backend_restarted, no start/resend); retry limit only for in-scope re-runs; idle experiment Task superseded by a new Task; approve refused while paused; free-work done/blocked recorded after delivery to manager; notices[] in the manager's next to_worker result",
+  "ui_v1_for_U5": {
+    "state": [
+      "approvals[{approval_id,task_id,revision,kind,summary,spec,diff_vs_approved,created_at}]",
+      "task{task_id,kind,status,revision,approved_revision,run_id,runs_started,retry_limit,held_reason,pending_approval_id,last_result}",
+      "panes.host_shell.automation_hold"
+    ],
+    "client": [
+      "approval_decide{approval_id,decision}",
+      "pause{}",
+      "resume{reconciled}"
+    ],
+    "reasons": [
+      "host_shell_automation",
+      "approval_unknown",
+      "approval_not_pending",
+      "approval_failed",
+      "automation_paused",
+      "automation_unavailable",
+      "resume_not_reconciled"
+    ]
+  },
+  "hooks_for_U3": [
+    "Backend.pause_hook/resume_hook",
+    "_automation_paused shared source",
+    "TaskFlow runner collect(paused=) and judge wait",
+    "LifecycleRecord/bind_production/tick not yet wired"
+  ],
+  "rule_deviation": "one `omp --version` with the real HOME (version output only; may touch ~/.omp natives mtime)",
+  "open": [
+    "backend restart during an experiment run leaves the run current in the repo and blocks re-run (CW-19 reconcile)",
+    "report unknown / judge held keep the run current (CW-10 semantics)"
+  ],
+  "residue": "none",
+  "observed_model": "opus"
+}

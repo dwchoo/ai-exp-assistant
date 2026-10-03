@@ -1,0 +1,1 @@
+{"before": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-home-senior2-after.json", "after": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-home-test2-after.json", "allowed": ["tests/backend/*_independent*.py", "tests/ui/*_independent*.py", "tests/backend/live_*.py", "tests/ui/live_*.py", "graphify-out/**"]}

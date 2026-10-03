@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-home-review-01",
+  "verdict": "block",
+  "frozen_candidate": "f76ac6ebb893234d30c690abcc8836da9355b1bdc2598488a23d6629a8046589",
+  "agent_result": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-home-review-01-agent.json",
+  "checks": {
+    "targeted tests": "211 OK",
+    "live WB_LIVE_HOME": "3 OK; ~/.omp 2315 entries, 0 new/deleted, only agent.db* and natives/18.4.5 mtime"
+  },
+  "findings": {
+    "F1 P2": "omp_home.py:71-75 HOME_ENV_DROP misses PI_CONFIG_FILES, PI_CODING_AGENT_SESSION_DIR, OMP_TEXT_PREDICT_AGENT_DIR, OMP_AUTORESEARCH_DB_DIR -> user config overlay read / sessions written to user locations; check misses it",
+    "F2 P3": "browser tool writes ~/.omp/browser-state/<n>.json",
+    "F3 P3": "user omp with custom PI_CODING_AGENT_DIR/PI_CONFIG_DIR/profile -> store location mis-resolved",
+    "F4 P3": "guidance says set API key env but env keys alone still refused",
+    "F5 P3": "XDG users: withheld XDG_* also missing in commands run by the OMP bash tool"
+  },
+  "focus": {
+    "credential safety": "pass",
+    "isolation": "pass except F1",
+    "no user impact": "pass except F2",
+    "migration": "pass",
+    "tests": "pass"
+  },
+  "observed_model": "opus"
+}

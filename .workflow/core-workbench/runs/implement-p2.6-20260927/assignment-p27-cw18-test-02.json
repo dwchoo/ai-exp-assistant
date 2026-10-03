@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw18-test-02",
+  "ticket_id": "CW-18 (re-verification after corrections)",
+  "role": "test_designer",
+  "unit": "V-CW-18-p2.7",
+  "approved_bundle_digest": "4f4a016424bafe78c2c23437706e206bce3a3c770d13610785564a4a93f00a93",
+  "routing": {
+    "planned_role": "test_designer",
+    "selected_role": "test_designer (wb-test-rerun, Sonnet high)",
+    "reason_codes": [
+      "rerun_defined_by_findings_and_adjudication"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-test-01-agent.json",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/root-adjudication-p27-cw18-f5.json"
+    ]
+  },
+  "frozen_candidate": "73493854655b432eaca6468d0195b78f733138ac3d05950309d6e743aa07c4b8",
+  "task": [
+    "1. Per root-adjudication-p27-cw18-f5: remove the expectedFailure marker from the F3 independent test; mark the F5 independent test expectedFailure with a reason string referencing root-adjudication-p27-cw18-f5 / CW-19 (do not change its assertions).",
+    "2. Verify each finding F1-F4, F6, F7 against the corrected code with the existing independent tests (no edits unless a test was wrong; report).",
+    "3. Run with real exit codes (no pipe; write output to files): tests/backend, tests/bridge, tests/workflow, tests/lifecycle, tests/terminal, tests/contracts, tests/ui (test_*.py, venv), tests/gates (g1_vt PYTHONPATH=src:., g2_shell), TS bridge tests, live WB_LIVE_CW18=1 tests.backend.live_cw18_independent_p27w once."
+  ],
+  "allowed_write_paths": [
+    "tests/**/*_independent*",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-test-02-agent.json"
+  ],
+  "rules": "Never modify production code. No model prompts (scripted provider only); OMP only with the Workbench home or a fake HOME (never the real HOME); never read credential contents or other processes' environ; temp dirs only under /tmp; kill only PIDs you started; never touch ~/wb-urux-sandbox or the user's processes or configs; no commits, no graphify update; zero residue.",
+  "result_format": "Write the result JSON (checks table with exit codes, verdict per finding, residue). Reply in Korean, <=12 lines."
+}

@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-home-probe-01",
+  "status": "complete",
+  "report": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-home-probe-01.md",
+  "summary": {
+    "auth": "agent.db symlink -> authenticated (openai-codex), WAL/SHM next to target, symlink/inode preserved; user agent.db gets WAL writes per start (OMP multi-process design)",
+    "isolation": "home alone insufficient: project .omp/config.yml overrides home config -> keep --config overlay; PI_CONFIG_DIR (HOME-relative) moves logs/run/cache/install-id/user agents/APPEND/TITLE/lsp user paths; OMP_PROFILE/PI_PROFILE/--profile must stay unset; config.yml needs setupVersion 2 + startup.setupWizard false and is rewritten each start",
+    "fresh user": "no ~/.omp/agent/agent.db -> OMP would create it in the user's home; launcher must lstat and show login guidance",
+    "still read": "~/.claude/settings.json, claude plugin LSP config, ~/lsp.*, ~/.env (dotenv), cwd ancestors' .omp/.claude/.codex/.gemini agents dirs"
+  },
+  "incident": "initial strace printed a 56-byte agent.db-wal WAL/frame header once (no credential payload); redacted immediately; later runs used -s 0; all traces deleted",
+  "left_in_user_home": [
+    "~/.omp/logs/omp.2026-10-03.{644605,646321,646419,647006,648010,648116,649429,650271}.log, .omp.650271-audit.json",
+    "~/.omp/run/daemons/85766810a63ade05/clients/{644605,...,648116}-*.json (created by OMP during probe runs before PI_CONFIG_DIR)"
+  ],
+  "observed_model": "opus"
+}

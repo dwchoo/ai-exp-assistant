@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw18-u6-01",
+  "status": "needs_reroute (tests outside scope assume no skills)",
+  "changed": {
+    "omp_bridge/skills/to-worker/SKILL.md": "704783bcf64f7e6389296165d1efc0154a5d9d24b9844d285e02b5e1d9878b6c",
+    "omp_bridge/skills/to-manager/SKILL.md": "0cc1a72998a47cedea337b1ba73f87369c81599b2adcc1a3038b8452b7f6ea3e",
+    "omp_bridge/skills/README.md": "b967f2d7e9be5eba9bb6c4fdce0d2f8185e655ea7d2d88b0a43b930ea89aa93c",
+    "src/workbench/backend/launcher.py": "d8d7c88a38fda6da1906c91d7be423d9de9fe07e13ab34260acc5c849a83cc0f",
+    "tests/backend/test_workbench_skills.py": "dababa1cf37b1283a8c59c6f078c92c77189223200e4469d5dd0da404c37b1d3"
+  },
+  "candidate_with_u5": "b3ba285c8152322c4a3843a2af0dd1554916591f965b8c32ef4d2ca1cb25d30f",
+  "checks": {
+    "test_workbench_skills": "11 red -> 12 OK",
+    "tests/backend": "434: 6 FAIL (p27m x3, p27n x1, test_paths_launcher x2 assert empty skills)",
+    "bridge": "32 OK",
+    "contracts": "52 OK",
+    "live (no model)": "manager: skills/skill_commands only to-worker, tool only to_worker; worker: only to-manager / to_manager; isolation ok both"
+  },
+  "design": "two English SKILL.md (~40 lines, front matter name/description); ROLE_SKILL_PATTERNS manager ('to-worker',), worker ('to-manager',); isolation check already uses role_skill_allowlist; customDirectories already omp_bridge/skills; field lists pinned against bridge.ts schemas by tests",
+  "residue": "none",
+  "observed_model": "sonnet"
+}

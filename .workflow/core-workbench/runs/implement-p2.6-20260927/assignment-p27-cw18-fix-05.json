@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw18-fix-05",
+  "ticket_id": "CW-18 skill text D1 (before real-model smoke)",
+  "role": "worker",
+  "unit": "V-CW-18-p2.7",
+  "approved_bundle_digest": "4f4a016424bafe78c2c23437706e206bce3a3c770d13610785564a4a93f00a93",
+  "routing": {
+    "planned_role": "worker",
+    "selected_role": "worker (wb-worker, Sonnet high)",
+    "reason_codes": [
+      "bounded_pattern",
+      "doc_only"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-review-02-agent.json D1"
+    ]
+  },
+  "base_candidate": "fad89b8e57d9b30441b61b51cc24fcf8e4c981ee0d1088042954f9e19a7ceae0",
+  "required_behavior": [
+    "to-worker SKILL.md: state that a new to_worker may be sent in the same turn that reads the worker's report; document the notices[] the manager may receive in tool results (report_outcome_unknown, report_not_delivered, task_cancelled, and any other notice kinds actually emitted by src/workbench/backend/flow_tasks.py - read the code) and what to do for each.",
+    "to-manager SKILL.md: document rejected:task_not_delivered (the TASK has not reached you yet; wait for it) and any other to_manager results actually emitted.",
+    "Keep each skill about one page; update tests/backend/test_workbench_skills.py so every documented result/notice name is checked against the code constants (no stale names)."
+  ],
+  "acceptance": [
+    "tests/backend/test_workbench_skills.py red->green; tests/bridge and the skills-related independent tests pass (real exit codes, no pipes)"
+  ],
+  "allowed_write_paths": [
+    "omp_bridge/skills/**",
+    "tests/backend/test_workbench_skills.py"
+  ],
+  "prohibited_paths": [
+    "src/**",
+    "omp_bridge/g3/**",
+    "tests/**/*_independent*",
+    "docs/**",
+    ".workflow/**"
+  ],
+  "rules": "Use /tmp/cw02-g1-venv/bin/python, short unique TMPDIR removed afterwards; no model prompts; never touch ~/wb-urux-sandbox or the user's processes; no commits, no graphify update.",
+  "result_format": "checks table first, status, changed paths + sha256. Korean, <=8 lines."
+}

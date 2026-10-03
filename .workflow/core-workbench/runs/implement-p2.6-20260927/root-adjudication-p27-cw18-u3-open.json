@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "record": "root-adjudication-p27-cw18-u3-open",
+  "decided_by": "Root",
+  "date": "2026-10-03",
+  "decisions": {
+    "force stop": "Accept for CW-18: the production RecoveryFacts/RecoveryPort is CW-19 scope (SQLite RecoveryPort, reconcile). Until then bound stop/force stays closed (fail-safe) and the user's force path is the C-D63 host-shell kill; record as a CW-19 carry-forward.",
+    "takeover during run": "Accept the fail-safe for CW-18: while the user takes over the host shell during a run, automatic review is held; the UI must show it (automation.review status/reason). Routing takeover/handoff through the coordinator so reviews resume after a clean handoff is carried to CW-19/CW-16 (lifecycle reconcile).",
+    "pause-while-closing / large manifest": "documented limits; carried"
+  },
+  "authority": "workflow-contract Root adjudication; CW-18 ticket; C-D66"
+}

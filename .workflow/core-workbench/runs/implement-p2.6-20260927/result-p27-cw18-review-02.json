@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw18-review-02",
+  "verdict": "integrate",
+  "frozen_candidate": "fad89b8e57d9b30441b61b51cc24fcf8e4c981ee0d1088042954f9e19a7ceae0",
+  "agent_result": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-review-02-agent.json",
+  "closed": [
+    "R1",
+    "R2",
+    "R3",
+    "R4",
+    "R5",
+    "R6"
+  ],
+  "findings": {
+    "D1 P3": "to-worker SKILL.md lacks same-turn to_worker and notices (report_outcome_unknown, report_not_delivered, ...); to-manager lacks rejected:task_not_delivered",
+    "D2 P3": "flow.py:643 handle holds _lock during _settle (up to 2 s) - tool calls serialised, no deadlock",
+    "D3 P3": "flow.py:836-844 a delivering item can be submitted after the last withdrawn check; cancel notice follows (safe side)"
+  },
+  "p27b_flake": "pre-existing timing flake unrelated to run.py delta (fixed 3 s pwd wait, 4 shells starting concurrently); fails with HEAD run.py too under concurrent suites; not a CW-18 blocker -> CW-16 hygiene",
+  "observed_model": "sonnet"
+}

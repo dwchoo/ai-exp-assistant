@@ -1,0 +1,205 @@
+{
+ "schema_version": 1,
+ "invocation": "p27-home-test-01",
+ "role": "test_designer",
+ "unit": "V-CW-17-p2.7-home",
+ "frozen_candidate": "3fc2a357aa866ad163ebbfc1cfd0cbd092094d0f74047f195d7955e5d2832cd7",
+ "status": "complete_with_findings",
+ "expectations_drafted_first": "E1-E10 from C-D64/CW-17/probe/senior required_behavior before reading omp_home.py",
+ "checks": {
+  "tests/backend (venv, test_*.py)": "306 ran: 3 FAIL (all new p27u, intentional red = findings F1,F2,F4), 27 skip; adapted p27m/p27n now green",
+  "tests/contracts": "48 OK",
+  "tests/ui (test_*.py)": "696 OK (p27p adapted)",
+  "tests/gates/g1_vt (PYTHONPATH=src:.)": "85 OK",
+  "baseline before adaptation": "tests/backend 264: 16 FAIL (p27m 8, p27n 8 incl. subtests)",
+  "live WB_LIVE_HOME=1 (once)": "LiveRealStore OK; LiveFakeHomeXdg FAIL (finding F3)"
+ },
+ "adapted_tests": [
+  {
+   "file": "tests/backend/test_omp_isolation_independent_p27m.py",
+   "sha256": "00b6b0353b8120a2de1e636b24557fe0c3dfff827c1674eab64b3b5b51551354",
+   "changes": [
+    "RealEntrypointBase fake HOME gets a fake non-credential agent.db regular file (plant_fake_auth_store)",
+    "FORBIDDEN_ENV no longer contains PI_CODING_AGENT_DIR; entrypoint test asserts pane+check env PI_CODING_AGENT_DIR=<data>/omp-root/agent, path.join(HOME, PI_CONFIG_DIR)=<data>/omp-root, BUN cache under root, check env == pane env for these keys",
+    "unit env test: user's OMP_PROFILE/PI_PROFILE/PI_CODING_AGENT_DIR dropped; home values passed through exactly",
+    "overlay: user 'omp config get' values no longer unioned, ~/.omp/agent/agents not read (home-agent absent), zero config_get calls; agent.db symlink + config.yml 0600 asserted",
+    "stub OMP answers get_login_providers and holds models.db open in the agent dir like real OMP; RPC list now includes get_login_providers x2",
+    "unreadable-user-config test now asserts the config is never read",
+    "new StartRefusedWithoutAuthStoreTests: exit 2, guidance (omp, /login, store path), no OMP/backend, home unchanged, no link"
+   ],
+   "reason": "C-D64 supersedes C-D59's 'no PI_CODING_AGENT_DIR' and the user-config union; start now requires the user's auth store"
+  },
+  {
+   "file": "tests/backend/test_omp_isolation_independent_p27n.py",
+   "sha256": "33da5fa020e06b863de5e795c47d343d3bce7e9adea2b9b2bbfd131ffedfcb28",
+   "changes": [
+    "personality tests now require: user PERSONALITY.md -> state ok, no warning, not mentioned in result/summary/start/status output"
+   ],
+   "reason": "user PERSONALITY.md is not read in the Workbench home"
+  },
+  {
+   "file": "tests/ui/test_product_jamo_detach_independent_p27p.py",
+   "sha256": "3bac89d35d290ac6c69e029b8acf42bc341586ad50f99b976095e2ce417fa026",
+   "changes": [
+    "fake HOME gets a fake agent.db"
+   ],
+   "reason": "start refuses without the user auth store"
+  }
+ ],
+ "new_tests": [
+  {
+   "file": "tests/backend/test_omp_home_independent_p27u.py",
+   "sha256": "b9c8e953bbed9ecb118a03e83aff8d20346871ac1ff640d610dff3e915397673",
+   "count": 41,
+   "red": 3,
+   "covers": "env construction (home keys, profile/PI_*/OMP_*_DIR/DB/PI_AUTO_QA drop, XDG withheld only when $XDG_*/omp exists, host shell untouched, --profile refused in --omp-arg/WORKBENCH_OMP_ARGS, --profile in checked command = leak); data dir inside/outside HOME, symlinked HOME, overlap with ~/.omp/XDG omp refused; config.yml 0600/required keys/rewritten after edit/symlink swap never written through; symlinked agent dir refused; link create/keep(inode)/repair wrong/dangling/relative target; file/dir/-wal(symlink to user's)/-shm/-journal moved aside inside wb agent dir, user home lstat-identical; store resolution incl XDG_DATA_HOME/omp; no store -> no link, guidance, home unchanged; vanished store -> link removed; overlay never reads user agents dir; classification (leaks, prefix neighbours, not_observed/no_provider warnings, drift missing/file/retargeted/inode replaced/split); check_isolation via fake RPC (open user file = leak, login RPC failure tolerated); entrypoint: empty home refuse, overlap refuse, profile env refuse/dropped, older data dir migrated (local agent.db moved aside), config edit replaced at next start; backend restart reuses home env, rewrites config, repairs link, vanished store unlinked at restart, link drift during re-check -> warning"
+  },
+  {
+   "file": "tests/backend/live_omp_home_independent_p27u.py",
+   "sha256": "2c3d5c6512884969905f709ae56f70305fbac1abb3032c79d63e9983c9547b3d",
+   "count": 2,
+   "opt_in": "WB_LIVE_HOME=1"
+  }
+ ],
+ "findings": [
+  {
+   "id": "F1",
+   "severity": "P3",
+   "file": "src/workbench/backend/cli.py:35 (cmd_start src/workbench/backend/cli.py:181,189)",
+   "summary": "start with a data dir inside ~/.omp is refused (exit 2) but _layout's ensure_private_dir already created the data dir (e.g. ~/.omp/wb, 0700, empty) and leaves it in the user's OMP dir",
+   "test": "test_omp_home_independent_p27u.EntrypointHomeTests.test_data_dir_inside_the_users_omp_dir_is_refused (red)"
+  },
+  {
+   "id": "F2",
+   "severity": "P3",
+   "file": "src/workbench/backend/omp_home.py:360-363 via src/workbench/backend/launcher.py:686",
+   "summary": "classify_open_paths derives the user's XDG OMP dir and auth store from the CHECK environment, from which home_environment (omp_home.py:325) removed XDG_DATA_HOME; for an XDG user files under $XDG_DATA_HOME/omp are never reported as leaks and auth_store_open is false",
+   "test": "test_omp_home_independent_p27u.ClassificationTests.test_xdg_users_omp_dir_is_watched_too (red)"
+  },
+  {
+   "id": "F3",
+   "severity": "P3 (P2 for XDG-layout users)",
+   "file": "src/workbench/backend/omp_home.py:319-327",
+   "summary": "with $XDG_DATA_HOME/omp present, XDG_DATA_HOME is withheld, so OMP's native loader (nativesDir: XDG_DATA_HOME/omp/natives else ~/.omp/natives, confirmed in the 18.4.5 binary) creates ~/.omp/natives/18.4.5/pi_natives.*.node in the user's home; same class: after an OMP upgrade the first Workbench OMP creates ~/.omp/natives/<newver> for non-XDG users too. Current user is non-XDG (live store_kind=default), so not hit today",
+   "test": "live_omp_home_independent_p27u.LiveFakeHomeXdg (red, fake HOME, empty fake store)"
+  },
+  {
+   "id": "F4",
+   "severity": "P3",
+   "file": "src/workbench/backend/launcher.py:122",
+   "summary": "EVIDENCE_OMP_VERSIONS isolation stays 18.4.4 although setupVersion 2 and the C-D64 evidence are OMP 18.4.5; status always shows drift (probe asked to report drift relative to the evidence version)",
+   "test": "test_omp_home_independent_p27u.ClassificationTests.test_version_evidence_matches_the_home_probe (red)"
+  },
+  {
+   "id": "N1",
+   "severity": "note",
+   "file": "src/workbench/backend/omp_home.py:142-147",
+   "summary": "symlinked HOME with a data dir outside it can be refused although OMP's lexical path.join would hit the right dir (conservative, clear message; test accepts refuse-or-resolve)"
+  },
+  {
+   "id": "N2",
+   "severity": "note",
+   "summary": "older opt-in live files (live_omp_isolation_independent_p27m/p27n) use a fake HOME without agent.db; with C-D64 their start would be refused; not run/edited here"
+  }
+ ],
+ "live": {
+  "store_kind": "default",
+  "isolation": {
+   "state": "ok",
+   "leaks": [],
+   "warnings": [],
+   "providers": {
+    "manager": [
+     "openai-codex"
+    ],
+    "worker": [
+     "openai-codex"
+    ]
+   },
+   "omp_version": "omp/18.4.5"
+  },
+  "wb_root_entries": [
+   "agent",
+   "bun-transpiler-cache",
+   "cache",
+   "logs",
+   "run"
+  ],
+  "panes": {
+   "manager_omp": {
+    "pid": 740719,
+    "open_in_wb_root": 13,
+    "open_user_agent_db": [
+     "agent.db",
+     "agent.db-shm",
+     "agent.db-wal"
+    ]
+   },
+   "worker_omp": {
+    "pid": 740720,
+    "open_in_wb_root": 13,
+    "open_user_agent_db": [
+     "agent.db",
+     "agent.db-shm",
+     "agent.db-wal"
+    ]
+   }
+  },
+  "restart_result": {
+   "ok": true,
+   "result": null,
+   "reason": null
+  },
+  "after_restart": {
+   "state": "ok",
+   "leaks": [],
+   "warnings": [],
+   "worker": {
+    "pid": 740874,
+    "open_in_wb_root": 13,
+    "open_user_agent_db": [
+     "agent.db",
+     "agent.db-shm",
+     "agent.db-wal"
+    ]
+   }
+  },
+  "shutdown": {
+   "exit": 0,
+   "alive_after": [],
+   "owned_seen": 5
+  },
+  "user_omp_inventory": {
+   "entries_before": 2291,
+   "entries_after": 2291,
+   "diff": {
+    "new": [],
+    "deleted": [],
+    "changed": [
+     "agent/agent.db",
+     "agent/agent.db-shm",
+     "agent/agent.db-wal",
+     "natives/18.4.5"
+    ]
+   },
+   "unexpected": {
+    "new": [],
+    "deleted": [],
+    "changed": []
+   },
+   "store_inode_same": true,
+   "store_mode_same": true
+  },
+  "cleanup": {
+   "survivors_killed": [],
+   "root_removed": true
+  }
+ },
+ "live_notes": [
+  "HTTP(S)/ALL_PROXY -> 127.0.0.1:9, no prompt, only the backend's RPC introspection; store and ~/.omp lstat only; pane environ read for PI_CONFIG_DIR/PI_CODING_AGENT_DIR/OMP_PROFILE/PI_PROFILE keys only",
+  "the user's sandbox OMPs (2) were running and share agent.db; untouched"
+ ],
+ "user_omp_writes_outside_agent_db_natives": [],
+ "residue": "none: temp roots under /tmp removed (p27u-*, p27m-*, p27q-*, wbp27p-*), no owned process left, no ~/.omp writes besides agent.db*/natives mtime; XDG probe used a fake HOME that was removed",
+ "constraints": "no production edits, no credential content read/copied/hashed, no strace, no prompts, no omp auth/config set commands, no commits, no graphify update"
+}

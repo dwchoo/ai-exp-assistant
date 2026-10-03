@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw18-smoke-01",
+  "ticket_id": "CW-18 real-model end-to-end smoke",
+  "role": "test_designer",
+  "unit": "V-CW-18-smoke",
+  "approved_bundle_digest": "4f4a016424bafe78c2c23437706e206bce3a3c770d13610785564a4a93f00a93",
+  "routing": {
+    "planned_role": "test_designer",
+    "selected_role": "test_designer (Opus general-purpose)",
+    "reason_codes": [
+      "live_real_model",
+      "authority_boundary"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/integration-p27-cw18.json"
+    ]
+  },
+  "user_authorization": "User answered '계속 진행해줘' to the question whether to run one real-model smoke of ~12-16 model calls (2026-10-03). Commits are NOT authorized.",
+  "goal": "Run ONE end-to-end smoke with the REAL model provider through the real product entrypoint and record what happens - the Workbench behaviour, not model quality.",
+  "setup": [
+    "Use a NEW temp data dir under /tmp (not ~/wb-urux-sandbox) and a temp project dir with a tiny git repo (one script, e.g. exp.sh that sleeps ~70 s and prints RESULT=ok, and a work area dir). Start with `python -m workbench start --data-dir <tmp> --no-attach` (or the equivalent) from the project dir so the Workbench-owned OMP home is created with the agent.db symlink to the user's real store (metadata only; never read it).",
+    "Drive it with a ui_v1 client (as the live probes do): attach, type into the manager pane, observe state pushes and pane output. Attach the real product UI in a PTY at least once to capture a text screenshot of the status lines during the run."
+  ],
+  "scenario": [
+    "1. Ask the manager (typed into its pane, in Korean or English) to use to_worker to give the worker a small WORK task: create <work-area>/hello.txt containing 'hello from worker' and report done. Observe: to_worker dispatched, worker does it (file exists), to_manager done reaches the manager, worker becomes idle.",
+    "2. While nothing is running, ask the manager to start an EXPERIMENT Task with to_worker: command ./exp.sh, criteria log_contains RESULT=ok, shell bash, environment none. Observe: host shell idle check, Workbench types the run, at least one 60 s worker review, judge/report to the manager, shell returned to the user with cwd restored.",
+    "3. During step 2 ask the manager (or call nothing extra) - if feasible, have the manager try another to_worker while busy and observe worker_busy (only if it costs <=2 extra calls)."
+  ],
+  "limits": [
+    "Hard cap: 30 provider requests in total (count via the bridge's provider request events / OMP state); hard wall-clock cap 20 minutes. If either is reached, stop: pause automation, shut the backend down (verified) and report what was observed.",
+    "Never touch ~/wb-urux-sandbox or the user's running Workbench/OMP processes; kill only PIDs you started; never read credential contents or other processes' environ; never print tokens; no commits, no graphify update; remove the temp dirs afterwards (keep only the result file and short logs under the run dir if useful, without secrets)."
+  ],
+  "result_format": "Write .workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-smoke-01.md (Korean): timeline with timestamps, provider request count per OMP, what worked, what did not (classify product defect vs model behaviour), screenshots (text) of the status lines, residue. Reply in Korean <=20 lines."
+}

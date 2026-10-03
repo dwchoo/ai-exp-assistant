@@ -1,0 +1,23 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 1771,
+  "event": {
+    "id": "limit-cw18-total",
+    "kind": "limit",
+    "data": {
+      "authority": "Approved PLAN p2.7h (approval-amendment-h, bundle 1addfa60...), C-D65, C-D55 budget delegation, workflow-contract section 8",
+      "bucket": "total",
+      "decision_owner": "Root",
+      "expected_previous": {
+        "authority": "C-D64 (CW-18 may start), approved PLAN p2.7g (bundle dafc9f2d...), C-D55 budget delegation, workflow-contract section 8",
+        "reason": "CW-18 design",
+        "value": 575
+      },
+      "origin": "operating",
+      "reason": "CW-18 unit",
+      "remaining_work_estimate": 14,
+      "scope_basis": null,
+      "value": 589
+    }
+  }
+}

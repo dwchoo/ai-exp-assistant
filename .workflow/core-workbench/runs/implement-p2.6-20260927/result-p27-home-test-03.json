@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-home-test-03",
+  "status": "complete",
+  "agent_result": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-home-test-03-agent.json",
+  "candidate": "144b40957f604a51bc936f4a161717119241f304eb0d0ad923faa7e0b2c7e3a8",
+  "checks": {
+    "tests/backend": "362 OK (27 skip)",
+    "contracts": "48 OK",
+    "ui": "696 OK",
+    "g1_vt": "85 OK",
+    "live WB_LIVE_HOME": "3 OK",
+    "p27v": "26 OK",
+    "mutations": "env drop shrink 7 fail, browser on 1, store ignores env 61, provider key ignored 6"
+  },
+  "observation": "no-store guidance shows the resolved path, not the variable name (variable named only for ambiguity refusals) - P3 wording",
+  "observed_model": "sonnet"
+}

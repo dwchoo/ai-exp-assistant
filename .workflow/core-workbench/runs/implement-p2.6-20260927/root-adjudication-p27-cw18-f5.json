@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "record": "root-adjudication-p27-cw18-f5",
+  "decided_by": "Root",
+  "date": "2026-10-03",
+  "issue": "independent test for F5 (after a backend restart, cancel closes the Task as cancelled before the host command ends) stays red; fixing it needs CW-19 restart reconcile (RecoveryPort)",
+  "decision": "Carry F5 to CW-19 (already listed in root-adjudication-p27-cw18-u3-open force-stop/restart scope). The test stays as the CW-19 acceptance probe but is marked expectedFailure with a reason referencing this record so the CW-18 suites are green; CW-19 must remove the marker. F3's expectedFailure marker is removed because the fix landed.",
+  "authority": "workflow-contract Root adjudication; CW-18/CW-19 tickets"
+}

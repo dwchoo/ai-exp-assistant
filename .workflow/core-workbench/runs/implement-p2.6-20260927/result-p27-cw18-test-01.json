@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw18-test-01",
+  "status": "complete",
+  "agent_result": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-test-01-agent.json",
+  "candidate": "4ff19f7621a34384780ae3a08a0ebf614f11800f832c523381183c91c1493650",
+  "checks": {
+    "backend": "482 OK",
+    "bridge": "1 FAIL (F4)",
+    "terminal": "4 FAIL (F1 x3, F2)",
+    "lifecycle/contracts/ui/g1_vt/g2_shell": "OK (ui 737, g1_vt 85, g2_shell 142)",
+    "TS": "37/37",
+    "live WB_LIVE_CW18": "2x PASS e2e (work dispatch, worker_busy, file written, done; experiment in host shell, success, shell returned; UI p,p pause/resume, no replay; UI states) - scripted provider only (manager 9 / worker 5)",
+    "workflow p27b": "2/3 fail under load in the agent run; Root rerun on the candidate 3/3 OK -> load-sensitive flake (CW-16 hygiene)"
+  },
+  "adapted": "6 skill tests to the role rule (stronger: look-alike names, other role skill, orca-cli -> leak)",
+  "findings": {
+    "F1 P1": "panes.py:700-735 idle check misses user background or Ctrl-Z stopped jobs at a normal prompt; Workbench types cd <worktree> + wb-handoff, handoff held, start_failed, a retry consumed, shell stuck in control_wait (reproduced live)",
+    "F2 P2": "run.py:585 user shell cwd left in the worktree after a run",
+    "F3 P2": "pause while a run closes -> resume refused forever, whole Workbench stays paused until backend restart (expectedFailure)",
+    "F4 P3": "to-worker skill lacks held:* results (paused etc.)",
+    "F5 P3": "after restart cancel closes as cancelled before the host command ends (CW-19)",
+    "F6 P3": "UI does not tell how to clear the job latch",
+    "F7 P3": "role_skill_allowlist fail-open for unknown role (unreachable)"
+  },
+  "observed_model": "opus"
+}

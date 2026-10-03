@@ -1,0 +1,24 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 1835,
+  "event": {
+    "id": "reserve-p27-cw18-fix-03",
+    "kind": "reserve",
+    "data": {
+      "buckets": [
+        "total",
+        "role:worker_senior",
+        "unit:V-CW-18-p2.7"
+      ],
+      "effort": "high",
+      "incident": "",
+      "invocation": "p27-cw18-fix-03",
+      "model": "claude-opus-5-5",
+      "purpose": "CW-18 review corrections p27-cw18-fix-03",
+      "role": "worker_senior",
+      "unit": "V-CW-18-p2.7",
+      "workspace": "/home/dwchoo/ai-exp-assistant",
+      "writer": true
+    }
+  }
+}

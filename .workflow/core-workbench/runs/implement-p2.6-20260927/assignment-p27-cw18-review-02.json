@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw18-review-02",
+  "ticket_id": "CW-18 (delta review after block)",
+  "role": "reviewer",
+  "unit": "V-CW-18-p2.7",
+  "approved_bundle_digest": "4f4a016424bafe78c2c23437706e206bce3a3c770d13610785564a4a93f00a93",
+  "routing": {
+    "planned_role": "reviewer",
+    "selected_role": "reviewer (wb-delta-reviewer, Sonnet high)",
+    "reason_codes": [
+      "bounded_delta_after_full_review"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-review-01-agent.json"
+    ]
+  },
+  "frozen_candidate": "fad89b8e57d9b30441b61b51cc24fcf8e4c981ee0d1088042954f9e19a7ceae0",
+  "criteria": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-review-01-agent.json findings R1-R7",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/root-adjudication-p27-cw18-r1.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/root-adjudication-p27-cw18-f5.json",
+    "docs/features/core-workbench/DECISIONS.md#C-D66"
+  ],
+  "delta": {
+    "reviewed_candidate": "d081a064 (p27-cw18-review-01)",
+    "evidence": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-cw18-fix34.json",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-cw18-test3.json",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-fix-03.json",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-fix-04.json",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-test-03-agent.json"
+    ],
+    "files": [
+      "src/workbench/backend/flow.py",
+      "src/workbench/backend/flow_tasks.py",
+      "src/workbench/backend/automation.py",
+      "src/workbench/workflow/run.py",
+      "src/workbench/ipc/bridge_g3/mailbox.py",
+      "src/workbench/ui/product/model.py",
+      "omp_bridge/skills/to-worker/SKILL.md"
+    ]
+  },
+  "focus": [
+    "R1-R3, R5, R6 closed without new liveness or no-replay holes (the 2 s ack wait, on_submitted semantics, withdraw races, keep_across_pause exactly-once).",
+    "R4 hint sequence matches the adapter's real behaviour (check against tests/backend/test_c_d58_handoff.py and the adapter).",
+    "to-worker SKILL.md still accurate after R1 (same-turn dispatch allowed, report_outcome_unknown / report_not_delivered / task_not_delivered results documented?) - report a P3 if missing.",
+    "Investigate the recurring tests/workflow test_workflow_unbounded_independent_p27b flake (child_pid None, children after close): is it plausibly related to the run.py changes (shell injection, before_shell_input) or pre-existing? Run it a few times alone and under load (e.g. alongside another suite) and look at the code paths; classify.",
+    "No regression elsewhere."
+  ],
+  "rules": "Read-only; write only .workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-review-02-agent.json. Tests with /tmp/cw02-g1-venv/bin/python, PYTHONPATH=src, short unique TMPDIR removed after; optional live WB_LIVE_CW18=1; no model prompts; OMP only with the Workbench home or a fake HOME; never read credential contents or other processes' environ; never pkill or pattern kills; never touch ~/wb-urux-sandbox or the user's processes.",
+  "result_format": "Findings P0..P3 with file:line; verdict per focus; overall integrate/block. Write JSON; reply in Korean <=12 lines."
+}

@@ -1,0 +1,132 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw18-test-03",
+  "role": "test_designer",
+  "unit": "V-CW-18-p2.7",
+  "status": "candidate_ready",
+  "frozen_candidate_packet": "9a337a6c67f1919dd178463442e871ca669afbea4f482d0a530573eb98adebdc",
+  "checks": [
+    {
+      "cmd": "unittest p27x + p27w flow + p27w automation + test_cw18_review_corrections",
+      "exit": 0,
+      "result": "82 OK, expected failures=1 (F5)",
+      "sec": 25
+    },
+    {
+      "cmd": "unittest p27x+p27w x3 reruns (stability)",
+      "exit": 0,
+      "result": "63 OK x3",
+      "sec": 16
+    },
+    {
+      "cmd": "discover tests/backend",
+      "exit": 0,
+      "result": "524 OK, skipped 27, xfail 1",
+      "sec": 415
+    },
+    {
+      "cmd": "discover tests/bridge",
+      "exit": 0,
+      "result": "47 OK",
+      "sec": 40
+    },
+    {
+      "cmd": "discover tests/workflow (run 1)",
+      "exit": 1,
+      "result": "52 ran, FAIL+ERROR in test_workflow_unbounded_independent_p27b (child_pid None; processes survived close)",
+      "sec": 123,
+      "classification": "environment/timing flake"
+    },
+    {
+      "cmd": "discover tests/workflow (rerun)",
+      "exit": 0,
+      "result": "52 OK",
+      "sec": 131
+    },
+    {
+      "cmd": "unittest tests.workflow.test_workflow_unbounded_independent_p27b (rerun 2)",
+      "exit": 0,
+      "result": "2 OK",
+      "sec": 120
+    },
+    {
+      "cmd": "discover tests/lifecycle",
+      "exit": 0,
+      "result": "38 OK",
+      "sec": 4
+    },
+    {
+      "cmd": "discover tests/terminal",
+      "exit": 0,
+      "result": "108 OK, skipped 2",
+      "sec": 543
+    },
+    {
+      "cmd": "discover tests/contracts",
+      "exit": 0,
+      "result": "52 OK",
+      "sec": 0
+    },
+    {
+      "cmd": "discover tests/ui",
+      "exit": 0,
+      "result": "740 OK",
+      "sec": 190
+    },
+    {
+      "cmd": "discover tests/gates/g1_vt (PYTHONPATH=src:.)",
+      "exit": 0,
+      "result": "85 OK",
+      "sec": 2
+    },
+    {
+      "cmd": "discover tests/gates/g2_shell (PYTHONPATH=src:.)",
+      "exit": 0,
+      "result": "142 OK, skipped 1",
+      "sec": 119
+    },
+    {
+      "cmd": "node --test tests/bridge/*.test.ts tests/gates/g3_omp/*.test.ts",
+      "exit": 0,
+      "result": "37/37 pass",
+      "sec": 11
+    },
+    {
+      "cmd": "WB_LIVE_CW18=1 unittest tests.backend.live_cw18_independent_p27w (scripted provider, fake HOME)",
+      "exit": 0,
+      "result": "2 OK (end_to_end, background-job wait)",
+      "sec": 46
+    },
+    {
+      "cmd": "mutation check on /tmp copies of src (removed afterwards)",
+      "exit": 0,
+      "result": "M1 R1 accept-at-receipt -> 9 FAIL; M2 R2 withdraw no-op -> 1 FAIL; M3 R3 keep_across_pause off -> 2 FAIL; M4 R5 hold whole start -> 2 FAIL; M5 R6 both bind guards off -> 2 FAIL (guard alone is redundant with the second)"
+    }
+  ],
+  "files_added": [
+    "tests/backend/test_cw18_review_independent_p27x.py (18 tests)"
+  ],
+  "files_modified": [
+    "tests/backend/test_cw18_flow_independent_p27w.py: CompletionTests.test_done_that_does_not_reach_the_manager_keeps_the_worker_busy -> test_done_whose_delivery_is_unknown_before_acceptance_closes_the_task_and_frees_the_worker (per root-adjudication-p27-cw18-r1)"
+  ],
+  "verdicts": {
+    "R1": "pass (same-turn to_worker for done/blocked/experiment report and experiment re-run; manager turn > deliver_timeout leaves no busy Task; unknown/rejected before acceptance -> report_outcome_unknown/report_not_delivered + one notice, no resend)",
+    "R2": "pass (cancelled deferred TASK never reaches the worker; untagged report rejected task_not_delivered until the new Task's own TASK arrives; delivered-task cancel still notifies)",
+    "R3": "pass (done, blocked report and free-work TASK queued across a pause delivered exactly once after resume; nothing delivered while paused)",
+    "R5": "pass (no hold during the pre-typing phase; held only at before_shell_input and released; user line started meanwhile -> start_failed:host_terminal_busy, nothing typed, no hold left)",
+    "R6": "pass (cancel before/after bind -> idle; ended-mark does not suppress the next run's bind)"
+  },
+  "frozen_hashes": {
+    "scope": "sha256 manifest of 66 files under src/ and omp_bridge/ (excluding __pycache__)",
+    "manifest_sha256_start": "276cd266607f55e864e4e67f402270254241116b19c9734b4bd0649f2dbed029",
+    "manifest_sha256_end": "276cd266607f55e864e4e67f402270254241116b19c9734b4bd0649f2dbed029",
+    "match": true,
+    "note": "packet digest 9a337a6c... is a snapshot identity that was not recomputed here"
+  },
+  "gaps": [
+    "experiment-report path is exercised through a fake Run (on_report events), not the real WorkflowRun/TaskMailbox",
+    "the live probe was not extended with an in-turn to_worker (only new *_independent* test files were allowed; it ran as is)",
+    "R4/R7 not in scope"
+  ],
+  "residue": "none: temp dirs removed (/tmp/p27x-flow-*, mutation copies); no owned process left; /tmp/p27-in-jhixl07c and /tmp/p27u-live-report.json pre-existed; user's wb-urux-sandbox backend/omp untouched; no model prompts; no commits/graphify update"
+}

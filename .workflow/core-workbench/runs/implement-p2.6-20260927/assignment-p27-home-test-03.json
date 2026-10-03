@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-home-test-03",
+  "ticket_id": "CW-17 (C-D64 re-verification after review block)",
+  "role": "test_designer",
+  "unit": "V-CW-17-p2.7-home",
+  "approved_bundle_digest": "dafc9f2d0fb3c71197003c594cbb69b562815a04e177ac08aa229878a48c1395",
+  "routing": {
+    "planned_role": "test_designer",
+    "selected_role": "test_designer (wb-test-rerun, Sonnet high)",
+    "reason_codes": [
+      "rerun_defined_by_findings_and_adjudication"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-home-review-01-agent.json",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/root-adjudication-p27-home-profile-fixture.json"
+    ]
+  },
+  "frozen_candidate": "24c9d8669042310be1875981b05000902e400fbca5c80a68d55f67db9e618ea1",
+  "task": [
+    "1. Correct tests/backend/test_omp_home_independent_p27u.py EntrypointHomeTests.test_profile_env_never_reaches_omp_and_the_home_is_used per the adjudication (fixture store at the profile location; add the complementary refused case).",
+    "2. Add independent tests for the review findings in tests/backend/test_omp_home_review_independent_p27v.py: every redirect env from the review + the senior's extra list is absent from pane and check envs and flagged as leak if injected; browser tool absent (config/argv) and an injected browser.enabled true is reported as leak; F3 resolution matrix (PI_CONFIG_DIR, OMP_PROFILE/PI_PROFILE incl. ''/'default', absolute/relative PI_CODING_AGENT_DIR, XDG_DATA_HOME/omp[/profiles/p]) incl. refusals naming the variable; F4 start with provider key env and no store (no symlink created, key values never logged); nothing created in user locations on any refusal.",
+    "3. Run tests/backend, tests/contracts, tests/ui (test_*.py, no pipe, venv), tests/gates/g1_vt; live WB_LIVE_HOME=1 once."
+  ],
+  "allowed_write_paths": [
+    "tests/backend/test_omp_home_independent_p27u.py",
+    "tests/backend/test_omp_home_review_independent_p27v.py",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-home-test-03-agent.json"
+  ],
+  "rules": "Never modify production code; keep failing tests red and report findings P0..P3 with file:line. Never read/print/copy/hash credential contents or other processes' environ (use fake stores in fake HOMEs; real store only via the existing live probe, metadata only); never print API key values (use dummy values in tests); no strace buffer capture; no model prompts; temp dirs only under /tmp; kill only PIDs you started; never touch ~/wb-urux-sandbox or the user's processes or configs; no commits, no graphify update; zero residue.",
+  "result_format": "Write the result JSON (checks table, changes, new tests, findings, residue). Reply in Korean, <=12 lines."
+}

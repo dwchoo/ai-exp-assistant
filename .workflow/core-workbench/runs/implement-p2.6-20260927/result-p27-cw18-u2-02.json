@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw18-u2-02",
+  "status": "complete",
+  "candidate_with_u4b": "98351a6888f3ed33562e9b568053dc18249faf8d7d3ccccf4bef3d3054bbc1d3",
+  "audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-cw18-u2b.json",
+  "checks": {
+    "red->green": "28 test_task_flow + 4 contract fail on old code; hold defect reproduced; all pass now",
+    "suites": "backend 422 (27 skip), bridge 32, workflow 49, lifecycle 38, contracts 52, ui 696, g1_vt 85; terminal 88 with 1 independent flake (p27c DefaultPipeXfszTests sh under load; 3x alone OK)",
+    "live (0 model)": "42/42: two OMP 18.4.5, fake HOME, scripted provider, real ShellPane; free-work dispatched -> second to_worker worker_busy -> done -> next dispatched; two experiments consecutively on the same host shell pid, both completed, shell returned; provider requests manager 14, worker 9"
+  },
+  "behaviour": "to_worker without task_id -> Task + scope_approved+proceed (actor user_standing_delegation, authority C-D66) -> dispatched (work: TASK message; experiment: idle-only host run else held:host_terminal_busy); active states -> worker_busy (nothing queued); same task_id -> QUESTION message; experiment re-run with run:true/spec change, retry 3; done closes, blocked frees worker and keeps Task open for follow-up; experiment finished after report delivered, superseded by a new Task; cancel: before start close, work cancel_run + cancel QUESTION, running host command -> cancelling (no kill), cancelled after command ends, notice; restart: unstarted closed, running held:backend_restarted; old pending approvals retired once; panes.automation_busy fixed; bridge to_worker description + cancel param",
+  "ui_v1_for_U5": "approvals removed; task{task_id,kind,status,summary,since,active,revision,run_id,runs_started,retry_limit,held_reason,closed_reason,cancel_requested,last_result}; worker{state idle|busy, task_id}; TASK_STATUSES, TASK_KINDS, WORKER_STATES; approval_decide -> unsupported_type; pause/resume unchanged; plus automation{...} from U3",
+  "open": [
+    "PlaceholderPolicy kept (U1 test stub)",
+    "to-worker skill text not written (U6)",
+    "paused -> cancel answers held:paused"
+  ],
+  "residue": "none",
+  "observed_model": "opus"
+}

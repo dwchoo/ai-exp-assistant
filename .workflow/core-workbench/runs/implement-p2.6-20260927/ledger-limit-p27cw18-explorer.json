@@ -1,0 +1,23 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 1766,
+  "event": {
+    "id": "limit-p27cw18-explorer",
+    "kind": "limit",
+    "data": {
+      "authority": "C-D64 (CW-18 may start), approved PLAN p2.7g (bundle dafc9f2d...), C-D55 budget delegation, workflow-contract section 8",
+      "bucket": "role:code_explorer",
+      "decision_owner": "Root",
+      "expected_previous": {
+        "authority": "Approved PLAN p2.7c (.workflow/core-workbench/runs/planning-p2.7-20260929/approval-amendment-c.json, bundle 91fe05dc...), C-D59 user request, C-D55 budget delegation, workflow-contract section 8",
+        "reason": "OMP 18.4.4 prompt-assembly investigation",
+        "value": 4
+      },
+      "origin": "operating",
+      "reason": "CW-18 design investigation",
+      "remaining_work_estimate": 1,
+      "scope_basis": null,
+      "value": 6
+    }
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw18-u3-01",
+  "ticket_id": "CW-18 U3 (lifecycle loop: tick, 60 s check, pause/resume)",
+  "role": "worker_senior",
+  "unit": "V-CW-18-p2.7",
+  "approved_bundle_digest": "1addfa60ef32e80d2ed2110f902e3b069ac872d38b675c13fbbb14ec4b549316",
+  "routing": {
+    "planned_role": "worker_senior",
+    "selected_role": "worker_senior (Opus general-purpose)",
+    "reason_codes": [
+      "lifecycle_invariants"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-design-01.md section 4",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-u2-01.json hooks_for_U3"
+    ]
+  },
+  "base_candidate": "ff00c2c09d2a963447a992aebdb2a999f765b5826015ba88d127135cf79adef6",
+  "criteria": [
+    "docs/features/core-workbench/tickets/CW-18.md (L-CW18-POLICY, C-D65 설계 확정)",
+    "docs/features/core-workbench/BRIEF.md items for 60 s checks, busy merge, pause semantics (requested/confirmed/unknown), resume only reconciled, retry 3, forced stop",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-design-01.md section 4",
+    "existing components: app/lifecycle.py LifecycleCoordinator.tick, app/production.py bind_production, observation/worker_review.py WorkerReviewScheduler, PauseCoordinator; wiring example tests/lifecycle/test_production_binding.py"
+  ],
+  "required_behavior": [
+    "On run start (experiment and free-work) create the first LifecycleRecord and bind_production; the backend loop calls coordinator.tick() about every second (injectable clock) while a run is active.",
+    "60 s worker review checks via the existing WorkerReviewScheduler (busy merge etc. unchanged) for experiment runs; for free-work runs use the same checks where the existing semantics apply, otherwise document what applies.",
+    "pause/resume: wire Backend.pause_hook/resume_hook to PauseCoordinator; collection continues while paused; interruption shown as requested/confirmed/unknown; resume only with reconciled=true; HandoffService/TaskFlow see the same paused state; automation status published in ui_v1 state (replace not_configured).",
+    "Retry limit 3, next revision and forced stop: connect existing policies only.",
+    "Do not change the verified lifecycle/pause semantics; if the free-work Task kind needs a new lifecycle mode, keep it minimal and explicit."
+  ],
+  "acceptance": [
+    "red->green tests with injected clock (tick starts 60 s check, busy merge, pause during run, resume reconciled only, published automation state)",
+    "run tests/lifecycle, tests/backend, tests/workflow, tests/bridge, tests/contracts, tests/ui (test_*.py, no pipe, venv), tests/gates/g1_vt; no-model live: an experiment run long enough for two 60 s checks with the scripted provider (or a shortened injected interval if the existing design allows) and a pause/resume cycle"
+  ],
+  "allowed_write_paths": [
+    "src/workbench/backend/**",
+    "src/workbench/app/**",
+    "src/workbench/observation/**",
+    "src/workbench/lifecycle/**",
+    "src/workbench/contracts/ui_v1.py",
+    "tests/backend/**",
+    "tests/lifecycle/**",
+    "tests/app/**",
+    "tests/observation/**",
+    "tests/contracts/test_ui_v1.py"
+  ],
+  "prohibited_paths": [
+    "src/workbench/ui/**",
+    "src/workbench/terminal/**",
+    "tests/**/*_independent*.py",
+    "docs/**",
+    ".workflow/**"
+  ],
+  "rules": "No model prompts (scripted provider only, outbound blocked); OMP only with the Workbench home or a fake HOME (never run omp with the real HOME, not even --version); never read/print/copy/hash credential contents or other processes' environ; temp dirs only under /tmp; kill only PIDs you started; never touch ~/wb-urux-sandbox or the user's processes or configs; no commits, no graphify update. If a requirement conflicts with an existing verified contract, stop and report. A parallel senior worker (U4) edits src/workbench/terminal/** at the same time: do not touch it.",
+  "result_format": "checks table first, status, wiring summary, ui_v1 state fields for U5, changed paths + sha256, failing independent tests, residue. Korean, <=25 lines."
+}

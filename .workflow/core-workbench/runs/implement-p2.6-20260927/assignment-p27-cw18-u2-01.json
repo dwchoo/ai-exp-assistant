@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw18-u2-01",
+  "ticket_id": "CW-18 U2 (approvals, scope check, experiment + free-work Task runs)",
+  "role": "worker_senior",
+  "unit": "V-CW-18-p2.7",
+  "approved_bundle_digest": "1addfa60ef32e80d2ed2110f902e3b069ac872d38b675c13fbbb14ec4b549316",
+  "routing": {
+    "planned_role": "worker_senior",
+    "selected_role": "worker_senior (Opus general-purpose)",
+    "reason_codes": [
+      "authority_boundary",
+      "shared_user_shell",
+      "workflow_semantics"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-design-01.md sections 3-4",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-u1-01.json"
+    ]
+  },
+  "base_candidate": "00411e26c7b112f5048846b884f81acc72279905172c734cf748490dd9c1fd31",
+  "criteria": [
+    "docs/features/core-workbench/DECISIONS.md C-D60, C-D64, C-D65 (experiment + free-work Tasks, idle-only host run)",
+    "docs/features/core-workbench/tickets/CW-18.md",
+    "docs/features/core-workbench/BRIEF.md C-AC-29 and related approval items",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-design-01.md sections 3-4"
+  ],
+  "required_behavior": [
+    "Replace PlaceholderPolicy with the real policy: first to_worker (or out-of-scope) creates/revises a Task (kind experiment or work) and a persisted pending approval (survives backend restart; no auto-resend after restart); scope check is deterministic per C-D65 (same Task/goal; paths inside approved paths; experiment: same command/criteria/environment names/shell, only commit may differ); in-scope instructions record a derived approval (derived_from user decision, actor backend_scope_check, tool_call_id) and proceed; one active Task at a time (another -> held:another_task_active); retry limit 3 for experiment re-runs (CW-13 policy).",
+    "ui_v1 (contract + backend handling; the UI card itself is U5): state exposes approvals [{approval_id, task_id, revision, kind, summary, spec, diff_vs_approved, created_at}] and active task/run status; client requests approval_decide{approval_id, decision approve|reject} (approve records approve_scope + proceed as ONE user action, C-AC-29), pause{}, resume{reconciled:true} (pause/resume semantics wired in U3; here accept and forward to a hook). Additive, versioning rules respected; refusals with reasons.",
+    "Experiment Task run: on approval start TaskWorkflow with the PRODUCT host shell (add a shell= injection to workflow/run.py as a CW-10 delta, default path unchanged); start only when the host shell is user-owned at a clean prompt with no jobs, otherwise mark held:host_terminal_busy and retry when it becomes idle (no user keystrokes are ever overwritten); collect/judge -> report to manager; complete/fail run.",
+    "Free-work Task: on approval deliver the instruction to the worker (non-staged message) with the approved goal/paths; the worker works with its own tools and reports via to_manager (progress/done/blocked/answer/report); reports are delivered to the manager; done/blocked close or hold the Task; manager can send further in-scope to_worker instructions.",
+    "Rejection: the manager learns it via its next to_worker/tool result or a delivered notice (no run exists).",
+    "Unify delivery: all deliveries to an OMP (workflow staged deliveries and handoff messages) go through ONE serialized delivery path per target so two messages never race into the same OMP turn.",
+    "Journal/records: every decision with ids; environment variable values rejected."
+  ],
+  "acceptance": [
+    "red->green tests (fake OMP/fake peers, no model): approval creation/persistence/restart, approve/reject via ui_v1 messages, derived approval table (commit-only change in scope, command change -> new approval, path outside -> new approval), one active Task, retry limit, experiment run with injected shell incl. idle-only start and held:host_terminal_busy, free-work deliver/report/done flow, rejection notice, single delivery path ordering",
+    "ui_v1 contract tests updated (non-independent); list *_independent* failures without editing",
+    "run tests/backend, tests/bridge, tests/workflow, tests/contracts, tests/app, tests/ui (test_*.py, no pipe, venv), tests/gates/g1_vt",
+    "a no-model live check with the scripted provider and two real OMPs: manager to_worker -> approval_pending -> approve via ui_v1 -> free-work instruction reaches the worker -> worker to_manager done reaches the manager; and an experiment Task whose command runs in the host shell (e.g. a short echo/sleep script) with collect/judge -> report"
+  ],
+  "allowed_write_paths": [
+    "src/workbench/backend/**",
+    "src/workbench/contracts/ui_v1.py",
+    "src/workbench/workflow/**",
+    "src/workbench/tasks/**",
+    "src/workbench/app/**",
+    "src/workbench/ipc/bridge_g3/**",
+    "omp_bridge/g3/bridge.ts",
+    "tests/backend/**",
+    "tests/bridge/**",
+    "tests/workflow/**",
+    "tests/app/**",
+    "tests/tasks/**",
+    "tests/contracts/test_ui_v1.py"
+  ],
+  "prohibited_paths": [
+    "src/workbench/ui/**",
+    "src/workbench/terminal/**",
+    "tests/**/*_independent*.py",
+    "docs/**",
+    ".workflow/**"
+  ],
+  "rules": "No model prompts (scripted provider only, outbound blocked); OMP only with the Workbench home or a fake HOME; never read/print/copy/hash credential contents or other processes' environ; temp dirs only under /tmp; kill only PIDs you started; never touch ~/wb-urux-sandbox or the user's processes or configs; no commits, no graphify update. If a requirement conflicts with an existing verified contract (e.g. CW-10/CW-13 semantics), stop and report rather than weakening it.",
+  "result_format": "checks table first, status, design decisions taken, ui_v1 additions (for U5), hooks for U3 (pause/resume/tick), changed paths + sha256, failing independent tests, residue. Korean, <=30 lines."
+}

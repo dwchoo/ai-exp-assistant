@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw18-test-01",
+  "ticket_id": "CW-18 (independent verification)",
+  "role": "test_designer",
+  "unit": "V-CW-18-p2.7",
+  "approved_bundle_digest": "4f4a016424bafe78c2c23437706e206bce3a3c770d13610785564a4a93f00a93",
+  "routing": {
+    "planned_role": "test_designer",
+    "selected_role": "test_designer (Opus general-purpose)",
+    "reason_codes": [
+      "first_independent_verification_of_new_behaviour",
+      "authority_boundary",
+      "process_lifetime"
+    ],
+    "evidence_refs": []
+  },
+  "frozen_candidate": "b3ba285c8152322c4a3843a2af0dd1554916591f965b8c32ef4d2ca1cb25d30f",
+  "criteria_sources": [
+    "docs/features/core-workbench/DECISIONS.md C-D58, C-D60, C-D64, C-D65, C-D66 (C-D66 supersedes UI approval)",
+    "docs/features/core-workbench/tickets/CW-18.md (C-D66 변경, C-D65 설계 확정, L-CW18-FLOW, L-CW18-POLICY)",
+    "docs/features/core-workbench/BRIEF.md items for checks/pause/retry/handoff",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/root-adjudication-p27-cw18-needs-review.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/root-adjudication-p27-cw18-u3-open.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/assignment-p27-cw18-u*-0*.json required_behavior"
+  ],
+  "task": [
+    "1. Adapt the 6 tests that assume no Workbench skills (tests/backend/*_independent_p27m.py x3, *_independent_p27n.py x1, tests/backend/test_paths_launcher.py x2) to the new rule (manager ('to-worker',), worker ('to-manager',); any other skill is still a leak) without weakening them.",
+    "2. New adversarial independent tests (draft expectations from the criteria BEFORE reading the implementation): tests/backend/test_cw18_flow_independent_p27w.py (+ tests/bridge/… and tests/terminal/… files with the same suffix if useful): tool availability per role and spoofing (frame role ignored, token role used), idempotence, outcome_unknown never resent, env values rejected, immediate dispatch for experiment and work, worker_busy while active in every active state (dispatched/starting/running/waiting_report/held/cancelling) with nothing queued, follow-up to the active Task, cancel in each phase (before start, work, running host command -> no kill, cancelled after), done/blocked semantics, retry limit 3, idle-only host run (user typing, partial line, background job, takeover in progress -> held:host_terminal_busy; user keystrokes never overwritten; user input refused while held and returned after), two consecutive runs on the same shell, pause/resume (reconciled only, held checks, no auto-resend after resume), 60 s review timing with an injected clock, backend restart (held:backend_restarted, no auto dispatch, retired approvals), single delivery path (no two deliveries into one OMP turn), journals 0600 and no secrets, C-D58 held handoff user control and the job-latch adjudication, ui_v1 task/worker/automation state + pause/resume requests, removed approval API answers unsupported_type, UI rendering/modals (p, k) incl. IME forms, skills content vs bridge schemas.",
+    "3. No-model live end-to-end through the real product entrypoint (python -m workbench start in a temp data dir with a fake/Workbench home and the existing scripted provider; outbound blocked): manager to_worker work Task -> worker does it (writes a file inside the allowed path) -> to_manager done -> manager receives; second to_worker while busy -> worker_busy; experiment Task runs a short script in the host shell, review/judge/report, shell returned; pause/resume once; real product UI attached in a PTY shows task/worker/automation states. Opt-in env WB_LIVE_CW18=1 in tests/backend/live_cw18_independent_p27w.py.",
+    "4. Run tests/backend, tests/bridge, tests/workflow, tests/lifecycle, tests/terminal, tests/contracts, tests/ui (test_*.py, no pipe, real exit, venv), tests/gates (g1_vt with PYTHONPATH=src:., g2_shell), the TS bridge tests, and the live probe once."
+  ],
+  "allowed_write_paths": [
+    "tests/**/*_independent*.py",
+    "tests/backend/test_paths_launcher.py",
+    "tests/backend/live_cw18_independent_p27w.py",
+    "tests/bridge/*_independent*",
+    "tests/terminal/*_independent*",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-test-01-agent.json"
+  ],
+  "rules": "Never modify production code (src/**, omp_bridge/**): keep failing tests red and report findings P0..P3 with file:line. No model prompts (scripted provider only, outbound blocked); OMP only with the Workbench home or a fake HOME (never the real HOME, not even --version); never read/print/copy/hash credential contents or other processes' environ; temp dirs only under /tmp, removed afterwards; robust teardown; kill only PIDs you started; never touch ~/wb-urux-sandbox or the user's processes or configs; no commits, no graphify update; zero residue.",
+  "result_format": "Write the result JSON (checks table, adapted tests, new tests, findings, live result, residue). Reply in Korean, <=20 lines."
+}

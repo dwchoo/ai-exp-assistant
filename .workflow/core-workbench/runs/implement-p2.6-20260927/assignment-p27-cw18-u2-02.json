@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw18-u2-02",
+  "ticket_id": "CW-18 U2b (C-D66 immediate dispatch + worker busy; hold defect)",
+  "role": "worker_senior",
+  "unit": "V-CW-18-p2.7",
+  "approved_bundle_digest": "4f4a016424bafe78c2c23437706e206bce3a3c770d13610785564a4a93f00a93",
+  "routing": {
+    "planned_role": "worker_senior",
+    "selected_role": "worker_senior (Opus general-purpose)",
+    "reason_codes": [
+      "authority_boundary",
+      "workflow_semantics"
+    ],
+    "evidence_refs": [
+      "docs/features/core-workbench/DECISIONS.md#C-D66",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-u2-01.json",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-u4-01.json open 2",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-u3-01.json"
+    ]
+  },
+  "base_candidate": "ae57fe7dec307a6d81a9d173d814263b252538783626cadb3a078907943a9ffe",
+  "criteria": [
+    "docs/features/core-workbench/DECISIONS.md#C-D66",
+    "docs/features/core-workbench/tickets/CW-18.md (C-D66 변경)"
+  ],
+  "required_behavior": [
+    "Policy: to_worker no longer creates UI approvals. If no Task is active, it creates the Task (experiment or work) and records scope approval + proceed with actor 'user_standing_delegation' and authority C-D66 (no derived-approval scope check), then dispatches immediately (free-work: deliver instruction to the worker; experiment: start the run with the existing idle-only host-shell rule, held:host_terminal_busy otherwise). If a Task is active (running, held for host terminal, waiting for the worker's report), return immediately status 'worker_busy' with {task_id, kind, summary, status, since} - nothing queued. Follow-up instructions for the ACTIVE Task from the manager (to_worker with that task_id) are delivered as messages to the worker (same Task; no new approval); experiment re-run of the active Task keeps the retry limit 3.",
+    "Completion: a Task becomes inactive when the worker reports done/blocked via to_manager (free-work) or the experiment run completes/fails and the report is delivered to the manager; the manager then may send the next task. Provide a way for the manager to cancel the active Task (to_worker {task_id, cancel:true}) -> run stopped via existing safe paths, Task closed as cancelled, worker notified.",
+    "Remove the ui_v1 approval surfaces that no longer apply (approvals list, approval_decide) or keep them inert if removing breaks verified contracts - prefer removal with additive versioning rules; keep pause/resume. Publish task/worker state for U5: task{task_id, kind, status, summary, since, run_id, held_reason, last_result} and worker{state idle|busy}.",
+    "Update the bridge to_worker tool description: 'The worker does ONE task at a time. If it is busy you get worker_busy with the current task; wait for its to_manager report (done/blocked) or cancel the task.'",
+    "Fix the hold defect from U4 open 2: panes.py automation_busy must not read the non-existent 'returned' key; compute returned like flow_tasks _give_back (lifetime ended and input/control returned and not unknown) so a second experiment run on the same shell can start.",
+    "Pending approvals persisted by U2 from earlier runs: migrate/ignore safely on start (no auto dispatch of old approvals)."
+  ],
+  "acceptance": [
+    "red->green tests: immediate dispatch for both kinds, worker_busy answer while active (incl. held:host_terminal_busy and waiting-for-report), follow-up message to the active Task, cancel, completion frees the worker, retry limit, second experiment run on the same shell, ui_v1 state task/worker, removed/inert approval API, old pending approvals not dispatched",
+    "update non-independent tests that assumed UI approval (test_task_flow etc.); list *_independent* failures without editing",
+    "run tests/backend, tests/bridge, tests/workflow, tests/lifecycle, tests/contracts, tests/terminal, tests/ui (test_*.py, no pipe, venv), tests/gates/g1_vt; no-model live with two real OMPs + scripted provider: free-work dispatch -> worker busy answer to a second to_worker -> worker done -> next to_worker accepted; two consecutive experiment runs on the same host shell"
+  ],
+  "allowed_write_paths": [
+    "src/workbench/backend/**",
+    "src/workbench/contracts/ui_v1.py",
+    "src/workbench/workflow/**",
+    "src/workbench/tasks/**",
+    "src/workbench/ipc/bridge_g3/**",
+    "omp_bridge/g3/bridge.ts",
+    "tests/backend/**",
+    "tests/bridge/**",
+    "tests/workflow/**",
+    "tests/tasks/**",
+    "tests/contracts/test_ui_v1.py"
+  ],
+  "prohibited_paths": [
+    "src/workbench/ui/**",
+    "src/workbench/terminal/**",
+    "tests/**/*_independent*.py",
+    "docs/**",
+    ".workflow/**"
+  ],
+  "rules": "No model prompts (scripted provider only); OMP only with the Workbench home or a fake HOME (never the real HOME, not even --version); never read/print/copy/hash credential contents or other processes' environ; temp dirs only under /tmp; kill only PIDs you started; never touch ~/wb-urux-sandbox or the user's processes or configs; no commits, no graphify update. A parallel worker (U4b) edits src/workbench/terminal - do not touch it.",
+  "result_format": "checks table first, status, behaviour summary, ui_v1 state for U5, changed paths + sha256, failing independent tests, residue. Korean, <=25 lines."
+}

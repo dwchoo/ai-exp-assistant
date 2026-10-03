@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "record": "root-adjudication-p27-cw18-needs-review",
+  "decided_by": "Root",
+  "date": "2026-10-03",
+  "issue": "CW-07 needs_review latch set when a wb-handoff is held because of user background/suspended jobs persists for the whole shell generation, so after the user cleans the jobs a new wb-handoff is held again",
+  "decision": "C-D58 requires that the user can clean up and run wb-handoff again. Clear ONLY a job-caused latch, and only on a fresh verified handoff whose jobs probe is empty (same verification path as a first handoff); latches caused by unknown/manual residue or unverifiable boundaries stay (fail-safe unchanged). Implement as a CW-07 delta with red->green tests, keeping every other CW-07 invariant and the p27s/independent tests green.",
+  "authority": "workflow-contract Root adjudication; C-D58; CW-18 ticket"
+}

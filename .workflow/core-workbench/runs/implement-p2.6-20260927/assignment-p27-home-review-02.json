@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-home-review-02",
+  "ticket_id": "CW-17 (C-D64 corrections after review block)",
+  "role": "reviewer",
+  "unit": "V-CW-17-p2.7-home",
+  "approved_bundle_digest": "dafc9f2d0fb3c71197003c594cbb69b562815a04e177ac08aa229878a48c1395",
+  "routing": {
+    "planned_role": "reviewer",
+    "selected_role": "reviewer (wb-delta-reviewer, Sonnet high)",
+    "reason_codes": [
+      "bounded_delta_after_full_review"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-home-review-01-agent.json"
+    ]
+  },
+  "frozen_candidate": "144b40957f604a51bc936f4a161717119241f304eb0d0ad923faa7e0b2c7e3a8",
+  "criteria": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-home-review-01-agent.json findings F1 (P2), F2-F5",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/root-adjudication-p27-home-profile-fixture.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/root-adjudication-p27-home-natives.json",
+    "docs/features/core-workbench/DECISIONS.md#C-D64 (browser tool off)"
+  ],
+  "delta": {
+    "reviewed_candidate": "f76ac6eb (p27-home-review-01)",
+    "evidence": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-home-senior3.json",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-home-test3.json",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-home-senior-03.json",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-home-test-03-agent.json"
+    ],
+    "files": [
+      "src/workbench/backend/omp_home.py",
+      "src/workbench/backend/launcher.py",
+      "src/workbench/backend/cli.py",
+      "omp_bridge/omp-isolation.yml"
+    ]
+  },
+  "focus": [
+    "F1 closed and the extra dropped env list is right (no env needed for normal OMP operation dropped, e.g. provider keys, PATH, LANG, TERM, auth broker vars kept).",
+    "Browser tool off via a supported key; detection works; no regression for other tools.",
+    "F3 resolution follows the user's omp rules; refusals create nothing; user values never reach OMP envs.",
+    "F4 env-key start does not create symlinks and never logs key values.",
+    "Test corrections keep invariants."
+  ],
+  "rules": "Read-only; write only .workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-home-review-02-agent.json. Tests with /tmp/cw02-g1-venv/bin/python, PYTHONPATH=src, short unique TMPDIR removed after; optional live WB_LIVE_HOME=1; never read/print credential contents or other processes' environ; no model prompts; never pkill or pattern kills; never touch ~/wb-urux-sandbox or the user's processes.",
+  "result_format": "Findings P0..P3 with file:line; verdict per focus; overall integrate/block. Write JSON; reply in Korean <=12 lines."
+}

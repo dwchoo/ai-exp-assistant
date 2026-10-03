@@ -1,0 +1,84 @@
+# OMP Workbench ambient-configuration isolation overlay (C-D59, C-D64).
+#
+# Passed to both Workbench-launched OMP processes with `--config`. Since C-D64
+# they run in a Workbench-owned OMP home (PI_CONFIG_DIR/PI_CODING_AGENT_DIR
+# under the data dir): the user's ~/.omp config, skills, agents, sessions and
+# memory are not read and nothing is written there; only the auth store
+# agent.db is a symlink to the user's own (never read by Workbench). The home's
+# config.yml carries the minimal isolation keys; this overlay stays on the
+# command line because project config (<cwd>/.omp/config.yml, .omp/settings.json,
+# .claude/settings.json) overrides the home config and only --config wins over
+# it. A second, per-role overlay generated in the data dir adds
+# skills.customDirectories (omp_bridge/skills), the Workbench-owned skill
+# filter (includeSkills/ignoredSkills) and task.disabledAgents (project agent
+# definitions). The launcher also passes --no-extensions,
+# --append-system-prompt "" (APPEND_SYSTEM.md) and --no-title. Verified against
+# OMP 18.4.5; the backend re-checks it at every start via RPC.
+#
+# What still touches the user's OMP locations (OMP 18.4.5 has no setting for
+# it): the native addon loader uses $XDG_DATA_HOME/omp/natives when
+# $XDG_DATA_HOME/omp exists, else ~/.omp/natives (HOME, never PI_CONFIG_DIR).
+# Every OMP start creates <natives>/<version> if missing, touches its mtime,
+# extracts the embedded pi_natives.*.node files missing there and removes
+# older version dirs. XDG_DATA_HOME, the only knob, would also move the
+# Workbench home's data (agent.db included), so it is withheld when
+# $XDG_DATA_HOME/omp exists. Remaining cases, reported at start as an
+# isolation note (omp_home.natives_status, metadata only):
+#  - after an OMP upgrade, before the user's own omp ran the new version, the
+#    first Workbench OMP extracts ~/.omp/natives/<new version> (the same files
+#    the user's omp extracts there);
+#  - an XDG-layout user: the Workbench OMPs extract into ~/.omp/natives/<ver>
+#    (new files; the user's own OMP uses $XDG_DATA_HOME/omp/natives).
+# With the version already extracted there, only the directory mtime changes.
+#
+# Browser: off (user decision 2026-10-03). In OMP 18.4.5 browser automation is
+# the eval tool's `browser` prelude (setting browser.enabled); with it off the
+# eval tool no longer offers `browser`, so its state save into
+# ~/.omp/browser-state/ (homedir-based, ignores PI_CONFIG_DIR) cannot run.
+# Other tools (read/web_search, which also fetch URLs) are unchanged. The
+# backend reports a browser prelude or tool still present as a leak.
+#
+# XDG users: when $XDG_{DATA,STATE,CACHE}_HOME/omp exists, that XDG_* value is
+# withheld from the Workbench OMPs (see above), so every command the OMP
+# bash tool runs inside the Workbench panes also runs without the user's
+# XDG_* value (tools that honour it fall back to ~/.local/share,
+# ~/.local/state, ~/.cache). The host shell pane keeps the user's
+# environment. Reported at start as an isolation note.
+#
+# Capability providers (context files, skills, rules, commands, prompts,
+# extensions, hooks, tools, MCP, SYSTEM.md). These ids do not collide with model
+# provider ids.
+disabledProviders: [native, omp-managed, skillshare, agents-md, agents, claude-md, claude-plugins, claude, cline, codex, cursor, gemini, github, mcp-json, omp-plugins, opencode, ssh-json, vscode, windsurf, agent-plugins, builtin-defaults]
+skills:
+  # Ambient skill sources off. Do not set skills.enabled=false or pass
+  # --no-skills: both also drop skills.customDirectories (Workbench skills).
+  enableClaudeProject: false
+  enableClaudeUser: false
+  enableCodexUser: false
+  enablePiUser: false
+  enablePiProject: false
+  enableAgentsUser: false
+  enableAgentsProject: false
+commands:
+  enableClaudeProject: false
+  enableOpencodeProject: false
+mcp:
+  enableProjectConfig: false
+memory:
+  backend: "off"
+memories:
+  enabled: false
+advisor:
+  enabled: false
+ttsr:
+  builtinRules: false
+# Personality: deliberately not set. OMP's default Personality/Tone/Reasoning
+# Format blocks stay (user choice); PERSONALITY.md is read only from the
+# Workbench home, so the user's file no longer applies. The launcher also
+# passes --no-title (no session-title model call, TITLE_SYSTEM.md unused).
+dev:
+  # Auto QA: no consent modal and no report push from Workbench sessions.
+  # PI_AUTO_QA in the environment would win; the launcher drops it for OMP.
+  autoqa: false
+browser:
+  enabled: false

@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw18-u1-01",
+  "status": "complete",
+  "candidate": "00411e26c7b112f5048846b884f81acc72279905172c734cf748490dd9c1fd31",
+  "audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-cw18-u1.json",
+  "checks": {
+    "TS fake peer": "7 red -> 7 green; gate TS 23 + independent 7 unchanged",
+    "tool_request bridge": "6 red -> green",
+    "HandoffService + socket/TaskMailbox roundtrip": "25+1 green",
+    "live no-model probe": "13/13 (two OMP 18.4.5, RPC, fake home, outbound blocked, 127.0.0.1 scripted provider; manager 5 / worker 4 requests)",
+    "suites": "bridge 29, backend 388 (27 skip), contracts 48, g1_vt 85, ui 696 with 1 FAIL test_last_fed_chunk_is_drawn_promptly_without_further_input (timing 2.001-2.010 s vs 2.0 s under load; Root reran 3x on the candidate: OK x3 -> load-sensitive flake, CW-16 hygiene)"
+  },
+  "api_facts": "pi.registerTool({name,label,description,parameters (JSON Schema or pi.typebox),loadMode,execute}); execute(toolCallId, params, signal, onUpdate, ctx) -> {content:[{type:'text',text}], details}; throw -> isError; loadMode default 'discoverable' (hidden from provider tools) -> 'essential' used; OMP adds required 'i' intent param and strips it before execute; parallel tool calls run concurrently; no extension tool timeout (bridge enforces 10 s)",
+  "interface": "HandoffService(journal_path, *, mailbox|mailbox_factory, policy, active_task, paused, sensitive_values, peer_lookup); handle(role, request)->dict; configure(policy=, active_task=, paused=); pending_approvals(); outbox_snapshot(); start()/close(); HandoffPolicy.decide(HandoffRequest, ActiveTask|None)->HandoffDecision(result, message, approval); PlaceholderPolicy in U1",
+  "deviation": "queued returns handoff_id (message created by the outbox thread because TaskMailbox.deliver holds the mailbox lock for the peer's turn); target session pinned at queue time",
+  "risks_for_U2": [
+    "outbox uses its own TaskMailbox: may deliver to the same OMP concurrently with workflow staged deliveries -> unify delivery in one path",
+    "stub approvals and outbox items are memory-only (lost on backend restart, not resent)"
+  ],
+  "residue": "none",
+  "observed_model": "opus"
+}

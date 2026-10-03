@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw18-fix-03",
+  "ticket_id": "CW-18 review corrections R1, R2, R3, R5, R6",
+  "role": "worker_senior",
+  "unit": "V-CW-18-p2.7",
+  "approved_bundle_digest": "4f4a016424bafe78c2c23437706e206bce3a3c770d13610785564a4a93f00a93",
+  "routing": {
+    "planned_role": "worker_senior",
+    "selected_role": "worker_senior (Opus general-purpose)",
+    "reason_codes": [
+      "workflow_liveness",
+      "no_replay"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-review-01-agent.json"
+    ]
+  },
+  "base_candidate": "d081a064d974bfc152a03a5710fd1a7f51cefb01c9a8c4be5fd821e7c2c77297",
+  "required_behavior": [
+    "R1 (P1): the worker becomes free as soon as the done/blocked report (work) or the experiment report is DELIVERED to the manager OMP (accepted into its session), not after the manager finishes its turn; a to_worker issued by the manager in the very turn that reads the report must be accepted; no fixed 20 s window can leave a Task busy/held forever - if the delivery outcome is unknown, release the worker with the Task closed as report_outcome_unknown (no resend) and tell the manager in the next tool result notices.",
+    "R2: cancel withdraws every not-yet-created/undelivered (DEFERRED or queued) message of the cancelled Task from the outbox before anything else is sent; the worker never receives a cancelled TASK after its cancel; a to_manager without task_id is attributed to the active Task only, never to a Task created after the report was queued.",
+    "R3: a done/blocked report that was queued but never created/delivered while paused is delivered after resume (this is not a replay); Tasks never stay busy because of a dropped report.",
+    "R5: do not hold the user's host input while the TASK is being delivered or the worker is deciding; hold only from the moment Workbench types until the run is handed back (keep the idle-only start rules).",
+    "R6: a fast cancel unbinds automation from the closed run (state returns to idle)."
+  ],
+  "acceptance": [
+    "red->green tests reproducing each finding (the reviewer's repro scenarios), incl. 'to_worker in the same turn as the report is accepted' and 'long manager turn does not leave the Task busy'",
+    "all suites with real exit codes (no pipes): tests/backend, tests/bridge, tests/workflow, tests/lifecycle, tests/terminal, tests/contracts, tests/ui, gates g1_vt/g2_shell, TS bridge tests; live WB_LIVE_CW18=1 once"
+  ],
+  "allowed_write_paths": [
+    "src/workbench/backend/**",
+    "src/workbench/workflow/**",
+    "src/workbench/ipc/bridge_g3/**",
+    "src/workbench/app/**",
+    "tests/backend/test_*.py",
+    "tests/workflow/test_*.py",
+    "tests/bridge/test_*.py"
+  ],
+  "prohibited_paths": [
+    "src/workbench/ui/**",
+    "omp_bridge/**",
+    "src/workbench/terminal/**",
+    "tests/**/*_independent*",
+    "docs/**",
+    ".workflow/**"
+  ],
+  "rules": "No model prompts (scripted provider only); OMP only with the Workbench home or a fake HOME (never the real HOME); never read credential contents or other processes' environ; temp dirs only under /tmp; robust teardown; kill only PIDs you started; never touch ~/wb-urux-sandbox or the user's processes or configs; no commits, no graphify update. A parallel worker edits omp_bridge/skills and src/workbench/ui/product - do not touch them.",
+  "result_format": "checks table first, status, fix summary per finding, changed paths + sha256, residue. Korean, <=20 lines."
+}

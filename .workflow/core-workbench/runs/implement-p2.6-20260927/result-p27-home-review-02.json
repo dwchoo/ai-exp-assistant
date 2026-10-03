@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-home-review-02",
+  "verdict": "integrate",
+  "frozen_candidate": "144b40957f604a51bc936f4a161717119241f304eb0d0ad923faa7e0b2c7e3a8",
+  "agent_result": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-home-review-02-agent.json",
+  "closed": [
+    "F1 (P2)",
+    "F2 (browser off by user decision)",
+    "F3",
+    "F4",
+    "F5"
+  ],
+  "findings": {
+    "N1 P3": "cli.py:195-200 omp_home_location runs before the running-backend check, so start-as-attach is refused for unresolvable env",
+    "N2 P3": "omp_home.py:81-96 dropping OMP_WORKTREE_DIR / OMP_*_CACHE_DB / OMP_AUTH_BROKER_SNAPSHOT_CACHE moves worktrees and caches into the wb home (intended; document)"
+  },
+  "observed_model": "sonnet"
+}

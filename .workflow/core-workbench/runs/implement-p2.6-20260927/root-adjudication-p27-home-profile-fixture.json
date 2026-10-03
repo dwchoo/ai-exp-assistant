@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "record": "root-adjudication-p27-home-profile-fixture",
+  "decided_by": "Root",
+  "date": "2026-10-03",
+  "issue": "p27u test_profile_env_never_reaches_omp_and_the_home_is_used places the fake user store at ~/.omp/agent while setting user env OMP_PROFILE=work and PI_CONFIG_DIR=.nope; the review-required F3 rule resolves the user's store like the user's own omp would (~/.nope/profiles/work/agent/agent.db), so the start is refused",
+  "decision": "F3 is the intended behaviour (review finding F3). The test's invariant (profile/redirect env never reaches the Workbench OMP and the wb home is used) stays; only its fixture premise is corrected: put the fake store at the location the user's own omp would use for that env, and add the complementary case (store only at ~/.omp/agent with that env -> refused with guidance naming the variable).",
+  "authority": "workflow-contract Root adjudication; C-D64; result-p27-home-review-01 F3"
+}

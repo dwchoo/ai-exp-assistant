@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw18-u5-01",
+  "status": "candidate_ready",
+  "changed": {
+    "src/workbench/ui/product/model.py": "d3b3924667e06c04b84131d0f983a973f27a92b163d7eec14daf4e315e356780",
+    "src/workbench/ui/product/view.py": "d86cf9ad3c96c3017c8b4bb93fd0fac797a4892a5ebcc7da69ee0d3378b3fa5b",
+    "src/workbench/ui/product/input.py": "d3cefd7e06c5fbeb44fd1b77db22c7a38da21b80a9189a828315defb745a06b5",
+    "tests/ui/test_product_model.py": "0ba03970b075ac28c3cebe05607f37bf05dab7ef8f030616bbc1424bc235bcde",
+    "tests/ui/test_product_pty.py": "d8552469101596749f650c84e72ced5339fe61feeea25f5e247267fd5e21465d"
+  },
+  "checks": {
+    "test_product_model": "305 OK (red: 31 fail / 54 error)",
+    "PTY TaskWorkerAutomation": "OK x3",
+    "tests/ui": "726 OK"
+  },
+  "design": "status line 1: worker 대기/작업 중 + 자동화 state; line 2 prefix: 작업 kind \"summary\" [status · held reason] + automation details (60s review due, delay, held, paused, interruption, resume refused, persistence error); width-safe truncation; tolerant of missing fields; pause/resume modal via prefix p / Ctrl-p / ㅔ (same single-key confirm rule as kill); pause{} or resume{reconciled:true}; refused results in footer; menu row under kill; help +1",
+  "gaps": [
+    "no real-backend PTY check (fake ui_v1 server)",
+    "ㅔ recognised as a lone jamo only while the modal is open; modal not auto-closed on backend state change"
+  ],
+  "residue": "none (pre-existing /tmp/p27-in-*, /tmp/p27m-e-*, /tmp/p27u-live-report.json not created by this worker)",
+  "observed_model": "sonnet"
+}

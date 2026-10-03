@@ -2,7 +2,7 @@
   "schema_version": 1,
   "checkpoint": "UR-UX",
   "decision": "C-D57",
-  "status": "direct-scroll follow-up integrated; awaiting user confirmation to close",
+  "status": "closed (user: UI OK, 2026-10-03)",
   "requested_at": "2026-09-30",
   "candidate": "671b05d3085701f0111e6440955fa6f4b9edc5ddcdba9f54c6d5af27a7c7351b (CW-06 integrated)",
   "guide": ".workflow/core-workbench/runs/implement-p2.6-20260927/ur-ux/UR-UX-GUIDE.md",
@@ -133,6 +133,15 @@
       "user": "그리고 터미널도 강제 종료 기능이 있어야 할거 같아. 강제로 종료하고 다시 자동으로 터미널이 뜨게.",
       "decision": "C-D61 (3)",
       "routing": "CW-19 with restart flow (ticket/PLAN amendment at CW-19 start)"
+    },
+    {
+      "date": "2026-10-03",
+      "user": "일단 UI 적인 것은 괜찮은거 같아. ...",
+      "decision": "C-D64; UR-UX closed (UI)",
+      "answers": {
+        "인증": "인증만 기존 omp에 있는 것을 미러할 수 없을까? ln -s 처럼. 동기화? 이렇게.",
+        "지시 방식": "bridge extension 도구를 사용하는데 이름은 to_worker, to_manager 이렇게 간단하게 하는게 더 좋을거 같은데 어때?"
+      }
     }
   ]
 }

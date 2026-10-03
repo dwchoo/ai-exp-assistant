@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-home-senior-02",
+  "status": "complete_with_residual",
+  "candidate": "78315bd17ac96baa48b1cfaf6fa30bdc5dc1228b4cd96c61feef3a90bca02174",
+  "audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-home-senior2.json",
+  "checks": {
+    "p27u unit + own": "102 OK (8 fail 5 error before)",
+    "tests/backend": "318: 1 FAIL p27m test_version_drift_is_visible_in_the_summary (assumes evidence 18.4.4)",
+    "contracts/ui/g1_vt": "48/696/85 OK",
+    "live WB_LIVE_HOME": "LiveRealStore OK; LiveFakeHomeXdg FAIL (F3 residual, as predicted)"
+  },
+  "resolution": {
+    "F1": "all path/auth checks before any directory creation",
+    "F2": "hidden XDG values passed as WORKBENCH_USER_* to the classifier only, removed before Popen",
+    "F3": "option 2: OMP 18.4.5 natives loader uses $XDG_DATA_HOME/omp/natives if present else ~/.omp/natives, ignores PI_CONFIG_DIR, no other setting; redirecting via XDG_DATA_HOME would move data/agent.db out of the agent dir (conflicts with C-D64 layout); natives_status predicts extraction into the user's location and the backend reports it as an isolation note; documented in omp-isolation.yml (new natives version after an OMP upgrade, XDG users)",
+    "F4": "EVIDENCE isolation 18.4.5 with evidence refs"
+  },
+  "residue": "none; real ~/.omp: only agent.db* and natives/18.4.5 mtime changed",
+  "observed_model": "opus"
+}

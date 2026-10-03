@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "units": [
+    "V-CW-17-p2.7-home"
+  ],
+  "status": "integrated",
+  "recorded_at": "2026-10-03",
+  "approved_bundle_digest": "dafc9f2d0fb3c71197003c594cbb69b562815a04e177ac08aa229878a48c1395",
+  "decision": "C-D64 (plan amendments p2.7f/p2.7g)",
+  "integrated_candidate": "e5db72f2c32b944c7c1299d8e9a594701bfed43571bbdada76e8cf7508bf913a",
+  "manifest": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-home-integrated-checkpoint.json (milestone, full blobs)",
+  "delta_vs_verified": "graphify-out/** and Root state.json only (.workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-home-integrated.json)",
+  "behaviour": {
+    "backend": "Workbench-owned OMP home <data>/omp-root via HOME-relative PI_CONFIG_DIR and PI_CODING_AGENT_DIR=<root>/agent; config.yml rewritten each start (setup wizard off, minimal isolation, Workbench skills dir, browser.enabled false); agent.db symlink to the user's store resolved like the user's omp (profiles/XDG/PI_* rules), lstat only, never opened; stale files moved aside inside the wb home; redirect/handoff env dropped and flagged as leaks; --profile refused; C-D59 --config overlay kept; no user omp config reads; no store -> refuse with guidance unless provider key env present; isolation check: home use via /proc fds, user OMP files opened -> leak, browser tool -> leak, natives extraction predicted as note"
+  },
+  "residuals": [
+    "natives/<ver> extraction under the user's OMP data dir (root-adjudication-p27-home-natives)",
+    "LSP configs (~/.claude settings/plugins, ~/lsp.*) and ~/.env still read (user choice)"
+  ],
+  "verification_chain": [
+    "p27-home-probe-01 (Opus; incident: 56-byte WAL header shown once, redacted)",
+    "p27-home-senior-01",
+    "p27-home-test-01 (Opus; p27u + live real store)",
+    "p27-home-senior-02 (F1-F4) + root-adjudication-p27-home-natives",
+    "p27-home-test-02",
+    "p27-home-review-01 (Opus; BLOCK F1 P2)",
+    "user decision: browser tool off; amendment p2.7g",
+    "p27-home-senior-03",
+    "root-adjudication-p27-home-profile-fixture",
+    "p27-home-test-03 (p27v 26 + mutations)",
+    "p27-home-review-02 (integrate)"
+  ],
+  "carried_forward": {
+    "polish": [
+      "N1 start-as-attach runs omp_home_location before the running check",
+      "no-store guidance shows the resolved path rather than the variable name"
+    ],
+    "docs": [
+      "N2 worktrees/caches now inside the wb home (UR-UX guide)"
+    ],
+    "CW-16": [
+      "OMP version drift/compat (now 18.4.5)"
+    ]
+  }
+}

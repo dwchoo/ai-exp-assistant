@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-home-test-01",
+  "status": "complete",
+  "agent_result": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-home-test-01-agent.json",
+  "candidate": "3546c93cbd4c7d125ccbde7daa826fbcecf4fc680c9a2048c63ce81a872cdc7e",
+  "checks": {
+    "tests/backend": "306: 3 FAIL (p27u intended red), 27 skip",
+    "contracts": "48 OK",
+    "ui": "696 OK",
+    "g1_vt": "85 OK",
+    "live WB_LIVE_HOME": "real OMP 18.4.5 + real store symlink, network blocked, 0 prompts: isolation ok, leaks/warnings 0, authenticated [openai-codex], pane opened only agent.db* user files, restart recheck ok, shutdown 0 residue; ~/.omp 2291 entries: only agent.db*/natives mtime changed, 0 new/deleted"
+  },
+  "findings": {
+    "F1 P3": "cli.py:35 data dir inside ~/.omp: start refuses but ~/.omp/wb is created first",
+    "F2 P3": "omp_home.py:360-363 (launcher.py:686) classification uses the check env without XDG_DATA_HOME, missing leaks of $XDG_DATA_HOME/omp files",
+    "F3 P3 (P2 for XDG users)": "omp_home.py:319-327 dropping XDG_DATA_HOME makes OMP create ~/.omp/natives/<ver>/*.node (fake-HOME live); new natives dirs after OMP upgrades too; current user is non-XDG",
+    "F4 P3": "launcher.py:122 EVIDENCE_OMP_VERSIONS isolation still 18.4.4 -> drift always shown"
+  },
+  "notes": [
+    "opt-in live p27m/p27n now refused (fake HOME without agent.db); not run/adapted"
+  ],
+  "observed_model": "opus"
+}

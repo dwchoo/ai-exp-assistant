@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-home-test-02",
+  "status": "complete",
+  "agent_result": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-home-test-02-agent.json",
+  "candidate": "f76ac6ebb893234d30c690abcc8836da9355b1bdc2598488a23d6629a8046589",
+  "checks": {
+    "tests/backend": "319 OK (27 skip)",
+    "contracts": "48 OK",
+    "ui": "696 OK",
+    "g1_vt": "85 OK",
+    "live p27u": "3 OK",
+    "live p27n": "10 OK (4 fail before)",
+    "live p27m": "9 OK"
+  },
+  "changes": [
+    "LiveFakeHomeXdg: only natives/<installed ver>/*.node allowed (XDG and default), isolation note prediction asserted; negative controls caught",
+    "p27m drift test same=18.4.5",
+    "p27n/p27m live repaired (fake agent.db); p27n live PERSONALITY expectation aligned with C-D64 (outside packet wording, consistent with unit p27n)",
+    "new WithheldUserValuesNeverLeakTests: no WORKBENCH_USER_*/user XDG in pane or check env"
+  ],
+  "real_omp_home_diff": "no new/deleted files; mtimes changed: agent/agent.db*, agent/models.db*, cache/legacy-pi-extension-cache.db*, logs dir - source not attributed (live RealStore OMPs or the user's running sandbox backend, which still runs pre-C-D64 code using ~/.omp)",
+  "observed_model": "sonnet"
+}

@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-home-probe-01",
+  "ticket_id": "CW-17 (C-D64 Workbench-owned OMP home probe)",
+  "role": "worker_senior",
+  "unit": "V-CW-17-p2.7-home",
+  "approved_bundle_digest": "f2084a7ccc5e5a6af7ca5bde6bc19b7d64052f43504b58549e587d379d121a43",
+  "routing": {
+    "planned_role": "worker_senior",
+    "selected_role": "worker_senior (Opus general-purpose), probe only",
+    "reason_codes": [
+      "host_state_experiment",
+      "credential_store_adjacent"
+    ],
+    "evidence_refs": [
+      "docs/features/core-workbench/DECISIONS.md#C-D64"
+    ]
+  },
+  "goal": "Establish facts (no product code change) for running Workbench OMPs with PI_CODING_AGENT_DIR=<temp wb home> whose agent.db is a symlink to the user's ~/.omp/agent/agent.db, so that wb OMPs see no user global config/skills/agents/sessions/memory and write nothing to ~/.omp except what OMP's own auth store sharing requires.",
+  "questions": [
+    "Q1 Which files OMP 18.4.5 reads/creates under PI_CODING_AGENT_DIR on startup (TUI in a PTY for ~8 s and RPC get_state/get_available_commands as the existing launcher.check_isolation does), and which paths outside it it still reads/writes (~/.omp/cache, logs, natives, install-id, run, ~/.agents, ~/.claude, ~/.codex, ~/.config, project dirs). Use strace -f -e trace=file,openat,rename,unlink (if available, without root) or an mtime/size/path inventory before/after (never read file contents of ~/.omp/agent/agent.db*, auth files or other credential stores).",
+    "Q2 With agent.db symlinked: does OMP recognise the user's authentication (observe only non-secret signals: get_state model/provider availability, TUI shows no login prompt); does SQLite put -wal/-shm next to the symlink target (no new agent.db-wal in the temp home); is the symlink preserved (not replaced by a regular file) after startup and shutdown; does the user's agent.db change (mtime/size only) and is that expected (refresh leases)?",
+    "Q3 Without the C-D59 overlay but with the separate home: which ambient sources are still loaded (system prompt length/sections, dumpTools, skills, agents, context files like AGENTS.md from cwd parents, ~/.agents skills, ~/.claude) - then with the overlay passed as a config.yml in the wb home vs --config: what is the minimal wb-home config.yml that yields zero ambient sources while keeping Workbench skills (customDirectories) and the bridge extension (-e)?",
+    "Q4 Is there any OMP setting/env that would still make it read the user's ~/.omp/agent/config.yml or other user files (e.g. XDG paths, OMP_PROFILE interplay)? Note PI_PROFILE/OMP_PROFILE must stay unset.",
+    "Q5 Risks: concurrent use of the shared agent.db by the user's own omp and wb OMPs; logout/login propagation; what happens if ~/.omp/agent/agent.db does not exist (fresh user) - recommend behaviour."
+  ],
+  "constraints": [
+    "Never read, print, copy or hash the contents of agent.db*, auth files, tokens or other credential stores; only metadata (path, size, mtime, inode, link target). Never run `omp token`, `omp auth-broker`, `omp auth-gateway`, `omp config set`, login/logout, or any command that changes the user's OMP state. Never send a prompt to a model (no provider requests).",
+    "Use only temp dirs you create under /tmp (unique) as wb home and cwd; remove them afterwards. Kill only PIDs you started (verified), never pkill/pattern kills.",
+    "Do not touch ~/wb-urux-sandbox, the user's running Workbench/OMP/herdr/tmux processes, ~/.omp contents (other than OMP itself opening agent.db through the symlink), ~/.agents, ~/.claude, ~/.codex, shell configs.",
+    "If any step would require reading secrets or modifying user state, stop and report instead."
+  ],
+  "allowed_write_paths": [
+    "/tmp/<your unique dirs>",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-home-probe-01.md"
+  ],
+  "result_format": "Write the report (facts with evidence, answers Q1-Q5, a concrete recommended launcher design: env, wb home layout, files to create/symlink, config.yml content, isolation-check criteria; risks) to .workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-home-probe-01.md. Reply in Korean <=20 lines."
+}

@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-home-test-02",
+  "ticket_id": "CW-17 (C-D64 re-verification)",
+  "role": "test_designer",
+  "unit": "V-CW-17-p2.7-home",
+  "approved_bundle_digest": "7c77b03ce61fb65c256b4dd9a4ea2977e1a32452c032ab9dc65249b6d3748bb5",
+  "routing": {
+    "planned_role": "test_designer",
+    "selected_role": "test_designer (wb-test-rerun, Sonnet high)",
+    "reason_codes": [
+      "rerun_defined_by_findings_and_adjudication"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/root-adjudication-p27-home-natives.json",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-home-senior-02.json"
+    ]
+  },
+  "frozen_candidate": "78315bd17ac96baa48b1cfaf6fa30bdc5dc1228b4cd96c61feef3a90bca02174",
+  "task": [
+    "1. Correct per root-adjudication-p27-home-natives: tests/backend/live_omp_home_independent_p27u.py LiveFakeHomeXdg - allow only ~/.omp/natives/<installed omp version>/*.node (or $XDG_DATA_HOME/omp/natives/<ver>) creation in the fake user locations, everything else still forbidden, and assert the backend's isolation note predicted it; tests/backend/test_omp_isolation_independent_p27m.py test_version_drift_is_visible_in_the_summary - use the 18.4.5 evidence value for 'same' and keep the drift assertions.",
+    "2. Repair the opt-in live tests p27m/p27n (tests/backend or tests/ui live_* files that start a backend in a fake HOME) by giving the fake HOME a fake agent.db regular file (not a credential) so they run; run them once if they need no model prompt.",
+    "3. Verify F1/F2 with the existing p27u tests (green) and add an independent test if F2's WORKBENCH_USER_* env could leak into the OMP/pane env (assert it does not).",
+    "4. Run tests/backend, tests/contracts, tests/ui (test_*.py, no pipe, venv), tests/gates/g1_vt, live WB_LIVE_HOME=1 once."
+  ],
+  "allowed_write_paths": [
+    "tests/backend/*_independent*.py",
+    "tests/ui/*_independent*.py",
+    "tests/backend/live_*.py",
+    "tests/ui/live_*.py",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-home-test-02-agent.json"
+  ],
+  "rules": "Never modify production code. Never read/print/copy/hash credential contents (metadata only); no strace buffer capture; no model prompts; temp dirs only under /tmp; kill only PIDs you started; never touch ~/wb-urux-sandbox or the user's running processes or configs; list (not delete) files any OMP you start writes into the real ~/.omp; no commits, no graphify update; zero residue.",
+  "result_format": "Write the result JSON (checks table, changes, residue). Reply in Korean, <=12 lines."
+}
