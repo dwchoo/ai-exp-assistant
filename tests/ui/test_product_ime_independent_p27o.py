@@ -14,7 +14,13 @@ client actually sends:
 
 The tests deliberately do not read a key table: aliases and digits are DISCOVERED by comparing observable effects
 (``effect``) of all C0 bytes / all menu digits with the effect of the plain letter, and the on-screen labels of the menu
-are checked against what the keys really do. Run:
+are checked against what the keys really do.
+
+Adapted by p27-jamo-test-01 for the user's later decisions (ur-ux follow_ups 2026-09-30 '자모 자동 변환 + Space' and
+C-D61 (1)): detach is prefix q / Ctrl-q (prefix d / Ctrl-d only show a notice), a single 2-set compatibility jamo after
+the prefix runs the command of its QWERTY key (syllables and longer runs are still hinted), and a raw Ctrl-d to an OMP
+pane is delivered only after a second Ctrl-d within the confirmation window. Each adapted check keeps the original
+invariant (nothing reaches a pane, splits/late bytes behave like one read, every other key is unchanged). Run:
 ``PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/ui -p test_product_ime_independent_p27o.py``
 """
 from __future__ import annotations
@@ -37,10 +43,13 @@ from workbench.ui.product.model import HELP_LINES, ProductModel, pane_boxes
 
 P = bytes([PREFIX])
 HOLD = PARTIAL_HOLD_SECONDS + 0.001
-LETTERS = "dtchrmz"  # every letter command of the documented prefix set
+LETTERS = "qtchrmz"  # every letter command of the documented prefix set (C-D61: detach d -> q)
 FORBIDDEN_CTRL = {0x08: "Backspace/Ctrl-h", 0x09: "Tab/Ctrl-i", 0x0A: "LF/Ctrl-j", 0x0D: "Enter/Ctrl-m",
                   0x1B: "Esc/Ctrl-[", 0x03: "Ctrl-c (must stay unknown)", 0x1D: "the prefix itself"}
-HANGUL = {"syllable": "한", "jamo_consonant": "ㅇ", "jamo_vowel": "ㅏ", "jamo_b": "ㅠ", "syllable_2": "글"}
+HANGUL = {"syllable": "한", "syllable_2": "글"}  # syllables: still hinted, never guessed
+# single compatibility jamo: now read as the 2-set QWERTY key (user decision '자모 자동 변환 + Space')
+JAMO = {"jamo_consonant": ("ㅇ", "d"), "jamo_vowel": ("ㅏ", "k"), "jamo_b": ("ㅠ", "b"), "jamo_q": ("ㅂ", "q"),
+        "jamo_z": ("ㅋ", "z")}
 UP, DOWN, ENTER, ESC = b"\x1b[A", b"\x1b[B", b"\r", b"\x1b"
 
 
@@ -165,12 +174,18 @@ class AliasTests(unittest.TestCase):
                     self.assertEqual(effect_of(P + bytes([byte]), split=True), want, "byte-by-byte")
 
     def test_plain_english_letters_still_run_their_commands_in_both_cases(self):
-        for letter in "dtchrm":
+        for letter in "qtchrm":
             want = effect_of(P + letter.encode())
             self.assertEqual(effect_of(P + letter.upper().encode()), want, f"prefix {letter.upper()}")
         m, s = make()
-        feed(m, P + b"d")
+        feed(m, P + b"q")
         self.assertTrue(m.quit)
+        for old in (b"d", b"D", b"\x04"):  # C-D61: the old detach keys no longer detach and send nothing
+            m, s = make()
+            feed(m, P + old)
+            self.assertFalse(m.quit, old)
+            self.assertEqual(s.sent, [], old)
+            self.assertIn("q", m.notice, old)
 
     def test_aliases_work_from_every_focused_pane_and_never_leak_a_byte_to_a_pane(self):
         for pane_key in b"123":
@@ -213,7 +228,7 @@ class AliasTests(unittest.TestCase):
 
 
 class MenuTests(unittest.TestCase):
-    NEEDED = ("d", "t", "c", "h", "r", "m", "z", "[", "?")
+    NEEDED = ("q", "t", "c", "h", "r", "m", "z", "[", "?")
 
     @staticmethod
     def open_menu():
@@ -411,7 +426,7 @@ class HangulAfterPrefixTests(unittest.TestCase):
         self.assertFalse(m.quit)
         self.assertEqual([k for k, *_ in s.sent], [], f"{label}: a command ran")
 
-    def test_single_hangul_key_after_the_prefix_is_hinted_never_forwarded_never_guessed(self):
+    def test_single_hangul_syllable_after_the_prefix_is_hinted_never_forwarded_never_guessed(self):
         for name, text in HANGUL.items():
             data = text.encode()
             for gap in (0.0, 0.2):
@@ -421,23 +436,47 @@ class HangulAfterPrefixTests(unittest.TestCase):
                         feed_parts(m, [P] + parts, gap=gap)
                         self.check_spent(m, s, name)
 
+    def test_single_jamo_after_the_prefix_runs_its_2set_key_never_forwarded_in_every_split(self):
+        """Adapted: a lone jamo is now converted (was: hinted). Still never forwarded, split reads = one read."""
+        for name, (jamo, key) in JAMO.items():
+            want_m, want_s = make()
+            feed(want_m, P + key.encode())
+            want = (effect(want_m, want_s), want_m.notice)
+            data = jamo.encode()
+            for gap in (0.0, 0.2):
+                for parts in self.splits(data):
+                    with self.subTest(key=name, parts=parts, gap=gap):
+                        m, s = make()
+                        feed_parts(m, [P] + parts, gap=gap)
+                        self.assertEqual((effect(m, s), m.notice), want, f"prefix {jamo} != prefix {key}")
+                        self.assertEqual(s.of("input") + s.of("paste"), [], f"{name}: the jamo reached a pane")
+                        self.assertFalse(m.parser.prefix_active)
+                        self.assertFalse(m.menu_open)
+
     def test_alt_hangul_after_the_prefix_is_hinted_too(self):
         m, s = make()
         feed(m, P + b"\x1b" + "한".encode())
         self.check_spent(m, s, "alt+hangul")
 
     def test_state_is_clean_afterwards_english_and_commands_work_normally(self):
-        for text in HANGUL.values():
+        for text in list(HANGUL.values()) + [jamo for jamo, _ in JAMO.values() if jamo != "ㅂ"]:
             m, s = make()
             t = feed(m, P + text.encode())
             self.assertFalse(m.parser.prefix_active)
+            if text == "ㅏ":
+                # Adapted for C-D63: prefix ㅏ is prefix k = the host terminal kill confirmation. The next plain key
+                # only cancels it (never kills, never reaches a pane); after that the state is clean as for the others.
+                self.assertTrue(m.kill_confirm_open)
+                t = feed(m, b"d", t)
+                self.assertFalse(m.kill_confirm_open)
+                self.assertEqual((s.of("kill_pane"), s.payloads("input"), s.payloads("paste")), ([], b"", b""))
             feed(m, b"d", t)  # a plain d is now just text for the pane, not a command
             self.assertFalse(m.quit)
             self.assertEqual(s.payloads("input"), b"d")
             s.sent.clear()
             t = feed(m, P + b"2", t + 1)
             self.assertIs(m.focus, PaneId.WORKER_OMP)
-            feed(m, P + ctrl("d"), t)  # the IME-neutral route right after the hint
+            feed(m, P + ctrl("q"), t)  # the IME-neutral route right after the hint (C-D61: Ctrl-q)
             self.assertTrue(m.quit)
 
     def test_split_utf8_continuation_arriving_after_the_flush_is_still_swallowed(self):
@@ -461,14 +500,18 @@ class HangulAfterPrefixTests(unittest.TestCase):
 
     def test_hangul_then_prefix_command_in_the_same_read(self):
         m, s = make()
-        feed(m, "안".encode() + P + ctrl("d"))
+        feed(m, "안".encode() + P + ctrl("q"))
         self.assertEqual(s.payloads("input"), "안".encode())
         self.assertTrue(m.quit)
 
     def test_footer_shows_the_hint_after_the_hangul_key(self):
         m, _ = make()
-        feed(m, P + "ㅇ".encode())
+        feed(m, P + "한".encode())
         self.assertIn("한글", m.footer())
+        m, _ = make()  # adapted: ㅇ is now d, whose footer notice points at the new detach key
+        feed(m, P + "ㅇ".encode())
+        self.assertIn("q", m.footer())
+        self.assertFalse(m.quit)
 
     def test_prefix_prefix_still_sends_the_literal_byte_and_hangul_after_it_is_plain_text(self):
         m, s = make()
@@ -539,16 +582,22 @@ class UnaffectedBehaviourTests(unittest.TestCase):
     def test_mouse_between_the_prefix_and_an_alias_does_not_cancel_the_alias(self):
         m, s = make()
         x, y = cell(PaneId.WORKER_OMP, 3, 2)
-        feed(m, P + sgr(64, x, y) + ctrl("d"))
+        feed(m, P + sgr(64, x, y) + ctrl("q"))
         self.assertTrue(m.quit)
 
     def test_direct_esc_and_ctrl_bytes_reach_the_pane_without_the_prefix(self):
-        keys = b"\x04\x14\x19\x0f\x12\x05\x1a\x03\x08\x09\x0a\r\x1b[A "
+        keys = b"\x04\x14\x19\x0f\x12\x05\x1a\x11\x03\x08\x09\x0a\r\x1b[A "
         m, s = make()
-        feed(m, keys)
+        feed(m, P + b"3")  # host shell: every byte immediately, Ctrl-d included
+        feed(m, keys, 2.0)
         self.assertEqual(s.payloads("input"), keys)
         self.assertFalse(m.quit)
         self.assertFalse(m.menu_open)
+        # an OMP pane: identical bytes once Ctrl-d is confirmed by a second Ctrl-d (C-D61); nothing else changes
+        m, s = make()
+        feed(m, b"\x04" + keys)
+        self.assertEqual(s.payloads("input"), keys)
+        self.assertFalse(m.quit)
 
 
 class PtyTests(unittest.TestCase):
@@ -579,22 +628,22 @@ class PtyTests(unittest.TestCase):
         flags = termios.tcgetattr(ui.fd)  # a Linux pty master shows the slave's line discipline
         self.assertFalse(flags[3] & (termios.ISIG | termios.ICANON | termios.IEXTEN), "cooked/signal/extended bits set")
         self.assertFalse(flags[0] & termios.IXON, "XON/XOFF would eat Ctrl-s/q")
-        ui.send(P + ctrl("d"))
+        ui.send(P + ctrl("q"))
         self.finish(ui)
 
-    def test_ctrl_prefix_ctrl_d_detaches_exit_0_and_restores_the_terminal(self):
+    def test_ctrl_prefix_ctrl_q_detaches_exit_0_and_restores_the_terminal(self):
         server, ui = self.start()
-        ui.send(P + ctrl("d"))  # both bytes in one write: Ctrl held for both keys
+        ui.send(P + ctrl("q"))  # both bytes in one write: Ctrl held for both keys
         self.finish(ui)
         self.assertEqual(len(server.of("detach")), 1)
         self.assertEqual(server.of("input"), [])
         self.assertIn("backend keeps running", ui.screen_text())
 
-    def test_released_prefix_then_ctrl_d_detaches(self):
+    def test_released_prefix_then_ctrl_q_detaches(self):
         server, ui = self.start()
         ui.send(P)
         time.sleep(0.4)
-        ui.send(ctrl("d"))
+        ui.send(ctrl("q"))
         self.finish(ui)
         self.assertEqual(len(server.of("detach")), 1)
 
@@ -615,7 +664,7 @@ class PtyTests(unittest.TestCase):
         ui.send(P + ctrl("r"))
         time.sleep(0.3)
         self.assertEqual(server.of("input"), [], "an alias reached a pane")
-        ui.send(P + ctrl("d"))
+        ui.send(P + ctrl("q"))
         self.finish(ui)
 
     def test_menu_by_space_then_detach_digit_read_from_the_screen(self):
@@ -659,7 +708,7 @@ class PtyTests(unittest.TestCase):
         self.assertIsNone(ui.status(), "a plain d after the hint must not detach")
         ui.send("안녕".encode())
         self.assertTrue(server.wait(lambda: server.payloads("input") == b"d" + "안녕".encode()))
-        ui.send(P + ctrl("d"))
+        ui.send(P + ctrl("q"))
         self.finish(ui)
 
 

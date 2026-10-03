@@ -191,6 +191,11 @@ def loop(win: "curses.window", client: UiClient, model: ProductModel, stdin_fd: 
                     _safe_write(stdout_fd, MOUSE_ON if mouse_on else MOUSE_OFF)
                 elif model.take_mouse_reassert() and mouse_on:  # prefix r: also repair the outer mouse mode
                     _safe_write(stdout_fd, MOUSE_ON)
+                if model.autoscroll_tick():  # a drag-to-copy selection held outside its pane keeps scrolling
+                    dirty = True
+                copied = model.take_output()  # OSC 52 for a finished drag-to-copy; never written while restoring
+                if copied:
+                    _safe_write(stdout_fd, copied)
                 model.flush_resizes()  # trailing resize frames of a divider drag (debounced)
                 if model.drag_active != drag_on:
                     drag_on = model.drag_active

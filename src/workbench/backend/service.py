@@ -3,7 +3,12 @@
 It runs in its own session (``setsid``) apart from any UI, holds a per-data-dir
 instance lock for its whole lifetime and serves ui_v1 on ``ui.sock``. UI
 connections come and go; only a confirmed shutdown request or a signal stops
-it. It never starts a Task run, replays a request or restarts a process.
+it. It never starts a Task run or replays a request. The only processes it
+starts again, when an attached UI asks for it, are an exited manager/worker OMP,
+as a new session with its start-up command (C-D62), and an exited host shell, as
+a new persistent shell started like the first one (C-D63). A live pane and the
+backend itself are never restarted. The only pane it force-kills on request is
+the host shell with the members of its own session (C-D63).
 """
 
 from __future__ import annotations
@@ -46,6 +51,7 @@ STATE_INTERVAL = 0.25
 SHUTDOWN_TOKEN_TTL = 120.0
 OMP_ROLES = (("manager", PaneId.MANAGER_OMP), ("worker", PaneId.WORKER_OMP))
 ISOLATION_JOIN_TIMEOUT = 15.0
+RESTART_HISTORY = 20
 
 
 def _log(message: str) -> None:
@@ -95,6 +101,18 @@ class Backend:
         self._isolation_cancel = threading.Event()
         self._isolation_thread: threading.Thread | None = None
         self._isolation_dirty = False
+        self._isolation_lock = threading.Lock()
+        self._isolation_results: dict[str, dict[str, Any]] = {}
+        self._isolation_rechecking: set[str] = set()
+        # C-D62 restart: each OMP pane's start-up launch, kept for the backend lifetime.
+        self._launch: dict[PaneId, dict[str, Any]] = {}
+        self._restart_lock = threading.Lock()
+        self.restarts: list[dict[str, Any]] = []
+        # C-D63: the host shell's start-up environment and cwd, and its kill/restart serialisation.
+        self._shell_env: dict[str, str] | None = None
+        self._shell_cwd: str | None = None
+        self._shell_lock = threading.Lock()
+        self.kills: list[dict[str, Any]] = []
 
     # -- lifecycle -------------------------------------------------------
     def run(self) -> int:
@@ -141,7 +159,9 @@ class Backend:
         self.mailbox = TaskMailbox(self.repository, self.bridge)
         self.ui = UiServer(layout.ui_socket, self)
         self._write_record()
-        self.shell = ShellPane(self.plan.shell, shell_environment(self.environment))
+        self._shell_env = shell_environment(self.environment)
+        self._shell_cwd = os.getcwd()
+        self.shell = ShellPane(self.plan.shell, dict(self._shell_env))
         self.panes[PaneId.HOST_SHELL] = self.shell
         home = Path(self.environment.get("HOME") or Path.home())
         # Bounded (shared timeout, own process groups): never blocks readiness.
@@ -152,10 +172,11 @@ class Backend:
                                              "replaced it for this run")
         checks: dict[str, tuple[list[str], dict[str, str], tuple[str, ...]]] = {}
         for role, pane_id in OMP_ROLES:
-            overlay = write_role_overlay(layout.root, role, role_overlay(
+            overlay_content = role_overlay(
                 role, project_dir=self.project_dir, home=home, environment=self.environment,
                 user_disabled_providers=user.get("disabledProviders") or (),
-                user_disabled_agents=user.get("task.disabledAgents") or ()))
+                user_disabled_agents=user.get("task.disabledAgents") or ())
+            overlay = write_role_overlay(layout.root, role, overlay_content)
             command = omp_command(self.plan, overlay)
             env = omp_environment(self.environment, self.plan, role=role, token=tokens[role],
                                   bridge_socket=layout.bridge_socket)
@@ -163,7 +184,11 @@ class Backend:
             checks[role] = (command, isolation_check_environment(
                 self.environment, self.plan, role=role, absent_socket=layout.root / "isolation-check.sock"),
                 role_skill_allowlist(role))
-        del tokens  # tokens live only in the bridge and each OMP child environment
+            # The role token lives in the bridge, the OMP child environment and this
+            # in-memory launch (never on disk) so an exited pane restarts as the same role.
+            self._launch[pane_id] = {"role": role, "overlay": overlay_content, "command": list(command),
+                                     "env": dict(env), "check": checks[role]}
+        del tokens
         self._ready_deadline = time.monotonic() + READY_TIMEOUT
         self._write_record()
         # Started after every pane fork so no fork happens while it runs.
@@ -171,9 +196,15 @@ class Backend:
                                                   name="omp-isolation-check", daemon=True)
         self._isolation_thread.start()
 
-    def _run_isolation_check(self, checks: dict[str, tuple[list[str], dict[str, str], tuple[str, ...]]]) -> None:
-        """Check each role's exact OMP command once (RPC introspection only, no model call)."""
+    def _run_isolation_check(self, checks: dict[str, tuple[list[str], dict[str, str], tuple[str, ...]]],
+                             *, recheck: bool = False) -> None:
+        """Check each role's exact OMP command (RPC introspection only, no model call).
+
+        At start-up this checks both roles once; after a pane restart (C-D62) it
+        re-checks that role and the summary combines it with the other role's result.
+        """
         results: dict[str, dict[str, Any]] = {}
+        failure: str | None = None
         try:
             for role, (command, env, allowed) in checks.items():
                 if self._isolation_cancel.is_set():
@@ -181,49 +212,97 @@ class Backend:
                 results[role] = check_isolation(command, cwd=self.project_dir, environment=env, role=role,
                                                 allowed_skills=allowed, omp_version=self.plan.omp_version,
                                                 cancel=self._isolation_cancel)
-            summary = summarize_isolation(results, self.plan.omp_version)
         except Exception as exc:  # never let the check die silently
-            summary = summarize_isolation({}, self.plan.omp_version)
-            summary["warning"] = f"OMP isolation check failed: {exc!r}"
-        summary["notes"] = list(self._isolation_notes)
-        self.omp_isolation = summary
-        self._isolation_dirty = True
+            failure = f"OMP isolation check failed: {exc!r}"
+        with self._isolation_lock:
+            if recheck:
+                self._isolation_rechecking.difference_update(checks)
+            if failure is None:
+                self._isolation_results.update(results)
+                summary = self._isolation_summary()
+            else:
+                summary = summarize_isolation({}, self.plan.omp_version)
+                summary["warning"] = failure
+                summary["notes"] = list(self._isolation_notes)
+            self.omp_isolation = summary
+            self._isolation_dirty = True
+        label = f"omp isolation re-check ({', '.join(checks)})" if recheck else "omp isolation check"
         if summary["state"] == "ok":
-            _log("omp isolation check ok")
+            _log(f"{label} ok")
+        elif summary["state"] != "pending":
+            _log(f"WARNING {label}: {summary['warning']}")
+
+    def _isolation_summary(self) -> dict[str, Any]:
+        """The snapshot field; a role being re-checked keeps the whole summary pending (caller holds the lock)."""
+        if self._isolation_rechecking:
+            summary = pending_isolation(self.plan.omp_version)
+            summary["roles"] = {role: dict(item) for role, item in self._isolation_results.items()
+                                if role not in self._isolation_rechecking}
+            summary["rechecking"] = sorted(self._isolation_rechecking)
         else:
-            _log(f"WARNING {summary['warning']}")
+            summary = summarize_isolation(self._isolation_results, self.plan.omp_version)
+        summary["notes"] = list(self._isolation_notes)
+        return summary
+
+    def _start_isolation_recheck(self, role: str,
+                                 check: tuple[list[str], dict[str, str], tuple[str, ...]]) -> None:
+        """Re-run one role's isolation check off the UI loop, after any check still running."""
+        with self._isolation_lock:
+            self._isolation_rechecking.add(role)
+            self.omp_isolation = self._isolation_summary()
+            self._isolation_dirty = True
+        previous = self._isolation_thread
+
+        def run() -> None:
+            if previous is not None:
+                previous.join()  # each check is bounded by its own timeout and the cancel event
+            self._run_isolation_check({role: check}, recheck=True)
+
+        thread = threading.Thread(target=run, name=f"omp-isolation-recheck-{role}", daemon=True)
+        self._isolation_thread = thread
+        thread.start()
 
     def _loop(self) -> None:
         assert self.ui is not None
         while self._stop_signal is None and not self._shutdown_confirmed:
-            reads = [fd for pane in self.panes.values() for fd in pane.fds()]
-            writes = [pane.master_fd for pane in self.panes.values()
-                      if isinstance(pane, OmpPane) and pane.wants_write() and pane.master_fd >= 0]
-            self.ui.poll(0.05, extra_read=reads, extra_write=writes)
-            for pane in self.panes.values():
-                for chunk in pane.pump():
-                    self.ui.broadcast(chunk)
-            self._check_ready()
-            if self._isolation_dirty:
-                self._isolation_dirty = False
-                self._write_record()
-            now = time.monotonic()
-            if now - self._last_state_at >= STATE_INTERVAL:
-                self._last_state_at = now
-                snapshot = self.snapshot()
-                digest = repr(self._state_view(snapshot))
-                if digest != self._last_state_digest:
-                    self._last_state_digest = digest
-                    self.ui.push_state(snapshot)
+            self._tick(0.05)
         _log(f"leaving loop (signal={self._stop_signal}, shutdown={self._shutdown_confirmed})")
 
+    def _tick(self, timeout: float) -> None:
+        """One loop iteration: UI requests, pane I/O, readiness, record and state push."""
+        assert self.ui is not None
+        reads = [fd for pane in self.panes.values() for fd in pane.fds()]
+        writes = [pane.master_fd for pane in self.panes.values()
+                  if isinstance(pane, OmpPane) and pane.wants_write() and pane.master_fd >= 0]
+        self.ui.poll(timeout, extra_read=reads, extra_write=writes)
+        # A restart request handled above may have replaced a pane: pump the current set.
+        for pane in list(self.panes.values()):
+            for chunk in pane.pump():
+                self.ui.broadcast(chunk)
+        self._check_ready()
+        if self._isolation_dirty:
+            self._isolation_dirty = False
+            self._write_record()
+        now = time.monotonic()
+        if now - self._last_state_at >= STATE_INTERVAL:
+            self._last_state_at = now
+            snapshot = self.snapshot()
+            digest = repr(self._state_view(snapshot))
+            if digest != self._last_state_digest:
+                self._last_state_digest = digest
+                self.ui.push_state(snapshot)
+
     def _check_ready(self) -> None:
+        if self.phase == "ready":
+            exited = self._exited_panes()
+            if exited:
+                self.phase, self.reason = "degraded", f"pane_exited:{','.join(exited)}"
+                self._write_record()
+            return
+        if self.phase == "degraded":
+            self._check_degraded()
+            return
         if self.phase != "starting":
-            if self.phase == "ready":
-                exited = self._exited_panes()
-                if exited:
-                    self.phase, self.reason = "degraded", f"pane_exited:{','.join(exited)}"
-                    self._write_record()
             return
         peers = self.bridge_state()
         if all(peers[role]["pid_matches_pane"] for role, _ in OMP_ROLES):
@@ -239,10 +318,28 @@ class Backend:
             _log(f"degraded: {self.reason}")
             self._write_record()
 
+    def _check_degraded(self) -> None:
+        """Degraded is recomputed: ready again only when every pane lives and both bridges match."""
+        exited = self._exited_panes()
+        if exited:
+            reason: str | None = f"pane_exited:{','.join(exited)}"
+        else:
+            peers = self.bridge_state()
+            missing = [role for role, _ in OMP_ROLES if not peers[role]["pid_matches_pane"]]
+            reason = f"bridge_unconnected:{','.join(missing)}" if missing else None
+        if reason is None:
+            self.phase, self.reason = "ready", None
+            _log("ready again: every pane alive and both OMP bridges connected")
+            self._write_record()
+        elif reason != self.reason:
+            self.reason = reason
+            _log(f"degraded: {reason}")
+            self._write_record()
+
     def _exited_panes(self) -> list[str]:
-        # A pane that exits is reported, never restarted here (restart is CW-19).
+        # A pane that exits is only reported here; an exited pane restarts on a UI request (C-D62/C-D63).
         exited = [p.pane_id.value for p in self.panes.values() if isinstance(p, OmpPane) and p.poll() is not None]
-        if self.shell is not None and self.shell._exited:
+        if self.shell is not None and self.shell.exited():
             exited.append(PaneId.HOST_SHELL.value)
         return exited
 
@@ -299,7 +396,9 @@ class Backend:
                 "shell": {"kind": self.plan.shell.kind, "executable": self.plan.shell.executable},
                 "omp_isolation": {key: self.omp_isolation.get(key) for key in
                                   ("state", "ok", "leaks", "warnings", "warning", "version_drift", "notes")},
-                "processes": {name: asdict(ref) for name, ref in self.process_refs().items()}}
+                "processes": {name: asdict(ref) for name, ref in self.process_refs().items()},
+                "restarts": [dict(item) for item in self.restarts],
+                "kills": [dict(item) for item in self.kills]}
 
     def _write_record(self) -> None:
         write_private_json(self.layout.record, self._record())
@@ -375,6 +474,8 @@ class Backend:
     def _shell_action(self, action: str) -> dict[str, Any]:
         if self.shell is None:
             raise Held(Reason.PANE_UNAVAILABLE, "host shell is not running")
+        if self.shell.exited():
+            raise Held(Reason.PANE_UNAVAILABLE, "host shell has exited; restart it first")
         try:
             return getattr(self.shell, action)()
         except UnsafeShellState as exc:
@@ -394,7 +495,8 @@ class Backend:
 
     def _active_work(self) -> list[dict[str, Any]]:
         active: list[dict[str, Any]] = []
-        if self.shell is not None:
+        # An exited or killed shell has no work left: its request was closed as unknown (C-D63).
+        if self.shell is not None and not self.shell.exited():
             state = self.shell.shell_state()
             if state["request_id"] is not None and state["phase"] not in {"control_returned"}:
                 active.append({"kind": "shell_request", "request_id": state["request_id"], "phase": state["phase"]})
@@ -435,6 +537,163 @@ class Backend:
             raise Held(Reason.BOOT_ID_MISMATCH, "boot id does not match the current boot")
         self.boot["confirmed"] = True
         return {"boot": dict(self.boot)}
+
+    def _shutting_down(self) -> bool:
+        return self._shutdown_confirmed or self._stop_signal is not None
+
+    def restart_pane(self, pane_id: PaneId) -> dict[str, Any]:
+        """Start a new session in an exited pane (OMP: C-D62, host shell: C-D63).
+
+        Only a pane whose process was reaped is replaced; a live pane and the
+        backend are never signalled. Requests are serialised; a spawn failure
+        leaves the exited pane in place with the reason.
+        """
+        if self._shutting_down():
+            raise Held(Reason.BACKEND_SHUTDOWN, "the backend is shutting down; panes are not restarted")
+        if pane_id is PaneId.HOST_SHELL:
+            return self._restart_shell()
+        pane, launch = self.panes.get(pane_id), self._launch.get(pane_id)
+        if not isinstance(pane, OmpPane) or launch is None:
+            raise Held(Reason.PANE_UNAVAILABLE, f"{pane_id.value} has no OMP pane in this backend")
+        if not self._restart_lock.acquire(blocking=False):
+            raise Held(Reason.RESTART_IN_PROGRESS, "another OMP pane restart is being set up; try again")
+        try:
+            if pane.poll() is None:
+                raise Held(Reason.PANE_ALIVE,
+                           f"{pane_id.value} OMP is still running; only an exited OMP pane is restarted")
+            with self._isolation_lock:
+                rechecking = launch["role"] in self._isolation_rechecking
+            if rechecking:
+                raise Held(Reason.RESTART_IN_PROGRESS,
+                           f"{pane_id.value} was just restarted and its isolation re-check is still running")
+            return self._respawn(pane_id, pane, launch)
+        finally:
+            self._restart_lock.release()
+
+    def _respawn(self, pane_id: PaneId, old: OmpPane, launch: dict[str, Any]) -> dict[str, Any]:
+        role = launch["role"]
+        previous = {"process": ref_dict(old.ref), "session_id": old.session_id, "generation": old.generation,
+                    "exit_status": old.returncode}
+        count = (old.restart or {}).get("count", 0)
+        try:
+            # The same per-role overlay content as at start-up, at the path the argv names.
+            write_role_overlay(self.layout.root, role, launch["overlay"])
+            # The exited OMP is reaped: release its PTY and any members left in its own session.
+            # A member that cannot be signalled (EPERM) is reported, never a restart failure.
+            previous["survivors"] = old.close()["survivors"]
+            new = OmpPane(pane_id, role, launch["command"], launch["env"], cwd=self.project_dir,
+                          size=old.size, generation=old.generation + 1)
+        except Exception as exc:  # the pane stays exited with the reason; the backend keeps running
+            detail = f"could not start a new {role} OMP: {exc}"
+            old.restart = {"state": "failed", "count": count, "at": time.time(), "error": detail,
+                           "previous": previous}
+            _log(f"restart of {pane_id.value} failed: {exc!r}")
+            self._write_record()
+            raise Held(Reason.RESTART_FAILED, detail) from exc
+        entry = {"pane": pane_id.value, "at": time.time(), "previous": previous,
+                 "process": ref_dict(new.ref), "session_id": new.session_id, "generation": new.generation}
+        new.restart = {"state": "restarted", "count": count + 1, "at": entry["at"], "error": None,
+                       "previous": previous}
+        self.panes[pane_id] = new
+        self.restarts = (self.restarts + [entry])[-RESTART_HISTORY:]
+        _log(f"restarted {pane_id.value}: pid {new.pid} (was {previous['process']}, exit {old.returncode})")
+        # Ready again only after the new OMP registers with its own pid (see _check_degraded).
+        self.phase = "degraded"
+        self._check_degraded()
+        self._write_record()
+        self._start_isolation_recheck(role, launch["check"])
+        return {"pane": pane_id.value, "restarted": True, "process": ref_dict(new.ref),
+                "session_id": new.session_id, "generation": new.generation,
+                "survivors": previous["survivors"]}
+
+    def _restart_shell(self) -> dict[str, Any]:
+        old = self.shell
+        if old is None or self._shell_env is None:
+            raise Held(Reason.PANE_UNAVAILABLE, "host_shell has no shell pane in this backend")
+        if not self._shell_lock.acquire(blocking=False):
+            raise Held(Reason.RESTART_IN_PROGRESS, "a host shell kill or restart is in progress; try again")
+        try:
+            if not old.exited():
+                raise Held(Reason.PANE_ALIVE, "the host shell is still running; only an exited host shell "
+                                              "is restarted")
+            previous = {"process": ref_dict(old.ref), "session_id": old.session_id, "generation": old.generation,
+                        "exit_status": old.returncode, "input_owner": old.state["input_owner"],
+                        "manager_command": None if old.closed_request is None else dict(old.closed_request)}
+            count = (old.restart or {}).get("count", 0)
+            try:
+                # Members left in the exited shell's session were pinned when it exited; one that
+                # cannot be signalled (EPERM) is reported and the new shell still starts.
+                previous["survivors"] = old.close()["survivors"]
+                if self._shell_cwd is not None and os.getcwd() != self._shell_cwd:
+                    os.chdir(self._shell_cwd)  # the shell starts in the backend's start-up cwd
+                new = ShellPane(self.plan.shell, dict(self._shell_env), size=old.size,
+                                generation=old.generation + 1)
+            except Exception as exc:  # the pane stays exited with the reason; the backend keeps running
+                detail = f"could not start a new host shell: {exc}"
+                old.restart = {"state": "failed", "count": count, "at": time.time(), "error": detail,
+                               "previous": previous}
+                _log(f"restart of host_shell failed: {exc!r}")
+                self._write_record()
+                raise Held(Reason.RESTART_FAILED, detail) from exc
+            entry = {"pane": PaneId.HOST_SHELL.value, "at": time.time(), "previous": previous,
+                     "process": ref_dict(new.ref), "session_id": new.session_id, "generation": new.generation}
+            new.restart = {"state": "restarted", "count": count + 1, "at": entry["at"], "error": None,
+                           "previous": previous}
+            self.shell = new
+            self.panes[PaneId.HOST_SHELL] = new
+            self.restarts = (self.restarts + [entry])[-RESTART_HISTORY:]
+            _log(f"restarted host_shell: pid {new.pid} (was {previous['process']}, exit {old.returncode})")
+            if self.phase == "degraded":
+                self._check_degraded()
+            self._write_record()
+            return {"pane": PaneId.HOST_SHELL.value, "restarted": True, "process": ref_dict(new.ref),
+                    "session_id": new.session_id, "generation": new.generation,
+                    "input_owner": new.state["input_owner"], "survivors": previous["survivors"]}
+        finally:
+            self._shell_lock.release()
+
+    def kill_pane(self, pane_id: PaneId) -> dict[str, Any]:
+        """Force-kill the host shell and the members of its session at once (C-D63).
+
+        The UI has already asked the user to confirm; this executes on the
+        request whatever the input owner is. OMP panes and the backend are never
+        signalled; a manager command in flight is closed as unknown.
+        """
+        if self._shutting_down():
+            raise Held(Reason.BACKEND_SHUTDOWN, "the backend is shutting down; the host shell is closed with it")
+        if pane_id is not PaneId.HOST_SHELL:
+            raise Held(Reason.PANE_NOT_KILLABLE,
+                       f"only the host shell can be force-killed; {pane_id.value} ends through the OMP itself")
+        shell = self.shell
+        if shell is None:
+            raise Held(Reason.PANE_UNAVAILABLE, "host_shell has no shell pane in this backend")
+        if not self._shell_lock.acquire(blocking=False):
+            raise Held(Reason.KILL_IN_PROGRESS, "a host shell kill or restart is in progress; try again")
+        try:
+            if shell.exited():
+                raise Held(Reason.PANE_EXITED, "the host shell has already exited; restart it instead")
+            try:
+                result = shell.kill()
+            except UnsafeShellState as exc:
+                if shell.exited():
+                    raise Held(Reason.PANE_EXITED, f"the host shell exited meanwhile: {exc}") from exc
+                raise Held(Reason.KILL_FAILED, str(exc)) from exc
+            except OSError as exc:  # never into the backend loop; the shell stays as it is
+                _log(f"force-kill of host_shell failed: {exc!r}")
+                raise Held(Reason.KILL_FAILED, f"host shell kill failed: {type(exc).__name__}: {exc}") from exc
+            entry = {"pane": PaneId.HOST_SHELL.value, "at": result["at"], "process": result["process"],
+                     "session_id": result["session_id"], "generation": result["generation"],
+                     "input_owner": result["input_owner"], "manager_command": result["manager_command"],
+                     "exit_status": result["exit_status"], "survivors": result["survivors"],
+                     "left_session": result["left_session"]}
+            self.kills = (self.kills + [entry])[-RESTART_HISTORY:]
+            _log(f"force-killed host_shell pid {shell.pid} (owner {result['input_owner']}, "
+                 f"manager command {result['manager_command']}, survivors {result['survivors']})")
+            self._check_ready()
+            self._write_record()
+            return result
+        finally:
+            self._shell_lock.release()
 
     # -- ports for later tickets (CW-18/CW-19) ----------------------------
     def set_automation_status(self, status: dict[str, Any]) -> None:

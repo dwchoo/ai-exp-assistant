@@ -267,7 +267,8 @@ class ScrollModelTests(unittest.TestCase):
             "h": lambda h: len(h.sender.of("handoff")) == 1,
             "r": lambda h: len(h.sender.of("resize")) > h._resizes,
             "?": lambda h: h.model.help_open is True,
-            "d": lambda h: h.model.quit is True,
+            "q": lambda h: h.model.quit is True,  # C-D61: detach moved from d to q
+            "\x11": lambda h: h.model.quit is True,  # Ctrl-q alias
             "1": lambda h: h.sender.of("focus")[-1][1]["pane"] == "manager_omp",
             "2": lambda h: h.sender.of("focus")[-1][1]["pane"] == "worker_omp",
             "\t": lambda h: h.sender.of("focus")[-1][1]["pane"] == "manager_omp",
@@ -409,7 +410,7 @@ class PtyLayoutScrollTests(PtyBase):
         self.ui.send(P + b"?")
         self.assertTrue(self.ui.wait_text("prefix", 10), self.ui.screen_text())
         self.ui.send(b" ")
-        self.ui.send(P + b"d")
+        self.ui.send(P + b"q")
         self.assertTrue(self.ui.ui_done(15), self.ui.screen_text())
         self.assertEqual(self.ui.status(), 0)
         self.assertTrue(self.server.wait(lambda: self.server.of("detach")))
@@ -569,7 +570,7 @@ class RealEntrypointRuntime(unittest.TestCase):
         ui.send(b"stty size\r")
         self.assertTrue(ui.wait_for(lambda: re.search(rb"(?<!\d)\d+ 158(?!\d)", bytes(ui.output[mark:])) is not None, 20),
                         bytes(ui.output[mark:])[-600:])
-        ui.send(P + b"d")
+        ui.send(P + b"q")
         self.assertTrue(ui.wait_for(lambda: b"detached; backend keeps running" in bytes(ui.output), 10))
         self.assertEqual(ui.process.wait(15), 0, "attach process did not exit cleanly after detach")
         ui.drain(0.2)

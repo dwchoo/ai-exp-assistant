@@ -899,7 +899,7 @@ class PtyDragTests(PtyBase):
         self.assertEqual(OuterMouse.of(bytes(ui.output)).changes_after(mark), [],
                          "mouse modes were switched during/after divider drags")
         assert_mouse_reporting_on(self, ui.output, "after two divider drags")
-        ui.send(P + b"d")
+        ui.send(P + b"q")
         self.assertTrue(ui.ui_done(), ui.screen_text())
         ui.drain(0.3)
         self.assertEqual(restored(bytes(ui.output)), [])
@@ -922,7 +922,7 @@ class PtyDragTests(PtyBase):
         self.assertEqual(OuterMouse.of(bytes(ui.output)).changes_after(mark), [],
                          "mouse modes switched by layout keys / clicks / wheel")
         assert_mouse_reporting_on(self, ui.output)
-        ui.send(P + b"d")
+        ui.send(P + b"q")
         self.assertTrue(ui.ui_done(), ui.screen_text())
         ui.drain(0.3)
         self.assertEqual(restored(bytes(ui.output)), [])
@@ -945,7 +945,7 @@ class PtyDragTests(PtyBase):
                          "a mouse mode was switched ON while capture is off")
         assert_mouse_off(self, ui.output, "a divider press while capture is off")
         self.assertEqual(drawn(ui), g["boxes"])
-        ui.send(P + b"d")
+        ui.send(P + b"q")
         self.assertTrue(ui.ui_done(), ui.screen_text())
 
     def test_flood_of_motion_reports_is_debounced_on_the_wire(self):
@@ -964,7 +964,7 @@ class PtyDragTests(PtyBase):
         self.assertLessEqual(len(manager), 20, f"{len(manager)} manager resize frames for a 400-report flood")
         self.server_matches_screen(ui)
         self.assertNotEqual(before, {})
-        ui.send(P + b"d")
+        ui.send(P + b"q")
         self.assertTrue(ui.ui_done(), ui.screen_text())
 
     def _drag_then(self, action: str):
@@ -978,7 +978,7 @@ class PtyDragTests(PtyBase):
         pid = ui.ui_pid()
         self.assertIsNotNone(pid)
         if action == "detach":
-            ui.send(P + b"d")
+            ui.send(P + b"q")
         elif action == "sigterm":
             os.kill(pid, signal.SIGTERM)
         elif action == "sighup":
@@ -1013,7 +1013,7 @@ class PtyDragTests(PtyBase):
         self.assertTrue(ui.wait_for(lambda: OuterMouse.of(bytes(ui.output)).mode is None, 5),
                         "mouse tracking not turned off when capture was switched off mid-drag")
         assert_mouse_off(self, ui.output, "after prefix m mid-drag")
-        ui.send(P + b"d")
+        ui.send(P + b"q")
         self.assert_drag_mode_closed(ui)
 
     def test_drag_mode_is_closed_when_the_window_becomes_too_small_mid_drag(self):
@@ -1024,14 +1024,14 @@ class PtyDragTests(PtyBase):
         ui.drain(0.6)
         # the drag ended with the too-small excursion; mouse capture itself is still on for the terminal
         assert_mouse_reporting_on(self, ui.output, "after a too-small excursion mid-drag")
-        ui.send(P + b"d")
+        ui.send(P + b"q")
         self.assert_drag_mode_closed(ui)
 
     def test_second_press_without_release_does_not_leave_drag_mode_on(self):
         ui = self.start_ui()
         g = self.grab_points(ui)
         ui.send(sgr(PRESS, g["vx"], g["vy"]) + sgr(PRESS, g["vx"] + 3, g["vy"]) + sgr(MOTION + 3, g["vx"] + 5, g["vy"]))
-        ui.send(P + b"d")
+        ui.send(P + b"q")
         self.assert_drag_mode_closed(ui, need_on=False)  # the whole sequence may be handled inside one read
 
 
@@ -1055,7 +1055,7 @@ class PtyLayoutKeysTests(PtyBase):
         self.assertTrue(settled(ui, lambda b: b == first), ui.screen_text())
         self.server_matches_screen(ui)
         self.assertEqual(self.server.payloads("input"), b"")
-        ui.send(P + b"d")
+        ui.send(P + b"q")
         self.assertTrue(ui.ui_done(), ui.screen_text())
 
     def test_window_resize_keeps_the_custom_ratio_on_the_real_screen(self):
@@ -1067,7 +1067,7 @@ class PtyLayoutKeysTests(PtyBase):
         self.assertTrue(settled(ui, lambda b: len(b) == 3 and b[2][3] == 200), ui.screen_text())
         self.assertAlmostEqual(drawn(ui)[0][3] / 200, ratio, delta=0.03)
         self.server_matches_screen(ui)
-        ui.send(P + b"d")
+        ui.send(P + b"q")
         self.assertTrue(ui.ui_done(), ui.screen_text())
 
 
@@ -1107,7 +1107,7 @@ class PtyLayoutFileTests(PtyBase):
                 self.assertEqual(len(boxes), 3, f"{name}: UI did not come up with the three panes")
                 self.assertEqual(boxes, default, f"{name}: a bad layout file changed the geometry")
                 self.server_matches_screen(ui)
-                ui.send(P + b"d")
+                ui.send(P + b"q")
                 self.assertTrue(ui.ui_done(), ui.screen_text())
                 self.assertEqual(ui.status(), 0, f"{name}: UI exited non-zero")
 
@@ -1118,7 +1118,7 @@ class PtyLayoutFileTests(PtyBase):
         self.assertAlmostEqual(boxes[0][3] / self.COLS, 0.3, delta=0.03)
         self.assertAlmostEqual(boxes[0][2] / (self.ROWS - 3), 0.6, delta=0.06)
         self.server_matches_screen(ui)
-        ui.send(P + b"d")
+        ui.send(P + b"q")
         self.assertTrue(ui.ui_done(), ui.screen_text())
 
     def test_symlink_layout_file_is_not_followed_for_reading_or_writing(self):
@@ -1131,7 +1131,7 @@ class PtyLayoutFileTests(PtyBase):
         self.assertAlmostEqual(default[0][3] / self.COLS, 0.5, delta=0.02, msg="a symlinked layout file was read")
         ui.send(P + LEFT + LEFT)
         self.assertTrue(settled(ui, lambda b: len(b) == 3 and b[0][3] < default[0][3]), ui.screen_text())
-        ui.send(P + b"d")
+        ui.send(P + b"q")
         self.assertTrue(ui.ui_done(), ui.screen_text())
         self.assertEqual(victim.read_bytes(), victim_bytes, "the layout was written through a symlink")
 
@@ -1139,7 +1139,7 @@ class PtyLayoutFileTests(PtyBase):
         ui = self.start_ui()
         ui.send(P + LEFT + LEFT * 6)
         self.assertTrue(settled(ui, lambda b: len(b) == 3 and b[0][3] <= 60), ui.screen_text())
-        ui.send(P + b"d")
+        ui.send(P + b"q")
         self.assertTrue(ui.ui_done(), ui.screen_text())
         self.assertTrue(self.layout_file.exists(), "no ui-layout.json next to the UI socket")
         mode = stat.S_IMODE(self.layout_file.stat().st_mode)
@@ -1156,7 +1156,7 @@ class PtyLayoutFileTests(PtyBase):
         self.addCleanup(ui2.close)
         self.assertTrue(server2.attached.wait(10))
         self.assertTrue(settled(ui2, lambda b: len(b) == 3 and b[0][3] <= 60), ui2.screen_text())
-        ui2.send(P + b"d")
+        ui2.send(P + b"q")
 
     def test_reset_is_persisted_as_the_default(self):
         ui = self.start_ui()
@@ -1165,7 +1165,7 @@ class PtyLayoutFileTests(PtyBase):
         self.assertTrue(settled(ui, lambda b: len(b) == 3 and b[0][3] < default[0][3]))
         ui.send(P + b"=")
         self.assertTrue(settled(ui, lambda b: b == default))
-        ui.send(P + b"d")
+        ui.send(P + b"q")
         self.assertTrue(ui.ui_done(), ui.screen_text())
         server2 = ScriptedServer()
         self.addCleanup(server2.close)
@@ -1175,7 +1175,7 @@ class PtyLayoutFileTests(PtyBase):
         self.addCleanup(ui2.close)
         self.assertTrue(server2.attached.wait(10))
         self.assertTrue(settled(ui2, lambda b: b == default), ui2.screen_text())
-        ui2.send(P + b"d")
+        ui2.send(P + b"q")
 
 
 # -------------------------------------------------------------------- real entrypoint + real backend + stub OMP
@@ -1278,7 +1278,7 @@ class RealEntrypointBase(unittest.TestCase):
         self.seen.update(procs_naming(self.root))
 
     def detach(self, ui: UiPty) -> None:
-        ui.send(P + b"d")
+        ui.send(P + b"q")
         self.assertTrue(ui.wait_for(lambda: b"detached; backend keeps running" in bytes(ui.output), 10))
         self.assertEqual(ui.process.wait(15), 0, "attach process did not exit cleanly after detach")
         ui.drain(0.2)

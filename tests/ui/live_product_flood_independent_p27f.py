@@ -345,7 +345,7 @@ class FloodRuntime(unittest.TestCase):
 
         # --- orderly end: detach the UI, then shutdown --yes ----------------------------------------------------
         w.feed = False
-        w.send(PREFIX + b"d")
+        w.send(PREFIX + b"q")
         end = time.monotonic() + 10
         while self.run_.poll() is None and time.monotonic() < end:
             w.pump(0.05)

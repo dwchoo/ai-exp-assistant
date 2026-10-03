@@ -86,7 +86,7 @@ class EntrypointSmoke(unittest.TestCase):
         self.assertTrue(first.until(lambda: "manager got b'/help\\r'" in first.text()), first.text())
         first.send(P + b"2" + "한글".encode())
         self.assertTrue(first.until(lambda: "worker got" in first.text()), first.text())
-        first.send(P + b"d")
+        first.send(P + b"q")
         self.assertEqual(0, first.wait_exit())
         self.assertIn(b"detached; backend keeps running", bytes(first.raw))
         status = self.cli("status", "--data-dir", str(self.data), "--json")
@@ -94,7 +94,7 @@ class EntrypointSmoke(unittest.TestCase):
         second = self.attach()
         self.assertTrue(second.until(lambda: "manager got b'/help" in second.text()), second.text())
         self.assertEqual(1, second.text().count("manager got b'/help"))  # replay, no duplicate delivery
-        second.send(P + b"d")
+        second.send(P + b"q")
         self.assertEqual(0, second.wait_exit())
         self.assertEqual(0, self.cli("status", "--data-dir", str(self.data), "--json").returncode)
 

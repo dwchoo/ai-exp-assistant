@@ -634,7 +634,7 @@ class LiveProductOmpProbe(unittest.TestCase):
         # S14 UI exit = detach; backend and all three identities unchanged.
         ui.pause(1.0)
         pre = {pane: ui.pane_lines(pane) for pane in PANES}
-        ui.send(PREFIX + b"d")
+        ui.send(PREFIX + b"q")
         self.assertTrue(ui.wait(ui.done, 15))
         s_d = self.wait_status(lambda s: s["attached"] is False)
         self.step("S14_detach", exit=ui.status(), message="backend keeps running" in ui.output.decode(errors="replace"),
@@ -669,7 +669,7 @@ class LiveProductOmpProbe(unittest.TestCase):
         ui3 = self.term("reattach", "attach", "--data-dir", str(self.data), rows=36, cols=173)
         back = ui3.wait(lambda: "HOST SHELL" in ui3.text() and min(ratio(ui3).values()) >= 0.8, 20)
         ratio3 = ratio(ui3)
-        ui3.send(PREFIX + b"d")
+        ui3.send(PREFIX + b"q")
         ui3.wait(ui3.done, 15)
         self.step("S16_sigkill_ui", identities_same=self.ident(s_k) == ids0, raw_after_kill=raw,
                   restored_ratio=ratio3,

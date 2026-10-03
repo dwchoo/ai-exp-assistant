@@ -66,6 +66,11 @@ class PassthroughTests(unittest.TestCase):
                     feed_and_settle(m, bytes([PREFIX]) + pane_key.encode())
                     self.assertIs(m.focus, pane)
                     feed_and_settle(m, key, t=1.0)
+                    if key == b"\x04" and pane is not PaneId.HOST_SHELL:
+                        # C-D61: Ctrl-d to an OMP pane is held until a second Ctrl-d within the window; the
+                        # original byte then reaches the pane unchanged (exactly once)
+                        self.assertEqual(s.of("input"), [], "a single Ctrl-d reached an OMP pane")
+                        feed_and_settle(m, key, t=2.0)
                     self.assertEqual(s.payloads("input", pane.value), key)
                     self.assertEqual(s.payloads("input", None), key, "bytes went to another pane")
                     self.assertEqual(s.of("paste"), [])
@@ -101,12 +106,17 @@ class PassthroughTests(unittest.TestCase):
                     self.assertEqual(s.payloads("input", None), want, "the report went to another pane")
 
     def test_keys_split_byte_by_byte_still_arrive_in_order(self):
-        m, s = model()
         stream = b"".join(OMP_KEYS.values())
-        for i, byte in enumerate(stream):
-            m.handle_input(bytes([byte]), now=i * 0.001)
-        m.flush_input(now=10.0)
-        self.assertEqual(s.payloads("input"), stream)
+        for pane_key, typed in ((b"3", stream), (b"1", stream.replace(b"\x04", b"\x04\x04"))):
+            with self.subTest(pane=pane_key):
+                # host shell: the stream as is; manager OMP: Ctrl-d pressed twice (C-D61 confirmation) must still
+                # yield exactly the original stream, in order, nothing lost or duplicated
+                m, s = model()
+                feed_and_settle(m, bytes([PREFIX]) + pane_key)
+                for i, byte in enumerate(typed):
+                    m.handle_input(bytes([byte]), now=1.0 + i * 0.001)
+                m.flush_input(now=10.0)
+                self.assertEqual(s.payloads("input"), stream)
 
     def test_prefix_prefix_sends_one_literal_prefix_byte_and_stays_out_of_prefix_mode(self):
         m, s = model()
@@ -190,11 +200,12 @@ class FocusCommandTests(unittest.TestCase):
                          ["manager_omp", "worker_omp", "host_shell", "manager_omp", "worker_omp", "host_shell"])
 
     def test_detach_command_sets_quit_and_sends_no_shutdown(self):
-        m, s = model()
-        feed_and_settle(m, bytes([PREFIX]) + b"d")
-        self.assertTrue(m.quit)
-        self.assertEqual([k for k, *_ in s.sent if k.startswith("shutdown")], [])
-        self.assertEqual(s.of("input"), [])
+        for key in (b"q", b"\x11"):  # C-D61: prefix q / Ctrl-q
+            m, s = model()
+            feed_and_settle(m, bytes([PREFIX]) + key)
+            self.assertTrue(m.quit)
+            self.assertEqual([k for k, *_ in s.sent if k.startswith("shutdown")], [])
+            self.assertEqual(s.of("input"), [])
 
 
 if __name__ == "__main__":

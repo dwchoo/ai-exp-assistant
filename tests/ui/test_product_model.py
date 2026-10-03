@@ -14,7 +14,7 @@ from workbench.contracts.v1 import PaneId  # noqa: E402
 from workbench.ui.product.input import (InputParser, Command, Mouse, PageScroll, Paste, PasteRejected,  # noqa: E402
                                         Passthrough, PREFIX)
 from workbench.ui.product.layout import LAYOUT_FILE, Layout, load_layout, save_layout  # noqa: E402
-from workbench.ui.product.model import (CATCHUP_BACKLOG_BYTES, HELP_LINES, MIN_COLS, MIN_ROWS, PANES,  # noqa: E402
+from workbench.ui.product.model import (CATCHUP_BACKLOG_BYTES, CTRL_D_CONFIRM_SECONDS, CTRL_D_NOTICE, HELP_LINES, MIN_COLS, MIN_ROWS, PANES,  # noqa: E402
                                        ProductModel, _safe_tail, pane_boxes, pane_inner_sizes)  # noqa: E402
 
 P = bytes([PREFIX])
@@ -211,7 +211,7 @@ class ModelTests(unittest.TestCase):
         model.handle_input(b"x")
         self.assertFalse(model.help_open)
         self.assertEqual([], sender.of("input"))
-        model.handle_input(P + b"d")
+        model.handle_input(P + b"q")
         self.assertTrue(model.quit)
         self.assertEqual([], [s for s in sender.sent if s[0].startswith("shutdown")])
 
@@ -745,7 +745,7 @@ class ScrollModeTests(unittest.TestCase):
         self.assertTrue(model.help_open)
         model.handle_input(b" ")
         self.assertIs(self.HOST, model.scroll_pane)
-        model.handle_input(P + b"d")
+        model.handle_input(P + b"q")
         self.assertTrue(model.quit)
         model.quit = False
         model.handle_input(P + b"1")
@@ -1653,11 +1653,11 @@ class SplitModelTests(unittest.TestCase):
 
 # ---------------------------------------------------------------------------------------- IME-neutral prefix commands
 CTRL = lambda ch: bytes([ord(ch) & 0x1F])  # noqa: E731
-HANGUL_HINT = "한글 입력 상태: Ctrl을 누른 채 명령 키(예: Ctrl-] Ctrl-d)나 Ctrl-] Space 메뉴를 쓰세요"
+HANGUL_HINT = "한글 입력 상태: Ctrl-] 뒤 자모 + Space (예: ㅂ Space = q detach), Ctrl 조합(Ctrl-] Ctrl-q), Ctrl-] Space 메뉴"
 # letter -> Ctrl alias (handoff/mouse move off the ambiguous Ctrl-h/Ctrl-m)
-CTRL_ALIAS = {"d": "d", "t": "t", "c": "y", "r": "r", "z": "z", "h": "o", "m": "e"}
+CTRL_ALIAS = {"q": "q", "t": "t", "c": "y", "r": "r", "z": "z", "h": "o", "m": "e"}
 AMBIGUOUS_CTRL = (b"\x08", b"\x09", b"\x0a", b"\x0d", b"\x1b")  # Ctrl-h/i/j/m/[ = Backspace/Tab/LF/Enter/Esc
-MENU_ORDER = ("[", "z", "t", "c", "h", "r", "m", "=", "?", "d")  # digits 1..9,0
+MENU_ORDER = ("[", "z", "t", "c", "h", "r", "m", "=", "?", "q")  # digits 1..9,0
 
 
 def _effects(model, sender):
@@ -1693,7 +1693,7 @@ class CtrlAliasTests(unittest.TestCase):
         self.assertIsNotNone(model.zoom)
         model.handle_input(P + CTRL("e"))
         self.assertFalse(model.mouse_capture)
-        model.handle_input(P + CTRL("d"))
+        model.handle_input(P + CTRL("q"))
         self.assertTrue(model.quit)
 
     def test_held_ctrl_sequence_in_one_read_and_split_reads(self):
@@ -1702,13 +1702,13 @@ class CtrlAliasTests(unittest.TestCase):
         self.assertIsNone(model.zoom)
         self.assertEqual([], sender.of("input"))
         model.handle_input(P)
-        model.handle_input(CTRL("d"))
+        model.handle_input(CTRL("q"))
         self.assertTrue(model.quit)
         parser = InputParser()
-        self.assertEqual([Command("\x04")], parser.feed(P + CTRL("d")))
+        self.assertEqual([Command("\x11")], parser.feed(P + CTRL("q")))
 
     def test_plain_letters_still_work_in_english_mode(self):
-        for key, check in ((b"d", lambda m, s: m.quit), (b"z", lambda m, s: m.zoom is not None),
+        for key, check in ((b"q", lambda m, s: m.quit), (b"z", lambda m, s: m.zoom is not None),
                            (b"m", lambda m, s: not m.mouse_capture), (b"t", lambda m, s: s.of("takeover_request")),
                            (b"c", lambda m, s: s.of("takeover_confirm")), (b"h", lambda m, s: s.of("handoff")),
                            (b"r", lambda m, s: m.take_mouse_reassert())):
@@ -1736,7 +1736,7 @@ class CtrlAliasTests(unittest.TestCase):
         model, sender = make()
         model.handle_input(P + P)
         self.assertEqual([b"\x1d"], [x[2] for x in sender.of("input")])
-        for letter in "abcfgklnpqsuvwx":
+        for letter in "abcfglnpsuvwx":  # Ctrl-k is the host terminal kill alias since C-D63
             other, other_sender = make()
             other.handle_input(P + CTRL(letter))
             self.assertEqual([], other_sender.sent)
@@ -1766,7 +1766,7 @@ class CtrlAliasTests(unittest.TestCase):
 
 class HangulHintTests(unittest.TestCase):
     def test_hangul_after_prefix_shows_hint_and_forwards_nothing(self):
-        for char in ("ㅇ", "한", "ㅈ", "ㅌ"):
+        for char in ("한", "안", "ㅢ", "ㄳ"):  # syllables and jamo without a 2-set key are never guessed
             with self.subTest(char=char):
                 model, sender = make()
                 model.handle_input(P + char.encode())
@@ -1781,8 +1781,8 @@ class HangulHintTests(unittest.TestCase):
 
     def test_split_hangul_bytes_after_prefix_are_dropped_whole(self):
         model, sender = make()
-        model.handle_input(P + b"\xe3\x85")
-        model.handle_input(b"\x87d")  # 'ㅇ' split across reads, then an English d
+        model.handle_input(P + b"\xec\x95")
+        model.handle_input(b"\x88d")  # syllable '안' split across reads, then an English d
         self.assertEqual(HANGUL_HINT, model.notice)
         self.assertEqual([b"d"], [s[2] for s in sender.of("input")])
         self.assertFalse(model.quit)
@@ -1800,7 +1800,7 @@ class HangulHintTests(unittest.TestCase):
         self.assertEqual([], sender.sent)
 
     def test_multi_syllable_burst_after_prefix_is_dropped_whole_with_one_hint(self):
-        for text in ("안녕", "안녕하세요", "ㅇㅏㅠ글"):
+        for text in ("안녕", "안녕하세요"):
             data = text.encode()
             for cut in range(1, len(data)):
                 with self.subTest(text=text, cut=cut):
@@ -1814,13 +1814,13 @@ class HangulHintTests(unittest.TestCase):
 
     def test_multi_syllable_burst_followed_by_a_command_in_the_same_read(self):
         model, sender = make()
-        model.handle_input(P + "안녕".encode() + P + b"\x04")  # Ctrl-d alias right after the run
+        model.handle_input(P + "안녕".encode() + P + b"\x11")  # Ctrl-q alias right after the run
         self.assertTrue(model.quit)
         self.assertEqual([], sender.of("input"))
 
     def test_ime_commit_key_right_after_the_run_is_consumed_too(self):
         keys = {"Enter": b"\r", "LF": b"\n", "Space": b" ", "Tab": b"\t", "Ctrl-d": b"\x04", "Ctrl-c": b"\x03"}
-        for text in ("ㅇ", "안녕"):
+        for text in ("안녕",):
             data = text.encode()
             for name, key in keys.items():
                 for cut in range(1, len(data) + 1):
@@ -1838,10 +1838,10 @@ class HangulHintTests(unittest.TestCase):
 
     def test_second_key_after_the_commit_key_is_handled_normally(self):
         model, sender = make()
-        model.handle_input(P + "ㅇ".encode() + b"\r\r", now=0.0)
+        model.handle_input(P + "안".encode() + b"\r\r", now=0.0)
         self.assertEqual([b"\r"], [s[2] for s in sender.of("input")])
         model, sender = make()
-        model.handle_input(P + "ㅇ".encode() + b" d", now=0.0)  # Space spent (opens no menu), d is text
+        model.handle_input(P + "안".encode() + b" d", now=0.0)  # Space spent (opens no menu), d is text
         self.assertFalse(model.menu_open)
         self.assertEqual([b"d"], [s[2] for s in sender.of("input")])
 
@@ -1851,7 +1851,7 @@ class HangulHintTests(unittest.TestCase):
         model.handle_input(b"\r", now=5.0)
         self.assertEqual([b"\r"], [s[2] for s in sender.of("input")])
         model, sender = make()
-        model.handle_input(P + "ㅇ".encode() + P + b"\x04", now=0.0)  # the prefix still starts a command
+        model.handle_input(P + "ㅇ".encode() + P + b"\x11", now=0.0)  # the prefix still starts a command
         self.assertTrue(model.quit)
         self.assertEqual([], sender.of("input"))
 
@@ -1915,6 +1915,199 @@ class HangulHintTests(unittest.TestCase):
         self.assertEqual([], sender.sent)
 
 
+class JamoAfterPrefixTests(unittest.TestCase):
+    """A lone 2-set jamo after the prefix runs the command of its QWERTY key; the IME commit key is swallowed."""
+
+    def test_jamo_table_matches_the_standard_dubeolsik_layout(self):
+        from workbench.ui.product.input import JAMO_KEYS
+        expected = dict(zip("ㅂㅈㄷㄱㅅㅛㅕㅑㅐㅔㅁㄴㅇㄹㅎㅗㅓㅏㅣㅋㅌㅊㅍㅠㅜㅡ" "ㅃㅉㄸㄲㅆㅒㅖ",
+                            "qwertyuiopasdfghjklzxcvbnm" "QWERTOP"))
+        self.assertEqual(expected, JAMO_KEYS)
+
+    def test_jamo_detaches_with_every_commit_key_split_and_late(self):
+        keys = {"Space": b" ", "CR": b"\r", "LF": b"\n", "Tab": b"\t", "Ctrl-x": b"\x18"}
+        data = "ㅂ".encode()
+        for name, key in keys.items():
+            for cut in range(1, len(data) + 1):
+                for late in (0.01, 5.0):  # the IME may hold the jamo for seconds
+                    with self.subTest(key=name, cut=cut, late=late):
+                        model, sender = make()
+                        model.handle_input(P, now=0.0)
+                        model.handle_input(data[:cut], now=late if cut < len(data) else late + 3.0)  # the IME hands the jamo over only when it commits
+                        if cut < len(data):
+                            self.assertFalse(model.quit)
+                            self.assertTrue(model.parser.prefix_active)  # partial UTF-8 held, never dropped
+                            model.flush_input(now=late + 3.0)  # the real loop keeps flushing while it waits
+                            self.assertTrue(model.parser.prefix_active)
+                            self.assertFalse(model.quit)
+                        model.handle_input(data[cut:], now=late + 3.0)
+                        self.assertTrue(model.quit)
+                        model.handle_input(key, now=late + 3.01)  # the commit key: spent, no menu, no pane
+                        self.assertFalse(model.menu_open)
+                        self.assertEqual([], sender.sent)
+                        self.assertEqual("", model.notice)
+                        self.assertFalse(model.parser.prefix_active)
+
+    def test_jamo_and_commit_key_in_one_read(self):
+        for tail in (b" ", b"\r"):
+            model, sender = make()
+            model.handle_input(P + "ㅂ".encode() + tail, now=0.0)
+            self.assertTrue(model.quit)
+            self.assertEqual([], sender.sent)
+            self.assertFalse(model.menu_open)
+
+    def test_prefix_stays_armed_for_any_length_of_time_before_the_jamo(self):
+        model, sender = make()
+        model.handle_input(P, now=0.0)
+        for t in (1.0, 5.0, 60.0):
+            model.flush_input(now=t)
+            self.assertTrue(model.parser.prefix_active)
+        model.handle_input("ㅂ".encode(), now=61.0)
+        self.assertTrue(model.quit)
+        self.assertEqual([], sender.sent)
+
+    def test_every_jamo_runs_the_command_of_its_key_exactly_like_the_ascii_key(self):
+        from workbench.ui.product.input import JAMO_KEYS
+        for jamo, key in JAMO_KEYS.items():
+            with self.subTest(jamo=jamo, key=key):
+                typed, typed_sender = make()
+                typed.handle_input(P + key.encode(), now=0.0)
+                converted, sender = make()
+                converted.handle_input(P + jamo.encode() + b" ", now=0.0)
+                self.assertEqual(_effects(typed, typed_sender), _effects(converted, sender))
+                self.assertEqual(typed.notice, converted.notice)
+                self.assertFalse(converted.menu_open)
+                self.assertEqual(typed.footer(), converted.footer())
+
+    def test_named_commands(self):
+        for jamo, attr in (("ㅋ", "zoom"), ("ㅂ", "quit"), ("ㅡ", "mouse_capture")):
+            with self.subTest(jamo=jamo):
+                model, sender = make()
+                before = getattr(model, attr)
+                model.handle_input(P + jamo.encode() + b" ", now=0.0)
+                self.assertNotEqual(before, getattr(model, attr))
+                self.assertEqual([], sender.of("input"))
+        for jamo, kind in (("ㅅ", "takeover_request"), ("ㅊ", "takeover_confirm"), ("ㅗ", "handoff")):
+            with self.subTest(jamo=jamo):
+                model, sender = make()
+                model.handle_input(P + jamo.encode() + b" ", now=0.0)
+                self.assertEqual([kind], [x[0] for x in sender.sent])
+        model, sender = make()
+        model.handle_input(P + "ㄱ".encode() + b" ", now=0.0)  # r = redraw
+        self.assertTrue(model.take_mouse_reassert())
+        self.assertEqual([], sender.of("input"))
+
+    def test_shifted_jamo_behaves_like_the_uppercase_key(self):
+        model, sender = make()
+        model.handle_input(P + "ㅆ".encode() + b" ", now=0.0)  # T = takeover request like t
+        self.assertEqual(["takeover_request"], [x[0] for x in sender.sent])
+        model, sender = make()
+        model.handle_input(P + "ㅉ".encode() + b" ", now=0.0)  # W: unknown command key
+        self.assertIn("'W'", model.notice)
+        self.assertEqual([], sender.sent)
+        model, sender = make()
+        model.handle_input(P + "ㅃ".encode() + b" ", now=0.0)  # Q = detach like q
+        self.assertTrue(model.quit)
+        self.assertEqual([], sender.sent)
+
+    def test_unmapped_result_is_an_unknown_command_key(self):
+        model, sender = make()
+        model.handle_input(P + "ㅁ".encode() + b" ", now=0.0)  # a
+        self.assertIn("알 수 없는 prefix 명령 'a'", model.notice)
+        self.assertEqual([], sender.sent)
+        self.assertFalse(model.menu_open)
+
+    def test_syllable_or_multi_character_run_keeps_the_hint(self):
+        for text in ("안", "안녕", "ㅇㅇ", "ㅇ안"):
+            with self.subTest(text=text):
+                model, sender = make()
+                model.handle_input(P + text.encode() + b" ", now=0.0)
+                self.assertEqual(HANGUL_HINT, model.notice)
+                self.assertEqual([], sender.sent)
+                self.assertFalse(model.quit)
+                self.assertFalse(model.menu_open)
+
+    def test_later_characters_of_the_same_run_are_dropped_silently(self):
+        model, sender = make()
+        model.handle_input(P + "ㅂ".encode(), now=0.0)
+        model.handle_input("ㅏ".encode(), now=0.1)
+        self.assertTrue(model.quit)
+        self.assertEqual([], sender.sent)
+
+    def test_hangul_without_the_prefix_is_unchanged(self):
+        model, sender = make()
+        model.handle_input("ㅇ".encode() + b" ", now=0.0)
+        self.assertEqual(["ㅇ ".encode()], [s[2] for s in sender.of("input")])
+        self.assertFalse(model.quit)
+
+    def test_ctrl_alias_prefix_space_menu_and_ascii_still_work(self):
+        model, sender = make()
+        model.handle_input(P + b"\x11")
+        self.assertTrue(model.quit)
+        model, sender = make()
+        model.handle_input(P + b" ")
+        self.assertTrue(model.menu_open)
+        model.handle_input("ㅇ".encode())  # in the menu Hangul is still swallowed
+        self.assertTrue(model.menu_open)
+        self.assertFalse(model.quit)
+
+    def test_hint_and_help_describe_the_jamo_usage(self):
+        self.assertIn("자모", HANGUL_HINT)
+        self.assertIn("Space", HANGUL_HINT)
+        self.assertTrue(any("자모" in line and "Space" in line for line in HELP_LINES))
+
+
+class JamoInScrollModeTests(unittest.TestCase):
+    HOST = PaneId.HOST_SHELL
+
+    def scrolling(self):
+        model, sender = make(30, 100)
+        model.handle_input(P + b"3")
+        sender.sent.clear()
+        model.on_display(display("host_shell", numbered(300)))
+        model.handle_input(P + b"[", now=0.0)
+        self.assertEqual(self.HOST, model.scroll_pane)
+        return model, sender
+
+    def test_jamo_letters_scroll_like_the_ascii_keys(self):
+        for jamo, ascii_key in (("ㅓ", b"j"), ("ㅏ", b"k"), ("ㅎ", b"g")):
+            for commit in (b" ", b"\r"):
+                with self.subTest(jamo=jamo, commit=commit):
+                    model, sender = self.scrolling()
+                    reference, _ = self.scrolling()
+                    model.handle_input(b"\x1b[5~", now=1.0)  # start one page back so both directions move
+                    reference.handle_input(b"\x1b[5~", now=1.0)
+                    model.handle_input(jamo.encode() + commit, now=2.0)
+                    reference.handle_input(ascii_key, now=2.0)
+                    self.assertEqual(reference.scroll_offset(), model.scroll_offset())
+                    self.assertEqual(self.HOST, model.scroll_pane)
+                    self.assertEqual([], sender.sent)
+
+    def test_jamo_split_and_late_and_quit(self):
+        model, sender = self.scrolling()
+        model.handle_input(b"\x1b[5~", now=1.0)
+        data = "ㅏ".encode()
+        model.handle_input(data[:1], now=2.0)
+        model.flush_input(now=9.0)
+        model.handle_input(data[1:], now=10.0)  # k: one line back
+        self.assertEqual(model._page() + 1, model.scroll_offset())
+        model.handle_input(b" ", now=10.01)  # the commit key is spent
+        model.handle_input("ㅂ".encode() + b" ", now=11.0)  # q quits scroll mode
+        self.assertIsNone(model.scroll_pane)
+        self.assertEqual([], sender.sent)
+
+    def test_hangul_syllable_in_scroll_mode_is_still_never_forwarded(self):
+        model, sender = self.scrolling()
+        model.handle_input("안녕".encode(), now=1.0)
+        self.assertEqual(self.HOST, model.scroll_pane)
+        self.assertEqual([], sender.sent)
+
+    def test_hangul_outside_scroll_mode_is_forwarded_unchanged(self):
+        model, sender = make()
+        model.handle_input("ㅓ".encode() + b" ", now=0.0)
+        self.assertEqual(["ㅓ ".encode()], [s[2] for s in sender.of("input")])
+
+
 class CommandMenuTests(unittest.TestCase):
     def open(self):
         model, sender = make()
@@ -1928,7 +2121,7 @@ class CommandMenuTests(unittest.TestCase):
         joined = "\n".join(lines)
         for digit, key in zip("1234567890", MENU_ORDER):
             self.assertTrue(any(line.lstrip("> ").startswith(digit) for line in lines), (digit, joined))
-        for needle in ("Ctrl-d", "Ctrl-t", "Ctrl-y", "Ctrl-o", "Ctrl-r", "Ctrl-e", "Ctrl-z", "detach", "1/2/3",
+        for needle in ("Ctrl-q", "Ctrl-t", "Ctrl-y", "Ctrl-o", "Ctrl-r", "Ctrl-e", "Ctrl-z", "detach", "1/2/3",
                        "↑/↓", "Enter", "Esc"):
             self.assertIn(needle, joined)
         self.assertEqual(0, model.menu_index)
@@ -1979,7 +2172,7 @@ class CommandMenuTests(unittest.TestCase):
         self.assertFalse(model.quit)
 
     def test_prefix_cancels_menu_without_running_the_following_key(self):
-        for follow in (b" ", b"d", CTRL("d"), b"z"):
+        for follow in (b" ", b"d", b"q", CTRL("d"), CTRL("q"), b"z"):
             with self.subTest(follow=follow):
                 model, sender = self.open()
                 model.handle_input(P + follow)
@@ -2018,7 +2211,7 @@ class CommandMenuTests(unittest.TestCase):
         model.handle_input(b"9")
         self.assertTrue(model.help_open)
         text = "\n".join(HELP_LINES)
-        for needle in ("Ctrl-d", "Ctrl-t", "Ctrl-y", "Ctrl-o", "Ctrl-r", "Ctrl-e", "Ctrl-z", "Space", "한글"):
+        for needle in ("Ctrl-q", "Ctrl-t", "Ctrl-y", "Ctrl-o", "Ctrl-r", "Ctrl-e", "Ctrl-z", "Space", "한글"):
             self.assertIn(needle, text)
         closed, _ = make()
         self.assertIn("Space", closed.footer())
@@ -2035,6 +2228,1187 @@ class CommandMenuTests(unittest.TestCase):
         model.flush_input(now=1.0)
         model.handle_input(P + b" ")
         self.assertEqual(0, model.menu_index)
+
+
+class DetachKeyTests(unittest.TestCase):
+    """C-D61: detach is prefix q / Ctrl-q / menu 0 (like herdr); the old d / Ctrl-d never detach."""
+
+    def test_every_detach_form_quits_and_sends_nothing(self):
+        forms = {"q": P + b"q", "Q": P + b"Q", "Ctrl-q": P + b"\x11", "ㅂ Space": P + "ㅂ".encode() + b" ",
+                 "ㅃ Space": P + "ㅃ".encode() + b" "}
+        for name, data in forms.items():
+            with self.subTest(form=name):
+                model, sender = make()
+                model.handle_input(data, now=0.0)
+                self.assertTrue(model.quit)
+                self.assertEqual([], sender.sent)
+        model, sender = make()
+        model.handle_input(P + b" ")
+        model.handle_input(b"0")
+        self.assertTrue(model.quit)
+        self.assertEqual([], sender.sent)
+
+    def test_old_detach_keys_do_not_detach_send_nothing_and_explain(self):
+        forms = {"d": P + b"d", "D": P + b"D", "Ctrl-d": P + b"\x04", "ㅇ Space": P + "ㅇ".encode() + b" "}
+        for name, data in forms.items():
+            with self.subTest(form=name):
+                model, sender = make()
+                model.handle_input(data, now=0.0)
+                self.assertFalse(model.quit)
+                self.assertEqual([], sender.sent)
+                self.assertIn("Ctrl-] q (Ctrl-q)", model.notice)
+                self.assertIn("detach", model.notice)
+                self.assertFalse(model.parser.prefix_active)
+        for pane_key in (b"3", b"2"):  # also from another focus (host shell): nothing is sent to the pane
+            model, sender = make()
+            model.handle_input(P + pane_key)
+            sender.sent.clear()
+            model.handle_input(P + b"\x04")
+            self.assertEqual([], sender.sent)
+            self.assertFalse(model.quit)
+
+    def test_prefix_q_only_applies_right_after_the_prefix_and_scroll_q_still_exits_scroll(self):
+        model, sender = make()
+        model.handle_input(b"q")  # a plain q is text for the pane
+        self.assertFalse(model.quit)
+        self.assertEqual([b"q"], [s[2] for s in sender.of("input")])
+        model.handle_input(P + b"[")
+        self.assertIsNotNone(model.scroll_pane)
+        model.handle_input(b"q")  # scroll mode: q leaves scroll mode, does not detach
+        self.assertIsNone(model.scroll_pane)
+        self.assertFalse(model.quit)
+
+    def test_texts_name_q_not_d(self):
+        model, _ = make()
+        self.assertIn("Ctrl-] q/Ctrl-q = detach", model.footer())
+        self.assertNotIn("Ctrl-d", model.footer())
+        text = "\n".join(HELP_LINES)
+        self.assertIn("prefix q        detach", text)
+        self.assertNotIn("prefix d ", text)
+        self.assertIn("ㅂ Space = q", text)
+        self.assertNotIn("ㅇ Space = d", text)
+        self.assertIn("ㅂ Space = q", HANGUL_HINT)
+        self.assertIn("Ctrl-q", HANGUL_HINT)
+        model.handle_input(P)
+        self.assertIn("Ctrl+q", model.footer())
+        self.assertIn("영문 q", model.footer())
+
+
+class CtrlDGuardTests(unittest.TestCase):
+    """A raw Ctrl-d (0x04) to an OMP pane needs a second press within CTRL_D_CONFIRM_SECONDS (OMP exits on Ctrl-d)."""
+
+    def inputs(self, sender):
+        return [s[2] for s in sender.of("input")]
+
+    def test_single_ctrl_d_is_held_with_a_notice_on_both_omp_panes(self):
+        for pane_key, pane in ((b"1", PaneId.MANAGER_OMP), (b"2", PaneId.WORKER_OMP)):
+            with self.subTest(pane=pane):
+                model, sender = make()
+                model.handle_input(P + pane_key, now=0.0)
+                sender.sent.clear()
+                model.handle_input(b"\x04", now=1.0)
+                self.assertEqual([], sender.sent)
+                self.assertEqual(CTRL_D_NOTICE, model.notice)
+                self.assertIn("2초 안에 Ctrl-d", model.footer())
+
+    def test_second_ctrl_d_within_two_seconds_forwards_exactly_one(self):
+        for pane_key, pane in ((b"1", "manager_omp"), (b"2", "worker_omp")):
+            with self.subTest(pane=pane):
+                model, sender = make()
+                model.handle_input(P + pane_key, now=0.0)
+                sender.sent.clear()
+                model.handle_input(b"\x04", now=1.0)
+                model.handle_input(b"\x04", now=2.9)
+                self.assertEqual([b"\x04"], self.inputs(sender))
+                self.assertEqual(pane, sender.of("input")[0][1]["pane"])
+                self.assertEqual("", model.notice)
+                model.handle_input(b"\x04", now=3.0)  # a fresh cycle: held again, not forwarded
+                self.assertEqual([b"\x04"], self.inputs(sender))
+                self.assertEqual(CTRL_D_NOTICE, model.notice)
+
+    def test_alt_ctrl_d_is_one_key_held_and_delivered_whole(self):
+        """ESC 0x04 is one key: the first press is held (no lone ESC), the second form pressed is delivered whole."""
+        for first, second in ((b"\x1b\x04", b"\x1b\x04"), (b"\x04", b"\x1b\x04"), (b"\x1b\x04", b"\x04")):
+            with self.subTest(first=first, second=second):
+                model, sender = make()
+                model.handle_input(P + b"1", now=0.0)
+                sender.sent.clear()
+                model.handle_input(first, now=1.0)
+                model.flush_input(now=1.5)
+                self.assertEqual([], sender.sent)
+                self.assertEqual(CTRL_D_NOTICE, model.notice)
+                model.handle_input(second, now=1.9)
+                model.flush_input(now=2.4)
+                self.assertEqual([second], self.inputs(sender))
+                self.assertEqual("", model.notice)
+
+    def test_second_ctrl_d_after_the_timeout_is_a_new_first_press(self):
+        model, sender = make()
+        model.handle_input(b"\x04", now=0.0)
+        model.handle_input(b"\x04", now=CTRL_D_CONFIRM_SECONDS + 0.5)
+        self.assertEqual([], sender.of("input"))
+        self.assertEqual(CTRL_D_NOTICE, model.notice)
+        model.handle_input(b"\x04", now=CTRL_D_CONFIRM_SECONDS + 1.0)  # confirms the new first press
+        self.assertEqual([b"\x04"], self.inputs(sender))
+
+    def test_timeout_clears_the_pending_state_and_the_notice_on_flush(self):
+        model, sender = make()
+        model.handle_input(b"\x04", now=0.0)
+        self.assertFalse(model.flush_input(now=1.0))
+        self.assertEqual(CTRL_D_NOTICE, model.notice)
+        self.assertTrue(model.flush_input(now=2.5))  # a redraw is requested
+        self.assertEqual("", model.notice)
+        model.handle_input(b"\x04", now=2.6)
+        self.assertEqual([], sender.of("input"))
+
+    def test_any_other_key_cancels_and_is_handled_normally(self):
+        for other in (b"x", b"\r", b"\x03", b"\x1b[A", "한".encode()):
+            with self.subTest(key=other):
+                model, sender = make()
+                model.handle_input(b"\x04", now=0.0)
+                model.handle_input(other, now=0.5)
+                self.assertEqual([other], self.inputs(sender))  # the other key went through, the Ctrl-d did not
+                self.assertEqual("", model.notice)
+                model.handle_input(b"\x04", now=1.0)  # cancelled: this is a first press again
+                self.assertEqual([other], self.inputs(sender))
+
+    def test_prefix_command_and_paste_cancel(self):
+        model, sender = make()
+        model.handle_input(b"\x04", now=0.0)
+        model.handle_input(P + b"r", now=0.5)  # any command
+        model.handle_input(b"\x04", now=1.0)
+        self.assertEqual([], sender.of("input"))
+        model, sender = make()
+        model.handle_input(b"\x04", now=0.0)
+        model.handle_input(b"\x1b[200~ab\x1b[201~", now=0.5)
+        self.assertEqual(1, len(sender.of("paste")))
+        model.handle_input(b"\x04", now=1.0)
+        self.assertEqual([], sender.of("input"))
+        self.assertEqual(CTRL_D_NOTICE, model.notice)
+
+    def test_focus_change_cancels_and_other_pane_needs_its_own_pair(self):
+        model, sender = make()
+        model.handle_input(b"\x04", now=0.0)
+        model.handle_input(P + b"2", now=0.5)
+        model.handle_input(b"\x04", now=1.0)
+        self.assertEqual([], sender.of("input"))  # worker: first press
+        model.handle_input(P + b"1", now=1.5)
+        model.handle_input(b"\x04", now=1.8)  # back on manager within 2 s of the first press: still cancelled
+        self.assertEqual([], sender.of("input"))
+        model.handle_input(b"\x04", now=1.9)
+        self.assertEqual([b"\x04"], self.inputs(sender))
+
+    def test_backend_driven_focus_change_and_click_focus_cancel(self):
+        model, sender = make()
+        model.handle_input(b"\x04", now=0.0)
+        snap = snapshot()
+        snap["focus"] = "worker_omp"
+        model.apply_snapshot(snap)
+        snap["focus"] = "manager_omp"
+        model.apply_snapshot(snap)
+        model.handle_input(b"\x04", now=0.5)
+        self.assertEqual([], sender.of("input"))
+
+    def test_host_shell_ctrl_d_is_sent_immediately_and_cancels_nothing_held_for_omp(self):
+        model, sender = make()
+        model.handle_input(P + b"3", now=0.0)
+        sender.sent.clear()
+        model.handle_input(b"\x04", now=0.1)
+        self.assertEqual([b"\x04"], self.inputs(sender))
+        self.assertEqual("", model.notice)
+
+    def test_paste_containing_ctrl_d_is_unchanged(self):
+        model, sender = make()
+        frame = b"\x1b[200~a\x04b\x1b[201~"
+        model.handle_input(frame, now=0.0)
+        pastes = sender.of("paste")
+        self.assertEqual(1, len(pastes))
+        self.assertEqual(frame, pastes[0][2])
+        self.assertEqual([], sender.of("input"))
+        self.assertEqual("", model.notice)
+        model.handle_input(frame[:6] + b"a\x04", now=1.0)  # a split paste with 0x04 inside: still no guard
+        model.handle_input(b"b\x1b[201~", now=1.1)
+        self.assertEqual([], sender.of("input"))
+        self.assertEqual("", model.notice)
+
+    def test_bytes_around_ctrl_d_in_one_read_are_handled_normally(self):
+        model, sender = make()
+        model.handle_input(b"ab\x04cd", now=0.0)  # a and b go through, Ctrl-d held then dropped by c, cd go through
+        self.assertEqual([b"abcd"], self.inputs(sender))  # one frame: the first Ctrl-d is simply absent
+        self.assertEqual("", model.notice)
+        model, sender = make()
+        model.handle_input(b"ab\x04", now=0.0)
+        self.assertEqual([b"ab"], self.inputs(sender))
+        self.assertEqual(CTRL_D_NOTICE, model.notice)
+        model.handle_input(b"\x04cd", now=1.0)  # confirm, then text
+        self.assertEqual([b"ab", b"\x04cd"], self.inputs(sender))
+        model, sender = make()
+        model.handle_input(b"\x04\x04", now=0.0)  # both in one read: held, then confirmed -> exactly one
+        self.assertEqual([b"\x04"], self.inputs(sender))
+        model, sender = make()
+        model.handle_input(b"\x04\x04\x04", now=0.0)  # held, sent, held again
+        self.assertEqual([b"\x04"], self.inputs(sender))
+        self.assertEqual(CTRL_D_NOTICE, model.notice)
+
+    def test_split_reads(self):
+        model, sender = make()
+        model.handle_input(b"x", now=0.0)
+        model.handle_input(b"\x04", now=0.1)
+        model.handle_input(b"\x04y", now=0.2)
+        self.assertEqual([b"x", b"\x04y"], self.inputs(sender))
+        # an ESC-prefixed sequence split around the Ctrl-d is not mistaken for it
+        model, sender = make()
+        model.handle_input(b"\x04", now=0.0)
+        model.handle_input(b"\x1b", now=0.1)
+        model.flush_input(now=0.3)
+        model.handle_input(b"\x04", now=0.4)
+        self.assertEqual([b"\x1b"], self.inputs(sender))
+
+    def test_scroll_mode_help_and_menu_never_forward_ctrl_d_and_cancel_a_held_one(self):
+        model, sender = make()
+        model.handle_input(b"\x04", now=0.0)
+        model.handle_input(P + b"[", now=0.5)
+        model.handle_input(b"\x04", now=0.6)  # scroll mode: keys drive the view, nothing is sent
+        self.assertEqual([], sender.of("input"))
+        model.handle_input(b"q", now=0.7)
+        model.handle_input(b"\x04", now=0.8)
+        self.assertEqual([], sender.of("input"))
+        model.handle_input(P + b"?", now=1.0)
+        model.handle_input(b"\x04", now=1.1)  # closes the overlay only
+        self.assertFalse(model.help_open)
+        self.assertEqual([], sender.of("input"))
+
+    def test_mouse_reports_do_not_cancel_a_held_ctrl_d(self):
+        model, sender = make()
+        model.handle_input(b"\x04", now=0.0)
+        model.handle_input(b"\x1b[<35;5;5M", now=0.5)  # motion report over a border/pane
+        model.handle_input(b"\x04", now=1.0)
+        self.assertEqual([b"\x04"], [s[2] for s in sender.of("input") if s[2] == b"\x04"])
+
+    def test_direct_scrolled_pane_returns_to_live_only_when_something_is_sent(self):
+        model, sender = make(30, 100)
+        model.on_display(display("manager_omp", numbered(300)))
+        model.handle_input(b"\x1b[5;2~", now=0.0)
+        self.assertTrue(model.scrolled(PaneId.MANAGER_OMP))
+        model.handle_input(b"\x04", now=0.1)  # held: nothing sent, the view stays
+        self.assertTrue(model.scrolled(PaneId.MANAGER_OMP))
+        model.handle_input(b"\x04", now=0.2)  # delivered: back to live
+        self.assertFalse(model.scrolled(PaneId.MANAGER_OMP))
+
+
+
+class _Ticker:
+    def __init__(self):
+        self.now = 100.0
+
+    def __call__(self):
+        return self.now
+
+
+def osc52(text, tmux=False):
+    import base64
+    plain = b"\x1b]52;c;" + base64.b64encode(text.encode()) + b"\x07"
+    if not tmux:
+        return plain
+    return plain + b"\x1bPtmux;" + plain.replace(b"\x1b", b"\x1b\x1b") + b"\x1b\\"
+
+
+class DragToCopyTests(unittest.TestCase):
+    """C-D62 (2): dragging in a pane that does not track the mouse selects and copies via OSC 52."""
+
+    def setUp(self):
+        self.ticker = _Ticker()
+        self.sender = FakeSender()
+        self.model = ProductModel(self.sender, 30, 120, clock=lambda: 1000.0, monotonic=self.ticker, environ={})
+        self.model.apply_snapshot(snapshot())
+        for pane in ("manager_omp", "worker_omp", "host_shell"):
+            self.model.on_display(display(pane, f"{pane} hello world\r\nsecond row   \r\nthird".encode()))
+        self.sender.sent.clear()
+
+    def cell(self, pane, dx=0, dy=0):
+        top, left, _, _ = pane_boxes(self.model.rows, self.model.cols)[pane]
+        return left + 2 + dx, top + 2 + dy
+
+    def mouse(self, pane, button, dx=0, dy=0, release=False):
+        x, y = self.cell(pane, dx, dy)
+        self.model.handle_input(sgr(button, x, y, release))
+
+    def drag(self, pane, start, end, *, steps=()):
+        self.mouse(pane, 0, *start)
+        for point in steps:
+            self.mouse(pane, 32, *point)
+        self.mouse(pane, 32, *end)
+        self.mouse(pane, 0, *end, release=True)
+
+    def test_drag_in_each_pane_type_copies_that_text_as_osc52(self):
+        for pane in PANES:
+            with self.subTest(pane=pane):
+                self.model.take_output()
+                self.drag(pane, (0, 0), (len(pane.value) - 1, 0))
+                self.assertEqual(osc52(pane.value), self.model.take_output())
+                self.assertEqual(b"", self.model.take_output())  # taken once
+                self.assertIn("복사됨: ", self.model.notice)
+
+    def test_single_row_selection_is_a_substring_and_end_cell_is_included(self):
+        pane = PaneId.WORKER_OMP
+        self.drag(pane, (11, 0), (15, 0))
+        self.assertEqual(osc52("hello"), self.model.take_output())
+        self.assertEqual("복사됨: 5자", self.model.notice)
+
+    def test_backward_drag_is_the_same_selection(self):
+        self.drag(PaneId.WORKER_OMP, (15, 0), (11, 0))
+        self.assertEqual(osc52("hello"), self.model.take_output())
+
+    def test_rows_joined_with_newline_and_trailing_spaces_trimmed(self):
+        pane = PaneId.HOST_SHELL
+        self.drag(pane, (5, 0), (4, 2))  # from "hello world" row 0 to "third" row 2
+        top = "host_shell hello world".rstrip()[5:]
+        self.assertEqual(osc52(f"{top}\nsecond row\nthird"), self.model.take_output())
+
+    def test_wide_characters_are_copied_once(self):
+        pane = PaneId.MANAGER_OMP
+        self.model.on_display(display("manager_omp", "\x1b[2J\x1b[H한글abc".encode()))
+        self.drag(pane, (0, 0), (6, 0))
+        self.assertEqual(osc52("한글abc"), self.model.take_output())
+        self.drag(pane, (1, 0), (2, 0))  # starts on the trailing half of the first wide character
+        self.assertEqual(osc52("한글"), self.model.take_output())
+
+    def test_selection_is_clamped_to_its_pane_and_never_crosses_into_others(self):
+        pane = PaneId.MANAGER_OMP
+        self.mouse(pane, 0, 0, 0)
+        x, y = self.cell(PaneId.WORKER_OMP, 3, 1)  # inside the other pane
+        self.model.handle_input(sgr(32, x, y))
+        self.model.handle_input(sgr(0, x, y, release=True))
+        out = self.model.take_output()
+        self.assertIn(b"\x1b]52;c;", out)
+        import base64
+        copied = base64.b64decode(out[len(b"\x1b]52;c;"):-1]).decode()
+        self.assertTrue(copied.startswith("manager_omp hello world"))
+        self.assertNotIn("worker", copied)
+        self.assertIn("second row", copied)  # ran to the pane's last row/column, not into the neighbour
+        spans = self.model.selection_spans(PaneId.WORKER_OMP, 12)
+        self.assertEqual({}, spans)
+
+    def test_release_over_a_border_still_copies(self):
+        pane = PaneId.HOST_SHELL
+        self.mouse(pane, 0, 0, 0)
+        x, y = self.cell(pane, 5, 0)
+        self.model.handle_input(sgr(32, x, y))
+        self.model.handle_input(sgr(0, x, y - 5, release=True))  # far above: clamped to the top row
+        self.assertEqual(osc52("host_s"), self.model.take_output())
+
+    def test_click_without_movement_focuses_and_copies_nothing(self):
+        self.mouse(PaneId.WORKER_OMP, 0, 3, 0)
+        self.mouse(PaneId.WORKER_OMP, 0, 3, 0, release=True)
+        self.assertIs(PaneId.WORKER_OMP, self.model.focus)
+        self.assertEqual([("focus", {"pane": "worker_omp"}, b"")], self.sender.sent)
+        self.assertEqual(b"", self.model.take_output())
+        self.assertEqual({}, self.model.selection_spans(PaneId.WORKER_OMP, 12))
+
+    def test_press_in_the_focused_pane_keeps_focus_untouched(self):
+        self.mouse(PaneId.MANAGER_OMP, 0, 3, 0)
+        self.mouse(PaneId.MANAGER_OMP, 0, 3, 0, release=True)
+        self.assertEqual([], self.sender.sent)
+        self.assertEqual(b"", self.model.take_output())
+
+    def test_tracking_pane_still_gets_the_mouse_and_never_selects(self):
+        self.model.on_display(display("worker_omp", b"\x1b[?1002h\x1b[?1006h"))
+        self.sender.sent.clear()
+        self.drag(PaneId.WORKER_OMP, (0, 0), (5, 0))
+        self.assertEqual([b"\x1b[<0;1;1M", b"\x1b[<32;6;1M", b"\x1b[<0;6;1m"], [d for _, _, d in self.sender.sent])
+        self.assertEqual(b"", self.model.take_output())
+        self.assertEqual({}, self.model.selection_spans(PaneId.WORKER_OMP, 12))
+
+    def test_highlight_spans_while_dragging_and_after_release(self):
+        pane = PaneId.MANAGER_OMP
+        self.mouse(pane, 0, 2, 0)
+        self.assertEqual({}, self.model.selection_spans(pane, 12))  # not moved yet
+        self.mouse(pane, 32, 4, 1)
+        last = self.model.sizes[pane][1] - 1
+        self.assertEqual({0: (2, last), 1: (0, 4)}, self.model.selection_spans(pane, 12))
+        self.mouse(pane, 0, 4, 1, release=True)
+        self.assertEqual({0: (2, last), 1: (0, 4)}, self.model.selection_spans(pane, 12))
+
+    def test_highlight_ends_with_a_key_a_click_a_new_selection_or_a_focus_change(self):
+        pane = PaneId.MANAGER_OMP
+
+        def select():
+            self.drag(pane, (0, 0), (3, 0))
+            self.assertEqual({0: (0, 3)}, self.model.selection_spans(pane, 12))
+
+        select()
+        self.model.handle_input(b"x")
+        self.assertEqual({}, self.model.selection_spans(pane, 12))
+        select()
+        self.mouse(pane, 0, 9, 1)  # any press
+        self.assertEqual({}, self.model.selection_spans(pane, 12))
+        self.mouse(pane, 0, 9, 1, release=True)
+        select()
+        self.drag(pane, (5, 1), (8, 1))  # a new selection replaces it
+        self.assertEqual({1: (5, 8)}, self.model.selection_spans(pane, 12))
+        self.model.handle_input(P + b"2")  # focus change
+        self.assertEqual({}, self.model.selection_spans(pane, 12))
+        self.mouse(pane, 0, 0, 0)
+        self.mouse(pane, 32, 4, 0)
+        self.mouse(pane, 0, 4, 0, release=True)
+        self.model.handle_input(P + b"m")  # a prefix command is a key too
+        self.assertEqual({}, self.model.selection_spans(pane, 12))
+
+    def test_highlight_ends_when_the_pane_content_is_reset(self):
+        pane = PaneId.MANAGER_OMP
+        self.drag(pane, (0, 0), (3, 0))
+        self.assertEqual({0: (0, 3)}, self.model.selection_spans(pane, 12))
+        self.model.on_display(display("manager_omp", b"fresh", gen=2))  # the pane's process was replaced
+        self.assertEqual({}, self.model.selection_spans(pane, 12))
+        self.drag(pane, (0, 0), (3, 0))
+        self.model.on_display(display("manager_omp", b"\x1b[?1049h"))  # alternate screen swaps the history
+        self.assertEqual({}, self.model.selection_spans(pane, 12))
+
+    def test_wheel_does_not_end_the_selection_and_it_stays_anchored_to_the_content(self):
+        pane = PaneId.MANAGER_OMP
+        self.model.on_display(display("manager_omp", numbered(120)))
+        self.drag(pane, (0, 0), (9, 0))
+        first = self.model.take_output()
+        self.assertEqual({0: (0, 9)}, self.model.selection_spans(pane, 12))
+        self.mouse(pane, 64)  # wheel up three lines: the highlight follows the content down
+        self.assertEqual({3: (0, 9)}, self.model.selection_spans(pane, 12))
+        self.assertTrue(first)
+
+    def test_selection_past_output_after_scrolling_back(self):
+        pane = PaneId.MANAGER_OMP
+        self.model.on_display(display("manager_omp", numbered(120)))
+        for _ in range(4):
+            self.mouse(pane, 64)  # 12 lines back
+        rows = visible(self.model, pane)
+        self.drag(pane, (0, 0), (9, 1))
+        self.assertEqual(osc52(rows[0] + "\n" + rows[1]), self.model.take_output())
+        self.assertNotIn("line 00119", rows[0])
+
+    def test_drag_above_the_top_edge_autoscrolls_history_and_extends_the_selection(self):
+        pane = PaneId.MANAGER_OMP
+        self.model.on_display(display("manager_omp", numbered(120)))
+        live = visible(self.model, pane)
+        self.mouse(pane, 0, 0, 2)
+        for _ in range(5):
+            self.ticker.now += 0.5
+            self.mouse(pane, 32, 3, -1)  # on the top border, above the inner area
+        self.mouse(pane, 0, 3, -1, release=True)
+        self.assertEqual(5, self.model.scroll_offset(pane))
+        self.assertIs(PaneId.MANAGER_OMP, self.model.focus)
+        import base64
+        out = self.model.take_output()
+        copied = base64.b64decode(out[len(b"\x1b]52;c;"):-1]).decode().split("\n")
+        view = visible(self.model, pane)  # the scrolled view now starts 5 lines above the old top
+        self.assertNotEqual(live[0], view[0])
+        # anchor = old row 2 (now view row 7, column 0); cursor = the top row of the view at column 3
+        self.assertEqual([view[0][3:]] + view[1:7] + [view[7][:1]], copied)
+
+    def test_drag_below_the_bottom_edge_autoscrolls_towards_live(self):
+        pane = PaneId.MANAGER_OMP
+        self.model.on_display(display("manager_omp", numbered(120)))
+        for _ in range(3):
+            self.mouse(pane, 64)  # 9 lines back
+        rows = self.model.sizes[pane][0]
+        self.mouse(pane, 0, 0, 0)
+        for _ in range(4):
+            self.ticker.now += 0.5
+            self.mouse(pane, 32, 3, rows)  # bottom border
+        self.mouse(pane, 0, 3, rows, release=True)
+        self.assertEqual(5, self.model.scroll_offset(pane))
+        self.assertTrue(self.model.take_output())
+
+    def test_autoscroll_is_rate_limited_and_continues_from_the_loop_tick(self):
+        pane = PaneId.MANAGER_OMP
+        self.model.on_display(display("manager_omp", numbered(120)))
+        self.mouse(pane, 0, 0, 2)
+        self.mouse(pane, 32, 3, -1)
+        self.mouse(pane, 32, 3, -1)  # same instant: no second step
+        self.assertEqual(1, self.model.scroll_offset(pane))
+        self.assertFalse(self.model.autoscroll_tick())
+        self.ticker.now += 0.5
+        self.assertTrue(self.model.autoscroll_tick())
+        self.assertEqual(2, self.model.scroll_offset(pane))
+        self.mouse(pane, 32, 3, 2)  # back inside: no further scrolling
+        self.ticker.now += 0.5
+        self.assertFalse(self.model.autoscroll_tick())
+
+    def test_osc52_gets_a_tmux_passthrough_copy_only_when_tmux_is_set(self):
+        for environ, tmux in (({}, False), ({"TMUX": "/tmp/tmux-1/default,1,0"}, True)):
+            with self.subTest(tmux=tmux):
+                model = ProductModel(self.sender, 30, 120, clock=lambda: 1000.0, monotonic=self.ticker, environ=environ)
+                model.apply_snapshot(snapshot())
+                model.on_display(display("manager_omp", b"abc"))
+                self.mouse_on(model, 0, 0, 0)
+                self.mouse_on(model, 32, 2, 0)
+                self.mouse_on(model, 0, 2, 0, release=True)
+                self.assertEqual(osc52("abc", tmux), model.take_output())
+                self.assertEqual(tmux, "tmux" in model.notice)
+                self.assertIn("복사됨: 3자", model.notice)
+                if tmux:
+                    self.assertIn("set-clipboard on 또는 allow-passthrough on", model.notice)
+
+    def test_environment_tmux_is_read_when_no_environ_is_given(self):
+        import os
+        from unittest import mock
+        model = ProductModel(self.sender, 30, 120, clock=lambda: 1000.0, monotonic=self.ticker)
+        model.on_display(display("manager_omp", b"abc"))
+        with mock.patch.dict(os.environ, {"TMUX": "x,1,0"}):
+            self.mouse_on(model, 0, 0, 0)
+            self.mouse_on(model, 32, 2, 0)
+            self.mouse_on(model, 0, 2, 0, release=True)
+        self.assertEqual(osc52("abc", True), model.take_output())
+
+    def mouse_on(self, model, button, dx, dy, release=False):
+        top, left, _, _ = pane_boxes(model.rows, model.cols)[PaneId.MANAGER_OMP]
+        model.handle_input(sgr(button, left + 2 + dx, top + 2 + dy, release))
+
+    def test_copy_over_one_mebibyte_is_refused_with_a_notice(self):
+        from workbench.ui.product import model as model_module
+        with mock_patch(model_module, "MAX_COPY_BYTES", 8):
+            self.drag(PaneId.MANAGER_OMP, (0, 0), (8, 0))  # 9 bytes
+            self.assertEqual(b"", self.model.take_output())
+            self.assertIn("1 MiB", self.model.notice)
+            self.drag(PaneId.MANAGER_OMP, (0, 0), (7, 0))  # exactly 8 bytes is fine
+            self.assertEqual(osc52("manager_"), self.model.take_output())
+
+    def test_cap_constant_is_one_mebibyte(self):
+        from workbench.ui.product import model as model_module
+        self.assertEqual(1024 * 1024, model_module.MAX_COPY_BYTES)
+
+    def test_blank_selection_copies_nothing(self):
+        self.drag(PaneId.MANAGER_OMP, (40, 5), (50, 5))
+        self.assertEqual(b"", self.model.take_output())
+        self.assertIn("비어", self.model.notice)
+
+    def test_divider_drag_and_wheel_and_capture_off_are_unchanged(self):
+        self.model.handle_input(P + b"m")
+        self.drag(PaneId.MANAGER_OMP, (0, 0), (5, 0))
+        self.assertEqual(b"", self.model.take_output())  # capture off: the terminal's own selection
+        self.model.handle_input(P + b"m")
+        before = self.model.layout
+        _, left, _, width = pane_boxes(self.model.rows, self.model.cols)[PaneId.MANAGER_OMP]
+        top = pane_boxes(self.model.rows, self.model.cols)[PaneId.MANAGER_OMP][0]
+        self.model.handle_input(sgr(0, width, top + 3))  # on the vertical divider
+        self.model.handle_input(sgr(32, width + 6, top + 3))
+        self.model.handle_input(sgr(0, width + 6, top + 3, release=True))
+        self.assertNotEqual(before, self.model.layout)
+        self.assertEqual(b"", self.model.take_output())
+
+    def test_help_gets_one_short_drag_to_copy_line(self):
+        self.assertTrue(any("드래그" in ln and "복사" in ln for ln in HELP_LINES))
+        self.assertLessEqual(len(HELP_LINES), HELP_LINES_BEFORE_COPY + 3)  # + exited-pane Enter (C-D62) + host kill/restart (C-D63)
+
+    def test_trimmed_history_rows_are_never_copied_and_an_empty_selection_is_cancelled(self):
+        pane = PaneId.MANAGER_OMP
+        self.model.on_display(display("manager_omp", "".join(f"\r\nold {i:04d}" for i in range(1000)).encode()))
+        self.model.scroll_by(10_000, pane)
+        self.mouse(pane, 0, 0, 0)
+        self.mouse(pane, 32, 7, 1)
+        self.model.on_display(display("manager_omp", "".join(f"\r\nflood {i:04d}" for i in range(600)).encode()))
+        self.mouse(pane, 32, 7, 1)
+        self.mouse(pane, 0, 7, 1, release=True)
+        self.assertEqual(b"", self.model.take_output())
+        self.assertIn("밀려나", self.model.notice)
+        self.assertEqual({}, self.model.selection_spans(pane, 10))
+
+    def test_partly_trimmed_selection_is_clamped_to_the_rows_that_remain(self):
+        from workbench.ui.product.model import _Selection
+        pane = PaneId.MANAGER_OMP
+        self.model.on_display(display("manager_omp", "".join(f"\r\nold {i:04d}" for i in range(1000)).encode()))
+        queue = self.model._history(pane)
+        base = queue.pushed - len(queue)
+        sel = _Selection(pane, queue, (base - 3, 5), (base + 1, 2), dragging=False,
+                         resets=self.model.panes[pane].screen.resets)
+        self.model._sel = sel
+        clamped = self.model._selection()
+        self.assertIs(sel, clamped)
+        self.assertEqual(((base, 0), (base + 1, 2)), clamped.span())
+
+    def test_full_terminal_reset_clears_the_selection_and_highlight(self):
+        pane = PaneId.HOST_SHELL
+        self.drag(pane, (0, 0), (8, 1))
+        self.assertNotEqual({}, self.model.selection_spans(pane, 10))
+        self.model.on_display(display("host_shell", b"\x1bc"))
+        self.assertEqual({}, self.model.selection_spans(pane, 10))
+
+    def test_footer_notice_and_help_name_drag_to_copy_first_and_keep_shift_drag(self):
+        self.assertIn("드래그: 복사", self.model.footer())
+        self.assertIn("Shift+드래그", self.model.footer())
+        line = next(ln for ln in HELP_LINES if "prefix m" in ln)
+        self.assertIn("드래그: 복사", line)
+        self.assertIn("Shift+드래그", line)
+        self.model.handle_input(P + b"m")
+        self.model.handle_input(P + b"m")
+        self.assertIn("드래그: 복사", self.model.notice)
+        self.assertIn("Shift+드래그", self.model.notice)
+
+
+HELP_LINES_BEFORE_COPY = 30
+
+
+class mock_patch:
+    def __init__(self, module, name, value):
+        self.module, self.name, self.value = module, name, value
+
+    def __enter__(self):
+        self.old = getattr(self.module, self.name)
+        setattr(self.module, self.name, self.value)
+
+    def __exit__(self, *exc):
+        setattr(self.module, self.name, self.old)
+
+
+class RestartExitedOmpTests(unittest.TestCase):
+    """C-D62 (1): Enter in an exited manager/worker OMP pane restarts it as a new session; nothing else reaches it."""
+
+    def exited(self, *dead, generation=1):
+        model, sender = make()
+        snap = snapshot(alive=tuple(p for p in ("manager_omp", "worker_omp", "host_shell") if p not in dead))
+        for name in dead:
+            snap["panes"][name]["exit_status"] = 0
+        for info in snap["panes"].values():
+            info["generation"] = generation
+        model.apply_snapshot(snap)
+        return model, sender
+
+    def alive_again(self, model, pane, generation=2):
+        snap = snapshot()
+        for info in snap["panes"].values():
+            info["generation"] = generation
+        model.apply_snapshot(snap)
+
+    def restarts(self, sender):
+        return sender.of("restart_pane")
+
+    def test_notice_text_title_and_wrapping_for_an_exited_pane(self):
+        model, _ = self.exited("manager_omp")
+        notice = model.restart_notice(PaneId.MANAGER_OMP)
+        self.assertEqual("OMP 종료됨 (exit 0) — Enter: 새 세션으로 다시 시작 · 이전 대화는 새 OMP에서 /resume", notice)
+        self.assertIn("종료됨", model.pane_title(PaneId.MANAGER_OMP))
+        self.assertIn("exited(0)", model.pane_title(PaneId.MANAGER_OMP))
+        self.assertIsNone(model.restart_notice(PaneId.WORKER_OMP))
+        self.assertIsNone(model.restart_notice(PaneId.HOST_SHELL))
+        self.assertNotIn("종료됨", model.pane_title(PaneId.WORKER_OMP))
+        lines = model.restart_notice_lines(PaneId.MANAGER_OMP, 24)
+        self.assertGreater(len(lines), 1)
+        self.assertEqual(notice.split(), " ".join(lines).split())
+        from wcwidth import wcswidth
+        self.assertTrue(all(wcswidth(line) <= 24 for line in lines), lines)
+        self.assertEqual([], model.restart_notice_lines(PaneId.WORKER_OMP, 24))
+        unknown, _ = self.exited("worker_omp")
+        unknown.state["panes"]["worker_omp"]["exit_status"] = None
+        self.assertIn("exit ?", unknown.restart_notice(PaneId.WORKER_OMP))
+
+    def test_notice_is_drawn_and_the_last_screen_stays(self):
+        model, _ = self.exited("manager_omp")
+        model.on_display(display("manager_omp", b"last words"))
+        self.assertIn("last words", text(model, PaneId.MANAGER_OMP))  # the old screen is kept
+
+    def test_enter_sends_exactly_one_restart_for_that_pane_and_shows_pending(self):
+        for data in (b"\r", b"\n", b"ab\rcd", b"\r\r"):
+            with self.subTest(data=data):
+                model, sender = self.exited("manager_omp")
+                sender.sent.clear()
+                model.handle_input(data)
+                self.assertEqual([("restart_pane", {"pane": "manager_omp"}, b"")], self.restarts(sender))
+                self.assertEqual([], sender.of("input"))
+                self.assertEqual("다시 시작 중…", model.notice)
+                self.assertEqual("다시 시작 중…", model.restart_notice(PaneId.MANAGER_OMP))
+                self.assertIn("다시 시작 중…", model.footer())
+
+    def test_worker_pane_restarts_when_focused(self):
+        model, sender = self.exited("worker_omp")
+        model.handle_input(P + b"2")
+        sender.sent.clear()
+        model.handle_input(b"\r")
+        self.assertEqual([("restart_pane", {"pane": "worker_omp"}, b"")], self.restarts(sender))
+
+    def test_other_keys_and_pastes_are_not_sent_and_the_notice_explains_enter(self):
+        model, sender = self.exited("manager_omp")
+        sender.sent.clear()
+        model.handle_input(b"hello \x1b[A\x04\x03")
+        self.assertEqual([], sender.sent)
+        self.assertIn("Enter", model.notice)
+        model.notice = ""
+        model.handle_input(b"\x1b[200~pasted\r\x1b[201~")
+        self.assertEqual([], sender.sent, "a paste, even one containing Enter, never restarts or is sent")
+        self.assertIn("Enter", model.notice)
+
+    def test_no_pane_bytes_leave_via_mouse_or_queries_for_an_exited_pane(self):
+        model, sender = self.exited("manager_omp")
+        model.panes[PaneId.MANAGER_OMP].modes.add(1049)  # alt screen: the wheel would become arrow keys
+        sender.sent.clear()
+        model.handle_input(b"\x1b[<64;5;5M")
+        model.on_display(display("manager_omp", b"\x1b[6n"))  # a terminal query the old screen answers
+        self.assertEqual([], sender.of("input"))
+        self.assertEqual({}, {k: v for k, v in model.pending.items() if v[0].value == "input"})
+
+    def test_repeated_enter_while_pending_is_ignored(self):
+        model, sender = self.exited("manager_omp")
+        sender.sent.clear()
+        model.handle_input(b"\r")
+        model.handle_input(b"\r")
+        model.handle_input(b"x\n")
+        self.assertEqual(1, len(self.restarts(sender)))
+        model.on_result({"id": "r1", "ok": True})  # accepted, but the snapshot still shows the old exited pane
+        model.handle_input(b"\r")
+        self.assertEqual(1, len(self.restarts(sender)))
+        self.assertEqual("다시 시작 중…", model.restart_notice(PaneId.MANAGER_OMP))
+
+    def test_ok_keeps_the_notice_until_the_new_generation_arrives_then_clears_it(self):
+        model, sender = self.exited("manager_omp")
+        model.on_display(display("manager_omp", b"old session"))
+        sender.sent.clear()
+        model.handle_input(b"\r")
+        rid = f"r{sender.count}"
+        model.on_result({"id": rid, "ok": True, "pane": "manager_omp", "restarted": True, "generation": 2})
+        self.assertEqual("다시 시작 중…", model.restart_notice(PaneId.MANAGER_OMP))
+        self.alive_again(model, "manager_omp")
+        self.assertIsNone(model.restart_notice(PaneId.MANAGER_OMP))
+        self.assertEqual("", model.notice)
+        self.assertNotIn("종료됨", model.pane_title(PaneId.MANAGER_OMP))
+        model.on_display(display("manager_omp", b"new session", gen=2))
+        self.assertIn("new session", text(model, PaneId.MANAGER_OMP))
+        self.assertNotIn("old session", text(model, PaneId.MANAGER_OMP))  # the generation reset cleared the screen
+        sender.sent.clear()
+        model.handle_input(b"typed")  # a live pane again: input flows
+        self.assertEqual([b"typed"], [s[2] for s in sender.of("input")])
+        self.assertEqual([], self.restarts(sender))
+
+    def test_a_newer_generation_ends_the_pending_state_even_before_alive(self):
+        model, sender = self.exited("manager_omp", generation=1)
+        model.handle_input(b"\r")
+        snap = snapshot(alive=("worker_omp", "host_shell"))
+        for info in snap["panes"].values():
+            info["generation"] = 2
+        snap["panes"]["manager_omp"]["exit_status"] = 0
+        model.apply_snapshot(snap)
+        self.assertNotIn(PaneId.MANAGER_OMP, model._restarting)
+
+    def test_refusals_show_in_the_footer_and_allow_another_enter(self):
+        for reason, detail in (("pane_alive", "still running"), ("restart_in_progress", "busy"),
+                               ("restart_failed", "could not start a new manager OMP: out of ptys"),
+                               ("pane_not_restartable", "no")):
+            with self.subTest(reason=reason):
+                model, sender = self.exited("manager_omp")
+                sender.sent.clear()
+                model.handle_input(b"\r")
+                model.on_result({"id": f"r{sender.count}", "ok": False, "reason": reason, "detail": detail})
+                self.assertIn(reason, model.footer())
+                self.assertIn(detail, model.footer())
+                self.assertIn("MANAGER OMP", model.footer())
+                self.assertEqual("OMP 종료됨 (exit 0) — Enter: 새 세션으로 다시 시작 · 이전 대화는 새 OMP에서 /resume",
+                                 model.restart_notice(PaneId.MANAGER_OMP))
+                model.handle_input(b"\r")
+                self.assertEqual(2, len(self.restarts(sender)))
+
+    def test_live_panes_host_shell_and_ctrl_d_guard_are_unchanged(self):
+        model, sender = self.exited("worker_omp")  # manager focused and alive
+        sender.sent.clear()
+        model.handle_input(b"\r")
+        model.handle_input(b"x")
+        self.assertEqual([b"\r", b"x"], [s[2] for s in sender.of("input")])
+        self.assertEqual([], self.restarts(sender))
+        model.handle_input(b"\x04", now=1.0)
+        self.assertEqual(CTRL_D_NOTICE, model.notice)
+        model.handle_input(P + b"3")
+        sender.sent.clear()
+        model.handle_input(b"\r")
+        self.assertEqual([("input", {"pane": "host_shell"}, b"\r")], sender.of("input"))
+        self.assertEqual([], self.restarts(sender))
+
+    def test_enter_is_not_reachable_from_the_menu_and_help_lists_the_line(self):
+        self.assertEqual(1, sum("Enter = 새 OMP 세션으로 다시 시작" in line for line in HELP_LINES))
+        model, sender = self.exited("manager_omp")
+        model.handle_input(P + b" ")
+        self.assertTrue(model.menu_open)
+        sender.sent.clear()
+        model.handle_input(b"\x1b")  # menu closed; Enter inside the menu runs a menu item, never a restart
+        model.handle_input(P + b" ")
+        model.handle_input(b"\r")  # first item = scroll mode
+        self.assertEqual([], self.restarts(sender))
+
+    def test_pane_scroll_mode_enter_does_not_restart(self):
+        model, sender = self.exited("manager_omp")
+        model.handle_input(P + b"[")
+        sender.sent.clear()
+        model.handle_input(b"\r")
+        self.assertEqual([], self.restarts(sender))
+
+    def test_help_overlay_keeps_key_swallowing_enter(self):
+        model, sender = self.exited("manager_omp")
+        model.handle_input(P + b"?")
+        sender.sent.clear()
+        model.handle_input(b"\r")  # closes the overlay only
+        self.assertFalse(model.help_open)
+        self.assertEqual([], self.restarts(sender))
+
+    def test_display_of_a_new_session_makes_the_pane_live_before_the_next_state_push(self):
+        model, sender = self.exited("manager_omp")
+        model.state["panes"]["manager_omp"]["session_id"] = "old-session"
+        model.handle_input(b"\r")
+        self.assertTrue(model.pane_exited(PaneId.MANAGER_OMP))
+        model.on_display(ui_v1.Frame({"pane": "manager_omp", "session_id": "old-session", "generation": 1}, b"late"))
+        self.assertTrue(model.pane_exited(PaneId.MANAGER_OMP), "output of the old session must not revive the pane")
+        model.on_display(ui_v1.Frame({"pane": "manager_omp", "session_id": "new-session", "generation": 2}, b"OMP"))
+        self.assertFalse(model.pane_exited(PaneId.MANAGER_OMP))
+        self.assertIsNone(model.restart_notice(PaneId.MANAGER_OMP))
+        sender.sent.clear()
+        model.handle_input(b"x")
+        self.assertEqual(["input"], [k for k, *_ in [(m[0],) for m in sender.sent]])
+        model.on_display(ui_v1.Frame({"pane": "manager_omp", "session_id": "new-session", "generation": 2}, b"\x1b[6n"))
+        self.assertEqual(2, len(sender.of("input")), "the new session's DSR query was not answered")
+
+    def test_queued_display_of_a_new_session_also_makes_the_pane_live(self):
+        model, _ = self.exited("worker_omp")
+        model.state["panes"]["worker_omp"]["session_id"] = "old-session"
+        model.enqueue_display(ui_v1.Frame({"pane": "worker_omp", "session_id": "new", "generation": 2}, b"OMP"))
+        self.assertFalse(model.pane_exited(PaneId.WORKER_OMP))
+
+
+def host_exited(generation=1, *, focus_host=True, owner="user", exit_status=0, **host_extra):
+    """A model whose host shell exited (snapshot ``alive`` false), host focused, nothing sent yet."""
+    model, sender = make()
+    snap = snapshot(alive=("manager_omp", "worker_omp"), owner=owner)
+    snap["panes"]["host_shell"]["exit_status"] = exit_status
+    snap["panes"]["host_shell"].update(host_extra)
+    for info in snap["panes"].values():
+        info["generation"] = generation
+    model.apply_snapshot(snap)
+    if focus_host:
+        model.handle_input(P + b"3")
+    sender.sent.clear()
+    return model, sender
+
+
+class RestartExitedHostShellTests(unittest.TestCase):
+    """C-D63 (1): an exited host shell behaves like an exited OMP pane; Enter restarts it, nothing else reaches it."""
+
+    NOTICE = "host terminal 종료됨 (exit 0) — Enter: 새 shell 시작"
+
+    def test_notice_title_and_last_screen(self):
+        model, _ = host_exited()
+        model.on_display(display("host_shell", b"last prompt $"))
+        self.assertEqual(self.NOTICE, model.restart_notice(PaneId.HOST_SHELL))
+        self.assertTrue(model.pane_exited(PaneId.HOST_SHELL))
+        self.assertIn("종료됨", model.pane_title(PaneId.HOST_SHELL))
+        self.assertIn("exited(0)", model.pane_title(PaneId.HOST_SHELL))
+        self.assertIn("last prompt", text(model, PaneId.HOST_SHELL))
+        self.assertIsNone(model.restart_notice(PaneId.MANAGER_OMP))
+        self.assertEqual(self.NOTICE.split(), " ".join(model.restart_notice_lines(PaneId.HOST_SHELL, 30)).split())
+        unknown, _ = host_exited(exit_status=None)
+        self.assertIn("exit ?", unknown.restart_notice(PaneId.HOST_SHELL))
+
+    def test_enter_sends_exactly_one_restart_host_shell_and_dedupes(self):
+        for data in (b"\r", b"\n", b"ab\rcd"):
+            with self.subTest(data=data):
+                model, sender = host_exited()
+                model.handle_input(data)
+                self.assertEqual([("restart_pane", {"pane": "host_shell"}, b"")], sender.of("restart_pane"))
+                self.assertEqual([], sender.of("input"))
+                self.assertEqual("다시 시작 중…", model.restart_notice(PaneId.HOST_SHELL))
+                model.handle_input(b"\r")
+                model.handle_input(b"x\n")
+                self.assertEqual(1, len(sender.of("restart_pane")))
+                model.on_result({"id": "r1", "ok": True, "pane": "host_shell", "input_owner": "user"})
+                model.handle_input(b"\r")  # accepted, snapshot still exited: still pending
+                self.assertEqual(1, len(sender.of("restart_pane")))
+
+    def test_other_keys_pastes_mouse_and_queries_reach_nothing(self):
+        model, sender = host_exited()
+        model.panes[PaneId.HOST_SHELL].modes.add(1049)
+        model.handle_input(b"hello \x1b[A\x04\x03")
+        self.assertEqual([], sender.sent)
+        self.assertIn("Enter", model.notice)
+        self.assertIn("host terminal", model.notice)
+        model.notice = ""
+        model.handle_input(b"\x1b[200~pasted\r\x1b[201~")
+        self.assertEqual([], sender.sent)
+        self.assertIn("Enter", model.notice)
+        model.handle_input(b"\x1b[<64;5;25M")  # wheel over the host pane (alt screen would send arrows)
+        model.on_display(display("host_shell", b"\x1b[6n"))
+        self.assertEqual([], sender.of("input"))
+        self.assertEqual([], sender.of("paste"))
+
+    def test_enter_is_a_normal_key_when_another_pane_is_focused(self):
+        model, sender = host_exited(focus_host=False)
+        model.handle_input(b"\r")
+        self.assertEqual([], sender.of("restart_pane"))
+        self.assertEqual([b"\r"], [s[2] for s in sender.of("input")])  # manager OMP is alive
+
+    def test_state_push_with_a_live_shell_revives_the_pane(self):
+        model, sender = host_exited(generation=1)
+        model.handle_input(b"\r")
+        snap = snapshot()
+        for info in snap["panes"].values():
+            info["generation"] = 2
+        model.apply_snapshot(snap)
+        self.assertFalse(model.pane_exited(PaneId.HOST_SHELL))
+        self.assertIsNone(model.restart_notice(PaneId.HOST_SHELL))
+        self.assertEqual("", model.notice)
+        sender.sent.clear()
+        model.handle_input(b"ls\r")
+        self.assertEqual([b"ls\r"], [s[2] for s in sender.of("input")])
+        self.assertEqual([], sender.of("restart_pane"))
+
+    def test_new_generation_output_revives_before_the_state_push_and_old_output_does_not(self):
+        model, sender = host_exited(generation=1)
+        model.state["panes"]["host_shell"]["session_id"] = "old"
+        model.handle_input(b"\r")
+        model.on_display(ui_v1.Frame({"pane": "host_shell", "session_id": "old", "generation": 1}, b"late"))
+        self.assertTrue(model.pane_exited(PaneId.HOST_SHELL))
+        model.on_display(ui_v1.Frame({"pane": "host_shell", "session_id": "new", "generation": 2}, b"$ "))
+        self.assertFalse(model.pane_exited(PaneId.HOST_SHELL))
+        sender.sent.clear()
+        model.handle_input(b"x")
+        self.assertEqual([b"x"], [s[2] for s in sender.of("input")])
+        model.enqueue_display(ui_v1.Frame({"pane": "host_shell", "session_id": "new", "generation": 2}, b"\x1b[6n"))
+        model.feed_pending()
+        self.assertEqual(2, len(sender.of("input")), "the new shell's DSR query is answered")
+
+    def test_refusals_are_shown_and_allow_another_enter(self):
+        for reason, detail in (("pane_alive", "still running"), ("restart_in_progress", "busy"),
+                               ("restart_failed", "could not start a new shell"), ("backend_shutdown", "closing")):
+            with self.subTest(reason=reason):
+                model, sender = host_exited()
+                model.handle_input(b"\r")
+                model.on_result({"id": f"r{sender.count}", "ok": False, "reason": reason, "detail": detail})
+                for needle in (reason, detail, "HOST SHELL"):
+                    self.assertIn(needle, model.footer())
+                self.assertEqual(self.NOTICE, model.restart_notice(PaneId.HOST_SHELL))
+                model.handle_input(b"\r")
+                self.assertEqual(2, len(sender.of("restart_pane")))
+
+    def test_restart_result_input_owner_is_adopted(self):
+        model, sender = host_exited(owner="manager")
+        model.handle_input(b"\r")
+        model.on_result({"id": f"r{sender.count}", "ok": True, "pane": "host_shell", "input_owner": "user"})
+        self.assertEqual("user", model.input_owner())
+
+    def test_live_host_shell_is_unchanged(self):
+        model, sender = make()
+        model.handle_input(P + b"3")
+        sender.sent.clear()
+        model.handle_input(b"\r")
+        self.assertEqual([("input", {"pane": "host_shell"}, b"\r")], sender.of("input"))
+        self.assertIsNone(model.restart_notice(PaneId.HOST_SHELL))
+        self.assertNotIn("종료됨", model.pane_title(PaneId.HOST_SHELL))
+
+
+CONFIRM_HEAD = "host terminal을 강제 종료합니다. 실행 중인 process가 모두 종료됩니다."
+MANAGER_WARNING = "manager가 사용 중입니다 — 진행 중인 명령은 결과 불명으로 남습니다"
+
+
+class KillHostTerminalTests(unittest.TestCase):
+    """C-D63 (2): prefix k / Ctrl-k / ㅏ asks for confirmation; only the k forms confirm; kill_pane host_shell."""
+
+    OPEN = {"k": P + b"k", "K": P + b"K", "Ctrl-k": P + b"\x0b", "ㅏ Space": P + "ㅏ".encode() + b" "}
+
+    def opened(self, form="k", focus="manager"):
+        model, sender = make()
+        if focus == "host":
+            model.handle_input(P + b"3")
+        sender.sent.clear()
+        model.handle_input(self.OPEN[form])
+        return model, sender
+
+    def kills(self, sender):
+        return sender.of("kill_pane")
+
+    def test_every_open_form_opens_the_confirmation_and_sends_nothing(self):
+        for form in self.OPEN:
+            with self.subTest(form=form):
+                model, sender = self.opened(form)
+                self.assertTrue(model.kill_confirm_open)
+                self.assertEqual([], sender.sent)
+                joined = "\n".join(model.kill_confirm_lines())
+                self.assertIn(CONFIRM_HEAD, joined)
+                self.assertIn("k: 종료 · Esc/다른 키: 취소", joined)
+                self.assertNotIn(MANAGER_WARNING, joined)
+                self.assertIn("강제 종료", model.footer())
+                self.assertFalse(model.quit)
+
+    def test_k_forms_confirm_with_exactly_one_kill_pane_host_shell(self):
+        for open_form in self.OPEN:
+            for confirm, data in (("k", b"k"), ("Ctrl-k", b"\x0b"), ("ㅏ", "ㅏ".encode()),
+                                  ("ㅏ Space", "ㅏ".encode() + b" "), ("prefix k", P + b"k"),
+                                  ("prefix Ctrl-k", P + b"\x0b"), ("prefix ㅏ Space", P + "ㅏ".encode() + b" ")):
+                with self.subTest(open=open_form, confirm=confirm):
+                    model, sender = self.opened(open_form)
+                    model.handle_input(data)
+                    self.assertFalse(model.kill_confirm_open)
+                    self.assertEqual([("kill_pane", {"pane": "host_shell"}, b"")], self.kills(sender))
+                    self.assertEqual([], sender.of("input"))
+                    self.assertIn("강제 종료 중", model.notice)
+
+    def test_only_a_single_confirm_key_on_its_own_confirms_extra_bytes_cancel(self):
+        """C-D63 review R3: auto-repeat / typed text / an unbracketed paste starting with k cancels, sends nothing."""
+        k_ko = "ㅏ".encode()
+        extras = {"kk": b"kk", "kkk": b"kkk", "kill": b"kill", "k Enter": b"k\r", "unbracketed paste": b"kubectl get pods\n",
+                  "Ctrl-k Ctrl-k": b"\x0b\x0b", "k Ctrl-k": b"k\x0b", "prefix k k": P + b"kk", "ㅏ k": k_ko + b"k",
+                  "ㅏㅏ": k_ko + k_ko, "k wheel": b"k\x1b[<64;5;5M"}
+        for name, data in extras.items():
+            with self.subTest(extra=name):
+                model, sender = self.opened("k")
+                model.handle_input(data, now=0.0)
+                model.flush_input(now=1.0)
+                self.assertFalse(model.kill_confirm_open)
+                self.assertEqual([], sender.sent, "nothing reaches a pane or the backend")
+                self.assertIn("확인이 취소되었습니다", model.notice)
+                self.assertIn("k 한 번만 눌러 확인", model.notice)
+                sender.sent.clear()
+                model.handle_input(b"ls\r")  # back to normal
+                self.assertEqual([b"ls\r"], [s[2] for s in sender.of("input")])
+        for name, data in {"k": b"k", "Ctrl-k": b"\x0b", "ㅏ Space": k_ko + b" ", "ㅏ Enter": k_ko + b"\r",
+                           "prefix k": P + b"k", "prefix Ctrl-k": P + b"\x0b"}.items():
+            with self.subTest(single=name):
+                model, sender = self.opened("k")
+                model.handle_input(data)
+                self.assertEqual([("kill_pane", {"pane": "host_shell"}, b"")], self.kills(sender))
+                self.assertEqual([], sender.of("input"))
+
+    def test_two_separate_k_keys_still_confirm_on_the_second_chunk(self):
+        model, sender = self.opened("k")
+        model.handle_input(P)  # a lone prefix leaves the confirmation open
+        self.assertTrue(model.kill_confirm_open)
+        model.handle_input(b"k")
+        self.assertEqual(1, len(self.kills(sender)))
+
+    def test_nothing_else_confirms_and_cancel_sends_nothing(self):
+        cancels = {"Esc": b"\x1b", "Enter": b"\r", "LF": b"\n", "x": b"x", "Space": b" ", "Tab": b"\t", "Ctrl-c": b"\x03",
+                   "arrow": b"\x1b[A", "digit": b"1", "q": b"q", "Ctrl-q": b"\x11", "ㅂ": "ㅂ".encode(),
+                   "paste": b"\x1b[200~k\x1b[201~", "wheel": b"\x1b[<64;5;5M", "click": b"\x1b[<0;5;5M",
+                   "shift-pgup": b"\x1b[5;2~", "prefix x": P + b"x", "prefix q": P + b"q", "prefix Space": P + b" "}
+        for name, data in cancels.items():
+            with self.subTest(cancel=name):
+                model, sender = self.opened("k")
+                model.handle_input(data, now=0.0)
+                model.flush_input(now=1.0)
+                self.assertFalse(model.kill_confirm_open)
+                self.assertEqual([], sender.sent, "nothing reaches a pane or the backend")
+                self.assertFalse(model.quit, "a cancelling prefix command is not run")
+                self.assertFalse(model.menu_open)
+                sender.sent.clear()
+                model.handle_input(b"ls\r")  # back to normal: the key flows to the focus pane
+                self.assertEqual([b"ls\r"], [s[2] for s in sender.of("input")])
+
+    def test_a_window_resize_cancels_the_confirmation_and_sends_nothing_to_a_pane(self):
+        for size in ((44, 160), (20, 70), (5, 10)):  # larger, smaller, too small
+            with self.subTest(size=size):
+                model, sender = self.opened("k")
+                sender.sent.clear()
+                model.resize(*size)
+                self.assertFalse(model.kill_confirm_open)
+                self.assertEqual([], self.kills(sender))
+                self.assertEqual([], sender.of("input"))
+                model.resize(30, 120)
+                sender.sent.clear()
+                model.handle_input(b"k")  # back to normal: a plain k flows to the focus pane, never kills
+                self.assertEqual([], self.kills(sender))
+                self.assertEqual([b"k"], [s[2] for s in sender.of("input")])
+
+    def test_works_whatever_pane_has_focus_and_keeps_the_focus(self):
+        for focus in ("manager", "host"):
+            with self.subTest(focus=focus):
+                model, sender = self.opened("k", focus)
+                before = model.focus
+                model.handle_input(b"k")
+                self.assertEqual([("kill_pane", {"pane": "host_shell"}, b"")], self.kills(sender))
+                self.assertIs(before, model.focus)
+
+    def test_manager_warning_when_the_manager_owns_the_shell_or_a_command_runs(self):
+        for name, setup in (("owner", {"owner": "manager"}), ("in_flight", {"manager_command_in_flight": True})):
+            with self.subTest(case=name):
+                model, sender = make()
+                snap = snapshot(owner=setup.get("owner", "user"))
+                snap["panes"]["host_shell"]["manager_command_in_flight"] = setup.get("manager_command_in_flight", False)
+                model.apply_snapshot(snap)
+                model.handle_input(P + b"k")
+                lines = model.kill_confirm_lines()
+                self.assertIn(MANAGER_WARNING, lines)
+                self.assertIn(CONFIRM_HEAD, "\n".join(lines))
+                model.handle_input(b"k")
+                self.assertEqual(1, len(self.kills(sender)), "confirming after the warning is allowed")
+        quiet, _ = make()
+        snap = snapshot()
+        snap["panes"]["host_shell"]["manager_command_in_flight"] = False
+        quiet.apply_snapshot(snap)
+        quiet.handle_input(P + b"k")
+        self.assertNotIn(MANAGER_WARNING, quiet.kill_confirm_lines())
+
+    def test_ok_result_shows_the_killed_notice_and_survivors(self):
+        model, sender = self.opened("k")
+        model.handle_input(b"k")
+        model.on_result({"id": f"r{sender.count}", "ok": True, "pane": "host_shell", "killed": True, "survivors": []})
+        self.assertEqual("host terminal 강제 종료됨 — Enter로 새 shell", model.notice)
+        self.assertIn("Enter로 새 shell", model.footer())
+        other, other_sender = self.opened("k")
+        other.handle_input(b"k")
+        other.on_result({"id": f"r{other_sender.count}", "ok": True, "survivors": [{"pid": 7}]})
+        self.assertIn("1개", other.notice)
+
+    def test_refusals_are_shown_and_a_new_attempt_is_possible(self):
+        for reason in ("pane_not_killable", "pane_exited", "kill_in_progress", "kill_failed", "backend_shutdown",
+                       "not_attached", "pane_unavailable"):
+            with self.subTest(reason=reason):
+                model, sender = self.opened("k")
+                model.handle_input(b"k")
+                model.on_result({"id": f"r{sender.count}", "ok": False, "reason": reason, "detail": "why"})
+                for needle in (reason, "why", "HOST SHELL", "강제 종료"):
+                    self.assertIn(needle, model.footer())
+                model.handle_input(P + b"k")
+                self.assertTrue(model.kill_confirm_open)
+                model.handle_input(b"k")
+                self.assertEqual(2, len(self.kills(sender)))
+
+    def test_a_kill_in_flight_is_not_asked_for_again(self):
+        model, sender = self.opened("k")
+        model.handle_input(b"k")
+        model.handle_input(P + b"k")
+        self.assertFalse(model.kill_confirm_open)
+        self.assertIn("강제 종료 중", model.notice)
+        self.assertEqual(1, len(self.kills(sender)))
+
+    def test_menu_row_help_line_and_cycle(self):
+        model, sender = make()
+        model.handle_input(P + b" ")
+        row = next(ln for ln in model.menu_lines() if "host terminal 강제 종료" in ln)
+        self.assertIn("Ctrl-] k", row)
+        self.assertIn("Ctrl-] Ctrl-k", row)
+        self.assertEqual(1, sum("강제 종료" in line and "prefix k" in line for line in HELP_LINES))
+        self.assertTrue(any("Ctrl-k" in line and "ㅏ" in line for line in HELP_LINES))
+        model.handle_input(b"\x0b")  # Ctrl-k inside the menu runs the row; the menu closes
+        self.assertFalse(model.menu_open)
+        self.assertTrue(model.kill_confirm_open)
+        self.assertEqual([], sender.sent)
+        model.handle_input(b"\x1b", now=0.0)
+        model.flush_input(now=1.0)
+        self.assertFalse(model.kill_confirm_open)
+        # the ten numbered items keep their digits and the arrow cycle
+        model.handle_input(P + b" ")
+        for digit, key in zip("1234567890", ("[", "z", "t", "c", "h", "r", "m", "=", "?", "q")):
+            self.assertTrue(any(ln.lstrip("> ").startswith(digit) and f"Ctrl-] {key}" in ln for ln in model.menu_lines()))
+        model.handle_input(b"\x1b[A")
+        self.assertEqual(9, model.menu_index)
+
+    def test_exited_host_kill_is_asked_and_backend_refusal_shown(self):
+        model, sender = host_exited()
+        model.handle_input(P + b"k")
+        self.assertTrue(model.kill_confirm_open)
+        model.handle_input(b"k")
+        model.on_result({"id": f"r{sender.count}", "ok": False, "reason": "pane_exited", "detail": "already exited"})
+        self.assertIn("pane_exited", model.footer())
+
+    def test_opening_the_confirmation_drops_a_held_ctrl_d(self):
+        model, sender = make()
+        model.handle_input(b"\x04", now=1.0)  # first Ctrl-d to the manager OMP is held, not sent
+        self.assertEqual([], sender.of("input"))
+        model.handle_input(P + b"k", now=1.5)
+        self.assertTrue(model.kill_confirm_open)
+        self.assertIsNone(model._ctrl_d)
+        model.handle_input(b"x", now=1.6)  # cancels the confirmation
+        model.handle_input(b"\x04", now=1.7)  # a fresh first press: held again, never delivered
+        self.assertEqual([], [s for s in sender.of("input") if s[2] == b"\x04"])
 
 
 if __name__ == "__main__":

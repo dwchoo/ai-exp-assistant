@@ -95,7 +95,7 @@ class RerunLiveProbe(L.LiveProductOmpProbe):
         self.assertEqual(raw_cat, "붙여 abc\n".encode(), "markers/garbage reached cat in sh")
         self.assertNotIn(b"\x1b", raw_cat)
         self.assertEqual(dp, b"DASH-PASTE-OK\n", "markers reached the dash command line")
-        ui.send(PREFIX + b"d")
+        ui.send(PREFIX + b"q")
         ui.wait(ui.done, 15)
 
     # -- S5 bash + F6 -------------------------------------------------------
@@ -132,7 +132,7 @@ class RerunLiveProbe(L.LiveProductOmpProbe):
         reasons = s1.get("held_reasons") or s0.get("held_reasons") or []
         for reason in reasons:
             self.assertIn(reason, footer)
-        ui.send(PREFIX + b"d")
+        ui.send(PREFIX + b"q")
         ui.wait(ui.done, 15)
 
     # -- P-C-AC-14 with the real OMP ---------------------------------------
@@ -200,7 +200,7 @@ class RerunLiveProbe(L.LiveProductOmpProbe):
                   verdict=("answered" if prompt_lines and replied else
                            "not_applicable_auto_approved" if replied and not prompt_lines else "inconclusive"))
         self.assertTrue(replied, "manager never produced the tool turn reply")
-        ui.send(PREFIX + b"d")
+        ui.send(PREFIX + b"q")
         ui.wait(ui.done, 15)
 
 
@@ -295,7 +295,7 @@ class RerunLiveProbe(L.LiveProductOmpProbe):
         self.assertIsNotNone(gone_at, "sleep child not gone within 10 s of Esc")
         self.assertEqual(left, [])
         self.assertTrue(markers, "no interruption/abort state visible in pane")
-        ui.send(PREFIX + b"d")
+        ui.send(PREFIX + b"q")
         ui.wait(ui.done, 15)
 
 

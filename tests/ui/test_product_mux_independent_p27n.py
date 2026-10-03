@@ -162,7 +162,7 @@ class OuterTerminalAfterDragsTests(MuxBase):
         self.assertEqual((model.mode, model.sgr, model.motion), ("button", True, True))
         for number in (1000, 1002, 1006):
             self.assertEqual(out.count(b"\x1b[?%dh" % number), 1, f"?{number}h written more than once at start")
-        ui.send(P + b"d")
+        ui.send(P + b"q")
         self.assertTrue(ui.ui_done(), ui.screen_text())
 
     def test_after_many_divider_drags_the_outer_terminal_still_reports_wheel_and_clicks(self):
@@ -177,7 +177,7 @@ class OuterTerminalAfterDragsTests(MuxBase):
         self.wheel_scrolls(ui, "after 8 drags")
         self.click_focuses(ui, "worker_omp", "after 8 drags")
         self.click_focuses(ui, "manager_omp", "after 8 drags")
-        ui.send(P + b"d")
+        ui.send(P + b"q")
         self.assertTrue(ui.ui_done(), ui.screen_text())
         ui.drain(0.3)
         self.assert_off(ui, "after detach")
@@ -214,7 +214,7 @@ class OuterTerminalAfterDragsTests(MuxBase):
         changes = [c for c in model_of(ui).changes_after(mark) if not c[2]]
         self.assertEqual(changes, [], "a mouse mode was reset while capture stayed on")
         self.wheel_scrolls(ui, "after every drag-ending path")
-        ui.send(P + b"d")
+        ui.send(P + b"q")
         self.assertTrue(ui.ui_done(), ui.screen_text())
         ui.drain(0.3)
         self.assert_off(ui, "after detach")
@@ -247,7 +247,7 @@ class OuterTerminalAfterDragsTests(MuxBase):
                         f"the divider drag after window resizes did not resize the manager pane: {manager()} vs "
                         f"{(rows, cols - 9)}")
         self.assert_reports(ui, "after resizes and a drag")
-        ui.send(P + b"d")
+        ui.send(P + b"q")
         self.assertTrue(ui.ui_done(), ui.screen_text())
 
 
@@ -269,7 +269,7 @@ class CaptureToggleTests(MuxBase):
             self.assert_reports(ui, f"cycle {cycle} after a drag")
         self.wheel_scrolls(ui, "after 3 capture toggles")
         self.click_focuses(ui, "worker_omp", "after 3 capture toggles")
-        ui.send(P + b"d")
+        ui.send(P + b"q")
         self.assertTrue(ui.ui_done(), ui.screen_text())
         ui.drain(0.3)
         self.assert_off(ui, "after detach")
@@ -292,7 +292,7 @@ class CaptureToggleTests(MuxBase):
         self.assertEqual(len(self.server.of("focus")), focus_frames)
         self.assertEqual([c for c in model_of(ui).changes_after(mark) if c[2]], [])
         self.assert_off(ui, "while capture is off")
-        ui.send(P + b"d")
+        ui.send(P + b"q")
         self.assertTrue(ui.ui_done(), ui.screen_text())
 
     def test_every_exit_path_leaves_all_mouse_modes_off_after_drags(self):
@@ -306,7 +306,7 @@ class CaptureToggleTests(MuxBase):
                 pid = ui.ui_pid()
                 self.assertIsNotNone(pid)
                 if action == "detach":
-                    ui.send(P + b"d")
+                    ui.send(P + b"q")
                 elif action == "sigterm":
                     os.kill(pid, signal.SIGTERM)
                 elif action == "sighup":
@@ -332,7 +332,7 @@ class KeyboardFallbackTests(MuxBase):
         self.assertTrue(ui.wait_for(lambda: "[SCROLL" not in ui.screen_text(), 5), ui.screen_text())
         ui.drain(0.2)
         self.assertEqual(self.server.payloads("input"), b"", "scroll keys were typed into a pane")
-        ui.send(P + b"d")
+        ui.send(P + b"q")
         self.assertTrue(ui.ui_done(), ui.screen_text())
 
     def test_fallbacks_work_with_mouse_capture_off(self):
@@ -353,7 +353,7 @@ class KeyboardFallbackTests(MuxBase):
         self.assertTrue(ui.wait_for(lambda: "[SCROLL" not in ui.screen_text(), 5), ui.screen_text())
         ui.drain(0.2)
         self.assertEqual(self.server.payloads("input"), b"", "scroll keys were typed into a pane")
-        ui.send(P + b"d")
+        ui.send(P + b"q")
         self.assertTrue(ui.ui_done(), ui.screen_text())
 
     def test_prefix_pgup_and_prefix_bracket_after_drags(self):
@@ -366,7 +366,7 @@ class KeyboardFallbackTests(MuxBase):
             ui.send(b"q")
             self.assertTrue(ui.wait_for(lambda: "[SCROLL" not in ui.screen_text(), 5), (entry, ui.screen_text()))
         self.assertEqual(self.server.payloads("input"), b"")
-        ui.send(P + b"d")
+        ui.send(P + b"q")
         self.assertTrue(ui.ui_done(), ui.screen_text())
 
 
@@ -387,7 +387,7 @@ class IsolationWarningHeaderTests(unittest.TestCase):
         self.assertTrue(ui.wait_text("focus:", 10), ui.screen_text())
         ui.drain(0.4)
         head = "\n".join(ui.screen_text().split("\n")[:2])
-        ui.send(P + b"d")
+        ui.send(P + b"q")
         ui.ui_done()
         return head
 

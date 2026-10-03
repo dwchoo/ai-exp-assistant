@@ -131,12 +131,64 @@ class NegotiationAndValidationTests(unittest.TestCase):
     def test_every_client_type_has_a_documented_request_shape(self):
         extras = {"input": {"pane": "host_shell"}, "paste": {"pane": "host_shell"},
                   "resize": {"rows": 1, "cols": 1}, "focus": {"pane": "manager_omp"},
+                  "restart_pane": {"pane": "worker_omp"}, "kill_pane": {"pane": "host_shell"},
                   "shutdown_confirm": {"token": "t"}, "confirm_boot": {"boot_id": "b"}}
         for kind in ClientType:
             if kind is ClientType.HELLO:
                 continue
             message = self.parse(ui_v1.request(kind, "id1", **extras.get(kind.value, {})))
             self.assertIs(message.type, kind)
+
+    def test_restart_pane_names_one_pane_and_carries_no_payload(self):
+        for pane in PaneId:
+            message = self.parse({"v": 1, "type": "restart_pane", "id": "r", "pane": pane.value})
+            self.assertIs(message.type, ClientType.RESTART_PANE)
+            self.assertIs(message.fields["pane"], pane)
+        for header in ({"v": 1, "type": "restart_pane", "id": "r"},
+                       {"v": 1, "type": "restart_pane", "id": "r", "pane": None},
+                       {"v": 1, "type": "restart_pane", "id": "r", "pane": "tmux"},
+                       {"v": 1, "type": "restart_pane", "id": "r", "pane": 1},
+                       {"v": 1, "type": "restart_pane", "pane": "manager_omp"}):
+            with self.assertRaises(ContractError, msg=header):
+                self.parse(header)
+        with self.assertRaises(ContractError):
+            self.parse({"v": 1, "type": "restart_pane", "id": "r", "pane": "manager_omp"}, payload=b"x")
+        self.assertEqual(ui_v1.request(ClientType.RESTART_PANE, "r", pane="manager_omp")["type"], "restart_pane")
+
+    def test_kill_pane_names_one_pane_and_carries_no_payload(self):
+        # C-D63: the backend accepts only host_shell, but the contract parses every PaneId so an
+        # OMP pane is refused with a reason (pane_not_killable) rather than as an invalid message.
+        for pane in PaneId:
+            message = self.parse({"v": 1, "type": "kill_pane", "id": "k", "pane": pane.value})
+            self.assertIs(message.type, ClientType.KILL_PANE)
+            self.assertIs(message.fields["pane"], pane)
+            self.assertEqual(set(message.fields), {"pane"})
+        for header in ({"v": 1, "type": "kill_pane", "id": "k"},
+                       {"v": 1, "type": "kill_pane", "id": "k", "pane": None},
+                       {"v": 1, "type": "kill_pane", "id": "k", "pane": "tmux"},
+                       {"v": 1, "type": "kill_pane", "id": "k", "pane": 1},
+                       {"v": 1, "type": "kill_pane", "pane": "host_shell"},
+                       {"v": 2, "type": "kill_pane", "id": "k", "pane": "host_shell"}):
+            with self.assertRaises(ContractError, msg=header):
+                self.parse(header)
+        with self.assertRaises(ContractError):
+            self.parse({"v": 1, "type": "kill_pane", "id": "k", "pane": "host_shell"}, payload=b"x")
+        self.assertEqual(ui_v1.request(ClientType.KILL_PANE, "k", pane="host_shell"),
+                         {"v": 1, "type": "kill_pane", "id": "k", "pane": "host_shell"})
+
+    def test_restart_pane_host_shell_parses(self):
+        message = self.parse({"v": 1, "type": "restart_pane", "id": "r", "pane": "host_shell"})
+        self.assertEqual((message.type, message.fields), (ClientType.RESTART_PANE, {"pane": PaneId.HOST_SHELL}))
+
+    def test_kill_refusal_reasons_are_contract_values(self):
+        for name, value in (("PANE_NOT_KILLABLE", "pane_not_killable"), ("PANE_EXITED", "pane_exited"),
+                            ("KILL_IN_PROGRESS", "kill_in_progress"), ("KILL_FAILED", "kill_failed")):
+            self.assertEqual(Reason[name].value, value)
+
+    def test_restart_refusal_reasons_are_contract_values(self):
+        for name, value in (("PANE_ALIVE", "pane_alive"), ("PANE_NOT_RESTARTABLE", "pane_not_restartable"),
+                            ("RESTART_IN_PROGRESS", "restart_in_progress"), ("RESTART_FAILED", "restart_failed")):
+            self.assertEqual(Reason[name].value, value)
 
     def test_results_and_rejects_carry_reasons(self):
         result = ui_v1.result("x", False, reason=Reason.PASTE_TOO_LARGE, detail="d")

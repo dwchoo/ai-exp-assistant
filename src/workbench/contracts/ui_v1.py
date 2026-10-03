@@ -35,6 +35,46 @@ live ``display`` frames and ``state`` pushes. ``detach`` or closing the
 connection ends only the attachment; it never stops the backend, a PTY, or a
 running command. Focus, input ownership and control mode are backend state and
 survive detach/reattach.
+
+``restart_pane`` (attached client, ``pane`` field) starts a new session in an
+exited pane: an exited ``manager_omp``/``worker_omp`` gets a new OMP session with
+its start-up command (C-D62); an exited ``host_shell`` gets a new persistent
+shell started like the first one (same shell, rcfile/hooks, environment and
+cwd) with input owner ``user`` and a fresh control/handoff/takeover state
+(C-D63). It is refused with ``pane_alive`` for a running pane,
+``restart_in_progress`` while a restart (or, for the host shell, a kill) is
+still being carried out, ``backend_shutdown`` during shutdown and
+``restart_failed`` when the new process cannot be spawned (the pane stays
+exited). The restarted pane streams under a new ``session_id``/``generation``.
+``pane_not_restartable`` is kept as a value but no pane is refused with it now.
+
+``kill_pane`` (attached client, ``pane`` field) force-kills the host shell at
+once (C-D63; the UI asks the user to confirm before sending it): the parent
+shell and every process in its session (its jobs and their process groups) get
+SIGHUP/SIGTERM and then SIGKILL after a bounded wait; a process that moved to
+another session (``setsid``) is not signalled. It is accepted whatever the
+input owner is; the result reports ``input_owner``, ``manager_owned``,
+``manager_command_in_flight`` and ``manager_command`` (a manager request in
+flight is closed as ``outcome: unknown``, never a success), ``exit_status``,
+``signalled``, ``survivors`` and ``left_session``. Each survivor is
+``{pid, reason}``: a member that refuses the signal (for example a process now
+running as another user under sudo/su/pkexec) is skipped and reported with
+``permission_denied`` while the others are still signalled. A ``restart_pane``
+result reports the members of the old session it could not end the same way
+in ``survivors``. The pane is exited afterwards
+and ``restart_pane`` starts a new shell. It is refused with
+``pane_not_killable`` for an OMP pane (an OMP ends through the OMP itself),
+``pane_exited`` when the host shell has already exited, ``kill_in_progress``
+while a host shell kill or restart is being carried out, ``kill_failed`` when
+the shell cannot be proven, does not end or the kill fails with an OS error,
+and ``backend_shutdown`` during shutdown. Any request whose handler fails
+unexpectedly is answered with ``internal_error``; the backend keeps serving. A successful ``restart_pane`` or ``kill_pane`` result is followed by a
+``state`` push.
+
+The ``host_shell`` pane in a snapshot carries ``alive``, ``exit_status``,
+``input_owner``, ``manager_command_in_flight``, ``manager_command`` (the last
+manager request closed by an exit or kill), ``restart`` and ``kill`` (the last
+force-kill result) next to the ``shell`` control state.
 """
 
 from __future__ import annotations
@@ -79,6 +119,8 @@ class ClientType(StrEnum):
     SHUTDOWN_REQUEST = "shutdown_request"
     SHUTDOWN_CONFIRM = "shutdown_confirm"
     CONFIRM_BOOT = "confirm_boot"
+    RESTART_PANE = "restart_pane"
+    KILL_PANE = "kill_pane"
 
 
 class ServerType(StrEnum):
@@ -113,6 +155,15 @@ class Reason(StrEnum):
     BACKEND_NOT_READY = "backend_not_ready"
     SLOW_CLIENT = "slow_client"
     BACKEND_SHUTDOWN = "backend_shutdown"
+    PANE_ALIVE = "pane_alive"
+    PANE_NOT_RESTARTABLE = "pane_not_restartable"
+    RESTART_IN_PROGRESS = "restart_in_progress"
+    RESTART_FAILED = "restart_failed"
+    PANE_NOT_KILLABLE = "pane_not_killable"
+    PANE_EXITED = "pane_exited"
+    KILL_IN_PROGRESS = "kill_in_progress"
+    KILL_FAILED = "kill_failed"
+    INTERNAL_ERROR = "internal_error"
 
 
 # Requests whose ``id`` is mandatory. ``hello`` is answered by welcome/reject.
@@ -296,7 +347,7 @@ def parse_client_frame(frame: Frame, version: int | None) -> ClientMessage:
         fields["pane"] = _pane(header.get("pane")) if header.get("pane") is not None else None
         fields["rows"] = _dimension(header.get("rows"), "rows", MAX_TERMINAL_ROWS)
         fields["cols"] = _dimension(header.get("cols"), "cols", MAX_TERMINAL_COLUMNS)
-    elif kind is ClientType.FOCUS:
+    elif kind in {ClientType.FOCUS, ClientType.RESTART_PANE, ClientType.KILL_PANE}:
         fields["pane"] = _pane(header.get("pane"))
     elif kind is ClientType.ATTACH:
         size = header.get("size")

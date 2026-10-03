@@ -59,7 +59,7 @@ class ProductPtyTests(unittest.TestCase):
             self.assertTrue(ui.wait_text(text, 5), f"{text!r} not visible:\n{ui.screen_text()}")
         time.sleep(0.5)
         self.assertEqual(server.of("input"), [], "replayed queries answered as input")
-        ui.send(PREFIX + b"d")
+        ui.send(PREFIX + b"q")
         self.assert_restored(ui)
         self.assertEqual(ui.status(), 0)
         self.assertEqual(len(server.of("detach")), 1)
@@ -78,7 +78,7 @@ class ProductPtyTests(unittest.TestCase):
                         server.payloads("input"))
         self.assertIsNone(ui.status())
         self.assertTrue(ui.wait_text("WORKER OMP *FOCUS*", 3), ui.screen_text())
-        ui.send(PREFIX + b"d")
+        ui.send(PREFIX + b"q")
         self.assert_restored(ui)
 
     def test_lone_esc_reaches_the_pane_promptly(self):
@@ -90,7 +90,7 @@ class ProductPtyTests(unittest.TestCase):
         ui.send(PREFIX + PREFIX)
         self.assertTrue(server.wait(lambda: server.payloads("input", "manager_omp") == b"\x1b\x1d", 2.0),
                         server.payloads("input"))
-        ui.send(PREFIX + b"d")
+        ui.send(PREFIX + b"q")
         self.assert_restored(ui)
 
     # -- paste -----------------------------------------------------------
@@ -107,7 +107,7 @@ class ProductPtyTests(unittest.TestCase):
         self.assertEqual(pastes[0].header.get("pane"), "host_shell")
         self.assertEqual(pastes[0].payload, START + body + END)
         self.assertEqual(server.of("input"), [])
-        ui.send(PREFIX + b"d")
+        ui.send(PREFIX + b"q")
         self.assert_restored(ui)
 
     def test_over_2mib_paste_is_rejected_whole_with_visible_reason(self):
@@ -121,7 +121,7 @@ class ProductPtyTests(unittest.TestCase):
         self.assertNotIn(b"q", server.payloads("input"), "part of the rejected paste was delivered")
         ui.send(b"k")
         self.assertTrue(server.wait(lambda: server.payloads("input", "host_shell") == b"k"))
-        ui.send(PREFIX + b"d")
+        ui.send(PREFIX + b"q")
         self.assert_restored(ui)
 
     def test_backend_queue_full_and_owner_refusals_are_visible(self):
@@ -136,7 +136,7 @@ class ProductPtyTests(unittest.TestCase):
         self.assertTrue(ui.wait_text("queue_full", 5), ui.screen_text())
         ui.send(b"z")
         self.assertTrue(ui.wait_text("input_owner_manager", 5), ui.screen_text())
-        ui.send(PREFIX + b"d")
+        ui.send(PREFIX + b"q")
         self.assert_restored(ui)
 
     # -- resize ----------------------------------------------------------
@@ -151,7 +151,7 @@ class ProductPtyTests(unittest.TestCase):
             return {f.header["pane"]: (f.header["rows"], f.header["cols"]) for f in server.of("resize")[before:]}
         self.assertTrue(server.wait(lambda: got() == want, 5), got())
         self.assertTrue(ui.wait_text("HOST SHELL", 3))
-        ui.send(PREFIX + b"d")
+        ui.send(PREFIX + b"q")
         self.assert_restored(ui)
 
     # -- exit paths ------------------------------------------------------

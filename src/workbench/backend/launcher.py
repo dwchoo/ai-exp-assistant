@@ -684,7 +684,7 @@ def _stop_group(process: subprocess.Popen, ref: ProcessRef | None) -> dict[str, 
             break
         try:
             os.killpg(pgid, sig)
-        except ProcessLookupError:
+        except OSError:  # gone, or EPERM (no member may be signalled): reported in ``left``, never raised
             break
         deadline = time.monotonic() + grace
         while time.monotonic() < deadline and not (_leader_exited(pgid) and not _group_members(pgid)):

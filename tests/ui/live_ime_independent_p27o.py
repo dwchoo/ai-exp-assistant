@@ -9,11 +9,13 @@ What a Korean-IME client sends (Ctrl combos, Space, digits, arrows, Hangul UTF-8
 multiplexer client (an outer PTY this test owns, rendered with pyte) and checked in two ways:
 
 1. ``tap``: a raw byte recorder runs inside the multiplexer pane; the bytes it reads must equal the bytes sent, so tmux/
-   herdr pass Ctrl-] + Ctrl-d/t/y/o/r/e/z, Space, digits, arrows, Enter/Tab/Esc and Hangul unchanged.
+   herdr pass Ctrl-] + Ctrl-q/d/t/y/o/r/e/z, raw Ctrl-d, jamo + Space, Space, digits, arrows, Enter/Tab/Esc and Hangul unchanged.
 2. ``product``: the real entrypoint (``python -m workbench start --omp <stub>`` + ``attach``) runs inside the multiplexer.
    The stub OMP echoes every byte it receives (``[manager got b'..']``) and never contacts a provider (no model, no
-   credentials, no network). Ctrl-] Ctrl-d detaches (exit 0, backend survives), Ctrl-] Space opens the menu and a digit read
-   from the screen detaches, Esc closes the menu, Hangul after the prefix shows the hint and reaches no pane.
+   credentials, no network). Ctrl-] Ctrl-q detaches (exit 0, backend survives), Ctrl-] Space opens the menu and a digit read
+   from the screen detaches, Esc closes the menu, a Hangul syllable after the prefix shows the hint and reaches no pane.
+   Adapted by p27-jamo-test-01 (C-D61 (1), '자모 자동 변환 + Space'): Ctrl-] d only shows a notice, Ctrl-] ㅋ Space zooms,
+   a single raw Ctrl-d never reaches the manager OMP while a second one within 2 s does, Ctrl-] ㅂ Space detaches.
 
 Isolation: tmux runs as ``tmux -L <unique> -f <own conf>`` with ``TMUX_TMPDIR`` in the scratch root; herdr runs with its own
 ``XDG_CONFIG_HOME`` (own server/socket/log) and a minimal own config (the user's herdr config is not read or copied); no TMUX*/HERDR*
@@ -78,7 +80,8 @@ def ctrl(letter: str) -> bytes:
 
 
 # what an IME client sends for the IME-neutral routes, each as separate writes (a read boundary between them)
-TAP_CHUNKS = [PREFIX + ctrl(c) for c in "dtyorez"] + [PREFIX, b" ", PREFIX + b"1", PREFIX + b"0", PREFIX + b"\t",
+TAP_CHUNKS = [PREFIX + ctrl(c) for c in "qdtyorez"] + [b"\x04", PREFIX + "ㅂ ".encode(), PREFIX + "ㅋ".encode(), b" ",
+                                                        PREFIX, b" ", PREFIX + b"1", PREFIX + b"0", PREFIX + b"\t",
                                                        b"\x1b[A", b"\x1b[B", b"\x1bOA", b"\x1bOB", b"\r", b"\n", b"1234567890",
                                                        PREFIX + PREFIX, b"\x03\x1c", PREFIX + b"[", PREFIX + b"=", PREFIX + b"?",
                                                        PREFIX + "한".encode()[:1], "한".encode()[1:], "ㅇ".encode(),
@@ -217,6 +220,31 @@ class Case:
         term.send(PREFIX + PREFIX)
         self.ok("prefix_prefix_is_a_literal_prefix", term.until(lambda: "b'\\x1d'" in "".join(self.got("manager")), 8),
                 manager=self.got("manager"))
+        # -- C-D61: old detach keys only show a notice; jamo + Space runs the 2-set key (ㅋ = z zoom)
+        before = list(self.got("manager"))
+        term.send(PREFIX + b"d")
+        self.ok("prefix_d_is_no_longer_detach_notice_only", self.wait_text("detach는 이제", 8)
+                and f"UIDONE{self.marker}" not in term.text(), tail=term.text()[-200:])
+        term.send(PREFIX + "ㅋ".encode())
+        term.pump(0.3)
+        term.send(b" ")  # the IME commit key: swallowed, never a menu, never a pane byte
+        zoomed = self.gone_text("WORKER OMP", 8)
+        term.send(PREFIX + "ㅋ ".encode())
+        restored = self.wait_text("WORKER OMP", 8)
+        term.pump(0.5)
+        self.ok("prefix_jamo_space_runs_the_2set_key_and_space_is_swallowed", zoomed and restored
+                and self.got("manager") == before and "명령 메뉴" not in term.text(), zoomed=zoomed, restored=restored,
+                manager=self.got("manager")[len(before):])
+        # -- C-D61: a single raw Ctrl-d never reaches the OMP; a second one within 2 s is delivered exactly once
+        term.send(b"\x04")
+        noticed = self.wait_text("2초 안에", 5)
+        term.pump(0.4)
+        self.ok("single_ctrl_d_held_with_notice", noticed and "\\x04" not in "".join(self.got("manager")),
+                manager=self.got("manager")[len(before):])
+        term.send(b"\x04")
+        self.ok("second_ctrl_d_within_window_delivered_once",
+                term.until(lambda: "".join(self.got("manager")).count("\\x04") == 1, 8),
+                manager=self.got("manager")[len(before):])
         term.send(PREFIX + ctrl("t"))
         term.send(PREFIX + ctrl("y"))
         term.send(PREFIX + ctrl("o"))
@@ -227,8 +255,8 @@ class Case:
                 manager=self.got("manager"))
         status = self.cli("status", "--data-dir", str(self.data), "--json")
         # -- detach with the Ctrl alias
-        term.send(PREFIX + ctrl("d"))
-        self.ok("ctrl_bracket_ctrl_d_detaches_exit_0", self.done(), tail=term.text()[-200:])
+        term.send(PREFIX + ctrl("q"))
+        self.ok("ctrl_bracket_ctrl_q_detaches_exit_0", self.done(), tail=term.text()[-200:])
         self.ok("backend_survives_detach", self.cli("status", "--data-dir", str(self.data), "--json").returncode == 0)
         # -- reattach; detach through the menu digit read from the screen
         self.shell(self.attach_cmd())
@@ -248,6 +276,13 @@ class Case:
             term.send(b"\x1b[A")
             term.send(b"\r")
             self.ok("menu_up_enter_detaches_exit_0", self.done(), tail=term.text()[-160:])
+        # -- and with the jamo of q committed by Space (Ctrl-] ㅂ Space)
+        self.shell(self.attach_cmd())
+        if term.until(lambda: "STUB-OMP manager ready" in term.text(), 40):
+            term.send(PREFIX)
+            term.pump(0.3)
+            term.send("ㅂ ".encode())
+            self.ok("prefix_jamo_b_space_detaches_exit_0", self.done(), tail=term.text()[-160:])
         status_after = self.cli("status", "--data-dir", str(self.data), "--json")
         self.ok("backend_still_up_before_shutdown", status_after.returncode == 0, out=status_after.stdout[:200])
 

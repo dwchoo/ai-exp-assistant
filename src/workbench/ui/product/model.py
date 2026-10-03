@@ -1,12 +1,16 @@
 """Pure product-UI state: pane screens, backend state, key commands. No curses, no sockets."""
 from __future__ import annotations
 
+import base64
 from collections import deque
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
+import os
 import re
 import time
 from typing import Any, Protocol
+
+from wcwidth import wcswidth
 
 from workbench.contracts import ui_v1
 from workbench.contracts.ui_v1 import ClientType
@@ -33,6 +37,9 @@ CATCHUP_BACKLOG_BYTES = 256 * 1024  # unfed backlog per pane that triggers UI ca
 CATCHUP_KEEP_BYTES = 64 * 1024  # newest bytes kept (and fed) when catching up
 CATCHUP_NOTE_SECONDS = 10.0
 WHEEL_LINES = 3  # history lines (or alternate-screen arrow keys) per mouse-wheel notch
+MAX_COPY_BYTES = 1024 * 1024  # drag-to-copy: larger selections are refused (C-D62)
+AUTOSCROLL_SECONDS = 0.05  # while a drag is held outside the pane, its history scrolls one line per this interval
+TMUX_HINT = " (tmux는 set-clipboard on 또는 allow-passthrough on 필요)"
 ALT_SCREEN_MODES = {47, 1047, 1049}
 MOUSE_TRACKING_MODES = {1000, 1002, 1003}  # one tracking-mode state, like a real terminal (see _track_bracketed)
 MOTION_MODES = {1002, 1003}  # the pane's app asked for motion reports (1002: while pressed, 1003: any)
@@ -46,8 +53,31 @@ _ARROWS = {"\x1b[A": "up", "\x1bOA": "up", "\x1b[B": "down", "\x1bOB": "down",
 # arrows, Tab/Enter/Esc/Space pass through. Ctrl-h/i/j/m/[ collide with Backspace/Tab/LF/Enter/Esc, so handoff and
 # mouse use Ctrl-o / Ctrl-e instead; confirm uses Ctrl-y (yes), so Ctrl-c stays an unknown key (an interrupt reflex
 # must not confirm a takeover). The plain letters keep working in English mode.
-CTRL_ALIASES = {"\x04": "d", "\x14": "t", "\x19": "c", "\x0f": "h", "\x12": "r", "\x05": "m", "\x1a": "z"}
-HANGUL_HINT = "한글 입력 상태: Ctrl을 누른 채 명령 키(예: Ctrl-] Ctrl-d)나 Ctrl-] Space 메뉴를 쓰세요"
+CTRL_ALIASES = {"\x11": "q", "\x14": "t", "\x19": "c", "\x0f": "h", "\x12": "r", "\x05": "m", "\x1a": "z",
+                "\x0b": "k"}  # Ctrl-k: host terminal kill (C-D63); 0x0b collides with no other key here
+HANGUL_HINT = "한글 입력 상태: Ctrl-] 뒤 자모 + Space (예: ㅂ Space = q detach), Ctrl 조합(Ctrl-] Ctrl-q), Ctrl-] Space 메뉴"
+DETACH_MOVED = "detach는 이제 Ctrl-] q (Ctrl-q) — d / Ctrl-d 는 더 이상 detach가 아닙니다"
+CTRL_D = 0x04
+CTRL_D_CONFIRM_SECONDS = 2.0  # a second Ctrl-d to the same OMP pane within this time is delivered (OMP exits on Ctrl-d)
+SELECTION_EVICTED_NOTICE = "선택한 내용이 스크롤 기록에서 밀려나 복사하지 않았습니다"
+RESTARTABLE = PANES  # panes that Enter restarts once exited: both OMP panes (C-D62) and the host shell (C-D63)
+RESTARTING_NOTICE = "다시 시작 중…"
+EXITED_KEYS_NOTICE = "OMP 종료됨 — Enter로 새 세션을 시작합니다 (다른 입력은 전달되지 않음)"
+HOST_EXITED_KEYS_NOTICE = "host terminal 종료됨 — Enter로 새 shell을 시작합니다 (다른 입력은 전달되지 않음)"
+# host terminal force kill (C-D63): prefix k / Ctrl-k / jamo ㅏ opens a confirmation; only the k forms confirm
+KILL_KEYS = ("k", "K")  # the command key after CTRL_ALIASES (Ctrl-k -> k; ㅏ -> k via the jamo table)
+KILL_CONFIRM_LINES = ("host terminal 강제 종료 확인", "",
+                      "host terminal을 강제 종료합니다. 실행 중인 process가 모두 종료됩니다.",
+                      "k: 종료 · Esc/다른 키: 취소")
+KILL_MANAGER_WARNING = "manager가 사용 중입니다 — 진행 중인 명령은 결과 불명으로 남습니다"
+KILL_CONFIRM_FOOTER = "host terminal 강제 종료 확인: k(Ctrl-k·ㅏ) = 종료 · Esc/다른 키 = 취소 · 키는 pane으로 전달되지 않음"
+KILL_CANCELLED_NOTICE = "확인이 취소되었습니다 — k 한 번만 눌러 확인"  # extra bytes with the confirm key (auto-repeat, typing, paste)
+KILLING_NOTICE ="host terminal 강제 종료 중…"
+KILLED_NOTICE = "host terminal 강제 종료됨 — Enter로 새 shell"
+# shown below the numbered command menu: the menu cycle (digits 1-9,0, arrows) stays the 10 items above, so this row is
+# reached by Ctrl-k (the same key as after the prefix) instead of a digit
+KILL_MENU_ROW = ("host terminal 강제 종료 (확인 후 실행)", "k", "Ctrl-k")
+CTRL_D_NOTICE = "Ctrl-d는 OMP를 종료할 수 있습니다 — 2초 안에 Ctrl-d를 한 번 더 누르면 전달"
 # (command key, label, letter form, Ctrl form); menu digits are 1..9 then 0 in this order
 MENU_ITEMS = (
     ("[", "scroll 모드 (지나간 출력 보기)", "[", ""),
@@ -59,7 +89,7 @@ MENU_ITEMS = (
     ("m", "마우스 캡처 켜기/끄기", "m", "Ctrl-e"),
     ("=", "배치 초기화", "=", ""),
     ("?", "도움말", "?", ""),
-    ("d", "detach (backend와 PTY는 계속 실행)", "d", "Ctrl-d"),
+    ("q", "detach (backend와 PTY는 계속 실행)", "q", "Ctrl-q"),
 )
 MENU_DIGITS = "1234567890"
 CATCHUP_NUDGE_SECONDS = 0.5  # repaint nudges while catch-ups repeat under a sustained flood: at most this often
@@ -82,16 +112,20 @@ HELP_LINES = (
     "  prefix h        host shell을 manager에게 되돌리기(handoff)  (prefix Ctrl-o)",
     "  prefix r        focus pane 다시 그리기 요청      (prefix Ctrl-r)",
     "  prefix [        scroll 모드: focus pane의 지나간 출력 보기 (prefix PgUp 도 진입+한 페이지 위)",
-    "  prefix m        마우스 캡처 켜기/끄기 (켜져 있으면 텍스트 선택은 Shift+드래그)  (prefix Ctrl-e)",
-    "  prefix d        detach (backend와 PTY는 계속 실행)  (prefix Ctrl-d)",
+    "  prefix m        마우스 캡처 켜기/끄기 (켜져 있으면 드래그: 복사 · 터미널 자체 선택은 Shift+드래그)  (prefix Ctrl-e)",
+    "  prefix q        detach (backend와 PTY는 계속 실행)  (prefix Ctrl-q)",
+    "  OMP pane의 Ctrl-d는 종료 방지: 2초 안에 한 번 더 누르면 전달 (host shell은 즉시)",
+    "  종료된 OMP pane(종료됨 안내): 그 pane에서 Enter = 새 OMP 세션으로 다시 시작 (이전 대화는 새 OMP에서 /resume)",
+    "  host shell 종료 시: Enter = 새 shell 시작 · prefix k (Ctrl-k / ㅏ Space) = host terminal 강제 종료 (확인 필요)",
     "  prefix ?        이 도움말 (아무 키로 닫기)",
     "  prefix Space    명령 메뉴: ↑/↓+Enter 또는 숫자 1-9/0 (Esc 취소) — 글자 키 없이 쓸 수 있음",
-    "한글 IME: 글자 키는 조합 중이라 prefix 뒤에 안 먹힘 → Ctrl을 누른 채 명령 키(Ctrl-] Ctrl-d),",
-    "  숫자·Tab·[ = ? 방향키는 그대로 동작, 또는 Ctrl-] Space 메뉴 (Ctrl-h/m/i/[ 는 Backspace/Enter/Tab/Esc와 같아 제외)",
+    "한글 IME: Ctrl-] 뒤 자모 + Space 로 영문 키 명령 (예: ㅂ Space = q detach, ㅋ = z; scroll 모드도 ㅓ/ㅏ/ㅎ/ㅂ),",
+    "  또는 Ctrl을 누른 채 명령 키(Ctrl-] Ctrl-q), 숫자·Tab·[ = ? 방향키는 그대로, Ctrl-] Space 메뉴 (Ctrl-h/m/i/[ 는 제외)",
     "",
     "바로 scroll (모드 없음): 마우스 휠(해당 pane, 3줄) · Shift+PgUp/Shift+PgDn (focus pane 한 페이지)",
     "  스크롤한 pane에 입력/붙여넣기하면 자동으로 live 복귀 (다른 pane 위치는 유지)",
     "  앱이 마우스 추적을 켠 pane은 휠/클릭이 앱으로 전달, alt-screen 앱은 휠 → ↑/↓, 클릭 = focus",
+    "  추적 안 하는 pane(OMP·shell)에서 드래그 = 선택, 놓으면 복사(OSC 52; 위/아래로 끌면 자동 스크롤)",
     "  tmux/herdr 안: 휠·Shift+PgUp/PgDn 그대로 동작 (tmux mouse on/off, herdr 설정 변경 불필요)",
     "  키가 가로채이면 prefix PgUp / prefix [ (Ctrl-]는 tmux·herdr prefix Ctrl-b와 겹치지 않음)",
     "scroll 모드 (키는 pane으로 전달되지 않음, 새 출력이 와도 보던 위치 유지):",
@@ -204,6 +238,12 @@ class PaneScreen(TerminalScreen):
         super().__init__(*args, **kwargs)
         self._count_history()
 
+    resets = 0  # full resets (RIS, session replacement) so far: a selection made before one is void
+
+    def reset(self) -> None:
+        self.resets += 1
+        super().reset()
+
     def _restore(self, state: dict[str, object]) -> None:
         super()._restore(state)
         self._count_history()
@@ -218,6 +258,32 @@ class PaneScreen(TerminalScreen):
 class _ScrollView:
     queue: Any  # the history queue the anchor refers to
     anchor: int  # absolute history line index at the top edge of the view (pushed - offset)
+
+
+@dataclass
+class _Selection:
+    """A drag-to-copy selection in pane content coordinates: (absolute history line, column) pairs.
+
+    The absolute line is ``history.pushed - offset + row``, so it keeps pointing at the same output while the
+    view scrolls or new lines arrive. ``queue`` ties it to the history it was made on.
+    """
+
+    pane: PaneId
+    queue: Any
+    anchor: tuple[int, int]
+    cursor: tuple[int, int]
+    dragging: bool = True
+    edge: int = 0  # -1 = pointer above the pane's inner area, 1 = below, 0 = inside
+    column: int = 0  # last pointer column (clamped), used by the auto-scroll tick
+    next_scroll: float = float("-inf")
+    resets: int = 0  # the pane screen's reset count when the selection began
+
+    @property
+    def moved(self) -> bool:
+        return self.anchor != self.cursor
+
+    def span(self) -> tuple[tuple[int, int], tuple[int, int]]:
+        return (self.anchor, self.cursor) if self.anchor <= self.cursor else (self.cursor, self.anchor)
 
 
 @dataclass
@@ -258,8 +324,11 @@ class PaneView:
 
 class ProductModel:
     def __init__(self, sender: Sender, rows: int, cols: int, *, clock: Callable[[], float] = time.time,
-                 monotonic: Callable[[], float] = time.monotonic):
+                 monotonic: Callable[[], float] = time.monotonic, environ: Mapping[str, str] | None = None):
         self.sender = sender
+        self._environ = environ  # None: the process environment, read when a copy happens (TMUX)
+        self._sel: _Selection | None = None  # drag-to-copy selection (dragging, or kept highlighted after the copy)
+        self._out = b""  # terminal bytes the app loop writes (OSC 52); the model never touches the terminal
         self.clock = clock
         self._mono = monotonic
         self.rows, self.cols = rows, cols
@@ -270,6 +339,7 @@ class ProductModel:
         self.help_open = False
         self.menu_open = False  # prefix Space command menu (IME-neutral: arrows/Enter/digits/Esc only)
         self.menu_index = 0
+        self.kill_confirm_open = False  # host terminal kill confirmation (C-D63): modal like the menu
         self._mode: PaneId | None = None  # explicit scroll mode (prefix [): keys drive the view, never the pane
         self._views: dict[PaneId, _ScrollView] = {}  # panes whose view is scrolled back (wheel, Shift+PgUp, mode)
         self.mouse_capture = True  # outer-terminal mouse reporting wanted (prefix m toggles; the app loop applies it)
@@ -285,6 +355,8 @@ class ProductModel:
         self._drag: tuple[str, int] | None = None  # (axis "v"/"h", grab offset) of a divider drag in progress
         self._repeat_until: float | None = None  # bare arrows resize until then (tmux-like repeat)
         self._last_now = 0.0
+        self._restarting: dict[PaneId, Any] = {}  # OMP pane -> its generation when the restart was requested (C-D62)
+        self._ctrl_d: tuple[PaneId, float] | None = None  # (OMP pane, deadline) of a Ctrl-d held for confirmation
         self._unsent: set[PaneId] = set()  # panes whose current inner size was not sent to the backend yet
         self._last_resize_sent = float("-inf")
         self.sizes = pane_inner_sizes(rows, cols)
@@ -297,6 +369,8 @@ class ProductModel:
 
     # -- sending ---------------------------------------------------------
     def _send(self, kind: ClientType, payload: bytes = b"", pane: PaneId | None = None, **fields: Any) -> str:
+        if kind in (ClientType.INPUT, ClientType.PASTE) and pane is not None and self.pane_exited(pane):
+            return ""  # nothing typed reaches an exited OMP pane; Enter restarts it instead (C-D62)
         if pane is not None:
             fields["pane"] = pane.value
         request_id = self.sender.send(kind, payload, **fields)
@@ -309,7 +383,8 @@ class ProductModel:
         if self._replaying or not data:
             return
         request_id = self._send(ClientType.INPUT, data, pane)
-        self.pending[request_id] = (ClientType.INPUT, None)  # quiet: refusals are not shown
+        if request_id:
+            self.pending[request_id] = (ClientType.INPUT, None)  # quiet: refusals are not shown
 
     # -- backend frames --------------------------------------------------
     def touch(self) -> None:
@@ -319,13 +394,19 @@ class ProductModel:
         self.state = snapshot
         self.touch()
         if adopt_focus or not any(k is ClientType.FOCUS for k, _ in self.pending.values()):
+            before = self.focus
             try:
                 self.focus = PaneId(snapshot.get("focus", self.focus.value))
             except ValueError:
                 pass
+            if self.focus is not before:
+                self._clear_selection()
+        if self._ctrl_d is not None and self._ctrl_d[0] is not self.focus:
+            self._cancel_ctrl_d()  # a backend-driven focus change drops a held Ctrl-d
         if self._mode is not None and self._mode is not self.focus:
             self.exit_scroll()  # a backend-driven focus change leaves scroll mode, like prefix 1/2/3
         self._sync_zoom()
+        self._sync_restarts()
 
     def attach_done(self, snapshot: dict[str, Any]) -> None:
         self.apply_snapshot(snapshot, adopt_focus=True)
@@ -336,6 +417,7 @@ class ProductModel:
         if pane is None:
             return
         view, identity = self.panes[pane], _identity(frame)
+        self._note_new_session(pane, identity)
         self._receive(view, identity, frame.payload)
         self._apply(view, identity, bool(frame.header.get("replay")), frame.payload)
 
@@ -345,6 +427,24 @@ class ProductModel:
             return PaneId(frame.header.get("pane"))
         except ValueError:
             return None
+
+    def _note_new_session(self, pane: PaneId, identity: tuple[Any, Any]) -> None:
+        """Output of a newer session/generation than the one the last state calls exited: the pane was restarted
+        (C-D62) and is live now, without waiting for the next periodic state push (its start-up queries and typed
+        keys must not be dropped)."""
+        if pane not in RESTARTABLE or identity[0] is None:
+            return
+        info = self.state.get("panes", {}).get(pane.value)
+        if not isinstance(info, dict) or info.get("alive"):
+            return
+        session, generation = info.get("session_id"), info.get("generation")
+        newer = generation is not None and isinstance(identity[1], int) and identity[1] > generation
+        if newer or (session is not None and identity[0] != session):
+            info["alive"] = True
+            info["exit_status"] = None
+            self._restarting.pop(pane, None)
+            if self.notice == RESTARTING_NOTICE:
+                self.notice = ""
 
     def _receive(self, view: PaneView, identity: tuple[Any, Any], payload: bytes) -> None:
         """Receipt-time bookkeeping, once per received byte: 2004 state of the pane's current session."""
@@ -373,6 +473,7 @@ class ProductModel:
         if pane is None or not frame.payload:
             return
         view, identity = self.panes[pane], _identity(frame)
+        self._note_new_session(pane, identity)
         self._receive(view, identity, frame.payload)
         # backend replay is bounded by its retained tail: never part of the catch-up accounting
         kind = REPLAY if frame.header.get("replay") else LIVE
@@ -476,8 +577,20 @@ class ProductModel:
             if isinstance(host, dict):
                 host["shell"] = shell
                 host["input_owner"] = shell.get("input_owner", host.get("input_owner"))
+        if kind is ClientType.RESTART_PANE and not header.get("ok") and pane is not None:
+            self._restarting.pop(pane, None)  # refused: Enter may try again
+            if self.notice == RESTARTING_NOTICE:
+                self.notice = ""
+        if kind is ClientType.RESTART_PANE and header.get("ok") and pane is PaneId.HOST_SHELL:
+            host = self.state.get("panes", {}).get(PaneId.HOST_SHELL.value)
+            if isinstance(host, dict) and header.get("input_owner") in ("user", "manager"):
+                host["input_owner"] = header["input_owner"]
         if header.get("ok"):
-            if kind is ClientType.TAKEOVER_REQUEST:
+            if kind is ClientType.KILL_PANE:
+                survivors = header.get("survivors")
+                left = f" (종료되지 않은 process {len(survivors)}개)" if isinstance(survivors, (list, tuple)) and survivors else ""
+                self.notice = KILLED_NOTICE + left
+            elif kind is ClientType.TAKEOVER_REQUEST:
                 if isinstance(shell, dict) and not shell.get("takeover_requested"):
                     owner = shell.get("input_owner") or self.input_owner()
                     self.notice = f"인수 요청이 기록되지 않음 — 이미 host 입력 owner={owner}"
@@ -490,7 +603,8 @@ class ProductModel:
             return
         if kind is ClientType.INPUT and pane is None:
             return  # terminal-query reply refused; not a user action
-        what = {ClientType.PASTE: "붙여넣기", ClientType.INPUT: "입력"}.get(kind, str(kind.value if kind else "요청"))
+        what = {ClientType.PASTE: "붙여넣기", ClientType.INPUT: "입력",
+                                         ClientType.RESTART_PANE: "재시작", ClientType.KILL_PANE: "강제 종료"}.get(kind, str(kind.value if kind else "요청"))
         target = f" [{TITLES[pane]}]" if pane else ""
         text = f"{what} 거부{target}: {header.get('reason')}: {header.get('detail') or ''}".rstrip(": ")
         held = self._held_reasons(header)
@@ -513,14 +627,19 @@ class ProductModel:
     def handle_input(self, data: bytes, *, now: float | None = None) -> bool:
         """Parse and act on typed bytes; True when an event was handled (the caller redraws)."""
         self._last_now = self._mono() if now is None else now
+        self.parser.jamo_keys = self._mode is not None or self.kill_confirm_open  # a lone jamo is its 2-set letter key
         return self._handle_events(self.parser.feed(data, now=now))
 
     def flush_input(self, *, now: float | None = None) -> bool:
         """Release held partial input (e.g. a lone Esc); True when an event was handled (the caller redraws)."""
         self._last_now = self._mono() if now is None else now
+        self.parser.jamo_keys = self._mode is not None or self.kill_confirm_open
         expired = self._repeat_until is not None and self._last_now >= self._repeat_until
         if expired:
             self._repeat_until = None  # the resize-repeat hint leaves the footer
+        if self._ctrl_d is not None and self._last_now > self._ctrl_d[1]:
+            self._cancel_ctrl_d()  # the confirmation window is over: the first Ctrl-d stays dropped
+            expired = True
         return self._handle_events(self.parser.flush(now=now)) or expired
 
     @staticmethod
@@ -559,6 +678,8 @@ class ProductModel:
         return handled
 
     def _handle_event_list(self, events: list) -> bool:
+        kill_chunk = self.kill_confirm_open  # an open kill confirmation judges the whole chunk (C-D63 review R3)
+        single = len(events) == 1
         for event in events:
             if self._repeat_until is not None:
                 if self._last_now >= self._repeat_until or self._mode is not None:
@@ -571,6 +692,19 @@ class ProductModel:
                     self._repeat_until = None
                 elif not isinstance(event, Mouse):
                     self._repeat_until = None
+            if self._ctrl_d is not None and not self._continues_ctrl_d(event):
+                self._cancel_ctrl_d()  # any other key, a paste or a command drops the held first Ctrl-d
+            if not isinstance(event, Mouse):
+                self._clear_selection()  # the next key (or paste, command, page scroll) ends the highlight
+            if kill_chunk:
+                if self.kill_confirm_open:
+                    self._kill_confirm_event(event, single=single)
+                elif not single and self._kill_confirm_starts(event):
+                    self.notice = KILL_CANCELLED_NOTICE
+                continue  # the rest of a multi-event chunk after the decision is dropped: no pane sees it
+            if self.kill_confirm_open:
+                self._kill_confirm_event(event, single=True)
+                continue
             if self.menu_open:
                 self._menu_event(event)
                 continue
@@ -591,6 +725,9 @@ class ProductModel:
             elif isinstance(event, Paste) and self._mode is not None:
                 self.help_open = False
                 self.notice = "scroll 모드: 붙여넣기는 pane으로 전달되지 않음 (q로 종료)"
+            elif isinstance(event, Paste) and self.pane_exited(self.focus):
+                self.help_open = False
+                self.notice = self._exited_keys_notice(self.focus)
             elif isinstance(event, Paste):
                 self.help_open = False  # the paste is delivered, not swallowed by the overlay
                 data = event.data
@@ -603,9 +740,84 @@ class ProductModel:
             elif isinstance(event, Passthrough) and self._mode is not None:
                 self._scroll_input(event.data)  # scroll mode: keys drive the view, never the pane
             elif isinstance(event, Passthrough):
-                self._live_for_input()
-                self._send(ClientType.INPUT, event.data, self.focus)
+                self._send_input(event.data)
         return bool(events)
+
+    def _continues_ctrl_d(self, event: Any) -> bool:
+        """Events that leave a held Ctrl-d alone: mouse reports and keys that are about to reach the focus pane."""
+        if isinstance(event, Mouse):
+            return True
+        return (isinstance(event, Passthrough) and not self.menu_open and not self.help_open and self._mode is None)
+
+    def _cancel_ctrl_d(self) -> None:
+        if self._ctrl_d is not None:
+            self._ctrl_d = None
+            if self.notice == CTRL_D_NOTICE:
+                self.notice = ""
+
+    def _send_input(self, data: bytes) -> None:
+        """Send typed bytes to the focus pane. Ctrl-d to an OMP pane needs a second press (OMP exits on it)."""
+        pane = self.focus
+        if self.pane_exited(pane):
+            self._exited_input(pane, data)
+            return
+        if pane is PaneId.HOST_SHELL or CTRL_D not in data:
+            if self._ctrl_d is not None:
+                self._cancel_ctrl_d()
+            self._live_for_input()
+            self._send(ClientType.INPUT, data, pane)
+            return
+        out = bytearray()
+        i = 0
+        while i < len(data):
+            byte = data[i]
+            # ESC 0x04 (Alt+Ctrl-d) is ONE key: held / delivered whole, never split into a lone ESC + Ctrl-d
+            key = data[i:i + 2] if byte == 0x1B and data[i + 1:i + 2] == bytes((CTRL_D,)) else bytes((byte,))
+            i += len(key)
+            if key[-1] != CTRL_D:
+                if self._ctrl_d is not None:
+                    self._cancel_ctrl_d()  # the byte after a held Ctrl-d cancels it; the byte itself goes through
+                out.append(byte)
+                continue
+            held, self._ctrl_d = self._ctrl_d, None
+            if held is not None and held[0] is pane and self._last_now <= held[1]:
+                out += key  # confirmed: exactly the key pressed second is delivered, whole
+                if self.notice == CTRL_D_NOTICE:
+                    self.notice = ""
+            else:
+                self._ctrl_d = (pane, self._last_now + CTRL_D_CONFIRM_SECONDS)
+                self.notice = CTRL_D_NOTICE
+        if out:
+            self._live_for_input()
+            self._send(ClientType.INPUT, bytes(out), pane)
+
+    def _exited_keys_notice(self, pane: PaneId) -> str:
+        if pane in self._restarting:
+            return RESTARTING_NOTICE
+        return HOST_EXITED_KEYS_NOTICE if pane is PaneId.HOST_SHELL else EXITED_KEYS_NOTICE
+
+    def _exited_input(self, pane: PaneId, data: bytes) -> None:
+        """Typed bytes for an exited pane: only Enter counts (one restart request); the rest is dropped."""
+        self._cancel_ctrl_d()
+        if pane in self._restarting:
+            return  # a restart is already pending: no duplicate request
+        if b"\r" not in data and b"\n" not in data:
+            self.notice = self._exited_keys_notice(pane)
+            return
+        generation = (self.state.get("panes", {}).get(pane.value) or {}).get("generation")
+        self._send(ClientType.RESTART_PANE, pane=pane)
+        self._restarting[pane] = generation
+        self.notice = RESTARTING_NOTICE
+
+    def _sync_restarts(self) -> None:
+        """A pending restart ends when the snapshot shows the pane alive or on a newer generation."""
+        panes = self.state.get("panes", {})
+        for pane, generation in list(self._restarting.items()):
+            info = panes.get(pane.value)
+            if isinstance(info, dict) and (info.get("alive") or info.get("generation") != generation):
+                del self._restarting[pane]
+                if self.notice == RESTARTING_NOTICE:
+                    self.notice = ""
 
     def _repeat_arrows(self, data: bytes) -> bytes:
         """Consume leading arrow keys as divider moves during resize repeat; returns the rest (forwarded normally)."""
@@ -646,6 +858,9 @@ class ProductModel:
                 self._menu_run(self.menu_index)
             elif byte == PREFIX:
                 self.menu_open = False
+            elif byte == 0x0B:  # Ctrl-k: the kill row below the numbered list (IME-neutral, like the other Ctrl keys)
+                self.menu_open = False
+                self._command("k")
             elif 0x30 <= byte <= 0x39 and chr(byte) in MENU_DIGITS:
                 self._menu_run(MENU_DIGITS.index(chr(byte)))
             # anything else (letters, Hangul, Tab, Backspace, ...) is swallowed: the menu is arrows/Enter/digits/Esc
@@ -659,9 +874,60 @@ class ProductModel:
         for index, (_, label, letter, ctrl) in enumerate(MENU_ITEMS):
             keys = f"Ctrl-] {letter}" + (f" / Ctrl-] {ctrl}" if ctrl else "")
             lines.append(f"{'>' if index == self.menu_index else ' '} {MENU_DIGITS[index]}  {label}   [{keys}]")
+        label, letter, ctrl = KILL_MENU_ROW
+        lines.append(f"  Ctrl-k  {label}   [Ctrl-] {letter} / Ctrl-] {ctrl}]")
         lines += ["", "focus: Ctrl-] 1/2/3 · Tab   경계 조절: Ctrl-] ←↑↓→   literal prefix: Ctrl-] Ctrl-]",
                   "한글 입력 상태에서는 글자 키 대신 Ctrl 조합이나 이 메뉴를 쓰세요"]
         return lines
+
+    # -- host terminal force kill (C-D63) --------------------------------------------------------------
+    def _manager_in_use(self) -> bool:
+        info = self.host_info()
+        return self.input_owner() == "manager" or bool(info.get("manager_command_in_flight"))
+
+    def kill_confirm_lines(self) -> list[str]:
+        lines = list(KILL_CONFIRM_LINES)
+        if self._manager_in_use():
+            lines.insert(3, KILL_MANAGER_WARNING)
+        return lines
+
+    def _pending_kind(self, kind: ClientType) -> bool:
+        return any(pending_kind is kind for pending_kind, _ in self.pending.values())
+
+    def _open_kill_confirm(self) -> None:
+        """prefix k: ask before killing the host terminal; nothing reaches any pane meanwhile."""
+        if self._pending_kind(ClientType.KILL_PANE):
+            self.notice = KILLING_NOTICE
+            return
+        self.kill_confirm_open = True
+        self.notice = ""
+        self._cancel_ctrl_d()
+
+    @staticmethod
+    def _kill_confirm_starts(event: Any) -> bool:
+        """True when the event is (or starts with) a k confirm form."""
+        if isinstance(event, Command):
+            return CTRL_ALIASES.get(event.key, event.key) in KILL_KEYS
+        return isinstance(event, Passthrough) and event.data[:1] in (b"k", b"K", b"\x0b")
+
+    def _kill_confirm_event(self, event: Any, *, single: bool = True) -> None:
+        """While the confirmation is open no event reaches a pane: only one confirm key on its own confirms.
+
+        ``single`` is False when the input chunk held more than that one event, and a Passthrough must be exactly one
+        confirm key: 'kk' / 'kill' / 'k'+Enter (auto-repeat, typing, an unbracketed paste) cancel (C-D63 review R3).
+        A lone prefix leaves it open (so ``Ctrl-] k`` pressed twice confirms); the key after it decides."""
+        starts = self._kill_confirm_starts(event)
+        if isinstance(event, Passthrough):
+            confirmed = event.data in (b"k", b"K", b"\x0b")
+        else:
+            confirmed = starts  # a prefix command is one key; paste, mouse and page scroll never confirm
+        confirmed = confirmed and single
+        self.kill_confirm_open = False
+        if confirmed:
+            self._send(ClientType.KILL_PANE, pane=PaneId.HOST_SHELL)
+            self.notice = KILLING_NOTICE
+        else:
+            self.notice = KILL_CANCELLED_NOTICE if starts else ""
 
     def _command(self, key: str) -> None:
         key = CTRL_ALIASES.get(key, key)
@@ -680,8 +946,10 @@ class ProductModel:
             self.set_focus(PANES[int(key) - 1])
         elif key == "\t":
             self.set_focus(PANES[(PANES.index(self.focus) + 1) % len(PANES)])
-        elif key in "dD" and len(key) == 1:
+        elif key in "qQ" and len(key) == 1:
             self.quit = True
+        elif key in ("d", "D", "\x04"):
+            self.notice = DETACH_MOVED  # the old detach keys send nothing to any pane
         elif key in "tT" and len(key) == 1:
             self._send(ClientType.TAKEOVER_REQUEST)
         elif key in "cC" and len(key) == 1:
@@ -698,15 +966,19 @@ class ProductModel:
             self.scroll_by(self._page())
         elif key in "mM" and len(key) == 1:
             self.mouse_capture = not self.mouse_capture
-            self.notice = ("마우스 캡처 켜짐: 휠 스크롤 · 클릭 focus (텍스트 선택은 Shift+드래그)" if self.mouse_capture
+            self.notice = ("마우스 캡처 켜짐: 휠 스크롤 · 클릭 focus · 드래그: 복사 (터미널 자체 선택은 Shift+드래그)" if self.mouse_capture
                            else "마우스 캡처 꺼짐: 터미널 텍스트 선택 가능 (prefix m 으로 다시 켬)")
         elif key == "?":
             self.help_open = True
+        elif key in KILL_KEYS:
+            self._open_kill_confirm()
         else:
             self.notice = f"알 수 없는 prefix 명령 {key!r} (Ctrl-] Space 메뉴 · Ctrl-] ? 도움말)"
 
     def set_focus(self, pane: PaneId) -> None:
         self.exit_scroll()  # leaves scroll mode; panes scrolled directly keep their position
+        self._cancel_ctrl_d()
+        self._clear_selection()
         self.focus = pane
         self._send(ClientType.FOCUS, pane=pane)
         self.notice = ""
@@ -726,6 +998,10 @@ class ProductModel:
     def _mouse(self, event: Mouse) -> None:
         if not self.mouse_capture:
             return  # late report after the user turned capture off
+        if self._selection_mouse(event):
+            return  # motion / release of a drag-to-copy selection (also over borders and other panes)
+        if not event.button & (32 | 64) and not event.release:
+            self._clear_selection()  # any press ends a kept highlight
         if self._divider_mouse(event):
             return  # divider press/drag/release: never delivered to a pane, never a focus change
         hit = self._pane_at(event.x, event.y)
@@ -751,8 +1027,10 @@ class ProductModel:
             if button & 32 and not self._wants_motion(view, button):
                 return  # the outer terminal reports motion (1002); this app did not ask for it
             self._forward_mouse(pane, event, column, row)
-        elif button & 3 == 0 and not button & 32 and not event.release and pane is not self.focus:
-            self.set_focus(pane)  # left click focuses (same as prefix 1/2/3)
+        elif button & 3 == 0 and not button & 32 and not event.release:
+            if pane is not self.focus:
+                self.set_focus(pane)  # left click focuses (same as prefix 1/2/3)
+            self._begin_selection(pane, column - 1, row - 1)  # ... and may start a drag-to-copy selection
 
     @staticmethod
     def _wants_motion(view: PaneView, button: int) -> bool:
@@ -775,6 +1053,151 @@ class ProductModel:
             code = (event.button | 3) if event.release else event.button
             data = b"\x1b[M" + bytes((32 + code, 32 + column, 32 + row))
         self._send(ClientType.INPUT, data, pane)
+
+    # -- drag-to-copy (C-D62): selection in pane content coordinates, copy through OSC 52 --------------------------
+    def _view_top(self, pane: PaneId) -> int:
+        """Absolute history line shown on the first row of ``pane``'s inner area."""
+        return self._history(pane).pushed - self.scroll_offset(pane)
+
+    def _selection(self) -> _Selection | None:
+        sel = self._sel
+        if sel is not None and (self._history(sel.pane) is not sel.queue
+                                or self.panes[sel.pane].screen.resets != sel.resets):
+            self._sel = sel = None  # alternate-screen swap / reset (RIS): the content the selection pointed at is gone
+        if sel is not None:
+            sel = self._clamp_to_history(sel)
+        return sel
+
+    def _clamp_to_history(self, sel: _Selection) -> _Selection | None:
+        """Rows trimmed out of the scrollback under a selection are dropped from it (never copied as other text);
+        a selection with no row left is cancelled."""
+        queue = self._history(sel.pane)
+        base = queue.pushed - len(queue)  # the oldest absolute line that still exists
+        if min(sel.anchor[0], sel.cursor[0]) >= base:
+            return sel
+        if max(sel.anchor[0], sel.cursor[0]) < base:
+            self._sel = None
+            if sel.moved:
+                self.notice = SELECTION_EVICTED_NOTICE
+            return None
+        if sel.anchor[0] < base:
+            sel.anchor = (base, 0)
+        if sel.cursor[0] < base:
+            sel.cursor = (base, 0)
+        return sel
+
+    def _clear_selection(self) -> None:
+        self._sel = None
+
+    def _begin_selection(self, pane: PaneId, column: int, row: int) -> None:
+        cell = (self._view_top(pane) + row, column)
+        self._sel = _Selection(pane, self._history(pane), cell, cell, column=column,
+                               resets=self.panes[pane].screen.resets)
+
+    def _selection_mouse(self, event: Mouse) -> bool:
+        """Motion and release of a drag in progress. True when the event was consumed."""
+        sel, button = self._selection(), event.button
+        if sel is None or not sel.dragging or button & 64:
+            return False
+        if not event.release and not button & 32:
+            return False  # another press: a fresh click (the old drag is dropped by the caller)
+        if sel.pane not in pane_boxes(self.rows, self.cols, self.layout, self.zoom):
+            self._sel = None
+            return True
+        self._follow(sel, event, scroll=not event.release)
+        if event.release or button & 3:  # release, or motion with the left button no longer held (lost release)
+            sel.dragging = False
+            self._finish_selection(sel)
+        return True
+
+    def _follow(self, sel: _Selection, event: Mouse, *, scroll: bool) -> None:
+        """Move the selection's end to the pointer, clamped to the pane's inner area; scroll past its edges."""
+        top, left, height, width = pane_boxes(self.rows, self.cols, self.layout, self.zoom)[sel.pane]
+        rows, cols = max(1, height - 2), max(1, width - 2)
+        row = (event.y - 1) - top - 1
+        sel.column = min(max((event.x - 1) - left - 1, 0), cols - 1)
+        sel.edge = -1 if row < 0 else 1 if row >= rows else 0
+        self._extend(sel, min(max(row, 0), rows - 1), rows, scroll=scroll)
+
+    def _extend(self, sel: _Selection, row: int, rows: int, *, scroll: bool) -> None:
+        now = self._mono()
+        if sel.edge and scroll and now >= sel.next_scroll:
+            sel.next_scroll = now + AUTOSCROLL_SECONDS
+            self.scroll_by(-sel.edge, sel.pane)  # above: older output (+1), below: towards live (-1)
+        if sel.edge:
+            row = 0 if sel.edge < 0 else rows - 1
+        sel.cursor = (self._view_top(sel.pane) + row, sel.column)
+
+    def autoscroll_tick(self) -> bool:
+        """The app loop calls this every iteration: a drag held outside its pane keeps scrolling. True on a step."""
+        sel = self._selection()
+        if sel is None or not sel.dragging or not sel.edge or self._mono() < sel.next_scroll:
+            return False
+        boxes = pane_boxes(self.rows, self.cols, self.layout, self.zoom)
+        if sel.pane not in boxes:
+            return False
+        rows = max(1, boxes[sel.pane][2] - 2)
+        self._extend(sel, 0, rows, scroll=True)
+        return True
+
+    def _finish_selection(self, sel: _Selection) -> None:
+        if not sel.moved:
+            self._sel = None  # a click without movement is only a focus click
+            return
+        text = self._selection_text(sel)
+        if not text.strip():
+            self.notice = "선택 영역이 비어 있어 복사하지 않음"
+            return
+        data = text.encode()
+        if len(data) > MAX_COPY_BYTES:
+            self.notice = f"복사 거부: 선택이 1 MiB를 넘음 ({len(data)} bytes)"
+            return
+        osc = b"\x1b]52;c;" + base64.b64encode(data) + b"\x07"
+        environ = os.environ if self._environ is None else self._environ
+        tmux = bool(environ.get("TMUX"))
+        # inside tmux the plain sequence works with set-clipboard on; the passthrough copy with allow-passthrough on
+        self._out = osc + (b"\x1bPtmux;" + osc.replace(b"\x1b", b"\x1b\x1b") + b"\x1b\\" if tmux else b"")
+        self.notice = f"복사됨: {len(text)}자" + (TMUX_HINT if tmux else "")
+
+    def take_output(self) -> bytes:
+        """Terminal bytes queued for the app loop to write (OSC 52 copy); empty when there are none."""
+        out, self._out = self._out, b""
+        return out
+
+    def _selection_text(self, sel: _Selection) -> str:
+        pane = sel.pane
+        queue = self._history(pane)
+        history, pushed = list(queue), queue.pushed
+        base = pushed - len(history)
+        screen = self.panes[pane].screen
+        (first, first_col), (last, last_col) = sel.span()
+        rows = []
+        for line_no in range(first, last + 1):
+            if line_no < pushed:
+                line = history[line_no - base] if 0 <= line_no - base < len(history) else {}
+            else:
+                line = screen.buffer.get(line_no - pushed, {}) if line_no - pushed < screen.lines else {}
+            start = first_col if line_no == first else 0
+            end = last_col if line_no == last else screen.columns - 1
+            if start > 0 and start in line and not line[start].data and line.get(start - 1) is not None:
+                start -= 1  # began on the trailing half of a wide character: include the character
+            cells = (line.get(x, screen.default_char).data for x in range(start, end + 1))
+            rows.append("".join(cells).rstrip(" "))
+        return "\n".join(rows)
+
+    def selection_spans(self, pane: PaneId, rows: int) -> dict[int, tuple[int, int]]:
+        """Highlighted cells per visible row of ``pane``: {row: (first column, last column)} (inclusive)."""
+        sel = self._selection()
+        if sel is None or sel.pane is not pane or not sel.moved:
+            return {}
+        (first, first_col), (last, last_col) = sel.span()
+        top, columns = self._view_top(pane), self.panes[pane].screen.columns
+        spans = {}
+        for y in range(rows):
+            line_no = top + y
+            if first <= line_no <= last:
+                spans[y] = (first_col if line_no == first else 0, last_col if line_no == last else columns - 1)
+        return spans
 
     # -- scrolling (view only: never mutates the live pyte screen or cursor) -------------------------------
     def _history(self, pane: PaneId) -> _CountingDeque:
@@ -818,6 +1241,8 @@ class ProductModel:
     def _history_cleared(self, view: PaneView) -> bool:
         """The pane's history was wiped (catch-up or a replaced session): its scrolled view returns to live."""
         pane = next(p for p, v in self.panes.items() if v is view)
+        if self._sel is not None and self._sel.pane is pane:
+            self._sel = None  # its content is gone
         if pane not in self._views:
             return False
         self._views.pop(pane)
@@ -919,6 +1344,7 @@ class ProductModel:
 
     def resize(self, rows: int, cols: int, *, force: bool = False) -> None:
         self.rows, self.cols = rows, cols
+        self.kill_confirm_open = False  # a resize cancels the host-shell kill confirmation (C-D63): like any non-confirm input
         if self.too_small():
             self._end_drag()
             return
@@ -936,6 +1362,7 @@ class ProductModel:
         for pane in PANES:
             r, c = sizes[pane]
             if force or sizes[pane] != self.sizes[pane]:
+                self._sel = None  # cell positions change with the size
                 self.panes[pane].screen.resize(lines=r, columns=c)
                 if send:
                     self._unsent.add(pane)
@@ -1121,11 +1548,58 @@ class ProductModel:
         code = info.get("exit_status")
         return f"exited({code})" if code is not None else "exited"
 
+    def pane_exited(self, pane: PaneId) -> bool:
+        """A pane whose process the backend reports as not alive (OMP: C-D62, host shell: C-D63)."""
+        if pane not in RESTARTABLE:
+            return False
+        info = self.state.get("panes", {}).get(pane.value)
+        return isinstance(info, dict) and not info.get("alive")
+
+    def restart_notice(self, pane: PaneId) -> str | None:
+        """Text drawn inside an exited pane (OMP: C-D62, host shell: C-D63); None for a live pane."""
+        if not self.pane_exited(pane):
+            return None
+        if pane in self._restarting:
+            return RESTARTING_NOTICE
+        code = self.state["panes"][pane.value].get("exit_status")
+        if pane is PaneId.HOST_SHELL:
+            return f"host terminal 종료됨 (exit {'?' if code is None else code}) — Enter: 새 shell 시작"
+        return (f"OMP 종료됨 (exit {'?' if code is None else code}) — Enter: 새 세션으로 다시 시작 · "
+                "이전 대화는 새 OMP에서 /resume")
+
+    def restart_notice_lines(self, pane: PaneId, cols: int) -> list[str]:
+        """``restart_notice`` word-wrapped to ``cols`` display cells (long words are cut); empty when none."""
+        text = self.restart_notice(pane)
+        if text is None:
+            return []
+        cols, lines, current = max(1, cols), [], ""
+        for word in text.split():
+            while wcswidth(word) > cols:  # a word wider than the pane is cut
+                cut = len(word)
+                while cut > 1 and wcswidth(word[:cut]) > cols:
+                    cut -= 1
+                if current:
+                    lines.append(current)
+                    current = ""
+                lines.append(word[:cut])
+                word = word[cut:]
+            joined = f"{current} {word}" if current else word
+            if wcswidth(joined) <= cols:
+                current = joined
+            else:
+                lines.append(current)
+                current = word
+        if current:
+            lines.append(current)
+        return lines
+
     def pane_title(self, pane: PaneId) -> str:
         extra = ""
         if pane is PaneId.HOST_SHELL:
             extra = f" owner={self.input_owner()}"
         note = " 따라잡음" if self.catching_up(pane) else ""
+        if self.pane_exited(pane):
+            note += " 다시 시작 중…" if pane in self._restarting else " 종료됨 (Enter: 다시 시작)"
         scroll = ""
         if self.scrolled(pane):
             offset = self.scroll_offset(pane)
@@ -1171,11 +1645,13 @@ class ProductModel:
     def footer(self) -> str:
         if self.closed_reason:
             return self.notice
+        if self.kill_confirm_open:
+            return KILL_CONFIRM_FOOTER
         if self.menu_open:
             return self.notice or "명령 메뉴: ↑/↓ + Enter · 숫자 1-9/0 · Esc 취소 · 키는 pane으로 전달되지 않음"
         if self.parser.prefix_active:
-            return ("prefix… Space 메뉴 · 한글 IME는 Ctrl+d/t/y(확인)/o(handoff)/r/e(mouse)/z · 1/2/3 Tab [ = ? · "
-                    "영문 d t c h r m z · ←↑↓→ 분할 · Ctrl-] 한 번 더 = 리터럴")
+            return ("prefix… Space 메뉴 · 한글 IME는 Ctrl+q/t/y(확인)/o(handoff)/r/e(mouse)/z · 1/2/3 Tab [ = ? · "
+                    "영문 q t c h r m z · ←↑↓→ 분할 · Ctrl-] 한 번 더 = 리터럴")
         if self.resize_repeat_active:
             return (f"{self.notice} · " if self.notice else "") + "←↑↓→ 계속 조절 · 다른 키는 종료 후 그대로 처리"
         if self._mode is not None:
@@ -1183,7 +1659,7 @@ class ProductModel:
                                    "키는 pane으로 전달되지 않음")
         if self.scrolled(self.focus):
             return self.notice or "SCROLL: 휠/Shift+PgUp·PgDn 이동 · 입력하면 live로 복귀"
-        default = "원본 키는 focus pane으로 그대로 전달됩니다 · Ctrl-] Space 메뉴 · Ctrl-] d/Ctrl-d = detach"
+        default = "원본 키는 focus pane으로 그대로 전달됩니다 · Ctrl-] Space 메뉴 · Ctrl-] q/Ctrl-q = detach"
         if self.mouse_capture:
-            default += " · 휠/Shift+PgUp 스크롤 · 선택은 Shift+드래그"
+            default += " · 휠/Shift+PgUp 스크롤 · 드래그: 복사 · Shift+드래그: 터미널 선택"
         return self.notice or default

@@ -137,7 +137,7 @@ class ProductUiDetachReattachState(unittest.TestCase):
         return ui
 
     def detach(self, ui: OwnedTerm) -> None:
-        ui.send(PREFIX + b"d")
+        ui.send(PREFIX + b"q")
         self.assertTrue(ui.wait(ui.done, 20), footer(ui))
         self.assertEqual(ui.status(), 0, "clean detach must exit 0")
         flags = termios_flags((ui.work / "after_raw").read_text())
@@ -395,7 +395,7 @@ class FixtureUiStateTests(unittest.TestCase):
         self.assertFalse(self.kinds(server) & self.FORBIDDEN, self.kinds(server))
 
         # UI exit is a plain detach: no shutdown/handoff/takeover frame is sent
-        first.send(bytes([0x1D]) + b"d")
+        first.send(bytes([0x1D]) + b"q")
         self.assertTrue(first.ui_done(10))
         self.assertEqual(first.status(), 0)
         self.assertTrue(server.wait(lambda: len(server.of("detach")) == 1, 5))

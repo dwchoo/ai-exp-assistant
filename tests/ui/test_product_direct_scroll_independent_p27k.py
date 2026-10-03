@@ -853,7 +853,7 @@ class PtyDirectScrollTests(PtyBase):
         self.ui.send(sgr(64, x, y) * 3)
         self.assertTrue(self.ui.wait_for(lambda: "SCROLL" in self.title_line(2), 10), self.ui.screen_text())
         self.ui.send(P + b"m")  # leave capture off, then exit normally: still restored
-        self.ui.send(P + b"d")
+        self.ui.send(P + b"q")
         self.assertTrue(self.ui.ui_done(15), self.ui.screen_text())
         self.assert_restored()
 
@@ -883,7 +883,7 @@ class PtyDirectScrollTests(PtyBase):
 
     def test_exit_normal_detach_restores(self):
         self.fill(60)
-        self.ui.send(P + b"d")
+        self.ui.send(P + b"q")
         self.assertTrue(self.ui.ui_done(15), self.ui.screen_text())
         self.assertEqual(self.ui.status(), 0)
         self.assert_restored()
@@ -1130,7 +1130,7 @@ class RealEntrypointRuntime(unittest.TestCase):
         # shell still alive and clean, then detach: mouse reporting restored
         ui.send(b"echo ALIVE-$((6*7))\r")
         self.assertTrue(ui.wait_for(lambda: "ALIVE-42" in host(), 15), "\n".join(host()))
-        ui.send(P + b"d")
+        ui.send(P + b"q")
         self.assertTrue(ui.wait_for(lambda: b"detached; backend keeps running" in bytes(ui.output), 10))
         self.assertEqual(ui.process.wait(15), 0, "attach process did not exit cleanly after detach")
         ui.drain(0.2)

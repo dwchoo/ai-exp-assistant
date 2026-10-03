@@ -357,7 +357,7 @@ class Session:
         term.send(PREFIX + b"m")
         term.pump(0.5)
         self.wheel_check("wheel_after_prefix_m_off_on")
-        term.send(PREFIX + b"d")
+        term.send(PREFIX + b"q")
         detached = term.until(lambda: "detached; backend keeps running" in term.text(), 10)
         term.pump(0.5)
         self.note("detach", detached, **self.mode())

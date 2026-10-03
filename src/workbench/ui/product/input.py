@@ -20,6 +20,10 @@ PARTIAL_HOLD_SECONDS = 0.05  # lone ESC / 'ESC [' (real Esc or Alt keys)
 RUN_SWALLOW_SECONDS = 0.5  # non-ASCII text right after a swallowed prefix key: the run continues while it keeps arriving
 INTRODUCER_HOLD_SECONDS = 0.5  # 'ESC [ 2', 'ESC [ 2 0', 'ESC [ 2 0 0': a paste introducer split across reads
 SHIFT_PAGE_KEYS = {b"\x1b[5;2~": 1, b"\x1b[6;2~": -1}  # Shift+PgUp (back in history) / Shift+PgDn
+# Standard 2-set (dubeolsik) Hangul compatibility jamo -> the QWERTY key that types it. A Korean IME holds a lone jamo in
+# its preedit buffer and sends it only on commit; after the prefix (and in scroll mode) it is read as that ASCII key.
+JAMO_KEYS = dict(zip("ㅂㅈㄷㄱㅅㅛㅕㅑㅐㅔㅁㄴㅇㄹㅎㅗㅓㅏㅣㅋㅌㅊㅍㅠㅜㅡㅃㅉㄸㄲㅆㅒㅖ",
+                     "qwertyuiopasdfghjklzxcvbnm" "QWERTOP"))
 _MOUSE = re.compile(rb"\x1b\[<(\d{1,5});(\d{1,5});(\d{1,5})([Mm])")  # xterm SGR (1006) mouse report
 # a proper prefix of an SGR mouse report or of a Shift+PgUp/PgDn key: held briefly so a read boundary cannot split it
 _PARTIAL_SPECIAL = re.compile(rb"\x1b(?:\[(?:<[0-9;]{0,20}|[56](?:;2?)?)?)?\Z")
@@ -80,6 +84,20 @@ def _sequence_length(rest: bytes) -> int:
     return 2  # Alt + one byte, or ESC ESC
 
 
+def _utf8_char(buf: bytearray) -> tuple[int, str]:
+    """Look at the UTF-8 sequence led by ``buf[0]`` (>= 0xC0): (0, "") while incomplete, (n, char) once complete
+    (n bytes), (-1, "") when it is not valid UTF-8."""
+    need = 4 if buf[0] >= 0xF0 else 3 if buf[0] >= 0xE0 else 2
+    if any(b & 0xC0 != 0x80 for b in buf[1:need]):
+        return -1, ""
+    if len(buf) < need:
+        return 0, ""
+    try:
+        return need, bytes(buf[:need]).decode("utf-8")
+    except UnicodeDecodeError:
+        return -1, ""
+
+
 def _mouse_event(match: re.Match) -> Mouse:
     return Mouse(int(match.group(1)), int(match.group(2)), int(match.group(3)), match.group(4) == b"m")
 
@@ -95,6 +113,7 @@ class InputParser:
         self._skip = 0  # UTF-8 continuation bytes still to swallow after a prefix command
         self._run = False  # the non-ASCII run after a prefix key (an IME committing several syllables) is being dropped
         self._run_at = 0.0
+        self.jamo_keys = False  # scroll mode: a lone jamo without the prefix is read as its 2-set ASCII key
 
     def cancel_prefix(self) -> None:
         """Drop a pending prefix and the partial key held for it (e.g. a lone Esc awaiting its flush)."""
@@ -196,6 +215,19 @@ class InputParser:
                     events.append(Command(rest[:length].decode("utf-8", "replace")))
                     del buf[:length]
                     continue
+                if byte >= 0xC0:
+                    size, char = _utf8_char(buf)
+                    if size == 0:
+                        break  # UTF-8 split across reads: keep the prefix armed for however long the IME takes
+                    if size > 0:
+                        self._prefix = False
+                        out()
+                        del buf[:size]
+                        self._run, self._run_at = True, now  # commit key / rest of the run are swallowed
+                        key = JAMO_KEYS.get(char)
+                        # a lone mapped jamo is that ASCII key; anything else (syllable, longer run) is only hinted
+                        events.append(Command(key if key and not (buf and buf[0] >= 0x80) else char))
+                        continue
                 self._prefix = False
                 del buf[0]
                 if byte == PREFIX:
@@ -213,6 +245,17 @@ class InputParser:
                 self._prefix = True
                 del buf[0]
                 continue
+            if self.jamo_keys and byte >= 0xC0:
+                size, char = _utf8_char(buf)
+                if size == 0:
+                    break  # split UTF-8: wait for the rest
+                key = JAMO_KEYS.get(char) if size > 0 else None
+                if key and not (len(buf) > size and buf[size] >= 0x80):
+                    out()
+                    events.append(Passthrough(key.encode()))
+                    del buf[:size]
+                    self._run, self._run_at = True, now  # the IME's commit key right after it is spent
+                    continue
             if byte == 0x1B:
                 rest = bytes(buf)
                 if rest.startswith(PASTE_START):

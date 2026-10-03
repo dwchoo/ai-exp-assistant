@@ -2,7 +2,8 @@
 
 The server owns only connections. Pane, shell, bridge and shutdown decisions
 belong to the controller. Closing, detaching or misbehaving clients never stop
-the backend: a protocol error closes only that connection.
+the backend: a protocol error closes only that connection, and a request whose
+handler fails unexpectedly is answered with ``internal_error``.
 """
 
 from __future__ import annotations
@@ -14,7 +15,9 @@ from pathlib import Path
 import select
 import socket
 import stat
+import sys
 import time
+import traceback
 from typing import Any, Iterable, Protocol
 
 from workbench.contracts import ui_v1
@@ -48,6 +51,8 @@ class Controller(Protocol):
     def shutdown_request(self) -> dict[str, Any]: ...
     def shutdown_confirm(self, token: str) -> dict[str, Any]: ...
     def confirm_boot(self, boot_id: str) -> dict[str, Any]: ...
+    def restart_pane(self, pane: PaneId) -> dict[str, Any]: ...
+    def kill_pane(self, pane: PaneId) -> dict[str, Any]: ...
 
 
 class _Connection:
@@ -75,7 +80,7 @@ class UiServer:
         self.connections: list[_Connection] = []
         self.attached: _Connection | None = None
         self.stats = {"accepted": 0, "closed": 0, "protocol_errors": 0, "version_rejects": 0,
-                      "attaches": 0, "detaches": 0}
+                      "attaches": 0, "detaches": 0, "handler_errors": 0}
         listener = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
         previous = os.umask(0o177)
         try:
@@ -299,8 +304,21 @@ class UiServer:
         except Held as held:
             self._header(connection, ui_v1.result(message.id, False, reason=held.reason, detail=held.detail))
             return
+        except Exception as exc:  # a handler failure answers this request; it never stops the backend
+            self.stats["handler_errors"] += 1
+            traceback.print_exc(file=sys.stderr)
+            self._header(connection, ui_v1.result(message.id, False, reason=Reason.INTERNAL_ERROR,
+                                                  detail=f"{message.type.value} failed: {type(exc).__name__}: {exc}"))
+            return
         if fields is not None:
             self._header(connection, ui_v1.result(message.id, True, **fields))
+            if message.type in {ClientType.RESTART_PANE, ClientType.KILL_PANE}:
+                # The pane is live again / exited now: tell the UI at once, not on the next periodic push (C-D62/C-D63).
+                try:
+                    self.push_state(self.controller.snapshot())
+                except Exception:  # the periodic push follows
+                    self.stats["handler_errors"] += 1
+                    traceback.print_exc(file=sys.stderr)
 
     def _require_attached(self, connection: _Connection) -> None:
         if self.attached is not connection:
@@ -346,6 +364,10 @@ class UiServer:
         if kind is ClientType.FOCUS:
             controller.set_focus(fields["pane"])
             return {"focus": fields["pane"].value}
+        if kind is ClientType.RESTART_PANE:
+            return controller.restart_pane(fields["pane"])
+        if kind is ClientType.KILL_PANE:
+            return controller.kill_pane(fields["pane"])
         if kind is ClientType.TAKEOVER_REQUEST:
             return {"shell": controller.takeover_request()}
         if kind is ClientType.TAKEOVER_CONFIRM:

@@ -56,7 +56,9 @@ def draw(win: curses.window, model: ProductModel, colors: _ColorPairs) -> None:
         _put(win, top, left + 2, model.pane_title(pane), width - 4, curses.A_BOLD | (curses.A_REVERSE if focused else 0))
         screen = model.panes[pane].screen
         inner_rows, inner_cols = height - 2, width - 2
+        selected = model.selection_spans(pane, inner_rows)  # drag-to-copy highlight (reverse video)
         for y, line in enumerate(model.pane_lines(pane, inner_rows)):
+            span = selected.get(y)
             for x in range(min(inner_cols, screen.columns)):
                 cell = line.get(x, screen.default_char)
                 if not cell.data:
@@ -64,13 +66,21 @@ def draw(win: curses.window, model: ProductModel, colors: _ColorPairs) -> None:
                 cell_width = wcswidth(cell.data)
                 if cell_width < 0 or x + cell_width > inner_cols:
                     continue
+                attr = _attributes(cell, colors)
+                if span is not None and span[0] <= x + max(cell_width, 1) - 1 and x <= span[1]:
+                    attr ^= curses.A_REVERSE
                 try:
-                    win.addstr(top + 1 + y, left + 1 + x, cell.data, _attributes(cell, colors))
+                    win.addstr(top + 1 + y, left + 1 + x, cell.data, attr)
                 except curses.error:
                     pass
+        _draw_exit_notice(win, model, pane, top, left, height, width)
     if model.help_open:
         _cursor(False)
         _draw_help(win, rows, cols)
+    elif model.kill_confirm_open:
+        _cursor(False)
+        _draw_box(win, rows, cols, model.kill_confirm_lines())
+        _put(win, rows - 1, 0, model.footer(), cols - 1, curses.A_BOLD)
     elif model.menu_open:
         _cursor(False)
         _draw_menu(win, rows, cols, model)
@@ -85,10 +95,21 @@ def draw(win: curses.window, model: ProductModel, colors: _ColorPairs) -> None:
         pass
 
 
+def _draw_exit_notice(win: curses.window, model: ProductModel, pane: PaneId, top: int, left: int, height: int,
+                      width: int) -> None:
+    """Exited OMP pane (C-D62): its last screen stays; the notice fills the bottom inner rows (reverse video)."""
+    inner_rows, inner_cols = height - 2, width - 2
+    lines = model.restart_notice_lines(pane, inner_cols)[-max(1, inner_rows // 2):]
+    for i, line in enumerate(lines):
+        y = top + height - 1 - len(lines) + i
+        _put(win, y, left + 1, line + " " * max(0, inner_cols - wcswidth(line)), inner_cols,
+             curses.A_BOLD | curses.A_REVERSE)
+
+
 def _place_cursor(win: curses.window, model: ProductModel, rows: int, cols: int) -> None:
     top, left, height, width = pane_rects(rows, cols, model.layout, model.zoom)[model.focus]
     screen = model.panes[model.focus].screen
-    if screen.cursor.hidden or model.scrolled(model.focus):
+    if screen.cursor.hidden or model.scrolled(model.focus) or model.pane_exited(model.focus):
         return
     try:
         win.move(top + 1 + min(height - 3, max(0, screen.cursor.y)),
@@ -105,6 +126,17 @@ def _draw_help(win: curses.window, rows: int, cols: int) -> None:
         _put(win, top + y, left, " " * width, width, curses.A_REVERSE)
     for i, line in enumerate(HELP_LINES[:height - 2]):
         _put(win, top + 1 + i, left + 2, line, width - 4, curses.A_REVERSE)
+
+
+def _draw_box(win: curses.window, rows: int, cols: int, lines: list[str]) -> None:
+    """A centred reverse-video box of text lines (the host terminal kill confirmation, C-D63)."""
+    width = min(cols - 2, max(wcswidth(line) for line in lines) + 4)
+    height = min(rows - 2, len(lines) + 2)
+    top, left = max(0, (rows - height) // 2), max(0, (cols - width) // 2)
+    for y in range(height):
+        _put(win, top + y, left, " " * width, width, curses.A_REVERSE)
+    for i, line in enumerate(lines[:height - 2]):
+        _put(win, top + 1 + i, left + 2, line, width - 4, curses.A_REVERSE | (curses.A_BOLD if i == 0 else 0))
 
 
 def _draw_menu(win: curses.window, rows: int, cols: int, model: ProductModel) -> None:

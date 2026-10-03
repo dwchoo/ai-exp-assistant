@@ -11,8 +11,10 @@ import sys
 import termios
 import threading
 import time
+import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).parent))
 
@@ -133,7 +135,7 @@ class ProductPtyTests(unittest.TestCase):
         self.assertTrue(ui.until(lambda: "prefix" in ui.text() and "detach" in ui.text() and "임시" in ui.text()))
         ui.send(b" ")
         # detach
-        ui.send(P + b"d")
+        ui.send(P + b"q")
         self.assertEqual(0, ui.wait_exit())
         self.assertIn(b"detached; backend keeps running", bytes(ui.raw))
         self.assertTrue(server.wait_for(lambda: server.received("detach")))
@@ -152,7 +154,7 @@ class ProductPtyTests(unittest.TestCase):
         self.assertTrue(server.wait_for(lambda: server.received("paste")))
         self.assertEqual(body, server.received("paste")[0].payload)
         self.assertTrue(ui.until(lambda: "paste_too_large" in ui.text()), ui.text())
-        ui.send(P + b"d")
+        ui.send(P + b"q")
         self.assertEqual(0, ui.wait_exit())
 
     def test_resize_sends_new_per_pane_sizes(self):
@@ -164,7 +166,7 @@ class ProductPtyTests(unittest.TestCase):
         self.assertTrue(server.wait_for(lambda: len(server.received("resize")) >= before + 3))
         latest = {f.header["pane"]: (f.header["rows"], f.header["cols"]) for f in server.received("resize")[-3:]}
         self.assertEqual({"manager_omp": (17, 73), "worker_omp": (17, 73), "host_shell": (16, 148)}, latest)
-        ui.send(P + b"d")
+        ui.send(P + b"q")
         ui.wait_exit()
 
     def test_backend_close_shows_notice_and_exits_nonzero(self):
@@ -188,7 +190,7 @@ class ProductPtyTests(unittest.TestCase):
         self.assertTrue(ui.until(lambda: "host 입력 owner: manager" in ui.text() and "자동화: running" in ui.text()),
                         ui.text())
         self.assertIn("focus: MANAGER OMP", ui.text())
-        ui.send(P + b"d")
+        ui.send(P + b"q")
         ui.wait_exit()
 
     def test_no_tty_returns_2(self):
@@ -260,7 +262,7 @@ class ProductPtyTests(unittest.TestCase):
         self.assertGreater(result.get("seconds", 0), 1.5, "flood finished before the keys were typed")
         self.assertTrue(ui.until(lambda: "FLOOD-TAIL-MARKER" in ui.text(), 15.0), ui.text())
         self.assertTrue(ui.until(lambda: "따라잡음" in ui.text(), 5.0), ui.text())
-        ui.send(P + b"d")
+        ui.send(P + b"q")
         self.assertEqual(0, ui.wait_exit())
 
     def test_sustained_yes_flood_intake_keeps_up_and_ctrl_c_is_prompt(self):
@@ -302,7 +304,7 @@ class ProductPtyTests(unittest.TestCase):
         self.assertLess(ctrl_c, 1.0)
         self.assertGreater(rate, 20e6, "UI socket intake starved (backend would detach it as slow_client)")
         self.assertIsNone(ui.proc.poll())
-        ui.send(P + b"d")
+        ui.send(P + b"q")
         self.assertEqual(0, ui.wait_exit(10))
 
     def test_send_failure_shows_reason_and_no_traceback(self):
@@ -328,7 +330,7 @@ class ProductPtyTests(unittest.TestCase):
         ui.drain(0.3)
         raw = bytes(ui.raw)
         self.assertGreater(raw.rfind(b"\x1b[?25h"), raw.rfind(b"\x1b[?25l"), "cursor left hidden after help")
-        ui.send(P + b"d")
+        ui.send(P + b"q")
         ui.wait_exit()
 
     # -- C-D58: layout and host shell scrollback -----------------------------------------------------------
@@ -351,7 +353,7 @@ class ProductPtyTests(unittest.TestCase):
         self.assertEqual(120, len(bottom_border.rstrip()))
         sizes = {f.header["pane"]: (f.header["rows"], f.header["cols"]) for f in server.received("resize")}
         self.assertEqual({"manager_omp": (12, 58), "worker_omp": (12, 58), "host_shell": (11, 118)}, sizes)
-        ui.send(P + b"d")
+        ui.send(P + b"q")
         ui.wait_exit()
 
     def test_host_scrollback_via_prefix_bracket_keys_not_forwarded_and_exit_to_live(self):
@@ -382,7 +384,7 @@ class ProductPtyTests(unittest.TestCase):
         ui.send(b"ls\r")
         self.assertTrue(server.wait_for(lambda: any(f.payload == b"ls\r" for f in server.received("input"))))
         self.assertEqual([b"ls\r"], [f.payload for f in server.received("input")])
-        ui.send(P + b"d")
+        ui.send(P + b"q")
         self.assertEqual(0, ui.wait_exit())
         self.assertNotEqual("", live_text)
 
@@ -394,7 +396,7 @@ class ProductPtyTests(unittest.TestCase):
         ui.send(b"\x1b")
         self.assertTrue(ui.until(lambda: "[SCROLL" not in ui.text()), ui.text())
         self.assertEqual([], server.received("input"))
-        ui.send(P + b"d")
+        ui.send(P + b"q")
         ui.wait_exit()
 
     # -- direct scrolling: mouse wheel / Shift+PgUp, no mode ------------------------------------------------
@@ -411,7 +413,7 @@ class ProductPtyTests(unittest.TestCase):
         tracking = OuterMouse()
         tracking.feed(raw)
         self.assertEqual((1002, True), (tracking.tracking, tracking.sgr))
-        ui.send(P + b"d")
+        ui.send(P + b"q")
         self.assertEqual(0, ui.wait_exit())
         assert_mouse_restored(self, bytes(ui.raw))
 
@@ -444,7 +446,7 @@ class ProductPtyTests(unittest.TestCase):
         self.assertTrue(server.wait_for(lambda: len(server.received("input")) == 2))
         self.assertEqual([b"ls\r", b"x"], [f.payload for f in server.received("input")])
         self.assertNotIn(b"\x1b[<", b"".join(f.payload for f in server.received("input")))  # reports never leak
-        ui.send(P + b"d")
+        ui.send(P + b"q")
         self.assertEqual(0, ui.wait_exit())
 
     def test_shift_pgup_pgdn_scroll_the_focused_pane_without_reaching_it(self):
@@ -457,7 +459,7 @@ class ProductPtyTests(unittest.TestCase):
         self.assertTrue(ui.until(lambda: "[SCROLL" not in ui.text()), ui.text())
         ui.drain(0.2)
         self.assertEqual([], server.received("input"))
-        ui.send(P + b"d")
+        ui.send(P + b"q")
         self.assertEqual(0, ui.wait_exit())
 
     def test_prefix_m_toggles_mouse_reporting_and_a_click_focuses(self):
@@ -476,16 +478,44 @@ class ProductPtyTests(unittest.TestCase):
         ui.send(P + b"m")
         self.assertTrue(ui.until(lambda: "마우스 캡처 켜짐" in ui.text()), ui.text())
         self.assertTrue(ui.until(lambda: all(m in bytes(ui.raw[mark:]) for m in MOUSE_ON)))
-        ui.send(P + b"d")
+        ui.send(P + b"q")
         self.assertEqual(0, ui.wait_exit())
         assert_mouse_restored(self, bytes(ui.raw))
+
+    def test_drag_in_the_host_pane_copies_the_selected_text_as_osc52_on_the_ui_stdout(self):
+        import base64
+        from workbench.ui.product.model import pane_boxes
+        from workbench.contracts.v1 import PaneId
+        server, ui = self.start(replay={"host_shell": "hello copy 한글\r\nsecond".encode()})
+        self.assertTrue(ui.until(lambda: "hello copy" in ui.text()), ui.text())
+        top, left, _, _ = pane_boxes(30, 120)[PaneId.HOST_SHELL]
+        x, y = left + 2, top + 2
+        mark = len(ui.raw)
+        ui.send(sgr(0, x, y))
+        ui.send(sgr(32, x + 8, y))
+        ui.send(sgr(32, x + 12, y))
+        ui.send(sgr(0, x + 12, y, release=True))
+        expected = b"\x1b]52;c;" + base64.b64encode("hello copy 한".encode()) + b"\x07"
+        self.assertTrue(ui.until(lambda: expected in bytes(ui.raw[mark:])), bytes(ui.raw[mark:])[-300:])
+        self.assertTrue(ui.until(lambda: "복사됨: 12자" in ui.text()), ui.text())
+        row = ui.screen.buffer[y - 1]  # the selected cells stay highlighted (reverse video) after the copy
+        self.assertTrue(all(row[c].reverse for c in range(x - 1, x + 12)), [row[c].reverse for c in range(x - 1, x + 14)])
+        self.assertFalse(row[x + 14].reverse)
+        self.assertNotIn(b"\x1bPtmux;", bytes(ui.raw[mark:]))  # TMUX is not set in the child environment
+        self.assertEqual([], server.received("input"))  # nothing typed into any pane
+        ui.send(P + b"q")
+        self.assertEqual(0, ui.wait_exit())
+        raw = bytes(ui.raw)
+        assert_mouse_restored(self, raw)
+        self.assertEqual(1, raw.count(expected))  # written once, and nothing during terminal restore
+        self.assertLess(raw.rfind(expected), raw.rfind(MOUSE_OFF[0]))
 
     def test_mouse_reporting_stays_off_at_exit_after_toggling_off(self):
         server, ui = self.start()
         self.assertTrue(ui.until(lambda: "MANAGER OMP" in ui.text()))
         ui.send(P + b"m")
         self.assertTrue(ui.until(lambda: "마우스 캡처 꺼짐" in ui.text()), ui.text())
-        ui.send(P + b"d")
+        ui.send(P + b"q")
         self.assertEqual(0, ui.wait_exit())
         raw = bytes(ui.raw)
         self.assertGreater(raw.rfind(MOUSE_OFF[0]), raw.rfind(MOUSE_ON[0]))
@@ -521,7 +551,7 @@ class ProductPtyTests(unittest.TestCase):
         ui.send(b"Z")
         self.assertTrue(server.wait_for(lambda: any(f.payload == b"Z" for f in server.received("input"))))
         self.assertEqual([b"Z"], [f.payload for f in server.received("input")])
-        ui.send(P + b"d")
+        ui.send(P + b"q")
         ui.wait_exit()
 
 
@@ -572,7 +602,7 @@ class ProductLayoutPtyTests(unittest.TestCase):
         during = bytes(ui.raw[mark:])
         for mode in (b"\x1b[?1000l", b"\x1b[?1002l", b"\x1b[?1003h", b"\x1b[?1000h"):  # never switched by a drag
             self.assertNotIn(mode, during)
-        ui.send(P + b"d")
+        ui.send(P + b"q")
         self.assertEqual(0, ui.wait_exit())
         assert_mouse_restored(self, bytes(ui.raw))
 
@@ -596,7 +626,7 @@ class ProductLayoutPtyTests(unittest.TestCase):
             "manager_omp": (12, 58), "worker_omp": (12, 58)}))
         self.assertTrue(server.wait_for(lambda: self.layout_file(server) == {
             "version": 1, "col_ratio": None, "row_ratio": None, "zoom": False}))
-        ui.send(P + b"d")
+        ui.send(P + b"q")
         self.assertEqual(0, ui.wait_exit())
 
     def test_stored_layout_is_used_on_attach(self):
@@ -607,7 +637,7 @@ class ProductLayoutPtyTests(unittest.TestCase):
         for want in (("manager_omp", 14, 28), ("worker_omp", 14, 88), ("host_shell", 9, 118)):
             self.assertIn(want, sent)
         self.assertTrue(ui.until(lambda: ui.screen.display[2].find("WORKER OMP") in range(29, 34)), ui.text())
-        ui.send(P + b"d")
+        ui.send(P + b"q")
         self.assertEqual(0, ui.wait_exit())
 
     def test_stored_zoom_survives_a_restart(self):
@@ -616,7 +646,7 @@ class ProductLayoutPtyTests(unittest.TestCase):
         self.assertTrue(ui.until(lambda: "[ZOOM]" in ui.text() and "WORKER OMP" not in ui.text()), ui.text())
         self.assertIn(("manager_omp", 25, 118), [(f.header["pane"], f.header["rows"], f.header["cols"])
                                                   for f in server.received("resize")])
-        ui.send(P + b"d")
+        ui.send(P + b"q")
         self.assertEqual(0, ui.wait_exit())
         self.assertTrue(self.layout_file(server)["zoom"])  # still stored
 
@@ -629,7 +659,7 @@ class ProductLayoutPtyTests(unittest.TestCase):
                 self.assertIn(("manager_omp", 12, 58), sent)
                 self.assertIn(("host_shell", 11, 118), sent)
                 self.assertNotIn("Traceback", ui.text())
-                ui.send(P + b"d")
+                ui.send(P + b"q")
                 self.assertEqual(0, ui.wait_exit())
 
 
@@ -704,7 +734,7 @@ class OuterTerminalMouseTests(unittest.TestCase):
         ui.drain(0.2)
         self.assertEqual(1002, self.outer(ui).tracking)
         self.wheel_scrolls_host(ui)
-        ui.send(P + b"d")
+        ui.send(P + b"q")
         self.assertEqual(0, ui.wait_exit())
         after = self.outer(ui)
         self.assertEqual((None, False), (after.tracking, after.sgr), "mouse reporting left on after detach")
@@ -720,7 +750,7 @@ class OuterTerminalMouseTests(unittest.TestCase):
         ui.raw.extend(b"\x1b[?1002l")
         ui.send(P + b"r")  # redraw request re-asserts too
         self.assertTrue(ui.until(lambda: self.outer(ui).tracking == 1002), "not re-asserted after prefix r")
-        ui.send(P + b"d")
+        ui.send(P + b"q")
         self.assertEqual(0, ui.wait_exit())
 
 
@@ -737,14 +767,14 @@ class ImeNeutralPrefixTests(unittest.TestCase):
         self.assertTrue(ui.until(lambda: "MANAGER OMP" in ui.text()), ui.text())
         return server, ui
 
-    def test_ctrl_alias_zoom_then_ctrl_d_detach_in_one_held_sequence(self):
+    def test_ctrl_alias_zoom_then_ctrl_q_detach_in_one_held_sequence(self):
         server, ui = self.start()
         ui.send(P + b"\x1a")  # Ctrl-] Ctrl-z
         self.assertTrue(ui.until(lambda: "[ZOOM]" in ui.text() and "WORKER OMP" not in ui.text()), ui.text())
         ui.send(P + b"\x1a")
         self.assertTrue(ui.until(lambda: "[ZOOM]" not in ui.text() and "WORKER OMP" in ui.text()), ui.text())
         self.assertEqual([], server.received("input"))
-        ui.send(P + b"\x04")  # Ctrl-] Ctrl-d
+        ui.send(P + b"\x11")  # Ctrl-] Ctrl-q
         self.assertEqual(0, ui.wait_exit())
         self.assertTrue(server.wait_for(lambda: server.received("detach")))
         self.assertEqual([], server.received("input"))
@@ -764,14 +794,14 @@ class ImeNeutralPrefixTests(unittest.TestCase):
         ui.send(P + b"\x12")  # redraw nudge = two more resize frames for the focus pane
         self.assertTrue(server.wait_for(lambda: len(server.received("resize")) >= before + 2))
         self.assertEqual([], server.received("input"))
-        ui.send(P + b"\x04")
+        ui.send(P + b"\x11")
         self.assertEqual(0, ui.wait_exit())
 
     def test_menu_arrows_enter_digits_and_esc(self):
         server, ui = self.start()
         ui.send(P + b" ")
         self.assertTrue(ui.until(lambda: "명령 메뉴" in ui.text() and "> 1" in ui.text()), ui.text())
-        for needle in ("Ctrl-d", "Ctrl-z", "1/2/3", "Esc"):
+        for needle in ("Ctrl-q", "Ctrl-z", "1/2/3", "Esc"):
             self.assertIn(needle, ui.text())
         ui.send(b"\x1b[B")  # down -> item 2 (zoom)
         self.assertTrue(ui.until(lambda: "> 2" in ui.text()), ui.text())
@@ -792,25 +822,238 @@ class ImeNeutralPrefixTests(unittest.TestCase):
         self.assertTrue(server.wait_for(lambda: server.received("detach")))
         self.assertEqual([], server.received("input"))
 
-    def test_hangul_after_prefix_shows_hint_and_sends_nothing(self):
+    def test_syllable_after_prefix_shows_hint_and_sends_nothing(self):
         server, ui = self.start()
-        ui.send(P + "ㅇ".encode())
+        ui.send(P + "안".encode())
         self.assertTrue(ui.until(lambda: "한글 입력 상태" in ui.text() and "Ctrl-] Space" in ui.text()), ui.text())
         ui.drain(0.3)
         self.assertEqual([], server.received("input"))
         ui.send(b"x")
         self.assertTrue(server.wait_for(lambda: any(f.payload == b"x" for f in server.received("input"))))
-        ui.send(P + b"\x04")
+        ui.send(P + b"\x11")
         self.assertEqual(0, ui.wait_exit())
+
+    def test_jamo_after_prefix_then_space_detaches_on_the_real_loop(self):
+        server, ui = self.start()
+        ui.send(P)
+        ui.drain(0.6)  # the IME may hold the jamo for a while: the prefix stays armed
+        ui.send("ㅂ".encode()[:2])  # UTF-8 split across two reads
+        ui.drain(0.3)
+        ui.send("ㅂ".encode()[2:] + b" ")  # ㅂ (= q) + commit Space
+        self.assertEqual(0, ui.wait_exit())
+        self.assertTrue(server.wait_for(lambda: server.received("detach")))
+        self.assertEqual([], server.received("input"))
+        assert_mouse_restored(self, bytes(ui.raw))
 
     def test_footer_and_help_list_the_ctrl_forms_and_menu(self):
         server, ui = self.start()
         ui.send(P)
-        self.assertTrue(ui.until(lambda: "Space 메뉴" in ui.text() and "Ctrl+d" in ui.text()), ui.text())
+        self.assertTrue(ui.until(lambda: "Space 메뉴" in ui.text() and "Ctrl+q" in ui.text()), ui.text())
         ui.send(b"?")
         self.assertTrue(ui.until(lambda: "Ctrl-t" in ui.text() and "prefix Space" in ui.text()), ui.text())
         ui.send(b" ")
+        ui.send(P + b"\x11")
+        self.assertEqual(0, ui.wait_exit())
+
+    def test_old_detach_keys_do_not_detach_and_ctrl_d_to_omp_needs_a_second_press(self):
+        server, ui = self.start()
+        ui.send(P + b"d")  # old detach key: a notice, no detach, nothing sent
+        self.assertTrue(ui.until(lambda: "detach는 이제" in ui.text()), ui.text())
         ui.send(P + b"\x04")
+        ui.drain(0.3)
+        self.assertEqual([], server.received("input"))
+        self.assertEqual([], server.received("detach"))
+        ui.send(b"\x04")  # Ctrl-d on the manager pane: held, never delivered to the fake OMP
+        self.assertTrue(ui.until(lambda: "2초 안에 Ctrl-d" in ui.text()), ui.text())
+        ui.drain(0.3)
+        self.assertEqual([], server.received("input"))
+        ui.send(b"\x04")  # second press within 2 s: exactly one 0x04 arrives
+        self.assertTrue(server.wait_for(lambda: any(f.payload == b"\x04" for f in server.received("input"))))
+        ui.drain(0.3)
+        self.assertEqual([b"\x04"], [f.payload for f in server.received("input")])
+        self.assertEqual("manager_omp", server.received("input")[0].header["pane"])
+        ui.send(P + b"q")
+        self.assertEqual(0, ui.wait_exit())
+        self.assertTrue(server.wait_for(lambda: server.received("detach")))
+
+
+FAKE_OMP = r'''#!{python}
+import json, os, socket, sys, uuid
+argv = sys.argv[1:]
+if argv[:2] == ["config", "get"]:
+    print("[]")
+    sys.exit(0)
+with open(os.environ["FAKE_PANE_RECORD"], "a") as stream:
+    stream.write(json.dumps({{"pid": os.getpid(), "role": os.environ["WORKBENCH_G3_ROLE"]}}) + "\n")
+sock = socket.socket(socket.AF_UNIX)
+sock.connect(os.environ["WORKBENCH_G3_BRIDGE_SOCKET"])
+hello = {{"kind": "hello", "protocolVersion": 1, "token": os.environ["WORKBENCH_G3_TOKEN"],
+          "role": os.environ["WORKBENCH_G3_ROLE"], "ompSessionId": str(uuid.uuid4()),
+          "generation": int(os.environ["WORKBENCH_G3_GENERATION"]), "pid": os.getpid()}}
+sock.sendall((json.dumps(hello) + "\n").encode())
+json.loads(sock.makefile("rb").readline())
+print("fake omp", os.environ["WORKBENCH_G3_ROLE"], "pid=%d" % os.getpid(), flush=True)
+for line in sys.stdin:
+    if line.strip() == "exit":
+        break
+    print("echo:" + line.strip(), flush=True)
+'''
+
+
+def _alive(pid):
+    try:
+        return Path(f"/proc/{pid}/stat").read_text().rsplit(") ", 1)[1][0] not in "ZX"
+    except OSError:
+        return False
+
+
+class RealBackendCase(unittest.TestCase):
+    """A real Backend (fake OMP panes, real bash host shell) with the product UI on a PTY."""
+
+    def setUp(self):
+        from workbench.backend.launcher import LaunchPlan
+        from workbench.backend.paths import DataLayout, ensure_private_dir
+        from workbench.backend.service import Backend
+        from workbench.terminal.shell_g2.prototype import ShellChoice
+
+        self._dir = tempfile.TemporaryDirectory(prefix="rs27-", dir="/tmp")
+        self.addCleanup(self._dir.cleanup)
+        root = Path(self._dir.name)
+        project, home = root / "p", root / "h"
+        project.mkdir()
+        home.mkdir()
+        fake = root / "omp"
+        fake.write_text(FAKE_OMP.format(python=sys.executable))
+        fake.chmod(0o700)
+        self.record = root / "panes.jsonl"
+        env = {"PATH": os.environ.get("PATH", "/usr/bin:/bin"), "HOME": str(home), "FAKE_PANE_RECORD": str(self.record)}
+        plan = LaunchPlan(ShellChoice("bash", "/usr/bin/bash"), str(fake), "omp/18.4.4", "/x/bridge.ts", ("--plan-arg",))
+        patcher = mock.patch("workbench.backend.service.check_isolation",
+                             lambda *a, role, **k: {"role": role, "state": "ok", "ok": True, "leaks": [],
+                                                    "warnings": [], "error": None})
+        patcher.start()
+        self.addCleanup(patcher.stop)
+        layout = DataLayout(root / "d")
+        ensure_private_dir(layout.root)
+        self.backend = Backend(layout, plan, project_dir=str(project), environment=env)
+        self.stop = threading.Event()
+        self.ticker = None
+        self.addCleanup(self._close_backend)
+        self.backend._open()
+        deadline = time.monotonic() + 15
+        while self.backend.phase != "ready" and time.monotonic() < deadline:
+            self.backend._tick(0.02)
+        self.assertEqual("ready", self.backend.phase)
+        self.ticker = threading.Thread(target=self._tick_loop, daemon=True)
+        self.ticker.start()
+        self.ui = UiProcess(layout.ui_socket)
+        self.addCleanup(self.ui.close)
+
+    def _tick_loop(self):
+        while not self.stop.is_set():
+            self.backend._tick(0.02)
+
+    def _close_backend(self):
+        self.stop.set()
+        if self.ticker is not None:
+            self.ticker.join(5)
+        lines = self.record.read_text().splitlines() if self.record.exists() else []
+        pids = [json.loads(line)["pid"] for line in lines if line.strip()]
+        self.backend._close()
+        for pid in pids:
+            self.assertFalse(_alive(pid), f"fake OMP {pid} survived the backend close")
+
+
+class RestartExitedOmpPtyTests(RealBackendCase):
+    """C-D62 (1) on a real backend: the manager fake OMP exits, the UI shows the notice, Enter starts a new session."""
+
+    def test_exited_manager_shows_the_notice_and_enter_starts_a_new_session_that_takes_input(self):
+        ui = self.ui
+        old = json.loads(self.record.read_text().splitlines()[0])
+        self.assertEqual("manager", old["role"])  # the manager registered first: it is spawned before the worker
+        self.assertTrue(ui.until(lambda: f"fake omp manager pid={old['pid']}" in ui.text()), ui.text())
+        ui.send(b"exit\r")  # the fake OMP exits on this line
+        self.assertTrue(ui.until(lambda: "OMP 종료됨" in ui.text() and "/resume" in ui.text()), ui.text())
+        self.assertIn(f"pid={old['pid']}", ui.text(), "the last screen stays visible")
+        ui.send(b"stray")  # other keys go nowhere
+        self.assertTrue(ui.until(lambda: "Enter로 새 세션" in ui.text()), ui.text())
+        ui.send(b"\r")
+        self.assertTrue(ui.until(lambda: "fake omp manager pid=" in ui.text() and f"pid={old['pid']}" not in ui.text()),
+                        ui.text())  # the new generation cleared the old screen
+        self.assertTrue(ui.until(lambda: "MANAGER OMP *FOCUS* alive" in ui.text() and "다시 시작 중" not in ui.text()),
+                        ui.text())  # the snapshot shows the pane alive again: notice gone, input flows
+        self.assertNotIn("OMP 종료됨", ui.text())
+        ui.send(b"hello\r")
+        self.assertTrue(ui.until(lambda: "echo:hello" in ui.text()), ui.text())
+        self.assertNotIn("echo:stray", ui.text())
+        invocations = [json.loads(line) for line in self.record.read_text().splitlines() if line.strip()]
+        self.assertEqual(3, len(invocations), "manager, worker and exactly one restarted manager")
+        self.assertEqual("manager", invocations[-1]["role"])
+        self.assertNotEqual(old["pid"], invocations[-1]["pid"])
+        ui.send(P + b"q")
+        self.assertEqual(0, ui.wait_exit())
+
+
+def _session_members(sid, comm=None):
+    """PIDs of the processes in session ``sid`` (optionally only those whose command name is ``comm``)."""
+    found = []
+    for entry in Path("/proc").iterdir():
+        if not entry.name.isdigit():
+            continue
+        try:
+            stat = (entry / "stat").read_text()
+        except OSError:
+            continue
+        name, rest = stat[stat.index("(") + 1:stat.rindex(")")], stat[stat.rindex(")") + 2:].split()
+        if rest[0] not in "ZX" and int(rest[3]) == sid and (comm is None or name == comm):
+            found.append(int(entry.name))
+    return found
+
+
+class KillRestartHostShellPtyTests(RealBackendCase):
+    """C-D63 on a real backend: Ctrl-] k then k kills the host shell and its jobs; Enter starts a fresh shell."""
+
+    def test_ctrl_bracket_k_confirm_kills_shell_and_jobs_and_enter_starts_a_fresh_shell(self):
+        import re
+        ui = self.ui
+        self.assertTrue(ui.until(lambda: "HOST SHELL" in ui.text()), ui.text())
+        ui.send(P + b"3")  # focus the host shell
+        ui.send(b"echo SHPID=$$\r")
+        self.assertTrue(ui.until(lambda: re.search(r"SHPID=\d+", ui.text())), ui.text())
+        shell = int(re.search(r"SHPID=(\d+)", ui.text()).group(1))
+        sleeps = []
+
+        def cleanup_sleeps():  # only the sleeps found in this test's own shell session
+            for pid in set(sleeps) | set(_session_members(shell, "sleep")):
+                try:
+                    os.kill(pid, signal.SIGKILL)
+                except OSError:
+                    pass
+
+        self.addCleanup(cleanup_sleeps)
+        ui.send(b"sleep 1000 &\r")  # a background job ...
+        ui.send(b"sleep 1000\r")  # ... and a foreground one
+        self.assertTrue(ui.until(lambda: len(_session_members(shell, "sleep")) == 2), _session_members(shell))
+        sleeps.extend(_session_members(shell, "sleep"))
+        ui.send(P + b"k")
+        self.assertTrue(ui.until(lambda: "강제 종료합니다" in ui.text() and "k: 종료" in ui.text()), ui.text())
+        self.assertTrue(all(_alive(pid) for pid in sleeps + [shell]), "the confirmation alone kills nothing")
+        ui.send(b"k")
+        self.assertTrue(ui.until(lambda: "host terminal 종료됨" in ui.text() and "exited" in ui.text()), ui.text())
+        self.assertNotIn("강제 종료합니다", ui.text())
+        self.assertTrue(ui.until(lambda: not any(_alive(pid) for pid in sleeps + [shell]), 10), [_alive(p) for p in sleeps])
+        self.assertEqual([], _session_members(shell))
+        ui.send(b"typed")  # nothing reaches the exited pane
+        self.assertTrue(ui.until(lambda: "Enter로 새 shell" in ui.text()), ui.text())
+        ui.send(b"\r")  # Enter: a fresh shell
+        self.assertTrue(ui.until(lambda: "host terminal 종료됨" not in ui.text() and "HOST SHELL" in ui.text()), ui.text())
+        ui.send(b"echo NEWPID=$$ FRESH$((20+22))\r")
+        self.assertTrue(ui.until(lambda: re.search(r"NEWPID=\d+ FRESH42", ui.text())), ui.text())
+        fresh = int(re.search(r"NEWPID=(\d+) FRESH42", ui.text()).group(1))
+        self.assertNotEqual(shell, fresh)
+        self.assertTrue(_alive(fresh))
+        self.assertNotIn("echo:typed", ui.text())
+        ui.send(P + b"q")
         self.assertEqual(0, ui.wait_exit())
 
 

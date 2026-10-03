@@ -329,7 +329,7 @@ class Driver:
         self.wheel("wheel_after_prefix_m_off_on")
         self.drag("drag_after_prefix_m_off_on", "v")
         self.wheel("wheel_after_drag_following_prefix_m")
-        term.send(PREFIX + b"d")
+        term.send(PREFIX + b"q")
         detached = term.until(lambda: "UIDONE-0" in term.text(), 10)
         term.pump(0.6)
         self.ok("detach_exit_status_0", detached, **self.mode())

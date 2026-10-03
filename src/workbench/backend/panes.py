@@ -34,6 +34,8 @@ SHELL_WRITE_CHUNK_BYTES = 1024
 SHELL_FLUSH_SLICE_SECONDS = 0.02
 # Upper bound on pidfds an OMP pane keeps for its own session members.
 SESSION_PIN_LIMIT = 256
+# C-D63 force-kill: SIGHUP/SIGTERM grace before SIGKILL of the host shell session.
+SHELL_KILL_GRACE = 1.0
 DEFAULT_SIZE = (30, 100)
 
 
@@ -72,6 +74,13 @@ def _pidfd_exited(fd: int) -> bool:
     return bool(poller.poll(0))
 
 
+def _signal_failure(exc: OSError) -> str:
+    """Why a pinned member could not be signalled (it stays pinned and is reported)."""
+    if isinstance(exc, PermissionError):
+        return "permission_denied"  # e.g. sudo/su/pkexec: the member now runs as another user
+    return f"signal_failed:{errno.errorcode.get(exc.errno, exc.errno)}"
+
+
 def _pin_member(pid: int, session: int) -> tuple[int, bytes] | None:
     """(pidfd, start) for a live member of ``session``; identity re-read after opening.
 
@@ -91,6 +100,139 @@ def _pin_member(pid: int, session: int) -> tuple[int, bytes] | None:
         os.close(fd)
         return None
     return fd, before[19]
+
+
+class _OwnedSession:
+    """Pinned ownership of the session a backend child leads (C-D45).
+
+    The owner provides ``pid`` (the session leader, a child of this backend),
+    ``ref`` (its start ticks), ``_reaped``, ``_pins``, ``_unsignallable`` and
+    ``_drain_quietly``. Signals go only through pidfds that provably name a
+    member of that session. A member that refuses a signal (EPERM: it now runs
+    as another user, e.g. under sudo/su/pkexec) is skipped, never raised, and
+    reported as a survivor with the reason.
+    """
+
+    pid: int
+    ref: ProcessRef | None
+    _reaped: bool
+    _pins: dict[int, tuple[int, bytes]]
+    # pid -> reason for pinned members whose signal failed (never retried, reported as survivors).
+    _unsignallable: dict[int, str]
+
+    def _drain_quietly(self, timeout: float) -> None:
+        raise NotImplementedError
+
+    def _leader_exited(self) -> bool:
+        """Whether the leader child exited; never reaps, so a zombie keeps its numbers."""
+        if self._reaped:
+            return True
+        try:
+            return os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG | os.WNOWAIT) is not None
+        except ChildProcessError:
+            self._reaped = True  # not ours to reap any more; its numbers prove nothing
+            return True
+
+    def _leader_proven(self) -> bool:
+        """The leader child is unreaped and still ours: ppid is the backend, start ticks match."""
+        if self._reaped or self.ref is None:
+            return False
+        fields = _stat(self.pid)
+        return (fields is not None and int(fields[1]) == os.getpid()
+                and int(fields[19]) == self.ref.start_ticks)
+
+    def _pin_holds(self, pid: int) -> bool:
+        """A pinned member is the same live process and still in this session."""
+        fd, start = self._pins[pid]
+        fields = _stat(pid)
+        return (_live(fields) and fields[19] == start and int(fields[3]) == self.pid
+                and not _pidfd_exited(fd))
+
+    def _drop_stale_pins(self) -> None:
+        for pid in [pid for pid in self._pins if not self._pin_holds(pid)]:
+            os.close(self._pins.pop(pid)[0])
+            self._unsignallable.pop(pid, None)
+
+    def _release_pins(self) -> None:
+        for fd, _ in self._pins.values():
+            os.close(fd)
+        self._pins.clear()
+        self._unsignallable.clear()
+
+    def _send(self, pid: int, signum: int) -> bool:
+        """Signal one pinned member; False when it is gone or refuses (then recorded, never raised)."""
+        try:
+            signal.pidfd_send_signal(self._pins[pid][0], signum)
+        except ProcessLookupError:
+            return False
+        except OSError as exc:
+            self._unsignallable[pid] = _signal_failure(exc)
+            return False
+        return True
+
+    def _survivors(self) -> list[dict[str, Any]]:
+        """Pinned members still alive in this session, each with why it was not ended."""
+        self._drop_stale_pins()
+        return [{"pid": pid, "reason": self._unsignallable.get(pid, "did_not_exit")} for pid in sorted(self._pins)]
+
+    def _pin_session(self) -> None:
+        """Pin every live member of this session while the number is provably ours.
+
+        Proof is the unreaped leader, or a pinned member that is live and in
+        the session both before and after the scan: a process never rejoins a
+        session it left, and a session number cannot be reallocated while any
+        member uses it, so every member seen in between is ours.
+        """
+        self._drop_stale_pins()
+        anchors = list(self._pins)
+        if not self._leader_proven() and not anchors:
+            return
+        found: dict[int, tuple[int, bytes]] = {}
+        try:
+            names = os.listdir("/proc")
+        except OSError:
+            names = []
+        for name in names:
+            if len(self._pins) + len(found) >= SESSION_PIN_LIMIT:
+                break
+            if not name.isdecimal() or int(name) in self._pins:
+                continue
+            pinned = _pin_member(int(name), self.pid)
+            if pinned is not None:
+                found[int(name)] = pinned
+        if self._leader_proven() or any(self._pin_holds(pid) for pid in anchors):
+            self._pins.update(found)
+        else:
+            for fd, _ in found.values():
+                os.close(fd)
+
+    def _kill_owned_session(self) -> set[int]:
+        """KILL remaining members of this own session; skip when unprovable.
+
+        Signals go only through pinned pidfds. The unreaped leader keeps the
+        session provable across rounds; once it is reaped, one pinned member is
+        spared per round as the anchor that proves the next scan (an
+        unsignallable pinned member serves as that anchor when there is one),
+        and is killed last when it is the only member left. A member that
+        refuses SIGKILL is skipped and stays pinned. Returns the pids sent SIGKILL.
+        """
+        killed: set[int] = set()
+        deadline = time.monotonic() + 2.0
+        while time.monotonic() < deadline:
+            self._pin_session()
+            signallable = [pid for pid in self._pins if pid not in self._unsignallable]
+            if not signallable:
+                break
+            keep = None
+            if not self._leader_proven() and len(signallable) > 1 and len(signallable) == len(self._pins):
+                keep = signallable[0]
+            sent = [pid for pid in signallable if pid != keep and self._send(pid, signal.SIGKILL)]
+            killed.update(sent)
+            targets = [self._pins[pid][0] for pid in sent]
+            settle = min(deadline, time.monotonic() + 0.5)
+            while any(not _pidfd_exited(fd) for fd in targets) and time.monotonic() < settle:
+                self._drain_quietly(0.01)
+        return killed
 
 
 class Pane:
@@ -143,13 +285,17 @@ class Pane:
         raise NotImplementedError
 
 
-class OmpPane(Pane):
+class OmpPane(_OwnedSession, Pane):
     """One OMP process on its own PTY and session; the backend is its parent."""
 
     def __init__(self, pane_id: PaneId, role: str, argv: Sequence[str], env: Mapping[str, str],
-                 *, cwd: str | None = None, size: tuple[int, int] = DEFAULT_SIZE):
+                 *, cwd: str | None = None, size: tuple[int, int] = DEFAULT_SIZE, generation: int = 1):
         super().__init__(pane_id, size)
+        # A restarted pane (C-D62) streams under a new session id and a higher generation.
+        self.generation = generation
         self.role = role
+        # Set by the backend: the last restart of this pane slot (None until one happens).
+        self.restart: dict[str, Any] | None = None
         self.returncode: int | None = None
         self._pending = bytearray()
         rows, cols = size
@@ -174,6 +320,7 @@ class OmpPane(Pane):
         self._reaped = False
         # pid -> (pidfd, start ticks) of own session members, pinned while proven.
         self._pins: dict[int, tuple[int, bytes]] = {}
+        self._unsignallable: dict[int, str] = {}
         os.set_blocking(master, False)
         # The unreaped child is ours; its start ticks prove session ownership later.
         self.ref = process_ref(f"{role}_omp", pid)
@@ -181,16 +328,6 @@ class OmpPane(Pane):
     def fds(self) -> list[int]:
         # After EOF/EIO a PTY master stays readable; stop selecting on it.
         return [self.master_fd] if self.master_fd >= 0 and not self._eof else []
-
-    def _leader_exited(self) -> bool:
-        """Whether the OMP child exited; never reaps, so a zombie keeps its numbers."""
-        if self._reaped:
-            return True
-        try:
-            return os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG | os.WNOWAIT) is not None
-        except ChildProcessError:
-            self._reaped = True  # not ours to reap any more; its numbers prove nothing
-            return True
 
     def poll(self) -> int | None:
         if self.returncode is not None or self._reaped:
@@ -206,62 +343,6 @@ class OmpPane(Pane):
         self._reaped = True
         self.returncode = os.waitstatus_to_exitcode(status)
         return self.returncode
-
-    # -- session ownership (C-D45) ---------------------------------------
-    def _leader_proven(self) -> bool:
-        """The OMP child is unreaped and still ours: ppid is the backend, start ticks match."""
-        if self._reaped or self.ref is None:
-            return False
-        fields = _stat(self.pid)
-        return (fields is not None and int(fields[1]) == os.getpid()
-                and int(fields[19]) == self.ref.start_ticks)
-
-    def _pin_holds(self, pid: int) -> bool:
-        """A pinned member is the same live process and still in this session."""
-        fd, start = self._pins[pid]
-        fields = _stat(pid)
-        return (_live(fields) and fields[19] == start and int(fields[3]) == self.pid
-                and not _pidfd_exited(fd))
-
-    def _drop_stale_pins(self) -> None:
-        for pid in [pid for pid in self._pins if not self._pin_holds(pid)]:
-            os.close(self._pins.pop(pid)[0])
-
-    def _release_pins(self) -> None:
-        for fd, _ in self._pins.values():
-            os.close(fd)
-        self._pins.clear()
-
-    def _pin_session(self) -> None:
-        """Pin every live member of this OMP's session while the number is provably ours.
-
-        Proof is the unreaped OMP leader, or a pinned member that is live and in
-        the session both before and after the scan: a process never rejoins a
-        session it left, and a session number cannot be reallocated while any
-        member uses it, so every member seen in between is ours.
-        """
-        self._drop_stale_pins()
-        anchors = list(self._pins)
-        if not self._leader_proven() and not anchors:
-            return
-        found: dict[int, tuple[int, bytes]] = {}
-        try:
-            names = os.listdir("/proc")
-        except OSError:
-            names = []
-        for name in names:
-            if len(self._pins) + len(found) >= SESSION_PIN_LIMIT:
-                break
-            if not name.isdecimal() or int(name) in self._pins:
-                continue
-            pinned = _pin_member(int(name), self.pid)
-            if pinned is not None:
-                found[int(name)] = pinned
-        if self._leader_proven() or any(self._pin_holds(pid) for pid in anchors):
-            self._pins.update(found)
-        else:
-            for fd, _ in found.values():
-                os.close(fd)
 
     def pump(self) -> list[DisplayChunk]:
         chunks = []
@@ -324,55 +405,37 @@ class OmpPane(Pane):
         alive = self.poll() is None
         return {**super().info(), "role": self.role, "process": ref_dict(self.ref), "alive": alive,
                 "exit_status": self.returncode, "input_owner": "user",
-                "queued_input_bytes": len(self._pending), "input_capacity": INPUT_QUEUE_BYTES}
+                "queued_input_bytes": len(self._pending), "input_capacity": INPUT_QUEUE_BYTES,
+                "restart": None if self.restart is None else dict(self.restart)}
 
     def close(self, grace: float = 3.0) -> dict[str, Any]:
-        """TERM the proven OMP group, then KILL every proven member left in its session."""
+        """TERM the proven OMP group, then KILL every proven member left in its session.
+
+        Never raises for a member that cannot be signalled: it is reported in ``survivors``.
+        """
         if not self._leader_exited() and self._leader_proven():
             # Unreaped child of this backend: its group number is still ours.
             try:
                 os.killpg(self.pid, signal.SIGTERM)
+                terminated = True
             except ProcessLookupError:
-                pass
-            deadline = time.monotonic() + grace
+                terminated = True
+            except OSError:
+                terminated = False  # EPERM: no group member took it; the pinned KILL below decides
+            deadline = time.monotonic() + (grace if terminated else 0.0)
             while not self._leader_exited() and time.monotonic() < deadline:
                 self._drain_quietly(0.05)
         self._kill_owned_session()
         deadline = time.monotonic() + 2.0
         while self.poll() is None and time.monotonic() < deadline:
             self._drain_quietly(0.02)
+        survivors = self._survivors()
         self._release_pins()
         if self.master_fd >= 0:
             os.close(self.master_fd)
             self.master_fd = -1
         self._pending.clear()
-        return {"pane": self.pane_id.value, "exit_status": self.returncode}
-
-    def _kill_owned_session(self) -> None:
-        """KILL remaining members of this OMP's own session; skip when unprovable.
-
-        Signals go only through pinned pidfds. The unreaped leader keeps the
-        session provable across rounds; once it is reaped, one pinned member is
-        spared per round as the anchor that proves the next scan, and is killed
-        last when it is the only member left.
-        """
-        deadline = time.monotonic() + 2.0
-        while time.monotonic() < deadline:
-            self._pin_session()
-            if not self._pins:
-                return
-            keep = None
-            if not self._leader_proven() and len(self._pins) > 1:
-                keep = next(iter(self._pins))
-            targets = [fd for pid, (fd, _) in self._pins.items() if pid != keep]
-            for fd in targets:
-                try:
-                    signal.pidfd_send_signal(fd, signal.SIGKILL)
-                except ProcessLookupError:
-                    pass
-            settle = min(deadline, time.monotonic() + 0.5)
-            while any(not _pidfd_exited(fd) for fd in targets) and time.monotonic() < settle:
-                self._drain_quietly(0.01)
+        return {"pane": self.pane_id.value, "exit_status": self.returncode, "survivors": survivors}
 
     def _drain_quietly(self, timeout: float) -> None:
         try:
@@ -382,30 +445,92 @@ class OmpPane(Pane):
             time.sleep(timeout)
 
 
-class ShellPane(Pane):
-    """Backend ownership of the CW-07 PersistentShell; input goes through its boundary."""
+class ShellPane(_OwnedSession, Pane):
+    """Backend ownership of the CW-07 PersistentShell; input goes through its boundary.
+
+    The parent shell is a child of this backend leading its own PTY session. Its
+    exit is observed without reaping first, so the zombie keeps the session
+    number while the members still in that session are pinned (C-D45); then it
+    is reaped. A force-kill (C-D63) signals only pinned members of that session:
+    a process that called setsid is in another session and is never targeted.
+    """
 
     def __init__(self, choice: ShellChoice, environment: dict[str, str],
-                 *, size: tuple[int, int] = DEFAULT_SIZE):
+                 *, size: tuple[int, int] = DEFAULT_SIZE, generation: int = 1):
         super().__init__(PaneId.HOST_SHELL, size)
+        # A restarted host shell (C-D63) streams under a new session id and a higher generation.
+        self.generation = generation
         self.choice = choice
         self.shell = PersistentShell(user_environment=environment, choice=choice)
         self._pending = bytearray()
-        self.ref = process_ref("host_shell", self.shell.parent_pid)
+        self.pid = self.shell.parent_pid
+        self.ref = process_ref("host_shell", self.pid)
         self._supervisor_ref: ProcessRef | None = None
         self.state: dict[str, Any] = self.shell.snapshot()
         self.error: str | None = None
+        self.returncode: int | None = None
         self._exited = False
-        self._last_alive_check = 0.0
+        self._reaped = False
+        self._released = False
+        self._final = b""
+        self._drained_after_exit = False
+        # pid -> (pidfd, start ticks) of own session members, pinned while proven.
+        self._pins: dict[int, tuple[int, bytes]] = {}
+        self._unsignallable: dict[int, str] = {}
+        # Set by the backend: the last restart of this pane slot (None until one happens).
+        self.restart: dict[str, Any] | None = None
+        # The last force-kill of this shell and a manager request it closed (never a success).
+        self.kill_result: dict[str, Any] | None = None
+        self.closed_request: dict[str, Any] | None = None
         self.resize(*size)
 
     @property
     def _master_fd(self) -> int:
         return self.shell._transport.master_fd
 
-    def alive(self) -> bool:
-        return self.ref is not None and LinuxProcessProbe().observe(self.ref).state == "alive"
+    # -- exit and reaping ------------------------------------------------
+    def poll(self) -> int | None:
+        """Exit status once the parent shell exited; reaps it after pinning its session."""
+        if self._exited:
+            return self.returncode
+        if not self._leader_exited():
+            return None
+        if not self._reaped:
+            # The unreaped zombie still holds the session number: pin what is left now.
+            self._pin_session()
+            try:
+                _, status = os.waitpid(self.pid, 0)
+                self.returncode = os.waitstatus_to_exitcode(status)
+            except ChildProcessError:
+                pass
+            self._reaped = True
+        self._exited = True
+        self._close_request("host_shell_exited")
+        return self.returncode
 
+    def exited(self) -> bool:
+        self.poll()
+        return self._exited
+
+    def alive(self) -> bool:
+        return (not self.exited() and self.ref is not None
+                and LinuxProcessProbe().observe(self.ref).state == "alive")
+
+    def request_in_flight(self) -> bool:
+        """A manager request was sent to this shell and has not fully returned."""
+        life = self.shell._transport.lifecycle
+        return not self._exited and life.request_id is not None and not life.returned
+
+    def _close_request(self, reason: str) -> None:
+        """An unreturned manager request ends as unknown, never as a success."""
+        life = self.shell._transport.lifecycle
+        if life.request_id is None or life.returned or self.closed_request is not None:
+            return
+        self.closed_request = {"request_id": life.request_id, "outcome": "unknown", "task_success": None,
+                               "reason": reason, "phase": self.state.get("phase"), "at": time.time()}
+        life.fail_unknown(reason)
+
+    # -- I/O -------------------------------------------------------------
     def fds(self) -> list[int]:
         transport = self.shell._transport
         if transport._closed or self._exited:
@@ -413,12 +538,15 @@ class ShellPane(Pane):
         return [transport.master_fd, transport._control_fd]
 
     def pump(self) -> list[DisplayChunk]:
-        if self.shell._transport._closed:
+        if self._released or self.shell._transport._closed:
+            final, self._final = self._final, b""
+            return [self._chunk(final)] if final else []
+        if not self._exited:
+            self.poll()
+        elif self._drained_after_exit:
             return []
-        now = time.monotonic()
-        if not self._exited and now - self._last_alive_check >= 0.5:
-            self._last_alive_check = now
-            self._exited = not self.alive()
+        # An exited shell's last output is drained once, then it leaves the select set.
+        self._drained_after_exit = self._exited
         try:
             self.state = self.shell.poll(0)
             self._flush()
@@ -426,7 +554,7 @@ class ShellPane(Pane):
         except (OSError, UnsafeShellState) as exc:
             self.error = f"{type(exc).__name__}: {exc}"
             self.state = self.shell.snapshot()
-            return []
+            data = b""
         supervisor = self.state["lifecycle"].get("supervisor_pid")
         if supervisor and (self._supervisor_ref is None or self._supervisor_ref.pid != supervisor):
             self._supervisor_ref = process_ref("supervisor", supervisor)
@@ -446,6 +574,8 @@ class ShellPane(Pane):
         return None
 
     def admit(self, data: bytes) -> tuple[Reason, str] | None:
+        if self._released or self.exited():
+            return Reason.PANE_UNAVAILABLE, "host shell has exited; restart it first"
         if len(data) > INPUT_QUEUE_BYTES:
             return Reason.PASTE_TOO_LARGE, f"{len(data)} bytes exceeds {INPUT_QUEUE_BYTES}"
         try:
@@ -505,9 +635,15 @@ class ShellPane(Pane):
                 "unknown": list(life.get("unknown") or ()), "error": self.error}
 
     def info(self) -> dict[str, Any]:
-        return {**super().info(), "process": ref_dict(self.ref), "alive": self.alive(), "exit_status": None,
-                "input_owner": self.state["input_owner"], "queued_input_bytes": len(self._pending),
-                "input_capacity": INPUT_QUEUE_BYTES, "shell": self.shell_state()}
+        alive = self.alive()
+        return {**super().info(), "process": ref_dict(self.ref), "alive": alive,
+                "exit_status": self.returncode, "input_owner": self.state["input_owner"],
+                "queued_input_bytes": len(self._pending), "input_capacity": INPUT_QUEUE_BYTES,
+                "manager_command_in_flight": self.request_in_flight(),
+                "manager_command": None if self.closed_request is None else dict(self.closed_request),
+                "restart": None if self.restart is None else dict(self.restart),
+                "kill": None if self.kill_result is None else dict(self.kill_result),
+                "shell": self.shell_state()}
 
     def request_takeover(self) -> dict[str, Any]:
         self.state = self.shell.request_takeover()
@@ -522,7 +658,139 @@ class ShellPane(Pane):
         self.state = self.shell.claim_manager()
         return self.shell_state()
 
-    def close(self) -> dict[str, Any]:
+    # -- force-kill (C-D63) ----------------------------------------------
+    def _drain_quietly(self, timeout: float) -> None:
+        started = time.monotonic()
+        transport = self.shell._transport
+        if not transport._closed:
+            try:
+                transport._drain(timeout)
+            except (OSError, ValueError, UnsafeShellState):
+                pass
+        rest = timeout - (time.monotonic() - started)
+        if rest > 0:
+            time.sleep(rest)  # an EIO-readable master after the exit must not spin
+
+    def _left_session(self) -> list[dict[str, Any]]:
+        """Descendants of the live parent shell that moved to another session (never signalled)."""
+        left = []
+        for pid in sorted(self.shell._transport._descendant_pids()):
+            fields = _stat(pid)
+            if _live(fields) and int(fields[3]) != self.pid:
+                left.append({"pid": pid, "session": int(fields[3])})
+        return left
+
+    def _signal_pins(self, pids: Sequence[int], signums: Sequence[int]) -> set[int]:
+        """Send ``signums`` to each pinned member; a gone or refusing member is skipped (never raises)."""
+        delivered: set[int] = set()
+        for pid in pids:
+            for signum in signums:
+                if not self._send(pid, signum):
+                    break
+                delivered.add(pid)
+        return delivered
+
+    def kill(self, grace: float = SHELL_KILL_GRACE) -> dict[str, Any]:
+        """End the parent shell and every member of its session: HUP/TERM, then KILL.
+
+        Only pidfds pinned while the unreaped parent proves the session are
+        signalled, so neither a recycled PID nor a setsid daemon is targeted.
+        A member that refuses a signal (EPERM) is skipped and reported in
+        ``survivors`` with its reason; the others are still signalled.
+        Raises UnsafeShellState if the shell already exited, cannot be proven or
+        does not end.
+        """
+        if self._released or self.exited():
+            raise UnsafeShellState("host shell has already exited")
+        if not self._leader_proven():
+            raise UnsafeShellState("host shell identity is not provable; nothing signalled")
+        try:
+            self.state = self.shell.poll(0)
+        except (OSError, UnsafeShellState) as exc:
+            self.error = f"{type(exc).__name__}: {exc}"
+        owner = self.state["input_owner"]
+        in_flight = self.request_in_flight()
+        self._unsignallable.clear()  # a retried kill tries every member again
+        left = self._left_session()
         self._pending.clear()
-        self.shell.close()
-        return {"pane": self.pane_id.value}
+        # The manager's command dies with the shell: it is closed as unknown before any signal.
+        self._close_request("host_shell_killed")
+        signalled: set[int] = set()
+        tried: set[int] = set()
+        deadline = time.monotonic() + grace
+        while True:
+            # Members forked meanwhile are still in the proven session: they get the same signals.
+            self._pin_session()
+            fresh = [pid for pid in self._pins if pid not in tried]
+            signalled |= self._signal_pins(fresh, (signal.SIGHUP, signal.SIGTERM, signal.SIGCONT))
+            tried.update(fresh)
+            pending = [pid for pid in self._pins if pid not in self._unsignallable]
+            if (not pending and self._leader_exited()) or time.monotonic() >= deadline:
+                break
+            self._drain_quietly(0.02)
+        signalled |= self._kill_owned_session()  # the unreaped parent keeps every scan provable
+        deadline = time.monotonic() + 1.0
+        while not self._leader_exited() and time.monotonic() < deadline:
+            self._drain_quietly(0.02)
+        if not self._leader_exited():
+            why = self._unsignallable.get(self.pid)
+            raise UnsafeShellState("host shell did not end after SIGKILL"
+                                   + (f" (it cannot be signalled: {why})" if why else ""))
+        survivors = self._survivors()
+        try:
+            self.state = self.shell.snapshot()
+        except OSError:
+            pass
+        self.poll()
+        self._release_transport()
+        self._release_pins()
+        self.kill_result = {"at": time.time(), "input_owner": owner, "manager_owned": owner == "manager",
+                            "manager_command_in_flight": in_flight,
+                            "manager_command": None if self.closed_request is None else dict(self.closed_request),
+                            "exit_status": self.returncode, "signalled": sorted(signalled), "survivors": survivors,
+                            "left_session": left}
+        return {"pane": self.pane_id.value, "killed": True, "process": ref_dict(self.ref),
+                "session_id": self.session_id, "generation": self.generation, **self.kill_result}
+
+    def _release_transport(self) -> None:
+        """Close the old shell's PTY and control descriptors; never signals by number."""
+        transport = self.shell._transport
+        if transport._closed:
+            self._released = True
+            return
+        transport._closed = True
+        transport.boundary.fail_closed()
+        transport.manual_prompt_confirmed = False
+        tail = bytes(transport._display_tail)
+        transport._display_tail.clear()
+        if tail:
+            self._final = tail
+        for fd in (transport.master_fd, transport._control_fd, transport._request_fd, transport._recovery_fd):
+            try:
+                os.close(fd)
+            except OSError:
+                pass
+        transport._init_dir.cleanup()
+        self._released = True
+
+    def close(self) -> dict[str, Any]:
+        """End the shell and its session through pinned identities, then release its PTY.
+
+        Never raises for a member that cannot be signalled: it is reported in ``survivors``.
+        """
+        self._pending.clear()
+        survivors: list[dict[str, Any]] = []
+        if not self._released:
+            if not self.exited() and self._leader_proven():
+                try:
+                    survivors = self.kill()["survivors"]
+                except (UnsafeShellState, OSError):
+                    pass  # the pinned members still get SIGKILL below
+            if not self._released:
+                # Exited shell: members left in its session were pinned at the exit.
+                self._kill_owned_session()
+                self.poll()
+                survivors = self._survivors()
+                self._release_transport()
+        self._release_pins()
+        return {"pane": self.pane_id.value, "exit_status": self.returncode, "survivors": survivors}

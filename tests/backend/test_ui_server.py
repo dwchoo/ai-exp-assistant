@@ -86,6 +86,23 @@ class FakeController:
     def confirm_boot(self, boot_id):
         raise Held(Reason.BOOT_CONFIRMATION_NOT_REQUIRED, "none")
 
+    def restart_pane(self, pane):
+        self.restarts = getattr(self, "restarts", []) + [pane]
+        if pane is PaneId.HOST_SHELL:
+            raise Held(Reason.PANE_ALIVE, "host shell is running")
+        if pane is PaneId.WORKER_OMP:
+            raise Held(Reason.PANE_ALIVE, "worker OMP is running")
+        return {"pane": pane.value, "restarted": True, "generation": 2}
+
+    def kill_pane(self, pane):
+        self.kills = getattr(self, "kills", []) + [pane]
+        if pane is not PaneId.HOST_SHELL:
+            raise Held(Reason.PANE_NOT_KILLABLE, "only the host shell is force-killed")
+        if getattr(self, "shell_exited", False):
+            raise Held(Reason.PANE_EXITED, "host shell has already exited")
+        self.shell_exited = True
+        return {"pane": pane.value, "killed": True, "manager_owned": False, "manager_command": None}
+
 
 class ServerFixture(unittest.TestCase):
     def setUp(self):
@@ -226,6 +243,94 @@ class ContractServerTests(ServerFixture):
         self.controller.shell_owner = "manager"
         held = client.input(PaneId.HOST_SHELL, b"x")
         self.assertEqual(held["reason"], "input_owner_manager")
+
+    def test_restart_pane_requires_attachment_and_relays_result_or_refusal(self):
+        client = self.client()
+        refused = client.request(ClientType.RESTART_PANE, pane="manager_omp")
+        self.assertEqual((refused["ok"], refused["reason"]), (False, "not_attached"))
+        self.assertEqual(getattr(self.controller, "restarts", []), [])
+        client.attach()
+        done = client.request(ClientType.RESTART_PANE, pane="manager_omp")
+        self.assertEqual((done["ok"], done["pane"], done["restarted"], done["generation"]),
+                         (True, "manager_omp", True, 2))
+        for pane, reason in (("worker_omp", "pane_alive"), ("host_shell", "pane_alive")):
+            held = client.request(ClientType.RESTART_PANE, pane=pane)
+            self.assertEqual((held["ok"], held["reason"]), (False, reason), pane)
+            self.assertTrue(held["detail"])
+        bad = client.request(ClientType.RESTART_PANE, pane="tmux")
+        self.assertEqual((bad["ok"], bad["reason"]), (False, "invalid_message"))
+        self.assertEqual(self.controller.restarts, [PaneId.MANAGER_OMP, PaneId.WORKER_OMP, PaneId.HOST_SHELL])
+        self.assert_server_alive()
+
+    def test_successful_restart_pushes_a_state_snapshot_right_after_the_result(self):
+        client = self.client()
+        client.attach()
+        client.pump(0.05)
+        before = len(client.states)
+        client.request(ClientType.RESTART_PANE, pane="worker_omp")  # refused: no push
+        client.request(ClientType.RESTART_PANE, pane="host_shell")
+        client.pump(0.1)
+        self.assertEqual(len(client.states), before)
+        done = client.request(ClientType.RESTART_PANE, pane="manager_omp")
+        self.assertTrue(done["ok"])
+        deadline = time.monotonic() + 3
+        while len(client.states) == before and time.monotonic() < deadline:
+            client.pump(0.05)
+        self.assertEqual(len(client.states), before + 1, "no state pushed after a successful restart")
+        self.assertEqual(client.states[-1]["focus"], self.controller.focus.value)
+
+    def test_kill_pane_requires_attachment_relays_result_or_refusal_and_pushes_state(self):
+        client = self.client()
+        refused = client.request(ClientType.KILL_PANE, pane="host_shell")
+        self.assertEqual((refused["ok"], refused["reason"]), (False, "not_attached"))
+        self.assertEqual(getattr(self.controller, "kills", []), [])
+        client.attach()
+        client.pump(0.05)
+        before = len(client.states)
+        for pane in ("manager_omp", "worker_omp"):
+            held = client.request(ClientType.KILL_PANE, pane=pane)
+            self.assertEqual((held["ok"], held["reason"]), (False, "pane_not_killable"), pane)
+            self.assertTrue(held["detail"])
+        client.pump(0.1)
+        self.assertEqual(len(client.states), before, "a refused kill pushes no state")
+        done = client.request(ClientType.KILL_PANE, pane="host_shell")
+        self.assertEqual((done["ok"], done["pane"], done["killed"], done["manager_owned"]),
+                         (True, "host_shell", True, False))
+        deadline = time.monotonic() + 3
+        while len(client.states) == before and time.monotonic() < deadline:
+            client.pump(0.05)
+        self.assertEqual(len(client.states), before + 1, "no state pushed after a successful kill")
+        again = client.request(ClientType.KILL_PANE, pane="host_shell")
+        self.assertEqual((again["ok"], again["reason"]), (False, "pane_exited"))
+        bad = client.request(ClientType.KILL_PANE, pane="tmux")
+        self.assertEqual((bad["ok"], bad["reason"]), (False, "invalid_message"))
+        self.assertEqual(self.controller.kills, [PaneId.MANAGER_OMP, PaneId.WORKER_OMP, PaneId.HOST_SHELL,
+                                                 PaneId.HOST_SHELL])
+        self.assert_server_alive()
+
+    def test_unexpected_handler_exception_is_an_error_result_and_the_server_keeps_serving(self):
+        client = self.client()
+        client.attach()
+        client.pump(0.05)
+
+        def kill_pane(pane):
+            raise PermissionError(1, "Operation not permitted")
+
+        def takeover_request():
+            raise RuntimeError("controller bug")
+        self.controller.kill_pane = kill_pane
+        self.controller.takeover_request = takeover_request
+        failed = client.request(ClientType.KILL_PANE, pane="host_shell")
+        self.assertEqual((failed["ok"], failed["reason"]), (False, "internal_error"))
+        self.assertIn("Operation not permitted", failed["detail"])
+        failed = client.request(ClientType.TAKEOVER_REQUEST)
+        self.assertEqual((failed["ok"], failed["reason"]), (False, "internal_error"))
+        self.assertIn("controller bug", failed["detail"])
+        self.assertTrue(self.thread.is_alive(), "the server loop stopped")
+        focus = client.request(ClientType.FOCUS, pane="worker_omp")
+        self.assertEqual((focus["ok"], focus["focus"]), (True, "worker_omp"))
+        self.assertIs(self.server.attached is not None, True)
+        self.assert_server_alive()
 
     def test_client_disconnect_detaches_but_server_keeps_serving(self):
         client = self.client()
