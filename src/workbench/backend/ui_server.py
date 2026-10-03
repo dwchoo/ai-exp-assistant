@@ -53,6 +53,8 @@ class Controller(Protocol):
     def confirm_boot(self, boot_id: str) -> dict[str, Any]: ...
     def restart_pane(self, pane: PaneId) -> dict[str, Any]: ...
     def kill_pane(self, pane: PaneId) -> dict[str, Any]: ...
+    def pause(self) -> dict[str, Any]: ...
+    def resume(self, reconciled: bool) -> dict[str, Any]: ...
 
 
 class _Connection:
@@ -312,7 +314,8 @@ class UiServer:
             return
         if fields is not None:
             self._header(connection, ui_v1.result(message.id, True, **fields))
-            if message.type in {ClientType.RESTART_PANE, ClientType.KILL_PANE}:
+            if message.type in {ClientType.RESTART_PANE, ClientType.KILL_PANE, ClientType.PAUSE,
+                                ClientType.RESUME}:
                 # The pane is live again / exited now: tell the UI at once, not on the next periodic push (C-D62/C-D63).
                 try:
                     self.push_state(self.controller.snapshot())
@@ -374,6 +377,10 @@ class UiServer:
             return {"shell": controller.takeover_confirm()}
         if kind is ClientType.HANDOFF:
             return {"shell": controller.handoff()}
+        if kind is ClientType.PAUSE:
+            return controller.pause()
+        if kind is ClientType.RESUME:
+            return controller.resume(fields["reconciled"])
         raise Held(Reason.UNSUPPORTED_TYPE, f"unsupported type {kind.value}")
 
     # -- shutdown --------------------------------------------------------

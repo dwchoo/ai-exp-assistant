@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from hashlib import sha256
+import inspect
 import json
 import os
 from pathlib import Path, PurePosixPath
@@ -91,6 +92,20 @@ def _current_authority(repository: TaskRepository, task_id: str, revision: int, 
     return state
 
 
+def _deliver_report(mailbox: Any, message: Any, timeout: float | None,
+                    on_submitted: Callable[[], None] | None) -> Any:
+    """``mailbox.deliver`` with ``on_submitted`` when the mailbox supports it (``TaskMailbox`` does)."""
+    options: dict[str, Any] = {} if timeout is None else {"timeout": timeout}
+    if on_submitted is not None:
+        try:
+            parameters = inspect.signature(mailbox.deliver).parameters.values()
+        except (TypeError, ValueError):
+            parameters = ()
+        if any(p.name == "on_submitted" or p.kind is p.VAR_KEYWORD for p in parameters):
+            options["on_submitted"] = on_submitted
+    return mailbox.deliver(message, **options)
+
+
 def classify_worker_request(request: Mapping[str, Any], approved_paths: list[str] | None) -> str:
     """Advisory classification only; never grants execution authority."""
     def valid(path: Any) -> bool:
@@ -137,6 +152,12 @@ class WorkflowRun:
     worker_port: WorkerRolePort | None
     _terminal: bool = False
     _reported: bool = False
+    # False when the caller injected the shell (the product host shell): it is never closed here.
+    owns_shell: bool = True
+    _report_message: Any = None
+    _report_requires_code_change: bool = False
+    _report_judgment: str | None = None
+    _run_closed: bool = False
 
     def _persist(self) -> None:
         _write_json(self.result_path, self._record)
@@ -221,7 +242,16 @@ class WorkflowRun:
         return dict(self._record)
 
     def judge(self, *, paused: bool = False, requires_code_change: bool = False,
-              code_change_reason: str = "") -> dict[str, Any]:
+              code_change_reason: str = "",
+              on_report: Callable[[str, Mapping[str, Any]], None] | None = None) -> dict[str, Any]:
+        """Judge the collected evidence and report it to the manager (once; never replayed).
+
+        ``on_report`` (CW-18 R1) is told ``sending`` just before the report is
+        delivered and ``submitted`` once the manager OMP accepted it into its
+        session (mailboxes with ``on_submitted``). With ``on_report`` the run is
+        closed at that acceptance, not when the manager's turn ends: the report
+        reached the manager, and a later unknown receipt changes nothing.
+        """
         if paused:
             return {"status": "deferred_paused", "run_id": self.run_id, "raw_log": str(self.raw_log)}
         if not self._terminal or self._record.get("shell_state") != "exited":
@@ -343,24 +373,84 @@ class WorkflowRun:
             MessageKind.REPORT, evidence, in_reply_to_message_id=self.task_message_id,
         )
         self._reported = True  # The delivery attempt may succeed before its caller sees a receipt.
+        self._report_message = message
+        self._report_requires_code_change = requires_code_change
+        self._report_judgment = judgment
         self._record["report"] = {"message_id": message.message_id, "status": "delivery_unknown"}
         self._persist()
+        if on_report is not None:
+            on_report("sending", dict(self._record))
         try:
-            receipt = self.mailbox.deliver(message)
+            receipt = _deliver_report(self.mailbox, message, None, self._report_submitted(on_report))
         except BaseException:
             self._persist()
             raise
-        self._record["report"]["status"] = receipt.status.value
-        self._record["instruction_ended"] = requires_code_change
-        self._persist()
-        if requires_code_change:
+        return self._finish_report(receipt)
+
+    def _close_reported_run(self) -> None:
+        if self._run_closed:
+            return
+        self._run_closed = True
+        if self._report_requires_code_change:
             self.repository.fail_run(self.run_id, {"requires_code_change": True, "report": self._record["report"]})
-        elif receipt.status is MailboxStatus.OMP_PROCESSED:
-            self.repository.complete_run(self.run_id, {"judgment": judgment, "report": self._record["report"]})
+        else:
+            self.repository.complete_run(self.run_id, {"judgment": self._report_judgment,
+                                                       "report": self._record["report"]})
+
+    def _report_submitted(self, on_report: Callable[[str, Mapping[str, Any]], None] | None
+                          ) -> Callable[[], None] | None:
+        if on_report is None:
+            return None
+
+        def submitted() -> None:  # on this thread, inside the mailbox delivery
+            self._record["report"]["status"] = MailboxStatus.API_RETURNED.value
+            self._record["report"]["accepted_by_manager"] = True
+            self._record["instruction_ended"] = self._report_requires_code_change
+            self._persist()
+            self._close_reported_run()
+            on_report("submitted", dict(self._record))
+        return submitted
+
+    def _finish_report(self, receipt: Any) -> dict[str, Any]:
+        self._record["report"]["status"] = receipt.status.value
+        self._record["instruction_ended"] = self._report_requires_code_change
+        self._persist()
+        if self._report_requires_code_change or receipt.status is MailboxStatus.OMP_PROCESSED:
+            self._close_reported_run()
         return dict(self._record)
 
+    def retry_report(self, *, timeout: float = 20,
+                     on_report: Callable[[str, Mapping[str, Any]], None] | None = None) -> dict[str, Any]:
+        """Deliver the same report again only while its last receipt was ``deferred``.
+
+        A deferred receipt means nothing was submitted to the manager OMP (the
+        mailbox resends only that state); any other state is never replayed.
+        """
+        report = self._record.get("report") or {}
+        if self._report_message is None or report.get("status") != MailboxStatus.DEFERRED.value:
+            raise WorkflowHeld("only a deferred (never submitted) report is delivered again; no replay")
+        if on_report is not None:
+            on_report("sending", dict(self._record))
+        try:
+            receipt = _deliver_report(self.mailbox, self._report_message, timeout, self._report_submitted(on_report))
+        except BaseException:
+            self._record["report"]["status"] = "delivery_unknown"
+            self._persist()
+            raise
+        return self._finish_report(receipt)
+
     def close(self) -> None:
-        self.shell.close()
+        _release_shell(self.shell, self.owns_shell)
+
+
+def _release_shell(shell: Any, owned: bool) -> None:
+    """Close a shell the workflow created; only detach from an injected one."""
+    if owned:
+        shell.close()
+        return
+    detach = getattr(shell, "detach", None)
+    if callable(detach):
+        detach()
 
 
 class TaskWorkflow:
@@ -420,7 +510,23 @@ class TaskWorkflow:
 
     def start(self, task_id: str, revision: int, *, worktree_path: str | Path,
               artifacts_root: str | Path, automation: Mapping[str, Any],
-              environment_values: Mapping[str, str] | None = None) -> WorkflowRun:
+              environment_values: Mapping[str, str] | None = None,
+              shell: Any | None = None,
+              before_shell_input: Callable[[], None] | None = None) -> WorkflowRun:
+        """Start one approved run.
+
+        ``before_shell_input`` (CW-18 R5) is called right before the first
+        keystroke into the shell (after the worker's decision and the worktree
+        preparation); it may raise ``WorkflowHeld`` so that nothing is typed.
+
+        ``shell`` (CW-18 delta) injects an existing persistent host shell, the
+        product host pane, instead of a new ``PersistentShell``. The run then
+        uses that shell's own environment: ``environment_values`` must be None,
+        the approved names are recorded, and the shell kind must equal the
+        approved ``execution.shell``. An injected shell is never closed by the
+        workflow (only ``detach()`` is called when it has one). Without
+        ``shell`` the behaviour is unchanged.
+        """
         if self._public_mailbox and (self.worker_port is None or self.automation_source is None):
             raise WorkflowHeld("public OMP execution requires worker-response and current-automation ports")
         automation_source = self.automation_source or (lambda: automation)
@@ -431,7 +537,17 @@ class TaskWorkflow:
         environment_spec = execution["environment"]
         if self._public_mailbox and not isinstance(environment_spec, list):
             raise WorkflowHeld("public OMP TaskSpec must contain environment names, never values")
-        if isinstance(environment_spec, list):
+        injected = shell is not None
+        if injected:
+            if environment_values is not None:
+                raise ValueError("an injected host shell runs with its own environment; pass no values")
+            if not isinstance(environment_spec, list):
+                raise WorkflowHeld("an injected host shell runs only TaskSpecs with environment names")
+            kind = getattr(getattr(shell, "choice", None), "kind", None)
+            if kind != execution["shell"]:
+                raise WorkflowHeld("the host shell kind differs from the approved execution shell")
+            shell_environment = {name: "" for name in environment_spec}  # names only; values stay in the shell
+        elif isinstance(environment_spec, list):
             if environment_values is None or set(environment_values) != set(environment_spec) or any(
                 not isinstance(value, str) for value in environment_values.values()
             ):
@@ -472,12 +588,14 @@ class TaskWorkflow:
             "shell_state": "not_sent", "exit_status": None, "exit_confirmed": False,
             "worker_judgment": None, "approval_hash": approval_hash,
         }
+        if injected:
+            record["shell_source"] = "injected_host_shell"
         try:
             _write_json(result_path, record)
         except BaseException as exc:
             self.repository.fail_run(run_id, {"stage": "artifact_setup", "error": type(exc).__name__})
             raise
-        shell = None
+        host_shell, shell = shell, None
         task_message = None
         try:
             task_message = self.mailbox.create_message(
@@ -508,9 +626,14 @@ class TaskWorkflow:
                            "source_status_after": worktree.source_status_after})
             _write_json(result_path, record)
             _current_authority(self.repository, task_id, revision, run_id, approval_hash, automation_source)
-            executable = "/bin/bash" if execution["shell"] == "bash" else "/bin/sh"
-            shell = PersistentShell(user_environment=shell_environment,
-                                    choice=ShellChoice(execution["shell"], executable))
+            if before_shell_input is not None:
+                before_shell_input()  # e.g. the product host shell is checked idle and held from here
+            if injected:
+                shell = host_shell
+            else:
+                executable = "/bin/bash" if execution["shell"] == "bash" else "/bin/sh"
+                shell = PersistentShell(user_environment=shell_environment,
+                                        choice=ShellChoice(execution["shell"], executable))
             pwd_file = record_dir / "parent-cwd.txt"
             shell.send_user((f"cd {shlex.quote(str(worktree.path))} && pwd -P > {shlex.quote(str(pwd_file))}\n").encode())
             deadline = time.monotonic() + 3
@@ -550,10 +673,10 @@ class TaskWorkflow:
             return WorkflowRun(self.repository, self.mailbox, task_id, revision, run_id,
                                task_message.message_id, worktree, shell, execution,
                                record_dir, raw_log, result_path, before, approval_hash, record, {"sent"},
-                               automation_source, self.worker_port)
+                               automation_source, self.worker_port, owns_shell=not injected)
         except BaseException as exc:
             if shell is not None:
-                shell.close()
+                _release_shell(shell, not injected)
             record.update({"shell_state": "unknown" if isinstance(exc, WorkflowHeld) else "preparation_failed",
                            "preparation_error": {"type": type(exc).__name__, "detail": str(exc)}})
             active = self.repository.get_current_run(task_id)

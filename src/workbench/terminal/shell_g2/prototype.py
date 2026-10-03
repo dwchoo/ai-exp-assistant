@@ -86,7 +86,13 @@ class InputBoundary:
         self._residue_open = False
         self._sticky_uncertain = False
         self.active_command: str | None = None
-        self.needs_review = False
+        # needs_review has two sources. A latch set only by a user job seen at
+        # a prompt/handoff jobs probe is cleared by a fresh verified handoff
+        # whose own jobs probe is empty (C-D58); every other cause (unknown or
+        # manual residue, lost hook/control, failed or unfinished command,
+        # automation jobs, fail_closed) stays for the shell generation.
+        self._review_jobs = False
+        self._review_other = False
         # The control FD reached EOF: shell state is no longer observable.
         self.control_lost = False
         self.last_exit_code: int | None = None
@@ -97,9 +103,31 @@ class InputBoundary:
         self._handoff_seen = False
         self._handoff_hook_checked = False
         self._handoff_jobs_checked = False
+        self._handoff_jobs_clean = False
         self._handoff_ready = False
         self.shell_pid: int | None = None
         self.lock = threading.RLock()
+
+    @property
+    def needs_review(self) -> bool:
+        return self._review_other or self._review_jobs
+
+    @needs_review.setter
+    def needs_review(self, value: bool) -> None:
+        # A direct latch has no proven cause: only a job-caused one may clear.
+        if value:
+            self._review_other = True
+        else:
+            self._review_other = self._review_jobs = False
+
+    def _job_review_clearable(self) -> bool:
+        """Nothing but user jobs latched, and this handoff's probe saw none."""
+        return not self._review_other and (not self._review_jobs or self._handoff_jobs_clean)
+
+    def _clear_job_review(self) -> None:
+        # Called only when a fresh verified handoff is accepted.
+        if self._handoff_jobs_clean:
+            self._review_jobs = False
 
     def owner_change(self, owner: InputOwner) -> int:
         with self.lock:
@@ -112,6 +140,7 @@ class InputBoundary:
                     self._handoff_seen = False
                     self._handoff_hook_checked = False
                     self._handoff_jobs_checked = False
+                    self._handoff_jobs_clean = False
                     self._handoff_ready = False
             if owner == "manager":
                 self._reconcile_clean()
@@ -132,6 +161,7 @@ class InputBoundary:
                     self._handoff_seen = False
                     self._handoff_hook_checked = False
                     self._handoff_jobs_checked = False
+                    self._handoff_jobs_clean = False
                     self._handoff_ready = False
                     self.pending_line.clear()
                     self.submitted_lines += 1
@@ -191,6 +221,7 @@ class InputBoundary:
                     self._handoff_seen = False
                     self._handoff_hook_checked = False
                     self._handoff_jobs_checked = False
+                    self._handoff_jobs_clean = False
                     self.pending_line.clear()
                     self.submitted_lines += 1
                     self._line_uncertain = False
@@ -247,9 +278,10 @@ class InputBoundary:
                     and self.submitted_lines == 1
                     and not self.pending_line
                     and not self.uncertain
-                    and not self.needs_review
+                    and self._job_review_clearable()
                     and self.active_command is None
                 ):
+                    self._clear_job_review()
                     self.submitted_lines = 0
                     self.ready = True
                     self._handoff_ready = True
@@ -289,16 +321,24 @@ class InputBoundary:
                 return
             if event.startswith("JOBS_END:"):
                 if self._job_probe and self._job_pids:
-                    self.needs_review = True
+                    self._handoff_jobs_clean = False
+                    if self.owner == "user" and event in {"JOBS_END:HANDOFF", "JOBS_END:READY"}:
+                        # The user's own background/suspended job at a prompt
+                        # or handoff: they can clean it up and hand off again.
+                        self._review_jobs = True
+                    else:
+                        self._review_other = True
                 if self._job_probe and event == "JOBS_END:HANDOFF" and self._handoff_seen:
                     self._handoff_jobs_checked = True
+                    self._handoff_jobs_clean = not self._job_pids
                 if self._job_probe and event == "JOBS_END:READY" and self._handoff_seen:
                     if (
                         self.ready
                         and self._handoff_hook_checked
                         and self._handoff_jobs_checked
-                        and not self.needs_review
+                        and self._job_review_clearable()
                     ):
+                        self._clear_job_review()
                         self._handoff_ready = True
                         self._reconcile_clean()
                 self._job_probe = False

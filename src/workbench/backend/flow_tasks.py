@@ -1,0 +1,1237 @@
+"""CW-18 Task flow under the user's standing delegation (C-D60, C-D64, C-D65, C-D66).
+
+``TaskFlow`` is the backend's ``HandoffPolicy`` for ``to_worker``/``to_manager``
+and the owner of the single active Task:
+
+- Standing delegation (C-D66): the user delegates handing work to the worker to
+  the manager. A ``to_worker`` without ``task_id`` while the worker is idle
+  creates the Task (``experiment`` or ``work``), records ``approve_scope`` +
+  ``proceed`` with ``actor: user_standing_delegation`` and ``authority: C-D66``
+  (no UI approval, no derived scope check) and dispatches at once: a free-work
+  instruction goes to the worker, an experiment run starts on the product host
+  shell under the idle-only rule (else the Task shows
+  ``held:host_terminal_busy`` and the start is tried again). The user's host
+  input is held only from the moment Workbench types (R5): the TASK delivery,
+  the worker's decision and the worktree preparation run unheld; just before
+  the first keystroke the shell is checked idle again and held (if the user
+  started a line meanwhile nothing is typed and the start fails as
+  ``start_failed:host_terminal_busy``).
+- One Task at a time: while a Task is active (dispatched, starting, running,
+  held, waiting for the worker's report, cancelling) a new ``to_worker``
+  answers ``worker_busy`` with ``{task_id, kind, summary, status, since}``.
+  Nothing is queued.
+- Follow-ups: a ``to_worker`` with the active Task's ``task_id`` is a message to
+  the worker for the same Task (no new approval). An experiment re-run
+  (``run: true`` or a changed spec) of the current Task is a new run under the
+  same delegation, limited to ``RETRY_LIMIT`` (CW-13) re-runs per Task.
+- Completion frees the worker (CW-18 R1): free work ends when the worker's
+  ``done`` (closes the Task) or ``blocked`` (the Task stays open for a
+  follow-up) report is accepted into the manager OMP's session (the mailbox's
+  ``api_accepted``), not when the manager's turn ends: a ``to_worker`` in the
+  turn that reads the report is accepted. An experiment Task is ``finished``
+  once its report was accepted the same way (its run closes then; it can still
+  be re-run until a new Task supersedes it). A ``to_worker`` that races the
+  report's ack waits for it at most ``REPORT_SETTLE_WAIT``. A report whose
+  delivery ended unknown or rejected before any acceptance closes the Task as
+  ``report_outcome_unknown`` / ``report_not_delivered`` (nothing is resent) and
+  the manager learns it from the notices of its next ``to_worker`` result. A
+  done/blocked report and a free-work TASK are kept across a pause (never
+  submitted, so delivering them after the resume is not a replay; R3).
+- Attribution (R2): a ``to_manager`` without ``task_id`` belongs to the active
+  Task only once that Task's TASK reached the worker; before that it is
+  ``rejected:task_not_delivered``.
+- Cancel (``to_worker {task_id, cancel: true}``): every not yet submitted
+  message of the Task is withdrawn from the outbox first (R2: the worker never
+  gets a cancelled TASK after its cancel; a TASK it never got needs no cancel
+  notice). An unstarted Task closes at once; a free-work run is cancelled in
+  the repository and the worker is told;
+  a host command in flight is never killed by Workbench (no CW-13 forced stop):
+  the Task is ``cancelling`` until the command exits, then the run is cancelled
+  without a judgment and the Task closes. The manager learns the end from a
+  notice in its next ``to_worker`` result.
+- Automation (CW-18 U3): an optional ``lifecycle`` hook (the backend's
+  ``AutomationController``) learns each run's start (``experiment_started`` with
+  the live ``WorkflowRun`` on the runner thread, ``work_started`` once the
+  free-work TASK message exists) and its close (``run_ended``). It is called
+  outside the flow lock; its failure never stops the flow.
+- Persistence: ``workflow/tasks-flow.jsonl`` (0600, fsync per record) keeps the
+  Task state and every decision with its ids. After a backend restart nothing
+  is started or resent: an unstarted Task is closed, a Task with a current run
+  is held (``backend_restarted``) until its report or a cancel. Pending UI
+  approvals from before C-D66 are retired once (never dispatched).
+"""
+
+from __future__ import annotations
+
+from dataclasses import asdict, dataclass, field, fields
+import os
+from pathlib import Path
+import threading
+import time
+from typing import Any, Callable, Iterator, Mapping
+from contextlib import contextmanager
+from uuid import uuid4
+
+from workbench.backend.flow import (
+    ActiveTask, HandoffDecision, HandoffJournal, HandoffRequest, OutboundMessage, accepts_keyword, held, rejected,
+)
+from workbench.contracts.v1 import ActorRole, MessageKind
+from workbench.ipc.bridge_g3.mailbox import MailboxStatus
+from workbench.workflow.run import WorkflowHeld, classify_worker_request
+
+FLOW_LEDGER_NAME = "tasks-flow.jsonl"  # under DataLayout.workflow
+RETRY_LIMIT = 3  # CW-13: re-runs of one experiment Task
+SUMMARY_MAX = 1024
+NOTICE_LIMIT = 16
+HOLD_REASON = "Workbench is starting the manager's experiment run"
+RETURN_REASON = "Workbench is returning the host shell to your directory"
+# F2: how long a give-back waits for the shell to be idle before it retries the cd later.
+RESTORE_IDLE_WAIT = 5.0
+STANDING_DELEGATION = {"actor": "user_standing_delegation", "authority": "C-D66"}
+# Task statuses (ui_v1 TASK_STATUSES). Inactive ones free the worker.
+ACTIVE_STATUSES = ("dispatched", "starting", "running", "waiting_report", "held", "cancelling")
+INACTIVE_STATUSES = ("finished", "blocked", "closed")
+BUSY_DETAIL = ("The worker does one task at a time and is busy with this Task. Wait for its to_manager "
+               "report (done/blocked), send a follow-up with this task_id, or cancel it with "
+               "{task_id, cancel: true}.")
+TASK_NOT_DELIVERED_DETAIL = ("The active Task's instruction has not reached you yet; a report without task_id "
+                             "cannot belong to it. Finish the turn; the Task's TASK message follows.")
+# R1: how long a to_worker (to_manager) waits for a report (TASK) the lane is submitting right now.
+REPORT_SETTLE_WAIT = 2.0
+CANCEL_WAIT_DETAIL = ("The experiment's host command is still running; Workbench never kills it. The Task "
+                      "closes as cancelled when the command exits (the user can stop it in the host shell); "
+                      "no judgment is made.")
+
+
+def _under(path: str, root: Path | str) -> bool:
+    root = os.path.realpath(root)
+    try:
+        return os.path.commonpath([os.path.realpath(path), root]) == root
+    except ValueError:
+        return False
+
+
+def _now() -> str:
+    return time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+
+
+def _valid_paths(paths: list[str]) -> bool:
+    if not paths:
+        return True
+    try:
+        classify_worker_request({"paths": list(paths)}, None)
+    except ValueError:
+        return False
+    return True
+
+
+# -- state ------------------------------------------------------------------------
+@dataclass
+class FlowTask:
+    task_id: str
+    kind: str
+    status: str = "dispatched"  # see ACTIVE_STATUSES / INACTIVE_STATUSES
+    revision: int = 1
+    spec: dict[str, Any] = field(default_factory=dict)  # the spec of ``revision`` (delegated)
+    summary: str = ""
+    since: str = ""
+    scope_decision_id: str | None = None
+    run_id: str | None = None
+    run_revision: int | None = None
+    task_message_id: str | None = None
+    runs_started: int = 0  # start attempts (each consumed one proceed)
+    pending_start: dict[str, Any] | None = None  # {revision, origin}
+    held_reason: str | None = None
+    closed_reason: str | None = None
+    last_result: dict[str, Any] | None = None
+    cancel_requested: dict[str, Any] | None = None
+
+    def set_status(self, status: str) -> None:
+        if status != self.status or not self.since:
+            self.status, self.since = status, _now()
+
+    def busy(self) -> bool:
+        """True while this Task occupies the worker (C-D66: one Task at a time)."""
+        return self.status not in INACTIVE_STATUSES
+
+    def shown_status(self) -> str:
+        if self.status in ("dispatched", "starting", "running", "held") and self.held_reason:
+            return f"held:{self.held_reason}"
+        return self.status
+
+    def busy_view(self) -> dict[str, Any]:
+        return {"task_id": self.task_id, "kind": self.kind, "summary": self.summary,
+                "status": self.shown_status(), "since": self.since, "run_id": self.run_id,
+                "held_reason": self.held_reason}
+
+    def view(self) -> dict[str, Any]:
+        return {"task_id": self.task_id, "kind": self.kind, "status": self.status, "summary": self.summary,
+                "since": self.since, "active": self.busy(), "revision": self.revision, "run_id": self.run_id,
+                "runs_started": self.runs_started, "retry_limit": RETRY_LIMIT, "held_reason": self.held_reason,
+                "closed_reason": self.closed_reason, "cancel_requested": self.cancel_requested is not None,
+                "last_result": None if self.last_result is None else dict(self.last_result)}
+
+
+_TASK_FIELDS = frozenset(item.name for item in fields(FlowTask))
+
+
+@dataclass
+class ExperimentPorts:
+    """What the runner needs for an experiment run (the backend supplies product parts)."""
+
+    host_shell: Callable[[], Any]  # -> HostShellPort | None
+    make_workflow: Callable[[Any], Any]  # (repository on the runner thread) -> TaskWorkflow
+    automation: Callable[[], Mapping[str, Any]]  # AutomationState port
+    environment_names: Callable[[], set[str]]  # names in the host shell's start-up environment
+    worktrees_root: Path
+    artifacts_root: Path
+
+
+class TaskFlow:
+    """The CW-18 policy and Task runner under the standing delegation; see the module docstring."""
+
+    def __init__(self, ledger_path: str | Path, *, repository_factory: Callable[[], Any],
+                 handoffs: Any, omp_idle: Callable[[ActorRole], bool | None],
+                 paused: Callable[[], bool] = lambda: False,
+                 experiment: ExperimentPorts | None = None, lifecycle: Any | None = None,
+                 poll_interval: float = 0.5, collect_slice: float = 1.0):
+        self._repository_factory = repository_factory
+        self._handoffs = handoffs
+        self._omp_idle = omp_idle
+        self._paused = paused
+        self._experiment = experiment
+        self._lifecycle = lifecycle
+        self._poll_interval = poll_interval
+        self._collect_slice = collect_slice
+        self._lock = threading.RLock()
+        self._wake = threading.Condition(self._lock)
+        self._stop = False
+        self._thread: threading.Thread | None = None
+        self._following: str | None = None  # the Task whose experiment run the runner thread is driving
+        # F2: the user's host shell directory before Workbench typed a run's ``cd`` (restored after the run).
+        self._home_cwd: str | None = None
+        # R1/R2 (in memory): Tasks whose report the lane/runner is submitting right now, and each free-work
+        # Task's TASK message state (queued | delivering | sent | not_sent).
+        self._report_inflight: set[str] = set()
+        self._task_message_state: dict[str, str] = {}
+        self._ledger = HandoffJournal(ledger_path)
+        self.tasks: dict[str, FlowTask] = {}
+        self.notices: list[dict[str, Any]] = []
+        self._load(self._ledger.records)
+        self._ledger.records = []
+
+    # -- persistence ------------------------------------------------------------
+    def _load(self, records: list[dict[str, Any]]) -> None:
+        pending_approvals: dict[str, Any] = {}
+        retired: set[str] = set()
+        for record in records:
+            kind = record.get("type")
+            if kind == "task" and isinstance(record.get("task"), dict):
+                data = {name: value for name, value in record["task"].items() if name in _TASK_FIELDS}
+                try:
+                    self.tasks[data["task_id"]] = FlowTask(**data)
+                except (KeyError, TypeError):
+                    continue
+            elif kind == "approval" and isinstance(record.get("approval"), dict):  # before C-D66
+                approval = record["approval"]
+                approval_id = str(approval.get("approval_id"))
+                if approval.get("state") == "pending":
+                    pending_approvals[approval_id] = approval
+                else:
+                    pending_approvals.pop(approval_id, None)
+            elif kind == "approvals_retired":
+                retired.update(str(item) for item in record.get("approval_ids") or ())
+            elif kind == "notice" and isinstance(record.get("notice"), dict):
+                self.notices.append(dict(record["notice"]))
+            elif kind == "notices_delivered":
+                done = set(record.get("notice_ids") or ())
+                self.notices = [n for n in self.notices if n.get("notice_id") not in done]
+        # C-D66: pending UI approvals are retired, never turned into a dispatch.
+        stale = sorted(set(pending_approvals) - retired)
+        if stale:
+            self._record({"type": "approvals_retired", "approval_ids": stale, "authority": "C-D66"})
+        # A restart starts nothing and resends nothing: the manager acts again.
+        for task in list(self.tasks.values()):
+            if task.status == "closed":
+                continue
+            if task.status == "pending_approval":  # a Task of the old flow that was never approved
+                self._close(task, "approval_retired_c_d66")
+            elif task.run_id is not None:  # its report or a cancel ends it; nothing is resent
+                task.pending_start = None
+                task.held_reason = "backend_restarted"
+                if task.kind == "experiment":
+                    task.set_status("held")  # no runner follows the run any more
+                self._save_task(task)
+            elif task.kind == "experiment" and task.runs_started > 0:
+                if task.pending_start is not None or task.status != "finished":
+                    task.pending_start = None
+                    task.held_reason = "backend_restarted" if task.status != "finished" else task.held_reason
+                    task.set_status("finished")  # a re-run needs the manager's run: true again
+                    self._save_task(task)
+            elif task.status != "blocked":
+                self._close(task, "not_started_before_restart")
+
+    def _notify_lifecycle(self, name: str, *args: Any) -> None:
+        """Tell the automation controller about a run start/close (never under the flow lock)."""
+        hook = getattr(self._lifecycle, name, None)
+        if hook is None:
+            return
+        try:
+            hook(*args)
+        except Exception:
+            pass  # automation for the run stays held; the flow itself goes on
+
+    def _notify_lifecycle_later(self, name: str, *args: Any) -> None:
+        """The lifecycle hook from a mailbox callback (never under the mailbox's or the flow's lock)."""
+        threading.Thread(target=self._notify_lifecycle, args=(name, *args), daemon=True).start()
+
+    def _settle(self, waiting: Callable[[], bool]) -> None:
+        """Wait (flow lock released) at most ``REPORT_SETTLE_WAIT`` while ``waiting()`` (under the flow lock)."""
+        deadline = time.monotonic() + REPORT_SETTLE_WAIT
+        while not self._stop and waiting():
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                return
+            self._wake.wait(remaining)
+
+    def _record(self, record: Mapping[str, Any]) -> None:
+        try:
+            self._ledger.append(record)
+        except OSError:
+            if not self._stop:  # after close() a late runner record is dropped, never raised
+                raise
+
+    def _save_task(self, task: FlowTask) -> None:
+        self._record({"type": "task", "task": asdict(task)})
+
+    @contextmanager
+    def _repository(self) -> Iterator[Any]:
+        repository = self._repository_factory()
+        try:
+            yield repository
+        finally:
+            repository.close()
+
+    # -- lifecycle --------------------------------------------------------------
+    def start(self) -> None:
+        with self._lock:
+            if self._thread is not None or self._stop:
+                return
+            self._thread = threading.Thread(target=self._runner, name="task-flow-runner", daemon=True)
+            self._thread.start()
+
+    def close(self, timeout: float = 10.0) -> None:
+        with self._wake:
+            self._stop = True
+            self._wake.notify_all()
+            thread = self._thread
+        if thread is not None:
+            thread.join(timeout)
+        self._ledger.close()
+
+    # -- views (ui_v1 state and the HandoffService hook) ---------------------------
+    def active(self) -> FlowTask | None:
+        """The current Task: the latest one not closed (it may be inactive: finished or blocked)."""
+        with self._lock:
+            live = [task for task in self.tasks.values() if task.status != "closed"]
+            return live[-1] if live else None
+
+    def active_task(self) -> ActiveTask | None:
+        task = self.active()
+        if task is None:
+            return None
+        return ActiveTask(task.task_id, task.run_revision or task.revision, task.kind, True, task.run_id,
+                          task.task_message_id)
+
+    def task_view(self) -> dict[str, Any] | None:
+        """ui_v1 ``task``: the current Task, else the most recent one (closed), else None."""
+        with self._lock:
+            task = self.active() or (list(self.tasks.values())[-1] if self.tasks else None)
+            return None if task is None else task.view()
+
+    def worker_view(self) -> dict[str, Any]:
+        """ui_v1 ``worker``: busy while a Task occupies it (C-D66)."""
+        with self._lock:
+            task = self.active()
+            busy = task is not None and task.busy()
+            return {"state": "busy" if busy else "idle", "task_id": task.task_id if busy else None}
+
+    # -- the HandoffPolicy -----------------------------------------------------------
+    def decide(self, request: HandoffRequest, _active: ActiveTask | None) -> HandoffDecision:
+        with self._lock:
+            if request.tool == "to_worker":
+                decision = self._to_worker(request)
+                notices = self._take_notices()
+                if notices:
+                    decision = HandoffDecision({**decision.result, "notices": notices}, decision.message,
+                                               decision.approval, decision.listener)
+                return decision
+            return self._to_manager(request)
+
+    def _take_notices(self) -> list[dict[str, Any]]:
+        if not self.notices:
+            return []
+        taken, self.notices = self.notices[:NOTICE_LIMIT], self.notices[NOTICE_LIMIT:]
+        self._record({"type": "notices_delivered", "notice_ids": [n["notice_id"] for n in taken]})
+        return taken
+
+    def _notice(self, **values: Any) -> None:
+        notice = {"notice_id": str(uuid4()), "at": _now(), **values}
+        self.notices.append(notice)
+        self._record({"type": "notice", "notice": notice})
+
+    @staticmethod
+    def _spec_document(args: Mapping[str, Any]) -> dict[str, Any]:
+        spec = dict(args["spec"])
+        document: dict[str, Any] = {"kind": args["kind"], "goal": spec["goal"], "paths": list(spec["paths"])}
+        if "instructions" in spec:
+            document["instructions"] = spec["instructions"]
+        if "execution" in spec:
+            document["execution"] = dict(spec["execution"])
+        document["source"] = "manager_to_worker"
+        return document
+
+    @staticmethod
+    def _worker_busy(task: FlowTask, **extra: Any) -> HandoffDecision:
+        return HandoffDecision({"status": "worker_busy", "task_id": task.task_id, "task": task.busy_view(),
+                                "detail": BUSY_DETAIL, **extra})
+
+    @staticmethod
+    def _standing(request: HandoffRequest) -> dict[str, Any]:
+        return {**STANDING_DELEGATION, "tool_call_id": request.tool_call_id, "request_key": request.key_dict()}
+
+    def _delegate(self, task: FlowTask, request: HandoffRequest, revision: int, spec: Mapping[str, Any]) -> None:
+        """Record scope + proceed for ``revision`` under the standing delegation (C-D66) and schedule it."""
+        scope: dict[str, Any] = {"kind": task.kind, "goal": spec["goal"], "paths": list(spec["paths"]),
+                                 "commit_policy": "manager_local_commits", "retry_limit": RETRY_LIMIT,
+                                 **self._standing(request)}
+        for name in ("execution", "instructions"):
+            if name in spec:
+                scope[name] = spec[name]
+        with self._repository() as repository:
+            scope_id = repository.approve_scope(task.task_id, revision, scope, retry_count_used=task.runs_started)
+            proceed_id = repository.proceed(task.task_id, revision, {
+                "source": "manager_to_worker", "instruction": request.args["message"][:SUMMARY_MAX],
+                **self._standing(request)}, retry_count_used=task.runs_started)
+        task.revision, task.spec, task.scope_decision_id = revision, dict(spec), scope_id
+        self._record({"type": "delegated", "task_id": task.task_id, "revision": revision,
+                      "scope_decision_id": scope_id, "proceed_decision_id": proceed_id,
+                      **self._standing(request)})
+        task.set_status("dispatched")
+        self._schedule(task, revision, f"tool_call:{request.tool_call_id}")
+
+    def _to_worker(self, request: HandoffRequest) -> HandoffDecision:
+        args = request.args
+        if args.get("cancel") is True:
+            return self._cancel(request)
+        # R1: a report the lane is submitting right now decides whether the worker is free (bounded wait).
+        self._settle(lambda: (current := self.active()) is not None and current.busy()
+                     and current.task_id in self._report_inflight)
+        task_id = args.get("task_id")
+        active = self.active()
+        if task_id is None:
+            if active is not None and active.busy():
+                return self._worker_busy(active)
+            if "spec" not in args:
+                return HandoffDecision(rejected("spec_required"))
+            spec = self._spec_document(args)
+            if not _valid_paths(spec["paths"]):
+                return HandoffDecision(rejected("invalid_paths"))
+            if active is not None:  # a finished or blocked Task is ended by a new Task
+                self._end_inactive(active, "superseded_by_new_task")
+            with self._repository() as repository:
+                new_id = repository.create_task(spec)
+            task = FlowTask(new_id, args["kind"], spec=spec, summary=args["message"][:SUMMARY_MAX])
+            task.set_status("dispatched")
+            self.tasks[new_id] = task
+            self._record({"type": "task_created", "task_id": new_id, "request_key": request.key_dict()})
+            self._delegate(task, request, 1, spec)
+            return HandoffDecision({"status": "dispatched", "task_id": new_id, "kind": task.kind, "revision": 1,
+                                    "detail": "dispatched to the worker under the user's standing delegation "
+                                              "(C-D66); it reports back with to_manager"})
+        task = self.tasks.get(task_id)
+        if task is None:
+            return HandoffDecision(rejected("unknown_task"))
+        if task.status == "closed":
+            return HandoffDecision(rejected("task_closed") | {"closed_reason": task.closed_reason})
+        if active is not task:  # only the latest Task is open; kept for safety
+            return self._worker_busy(active) if active is not None and active.busy() \
+                else HandoffDecision(rejected("task_closed"))
+        if args["kind"] != task.kind:
+            return HandoffDecision(rejected("task_kind_mismatch") | {"task_kind": task.kind})
+        spec = self._spec_document(args) if "spec" in args else None
+        if spec is not None and not _valid_paths(spec["paths"]):
+            return HandoffDecision(rejected("invalid_paths"))
+        if task.kind == "experiment":
+            return self._experiment_follow_up(task, request, spec)
+        return self._work_follow_up(task, request, spec)
+
+    def _experiment_follow_up(self, task: FlowTask, request: HandoffRequest,
+                              spec: dict[str, Any] | None) -> HandoffDecision:
+        wants_run = request.args.get("run") is True or (spec is not None and spec != task.spec)
+        if not wants_run:
+            if task.run_id is None:
+                return HandoffDecision(held("no_active_run") | {
+                    "task_id": task.task_id, "detail": "no run is in progress; send run: true to re-run this "
+                                                       "experiment or a new Task without task_id"})
+            self._record({"type": "follow_up", "task_id": task.task_id, "run_id": task.run_id,
+                          **self._standing(request)})
+            return self._question(task, request, None)
+        if task.busy():
+            return self._worker_busy(task)
+        if task.runs_started > RETRY_LIMIT:
+            return HandoffDecision(held("retry_limit") | {"task_id": task.task_id, "retry_limit": RETRY_LIMIT,
+                                                          "runs_started": task.runs_started})
+        base = dict(spec) if spec is not None else dict(task.spec)
+        if base == task.spec:
+            revision = task.revision  # the same delegated spec runs again on its revision
+        else:
+            with self._repository() as repository:
+                revision = repository.revise_task(task.task_id, base)
+        self._delegate(task, request, revision, base)
+        return HandoffDecision({"status": "dispatched", "task_id": task.task_id, "kind": task.kind,
+                                "revision": revision, "retry": task.runs_started, "retry_limit": RETRY_LIMIT})
+
+    def _work_follow_up(self, task: FlowTask, request: HandoffRequest,
+                        spec: dict[str, Any] | None) -> HandoffDecision:
+        if task.run_id is None:
+            return HandoffDecision(held("run_starting") | {"task_id": task.task_id})
+        self._record({"type": "follow_up", "task_id": task.task_id, "run_id": task.run_id,
+                      **self._standing(request)})
+        if task.status == "blocked":
+            task.held_reason = None
+            task.set_status("running")
+            self._save_task(task)
+        return self._question(task, request, spec)
+
+    def _question(self, task: FlowTask, request: HandoffRequest, spec: dict[str, Any] | None) -> HandoffDecision:
+        payload: dict[str, Any] = {"handoff": "to_worker", "kind": task.kind, "message": request.args["message"],
+                                   "task_id": task.task_id}
+        if spec is not None:
+            payload["paths"] = list(spec["paths"])
+        return HandoffDecision({"status": "queued", "task_id": task.task_id}, message=OutboundMessage(
+            task.task_id, task.run_revision, task.run_id, ActorRole.MANAGER, ActorRole.WORKER,
+            MessageKind.QUESTION, payload))
+
+    # -- cancel ---------------------------------------------------------------------
+    def _cancel(self, request: HandoffRequest) -> HandoffDecision:
+        task_id = request.args.get("task_id")
+        if task_id is None:
+            return HandoffDecision(rejected("task_id_required"))
+        task = self.tasks.get(task_id)
+        if task is None:
+            return HandoffDecision(rejected("unknown_task"))
+        if task.status == "closed":
+            return HandoffDecision(rejected("task_closed") | {"closed_reason": task.closed_reason})
+        record = {"by": "manager", "message": request.args["message"][:SUMMARY_MAX], "at": _now(),
+                  **self._standing(request)}
+        self._record({"type": "cancel_requested", "task_id": task_id, **record})
+        if self._following == task_id:  # the runner drives a host run: it ends the Task after the exit
+            self._withdraw(task_id)
+            task.cancel_requested = record
+            task.set_status("cancelling")
+            task.held_reason = "cancel_waiting_for_host_exit"
+            self._save_task(task)
+            self._wake.notify_all()
+            return HandoffDecision({"status": "cancel_requested", "task_id": task_id, "detail": CANCEL_WAIT_DETAIL})
+        task.cancel_requested = record
+        notified = self._finish_cancel(task, task.run_id)
+        return HandoffDecision({"status": "cancelled", "task_id": task_id, "worker_notified": notified})
+
+    def _finish_cancel(self, task: FlowTask, run_id: str | None) -> bool:
+        """Cancel the current run (if any), close the Task and tell the worker; under the flow lock."""
+        record = task.cancel_requested or {}
+        cancelled_run = None
+        if run_id is not None:
+            with self._repository() as repository:
+                current = repository.get_current_run(task.task_id)
+                if current is not None and current.get("run_id") == run_id:
+                    repository.cancel_run(run_id, "cancelled_by_manager")
+                cancelled_run = repository.get_run(run_id)
+        task.last_result = {"run_id": run_id, "outcome": "cancelled"}
+        revision = task.run_revision
+        self._close(task, "cancelled")
+        # R2: nothing of the cancelled Task that was not submitted yet goes out, before the cancel notice.
+        withdrawn = self._withdraw(task.task_id)
+        never_sent = (MessageKind.TASK.value in withdrawn
+                      or self._task_message_state.get(task.task_id) in ("queued", "not_sent"))
+        self._notice(kind="task_cancelled", task_id=task.task_id, run_id=run_id)
+        notified = False
+        if cancelled_run is not None and not never_sent:
+            payload = {"handoff": "to_worker", "kind": task.kind, "task_id": task.task_id, "cancel": True,
+                       "message": record.get("message") or "cancelled by the manager"}
+            queued = self._handoffs.enqueue(OutboundMessage(
+                task.task_id, revision or cancelled_run["revision"], run_id, ActorRole.MANAGER, ActorRole.WORKER,
+                MessageKind.QUESTION, payload), origin=f"cancel:{task.task_id}")
+            notified = queued.get("status") == "queued"
+        if run_id is not None:
+            threading.Thread(target=self._notify_lifecycle, args=("run_ended", run_id), daemon=True).start()
+        return notified
+
+    def _end_inactive(self, task: FlowTask, reason: str) -> None:
+        """A finished experiment or blocked free-work Task ends when a new Task arrives."""
+        run_id = task.run_id
+        if run_id is not None:
+            with self._repository() as repository:
+                current = repository.get_current_run(task.task_id)
+                if current is not None and current.get("run_id") == run_id:
+                    repository.cancel_run(run_id, reason)
+            threading.Thread(target=self._notify_lifecycle, args=("run_ended", run_id), daemon=True).start()
+        self._close(task, reason)
+        self._withdraw(task.task_id)
+
+    def _withdraw(self, task_id: str) -> list[str]:
+        withdraw = getattr(self._handoffs, "withdraw", None)
+        if withdraw is None:
+            return []
+        try:
+            return list(withdraw(task_id))
+        except Exception:
+            return []
+
+    # -- worker reports -------------------------------------------------------------
+    def _to_manager(self, request: HandoffRequest) -> HandoffDecision:
+        args = request.args
+        task = self.active()
+        if task is None:
+            return HandoffDecision(rejected("no_active_task"))
+        if args.get("task_id") not in (None, task.task_id):
+            return HandoffDecision(rejected("unknown_task"))
+        if task.run_id is None:
+            return HandoffDecision(held("no_active_run"))
+        if args.get("task_id") is None and task.kind == "work":
+            # R2: an untagged report belongs to the active Task only once its TASK reached the worker.
+            self._settle(lambda: self._task_message_state.get(task.task_id) == "delivering")
+            if self._task_message_state.get(task.task_id) in ("queued", "not_sent"):
+                return HandoffDecision(rejected("task_not_delivered") | {"task_id": task.task_id,
+                                                                         "detail": TASK_NOT_DELIVERED_DETAIL})
+            if task.status == "closed" or task.run_id is None:
+                return HandoffDecision(rejected("no_active_task"))
+        payload: dict[str, Any] = {"handoff": "to_manager", "kind": args["kind"], "message": args["message"]}
+        for name in ("requires_code_change", "reason"):
+            if name in args:
+                payload[name] = args[name]
+        if "request" in args:  # a worker's own request: classified only, never dispatched
+            try:
+                category = classify_worker_request(args["request"], list(task.spec.get("paths") or []))
+            except ValueError:
+                category = "invalid_paths"
+            payload["request"] = {**args["request"], "classification": category, "dispatch_authorized": False}
+        if args["kind"] == "answer":
+            if args.get("in_reply_to") is None:
+                return HandoffDecision(rejected("in_reply_to_required"))
+            kind, reply_to = MessageKind.ANSWER, args["in_reply_to"]
+        else:
+            if task.task_message_id is None:
+                return HandoffDecision(rejected("no_task_message"))
+            if args.get("in_reply_to") is not None:
+                payload["in_reply_to"] = args["in_reply_to"]
+            kind, reply_to = MessageKind.REPORT, task.task_message_id
+        listener = None
+        report = task.kind == "work" and args["kind"] in {"done", "blocked"}
+        if report:
+            listener = self._report_listener(task.task_id, task.run_id, args["kind"], request.tool_call_id)
+            task.held_reason = f"{args['kind']}_report_pending"
+            self._save_task(task)
+        return HandoffDecision({"status": "queued", "task_id": task.task_id}, message=OutboundMessage(
+            task.task_id, task.run_revision, task.run_id, ActorRole.WORKER, ActorRole.MANAGER, kind, payload,
+            in_reply_to_message_id=reply_to), listener=listener, keep_across_pause=report)
+
+    def _report_listener(self, task_id: str, run_id: str, kind: str, tool_call_id: str) -> Callable:
+        """The done/blocked report's outbox events (R1): accepted -> the worker is free; lost -> the Task closes."""
+        settled = [False]  # decided once: at the submission, else at the terminal state
+
+        def listener(event: str, snapshot: Mapping[str, Any]) -> None:
+            if event == "created":
+                return
+            ended = False
+            with self._lock:
+                if event == "delivering":
+                    self._report_inflight.add(task_id)
+                    self._wake.notify_all()
+                    return
+                self._report_inflight.discard(task_id)
+                self._wake.notify_all()
+                if event == "deferred" or settled[0]:
+                    return
+                task = self.tasks.get(task_id)
+                if task is None or task.run_id != run_id or task.status == "closed":
+                    return  # cancelled/superseded (its messages were withdrawn) or restarted
+                settled[0] = True
+                if event in ("submitted", "delivered"):
+                    ended = self._report_accepted(task, run_id, kind, tool_call_id, snapshot)
+                else:  # unknown / rejected / held_paused before any acceptance: never resent
+                    ended = self._report_lost(task, run_id, kind, event)
+            if ended:
+                self._notify_lifecycle_later("run_ended", run_id)
+        return listener
+
+    def _report_accepted(self, task: FlowTask, run_id: str, kind: str, tool_call_id: str,
+                         snapshot: Mapping[str, Any]) -> bool:
+        """The manager OMP accepted the report: the worker is free (under the flow lock); True when the run ended."""
+        task_id = task.task_id
+        with self._repository() as repository:
+            details = {"source": "worker_to_manager", "kind": kind, "tool_call_id": tool_call_id,
+                       "report_message_id": snapshot.get("message_id"), "report": "accepted_by_manager"}
+            if kind == "done":
+                repository.complete_run(run_id, details)
+            else:
+                run = repository.get_run(run_id)
+                repository.record_decision(task_id, run["revision"], run_id, "blocked",
+                                           retry_count_used=run["retry_count_used"], details=details)
+        if kind == "done":
+            task.last_result = {"run_id": run_id, "outcome": "done"}
+            self._record({"type": "run_ended", "task_id": task_id, "run_id": run_id, "outcome": "done"})
+            self._close(task, "done")
+            return True
+        # the worker is free; the Task stays open for a follow-up or ends with a new Task
+        task.last_result = {"run_id": run_id, "outcome": "blocked"}
+        task.held_reason = "worker_blocked"
+        task.set_status("blocked")
+        self._save_task(task)
+        return False
+
+    def _report_lost(self, task: FlowTask, run_id: str, kind: str, event: str) -> bool:
+        """The report never reached (or may not have reached) the manager: close, never resend (R1)."""
+        reason = "report_outcome_unknown" if event == "unknown" else "report_not_delivered"
+        with self._repository() as repository:
+            current = repository.get_current_run(task.task_id)
+            if current is not None and current.get("run_id") == run_id:
+                details = {"source": "worker_to_manager", "kind": kind, "report_outcome": event}
+                if kind == "done" and event == "unknown":
+                    repository.complete_run(run_id, details)
+                elif kind == "done":
+                    repository.fail_run(run_id, details)
+                else:
+                    repository.cancel_run(run_id, reason)
+        task.last_result = {"run_id": run_id, "outcome": reason, "report_kind": kind}
+        self._record({"type": "run_ended", "task_id": task.task_id, "run_id": run_id, "outcome": reason})
+        self._close(task, reason)
+        self._notice(kind=reason, task_id=task.task_id, run_id=run_id, report_kind=kind)
+        return True
+
+    def _close(self, task: FlowTask, reason: str) -> None:
+        task.closed_reason, task.pending_start, task.run_id = reason, None, None
+        task.held_reason = None
+        task.set_status("closed")
+        self._record({"type": "task_closed", "task_id": task.task_id, "reason": reason})
+        self._save_task(task)
+
+    def _paused_now(self) -> bool:
+        try:
+            return self._paused() is not False
+        except Exception:
+            return True
+
+    def _schedule(self, task: FlowTask, revision: int, origin: str) -> None:
+        task.pending_start = {"revision": revision, "origin": origin}
+        task.held_reason = None
+        self._save_task(task)
+        self._wake.notify_all()
+
+    # -- the runner thread ------------------------------------------------------------------
+    def _runner(self) -> None:
+        while True:
+            with self._wake:
+                if self._stop:
+                    return
+                task = next((t for t in self.tasks.values() if t.status != "closed" and t.pending_start), None)
+                if task is None:
+                    self._wake.wait(self._poll_interval)
+                    retry = self._home_cwd is not None and not self._stop
+                else:
+                    job = (task.task_id, task.kind, dict(task.pending_start))
+            if task is None:
+                if retry:
+                    self._retry_home_cwd()
+                continue
+            try:
+                if job[1] == "work":
+                    self._start_work(job[0], job[2])
+                else:
+                    self._run_experiment(job[0], job[2])
+            except Exception as exc:  # never let the runner die silently
+                with self._lock:
+                    self._following = None
+                    task = self.tasks.get(job[0])
+                    if task is not None and task.status != "closed":
+                        self._runner_failed(task, f"runner_error:{type(exc).__name__}")
+            with self._wake:
+                if not self._stop:
+                    self._wake.wait(0.01)
+
+    def _runner_failed(self, task: FlowTask, reason: str) -> None:
+        """Nothing started: the worker is free again and the manager learns why (under the flow lock)."""
+        task.pending_start = None
+        if task.run_id is not None:
+            task.held_reason = reason  # a run exists: its report or a cancel ends the Task
+            self._save_task(task)
+            return
+        task.last_result = {"outcome": "not_started", "reason": reason}
+        self._notice(kind="task_not_started", task_id=task.task_id, reason=reason)
+        if task.kind == "experiment" and task.runs_started > 0:
+            task.held_reason = reason
+            task.set_status("finished")
+            self._save_task(task)
+        else:
+            self._close(task, reason)
+
+    def _set_held(self, task_id: str, reason: str | None) -> None:
+        with self._lock:
+            task = self.tasks.get(task_id)
+            if task is not None and task.status != "closed" and task.held_reason != reason:
+                task.held_reason = reason
+                self._save_task(task)
+
+    def _wait(self, seconds: float) -> bool:
+        """Sleep unless stopping; False when the flow is stopping."""
+        with self._wake:
+            if not self._stop:
+                self._wake.wait(seconds)
+            return not self._stop
+
+    def _start_work(self, task_id: str, job: Mapping[str, Any]) -> None:
+        if self._paused_now():
+            self._set_held(task_id, "paused")
+            self._wait(self._poll_interval)
+            return
+        if self._omp_idle(ActorRole.WORKER) is None:
+            self._set_held(task_id, "worker_not_connected")
+            self._wait(self._poll_interval)
+            return
+        with self._lock:
+            task = self.tasks.get(task_id)
+            if task is None or task.pending_start != job or task.status == "closed":
+                return
+            revision = job["revision"]
+            with self._repository() as repository:
+                run_id = repository.start_run(task_id, revision, inputs={"kind": "work", "origin": job["origin"]})
+            task.runs_started += 1
+            task.pending_start, task.run_id, task.run_revision = None, run_id, revision
+            task.held_reason, task.task_message_id = None, None
+            task.set_status("starting")
+            self._save_task(task)
+            self._record({"type": "run_started", "task_id": task_id, "run_id": run_id, "revision": revision})
+            spec = task.spec or {}
+            payload: dict[str, Any] = {"handoff": "to_worker", "kind": "work", "task_id": task_id,
+                                       "revision": revision, "goal": spec.get("goal"),
+                                       "paths": list(spec.get("paths") or []), "message": task.summary}
+            if "instructions" in spec:
+                payload["instructions"] = spec["instructions"]
+            outbound = OutboundMessage(task_id, revision, run_id, ActorRole.MANAGER, ActorRole.WORKER,
+                                       MessageKind.TASK, payload)
+            self._task_message_state[task_id] = "queued"
+        queued = self._handoffs.enqueue(outbound, origin=str(job["origin"]),
+                                        listener=self._task_message_listener(task_id, run_id),
+                                        keep_across_pause=True)  # R3: never submitted -> sent after a resume
+        if queued.get("status") != "queued":
+            with self._lock:
+                self._task_message_state[task_id] = "not_sent"
+            self._set_held(task_id, f"instruction_{queued.get('reason', 'not_queued')}")
+
+    _TASK_MESSAGE_STATES = {"delivering": "delivering", "deferred": "queued", "submitted": "sent",
+                            "delivered": "sent", "unknown": "sent", "rejected": "not_sent",
+                            "held_paused": "not_sent", "withdrawn": "not_sent"}
+
+    def _task_message_listener(self, task_id: str, run_id: str) -> Callable:
+        submitted = [False]
+
+        def listener(event: str, snapshot: Mapping[str, Any]) -> None:
+            with self._lock:
+                state = self._TASK_MESSAGE_STATES.get(event)
+                if state is not None and not (submitted[0] and state != "sent"):
+                    self._task_message_state[task_id] = state  # "unknown": the worker may have it
+                    self._wake.notify_all()
+                if event == "submitted":
+                    submitted[0] = True
+                task = self.tasks.get(task_id)
+                if task is None or task.run_id != run_id or task.status == "closed":
+                    return
+                if event == "created":
+                    task.task_message_id = snapshot.get("message_id")
+                    task.set_status("running")
+                elif event in ("rejected", "held_paused") or event == "unknown" and not submitted[0]:
+                    task.held_reason = f"instruction_{event}"
+                else:
+                    return
+                self._save_task(task)
+                revision, message_id = task.run_revision, task.task_message_id
+            if event == "created" and message_id is not None:
+                self._notify_lifecycle("work_started", task_id, revision, run_id, message_id)
+        return listener
+
+    # -- experiment runs ------------------------------------------------------------------------
+    def _experiment_blocker(self, task: FlowTask, port: Any) -> str | None:
+        if self._paused_now():
+            return "paused"
+        if port is None:
+            return "host_terminal_unavailable"
+        names = set((task.spec or {}).get("execution", {}).get("environment") or [])
+        try:
+            missing = sorted(names - set(self._experiment.environment_names()))
+        except Exception:
+            missing = sorted(names)
+        if missing:
+            return "environment_missing:" + ",".join(missing)
+        if self._omp_idle(ActorRole.WORKER) is not True:
+            return "worker_busy"
+        busy = port.busy()
+        if busy is not None:
+            return "host_terminal_busy"
+        return None
+
+    def _run_experiment(self, task_id: str, job: Mapping[str, Any]) -> None:
+        ports = self._experiment
+        with self._lock:
+            task = self.tasks.get(task_id)
+            if task is None or task.pending_start != job or task.status == "closed":
+                return
+            if ports is None:
+                self._runner_failed(task, "experiment_runner_unavailable")
+                return
+        port = None
+        try:
+            port = ports.host_shell()
+            blocker = self._experiment_blocker(task, port)  # the idle-only rule (nothing is held yet)
+            if blocker is not None:
+                self._set_held(task_id, blocker)
+                self._wait(self._poll_interval)
+                return
+            self._execute(task, job, port, ports)
+        finally:
+            with self._lock:
+                self._following = None
+            if port is not None:
+                try:
+                    port.release_hold()
+                except Exception:
+                    pass
+                port.detach()
+
+    def _typing_hold(self, task: FlowTask, port: Any, ports: ExperimentPorts, refused: list[str]) -> Callable:
+        """R5: called by the workflow just before its first keystroke into the host shell.
+
+        The shell must still be idle and is held from here until the start returns;
+        else nothing is typed (``WorkflowHeld``) and ``refused`` names why.
+        """
+        def before_shell_input() -> None:
+            reason = None
+            if self._cancelled(task):
+                reason = "cancelled"
+            elif self._paused_now():
+                reason = "paused"
+            else:
+                try:
+                    if port.busy() is not None or port.hold(HOLD_REASON) is not None:
+                        reason = "host_terminal_busy"
+                except Exception:
+                    reason = "host_terminal_busy"
+            if reason is not None:
+                refused.append(reason)
+                raise WorkflowHeld(f"{reason}: nothing was typed into the host shell")
+            self._remember_home_cwd(port, ports)
+        return before_shell_input
+
+    def _execute(self, task: FlowTask, job: Mapping[str, Any], port: Any, ports: ExperimentPorts) -> None:
+        revision = job["revision"]
+        repository = self._repository_factory()
+        run = None
+        try:
+            workflow = ports.make_workflow(repository)
+            late_hold = accepts_keyword(workflow.start, "before_shell_input")
+            if not late_hold and port.hold(HOLD_REASON) is not None:
+                # A workflow that cannot say when it types is held for its whole start (fail-safe).
+                self._set_held(task.task_id, "host_terminal_busy")  # changed since the idle check
+                self._wait(self._poll_interval)
+                return
+            with self._lock:
+                if task.pending_start != job or task.status == "closed":  # cancelled meanwhile
+                    return
+                task.pending_start, task.held_reason = None, None
+                task.set_status("starting")
+                task.runs_started += 1
+                self._following = task.task_id
+                self._save_task(task)
+            refused: list[str] = []
+            options: dict[str, Any] = {}
+            if late_hold:
+                options["before_shell_input"] = self._typing_hold(task, port, ports, refused)
+            else:
+                self._remember_home_cwd(port, ports)
+            slot = ports.worktrees_root / f"{task.task_id}-r{revision}-{uuid4().hex[:8]}"
+            try:
+                run = workflow.start(task.task_id, revision, worktree_path=slot,
+                                     artifacts_root=ports.artifacts_root, automation=ports.automation(), shell=port,
+                                     **options)
+            except Exception as exc:
+                port.release_hold()
+                self._give_back(port, ports)
+                error = refused[0] if refused else type(exc).__name__
+                with self._lock:
+                    task.last_result = {"outcome": "start_failed", "error": error,
+                                        "detail": str(exc)[:SUMMARY_MAX]}
+                    self._record({"type": "run_start_failed", "task_id": task.task_id, "revision": revision,
+                                  "error": error})
+                    if task.cancel_requested is not None:
+                        self._finish_cancel(task, None)
+                    else:
+                        task.held_reason = f"start_failed:{error}"
+                        task.set_status("finished")  # the worker is free; the manager may re-run or move on
+                        self._save_task(task)
+                        self._notice(kind="run_start_failed", task_id=task.task_id, error=error)
+                return
+            port.release_hold()
+            with self._lock:
+                task.run_id, task.run_revision, task.task_message_id = run.run_id, revision, run.task_message_id
+                if task.status != "cancelling":
+                    task.set_status("running")
+                self._save_task(task)
+                self._record({"type": "run_started", "task_id": task.task_id, "run_id": run.run_id,
+                              "revision": revision})
+            self._notify_lifecycle("experiment_started", run)
+            self._follow(task, run, port)
+        finally:
+            if run is not None:
+                run.close()
+            repository.close()
+
+    def _give_back(self, port: Any, ports: ExperimentPorts | None = None) -> None:
+        """Return the host shell to the user when the manager holds it with nothing in flight.
+
+        CW-18 F2: then the user's directory from before the run is restored. User
+        input stays held from the takeover until that ``cd`` is done, so nothing
+        the user types mixes with it.
+        """
+        held = False
+        try:
+            state = port.snapshot()
+            life = state.get("lifecycle") or {}
+            returned = (not life.get("unknown") and life.get("lifetime") == "ended"
+                        and life.get("input_returned") and life.get("control_returned"))
+            if state.get("input_owner") == "manager" and (life.get("request_id") is None or returned):
+                if self._home_cwd is not None and ports is not None:
+                    try:
+                        held = port.hold_return(RETURN_REASON) is True
+                    except Exception:
+                        held = False
+                port.request_takeover()
+        except Exception:
+            pass
+        try:
+            if ports is not None:
+                self._restore_home_cwd(port, ports, RESTORE_IDLE_WAIT)
+        finally:
+            if held:
+                try:
+                    port.release_hold(RETURN_REASON)
+                except Exception:
+                    pass
+
+    # -- F2: the user's host shell directory --------------------------------------------------
+    def _remember_home_cwd(self, port: Any, ports: ExperimentPorts) -> None:
+        """Before a run types its ``cd``: the shell's directory (a pending one from an earlier run wins)."""
+        try:
+            current = port.cwd()
+        except Exception:
+            current = None
+        if current is None:
+            return
+        if not _under(current, ports.worktrees_root):
+            self._home_cwd = current  # the user's own directory
+        # else the shell is still in an earlier run's worktree: the pending directory stays the target
+
+    def _restore_home_cwd(self, port: Any, ports: ExperimentPorts, idle_wait: float) -> str | None:
+        target = self._home_cwd
+        if target is None:
+            return None
+        try:
+            outcome = port.restore_cwd(target, ports.worktrees_root, reason=RETURN_REASON, idle_wait=idle_wait)
+        except Exception as exc:
+            outcome = f"error:{type(exc).__name__}"
+        if outcome in {"restored", "unchanged", "user_moved", "target_missing", "shell_gone"}:
+            self._home_cwd = None
+            if outcome != "unchanged":
+                with self._lock:
+                    self._record({"type": "host_cwd_restore", "outcome": outcome})
+        return outcome
+
+    def _retry_home_cwd(self) -> None:
+        """A restore that found the shell busy is tried again while no Task start is pending."""
+        ports = self._experiment
+        if ports is None:
+            self._home_cwd = None
+            return
+        port = None
+        try:
+            port = ports.host_shell()
+            if port is not None:
+                self._restore_home_cwd(port, ports, 0.0)
+        except Exception:
+            pass
+        finally:
+            if port is not None:
+                try:
+                    port.detach()
+                except Exception:
+                    pass
+
+    def _cancelled(self, task: FlowTask) -> bool:
+        with self._lock:
+            return task.cancel_requested is not None
+
+    def _end_cancelled_run(self, task: FlowTask, run: Any) -> None:
+        with self._lock:
+            self._finish_cancel(task, run.run_id)
+
+    def _follow(self, task: FlowTask, run: Any, port: Any) -> None:
+        # The host command is never interrupted (also not on cancel): collect until it exits.
+        while True:
+            record = run.collect(timeout=self._collect_slice, paused=self._paused_now())
+            if record.get("shell_state") == "exited" and record.get("exit_confirmed"):
+                break
+            if record.get("shell_state") == "unknown":
+                self._set_held(task.task_id, "shell_unknown")  # CW-10: no judgment, no replay
+                with self._lock:
+                    if task.status != "cancelling":
+                        task.set_status("held")
+                        self._save_task(task)
+                return
+            if not self._wait(0):
+                return
+        self._give_back(port, self._experiment)
+        if self._cancelled(task):
+            self._end_cancelled_run(task, run)
+            return
+        with self._lock:
+            task.set_status("waiting_report")
+            self._save_task(task)
+        accepted: list[bool] = []
+        on_report = self._report_hook(task, run, accepted)
+        try:
+            while True:  # judge only when not paused and the worker can take the staged analysis
+                if not self._wait(0):
+                    return
+                if self._cancelled(task):
+                    self._end_cancelled_run(task, run)
+                    return
+                if self._paused_now():
+                    self._set_held(task.task_id, "paused")
+                    self._wait(self._poll_interval)
+                    continue
+                if self._omp_idle(ActorRole.WORKER) is not True:
+                    self._set_held(task.task_id, "worker_busy")
+                    self._wait(self._poll_interval)
+                    continue
+                self._set_held(task.task_id, None)
+                try:
+                    record = self._call_with_report_hook(run.judge, on_report)
+                    break
+                except WorkflowHeld as exc:
+                    request = run._record.get("worker_analysis_request") or {}
+                    if request.get("status") == MailboxStatus.DEFERRED.value:
+                        self._set_held(task.task_id, "worker_busy")  # nothing was sent: ask again
+                        self._wait(self._poll_interval)
+                        continue
+                    self._finish_run(task, run, "held", {"reason": str(exc)[:SUMMARY_MAX]})
+                    return
+            while not accepted and (record.get("report") or {}).get("status") == MailboxStatus.DEFERRED.value:
+                self._set_held(task.task_id, "manager_busy")
+                if not self._wait(self._poll_interval):
+                    return
+                if self._paused_now() or self._omp_idle(ActorRole.MANAGER) is not True:
+                    continue
+                record = self._call_with_report_hook(run.retry_report, on_report)
+        finally:
+            with self._lock:
+                self._report_inflight.discard(task.task_id)
+                self._wake.notify_all()
+        report = (record.get("report") or {}).get("status")
+        if accepted:  # the worker was freed at the acceptance (R1); only the final receipt is recorded
+            with self._lock:
+                if task.last_result is not None and task.last_result.get("run_id") == run.run_id:
+                    task.last_result["report"] = report
+                    self._save_task(task)
+                self._record({"type": "report_receipt", "task_id": task.task_id, "run_id": run.run_id,
+                              "report": report})
+            return
+        judgment = (record.get("worker_judgment") or {}).get("judgment")
+        self._finish_run(task, run, "reported", {"judgment": judgment, "report": report})
+
+    @staticmethod
+    def _call_with_report_hook(method: Callable, on_report: Callable) -> dict[str, Any]:
+        if accepts_keyword(method, "on_report"):
+            return method(on_report=on_report)
+        return method()
+
+    def _report_hook(self, task: FlowTask, run: Any, accepted: list[bool]) -> Callable:
+        """R1: the experiment report's ``sending``/``submitted`` events from ``WorkflowRun`` (runner thread)."""
+        def on_report(event: str, record: Mapping[str, Any]) -> None:
+            if event == "sending":
+                with self._lock:
+                    self._report_inflight.add(task.task_id)
+                    self._wake.notify_all()
+                return
+            if event != "submitted" or accepted:
+                return
+            accepted.append(True)
+            with self._lock:
+                self._report_inflight.discard(task.task_id)
+                self._wake.notify_all()
+                if self._following == task.task_id:
+                    self._following = None  # nothing of this run is followed any more
+                judgment = (record.get("worker_judgment") or {}).get("judgment")
+                task.last_result = {"run_id": run.run_id, "outcome": "reported", "judgment": judgment,
+                                    "report": "accepted_by_manager", "run_closed": True}
+                self._record({"type": "run_ended", "task_id": task.task_id, "run_id": run.run_id,
+                              **task.last_result})
+                if task.status == "closed":
+                    return
+                if task.cancel_requested is not None:
+                    self._finish_cancel(task, run.run_id)  # the report was delivered; then it closes
+                    return
+                task.run_id, task.held_reason = None, None
+                task.set_status("finished")  # the worker is free (C-D66)
+                self._save_task(task)
+            self._notify_lifecycle_later("run_ended", run.run_id)
+        return on_report
+
+    def _finish_run(self, task: FlowTask, run: Any, outcome: str, details: Mapping[str, Any]) -> None:
+        lost = None
+        with self._lock:
+            with self._repository() as repository:
+                current = repository.get_current_run(task.task_id)
+                closed = current is None or current.get("run_id") != run.run_id
+                if not closed and outcome == "reported":
+                    # R1: the report never reached (or may not have reached) the manager: the run and the
+                    # Task close without a resend; the manager learns it from the next tool result.
+                    report = details.get("report")
+                    lost = "report_not_delivered" if report == MailboxStatus.REJECTED.value \
+                        else "report_outcome_unknown"
+                    closing = {"judgment": details.get("judgment"), "report_outcome": report}
+                    if lost == "report_outcome_unknown":
+                        repository.complete_run(run.run_id, closing)
+                    else:
+                        repository.fail_run(run.run_id, closing)
+                    closed = True
+            task.last_result = {"run_id": run.run_id, "outcome": lost or outcome, **details, "run_closed": closed}
+            self._record({"type": "run_ended" if closed else "run_held", "task_id": task.task_id,
+                          "run_id": run.run_id, **task.last_result})
+            if task.cancel_requested is not None:
+                self._finish_cancel(task, run.run_id)  # the report (if any) was delivered; then it closes
+                return
+            if lost is not None:
+                self._close(task, lost)
+                self._notice(kind=lost, task_id=task.task_id, run_id=run.run_id, report_kind="experiment")
+            elif closed:  # the report reached the manager: the worker is free (C-D66)
+                task.run_id, task.held_reason = None, None
+                task.set_status("finished")
+            else:  # held judgment: the run stays current until a cancel; nothing is replayed
+                task.held_reason = f"run_{outcome}"
+                task.set_status("held")
+            self._save_task(task)
+        if closed:
+            self._notify_lifecycle("run_ended", run.run_id)
+
+
+__all__ = ["ACTIVE_STATUSES", "FLOW_LEDGER_NAME", "INACTIVE_STATUSES", "RETRY_LIMIT", "STANDING_DELEGATION",
+           "ExperimentPorts", "FlowTask", "TaskFlow"]

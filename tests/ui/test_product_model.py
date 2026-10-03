@@ -1,4 +1,5 @@
 import json
+import re
 import shutil
 import sys
 import tempfile
@@ -310,6 +311,39 @@ class P27FixTests(unittest.TestCase):
                                      shell={"held_reasons": ["unsubmitted_or_unconsumed_input"]}))
         self.assertIn("handoff_held", model.footer())
         self.assertIn("unsubmitted_or_unconsumed_input", model.footer())
+
+    def test_job_held_refusal_shows_how_to_clear_it(self):
+        for reasons in (["manual_jobs"], ["unknown_or_manual_residue"], ["unsubmitted_or_unconsumed_input", "manual_jobs"]):
+            with self.subTest(reasons=reasons):
+                model, sender = make()
+                model.handle_input(P + b"h")
+                rid = f"r{sender.sent.index(sender.of('handoff')[-1]) + 1}"
+                model.on_result(ui_v1.result(rid, False, reason=ui_v1.Reason.HANDOFF_HELD, detail="jobs",
+                                             shell={"held_reasons": reasons}))
+                footer = model.footer()
+                self.assertIn("manual_jobs" if "manual_jobs" in reasons else reasons[0], footer)
+                for needle in ("인수", "wb-handoff"):
+                    self.assertIn(needle, footer)
+                # the full recovery order (C-D58): take over, clear jobs, wb-handoff, give back, take over again
+                self.assertTrue(self._in_order(footer, ["prefix t,c", "jobs", "wb-handoff", "prefix h", "prefix t,c"]), footer)
+
+    @staticmethod
+    def _in_order(text, needles):
+        pos = 0
+        for n in needles:
+            pos = text.find(n, pos)
+            if pos < 0:
+                return False
+            pos += len(n)
+        return True
+
+    def test_other_held_reasons_get_no_job_hint(self):
+        model, sender = make()
+        model.handle_input(P + b"h")
+        rid = f"r{sender.sent.index(sender.of('handoff')[-1]) + 1}"
+        model.on_result(ui_v1.result(rid, False, reason=ui_v1.Reason.HANDOFF_HELD, detail="typing",
+                                     shell={"held_reasons": ["unsubmitted_or_unconsumed_input"]}))
+        self.assertNotIn("wb-handoff", model.footer())
 
     def test_refusal_uses_state_held_reasons(self):
         model, sender = make()
@@ -1736,7 +1770,7 @@ class CtrlAliasTests(unittest.TestCase):
         model, sender = make()
         model.handle_input(P + P)
         self.assertEqual([b"\x1d"], [x[2] for x in sender.of("input")])
-        for letter in "abcfglnpsuvwx":  # Ctrl-k is the host terminal kill alias since C-D63
+        for letter in "abcfglnsuvwx":  # Ctrl-k is the host terminal kill alias since C-D63, Ctrl-p pause/resume since CW-18 U5
             other, other_sender = make()
             other.handle_input(P + CTRL(letter))
             self.assertEqual([], other_sender.sent)
@@ -2796,7 +2830,7 @@ class DragToCopyTests(unittest.TestCase):
 
     def test_help_gets_one_short_drag_to_copy_line(self):
         self.assertTrue(any("드래그" in ln and "복사" in ln for ln in HELP_LINES))
-        self.assertLessEqual(len(HELP_LINES), HELP_LINES_BEFORE_COPY + 3)  # + exited-pane Enter (C-D62) + host kill/restart (C-D63)
+        self.assertLessEqual(len(HELP_LINES), HELP_LINES_BEFORE_COPY + 4)  # + exited-pane Enter (C-D62) + host kill/restart (C-D63) + pause/resume (CW-18 U5)
 
     def test_trimmed_history_rows_are_never_copied_and_an_empty_selection_is_cancelled(self):
         pane = PaneId.MANAGER_OMP
@@ -3409,6 +3443,404 @@ class KillHostTerminalTests(unittest.TestCase):
         model.handle_input(b"x", now=1.6)  # cancels the confirmation
         model.handle_input(b"\x04", now=1.7)  # a fresh first press: held again, never delivered
         self.assertEqual([], [s for s in sender.of("input") if s[2] == b"\x04"])
+
+
+# ---- CW-18 U5 (C-D66): current Task / worker / automation state and pause/resume -------------------------------------
+def task_state(task=None, worker=None, automation=None, **extra):
+    """A snapshot with the ui_v1 task/worker/automation fields (all optional: an older backend sends none)."""
+    snap = snapshot()
+    if task is not None:
+        base = {"task_id": "t1", "kind": "experiment", "status": "running", "summary": "lr sweep 3 runs", "since": 1.0,
+                "active": True, "revision": 1, "run_id": "run-1", "runs_started": 1, "retry_limit": 3,
+                "held_reason": None, "closed_reason": None, "cancel_requested": False, "last_result": None}
+        base.update(task)
+        snap["task"] = base
+    if worker is not None:
+        snap["worker"] = worker
+    if automation is not None:
+        snap["automation"] = {"state": "active", "source": "user", "detail": None, "paused": False,
+                              "transition": None, "run": None, "tick": None, "review": None,
+                              "interruption": {"state": "none"}, "resume": None, "retry_limit": 3,
+                              "persistence_error": None}
+        snap["automation"].update(automation)
+    snap.update(extra)
+    return snap
+
+
+def shown(model):
+    return "\n".join(model.status_lines())
+
+
+class TaskWorkerStatusTests(unittest.TestCase):
+    def render(self, snap, rows=30, cols=120):
+        model = ProductModel(FakeSender(), rows, cols, clock=lambda: 1000.0)
+        model.apply_snapshot(snap)
+        return model
+
+    def test_worker_state_idle_and_busy(self):
+        idle = self.render(task_state(worker={"state": "idle", "task_id": None}))
+        self.assertIn("worker: 대기", idle.status_lines()[0])
+        busy = self.render(task_state(task={}, worker={"state": "busy", "task_id": "t1"}))
+        self.assertIn("worker: 작업 중", busy.status_lines()[0])
+
+    def test_task_kind_summary_and_status_texts(self):
+        cases = {("experiment", "running"): ("실험", "실행 중"), ("work", "dispatched"): ("작업", "전달됨"),
+                 ("experiment", "starting"): ("실험", "시작 중"), ("experiment", "waiting_report"): ("실험", "보고 대기"),
+                 ("work", "cancelling"): ("작업", "취소 중"), ("experiment", "blocked"): ("실험", "막힘"),
+                 ("experiment", "finished"): ("실험", "보고 완료"), ("work", "held"): ("작업", "보류")}
+        for (kind, status), (kind_text, status_text) in cases.items():
+            with self.subTest(kind=kind, status=status):
+                model = self.render(task_state(task={"kind": kind, "status": status, "summary": "fix flaky test"}))
+                line2 = model.status_lines()[1]
+                self.assertIn(kind_text, line2)
+                self.assertIn("fix flaky test", line2)
+                self.assertIn(status_text, line2)
+                self.assertIn("backend: ready", line2, "the rest of the line stays")
+
+    def test_held_reason_and_cancel_request_are_shown(self):
+        held = self.render(task_state(task={"status": "dispatched", "held_reason": "host_terminal_busy"}))
+        self.assertIn("host terminal 사용 중", held.status_lines()[1])
+        other = self.render(task_state(task={"status": "held", "held_reason": "needs_report_or_cancel"}))
+        self.assertIn("needs_report_or_cancel", other.status_lines()[1])
+        cancelling = self.render(task_state(task={"status": "cancelling", "cancel_requested": True}))
+        self.assertIn("취소 중", cancelling.status_lines()[1])
+
+    def test_task_held_by_host_jobs_hints_how_to_clear_it(self):
+        base = task_state(task={"status": "dispatched", "held_reason": "host_terminal_busy"})
+        jobs = json.loads(json.dumps(base))
+        jobs.setdefault("panes", {}).setdefault("host_shell", {})["shell"] = {"held_reasons": ["manual_jobs"]}
+        line = self.render(jobs).status_lines()[1]
+        self.assertIn("wb-handoff", line)
+        self.assertIn("prefix h", line)
+        self.assertGreater(line.count("prefix t,c"), 1, line)
+        self.assertNotIn("wb-handoff", self.render(base).status_lines()[1], "no jobs reported: no hint")
+
+    def test_closed_task_shows_its_reason(self):
+        for reason, text in (("done", "완료"), ("cancelled", "취소됨"), ("superseded_by_new_task", "새 작업으로 대체"),
+                             ("mystery", "mystery")):
+            with self.subTest(reason=reason):
+                model = self.render(task_state(task={"status": "closed", "closed_reason": reason, "active": False}))
+                line2 = model.status_lines()[1]
+                self.assertIn("종료", line2)
+                self.assertIn(text, line2)
+
+    def test_no_task_or_null_task_shows_no_task_segment(self):
+        for snap in (task_state(), dict(task_state(), task=None)):
+            model = self.render(snap)
+            self.assertNotIn("작업:", model.status_lines()[1])
+            self.assertIn("마지막 확인", model.status_lines()[1])
+
+    def test_unknown_and_malformed_fields_are_tolerated(self):
+        garbage = [{"task": "x"}, {"task": []}, {"task": {"kind": 3, "status": None, "summary": 7}},
+                   {"task": {"kind": "future_kind", "status": "future_status", "summary": None}},
+                   {"worker": "busy"}, {"worker": {"state": "napping"}}, {"worker": None},
+                   {"automation": "paused"}, {"automation": {"state": 5, "review": "soon", "interruption": 3}},
+                   {"automation": {"state": "future", "review": {"next_due_in_seconds": "x", "applies": True}}}]
+        for extra in garbage:
+            with self.subTest(extra=extra):
+                model = self.render(dict(snapshot(), **extra))
+                line1, line2 = model.status_lines()
+                self.assertIn("focus: MANAGER OMP", line1)
+                self.assertIn("backend: ready", line2)
+                model.handle_input(P + b"p")  # opening the pause confirmation never raises either
+                model.handle_input(b"\x1b")
+
+    def test_future_values_are_shown_raw_and_control_characters_are_never_shown(self):
+        model = self.render(task_state(task={"kind": "future", "status": "warp", "summary": "a\x1b[31mred\x07\nline\tx"}))
+        line2 = model.status_lines()[1]
+        self.assertIn("future", line2)
+        self.assertIn("warp", line2)
+        self.assertNotIn("\x1b", line2)
+        self.assertNotIn("\x07", line2)
+        self.assertNotIn("\n", line2)
+        self.assertNotIn("\t", line2)
+        self.assertIn("red", line2)
+
+    def test_summary_is_shortened_by_display_width_with_an_ellipsis(self):
+        long_ko = "가" * 80
+        for cols in (30, 60, 80, 120, 200):
+            with self.subTest(cols=cols):
+                model = self.render(task_state(task={"summary": long_ko}), cols=cols)
+                line2 = model.status_lines()[1]
+                self.assertIn("…", line2)
+                self.assertLess(line2.count("가"), 80)
+                self.assertIn("backend: ready", line2)
+        short = self.render(task_state(task={"summary": "ok"}), cols=30).status_lines()[1]
+        self.assertIn("ok", short)
+
+    def test_automation_states_in_the_status_lines(self):
+        for state in ("idle", "active", "held", "pausing", "paused", "resuming"):
+            with self.subTest(state=state):
+                model = self.render(task_state(automation={"state": state, "paused": state in ("paused", "pausing")}))
+                self.assertIn(f"자동화: {state}", model.status_lines()[0])
+
+    def test_review_next_due_and_delay_reasons(self):
+        review = {"applies": True, "interval_seconds": 60, "status": "waiting", "reason": None, "review_count": 2,
+                  "last_review_at": 900.0, "next_due_in_seconds": 41.6, "pending": False, "coalesced_count": 0, "exit": None}
+        model = self.render(task_state(automation={"state": "active", "review": review}))
+        self.assertIn("60s 대조 41s 후", model.status_lines()[1])
+        delayed = dict(review, status="delayed", reason="worker_busy_or_unknown", coalesced_count=2, pending=True)
+        model = self.render(task_state(automation={"state": "active", "review": delayed}))
+        self.assertIn("대조 지연: worker_busy_or_unknown", model.status_lines()[1])
+        model = self.render(task_state(automation={"state": "active", "review": dict(review, applies=False)}))
+        self.assertNotIn("대조", model.status_lines()[1])
+        model = self.render(task_state(automation={"state": "idle", "review": None}))
+        self.assertNotIn("대조", model.status_lines()[1])
+
+    def test_held_automation_reason_and_persistence_error(self):
+        model = self.render(task_state(automation={"state": "held", "detail": "user_owner_or_control_hold"}))
+        self.assertIn("보류: user_owner_or_control_hold", model.status_lines()[1])
+        model = self.render(task_state(automation={"state": "held", "detail": None,
+                                                   "tick": {"outcome": "held", "problems": ["host_busy"], "at": 1.0}}))
+        self.assertIn("보류: host_busy", model.status_lines()[1])
+        model = self.render(task_state(automation={"state": "active", "persistence_error": "disk full"}))
+        self.assertIn("저장 오류", model.status_lines()[1])
+
+    def test_paused_shows_interruption_state_and_a_refused_resume(self):
+        texts = {"requested": "중단 요청됨", "confirmed": "중단 확인됨", "unknown": "중단 확인 불명",
+                 "requesting": "중단 요청 중", "request_failed": "중단 요청 실패"}
+        for state, text in texts.items():
+            with self.subTest(interruption=state):
+                model = self.render(task_state(automation={"state": "paused", "paused": True,
+                                                           "interruption": {"state": state}}))
+                self.assertIn(text, model.status_lines()[1])
+        for quiet in ("none", "not_needed"):
+            model = self.render(task_state(automation={"state": "paused", "paused": True,
+                                                       "interruption": {"state": quiet}}))
+            self.assertNotIn("중단", model.status_lines()[1])
+        refused = self.render(task_state(automation={"state": "paused", "paused": True,
+                                                     "resume": {"outcome": "refused", "reason": "not_reconciled", "at": 1.0}}))
+        self.assertIn("재개 거부: not_reconciled", refused.status_lines()[1])
+
+    def test_no_approval_ui_remains(self):
+        model = self.render(dict(task_state(task={}), approvals=[{"approval_id": "a1", "status": "pending"}]))
+        joined = shown(model) + "\n".join(HELP_LINES) + "\n".join(model.menu_lines())
+        self.assertNotIn("승인", joined)
+        self.assertNotIn("approval", joined.lower())
+
+
+class PauseResumeTests(unittest.TestCase):
+    def setUp(self):
+        self.sender = FakeSender()
+        self.model = ProductModel(self.sender, 30, 120, clock=lambda: 1000.0)
+
+    def state(self, state, paused=None, **extra):
+        paused = state in ("paused", "pausing") if paused is None else paused
+        self.model.apply_snapshot(task_state(automation=dict({"state": state, "paused": paused}, **extra)))
+
+    def calls(self, kind):
+        return self.sender.of(kind)
+
+    OPEN = {"p": P + b"p", "P": P + b"P", "Ctrl-p": P + b"\x10", "ㅔ Space": P + "ㅔ".encode() + b" "}
+    CONFIRM = {"p": b"p", "Ctrl-p": b"\x10", "ㅔ": "ㅔ".encode(), "ㅔ Space": "ㅔ".encode() + b" ",
+               "prefix p": P + b"p", "prefix Ctrl-p": P + b"\x10", "prefix ㅔ Space": P + "ㅔ".encode() + b" "}
+
+    def test_every_open_form_opens_the_pause_confirmation_and_sends_nothing(self):
+        for form, data in self.OPEN.items():
+            with self.subTest(form=form):
+                self.setUp()
+                self.state("active")
+                self.model.handle_input(data)
+                self.assertTrue(self.model.pause_confirm_open)
+                self.assertFalse(self.model.kill_confirm_open)
+                self.assertEqual([], [s for s in self.sender.sent if s[0] != "focus"])
+                joined = "\n".join(self.model.pause_confirm_lines())
+                self.assertIn("자동화를 일시정지합니다 (p: 확인)", joined)
+                self.assertIn("일시정지", self.model.footer())
+                self.assertFalse(self.model.quit)
+
+    def test_confirm_forms_send_exactly_one_pause_without_fields(self):
+        for form, data in self.CONFIRM.items():
+            with self.subTest(confirm=form):
+                self.setUp()
+                self.state("active")
+                self.model.handle_input(P + b"p")
+                self.model.handle_input(data)
+                self.assertFalse(self.model.pause_confirm_open)
+                self.assertEqual([("pause", {}, b"")], self.calls("pause"))
+                self.assertEqual([], self.calls("resume"))
+                self.assertEqual([], self.sender.of("input"))
+                self.assertIn("일시정지 요청", self.model.notice)
+
+    def test_every_other_input_cancels_without_sending(self):
+        cancels = {"Esc": b"\x1b", "Enter": b"\r", "x": b"x", "Space": b" ", "Ctrl-c": b"\x03", "arrow": b"\x1b[A",
+                   "digit": b"1", "k": b"k", "Ctrl-k": b"\x0b", "q": b"q", "ㅂ": "ㅂ".encode(),
+                   "paste": b"\x1b[200~p\x1b[201~", "wheel": b"\x1b[<64;5;5M", "prefix x": P + b"x", "prefix q": P + b"q"}
+        for name, data in cancels.items():
+            with self.subTest(cancel=name):
+                self.setUp()
+                self.state("active")
+                self.model.handle_input(P + b"p")
+                self.model.handle_input(data, now=0.0)
+                self.model.flush_input(now=1.0)
+                self.assertFalse(self.model.pause_confirm_open)
+                self.assertFalse(self.model.kill_confirm_open)
+                self.assertEqual([], [s for s in self.sender.sent if s[0] != "focus"])
+                self.assertFalse(self.model.quit)
+                self.sender.sent.clear()
+                self.model.handle_input(b"ls\r")
+                self.assertEqual([b"ls\r"], [s[2] for s in self.sender.of("input")], "back to normal input")
+
+    def test_extra_bytes_with_the_confirm_key_cancel(self):
+        for name, data in {"pp": b"pp", "ps": b"ps", "p Enter": b"p\r", "Ctrl-p Ctrl-p": b"\x10\x10", "prefix p p": P + b"pp",
+                           "ㅔㅔ": "ㅔㅔ".encode(), "p wheel": b"p\x1b[<64;5;5M", "paste-like": b"pwd\n"}.items():
+            with self.subTest(extra=name):
+                self.setUp()
+                self.state("active")
+                self.model.handle_input(P + b"p")
+                self.model.handle_input(data, now=0.0)
+                self.model.flush_input(now=1.0)
+                self.assertFalse(self.model.pause_confirm_open)
+                self.assertEqual([], self.calls("pause"))
+                self.assertEqual([], self.sender.of("input"))
+                self.assertIn("확인이 취소되었습니다", self.model.notice)
+                self.assertIn("p 한 번만 눌러 확인", self.model.notice)
+
+    def test_a_lone_prefix_keeps_it_open_and_the_next_p_confirms(self):
+        self.state("active")
+        self.model.handle_input(P + b"p")
+        self.model.handle_input(P)
+        self.assertTrue(self.model.pause_confirm_open)
+        self.model.handle_input(b"p")
+        self.assertEqual(1, len(self.calls("pause")))
+
+    def test_resize_cancels_the_confirmation(self):
+        for size in ((44, 160), (20, 70), (5, 10)):
+            with self.subTest(size=size):
+                self.setUp()
+                self.state("active")
+                self.model.handle_input(P + b"p")
+                self.model.resize(*size)
+                self.assertFalse(self.model.pause_confirm_open)
+                self.assertEqual([], self.calls("pause"))
+
+    def test_when_paused_the_confirmation_resumes_with_reconciled_true(self):
+        for state in ("paused",):
+            self.setUp()
+            self.state(state)
+            self.model.handle_input(P + b"\x10")
+            self.assertTrue(self.model.pause_confirm_open)
+            joined = "\n".join(self.model.pause_confirm_lines())
+            self.assertIn("대조 후 재개합니다 (p: 확인)", joined)
+            self.assertNotIn("일시정지합니다", joined)
+            self.assertIn("재개", self.model.footer())
+            self.model.handle_input("ㅔ".encode())
+            self.assertEqual([("resume", {"reconciled": True}, b"")], self.calls("resume"))
+            self.assertEqual([], self.calls("pause"))
+            self.assertIn("재개 요청", self.model.notice)
+
+    def test_resume_cancel_paths_send_nothing(self):
+        for data in (b"\x1b", b"x", b"\r", b"pp", P + b"q"):
+            with self.subTest(data=data):
+                self.setUp()
+                self.state("paused")
+                self.model.handle_input(P + b"p")
+                self.model.handle_input(data, now=0.0)
+                self.model.flush_input(now=1.0)
+                self.assertFalse(self.model.pause_confirm_open)
+                self.assertEqual([], self.calls("resume"))
+                self.assertEqual([], self.calls("pause"))
+
+    def test_in_progress_and_unknown_states_do_not_open_the_confirmation(self):
+        for state, text in (("pausing", "진행 중"), ("resuming", "진행 중")):
+            with self.subTest(state=state):
+                self.setUp()
+                self.state(state)
+                self.model.handle_input(P + b"p")
+                self.assertFalse(self.model.pause_confirm_open)
+                self.assertIn(text, self.model.notice)
+                self.assertEqual([], self.sender.of("pause") + self.sender.of("resume"))
+        self.setUp()
+        self.model.apply_snapshot(dict(snapshot(), automation={}))
+        self.model.handle_input(P + b"p")
+        self.assertFalse(self.model.pause_confirm_open)
+        self.assertIn("알 수 없", self.model.notice)
+
+    def test_idle_and_held_automation_can_be_paused(self):
+        for state in ("idle", "active", "held"):
+            with self.subTest(state=state):
+                self.setUp()
+                self.state(state)
+                self.model.handle_input(P + b"p")
+                self.assertTrue(self.model.pause_confirm_open)
+                self.assertEqual("pause", self.model.pause_confirm)
+
+    def test_a_request_in_flight_is_not_asked_for_again(self):
+        self.state("active")
+        self.model.handle_input(P + b"p")
+        self.model.handle_input(b"p")
+        self.model.handle_input(P + b"p")
+        self.assertFalse(self.model.pause_confirm_open)
+        self.assertEqual(1, len(self.calls("pause")))
+        self.assertIn("처리 중", self.model.notice)
+
+    def test_ok_results_update_the_automation_state_and_notice(self):
+        self.state("active")
+        self.model.handle_input(P + b"p")
+        self.model.handle_input(b"p")
+        rid = f"r{self.sender.count}"
+        self.model.on_result({"id": rid, "ok": True, "automation": {"state": "paused", "paused": True, "source": "user"}})
+        self.assertIn("자동화: paused", self.model.status_lines()[0])
+        self.assertIn("일시정지됨", self.model.notice)
+        self.model.handle_input(P + b"p")
+        self.model.handle_input(b"p")
+        rid = f"r{self.sender.count}"
+        self.model.on_result({"id": rid, "ok": True, "automation": {"state": "resuming", "paused": True}})
+        self.assertIn("재개 진행 중", self.model.notice)
+        self.model.on_state(task_state(automation={"state": "idle", "paused": False}))
+        self.assertIn("자동화: idle", self.model.status_lines()[0])
+
+    def test_refusals_are_shown_in_the_footer(self):
+        self.state("paused")
+        self.model.handle_input(P + b"p")
+        self.model.handle_input(b"p")
+        rid = f"r{self.sender.count}"
+        self.model.on_result({"id": rid, "ok": False, "reason": "resume_not_reconciled", "detail": "resume needs reconciled: true"})
+        self.assertIn("재개 거부", self.model.footer())
+        self.assertIn("resume_not_reconciled", self.model.footer())
+        self.state("active")
+        self.model.handle_input(P + b"p")
+        self.model.handle_input(b"p")
+        rid = f"r{self.sender.count}"
+        self.model.on_result({"id": rid, "ok": False, "reason": "backend_shutdown", "detail": ""})
+        self.assertIn("일시정지 거부", self.model.footer())
+        self.assertIn("backend_shutdown", self.model.footer())
+
+    def test_menu_has_the_pause_row_and_keeps_the_numbered_items(self):
+        self.state("active")
+        self.model.handle_input(P + b" ")
+        lines = self.model.menu_lines()
+        row = next(ln for ln in lines if "일시정지" in ln)
+        self.assertIn("Ctrl-p", row)
+        self.assertGreater(lines.index(row), lines.index(next(ln for ln in lines if "host terminal 강제 종료" in ln)))
+        self.model.handle_input(b"\x10")
+        self.assertFalse(self.model.menu_open)
+        self.assertTrue(self.model.pause_confirm_open)
+        self.model.handle_input(b"\x1b", now=0.0)
+        self.model.flush_input(now=1.0)
+        self.assertFalse(self.model.pause_confirm_open)
+        self.model.handle_input(P + b" ")
+        self.model.handle_input(b"0")  # the 10th numbered item is still detach
+        self.assertTrue(self.model.quit)
+
+    def test_help_has_one_pause_line(self):
+        lines = [ln for ln in HELP_LINES if re.match(r"\s*prefix p\s", ln)]
+        self.assertEqual(1, len(lines), lines)
+        self.assertIn("Ctrl-p", lines[0])
+        self.assertIn("ㅔ", lines[0])
+
+    def test_pause_and_kill_confirmations_never_overlap(self):
+        self.state("active")
+        self.model.handle_input(P + b"p")
+        self.model.handle_input(P + b"k")  # the kill key cancels the pause confirmation; it does not open the kill one
+        self.assertFalse(self.model.pause_confirm_open)
+        self.assertFalse(self.model.kill_confirm_open)
+        self.assertEqual([], self.sender.of("kill_pane"))
+        self.model.handle_input(P + b"k")
+        self.model.handle_input(b"p")  # p does not confirm the kill
+        self.assertFalse(self.model.kill_confirm_open)
+        self.assertEqual([], self.sender.of("kill_pane"))
+        self.assertEqual([], self.calls("pause"))
 
 
 if __name__ == "__main__":

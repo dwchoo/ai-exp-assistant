@@ -54,7 +54,8 @@ _ARROWS = {"\x1b[A": "up", "\x1bOA": "up", "\x1b[B": "down", "\x1bOB": "down",
 # mouse use Ctrl-o / Ctrl-e instead; confirm uses Ctrl-y (yes), so Ctrl-c stays an unknown key (an interrupt reflex
 # must not confirm a takeover). The plain letters keep working in English mode.
 CTRL_ALIASES = {"\x11": "q", "\x14": "t", "\x19": "c", "\x0f": "h", "\x12": "r", "\x05": "m", "\x1a": "z",
-                "\x0b": "k"}  # Ctrl-k: host terminal kill (C-D63); 0x0b collides with no other key here
+                "\x0b": "k",  # Ctrl-k: host terminal kill (C-D63); 0x0b collides with no other key here
+                "\x10": "p"}  # Ctrl-p: automation pause/resume (CW-18 U5); 0x10 collides with no other key here
 HANGUL_HINT = "한글 입력 상태: Ctrl-] 뒤 자모 + Space (예: ㅂ Space = q detach), Ctrl 조합(Ctrl-] Ctrl-q), Ctrl-] Space 메뉴"
 DETACH_MOVED = "detach는 이제 Ctrl-] q (Ctrl-q) — d / Ctrl-d 는 더 이상 detach가 아닙니다"
 CTRL_D = 0x04
@@ -73,10 +74,38 @@ KILL_MANAGER_WARNING = "manager가 사용 중입니다 — 진행 중인 명령�
 KILL_CONFIRM_FOOTER = "host terminal 강제 종료 확인: k(Ctrl-k·ㅏ) = 종료 · Esc/다른 키 = 취소 · 키는 pane으로 전달되지 않음"
 KILL_CANCELLED_NOTICE = "확인이 취소되었습니다 — k 한 번만 눌러 확인"  # extra bytes with the confirm key (auto-repeat, typing, paste)
 KILLING_NOTICE ="host terminal 강제 종료 중…"
+PAUSE_CANCELLED_NOTICE = "확인이 취소되었습니다 — p 한 번만 눌러 확인"
+PAUSING_NOTICE = "자동화 일시정지 요청 중…"
+RESUMING_NOTICE = "자동화 재개 요청 중… (대조 완료로 전달)"
+AUTOMATION_PENDING_NOTICE = "자동화 일시정지/재개 요청 처리 중…"
 KILLED_NOTICE = "host terminal 강제 종료됨 — Enter로 새 shell"
 # shown below the numbered command menu: the menu cycle (digits 1-9,0, arrows) stays the 10 items above, so this row is
 # reached by Ctrl-k (the same key as after the prefix) instead of a digit
 KILL_MENU_ROW = ("host terminal 강제 종료 (확인 후 실행)", "k", "Ctrl-k")
+# automation pause/resume (CW-18 U5, C-D66): prefix p / Ctrl-p / jamo ㅔ opens a confirmation; only the p forms confirm
+PAUSE_KEYS = ("p", "P")  # the command key after CTRL_ALIASES (Ctrl-p -> p; ㅔ -> p via the jamo table)
+PAUSE_CONFIRM_LINES = ("자동화 일시정지 확인", "", "자동화를 일시정지합니다 (p: 확인)",
+                       "새 자동 작업이 시작되지 않고 manager 턴 중단을 요청합니다.", "p: 확인 · Esc/다른 키: 취소")
+RESUME_CONFIRM_LINES = ("자동화 재개 확인", "", "대조 후 재개합니다 (p: 확인)",
+                        "일시정지 중 바뀐 상태를 확인(대조)한 뒤에만 확인하세요.", "p: 확인 · Esc/다른 키: 취소")
+PAUSE_CONFIRM_FOOTER = "자동화 일시정지 확인: p(Ctrl-p·ㅔ) = 확인 · Esc/다른 키 = 취소 · 키는 pane으로 전달되지 않음"
+RESUME_CONFIRM_FOOTER = "자동화 재개(대조 후) 확인: p(Ctrl-p·ㅔ) = 확인 · Esc/다른 키 = 취소 · 키는 pane으로 전달되지 않음"
+PAUSE_MENU_ROW = ("자동화 일시정지 / 재개 (확인 후 실행)", "p", "Ctrl-p")
+SUMMARY_MAX_COLS = 40  # the Task summary in the status line is shortened to at most this display width
+SUMMARY_MIN_COLS = 8
+WORKER_TEXT = {"idle": "대기", "busy": "작업 중"}
+TASK_KIND_TEXT = {"experiment": "실험", "work": "작업"}
+TASK_STATUS_TEXT = {"dispatched": "전달됨", "starting": "시작 중", "running": "실행 중", "waiting_report": "보고 대기",
+                    "held": "보류", "cancelling": "취소 중", "finished": "보고 완료", "blocked": "막힘", "closed": "종료"}
+TASK_HELD_TEXT = {"host_terminal_busy": "host terminal 사용 중"}
+# host-shell held reasons that mean user jobs (or a state left unknown by them) keep the handoff / automation held
+JOB_HELD_REASONS = ("manual_jobs", "unknown_or_manual_residue")
+JOB_HELD_HINT = ("해제: prefix t,c로 인수 → jobs 종료(fg/kill) → host shell에서 wb-handoff 다시 실행 → "
+                 "prefix h로 manager에 반환 → prefix t,c로 다시 인수(빈 prompt)")
+JOB_HELD_TASK_NOTE = "jobs 정리: prefix t,c 인수 → wb-handoff → prefix h → prefix t,c 재인수"
+TASK_CLOSED_TEXT = {"done": "완료", "cancelled": "취소됨", "superseded_by_new_task": "새 작업으로 대체"}
+INTERRUPTION_TEXT = {"requesting": "중단 요청 중", "requested": "중단 요청됨", "confirmed": "중단 확인됨",
+                     "unknown": "중단 확인 불명", "request_failed": "중단 요청 실패"}
 CTRL_D_NOTICE = "Ctrl-d는 OMP를 종료할 수 있습니다 — 2초 안에 Ctrl-d를 한 번 더 누르면 전달"
 # (command key, label, letter form, Ctrl form); menu digits are 1..9 then 0 in this order
 MENU_ITEMS = (
@@ -117,6 +146,7 @@ HELP_LINES = (
     "  OMP pane의 Ctrl-d는 종료 방지: 2초 안에 한 번 더 누르면 전달 (host shell은 즉시)",
     "  종료된 OMP pane(종료됨 안내): 그 pane에서 Enter = 새 OMP 세션으로 다시 시작 (이전 대화는 새 OMP에서 /resume)",
     "  host shell 종료 시: Enter = 새 shell 시작 · prefix k (Ctrl-k / ㅏ Space) = host terminal 강제 종료 (확인 필요)",
+    "  prefix p        자동화 일시정지 / 재개(대조 후) (확인 필요)  (prefix Ctrl-p · 한글: ㅔ Space)",
     "  prefix ?        이 도움말 (아무 키로 닫기)",
     "  prefix Space    명령 메뉴: ↑/↓+Enter 또는 숫자 1-9/0 (Esc 취소) — 글자 키 없이 쓸 수 있음",
     "한글 IME: Ctrl-] 뒤 자모 + Space 로 영문 키 명령 (예: ㅂ Space = q detach, ㅋ = z; scroll 모드도 ㅓ/ㅏ/ㅎ/ㅂ),",
@@ -144,6 +174,26 @@ _SCROLL_KEYS = {
     b"\x1b[F": "end", b"\x1b[4~": "end", b"\x1bOF": "end", b"\x1b[8~": "end",
     b"k": "up", b"j": "down", b"g": "home", b"G": "end", b"q": "quit", b"Q": "quit", b"\x1b": "quit",
 }
+
+
+def _plain(value: Any) -> str:
+    """Backend text made safe for a status line: no control characters, single spaces."""
+    text = value if isinstance(value, str) else ("" if value is None else str(value))
+    return " ".join("".join(ch if ch.isprintable() else " " for ch in text).split())
+
+
+def _clip(text: str, width: int) -> str:
+    """Shorten ``text`` to at most ``width`` display columns, ending in an ellipsis when shortened."""
+    if wcswidth(text) <= width:
+        return text
+    out, used = [], 0
+    for ch in text:
+        size = max(wcswidth(ch), 0)
+        if used + size > width - 1:
+            break
+        out.append(ch)
+        used += size
+    return "".join(out) + "…"
 
 
 def _safe_tail(segment: bytes, keep: int) -> bytes:
@@ -340,6 +390,7 @@ class ProductModel:
         self.menu_open = False  # prefix Space command menu (IME-neutral: arrows/Enter/digits/Esc only)
         self.menu_index = 0
         self.kill_confirm_open = False  # host terminal kill confirmation (C-D63): modal like the menu
+        self.pause_confirm: str | None = None  # automation "pause" / "resume" confirmation (CW-18 U5): same kind of modal
         self._mode: PaneId | None = None  # explicit scroll mode (prefix [): keys drive the view, never the pane
         self._views: dict[PaneId, _ScrollView] = {}  # panes whose view is scrolled back (wheel, Shift+PgUp, mode)
         self.mouse_capture = True  # outer-terminal mouse reporting wanted (prefix m toggles; the app loop applies it)
@@ -600,17 +651,38 @@ class ProductModel:
                 self.notice = "인수 확인됨: host 입력 owner 변경"
             elif kind is ClientType.HANDOFF:
                 self.notice = "host shell을 manager에게 되돌림"
+            elif kind in (ClientType.PAUSE, ClientType.RESUME):
+                self._automation_result(kind, header.get("automation"))
             return
         if kind is ClientType.INPUT and pane is None:
             return  # terminal-query reply refused; not a user action
         what = {ClientType.PASTE: "붙여넣기", ClientType.INPUT: "입력",
-                                         ClientType.RESTART_PANE: "재시작", ClientType.KILL_PANE: "강제 종료"}.get(kind, str(kind.value if kind else "요청"))
+                                         ClientType.RESTART_PANE: "재시작", ClientType.KILL_PANE: "강제 종료",
+                                         ClientType.PAUSE: "일시정지", ClientType.RESUME: "재개"}.get(kind, str(kind.value if kind else "요청"))
         target = f" [{TITLES[pane]}]" if pane else ""
         text = f"{what} 거부{target}: {header.get('reason')}: {header.get('detail') or ''}".rstrip(": ")
         held = self._held_reasons(header)
         if held:
             text += f" (held: {', '.join(held)})"
+            if any(r in JOB_HELD_REASONS for r in held):
+                text += f" · {JOB_HELD_HINT}"
         self.notice = text
+
+    def _automation_result(self, kind: ClientType, automation: Any) -> None:
+        """A pause/resume answer carries the automation state at once; the rest finishes in a later state push."""
+        if isinstance(automation, dict):
+            merged = dict(self._automation())
+            merged.update(automation)
+            self.state["automation"] = merged
+        state = self._automation().get("state")
+        if kind is ClientType.PAUSE:
+            self.notice = "자동화 일시정지됨" if state == "paused" else "자동화 일시정지 요청됨 — 진행은 상태줄에서 확인"
+        elif state == "resuming":
+            self.notice = "자동화 재개 진행 중"
+        elif state in ("paused", "pausing"):
+            self.notice = "자동화 재개 요청됨 — 아직 일시정지 상태입니다"
+        else:
+            self.notice = "자동화 재개됨"
 
     def _held_reasons(self, header: dict[str, Any]) -> list[str]:
         for source in (header.get("shell"), self.host_info().get("shell"), header):
@@ -627,13 +699,13 @@ class ProductModel:
     def handle_input(self, data: bytes, *, now: float | None = None) -> bool:
         """Parse and act on typed bytes; True when an event was handled (the caller redraws)."""
         self._last_now = self._mono() if now is None else now
-        self.parser.jamo_keys = self._mode is not None or self.kill_confirm_open  # a lone jamo is its 2-set letter key
+        self.parser.jamo_keys = self._mode is not None or self._confirm_open()  # a lone jamo is its 2-set letter key
         return self._handle_events(self.parser.feed(data, now=now))
 
     def flush_input(self, *, now: float | None = None) -> bool:
         """Release held partial input (e.g. a lone Esc); True when an event was handled (the caller redraws)."""
         self._last_now = self._mono() if now is None else now
-        self.parser.jamo_keys = self._mode is not None or self.kill_confirm_open
+        self.parser.jamo_keys = self._mode is not None or self._confirm_open()
         expired = self._repeat_until is not None and self._last_now >= self._repeat_until
         if expired:
             self._repeat_until = None  # the resize-repeat hint leaves the footer
@@ -678,7 +750,8 @@ class ProductModel:
         return handled
 
     def _handle_event_list(self, events: list) -> bool:
-        kill_chunk = self.kill_confirm_open  # an open kill confirmation judges the whole chunk (C-D63 review R3)
+        kill_chunk = self._confirm_open()  # an open confirmation judges the whole chunk (C-D63 review R3)
+        chunk_keys = self._confirm_keys()
         single = len(events) == 1
         for event in events:
             if self._repeat_until is not None:
@@ -697,13 +770,13 @@ class ProductModel:
             if not isinstance(event, Mouse):
                 self._clear_selection()  # the next key (or paste, command, page scroll) ends the highlight
             if kill_chunk:
-                if self.kill_confirm_open:
-                    self._kill_confirm_event(event, single=single)
-                elif not single and self._kill_confirm_starts(event):
-                    self.notice = KILL_CANCELLED_NOTICE
+                if self._confirm_open():
+                    self._confirm_event(event, single=single)
+                elif not single and self._confirm_starts(event, chunk_keys):
+                    self.notice = self._cancelled_notice(chunk_keys)
                 continue  # the rest of a multi-event chunk after the decision is dropped: no pane sees it
-            if self.kill_confirm_open:
-                self._kill_confirm_event(event, single=True)
+            if self._confirm_open():
+                self._confirm_event(event, single=True)
                 continue
             if self.menu_open:
                 self._menu_event(event)
@@ -861,6 +934,9 @@ class ProductModel:
             elif byte == 0x0B:  # Ctrl-k: the kill row below the numbered list (IME-neutral, like the other Ctrl keys)
                 self.menu_open = False
                 self._command("k")
+            elif byte == 0x10:  # Ctrl-p: the pause/resume row below it
+                self.menu_open = False
+                self._command("p")
             elif 0x30 <= byte <= 0x39 and chr(byte) in MENU_DIGITS:
                 self._menu_run(MENU_DIGITS.index(chr(byte)))
             # anything else (letters, Hangul, Tab, Backspace, ...) is swallowed: the menu is arrows/Enter/digits/Esc
@@ -876,6 +952,8 @@ class ProductModel:
             lines.append(f"{'>' if index == self.menu_index else ' '} {MENU_DIGITS[index]}  {label}   [{keys}]")
         label, letter, ctrl = KILL_MENU_ROW
         lines.append(f"  Ctrl-k  {label}   [Ctrl-] {letter} / Ctrl-] {ctrl}]")
+        label, letter, ctrl = PAUSE_MENU_ROW
+        lines.append(f"  Ctrl-p  {label}   [Ctrl-] {letter} / Ctrl-] {ctrl}]")
         lines += ["", "focus: Ctrl-] 1/2/3 · Tab   경계 조절: Ctrl-] ←↑↓→   literal prefix: Ctrl-] Ctrl-]",
                   "한글 입력 상태에서는 글자 키 대신 Ctrl 조합이나 이 메뉴를 쓰세요"]
         return lines
@@ -903,31 +981,89 @@ class ProductModel:
         self.notice = ""
         self._cancel_ctrl_d()
 
-    @staticmethod
-    def _kill_confirm_starts(event: Any) -> bool:
-        """True when the event is (or starts with) a k confirm form."""
-        if isinstance(event, Command):
-            return CTRL_ALIASES.get(event.key, event.key) in KILL_KEYS
-        return isinstance(event, Passthrough) and event.data[:1] in (b"k", b"K", b"\x0b")
+    # -- confirmation modals (host terminal kill, automation pause/resume) ---------------------------------------
+    @property
+    def pause_confirm_open(self) -> bool:
+        return self.pause_confirm is not None
 
-    def _kill_confirm_event(self, event: Any, *, single: bool = True) -> None:
-        """While the confirmation is open no event reaches a pane: only one confirm key on its own confirms.
+    def _confirm_open(self) -> bool:
+        return self.kill_confirm_open or self.pause_confirm is not None
+
+    def _confirm_keys(self) -> tuple[str, ...]:
+        """The command letters that confirm the modal now open (empty when none is)."""
+        if self.kill_confirm_open:
+            return KILL_KEYS
+        return PAUSE_KEYS if self.pause_confirm is not None else ()
+
+    @staticmethod
+    def _confirm_starts(event: Any, keys: tuple[str, ...]) -> bool:
+        """True when the event is (or starts with) a confirm form: the letter, its Ctrl form or (via the parser) its jamo."""
+        if not keys:
+            return False
+        if isinstance(event, Command):
+            return CTRL_ALIASES.get(event.key, event.key) in keys
+        raw = tuple(k.encode() for k in keys) + tuple(c.encode() for c, k in CTRL_ALIASES.items() if k == keys[0])
+        return isinstance(event, Passthrough) and event.data[:1] in raw
+
+    @staticmethod
+    def _cancelled_notice(keys: tuple[str, ...]) -> str:
+        return KILL_CANCELLED_NOTICE if keys == KILL_KEYS else PAUSE_CANCELLED_NOTICE
+
+    def _confirm_event(self, event: Any, *, single: bool = True) -> None:
+        """While a confirmation is open no event reaches a pane: only one confirm key on its own confirms.
 
         ``single`` is False when the input chunk held more than that one event, and a Passthrough must be exactly one
         confirm key: 'kk' / 'kill' / 'k'+Enter (auto-repeat, typing, an unbracketed paste) cancel (C-D63 review R3).
         A lone prefix leaves it open (so ``Ctrl-] k`` pressed twice confirms); the key after it decides."""
-        starts = self._kill_confirm_starts(event)
+        keys = self._confirm_keys()
+        starts = self._confirm_starts(event, keys)
         if isinstance(event, Passthrough):
-            confirmed = event.data in (b"k", b"K", b"\x0b")
+            confirmed = starts and len(event.data) == 1
         else:
             confirmed = starts  # a prefix command is one key; paste, mouse and page scroll never confirm
         confirmed = confirmed and single
+        which = self.pause_confirm
         self.kill_confirm_open = False
-        if confirmed:
+        self.pause_confirm = None
+        if confirmed and keys == KILL_KEYS:
             self._send(ClientType.KILL_PANE, pane=PaneId.HOST_SHELL)
             self.notice = KILLING_NOTICE
+        elif confirmed and which == "resume":
+            self._send(ClientType.RESUME, reconciled=True)
+            self.notice = RESUMING_NOTICE
+        elif confirmed:
+            self._send(ClientType.PAUSE)
+            self.notice = PAUSING_NOTICE
         else:
-            self.notice = KILL_CANCELLED_NOTICE if starts else ""
+            self.notice = self._cancelled_notice(keys) if starts else ""
+
+    # -- automation pause / resume (CW-18 U5) ---------------------------------------------------------------------
+    def _automation(self) -> dict[str, Any]:
+        value = self.state.get("automation")
+        return value if isinstance(value, dict) else {}
+
+    def pause_confirm_lines(self) -> list[str]:
+        return list(RESUME_CONFIRM_LINES if self.pause_confirm == "resume" else PAUSE_CONFIRM_LINES)
+
+    def _open_pause_confirm(self) -> None:
+        """prefix p: ask before pausing (running) or resuming (paused, after reconciliation); nothing reaches a pane."""
+        if self._pending_kind(ClientType.PAUSE) or self._pending_kind(ClientType.RESUME):
+            self.notice = AUTOMATION_PENDING_NOTICE
+            return
+        automation = self._automation()
+        state = automation.get("state")
+        if state in ("pausing", "resuming"):
+            self.notice = f"자동화 {'일시정지' if state == 'pausing' else '재개'} 진행 중 — 완료를 기다리세요"
+            return
+        if state == "paused" or automation.get("paused") is True:
+            self.pause_confirm = "resume"
+        elif isinstance(state, str) and state:
+            self.pause_confirm = "pause"
+        else:
+            self.notice = "자동화 상태를 알 수 없어 일시정지/재개를 열 수 없습니다"
+            return
+        self.notice = ""
+        self._cancel_ctrl_d()
 
     def _command(self, key: str) -> None:
         key = CTRL_ALIASES.get(key, key)
@@ -972,6 +1108,8 @@ class ProductModel:
             self.help_open = True
         elif key in KILL_KEYS:
             self._open_kill_confirm()
+        elif key in PAUSE_KEYS:
+            self._open_pause_confirm()
         else:
             self.notice = f"알 수 없는 prefix 명령 {key!r} (Ctrl-] Space 메뉴 · Ctrl-] ? 도움말)"
 
@@ -1344,6 +1482,7 @@ class ProductModel:
 
     def resize(self, rows: int, cols: int, *, force: bool = False) -> None:
         self.rows, self.cols = rows, cols
+        self.pause_confirm = None  # ... and the automation pause/resume one (CW-18 U5)
         self.kill_confirm_open = False  # a resize cancels the host-shell kill confirmation (C-D63): like any non-confirm input
         if self.too_small():
             self._end_drag()
@@ -1613,8 +1752,9 @@ class ProductModel:
     def status_lines(self) -> tuple[str, str]:
         shell = self.host_info().get("shell") or {}
         mode = shell.get("parent_mode", "unknown")
-        automation = (self.state.get("automation") or {}).get("state", "unknown")
-        bridge = self.state.get("bridge") or {}
+        automation = _plain(self._automation().get("state")) or "unknown"
+        bridge = self.state.get("bridge")
+        bridge = bridge if isinstance(bridge, dict) else {}
 
         def peer(role: str) -> str:
             value = bridge.get(role)
@@ -1624,14 +1764,98 @@ class ProductModel:
         if self.last_seen is not None:
             age = max(0, int(self.clock() - self.last_seen))
             seen = f"{time.strftime('%H:%M:%S', time.localtime(self.last_seen))} ({age}s 전)"
+        worker = self.worker_text()
         line1 = (f"focus: {TITLES[self.focus]} | host 입력 owner: {self.input_owner()} | "
-                 f"shell mode: {mode} | 자동화: {automation}")
+                 f"shell mode: {mode}" + (f" | worker: {worker}" if worker else "") + f" | 자동화: {automation}")
         line2 = (f"backend: {self.state.get('phase', 'unknown')} | bridge manager={peer('manager')} "
                  f"worker={peer('worker')} | 마지막 확인 {seen} | Ctrl-] ? 도움말")
+        extra = " | ".join(part for part in (self.task_text(), self.automation_text()) if part)
+        if extra:
+            line2 = f"{extra} | {line2}"
         warning = self.isolation_warning()
         if warning:
             line2 = f"{warning} | {line2}"
         return line1, line2
+
+    # -- CW-18 U5: current Task / worker / automation (all fields optional; unknown values are shown as sent) --------
+    def worker_text(self) -> str:
+        """대기 / 작업 중 from the snapshot ``worker``; empty when an older backend sends none."""
+        worker = self.state.get("worker")
+        if not isinstance(worker, dict):
+            return ""
+        state = _plain(worker.get("state"))
+        return WORKER_TEXT.get(state) or state or "?"
+
+    def task_text(self) -> str:
+        """``작업: 실험 "summary" [실행 중 · host terminal 사용 중]`` for the snapshot ``task`` (current, else last)."""
+        task = self.state.get("task")
+        if not isinstance(task, dict):
+            return ""
+        kind = _plain(task.get("kind"))
+        status = _plain(task.get("status"))
+        status_text = TASK_STATUS_TEXT.get(status) or status or "?"
+        if status == "closed":
+            reason = _plain(task.get("closed_reason"))
+            status_text = f"종료({TASK_CLOSED_TEXT.get(reason) or reason})" if reason else status_text
+        notes = []
+        held = _plain(task.get("held_reason"))
+        if held:
+            notes.append(TASK_HELD_TEXT.get(held) or held)
+            if held == "host_terminal_busy" and any(r in JOB_HELD_REASONS for r in self._held_reasons({})):
+                notes.append(JOB_HELD_TASK_NOTE)
+        if task.get("cancel_requested") is True and status != "cancelling":
+            notes.append("취소 요청됨")
+        tail = f" [{' · '.join([status_text] + notes)}]"
+        head = f"작업: {TASK_KIND_TEXT.get(kind) or kind or '?'}"
+        summary = _plain(task.get("summary"))
+        if summary:
+            summary = _clip(summary, max(SUMMARY_MIN_COLS, min(SUMMARY_MAX_COLS, self.cols // 3)))
+            head += f' "{summary}"'
+        return head + tail
+
+    def automation_text(self) -> str:
+        """Review timer / held reason / interruption / refused resume of the snapshot ``automation``."""
+        automation = self._automation()
+        state = automation.get("state")
+        paused = state in ("paused", "pausing") or automation.get("paused") is True
+        parts: list[str] = []
+        if state == "held":
+            tick = automation.get("tick")
+            problems = tick.get("problems") if isinstance(tick, dict) else None
+            why = _plain(automation.get("detail")) or (
+                _plain(", ".join(str(p) for p in problems)) if isinstance(problems, (list, tuple)) else "")
+            parts.append(f"보류: {why}" if why else "보류")
+        if state == "pausing":
+            parts.append("일시정지 중")
+        elif state == "resuming":
+            parts.append("재개 중")
+        review = automation.get("review")
+        if not paused and isinstance(review, dict) and review.get("applies") is True:
+            if review.get("status") == "delayed":
+                why = _plain(review.get("reason"))
+                count = review.get("coalesced_count")
+                merged = f" (합침 {count})" if isinstance(count, int) and not isinstance(count, bool) and count > 0 else ""
+                parts.append(f"대조 지연: {why or '?'}{merged}")
+            else:
+                due = review.get("next_due_in_seconds")
+                interval = review.get("interval_seconds")
+                if isinstance(due, (int, float)) and not isinstance(due, bool):
+                    every = f"{int(interval)}s " if isinstance(interval, (int, float)) and not isinstance(interval, bool) else ""
+                    parts.append(f"{every}대조 {int(max(0, due))}s 후")
+        if paused:
+            if state == "paused":
+                parts.append("일시정지됨")
+            interruption = automation.get("interruption")
+            if isinstance(interruption, dict):
+                text = INTERRUPTION_TEXT.get(_plain(interruption.get("state")))
+                if text:
+                    parts.append(text)
+            resume = automation.get("resume")
+            if isinstance(resume, dict) and resume.get("outcome") == "refused":
+                parts.append(f"재개 거부: {_plain(resume.get('reason')) or '?'}")
+        if automation.get("persistence_error"):
+            parts.append("저장 오류")
+        return " · ".join(parts)
 
     def isolation_warning(self) -> str | None:
         """The backend's OMP isolation warning (snapshot ``omp_isolation``) once its check found a problem."""
@@ -1647,6 +1871,8 @@ class ProductModel:
             return self.notice
         if self.kill_confirm_open:
             return KILL_CONFIRM_FOOTER
+        if self.pause_confirm is not None:
+            return RESUME_CONFIRM_FOOTER if self.pause_confirm == "resume" else PAUSE_CONFIRM_FOOTER
         if self.menu_open:
             return self.notice or "명령 메뉴: ↑/↓ + Enter · 숫자 1-9/0 · Esc 취소 · 키는 pane으로 전달되지 않음"
         if self.parser.prefix_active:

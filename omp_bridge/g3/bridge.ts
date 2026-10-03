@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import net from "node:net";
 import { parseControlEnvelope } from "../contract/v1.ts";
 
@@ -111,6 +112,90 @@ function roleAllows(role: Role, senderRole: string, kind: string): boolean {
 		: senderRole === "worker" && (kind === "answer" || kind === "report");
 }
 
+// CW-18 (C-D64/C-D65/C-D66) handoff tools. The extension only forwards one request
+// frame; the backend decides (Task, one at a time, pause) and delivers through the
+// existing TaskMailbox path. The result returns at once; it never waits for
+// the other OMP. A lost answer is outcome_unknown and is never resent.
+const TOOL_RESULT_TIMEOUT_MS = 10_000;
+const MESSAGE_MAX = 8192;
+const TEXT = { type: "string", minLength: 1, maxLength: MESSAGE_MAX };
+const SHORT = { type: "string", minLength: 1, maxLength: 1024 };
+const UUID_TEXT = { type: "string", pattern: UUID_PATTERN.source };
+const PATHS = { type: "array", items: SHORT, maxItems: 64 };
+const TO_WORKER_PARAMETERS = {
+	type: "object",
+	additionalProperties: false,
+	required: ["kind", "message"],
+	properties: {
+		task_id: { ...UUID_TEXT, description: "The active Task this follow-up or cancel belongs to; omit for a new Task." },
+		kind: { type: "string", enum: ["experiment", "work"],
+			description: "experiment: run a command and judge criteria; work: the worker does the work itself." },
+		message: { ...TEXT, description: "The instruction or summary for the worker (no secret values)." },
+		spec: {
+			type: "object", additionalProperties: false, required: ["goal", "paths"],
+			description: "The Task: goal and the paths the worker may change (required for a new Task).",
+			properties: {
+				goal: TEXT,
+				paths: { ...PATHS, description: "Paths the worker may change." },
+				instructions: TEXT,
+				execution: {
+					type: "object", additionalProperties: false,
+					required: ["source", "commit", "command", "criteria", "environment", "shell"],
+					description: "Experiment run (kind experiment only).",
+					properties: {
+						source: SHORT, commit: SHORT,
+						command: { anyOf: [TEXT, { type: "array", items: TEXT, minItems: 1, maxItems: 64 }] },
+						criteria: {
+							type: "object", additionalProperties: false,
+							required: ["log_contains", "result_file", "result_contains"],
+							properties: { log_contains: SHORT, result_file: SHORT, result_contains: SHORT },
+						},
+						environment: { type: "array", maxItems: 64, description: "Environment variable NAMES only, never values.",
+							items: { type: "string", pattern: "^[A-Za-z_][A-Za-z0-9_]*$", maxLength: 128 } },
+						shell: { type: "string", enum: ["bash", "sh"] },
+					},
+				},
+			},
+		},
+		run: { type: "boolean", description: "Re-run the current experiment Task (at most 3 re-runs per Task)." },
+		cancel: { type: "boolean", description: "With task_id: cancel that Task; the worker is told and becomes free." },
+	},
+};
+const TO_MANAGER_PARAMETERS = {
+	type: "object",
+	additionalProperties: false,
+	required: ["kind", "message"],
+	properties: {
+		kind: { type: "string", enum: ["answer", "progress", "done", "blocked", "report"] },
+		message: { ...TEXT, description: "The report for the manager (no secret values)." },
+		task_id: UUID_TEXT,
+		in_reply_to: { ...UUID_TEXT, description: "workbench_message_id of the manager message answered." },
+		requires_code_change: { type: "boolean" },
+		reason: TEXT,
+		request: {
+			type: "object", additionalProperties: false, required: ["goal", "paths"],
+			description: "A request for new or wider scope; the manager decides whether to send it as a Task.",
+			properties: { goal: TEXT, paths: PATHS },
+		},
+	},
+};
+const HANDOFF_TOOLS: Record<Role, { name: "to_worker" | "to_manager"; label: string; description: string; parameters: Frame }> = {
+	manager: {
+		name: "to_worker", label: "To worker", parameters: TO_WORKER_PARAMETERS,
+		description: "Send an instruction to the Workbench worker OMP. The worker does ONE task at a time. If it is "
+			+ "busy you get worker_busy with the current task; wait for its to_manager report (done/blocked) or "
+			+ "cancel the task. Without task_id a new Task is dispatched at once (status dispatched; the user "
+			+ "delegated this, no approval step). With the current task_id it is a follow-up message for the "
+			+ "worker (status queued), run: true re-runs an experiment, cancel: true cancels the Task. The result "
+			+ "returns at once; the worker reports back with to_manager.",
+	},
+	worker: {
+		name: "to_manager", label: "To manager", parameters: TO_MANAGER_PARAMETERS,
+		description: "Report to the Workbench manager OMP about the active Task: answer, progress, done, blocked "
+			+ "or report. Never use it while answering a message that carries a response_contract.",
+	},
+};
+
 export default function workbenchG3Extension(pi: any): void {
 	const socketPath = env("WORKBENCH_G3_BRIDGE_SOCKET");
 	const role = env("WORKBENCH_G3_ROLE") as Role;
@@ -151,6 +236,11 @@ export default function workbenchG3Extension(pi: any): void {
 		abortStatus: string;
 		unconfirmedToolCallIds: string[];
 	}> = [];
+	const pendingToolResults = new Map<string, {
+		toolCallId: string;
+		client: net.Socket;
+		settle: (result: Frame) => void;
+	}>();
 
 	function snapshot(): Frame {
 		let editorText: string | undefined;
@@ -397,6 +487,15 @@ export default function workbenchG3Extension(pi: any): void {
 			}
 			return;
 		}
+		if (frame.kind === "tool_result" && typeof frame.requestId === "string") {
+			const pending = pendingToolResults.get(frame.requestId);
+			const result = frame.result;
+			if (pending && pending.client === client && frame.toolCallId === pending.toolCallId
+				&& typeof result === "object" && result !== null && !Array.isArray(result)) {
+				pending.settle(result as Frame);
+			}
+			return;
+		}
 		if (frame.kind !== "deliver" || typeof frame.requestId !== "string" || typeof frame.envelope !== "string") return;
 
 		const requestId = frame.requestId;
@@ -518,6 +617,65 @@ export default function workbenchG3Extension(pi: any): void {
 		if (isCurrentConnection(client, sessionId, sessionGeneration)) publishState();
 	}
 
+	function failPendingTools(client: net.Socket | undefined, reason: string): void {
+		for (const pending of [...pendingToolResults.values()]) {
+			if (client === undefined || pending.client === client) pending.settle({ status: "outcome_unknown", reason });
+		}
+	}
+
+	function requestHandoff(tool: "to_worker" | "to_manager", toolCallId: unknown, params: unknown,
+		signal: AbortSignal | undefined): Promise<Frame> {
+		// The worker's staged reply is one provider round without tools; never forward a report from inside it.
+		if (activeDelivery?.workerStage && activeDelivery.terminal === "pending") {
+			return Promise.resolve({ status: "rejected", reason: "staged_delivery_pending" });
+		}
+		if (typeof toolCallId !== "string" || toolCallId.length === 0
+			|| typeof params !== "object" || params === null || Array.isArray(params)) {
+			return Promise.resolve({ status: "rejected", reason: "invalid_tool_call" });
+		}
+		const client = socket;
+		if (!connected || client === undefined || client.destroyed) {
+			return Promise.resolve({ status: "rejected", reason: "bridge_not_connected" });
+		}
+		if (signal?.aborted) return Promise.resolve({ status: "rejected", reason: "aborted_before_send" });
+		// OMP adds an intent field `i` to every tool schema; it is not a Workbench argument.
+		const { i: _intent, ...args } = params as Frame;
+		const requestId = randomUUID();
+		return new Promise(resolve => {
+			let settled = false;
+			const onAbort = () => settle({ status: "outcome_unknown", reason: "aborted" });
+			const timer = setTimeout(() => settle({ status: "outcome_unknown", reason: "timeout" }), TOOL_RESULT_TIMEOUT_MS);
+			function settle(result: Frame): void {
+				if (settled) return;
+				settled = true;
+				clearTimeout(timer);
+				signal?.removeEventListener("abort", onAbort);
+				pendingToolResults.delete(requestId);
+				resolve(result);
+			}
+			pendingToolResults.set(requestId, { toolCallId, client, settle });
+			signal?.addEventListener("abort", onAbort, { once: true });
+			// Sent once. A timeout, abort or disconnect leaves the backend outcome unknown; no resend.
+			sendLine(client, { kind: "tool_request", requestId, toolCallId, tool, args, sessionId: ompSessionId, generation });
+		});
+	}
+
+	if (typeof pi.registerTool === "function") {
+		const tool = HANDOFF_TOOLS[role];
+		pi.registerTool({
+			name: tool.name,
+			label: tool.label,
+			description: tool.description,
+			parameters: tool.parameters,
+			// Ship the schema with every provider request instead of xd:// discovery.
+			loadMode: "essential",
+			async execute(toolCallId: string, params: unknown, signal?: AbortSignal) {
+				const result = await requestHandoff(tool.name, toolCallId, params, signal);
+				return { content: [{ type: "text", text: JSON.stringify(result) }], details: result };
+			},
+		});
+	}
+
 	function clearReconnect(): void {
 		if (reconnectTimer !== undefined) clearTimeout(reconnectTimer);
 		reconnectTimer = undefined;
@@ -567,6 +725,7 @@ export default function workbenchG3Extension(pi: any): void {
 			}
 		});
 		client.on("error", error => {
+			failPendingTools(client, "bridge_disconnected");
 			if (isCurrentConnection(client, sessionId, sessionGeneration)) {
 				if (activeDelivery?.workerStage) markDeliveryUnknown("bridge_disconnected");
 				connected = false;
@@ -574,6 +733,7 @@ export default function workbenchG3Extension(pi: any): void {
 			}
 		});
 		client.on("close", () => {
+			failPendingTools(client, "bridge_disconnected");
 			if (!isCurrentConnection(client, sessionId, sessionGeneration)) return;
 			if (activeDelivery?.workerStage) markDeliveryUnknown("bridge_disconnected");
 			connected = false;
@@ -631,6 +791,7 @@ export default function workbenchG3Extension(pi: any): void {
 	pi.on("session_shutdown", () => {
 		if (activeDelivery?.workerStage) markDeliveryUnknown("session_shutdown");
 		shuttingDown = true;
+		failPendingTools(undefined, "session_shutdown");
 		clearReconnect();
 		const previous = socket;
 		socket = undefined;

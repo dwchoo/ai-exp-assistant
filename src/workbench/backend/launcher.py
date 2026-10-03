@@ -1,28 +1,34 @@
 """Start-requirement checks, the production OMP launch plan and OMP isolation.
 
 The launcher injects the G3 bridge extension and its role/token/generation
-environment. It never reads, stores or copies OMP credentials: OMP keeps using
-the user's own agent dir, auth, provider and model settings.
+environment. It never reads, stores or copies OMP credentials.
 
-C-D59 isolation: both OMP processes also get ``--config`` overlays (the static
-``omp_bridge/omp-isolation.yml`` plus a per-role overlay generated in the data
-dir), ``--no-extensions``, ``--append-system-prompt ""`` and ``--no-title``, so
-ambient context files (AGENTS.md/CLAUDE.md), APPEND_SYSTEM.md, user/project skills, rules, commands,
-auto-discovered extensions, MCP project config, memory, Auto QA and task
-subagent definitions stay out of the Workbench sessions. Nothing global is
-edited and ``--profile``/``PI_CODING_AGENT_DIR`` are never used (they would
-switch to a separate agent dir without the user's logins). User
+C-D64 Workbench-owned OMP home (``omp_home``): both OMP processes (and the
+isolation check) run with ``PI_CONFIG_DIR``/``PI_CODING_AGENT_DIR`` pointing at
+``<data dir>/omp-root[/agent]``; only the auth store ``agent.db`` is a symlink
+to the user's own. Profiles (``OMP_PROFILE``/``PI_PROFILE``/``--profile``)
+would replace the agent dir and are never used.
+
+C-D59 isolation (kept): both OMP processes also get ``--config`` overlays (the
+static ``omp_bridge/omp-isolation.yml`` plus a per-role overlay generated in
+the data dir), ``--no-extensions``, ``--append-system-prompt ""`` and
+``--no-title``, because project config (``<cwd>/.omp/config.yml`` etc.) still
+overrides the home config.yml and only ``--config`` wins over it. Ambient
+context files (AGENTS.md/CLAUDE.md), APPEND_SYSTEM.md, project skills, rules,
+commands, auto-discovered extensions, MCP project config, memory, Auto QA and
+project task subagent definitions stay out of the Workbench sessions. User
 ``--omp-arg``/``WORKBENCH_OMP_ARGS`` come after the isolation arguments and can
 therefore override them. ``check_isolation`` verifies the result at start
-through RPC ``get_state``/``get_available_commands`` only (zero model calls).
+through RPC ``get_state``/``get_available_commands``/``get_login_providers``
+only (zero model calls) and, for the Workbench home, the files the checked OMP
+holds open.
 
-User choices (2026-09-30): OMP's default Personality/Tone/Reasoning Format
-blocks are kept (no ``personality: none``), so the user's personality preset
-and ``~/.omp/agent/PERSONALITY.md`` reach the prompt; ``check_isolation``
-reports an existing PERSONALITY.md as a warning (state ``warning``, not a
-leak). ``--no-title`` disables OMP's session-title model call, so
-TITLE_SYSTEM.md is unused and is a leak only if a user ``--omp-arg`` drops
-``--no-title`` from the checked command.
+User choices: OMP's default Personality/Tone/Reasoning Format blocks are kept
+(2026-09-30); with the Workbench home the user's PERSONALITY.md is no longer
+read, so it is not reported any more. ``--no-title`` disables OMP's
+session-title model call, so TITLE_SYSTEM.md is unused and is a leak only if a
+user ``--omp-arg`` drops ``--no-title`` from the checked command. LSP config
+and ``~/.env`` reads stay as they are (2026-10-03).
 """
 
 from __future__ import annotations
@@ -45,6 +51,9 @@ import time
 from typing import Any, Mapping, Sequence
 
 from workbench.backend.paths import write_private_json
+from workbench.backend.omp_home import (
+    classify_open_paths, home_env_leaks, home_environment, observe_open_paths, withheld_user_values,
+    without_user_values)
 from workbench.runtime.process_evidence import LinuxProcessProbe, ProcessRef
 
 from workbench.terminal.shell_g2.prototype import ShellChoice, ShellUnavailable, select_shell
@@ -59,8 +68,11 @@ _BRIDGE_KEYS = ("WORKBENCH_G3_BRIDGE_SOCKET", "WORKBENCH_G3_ROLE", "WORKBENCH_G3
                 "WORKBENCH_G3_GENERATION", "WORKBENCH_G3_EXPECTED_OMP_VERSION")
 # Ambient environment that overrides the isolation overlay inside OMP: the
 # PI_AUTO_QA env value wins over dev.autoqa (OMP 18.4.4), so OMP children do
-# not inherit it (the user shell keeps it).
+# not inherit it (the user shell keeps it). Profile and path overrides are
+# dropped by omp_home.home_environment.
 _OMP_ENV_DROP = ("PI_AUTO_QA",)
+# A profile replaces PI_CODING_AGENT_DIR with ~/.omp/profiles/<p>/agent.
+PROFILE_OPTION = "--profile"
 
 SHELL_REQUIREMENTS = (
     "OMP Workbench needs Bash or a POSIX sh on PATH for its persistent host shell.\n"
@@ -92,7 +104,7 @@ def default_skills_dir() -> Path:
     return _repository_root() / "omp_bridge" / "skills"
 
 
-# -- C-D59 isolation constants (verified with OMP 18.4.4) -------------------
+# -- C-D59 isolation constants (verified with OMP 18.4.4, re-run with 18.4.5) -
 # Capability-provider ids disabled per run; must equal the list in
 # omp_bridge/omp-isolation.yml (asserted by tests). None is a model provider id.
 ISOLATION_PROVIDER_IDS = (
@@ -100,16 +112,20 @@ ISOLATION_PROVIDER_IDS = (
     "cline", "codex", "cursor", "gemini", "github", "mcp-json", "omp-plugins", "opencode", "ssh-json",
     "vscode", "windsurf", "agent-plugins", "builtin-defaults",
 )
-# Role skill filter (skills.includeSkills globs) applied to omp_bridge/skills.
-# Empty = no role filter. Role skills themselves are CW-18.
-ROLE_SKILL_PATTERNS: dict[str, tuple[str, ...]] = {"manager": (), "worker": ()}
+# Role skill filter (skills.includeSkills globs) applied to omp_bridge/skills
+# (C-D65 (3), CW-18 U6): the manager loads only to-worker, the worker only
+# to-manager. These are the Workbench skills the isolation check expects.
+ROLE_SKILL_PATTERNS: dict[str, tuple[str, ...]] = {"manager": ("to-worker",), "worker": ("to-manager",)}
 OMP_ROLE_NAMES = ("manager", "worker")
 # What an isolated OMP 18.4.4 still shows: bundled task agents and bundled
 # non-builtin-sourced commands. Anything else is reported as a leak.
 BUNDLED_TASK_AGENTS = frozenset({"scout", "reviewer", "security-reviewer", "task", "sonic"})
 BUNDLED_EXTRA_COMMANDS = frozenset({"autoresearch", "init"})
 # OMP versions the Workbench evidence was produced with (drift is reported).
-EVIDENCE_OMP_VERSIONS = {"bridge_g3": "18.2.10", "isolation": "18.4.4"}
+# isolation: C-D64 Workbench home (setupVersion 2) - probe p27-home-probe-01 and
+# the live run of p27-home-test-01 with omp/18.4.5 (isolation ok, 0 leaks;
+# .workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-home-test-01-agent.json).
+EVIDENCE_OMP_VERSIONS = {"bridge_g3": "18.2.10", "isolation": "18.4.5"}
 # Present only in OMP's bundled default system prompt. A project/user
 # SYSTEM.md (or --system-prompt) replaces it and uses another template.
 DEFAULT_PROMPT_MARKER = "You are omp's"
@@ -118,9 +134,14 @@ DEFAULT_PROMPT_MARKER = "You are omp's"
 PERSONALITY_HEADING = "# Personality"
 # Rendered only while OMP Auto QA (dev.autoqa) is effectively on.
 AUTOQA_MARKER = "xd://report_issue"
+# OMP 18.4.5 browser capability: the eval tool lists a `browser` prelude
+# (documented at this URI) while browser.enabled is on; a separate tool named
+# "browser" (other OMP versions/MCP) counts too. Off by user decision 2026-10-03.
+BROWSER_TOOL_NAME = "browser"
+BROWSER_PRELUDE_MARKER = "xd://eval/browser"
 # Where OMP 18.4.4 looks for prompt files outside disabledProviders:
 # APPEND_SYSTEM.md / TITLE_SYSTEM.md in <cwd>/{.omp,.claude,.codex,.gemini} and
-# the user agent dir; PERSONALITY.md in the user agent dir only (a warning).
+# the user agent dir (with the Workbench home: <omp-root>/agent).
 PROMPT_FILE_PROJECT_DIRS = (".omp", ".claude", ".codex", ".gemini")
 _PROMPT_FILE_READ_LIMIT = 4096
 # Bound for the start-path ``omp config get`` reads (all keys together).
@@ -129,6 +150,8 @@ USER_CONFIG_KEYS = ("disabledProviders", "task.disabledAgents")
 ISOLATION_CHECK_TIMEOUT = 20.0
 ISOLATION_CHECK_TOKEN = "isolation-check"
 _RPC_CHECK_ARGS = ("--mode", "rpc", "--no-session", "--no-title")
+# Optional in the check: login state (provider ids and flags only, no secret).
+_RPC_LOGIN_PROVIDERS = ("wb-iso-login", "get_login_providers")
 _AGENT_NAME_READ_LIMIT = 16384
 _RESERVED_AGENT_NAMES = frozenset({"main", "sub"})
 
@@ -188,7 +211,15 @@ def build_plan(environment: Mapping[str, str], *, omp: str | None = None,
         raise StartRequirementError(
             f"OMP isolation overlay not found: {default_isolation_overlay()}\nNo backend was started.")
     extra = tuple(omp_args) or tuple(shlex.split(environment.get(OMP_ARGS_ENV, "")))
+    if any(_is_profile_arg(item) for item in extra):
+        raise StartRequirementError(
+            "OMP Workbench runs OMP with its own OMP home; '--profile' would switch OMP to a profile under "
+            "~/.omp and is not allowed in --omp-arg/WORKBENCH_OMP_ARGS.\nNo backend was started.")
     return LaunchPlan(shell, candidate, omp_version(candidate), str(extension.resolve()), extra)
+
+
+def _is_profile_arg(item: str) -> bool:
+    return item == PROFILE_OPTION or item.startswith(PROFILE_OPTION + "=")
 
 
 def isolation_args(role_overlay: Path | str, append_system_prompt: str = "") -> list[str]:
@@ -311,9 +342,13 @@ def _nearest_project_agents_dir(project_dir: Path | str) -> Path | None:
 
 
 def omp_user_dir(home: Path | str, environment: Mapping[str, str] | None = None) -> Path:
-    """OMP's user agent dir as seen by its discovery helpers (``~/.omp/agent``)."""
+    """OMP's user agent dir as seen by its discovery helpers (``~/.omp/agent``).
+
+    With the Workbench home (``PI_CONFIG_DIR`` relative to HOME) this is
+    ``<omp-root>/agent``; ``..`` is normalised like OMP's ``path.join``.
+    """
     config_dir = (environment or {}).get("PI_CONFIG_DIR") or ".omp"
-    return Path(home) / config_dir / "agent"
+    return Path(os.path.normpath(os.path.join(home, config_dir, "agent")))
 
 
 def task_agent_names(project_dir: Path | str, home: Path | str,
@@ -431,7 +466,8 @@ def read_user_config(omp: str, keys: Sequence[str] = USER_CONFIG_KEYS, *, cwd: P
                      ) -> dict[str, list[str] | None]:
     """The user's own values of a few array settings, read-only via ``omp config get``.
 
-    Only the named keys are requested (no credentials). The reads run
+    Not used by the backend since C-D64 (the Workbench OMP home does not read
+    the user's OMP config, so nothing is unioned back). Only the named keys are requested (no credentials). The reads run
     concurrently under one ``timeout``; each runs in its own process group
     that is stopped and reaped. A key is ``None`` when it could not be read
     in time.
@@ -458,9 +494,12 @@ def role_overlay(role: str, *, project_dir: Path | str, home: Path | str,
                  environment: Mapping[str, str] | None = None) -> dict[str, Any]:
     """The per-role ``--config`` overlay that completes omp-isolation.yml.
 
-    ``--config`` replaces arrays, so the user's own ``disabledProviders`` and
-    ``task.disabledAgents`` are unioned back in (the Workbench never enables
-    what the user disabled). The skill filter is Workbench-owned: ``includeSkills``
+    ``task.disabledAgents`` lists the loadable definitions of the nearest
+    project ``.omp/agents`` and of the user agents dir OMP sees with
+    ``environment`` (the Workbench home: ``<omp-root>/agent/agents``). Since
+    C-D64 the backend passes no user values (the Workbench home does not read
+    the user's OMP config); ``user_disabled_*`` are only unioned when given.
+    The skill filter is Workbench-owned: ``includeSkills``
     is the role filter (``[]`` = every Workbench skill) and ``ignoredSkills`` is
     ``[]``, so the user's global include/ignore lists can neither hide
     Workbench skills nor widen the role filter; ambient skill sources are
@@ -479,7 +518,11 @@ def role_overlay(role: str, *, project_dir: Path | str, home: Path | str,
 
 
 def role_skill_allowlist(role: str, skills_dir: Path | str | None = None) -> tuple[str, ...]:
-    return workbench_skill_names(skills_dir or default_skills_dir(), ROLE_SKILL_PATTERNS.get(role, ()))
+    """The Workbench skills ``role`` may load; fails closed (nothing) for a role without a filter."""
+    patterns = ROLE_SKILL_PATTERNS.get(role) if isinstance(role, str) else None
+    if not patterns:
+        return ()
+    return workbench_skill_names(skills_dir or default_skills_dir(), patterns)
 
 
 def write_role_overlay(directory: Path, role: str, overlay: Mapping[str, Any]) -> Path:
@@ -492,8 +535,13 @@ def write_role_overlay(directory: Path, role: str, overlay: Mapping[str, Any]) -
 
 
 def omp_environment(base: Mapping[str, str], plan: LaunchPlan, *, role: str, token: str,
-                    bridge_socket: Path) -> dict[str, str]:
-    env = {key: value for key, value in base.items() if key not in _BRIDGE_KEYS and key not in _OMP_ENV_DROP}
+                    bridge_socket: Path, home: Mapping[str, str] | None = None) -> dict[str, str]:
+    """The OMP child environment: ``home`` is ``OmpHome.environment()`` (C-D64).
+
+    Profile/path overrides are always dropped; the user shell keeps them.
+    """
+    env = {key: value for key, value in home_environment(base, home).items()
+           if key not in _BRIDGE_KEYS and key not in _OMP_ENV_DROP}
     env.update({
         "TERM": DISPLAY_TERM,
         "COLORTERM": env.get("COLORTERM", "truecolor"),
@@ -563,6 +611,9 @@ def observe_isolation(state: Mapping[str, Any], commands: Sequence[Mapping[str, 
         "system_prompt_default": DEFAULT_PROMPT_MARKER in prompt,
         "personality_block": re.search(rf"^{re.escape(PERSONALITY_HEADING)}\s*$", prompt, re.M) is not None,
         "autoqa": AUTOQA_MARKER in prompt,
+        "browser": any(isinstance(tool, Mapping) and (
+            tool.get("name") == BROWSER_TOOL_NAME or BROWSER_PRELUDE_MARKER in str(tool.get("description") or ""))
+            for tool in state.get("dumpTools") or []) or BROWSER_PRELUDE_MARKER in prompt,
         "model": f"{model.get('provider')}/{model.get('id')}" if model else None,
     }
 
@@ -580,6 +631,8 @@ def isolation_leaks(observed: Mapping[str, Any], *, allowed_skills: Sequence[str
               if name not in BUNDLED_EXTRA_COMMANDS]
     if observed.get("autoqa"):
         leaks.append("autoqa:enabled")
+    if observed.get("browser"):
+        leaks.append("tool:browser")
     return leaks
 
 
@@ -594,17 +647,18 @@ def _probe_lines(text: str, count: int = 3) -> list[str]:
 def ambient_prompt_files(project_dir: Path | str, environment: Mapping[str, str]) -> list[dict[str, Any]]:
     """Existing ambient prompt files OMP 18.4.4 reads outside disabledProviders.
 
-    Each entry: kind (append_system/personality/title_system), path and up to
-    three non-empty lines (bounded read) used to see whether it reached the
-    prompt. Paths follow OMP: ``<cwd>/{.omp,.claude,.codex,.gemini}`` and the
-    user agent dir (PERSONALITY.md: ``PI_CODING_AGENT_DIR`` or the same dir).
+    Each entry: kind (append_system/title_system), path and up to three
+    non-empty lines (bounded read) used to see whether it reached the prompt.
+    Paths follow OMP: ``<cwd>/{.omp,.claude,.codex,.gemini}`` and the user agent
+    dir under ``PI_CONFIG_DIR`` (the Workbench home since C-D64).
+    PERSONALITY.md is read from the agent dir only, which the Workbench owns
+    since C-D64, so it is no longer an ambient source.
     """
     home = environment.get("HOME") or str(Path.home())
     user = omp_user_dir(home, environment)
-    agent_dir = Path(environment.get("PI_CODING_AGENT_DIR") or user)
     project = Path(project_dir)
     candidates = [("append_system", project / name / "APPEND_SYSTEM.md") for name in PROMPT_FILE_PROJECT_DIRS]
-    candidates += [("append_system", user / "APPEND_SYSTEM.md"), ("personality", agent_dir / "PERSONALITY.md")]
+    candidates += [("append_system", user / "APPEND_SYSTEM.md")]
     candidates += [("title_system", project / name / "TITLE_SYSTEM.md") for name in PROMPT_FILE_PROJECT_DIRS]
     candidates += [("title_system", user / "TITLE_SYSTEM.md")]
     found = []
@@ -621,28 +675,55 @@ def prompt_file_leaks(prompt: str, files: Sequence[Mapping[str, Any]], *, no_tit
     APPEND_SYSTEM.md is a leak when all its probe lines are in the system
     prompt (an empty file adds nothing). TITLE_SYSTEM.md feeds only the title
     model call, which RPC cannot show: with ``--no-title`` it is unused;
-    without, an existing one is reported. PERSONALITY.md is a warning
-    (``prompt_file_warnings``), not a leak.
+    without, an existing one is reported.
     """
     leaks = []
     for item in files:
         probe = item.get("probe") or []
-        if item["kind"] == "personality" or (item["kind"] == "title_system" and no_title):
+        if item["kind"] == "title_system" and no_title:
             continue
         if item["kind"] == "title_system" or (probe and all(line in prompt for line in probe)):
             leaks.append(f"{item['kind']}:{item['path']}")
     return leaks
 
 
-def prompt_file_warnings(files: Sequence[Mapping[str, Any]]) -> list[str]:
-    """PERSONALITY.md is read by OMP (default personality kept by user choice): warn, do not leak."""
-    return [f"personality:{item['path']}" for item in files if item["kind"] == "personality"]
-
-
 def isolation_check_environment(base: Mapping[str, str], plan: LaunchPlan, *, role: str,
-                                absent_socket: Path) -> dict[str, str]:
-    """Same environment as the pane, but the bridge points at a socket that never exists."""
-    return omp_environment(base, plan, role=role, token=ISOLATION_CHECK_TOKEN, bridge_socket=absent_socket)
+                                absent_socket: Path, home: Mapping[str, str] | None = None) -> dict[str, str]:
+    """Same environment as the pane, but the bridge points at a socket that never exists.
+
+    With a home it also carries the user's withheld XDG values (``WORKBENCH_USER_*``)
+    for classifying the user's OMP locations; ``check_isolation`` never passes them to OMP.
+    """
+    env = omp_environment(base, plan, role=role, token=ISOLATION_CHECK_TOKEN, bridge_socket=absent_socket,
+                          home=home)
+    if home is not None:
+        env.update(withheld_user_values(base))
+    return env
+
+
+def home_observation(open_paths: Sequence[str], environment: Mapping[str, str],
+                     login: Mapping[str, Any] | None, model: str | None) -> tuple[dict[str, Any], list[str], list[str]]:
+    """Workbench-home criteria for one checked OMP: (observed, leaks, warnings).
+
+    Leak: the OMP holds a file open under the user's own OMP directories other
+    than the shared auth store. Warning: neither the Workbench config root nor
+    agent dir is in use, or no provider is usable (no logged-in login provider
+    and no model). Only provider ids and flags of ``get_login_providers`` are kept.
+    """
+    observed = classify_open_paths(open_paths, environment)
+    providers = (login or {}).get("providers") if isinstance(login, Mapping) else None
+    authenticated = None
+    if isinstance(providers, list):
+        authenticated = sorted(str(item.get("id")) for item in providers
+                               if isinstance(item, Mapping) and item.get("authenticated") is True)
+    observed["authenticated_providers"] = authenticated
+    leaks = [f"user_omp_path:{path}" for path in observed["user_paths"]]
+    warnings = []
+    if not (observed["config_root_in_use"] or observed["agent_dir_in_use"]):
+        warnings.append("omp_home:not_observed")
+    if not authenticated and not model:
+        warnings.append("auth:no_provider")
+    return observed, leaks, warnings
 
 
 class _CheckFailed(Exception):
@@ -706,7 +787,8 @@ def _stop_group(process: subprocess.Popen, ref: ProcessRef | None) -> dict[str, 
 
 
 def _rpc_exchange(process: subprocess.Popen, requests: Sequence[tuple[str, str]], deadline: float,
-                  cancel: threading.Event | None) -> dict[str, Any]:
+                  cancel: threading.Event | None, optional: frozenset[str] = frozenset()) -> dict[str, Any]:
+    """Send ``requests`` one at a time; an ``optional`` request that fails answers ``None``."""
     assert process.stdin is not None and process.stdout is not None
     fd = process.stdout.fileno()
     buffer = b""
@@ -741,6 +823,9 @@ def _rpc_exchange(process: subprocess.Popen, requests: Sequence[tuple[str, str]]
                     continue
                 if isinstance(frame, dict) and frame.get("type") == "response" and frame.get("id") in dict(requests):
                     if not frame.get("success", False):
+                        if frame["id"] in optional:
+                            responses[frame["id"]] = None
+                            continue
                         raise _CheckFailed(f"'{frame.get('command')}' failed: {frame.get('error')}")
                     responses[frame["id"]] = frame.get("data") or {}
     return responses
@@ -753,18 +838,26 @@ def check_isolation(command: Sequence[str], *, cwd: Path | str, environment: Map
     """Run the pane's OMP command once in RPC mode and list what it loaded.
 
     Only ``get_state`` and ``get_available_commands`` are sent (no prompt, no
-    model call); ``--no-session`` keeps no session. Bounded by ``timeout``;
-    the check's own process group is always stopped and reaped. ``keep_raw``
-    adds the raw RPC data (tests/evidence only; not for the snapshot).
+    model call); ``--no-session`` keeps no session. With the Workbench OMP
+    home (``PI_CODING_AGENT_DIR`` in ``environment``) the check also sends
+    ``get_login_providers`` and records which files the checked OMP holds open
+    (``home_observation``). Bounded by ``timeout``; the check's own process
+    group is always stopped and reaped. ``keep_raw`` adds the raw RPC data
+    (tests/evidence only; not for the snapshot).
     """
     started = time.monotonic()
     result: dict[str, Any] = {"role": role, "state": "failed", "ok": False, "leaks": [], "error": None,
                               "warnings": [], "observed": None, "extension_errors": [], "omp_version": omp_version,
                               "duration": None, "cleanup": None}
     argv = [*command, *_RPC_CHECK_ARGS]
+    home_mode = bool(environment.get("PI_CODING_AGENT_DIR"))
+    requests = [("wb-iso-state", "get_state"), ("wb-iso-commands", "get_available_commands")]
+    if home_mode:
+        requests.append(_RPC_LOGIN_PROVIDERS)
+    open_paths: list[str] = []
     with tempfile.TemporaryFile() as stderr:
         try:
-            process = subprocess.Popen(argv, cwd=cwd, env=dict(environment), stdin=subprocess.PIPE,
+            process = subprocess.Popen(argv, cwd=cwd, env=without_user_values(environment), stdin=subprocess.PIPE,
                                        stdout=subprocess.PIPE, stderr=stderr, start_new_session=True,
                                        close_fds=True)
         except OSError as exc:
@@ -776,8 +869,10 @@ def check_isolation(command: Sequence[str], *, cwd: Path | str, environment: Map
             ticks = None
         ref = ProcessRef("isolation-check", process.pid, ticks, 1) if ticks else None
         try:
-            data = _rpc_exchange(process, (("wb-iso-state", "get_state"), ("wb-iso-commands", "get_available_commands")),
-                                 started + timeout, cancel)
+            data = _rpc_exchange(process, requests, started + timeout, cancel,
+                                 optional=frozenset({_RPC_LOGIN_PROVIDERS[0]}))
+            if home_mode:  # still running: the files its started session holds open
+                open_paths = observe_open_paths(process.pid)
         except _CheckFailed as exc:
             result["error"] = str(exc)
             data = None
@@ -795,7 +890,13 @@ def check_isolation(command: Sequence[str], *, cwd: Path | str, environment: Map
         observed["prompt_files"] = [{key: item[key] for key in ("kind", "path")} for item in files]
         leaks = isolation_leaks(observed, allowed_skills=allowed_skills) + prompt_file_leaks(
             prompt, files, no_title="--no-title" in command)
-        warnings = prompt_file_warnings(files)
+        leaks += [f"profile:{item}" for item in command if _is_profile_arg(item)]
+        leaks += home_env_leaks(without_user_values(environment))
+        warnings: list[str] = []
+        if home_mode:
+            observed["omp_home"], home_leaks, warnings = home_observation(
+                open_paths, environment, data.get(_RPC_LOGIN_PROVIDERS[0]), observed.get("model"))
+            leaks += home_leaks
         result.update(observed=observed, leaks=leaks, warnings=warnings)
         if keep_raw:
             result["raw"] = data
@@ -837,7 +938,7 @@ def summarize_isolation(results: Mapping[str, Mapping[str, Any]], omp_version: s
     elif state == "failed":
         warning = "OMP isolation check failed: " + ("; ".join(errors) or "no result")
     elif state == "warning":
-        warning = "OMP keeps its default personality and reads PERSONALITY.md: " + ", ".join(warnings)
+        warning = "OMP isolation warning: " + ", ".join(warnings)
     summary.update(state=state, checked=True, ok=state in ("ok", "warning"), leaks=leaks, warnings=warnings,
                    warning=warning,
                    roles={role: dict(item) for role, item in results.items()})

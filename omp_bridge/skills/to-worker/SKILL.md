@@ -1,0 +1,49 @@
+---
+name: to-worker
+description: Hand work to the Workbench worker with the to_worker tool - experiments and free work, one task at a time. Use whenever you must delegate, follow up on, re-run or cancel worker work.
+---
+
+# to-worker (manager)
+
+You are the Workbench manager. The user has delegated handing work to the worker to you: a `to_worker` call becomes a Task and reaches the worker at once, with no approval step. Use `to_worker` for every instruction to the worker; do not run the work yourself.
+
+## The worker does ONE task at a time
+- Without `task_id`, `to_worker` starts a new Task. If the worker already has an active Task you get `worker_busy` with that Task's summary. Nothing is queued.
+- On `worker_busy`: wait for the worker's `to_manager` report (done/blocked) or cancel the active Task, then send the new one. Do not retry in a loop.
+
+## Fields
+- `kind` (required): `experiment` runs a command and judges criteria; `work` is free work the worker does with its own tools (analysis, code changes).
+- `message` (required): the instruction or summary the worker sees. Short and concrete.
+- `spec` (required for a new Task): `goal`, `paths` (the only paths the worker may change; stay narrow), optional `instructions`.
+- `spec.execution` (experiment only): `source`, `commit`, `command` (string or list), `criteria` (`log_contains`, `result_file`, `result_contains`), `environment` (variable NAMES only), `shell` (`bash` or `sh`).
+- `task_id`: the active Task a follow-up or cancel belongs to. With it, `to_worker` is a message to the worker for the same Task (status `queued`).
+- `run: true` (with the current `task_id`): re-run the experiment, for example with a new commit. At most 3 re-runs per Task; after that report to the user instead.
+- `cancel: true` (with `task_id`): cancel the Task; the worker is told and becomes free.
+
+## Results
+The result returns at once. The worker's outcome arrives later as a `to_manager` report; it is not in the tool result. Statuses and what to do:
+- `dispatched`: the Task (or re-run) started. Wait for the report.
+- `queued`: your follow-up message reached the same Task. Wait.
+- `cancelled` / `cancel_requested`: the Task is closed / the worker is being told. Wait for the confirmation before a new Task.
+- `worker_busy`: see above; wait or cancel.
+- `rejected` (with a reason): the call was invalid. Fix the arguments once; do not resend it unchanged.
+- `held` (nothing was sent; the reason says why, so do not loop):
+  - `held:paused`: the user paused automation. Stop sending, tell the user, wait for their resume.
+  - `held:no_active_run` / `held:run_starting` / `held:another_task_active`: the `task_id` has no run in progress yet or the worker is on another Task. Re-check the Task state; for a re-run send `run: true` or start a new Task without `task_id`.
+  - `held:retry_limit`: 3 re-runs are used. Report to the user instead of re-running.
+  - `held:target_not_connected`, `held:mailbox_unavailable`, `held:journal_unavailable`: the worker or the Workbench is not ready. Tell the user; retry only after they say it is fixed.
+- A Task can also show `held:<reason>` on its own. `held:host_terminal_busy`: the experiment runs in the user's host terminal only when it is idle (clean prompt, no job, no background or suspended job); the start is retried, so do not work around it and never operate the host terminal yourself. If it stays, ask the user to clear the host shell: take it over (prefix t, then c), finish or kill their jobs, run `wb-handoff` again, hand the shell back to the manager (prefix h), then take it over again (prefix t, c) so it sits at an idle user-owned prompt; automation starts only from that state. `held:backend_restarted`: the Workbench restarted mid-Task; nothing is replayed, so wait for the worker's report or cancel the Task. `held:worker_busy`, `held:manager_busy`, `held:worker_not_connected`: wait; it is retried. `held:shell_unknown`: the host shell state is unknown; no result was judged; ask the user.
+- After a `done`/`blocked` report, read it, check it against the goal, then decide: follow-up, re-run, a new Task, or answer the user. The worker is free as soon as the report reached you, so you may send a new `to_worker` in the same turn that reads the report; do not wait for another turn.
+
+## Notices
+A `to_worker` result may carry `notices[]`: things that ended a Task while you were not looking. Read them every time and update your picture of the Task; each is shown once.
+- `report_outcome_unknown`: the worker's report may not have reached you; it is not resent and the Task is closed. Ask the worker with a new Task or check the result yourself; do not assume success or failure.
+- `report_not_delivered`: the report never reached you; the Task is closed. Start a new Task if the work still matters.
+- `task_cancelled`: the Task you cancelled is closed; the worker is free. Do not keep waiting for a report.
+- `task_not_started`: the Task never started (see `reason`); the worker is free. Fix the cause or tell the user, then send a new Task or `run: true`.
+- `run_start_failed`: the experiment run could not start (see `error`); the worker is free. Tell the user or re-run once the cause is fixed.
+
+## Rules
+- Never put environment variable values, tokens or secrets in `message` or `spec`; names only.
+- Do not ask the worker to push, merge, publish or touch anything outside the Task's `paths`. No push, no merge.
+- Report to the user only after you have checked the worker's report; state what was verified and what was not.

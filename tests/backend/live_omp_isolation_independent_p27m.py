@@ -363,7 +363,7 @@ class LiveIsolation(unittest.TestCase):
 
     # -- tests
     def test_00_omp_version_is_the_one_the_evidence_is_about(self):
-        self.assertIn("18.4.4", self.version)
+        self.assertIn(launcher.EVIDENCE_OMP_VERSIONS["isolation"], self.version)  # 18.4.5 (C-D64 evidence)
 
     def test_negative_control_shows_every_canary_and_the_orca_skills(self):
         for marker in self.marker.values():

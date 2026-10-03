@@ -1,4 +1,4 @@
-"""LIVE C-D59 isolation-correction check against real OMP 18.4.4 (p27-cd59-test-02), ZERO model calls. Opt-in: ``WB_LIVE_OMP=1``.
+"""LIVE C-D59 isolation-correction check against real OMP 18.4.5 (p27-cd59-test-02; C-D64 adaptation p27-home-test-02), ZERO model calls. Opt-in: ``WB_LIVE_OMP=1``.
 
 Run (repo root)::
 
@@ -13,7 +13,8 @@ failures. The oracle is the raw system prompt / tool list OMP itself reports, no
 cross-checked where the assertion is about ITS output: warning / leak state, start summary).
 
 Covered (review R1/R3/R4/R5 + user answers): APPEND_SYSTEM.md canaries (4 project locations + user level) absent; a fake-HOME
-PERSONALITY.md gives state ``warning`` with the default personality block kept; TITLE_SYSTEM.md is no leak with ``--no-title``;
+PERSONALITY.md is neither warning nor leak (C-D64: the Workbench OMP home no longer reads the user's PERSONALITY.md) and the
+default personality block is kept; TITLE_SYSTEM.md is no leak with ``--no-title``;
 dev.autoqa off (``xd://report_issue`` absent, also with ``PI_AUTO_QA`` in the environment); ``task.disabledAgents`` equals the
 set of definitions OMP really loads (OMP is the oracle) and is unioned with the user's own value; the real ``start`` entrypoint
 prints the isolation state.
@@ -96,6 +97,8 @@ class LiveIsolationP27n(unittest.TestCase):
         type(self).counter += 1
         home = self.root / f"home{self.counter}"
         (home / ".omp" / "agent").mkdir(parents=True)
+        # C-D64: the Workbench home links the user's OMP auth store, so a fake HOME needs one (an empty regular file, no credential)
+        (home / ".omp" / "agent" / "agent.db").write_bytes(b"")
         for name, text in files.items():
             write(home / ".omp" / "agent" / name.replace("__", "."), text)
         return home
@@ -134,7 +137,9 @@ class LiveIsolationP27n(unittest.TestCase):
     def check(self, role: str, project: Path, home: Path, env: dict[str, str]) -> dict:
         plan, command, pane_env = self.wb(role, project, home, env)
         check_env = launcher.isolation_check_environment(env, plan, role=role, absent_socket=self.root / "absent-check.sock")
-        return launcher.check_isolation(command, cwd=project, environment=check_env, role=role, allowed_skills=(),
+        # CW-18: each role's own Workbench skill (to-worker / to-manager) is expected; any other skill is a leak
+        return launcher.check_isolation(command, cwd=project, environment=check_env, role=role,
+                                        allowed_skills=launcher.role_skill_allowlist(role),
                                         omp_version=self.version, keep_raw=True)
 
     def clean(self, result: dict) -> None:
@@ -143,7 +148,7 @@ class LiveIsolationP27n(unittest.TestCase):
 
     # -- 0
     def test_00_version_and_fake_home_control_works(self):
-        self.assertIn("18.4.4", self.version)
+        self.assertIn(launcher.EVIDENCE_OMP_VERSIONS["isolation"], self.version)  # 18.4.5
         home = self.home()
         result = self.control(self.project(), self.env(home))
         self.clean(result)
@@ -208,8 +213,9 @@ class LiveIsolationP27n(unittest.TestCase):
         for role in ("manager", "worker"):
             with self.subTest(role=role):
                 report = self.check(role, project, home, env)
-                self.assertEqual((report["state"], report["ok"], report["leaks"]), ("warning", True, []), report)
-                self.assertTrue(any("PERSONALITY.md" in item for item in report["warnings"]), report["warnings"])
+                # C-D64: the user's PERSONALITY.md is not read by the Workbench OMP: no warning, no leak
+                self.assertEqual((report["state"], report["ok"], report["leaks"]), ("ok", True, []), report)
+                self.assertNotIn("PERSONALITY", json.dumps(report["warnings"]))
                 result = self.isolated(role, project, home, env)
                 self.clean(result)
                 self.assertIn("# Personality", live.prompt_text(result), "the default personality block was removed")
@@ -319,14 +325,14 @@ class LiveIsolationP27n(unittest.TestCase):
         try:
             out = cli("start", "--data-dir", str(data), "--omp", self.omp, "--no-attach", "--timeout", "120")
             self.assertEqual(out.returncode, 0, out.stdout + out.stderr)
-            self.assertRegex(out.stdout, r"omp isolation: warning", out.stdout)
-            self.assertRegex(out.stdout, r"WARNING:.*PERSONALITY\.md", out.stdout)
-            self.assertNotRegex(out.stdout, r"omp isolation: (pending|ok|leak|failed)")
+            self.assertRegex(out.stdout, r"omp isolation: ok", out.stdout)  # C-D64: PERSONALITY.md is not read any more
+            self.assertNotIn("PERSONALITY", out.stdout)
+            self.assertNotRegex(out.stdout, r"omp isolation: (pending|warning|leak|failed)")
             status = cli("status", "--data-dir", str(data), "--json")
             snapshot = json.loads(status.stdout)["snapshot"]
             iso = snapshot["omp_isolation"]
-            self.assertEqual((iso["state"], iso["ok"], iso["leaks"]), ("warning", True, []), iso)
-            self.assertIn("PERSONALITY.md", json.dumps(iso["warnings"]))
+            self.assertEqual((iso["state"], iso["ok"], iso["leaks"]), ("ok", True, []), iso)
+            self.assertNotIn("PERSONALITY", json.dumps(iso["warnings"]))
             # the panes are real OMP processes: PI_AUTO_QA must not be in their environment
             seen = 0
             for pid, ticks in live.naming_identities(self.root).items():

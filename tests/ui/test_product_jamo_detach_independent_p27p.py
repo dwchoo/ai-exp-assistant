@@ -661,6 +661,9 @@ class RealLoopTests(unittest.TestCase):
         self.data = self.root / "d"
         self.env = {"PATH": "/usr/bin:/bin", "PYTHONPATH": str(SRC), "PYTHONDONTWRITEBYTECODE": "1",
                     "LANG": "C.UTF-8", "TERM": "xterm-256color", "HOME": str(self.root)}
+        # C-D64 (p27-home-test-01): start needs the user's OMP auth store; a fake regular file, never a credential
+        (self.root / ".omp" / "agent").mkdir(parents=True)
+        (self.root / ".omp" / "agent" / "agent.db").write_bytes(b"p27u fake auth store - not a credential\n")
         self.addCleanup(self.stop_backend)
 
     def cli(self, *args, timeout=60):

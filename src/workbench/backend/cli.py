@@ -1,8 +1,9 @@
 """Product entrypoint: ``start``, ``attach``, ``status`` and ``shutdown``.
 
 ``start`` attaches to a backend already serving the data dir; otherwise it
-checks start requirements (Bash, then sh; OMP; bridge extension), launches a
-detached backend in its own session and attaches. Exit codes: 0 success,
+checks start requirements (Bash, then sh; OMP; bridge extension; the user's
+OMP auth store and a usable Workbench OMP home, C-D64), launches a detached
+backend in its own session and attaches. Exit codes: 0 success,
 1 failure, 2 start requirement missing (no backend started), 3 not running.
 """
 
@@ -15,9 +16,11 @@ from pathlib import Path
 import select
 import sys
 import time
+from typing import Mapping
 
 from workbench.backend.client import ClientError, NotRunning, UiClient, run_attach
 from workbench.backend.launcher import ISOLATION_CHECK_TIMEOUT, LaunchPlan, StartRequirementError, build_plan
+from workbench.backend.omp_home import OmpHomeError, auth_guidance, config_dir_value, omp_root
 from workbench.backend.paths import DataDirError, DataLayout, InstanceLock, ensure_private_dir, resolve_data_dir
 from workbench.contracts.ui_v1 import ClientType
 
@@ -27,11 +30,13 @@ START_TIMEOUT = 120.0
 ISOLATION_WAIT = 2 * ISOLATION_CHECK_TIMEOUT + 10.0
 
 
-def _layout(args: argparse.Namespace) -> DataLayout:
+def _layout(args: argparse.Namespace, *, create: bool = True) -> DataLayout:
+    """The data dir layout; ``create=False`` creates nothing (an existing dir is still checked)."""
     root = resolve_data_dir(args.data_dir, os.environ)
-    ensure_private_dir(root)
     layout = DataLayout(root)
     layout.check_socket_paths()
+    if create or os.path.lexists(root):
+        ensure_private_dir(root)
     return layout
 
 
@@ -163,18 +168,50 @@ def _attach(layout: DataLayout, args: argparse.Namespace) -> int:
     return run_product(layout.ui_socket)
 
 
+def omp_home_location(root: Path, environment: Mapping[str, str]) -> None:
+    """C-D64: the data dir must not overlap the user's OMP dirs (pure path check, creates nothing)."""
+    try:
+        config_dir_value(omp_root(root), environment)
+    except OmpHomeError as exc:
+        raise StartRequirementError(f"{exc}\nNo backend was started.") from exc
+
+
+def omp_home_requirements(layout: DataLayout, environment: Mapping[str, str]) -> None:
+    """C-D64: refuse to start without the user's OMP auth store (never created by Workbench).
+
+    Also refused when the store's location cannot be resolved unambiguously
+    from the user's own OMP variables; a provider API key variable admits a
+    start without any store (the OMPs then run without the shared login).
+    """
+    try:
+        guidance = auth_guidance(environment)
+    except OmpHomeError as exc:
+        raise StartRequirementError(f"{exc}\nNo backend was started.") from exc
+    if guidance:
+        raise StartRequirementError(guidance + "\nNo backend was started.")
+    omp_home_location(layout.root, environment)
+
+
 def cmd_start(args: argparse.Namespace) -> int:
-    layout = _layout(args)
-    running = _running_snapshot(layout)
+    # Validated before anything is created: a refused start leaves no new directory (C-D64).
+    try:
+        omp_home_location(resolve_data_dir(args.data_dir, os.environ), os.environ)
+    except StartRequirementError as exc:
+        print(str(exc), file=sys.stderr)
+        return EXIT_REQUIREMENT
+    layout = _layout(args, create=False)
+    running = _running_snapshot(layout) if os.path.lexists(layout.root) else None
     if running is not None:
         print(f"backend already running (pid {running['backend']['pid']}); attaching instead of starting")
     else:
         try:
             plan = build_plan(os.environ, omp=args.omp, omp_args=args.omp_arg or (),
                               bridge_extension=args.bridge_extension)
+            omp_home_requirements(layout, os.environ)
         except StartRequirementError as exc:
             print(str(exc), file=sys.stderr)
             return EXIT_REQUIREMENT
+        ensure_private_dir(layout.root)
         print(f"starting backend: shell {plan.shell.kind} ({plan.shell.executable}), {plan.omp_version}")
         pid = spawn_backend(layout, plan, os.getcwd())
         running = _wait_started(layout, pid, args.timeout)

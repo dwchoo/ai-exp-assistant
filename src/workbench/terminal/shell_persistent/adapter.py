@@ -31,6 +31,8 @@ class _Transport(ManagedLifecycleProbe):
         self.confirmed_target = None
         self._child_start = None
         self._parent_start = None
+        # Count of this parent's own HANDOFF events: one control wait episode each.
+        self.handoff_episode = 0
         super().__init__(choice, environment=environment)
 
     def _control_init_source(self):
@@ -46,6 +48,8 @@ class _Transport(ManagedLifecycleProbe):
         return setup + managed_controller_source(self.choice.executable, handoff_checks=True)
 
     def _on_control_event(self, event):
+        if event == f"HANDOFF:{self.pid}":
+            self.handoff_episode += 1
         super()._on_control_event(event)
         if event.startswith("EXEC_READY:") and not self.lifecycle.unknown:
             try:
@@ -270,6 +274,7 @@ class PersistentShell:
         self._transport = _Transport(selected, dict(user_environment))
         self._seen = set()
         self._takeover_sent = False
+        self._takeover_episode = None
         self._approval_hash = None
         try:
             self._transport.wait_ready()
@@ -296,6 +301,7 @@ class PersistentShell:
             if t.takeover_requested and not self._takeover_sent and t.control_wait_seen and (
                     t.lifecycle.request_id is None or t.lifecycle.returned):
                 self._takeover_sent = True  # A failed send is never retried.
+                self._takeover_episode = t.handoff_episode
                 try:
                     t.release_idle() if t.lifecycle.request_id is None else t.release_control()
                 except OSError:
@@ -336,6 +342,15 @@ class PersistentShell:
             self.poll()
             if t.lifecycle.request_id is None and t.boundary.owner == "user" and t.manual_prompt_confirmed:
                 return self.snapshot()
+            if (self._takeover_sent and t.boundary.owner == "user" and t.control_wait_seen
+                    and not t.manual_prompt_confirmed
+                    and (t.lifecycle.request_id is None or t.lifecycle.returned)
+                    and t.handoff_episode != getattr(self, "_takeover_episode", None)):
+                # C-D58: a held wb-handoff left the user-owned parent in a newer
+                # idle control wait than the one the earlier TAKEOVER ended. This
+                # explicit request gives that prompt back (one TAKEOVER per
+                # episode); automation stays held by the boundary.
+                self._takeover_sent = False
             t.takeover_requested = True
             t.take_user_control()
             self.poll()
@@ -347,10 +362,13 @@ class PersistentShell:
             self.poll()
             if not t.takeover_requested:
                 raise UnsafeShellState("no takeover request")
-            if self.snapshot()["parent_mode"] == "manual_prompt":
-                return self.snapshot()
+            state = self.snapshot()
+            if state["parent_mode"] == "manual_prompt":
+                return state
             group = t._current_foreground_child_group()
             if group is None or t.sent_id is None:
+                if self._takeover_sent and state["parent_mode"] == "control_wait":
+                    raise UnsafeShellState("takeover sent; parent prompt not yet returned")
                 raise UnsafeShellState("foreground target unknown; input held")
             t.confirmed_target = ForegroundTarget(t.sent_id, group)
             return self.snapshot()

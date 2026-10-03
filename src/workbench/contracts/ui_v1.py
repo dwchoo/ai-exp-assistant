@@ -74,7 +74,71 @@ unexpectedly is answered with ``internal_error``; the backend keeps serving. A s
 The ``host_shell`` pane in a snapshot carries ``alive``, ``exit_status``,
 ``input_owner``, ``manager_command_in_flight``, ``manager_command`` (the last
 manager request closed by an exit or kill), ``restart`` and ``kill`` (the last
-force-kill result) next to the ``shell`` control state.
+force-kill result) next to the ``shell`` control state. ``automation_hold`` is
+a reason while Workbench types an experiment run's start into the idle host shell
+(user input is then refused with ``host_shell_automation``), else null.
+
+Task and worker (CW-18, C-D66; additive)
+----------------------------------------
+The manager's ``to_worker`` is the user's standing delegation (C-D66): there is
+no UI approval. (``approval_decide`` and the ``approvals`` list of p2.7h were
+removed before any release; a client sending ``approval_decide`` gets
+``unsupported_type``.) A snapshot carries:
+
+- ``task``: the current Task, else the most recent one, else null:
+  ``{task_id, kind, status, summary, since, active, revision, run_id,
+  runs_started, retry_limit, held_reason, closed_reason, cancel_requested,
+  last_result}``. ``kind`` is one of :data:`TASK_KINDS`; ``status`` one of
+  :data:`TASK_STATUSES` (``dispatched`` until its run starts, ``starting``,
+  ``running``, ``waiting_report`` (an experiment's judgment and report),
+  ``held`` (its run needs a report or a cancel), ``cancelling`` (waits for the
+  host command to exit), ``finished`` (an experiment whose report reached the
+  manager; it can be re-run), ``blocked`` (the worker reported blocked),
+  ``closed`` with ``closed_reason`` such as ``done``, ``cancelled``,
+  ``superseded_by_new_task``). ``held_reason`` says why a start or step waits,
+  e.g. ``host_terminal_busy``. ``since`` is when ``status`` last changed.
+- ``worker``: ``{state, task_id}``; ``state`` is one of :data:`WORKER_STATES`
+  (``busy`` while a Task is active, then ``task_id`` names it).
+
+``pause`` (attached client, no fields) holds new automatic work. ``resume``
+(attached client, ``reconciled`` boolean) resumes only with ``reconciled:
+true``; ``false`` is refused with ``resume_not_reconciled``. Both answer with
+``automation`` at once; the pause/resume itself finishes in the background and
+the result arrives in a later ``state`` push.
+
+Automation state (CW-18 U3; additive)
+-------------------------------------
+A snapshot's ``automation`` is ``{state, source, detail, paused, transition,
+run, tick, review, interruption, resume, retry_limit, persistence_error}``:
+
+- ``state`` is one of :data:`AUTOMATION_STATES`: ``idle`` (no run), ``active``,
+  ``held`` (an experiment run's automatic work is held; ``detail`` and
+  ``tick.problems`` say why, e.g. ``user_owner_or_control_hold``), ``pausing``,
+  ``paused``, ``resuming``. ``paused`` is true from the pause request until a
+  resume succeeds; while it is true no new automatic work starts, a
+  ``to_worker`` is answered ``held:paused`` and host log/process collection
+  goes on.
+- ``run``: null or ``{kind, task_id, revision, run_id, bound, error}``.
+- ``tick``: null or ``{outcome, problems, at}`` of the last lifecycle tick
+  (``outcome`` ``admitted``|``held``|``idle``).
+- ``review`` (the 60 s worker review): ``{applies, interval_seconds, status,
+  reason, review_count, last_review_at, next_due_in_seconds, pending,
+  coalesced_count, exit}``. ``applies`` is false for a free-work run (no host
+  run). ``status`` is the scheduler's (``waiting``, ``dispatched``, ``delayed``
+  with ``reason`` ``worker_busy_or_unknown`` or ``user_priority``, ``paused``,
+  ``exited``, ...); ``coalesced_count`` counts reviews merged into the pending
+  one while the worker was busy. ``exit`` is the observed run exit, or null.
+- ``interruption`` (the manager turn stop requested on pause): ``{state,
+  pause_id, requested_at, confirmed_at, manager_ack, worker_ack,
+  unknown_tool_call_ids, error}``; ``state`` is one of
+  :data:`INTERRUPTION_STATES` (``requested``, ``confirmed`` once the turn stop
+  was observed, ``unknown``; ``not_needed`` without a bound run or when the
+  manager was idle; ``requesting`` while the pause is being carried out;
+  ``none`` when not paused).
+- ``resume``: null or ``{outcome, reason, at}`` of the last resume
+  (``outcome`` ``resumed``|``refused``; a refused resume stays paused and
+  replays nothing).
+- ``retry_limit``: re-runs allowed per Task (CW-13, 3).
 """
 
 from __future__ import annotations
@@ -102,6 +166,12 @@ MAX_DISCARD_PAYLOAD_BYTES = 64 * 1024 * 1024
 MAX_ID_LENGTH = 64
 MAX_TERMINAL_ROWS = 1000
 MAX_TERMINAL_COLUMNS = 1000
+AUTOMATION_STATES = ("idle", "active", "held", "pausing", "paused", "resuming")
+INTERRUPTION_STATES = ("none", "not_needed", "requesting", "requested", "confirmed", "request_failed", "unknown")
+WORKER_STATES = ("idle", "busy")
+TASK_KINDS = ("experiment", "work")
+TASK_STATUSES = ("dispatched", "starting", "running", "waiting_report", "held", "cancelling", "finished", "blocked",
+                 "closed")
 
 
 class ClientType(StrEnum):
@@ -121,6 +191,8 @@ class ClientType(StrEnum):
     CONFIRM_BOOT = "confirm_boot"
     RESTART_PANE = "restart_pane"
     KILL_PANE = "kill_pane"
+    PAUSE = "pause"
+    RESUME = "resume"
 
 
 class ServerType(StrEnum):
@@ -164,6 +236,8 @@ class Reason(StrEnum):
     KILL_IN_PROGRESS = "kill_in_progress"
     KILL_FAILED = "kill_failed"
     INTERNAL_ERROR = "internal_error"
+    HOST_SHELL_AUTOMATION = "host_shell_automation"
+    RESUME_NOT_RECONCILED = "resume_not_reconciled"
 
 
 # Requests whose ``id`` is mandatory. ``hello`` is answered by welcome/reject.
@@ -365,6 +439,10 @@ def parse_client_frame(frame: Frame, version: int | None) -> ClientMessage:
         if not isinstance(boot_id, str) or not boot_id or len(boot_id) > 64:
             raise ContractError("boot_id must be a short string")
         fields["boot_id"] = boot_id
+    elif kind is ClientType.RESUME:
+        if type(header.get("reconciled")) is not bool:
+            raise ContractError("resume needs reconciled (a boolean)")
+        fields["reconciled"] = header["reconciled"]
     return ClientMessage(kind, request_id, fields, frame.payload, frame.discarded_bytes)
 
 
@@ -411,7 +489,7 @@ def decode_display(frame: Frame) -> DisplayChunk:
 __all__ = [
     "CONTRACT_NAME", "VERSION", "SUPPORTED_VERSIONS", "MAGIC", "PREFIX_BYTES",
     "MAX_HEADER_BYTES", "MAX_PASTE_BYTES", "MAX_BUFFERED_PAYLOAD_BYTES",
-    "MAX_DISCARD_PAYLOAD_BYTES", "version_matches", "ClientType", "ServerType", "Reason", "ProtocolError",
+    "MAX_DISCARD_PAYLOAD_BYTES", "AUTOMATION_STATES", "INTERRUPTION_STATES", "TASK_KINDS", "TASK_STATUSES", "WORKER_STATES", "version_matches", "ClientType", "ServerType", "Reason", "ProtocolError",
     "Frame", "FrameDecoder", "ClientMessage", "encode_frame", "negotiate", "hello",
     "parse_client_frame", "request", "result", "reject", "encode_display", "decode_display",
 ]

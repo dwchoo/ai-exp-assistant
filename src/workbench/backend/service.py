@@ -25,12 +25,17 @@ from typing import Any
 from uuid import uuid4
 
 from workbench.app.lifecycle import LifecycleJournal
+from workbench.backend.automation import AutomationController
+from workbench.backend.flow import HANDOFF_JOURNAL_NAME, HandoffService, sensitive_environment_values
+from workbench.backend.flow_tasks import FLOW_LEDGER_NAME, ExperimentPorts, TaskFlow
 from workbench.backend.launcher import (
-    LaunchPlan, check_isolation, isolation_check_environment, omp_command, omp_environment, pending_isolation,
-    read_user_config, role_overlay, role_skill_allowlist, shell_environment, summarize_isolation,
-    write_role_overlay,
+    ISOLATION_PROVIDER_IDS, LaunchPlan, check_isolation, default_skills_dir, isolation_check_environment,
+    omp_command, omp_environment, pending_isolation, role_overlay, role_skill_allowlist, shell_environment,
+    summarize_isolation, write_role_overlay,
 )
-from workbench.backend.panes import OmpPane, Pane, ShellPane, process_ref, ref_dict
+from workbench.backend.omp_home import (
+    OmpHome, home_environment, natives_status, prepare_omp_home, verify_omp_home)
+from workbench.backend.panes import HostShellPort, OmpPane, Pane, ShellPane, process_ref, ref_dict
 from workbench.backend.paths import (
     BackendLocked, DataLayout, InstanceLock, ensure_private_dir, unlink_stale_socket, write_private_json,
 )
@@ -44,6 +49,8 @@ from workbench.runtime.process_evidence import LinuxProcessProbe, ProcessRef
 from workbench.storage.log_raw.store import RawLogStore
 from workbench.tasks.repository import TaskRepository
 from workbench.terminal.shell_g2.prototype import ShellChoice, UnsafeShellState
+from workbench.workflow.run import TaskWorkflow
+from workbench.workflow.worker_port import G3WorkerResponsePort
 
 EXIT_LOCKED = 75
 READY_TIMEOUT = 90.0
@@ -83,6 +90,14 @@ class Backend:
         self.shell: ShellPane | None = None
         self.bridge: G3BridgeServer | None = None
         self.mailbox: TaskMailbox | None = None
+        # CW-18 to_worker/to_manager (C-D64/C-D65): HandoffService with the TaskFlow policy (U2).
+        self.handoffs: HandoffService | None = None
+        self.flow: TaskFlow | None = None
+        # ui_v1 pause/resume go to these; CW-18 U3 binds them to the AutomationController in _open.
+        self.pause_hook = self._default_pause
+        self.resume_hook = self._default_resume
+        # CW-18 U3: lifecycle tick, 60 s worker review and pause/resume for the active run.
+        self.automation_loop: AutomationController | None = None
         self.repository: TaskRepository | None = None
         self.raw_logs: RawLogStore | None = None
         self.pause_journal: PauseJournal | None = None
@@ -104,6 +119,8 @@ class Backend:
         self._isolation_lock = threading.Lock()
         self._isolation_results: dict[str, dict[str, Any]] = {}
         self._isolation_rechecking: set[str] = set()
+        # C-D64 Workbench-owned OMP home, prepared at start and again before an OMP restart.
+        self.omp_home: OmpHome | None = None
         # C-D62 restart: each OMP pane's start-up launch, kept for the backend lifetime.
         self._launch: dict[PaneId, dict[str, Any]] = {}
         self._restart_lock = threading.Lock()
@@ -142,9 +159,25 @@ class Backend:
     def _on_signal(self, signum: int, _frame: object) -> None:
         self._stop_signal = signum
 
+    def _prepare_omp_home(self) -> OmpHome:
+        home = prepare_omp_home(self.layout.root, self.environment, skills_dir=default_skills_dir(),
+                                provider_ids=ISOLATION_PROVIDER_IDS)
+        # OMP has no setting for its native addon dir: say so when a Workbench OMP will extract into the user's.
+        natives = natives_status(self.environment, home_environment(self.environment, home.environment()),
+                                 self.plan.omp_version)
+        for note in (*home.notes, *([natives["note"]] if natives["note"] else [])):
+            _log(f"omp home: {note}")
+            if note not in self._isolation_notes:
+                self._isolation_notes.append(note)
+        self.omp_home = home
+        return home
+
     def _open(self) -> None:
         layout = self.layout
         _log(f"starting in {layout.root} (session {os.getsid(0)}, shell {self.plan.shell.executable})")
+        # C-D64: before anything starts; an unusable home stops the start here.
+        omp_home = self._prepare_omp_home()
+        _log(f"omp home {omp_home.root} (agent.db {'linked' if omp_home.linked else 'not linked'})")
         ensure_private_dir(layout.workflow)
         self.repository = TaskRepository(layout.tasks)
         os.chmod(layout.tasks, 0o600)  # SQLite journals inherit the database mode
@@ -157,6 +190,32 @@ class Backend:
         self.bridge = G3BridgeServer(layout.bridge_socket, tokens)
         self.bridge.start()
         self.mailbox = TaskMailbox(self.repository, self.bridge)
+        self.handoffs = HandoffService(layout.workflow / HANDOFF_JOURNAL_NAME,
+                                       mailbox_factory=self._handoff_mailbox, paused=self._automation_paused, sensitive_values=self._sensitive_values,
+                                       peer_lookup=self._bridge_peer)
+        self.handoffs.start()
+        # CW-18 U3: one automation controller; the paused flag is the single source for every reader.
+        self.automation_loop = AutomationController(
+            bridge=self.bridge, database=layout.tasks, journal=self.lifecycle_journal, raw=self.raw_logs,
+            shell_pane=lambda: self.shell, project_dir=self.project_dir,
+            artifacts_root=ensure_private_dir(layout.workflow / "runs"), boot_marker=read_boot_id, log=_log)
+        self.pause_hook = self.automation_loop.request_pause
+        self.resume_hook = self.automation_loop.request_resume
+        # CW-18: Tasks under the standing delegation (C-D66) and their runs (experiment: product host shell).
+        self.flow = TaskFlow(
+            layout.workflow / FLOW_LEDGER_NAME, repository_factory=lambda: TaskRepository(layout.tasks),
+            handoffs=self.handoffs, omp_idle=self._omp_idle, paused=self._automation_paused,
+            experiment=ExperimentPorts(
+                host_shell=self._host_shell_port, make_workflow=self._make_workflow,
+                automation=self._automation_port, environment_names=lambda: set(self._shell_env or {}),
+                worktrees_root=ensure_private_dir(layout.workflow / "worktrees"),
+                artifacts_root=ensure_private_dir(layout.workflow / "runs")),
+            lifecycle=self.automation_loop)
+        self.handoffs.configure(policy=self.flow, active_task=self.flow.active_task)
+        self.automation = self.automation_loop.status()
+        handoffs = self.handoffs
+        # The role is the peer's authenticated hello role, never a frame field.
+        self.bridge.set_tool_handler(lambda peer, request: handoffs.handle(peer.role, request))
         self.ui = UiServer(layout.ui_socket, self)
         self._write_record()
         self._shell_env = shell_environment(self.environment)
@@ -164,26 +223,19 @@ class Backend:
         self.shell = ShellPane(self.plan.shell, dict(self._shell_env))
         self.panes[PaneId.HOST_SHELL] = self.shell
         home = Path(self.environment.get("HOME") or Path.home())
-        # Bounded (shared timeout, own process groups): never blocks readiness.
-        user = read_user_config(self.plan.omp, cwd=self.project_dir, environment=self.environment)
-        for key, value in user.items():
-            if value is None:
-                self._isolation_notes.append(f"could not read the user's {key}; the isolation overlay "
-                                             "replaced it for this run")
+        home_env = omp_home.environment()
         checks: dict[str, tuple[list[str], dict[str, str], tuple[str, ...]]] = {}
         for role, pane_id in OMP_ROLES:
-            overlay_content = role_overlay(
-                role, project_dir=self.project_dir, home=home, environment=self.environment,
-                user_disabled_providers=user.get("disabledProviders") or (),
-                user_disabled_agents=user.get("task.disabledAgents") or ())
+            env = omp_environment(self.environment, self.plan, role=role, token=tokens[role],
+                                  bridge_socket=layout.bridge_socket, home=home_env)
+            # The Workbench home reads no user OMP config: nothing of the user's is unioned in.
+            overlay_content = role_overlay(role, project_dir=self.project_dir, home=home, environment=env)
             overlay = write_role_overlay(layout.root, role, overlay_content)
             command = omp_command(self.plan, overlay)
-            env = omp_environment(self.environment, self.plan, role=role, token=tokens[role],
-                                  bridge_socket=layout.bridge_socket)
             self.panes[pane_id] = OmpPane(pane_id, role, command, env, cwd=self.project_dir)
             checks[role] = (command, isolation_check_environment(
-                self.environment, self.plan, role=role, absent_socket=layout.root / "isolation-check.sock"),
-                role_skill_allowlist(role))
+                self.environment, self.plan, role=role, absent_socket=layout.root / "isolation-check.sock",
+                home=home_env), role_skill_allowlist(role))
             # The role token lives in the bridge, the OMP child environment and this
             # in-memory launch (never on disk) so an exited pane restarts as the same role.
             self._launch[pane_id] = {"role": role, "overlay": overlay_content, "command": list(command),
@@ -191,6 +243,8 @@ class Backend:
         del tokens
         self._ready_deadline = time.monotonic() + READY_TIMEOUT
         self._write_record()
+        self.flow.start()
+        self.automation_loop.start()
         # Started after every pane fork so no fork happens while it runs.
         self._isolation_thread = threading.Thread(target=self._run_isolation_check, args=(checks,),
                                                   name="omp-isolation-check", daemon=True)
@@ -209,9 +263,12 @@ class Backend:
             for role, (command, env, allowed) in checks.items():
                 if self._isolation_cancel.is_set():
                     break
-                results[role] = check_isolation(command, cwd=self.project_dir, environment=env, role=role,
-                                                allowed_skills=allowed, omp_version=self.plan.omp_version,
-                                                cancel=self._isolation_cancel)
+                before = verify_omp_home(self.omp_home) if self.omp_home is not None else []
+                result = check_isolation(command, cwd=self.project_dir, environment=env, role=role,
+                                         allowed_skills=allowed, omp_version=self.plan.omp_version,
+                                         cancel=self._isolation_cancel)
+                after = verify_omp_home(self.omp_home) if self.omp_home is not None else []
+                results[role] = _with_home_problems(result, list(dict.fromkeys(before + after)))
         except Exception as exc:  # never let the check die silently
             failure = f"OMP isolation check failed: {exc!r}"
         with self._isolation_lock:
@@ -345,6 +402,10 @@ class Backend:
 
     def _close(self) -> dict[str, Any]:
         self._isolation_cancel.set()
+        if self.automation_loop is not None:
+            self.automation_loop.close()  # the tick and pause/resume threads end first; nothing is replayed
+        if self.flow is not None:
+            self.flow.close()  # the runner stops before the panes close; a run left current stays unknown
         if self._isolation_thread is not None:
             self._isolation_thread.join(ISOLATION_JOIN_TIMEOUT)
         refs = self.process_refs()
@@ -357,7 +418,10 @@ class Backend:
             except Exception as exc:  # keep closing the rest; report the failure
                 closed.append({"pane": pane.pane_id.value, "error": repr(exc)})
         if self.bridge is not None:
+            self.bridge.set_tool_handler(None)
             self.bridge.close()
+        if self.handoffs is not None:
+            self.handoffs.close()
         if self.repository is not None:
             self.repository.close()
         if self.raw_logs is not None:
@@ -428,7 +492,9 @@ class Backend:
                 "attached": self.ui is not None and self.ui.attached is not None,
                 "focus": self.focus.value,
                 "panes": {pane_id.value: pane.info() for pane_id, pane in self.panes.items()},
-                "bridge": self.bridge_state(), "automation": dict(self.automation),
+                "bridge": self.bridge_state(), "automation": self._automation_view(),
+                "task": self.flow.task_view() if self.flow else None,
+                "worker": self.flow.worker_view() if self.flow else {"state": "idle", "task_id": None},
                 "omp_isolation": self.omp_isolation,
                 "boot": dict(self.boot), "shutdown": {"pending": self._shutdown_token is not None},
                 "ui": dict(self.ui.stats) if self.ui else {}}
@@ -509,8 +575,12 @@ class Backend:
                 idle = None
             if idle is not True:
                 active.append({"kind": "omp_turn", "role": role, "idle": idle})
-        if self.automation.get("state") not in {"not_configured", "idle", "paused", "cancelled"}:
-            active.append({"kind": "automation", "state": self.automation.get("state")})
+        automation = self._automation_view()
+        if automation.get("state") not in {"not_configured", "idle", "paused", "cancelled"}:
+            active.append({"kind": "automation", "state": automation.get("state")})
+        task = self.flow.task_view() if self.flow else None
+        if task is not None and task.get("run_id") is not None:
+            active.append({"kind": "task_run", "task_id": task["task_id"], "run_id": task["run_id"]})
         return active
 
     def shutdown_request(self) -> dict[str, Any]:
@@ -576,7 +646,10 @@ class Backend:
                     "exit_status": old.returncode}
         count = (old.restart or {}).get("count", 0)
         try:
-            # The same per-role overlay content as at start-up, at the path the argv names.
+            # The same Workbench OMP home (config.yml rewritten, auth link repaired) and the
+            # same per-role overlay content as at start-up, at the paths the argv/env name.
+            if self.omp_home is not None:
+                self._prepare_omp_home()
             write_role_overlay(self.layout.root, role, launch["overlay"])
             # The exited OMP is reaped: release its PTY and any members left in its own session.
             # A member that cannot be signalled (EPERM) is reported, never a restart failure.
@@ -696,6 +769,80 @@ class Backend:
             self._shell_lock.release()
 
     # -- ports for later tickets (CW-18/CW-19) ----------------------------
+    # -- CW-18 automation: one paused source for HandoffService, TaskFlow and AutomationState ----
+    def _automation_paused(self) -> bool:
+        if self.automation_loop is not None:
+            return self.automation_loop.paused()
+        return self.automation.get("state") == "paused"
+
+    def _automation_view(self) -> dict[str, Any]:
+        """The ui_v1 ``automation`` state: the controller's (U3) once bound, else the backend's own."""
+        if self.automation_loop is not None:
+            return self.automation_loop.status()
+        return dict(self.automation)
+
+    def _handoff_mailbox(self) -> tuple[TaskMailbox, Any]:
+        """Runs on the handoff outbox thread: SQLite connections are bound to their thread."""
+        repository = TaskRepository(self.layout.tasks)
+        return TaskMailbox(repository, self.bridge), repository.close
+
+    def _bridge_peer(self, role: Any) -> Any:
+        try:
+            return self.bridge.peer(role, 0) if self.bridge is not None else None
+        except (BridgeDisconnected, MailboxError):
+            return None
+
+    def _sensitive_values(self) -> tuple[str, ...]:
+        """Secret-like environment values and the bridge tokens; compared in memory, never stored."""
+        tokens = tuple(launch["env"].get("WORKBENCH_G3_TOKEN", "") for launch in list(self._launch.values()))
+        return sensitive_environment_values(self.environment) + tuple(token for token in tokens if token)
+
+    # -- CW-18 pause/resume (C-D66: Tasks need no UI approval) -------------------
+    def pause(self) -> dict[str, Any]:
+        return {"automation": dict(self.pause_hook())}
+
+    def resume(self, reconciled: bool) -> dict[str, Any]:
+        if reconciled is not True:
+            raise Held(Reason.RESUME_NOT_RECONCILED, "resume needs reconciled: true")
+        return {"automation": dict(self.resume_hook())}
+
+    def _default_pause(self) -> dict[str, Any]:
+        if self.automation.get("state") != "paused":
+            self.automation = {"state": "paused", "source": "user", "detail": "paused from the UI",
+                               "previous": self.automation.get("state")}
+        return self.automation
+
+    def _default_resume(self) -> dict[str, Any]:
+        if self.automation.get("state") == "paused":
+            self.automation = {"state": "idle", "source": "user", "detail": "resumed (reconciled)"}
+        return self.automation
+
+    def _omp_idle(self, role: Any) -> bool | None:
+        """True/False from the OMP's bridge state; None when it is not connected or does not answer."""
+        if self.bridge is None:
+            return None
+        try:
+            return self.bridge.probe(role, timeout=1.0).get("idle") is True
+        except (MailboxError, OSError, TimeoutError):
+            return None
+
+    def _host_shell_port(self) -> HostShellPort | None:
+        shell = self.shell
+        if shell is None or shell.exited():
+            return None
+        return HostShellPort(shell, lambda: self.shell)
+
+    def _automation_port(self) -> dict[str, Any]:
+        return {"portVersion": 2, "kind": "AutomationState", "payload": {
+            "paused": self._automation_paused(), "cancelled": False, "metadataHealthy": True,
+            "approvalValid": True}}
+
+    def _make_workflow(self, repository: TaskRepository) -> TaskWorkflow:
+        """Runs on the task-flow runner thread: its own mailbox on the shared bridge."""
+        return TaskWorkflow(repository, TaskMailbox(repository, self.bridge),
+                            worker_port=G3WorkerResponsePort(self.bridge),
+                            automation_source=self._automation_port)
+
     def set_automation_status(self, status: dict[str, Any]) -> None:
         """CW-18 publishes AutomationState/run status here; pushed to the UI as state."""
         self.automation = dict(status)
@@ -703,6 +850,17 @@ class Backend:
     def require_boot_confirmation(self) -> None:
         """CW-19 calls this after reconcile when the boot marker changed."""
         self.boot.update({"confirmation_required": True, "confirmed": False})
+
+
+def _with_home_problems(result: dict[str, Any], problems: list[str]) -> dict[str, Any]:
+    """Add auth-link problems (C-D64) seen around one check as warnings; a leak or failure keeps its state."""
+    if not problems:
+        return result
+    result = dict(result)
+    result["warnings"] = list(result.get("warnings") or []) + problems
+    if result.get("state") == "ok":
+        result["state"] = "warning"
+    return result
 
 
 def run_backend(layout: DataLayout, plan: LaunchPlan, project_dir: str) -> int:

@@ -251,7 +251,7 @@ class IsolationLaunchTests(unittest.TestCase):
                                         user_disabled_agents=["sonic", "canary-agent"])
         self.assertEqual(overlay["skills"]["customDirectories"], [str(launcher.default_skills_dir())])
         # R4: Workbench-owned skill filter; user include/ignore lists are replaced, not inherited
-        self.assertEqual(overlay["skills"]["includeSkills"], [])  # no role skills yet (CW-18)
+        self.assertEqual(overlay["skills"]["includeSkills"], ["to-manager"])  # CW-18: the worker's own skill only
         self.assertEqual(overlay["skills"]["ignoredSkills"], [])
         # R4: the user's own disabledAgents survive (union, no duplicates)
         self.assertEqual(overlay["task"]["disabledAgents"], ["sonic", "canary-agent"])
@@ -283,7 +283,10 @@ class IsolationLaunchTests(unittest.TestCase):
         self.assertEqual(launcher.workbench_skill_names(skills, ("order-worker", "shared-*")),
                          ("order-worker", "shared-x"))
         self.assertEqual(launcher.workbench_skill_names(self.root / "none"), ())
-        self.assertEqual(launcher.workbench_skill_names(launcher.default_skills_dir()), ())
+        # CW-18: the repository ships exactly the two role skills; each role's allow-list is its own one.
+        self.assertEqual(launcher.workbench_skill_names(launcher.default_skills_dir()), ("to-manager", "to-worker"))
+        self.assertEqual(launcher.role_skill_allowlist("manager"), ("to-worker",))
+        self.assertEqual(launcher.role_skill_allowlist("worker"), ("to-manager",))
 
     def test_user_disabled_providers_read_via_omp_config_get(self):
         fake = self.root / "omp"

@@ -153,7 +153,11 @@ class InstanceLock:
 
 def write_private_json(path: Path, value: dict[str, Any]) -> None:
     """Atomic, fsynced 0600 JSON write inside an existing private directory."""
-    payload = json.dumps(value, sort_keys=True, separators=(",", ":")).encode()
+    write_private_bytes(path, json.dumps(value, sort_keys=True, separators=(",", ":")).encode())
+
+
+def write_private_bytes(path: Path, payload: bytes) -> None:
+    """Atomic, fsynced 0600 write inside an existing private directory (replaces, never follows ``path``)."""
     parent_fd = os.open(path.parent, os.O_RDONLY | os.O_DIRECTORY | os.O_CLOEXEC)
     name = f".{path.name}-{os.getpid()}-{os.urandom(6).hex()}"
     try:

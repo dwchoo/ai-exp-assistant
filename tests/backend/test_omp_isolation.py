@@ -175,59 +175,63 @@ class ObservationPredicateTests(unittest.TestCase):
             os.mkfifo(project / ".codex" / "APPEND_SYSTEM.md")  # never blocks the check
             files = launcher.ambient_prompt_files(project, {"HOME": str(home)})
             kinds = sorted((item["kind"], Path(item["path"]).relative_to(root).as_posix()) for item in files)
+            # C-D64: PERSONALITY.md is read only from the (Workbench-owned) agent dir: not ambient any more
             self.assertEqual(kinds, [
                 ("append_system", "home/.omp/agent/APPEND_SYSTEM.md"),
                 ("append_system", "proj/.claude/APPEND_SYSTEM.md"),
                 ("append_system", "proj/.gemini/APPEND_SYSTEM.md"),
-                ("personality", "home/.omp/agent/PERSONALITY.md"),
                 ("title_system", "proj/.omp/TITLE_SYSTEM.md"),
             ])
             leaked = CLEAN_PROMPT + "\n# Personality\nCANARY_PERSONALITY_MD\n\nCANARY_APPEND_CLAUDE\nsecond line\n"
             title = f"title_system:{project / '.omp' / 'TITLE_SYSTEM.md'}"
-            # PERSONALITY.md is a warning (OMP's default personality is kept), never a leak
             self.assertEqual(launcher.prompt_file_leaks(leaked, files, no_title=False), [
                 f"append_system:{project / '.claude' / 'APPEND_SYSTEM.md'}", title])
-            self.assertEqual(launcher.prompt_file_warnings(files), [f"personality:{agent / 'PERSONALITY.md'}"])
+            self.assertFalse(hasattr(launcher, "prompt_file_warnings"))
             # --no-title (isolation args): TITLE_SYSTEM.md is never used, so no leak
             self.assertEqual(launcher.prompt_file_leaks(leaked, files), [
                 f"append_system:{project / '.claude' / 'APPEND_SYSTEM.md'}"])
             self.assertEqual(launcher.prompt_file_leaks(CLEAN_PROMPT, files), [])
             self.assertEqual(launcher.prompt_file_leaks(CLEAN_PROMPT, files, no_title=False), [title])
-            # PERSONALITY.md follows PI_CODING_AGENT_DIR like OMP's agent dir
-            other = root / "agentdir"
-            other.mkdir()
+            # the user agent dir follows PI_CONFIG_DIR (relative to HOME, '..' normalised) like OMP
+            other = root / "wb" / "omp-root" / "agent"
+            other.mkdir(parents=True)
+            (other / "APPEND_SYSTEM.md").write_text("X\n")
             (other / "PERSONALITY.md").write_text("X\n")
-            moved = launcher.ambient_prompt_files(root / "none", {"HOME": str(root / "nohome"),
+            moved = launcher.ambient_prompt_files(root / "none", {"HOME": str(home),
+                                                                  "PI_CONFIG_DIR": "../wb/omp-root",
                                                                   "PI_CODING_AGENT_DIR": str(other)})
             self.assertEqual([(item["kind"], item["path"]) for item in moved],
-                             [("personality", str(other / "PERSONALITY.md"))])
+                             [("append_system", str(other / "APPEND_SYSTEM.md"))])
 
     def test_summary_flags_leaks_failures_and_version_drift(self):
         ok = {"role": "manager", "state": "ok", "ok": True, "leaks": [], "error": None}
         leak = {"role": "worker", "state": "leak", "ok": False, "leaks": ["skill:orca-cli"], "error": None}
         failed = {"role": "worker", "state": "failed", "ok": False, "leaks": [], "error": "timed out"}
-        summary = launcher.summarize_isolation({"manager": ok, "worker": leak}, "omp/18.4.4")
+        summary = launcher.summarize_isolation({"manager": ok, "worker": leak}, "omp/18.4.5")
         self.assertEqual((summary["state"], summary["checked"], summary["ok"]), ("leak", True, False))
         self.assertEqual(summary["leaks"], ["worker:skill:orca-cli"])
         self.assertIn("worker:skill:orca-cli", summary["warning"])
-        self.assertEqual(summary["omp_version"], "omp/18.4.4")
+        self.assertEqual(summary["omp_version"], "omp/18.4.5")
+        # isolation evidence: C-D64 home probe + live p27-home-test-01 with OMP 18.4.5
         self.assertEqual(summary["version_drift"], {"bridge_g3": "18.2.10"})
+        self.assertEqual(launcher.summarize_isolation({"manager": ok}, "omp/18.4.4")["version_drift"],
+                         {"bridge_g3": "18.2.10", "isolation": "18.4.5"})
         self.assertEqual(launcher.summarize_isolation({"manager": ok, "worker": failed}, "omp/18.4.4")["state"],
                          "failed")
         clean = launcher.summarize_isolation({"manager": ok, "worker": dict(ok, role="worker")}, "omp/18.2.10")
         self.assertEqual((clean["state"], clean["ok"], clean["warning"]), ("ok", True, None))
-        self.assertEqual(clean["version_drift"], {"isolation": "18.4.4"})
+        self.assertEqual(clean["version_drift"], {"isolation": "18.4.5"})
         pending = launcher.pending_isolation("omp/18.4.4")
         self.assertEqual((pending["state"], pending["checked"], pending["ok"]), ("pending", False, None))
 
-    def test_summary_reports_personality_warning_without_a_leak(self):
+    def test_summary_reports_a_warning_without_a_leak(self):
         warned = {"role": "manager", "state": "warning", "ok": True, "leaks": [], "error": None,
-                  "warnings": ["personality:/h/.omp/agent/PERSONALITY.md"]}
+                  "warnings": ["auth_link:retargeted"]}
         ok = {"role": "worker", "state": "ok", "ok": True, "leaks": [], "error": None, "warnings": []}
         summary = launcher.summarize_isolation({"manager": warned, "worker": ok}, "omp/18.4.4")
         self.assertEqual((summary["state"], summary["ok"], summary["leaks"]), ("warning", True, []))
-        self.assertEqual(summary["warnings"], ["manager:personality:/h/.omp/agent/PERSONALITY.md"])
-        self.assertIn("PERSONALITY.md", summary["warning"])
+        self.assertEqual(summary["warnings"], ["manager:auth_link:retargeted"])
+        self.assertEqual(summary["warning"], "OMP isolation warning: manager:auth_link:retargeted")
         leak = {"role": "worker", "state": "leak", "ok": False, "leaks": ["skill:x"], "error": None, "warnings": []}
         mixed = launcher.summarize_isolation({"manager": warned, "worker": leak}, "omp/18.4.4")
         self.assertEqual(mixed["state"], "leak")
@@ -322,13 +326,14 @@ class FakeOmpCheckTests(unittest.TestCase):
         self.assertEqual((clean["state"], clean["leaks"]), ("ok", []))
         self.assert_cleaned(clean)
 
-    def test_personality_md_is_a_warning_not_a_leak(self):
+    def test_users_personality_md_is_no_longer_reported(self):
+        # C-D64: OMP reads PERSONALITY.md from its agent dir only (the Workbench home)
         agent = self.root / "home" / ".omp" / "agent"
         agent.mkdir(parents=True)
         (agent / "PERSONALITY.md").write_text("CANARY_PERSONALITY_MD\n")
         result = self.run_check("clean")
-        self.assertEqual((result["state"], result["ok"], result["leaks"], result["error"]), ("warning", True, [], None))
-        self.assertEqual(result["warnings"], [f"personality:{agent / 'PERSONALITY.md'}"])
+        self.assertEqual((result["state"], result["ok"], result["leaks"], result["error"]), ("ok", True, [], None))
+        self.assertEqual(result["warnings"], [])
         self.assert_cleaned(result)
 
     def test_title_system_md_is_a_leak_only_without_no_title(self):
@@ -417,7 +422,7 @@ class CliSummaryTests(unittest.TestCase):
         stream = io.StringIO()
         _print_summary(snapshot, stream)
         text = stream.getvalue()
-        self.assertIn("omp isolation: leak (omp/18.4.4 evidence bridge_g3=18.2.10)", text)
+        self.assertIn("omp isolation: leak (omp/18.4.4 evidence bridge_g3=18.2.10, isolation=18.4.5)", text)
         self.assertIn("WARNING: OMP isolation leak (ambient configuration loaded): worker:skill:orca-cli", text)
         self.assertIn("note: could not read", text)
 

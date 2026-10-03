@@ -16,6 +16,11 @@ Expectations come from the review findings R1/R3/R4/R5 (p27-cd59-review-01), Roo
 - R5: ``start`` prints the isolation result (waits for it) instead of "pending"; a warning/leak is shown in the summary.
 
 No model call anywhere: fake OMP scripts only (the live counterpart is ``live_omp_isolation_independent_p27n.py``).
+
+C-D64 adaptation (p27-home-test-01): R3's PERSONALITY warning is superseded. With the Workbench-owned OMP home OMP reads
+PERSONALITY.md only from the Workbench agent dir, so the user's ``~/.omp/agent/PERSONALITY.md`` is not read at all: it must
+be neither a leak nor a warning, and the summary must not mention it. The entrypoint fake HOME carries a fake (non-credential)
+``agent.db`` (see p27m).
 """
 from __future__ import annotations
 
@@ -187,9 +192,11 @@ class DisabledAgentsRulesTests(unittest.TestCase):
                                             role_skills={"manager": ("order-manager",), "worker": ("order-worker",)})
             self.assertEqual(overlay["skills"]["includeSkills"], list(patterns))
             self.assertEqual(overlay["skills"]["ignoredSkills"], [], "the user's ignoredSkills must not hide Workbench skills")
-        default = launcher.role_overlay("manager", project_dir=self.project, home=self.home)
-        self.assertEqual(default["skills"]["includeSkills"], [])
-        self.assertEqual(default["skills"]["ignoredSkills"], [])
+        # CW-18: without an explicit filter each role gets exactly its own Workbench skill.
+        for role, own in (("manager", ["to-worker"]), ("worker", ["to-manager"])):
+            default = launcher.role_overlay(role, project_dir=self.project, home=self.home)
+            self.assertEqual(default["skills"]["includeSkills"], own)
+            self.assertEqual(default["skills"]["ignoredSkills"], [])
 
     def test_no_definition_body_or_description_leaks_into_the_overlay_or_the_file(self):
         self.write(self.nearest, "a.md", "---\nname: near-agent\ndescription: DESC-p27n-secret\n---\nBODY-p27n-secret\n")
@@ -232,18 +239,19 @@ class PromptFileCheckTests(unittest.TestCase):
         self.assertFalse(result.get("warnings"))
 
     def test_personality_file_is_a_warning_not_a_leak_and_not_ok_false(self):
+        # C-D64: the user's PERSONALITY.md is not read any more -> neither a warning nor a leak (state ok)
         path = self.home / ".omp" / "agent" / "PERSONALITY.md"
         self.plant(path, "Talk like a pirate p27n\n")
         for role in ("manager", "worker"):
             with self.subTest(role=role):
                 result = self.check(role=role)
-                self.assertEqual((result["state"], result["ok"], result["leaks"]), ("warning", True, []), result)
-                self.assertIn(str(path), json.dumps(result.get("warnings")))
-                self.assertIn("personality", json.dumps(result.get("warnings")).lower())
+                self.assertEqual((result["state"], result["ok"], result["leaks"]), ("ok", True, []), result)
+                self.assertNotIn("PERSONALITY", json.dumps(result.get("warnings")))
+                self.assertNotIn("personality", json.dumps(result.get("warnings")).lower())
+                self.assertNotIn(str(path), json.dumps(result.get("observed")), "the user's PERSONALITY.md was looked at")
         summary = launcher.summarize_isolation({"manager": self.check(role="manager"), "worker": self.check()}, "omp/18.4.4")
-        self.assertEqual((summary["state"], summary["ok"], summary["leaks"]), ("warning", True, []))
-        self.assertIn("PERSONALITY.md", summary["warning"])
-        self.assertEqual(len(summary["warnings"]), 2)
+        self.assertEqual((summary["state"], summary["ok"], summary["leaks"], summary["warnings"]), ("ok", True, [], []))
+        self.assertNotIn("PERSONALITY.md", summary.get("warning") or "")
 
     def test_default_personality_is_never_replaced_by_the_launcher(self):
         # the launcher must not drop the default prompt: no --system-prompt*, no personality setting anywhere
@@ -285,7 +293,7 @@ class PromptFileCheckTests(unittest.TestCase):
         start = next(e for e in self.h.records() if e["event"] == "start")
         self.assertIn("--no-title", start["argv"])
 
-    def test_a_leak_outranks_a_personality_warning(self):
+    def test_a_leak_outranks_a_personality_warning(self):  # C-D64: PERSONALITY.md no longer warns; the leak still wins
         self.plant(self.home / ".omp" / "agent" / "PERSONALITY.md", "pirate\n")
         self.plant(self.project / ".claude" / "APPEND_SYSTEM.md", "CANARY_BOTH_P27N\n")
         self.h.set_mode(shapes={"prompt_extra": "CANARY_BOTH_P27N\n"})
@@ -329,19 +337,21 @@ class RealEntrypointSummaryTests(base.RealEntrypointBase):
         self.assertNotIn("WARNING", out.stdout)
 
     def test_start_prints_the_personality_warning_through_the_real_entrypoint(self):
+        # C-D64: the user's PERSONALITY.md is not read any more -> the real entrypoint prints ok and never mentions it
         path = self.personality()
         out = self.summary()
-        self.assertEqual(out.returncode, 0, "a warning must not fail the start: " + out.stdout + out.stderr)
-        self.assertRegex(out.stdout, r"omp isolation: warning", out.stdout)
-        self.assertRegex(out.stdout, r"WARNING:.*PERSONALITY\.md", out.stdout)
-        self.assertIn(str(path), out.stdout)
-        self.assertNotRegex(out.stdout, r"omp isolation: (ok|pending)")
+        self.assertEqual(out.returncode, 0, out.stdout + out.stderr)
+        self.assertRegex(out.stdout, r"omp isolation: ok", out.stdout)
+        self.assertNotIn("PERSONALITY", out.stdout)
+        self.assertNotIn(str(path), out.stdout)
+        self.assertNotIn("WARNING", out.stdout)
         snapshot = self.wait_isolation()
         iso = snapshot["omp_isolation"]
-        self.assertEqual((iso["state"], iso["ok"], iso["leaks"]), ("warning", True, []))
+        self.assertEqual((iso["state"], iso["ok"], iso["leaks"], iso["warnings"]), ("ok", True, [], []))
+        self.assertNotIn("PERSONALITY", json.dumps(iso))
         text = self.cli("status", "--data-dir", str(self.data)).stdout
-        self.assertRegex(text, r"omp isolation: warning")
-        self.assertIn("PERSONALITY.md", text)
+        self.assertRegex(text, r"omp isolation: ok")
+        self.assertNotIn("PERSONALITY.md", text)
         # the default OMP personality is not removed by the Workbench: no personality option anywhere in the panes' argv
         for role in ("manager", "worker"):
             for call in self.by_kind("pane", role) + self.by_kind("rpc", role):

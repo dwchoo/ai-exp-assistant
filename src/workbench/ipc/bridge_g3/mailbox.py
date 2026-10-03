@@ -19,7 +19,7 @@ import socketserver
 import stat
 from threading import Condition, Lock, RLock, Thread
 import time
-from typing import Any, Mapping
+from typing import Any, Callable, Mapping
 from uuid import UUID, uuid4, uuid5
 
 from workbench.contracts.v1 import (
@@ -35,6 +35,8 @@ from workbench.tasks.repository import TaskRepository
 
 MAX_FRAME_BYTES = 1_048_576
 MAX_RETAINED_EVENTS = 4096
+MAX_TOOL_IDENTIFIER = 256
+TOOL_RESULT_WRITE_TIMEOUT = 5.0
 
 
 class MailboxError(RuntimeError):
@@ -97,6 +99,11 @@ class BridgePeer:
     session_id: str
     generation: int
     pid: int
+
+
+# CW-18 handoff tools: (authenticated peer, normalized request) -> result object.
+# The request's role/session/generation come from the peer's hello, never the frame.
+ToolHandler = Callable[[BridgePeer, dict[str, Any]], Mapping[str, Any]]
 
 
 @dataclass(slots=True)
@@ -176,6 +183,10 @@ class G3BridgeServer:
         self._server: _G3UnixServer | None = None
         self._thread: Thread | None = None
         self._closed = False
+        self._tool_handler: ToolHandler | None = None
+        # CW-18: one serialized delivery path per target OMP. Every TaskMailbox on this
+        # bridge (workflow stage deliveries and handoff outbox lanes) delivers under it.
+        self._delivery_locks = {role: Lock() for role in (ActorRole.MANAGER, ActorRole.WORKER)}
 
         self.socket_path.parent.mkdir(parents=True, exist_ok=True)
         if self.socket_path.exists():
@@ -269,6 +280,69 @@ class G3BridgeServer:
                 pass
         return peer
 
+    def delivery_lock(self, role: ActorRole | str) -> Lock:
+        """The lock every delivery to ``role``'s OMP holds from its state probe to its outcome."""
+        return self._delivery_locks[_role(role)]
+
+    def set_tool_handler(self, handler: ToolHandler | None) -> None:
+        """Route ``tool_request`` frames (CW-18 ``to_worker``/``to_manager``) to ``handler``."""
+        with self._condition:
+            self._tool_handler = handler
+
+    def _accept_tool_request(self, peer: _LivePeer, frame: dict[str, Any]) -> None:
+        """Called under the condition lock; the handler runs on its own thread."""
+        request_id, tool_call_id = frame.get("requestId"), frame.get("toolCallId")
+        if (not isinstance(request_id, str) or not 0 < len(request_id) <= MAX_TOOL_IDENTIFIER
+                or not isinstance(tool_call_id, str) or not 0 < len(tool_call_id) <= MAX_TOOL_IDENTIFIER):
+            return  # nothing to answer to; the extension reports outcome_unknown
+        handler = self._tool_handler
+        result: dict[str, Any] | None = None
+        if (frame.get("sessionId") != peer.public.session_id or type(frame.get("generation")) is not int
+                or frame.get("generation") != peer.public.generation):
+            result = {"status": "rejected", "reason": "session_mismatch"}
+        elif handler is None:
+            result = {"status": "rejected", "reason": "handoff_unavailable"}
+        request = {
+            "request_id": request_id,
+            "tool_call_id": tool_call_id,
+            "tool": frame.get("tool"),
+            "args": frame.get("args"),
+            "session_id": peer.public.session_id,
+            "generation": peer.public.generation,
+        }
+        Thread(target=self._run_tool_request, args=(peer, request, handler, result),
+               name="g3-tool-request", daemon=True).start()
+
+    def _run_tool_request(self, peer: _LivePeer, request: dict[str, Any], handler: ToolHandler | None,
+                          result: dict[str, Any] | None) -> None:
+        if result is None and handler is not None:
+            try:
+                result = dict(handler(peer.public, request))
+            except Exception:
+                # The handler may have acted before failing: the outcome is not known.
+                result = {"status": "outcome_unknown", "reason": "backend_error"}
+        try:
+            encoded = (json.dumps({"kind": "tool_result", "requestId": request["request_id"],
+                                   "toolCallId": request["tool_call_id"], "result": result},
+                                  separators=(",", ":"), allow_nan=False) + "\n").encode()
+        except (TypeError, ValueError):
+            encoded = (json.dumps({"kind": "tool_result", "requestId": request["request_id"],
+                                   "toolCallId": request["tool_call_id"],
+                                   "result": {"status": "outcome_unknown", "reason": "backend_error"}},
+                                  separators=(",", ":")) + "\n").encode()
+        deadline = time.monotonic() + TOOL_RESULT_WRITE_TIMEOUT
+        if not peer.write_lock.acquire(timeout=TOOL_RESULT_WRITE_TIMEOUT):
+            return
+        try:
+            with self._condition:
+                if self._closed or self._peers.get(peer.public.role) is not peer:
+                    return  # a replaced session never receives another session's result
+            self._send_until(peer.connection, encoded, deadline)
+        except (OSError, ValueError, MailboxError):
+            pass  # the extension times out to outcome_unknown and never resends
+        finally:
+            peer.write_lock.release()
+
     def _unregister_peer(self, peer: _LivePeer) -> None:
         with self._condition:
             if self._peers.get(peer.public.role) is peer:
@@ -304,6 +378,8 @@ class G3BridgeServer:
                         "role": peer.public.role.value,
                         "bridgeSequence": self._event_sequence,
                     })
+            elif frame.get("kind") == "tool_request":
+                self._accept_tool_request(peer, frame)
             self._condition.notify_all()
 
     def peer(self, role: ActorRole | str, timeout: float = 0) -> BridgePeer:
@@ -561,8 +637,26 @@ class DeliveryReceipt:
     details: Mapping[str, Any]
 
 
+_FALLBACK_DELIVERY_LOCKS: dict[tuple[int, ActorRole], Lock] = {}
+_FALLBACK_DELIVERY_GUARD = Lock()
+
+
+def _delivery_lock(bridge: Any, role: ActorRole) -> Lock:
+    """The bridge's per-target delivery lock (a shared per-object lock for other bridges)."""
+    getter = getattr(bridge, "delivery_lock", None)
+    if callable(getter):
+        return getter(role)
+    with _FALLBACK_DELIVERY_GUARD:
+        return _FALLBACK_DELIVERY_LOCKS.setdefault((id(bridge), role), Lock())
+
+
 class TaskMailbox:
-    """Persists logical messages and one-way delivery evidence through CW-09 APIs."""
+    """Persists logical messages and one-way delivery evidence through CW-09 APIs.
+
+    Deliveries to one target OMP are serialized across every mailbox on the same
+    bridge (``G3BridgeServer.delivery_lock``): two messages never race into the
+    same OMP turn, whichever component (workflow stage or handoff outbox) sends.
+    """
 
     def __init__(self, repository: TaskRepository, bridge: G3BridgeServer):
         self._repository = repository
@@ -664,260 +758,284 @@ class TaskMailbox:
 
     def deliver(self, message: MailboxMessage, *, timeout: float = 20,
                 expected_peers: Mapping[ActorRole | str, tuple[str, int]] | None = None,
-                authority_token: object | None = None) -> DeliveryReceipt:
+                authority_token: object | None = None,
+                on_submitted: Callable[[], None] | None = None) -> DeliveryReceipt:
+        """Deliver ``message`` once; the receipt comes after the target's turn (or ``timeout``).
+
+        ``on_submitted`` (CW-18 R1) is called on this thread as soon as the target
+        OMP accepted the message into its session (``api_accepted``), before the
+        turn's outcome is observed. It is never called for a deferred, rejected or
+        unknown submission. Its failure never changes the receipt.
+        """
         if timeout <= 0:
             raise ValueError("timeout must be positive")
         with self._lock:
             if self._messages.get(getattr(message, "message_id", "")) is not message:
                 raise MailboxError("message handle is not owned by this live mailbox; replay after reopen is forbidden")
-            prior = self._receipts.get(message.message_id)
-            if prior is not None and prior.status is not MailboxStatus.DEFERRED:
-                return prior
-            if authority_token is not None and not authority_token.current():
-                receipt = self._receipt(message, None, MailboxStatus.REJECTED, {
-                    "reason": "authority_changed_before_delivery",
-                    "api_called": False, "omp_processed": False,
-                })
-                self._receipts[message.message_id] = receipt
-                return receipt
-            peer = self._bridge.peer(message.target_role)
-            if (peer.session_id, peer.generation) != (message.session_id, message.session_generation):
-                receipt = self._receipt(message, None, MailboxStatus.REJECTED, {
-                    "reason": "target_session_changed",
-                    "api_called": False,
-                    "omp_processed": False,
-                })
-                self._receipts[message.message_id] = receipt
-                return receipt
+            target_lock = _delivery_lock(self._bridge, message.target_role)
+        with self._lock, target_lock:
+            return self._deliver_serialized(message, timeout, expected_peers, authority_token, on_submitted)
 
-            try:
-                state = self._bridge.probe(message.target_role, timeout=min(timeout, 5))
-            except (BridgeTimeout, BridgeDisconnected, MailboxError) as exc:
-                receipt = self._receipt(message, None, MailboxStatus.DEFERRED, {
-                    "reason": type(exc).__name__,
-                    "api_called": False,
-                    "omp_processed": False,
-                })
-                return receipt
-            if not self._ready_state(message, state):
-                return self._receipt(message, None, MailboxStatus.DEFERRED, {
-                    "reason": "current_omp_state_not_safe",
-                    "api_called": False,
-                    "omp_processed": False,
-                })
+    def _deliver_serialized(self, message: MailboxMessage, timeout: float,
+                            expected_peers: Mapping[ActorRole | str, tuple[str, int]] | None,
+                            authority_token: object | None,
+                            on_submitted: Callable[[], None] | None = None) -> DeliveryReceipt:
+        # Held: self._lock and the target's delivery lock.
+        if self._messages.get(getattr(message, "message_id", "")) is not message:
+            raise MailboxError("message handle is not owned by this live mailbox; replay after reopen is forbidden")
+        prior = self._receipts.get(message.message_id)
+        if prior is not None and prior.status is not MailboxStatus.DEFERRED:
+            return prior
+        if authority_token is not None and not authority_token.current():
+            receipt = self._receipt(message, None, MailboxStatus.REJECTED, {
+                "reason": "authority_changed_before_delivery",
+                "api_called": False, "omp_processed": False,
+            })
+            self._receipts[message.message_id] = receipt
+            return receipt
+        peer = self._bridge.peer(message.target_role)
+        if (peer.session_id, peer.generation) != (message.session_id, message.session_generation):
+            receipt = self._receipt(message, None, MailboxStatus.REJECTED, {
+                "reason": "target_session_changed",
+                "api_called": False,
+                "omp_processed": False,
+            })
+            self._receipts[message.message_id] = receipt
+            return receipt
 
-            attempt_id = new_identifier()
-            envelope = message.envelope(attempt_id)
-            key = (message.target_role, message.session_id, message.session_generation)
-            ledger = self._ledgers.setdefault(
-                key, DeliveryLedger(message.target_role, message.session_id, message.session_generation)
+        try:
+            state = self._bridge.probe(message.target_role, timeout=min(timeout, 5))
+        except (BridgeTimeout, BridgeDisconnected, MailboxError) as exc:
+            receipt = self._receipt(message, None, MailboxStatus.DEFERRED, {
+                "reason": type(exc).__name__,
+                "api_called": False,
+                "omp_processed": False,
+            })
+            return receipt
+        if not self._ready_state(message, state):
+            return self._receipt(message, None, MailboxStatus.DEFERRED, {
+                "reason": "current_omp_state_not_safe",
+                "api_called": False,
+                "omp_processed": False,
+            })
+
+        attempt_id = new_identifier()
+        envelope = message.envelope(attempt_id)
+        key = (message.target_role, message.session_id, message.session_generation)
+        ledger = self._ledgers.setdefault(
+            key, DeliveryLedger(message.target_role, message.session_id, message.session_generation)
+        )
+        try:
+            decision, candidate = ledger.begin(
+                envelope.to_json(),
+                idle=state.get("idle") is True,
+                has_pending_messages=state.get("pending") is not False,
+                approval_pending=state.get("approvalPending") is not False,
+                editor_text="" if state.get("editorKnown") is True and state.get("editorEmpty") is True else None,
+                paused=state.get("paused") is not False,
             )
-            try:
-                decision, candidate = ledger.begin(
-                    envelope.to_json(),
-                    idle=state.get("idle") is True,
-                    has_pending_messages=state.get("pending") is not False,
-                    approval_pending=state.get("approvalPending") is not False,
-                    editor_text="" if state.get("editorKnown") is True and state.get("editorEmpty") is True else None,
-                    paused=state.get("paused") is not False,
+        except ValueError as exc:
+            return self._receipt(message, None, MailboxStatus.REJECTED, {
+                "reason": "public_contract_rejected_envelope",
+                "api_called": False,
+                "detail": str(exc),
+            })
+        if decision is DeliveryState.API_ACCEPTED:
+            return self._receipts.get(message.message_id) or self._receipt(
+                message, None, MailboxStatus.API_RETURNED, {"deduplicated": True}
+            )
+        if decision is DeliveryState.UNKNOWN:
+            return self._receipts.get(message.message_id) or self._receipt(
+                message, None, MailboxStatus.UNKNOWN, {"reason": "prior_attempt_unknown_no_replay"}
+            )
+        if decision is DeliveryState.DEFERRED or candidate is None:
+            return self._receipt(message, None, MailboxStatus.DEFERRED, {
+                "reason": "public_delivery_gate_deferred",
+                "api_called": False,
+                "omp_processed": False,
+            })
+
+        try:
+            self._repository.create_delivery_attempt(message.message_id, attempt_id=attempt_id)
+        except Exception as exc:
+            ledger.finish(candidate, api_accepted=False)
+            receipt = self._receipt(message, attempt_id, MailboxStatus.REJECTED, {
+                "reason": "delivery_attempt_persistence_failed",
+                "error_type": type(exc).__name__,
+                "api_called": False,
+            })
+            self._receipts[message.message_id] = receipt
+            return receipt
+
+        cursor = self._bridge.event_cursor()
+        try:
+            frame = {"kind": "deliver", "envelope": candidate.to_json()}
+            if isinstance(self._bridge, G3BridgeServer):
+                ack = self._bridge.request(
+                    message.target_role, frame, timeout=timeout,
+                    expected_peer=(message.session_id, message.session_generation),
+                    expected_peers=expected_peers, authority_token=authority_token,
                 )
-            except ValueError as exc:
-                return self._receipt(message, None, MailboxStatus.REJECTED, {
-                    "reason": "public_contract_rejected_envelope",
-                    "api_called": False,
-                    "detail": str(exc),
-                })
-            if decision is DeliveryState.API_ACCEPTED:
-                return self._receipts.get(message.message_id) or self._receipt(
-                    message, None, MailboxStatus.API_RETURNED, {"deduplicated": True}
-                )
-            if decision is DeliveryState.UNKNOWN:
-                return self._receipts.get(message.message_id) or self._receipt(
-                    message, None, MailboxStatus.UNKNOWN, {"reason": "prior_attempt_unknown_no_replay"}
-                )
-            if decision is DeliveryState.DEFERRED or candidate is None:
-                return self._receipt(message, None, MailboxStatus.DEFERRED, {
-                    "reason": "public_delivery_gate_deferred",
+            elif authority_token is None and expected_peers is None:
+                ack = self._bridge.request(message.target_role, frame, timeout=timeout)
+            else:
+                raise BridgeBoundMismatch("bound delivery requires G3BridgeServer")
+        except BridgeBoundMismatch as exc:
+            ledger.finish(candidate, api_accepted=False)
+            receipt = self._receipt(message, attempt_id, MailboxStatus.REJECTED, {
+                "reason": type(exc).__name__, "api_called": False,
+                "omp_processed": False, "automatic_replay": False,
+            })
+            self._record(attempt_id, "failed", receipt.details)
+            self._receipts[message.message_id] = receipt
+            return receipt
+        except (BridgeTimeout, BridgeDisconnected, OSError) as exc:
+            ledger.finish(candidate, api_accepted=None)
+            receipt = self._receipt(message, attempt_id, MailboxStatus.UNKNOWN, {
+                "reason": type(exc).__name__,
+                "stage": "api_return",
+                "api_called": True,
+                "automatic_replay": False,
+            })
+            self._record(attempt_id, "unknown", receipt.details)
+            self._receipts[message.message_id] = receipt
+            return receipt
+
+        if authority_token is not None and not authority_token.current():
+            ledger.finish(candidate, api_accepted=None)
+            receipt = self._receipt(message, attempt_id, MailboxStatus.UNKNOWN, {
+                "reason": "authority_changed_after_submission",
+                "api_called": True, "automatic_replay": False,
+            })
+            self._record(attempt_id, "unknown", receipt.details)
+            self._receipts[message.message_id] = receipt
+            return receipt
+
+        ack_status = ack.get("status")
+        ack_details = {
+            "method": "pi.sendUserMessage",
+            "api_status": ack_status,
+            "request_id": ack.get("requestId"),
+            "message_id": message.message_id,
+            "delivery_attempt_id": attempt_id,
+            "target_role": message.target_role.value,
+            "session_id": message.session_id,
+            "session_generation": message.session_generation,
+            "model_processed": False,
+        }
+        if ack_status != "api_accepted":
+            if ack_status == "deferred":
+                ledger.finish(candidate, api_accepted=False)
+                self._record(attempt_id, "failed", {**ack_details, "reason": ack.get("reason")})
+                return self._receipt(message, attempt_id, MailboxStatus.DEFERRED, {
+                    **ack_details,
+                    "reason": ack.get("reason", "public_extension_rechecked_state"),
                     "api_called": False,
                     "omp_processed": False,
                 })
-
-            try:
-                self._repository.create_delivery_attempt(message.message_id, attempt_id=attempt_id)
-            except Exception as exc:
-                ledger.finish(candidate, api_accepted=False)
-                receipt = self._receipt(message, attempt_id, MailboxStatus.REJECTED, {
-                    "reason": "delivery_attempt_persistence_failed",
-                    "error_type": type(exc).__name__,
-                    "api_called": False,
-                })
-                self._receipts[message.message_id] = receipt
-                return receipt
-
-            cursor = self._bridge.event_cursor()
-            try:
-                frame = {"kind": "deliver", "envelope": candidate.to_json()}
-                if isinstance(self._bridge, G3BridgeServer):
-                    ack = self._bridge.request(
-                        message.target_role, frame, timeout=timeout,
-                        expected_peer=(message.session_id, message.session_generation),
-                        expected_peers=expected_peers, authority_token=authority_token,
-                    )
-                elif authority_token is None and expected_peers is None:
-                    ack = self._bridge.request(message.target_role, frame, timeout=timeout)
-                else:
-                    raise BridgeBoundMismatch("bound delivery requires G3BridgeServer")
-            except BridgeBoundMismatch as exc:
-                ledger.finish(candidate, api_accepted=False)
-                receipt = self._receipt(message, attempt_id, MailboxStatus.REJECTED, {
-                    "reason": type(exc).__name__, "api_called": False,
-                    "omp_processed": False, "automatic_replay": False,
-                })
-                self._record(attempt_id, "failed", receipt.details)
-                self._receipts[message.message_id] = receipt
-                return receipt
-            except (BridgeTimeout, BridgeDisconnected, OSError) as exc:
+            if ack_status in {"unknown_no_replay", "duplicate_api_accepted"}:
                 ledger.finish(candidate, api_accepted=None)
                 receipt = self._receipt(message, attempt_id, MailboxStatus.UNKNOWN, {
-                    "reason": type(exc).__name__,
-                    "stage": "api_return",
-                    "api_called": True,
+                    **ack_details,
+                    "reason": ack.get("reason", "extension_refused_replay"),
                     "automatic_replay": False,
                 })
                 self._record(attempt_id, "unknown", receipt.details)
                 self._receipts[message.message_id] = receipt
                 return receipt
+            ledger.finish(candidate, api_accepted=False)
+            receipt = self._receipt(message, attempt_id, MailboxStatus.REJECTED, {
+                **ack_details,
+                "reason": ack.get("reason", "extension_rejected_delivery"),
+                "api_called": False,
+                "omp_processed": False,
+            })
+            self._record(attempt_id, "failed", receipt.details)
+            self._receipts[message.message_id] = receipt
+            return receipt
 
-            if authority_token is not None and not authority_token.current():
-                ledger.finish(candidate, api_accepted=None)
-                receipt = self._receipt(message, attempt_id, MailboxStatus.UNKNOWN, {
-                    "reason": "authority_changed_after_submission",
-                    "api_called": True, "automatic_replay": False,
-                })
-                self._record(attempt_id, "unknown", receipt.details)
-                self._receipts[message.message_id] = receipt
-                return receipt
-
-            ack_status = ack.get("status")
-            ack_details = {
-                "method": "pi.sendUserMessage",
-                "api_status": ack_status,
-                "request_id": ack.get("requestId"),
-                "message_id": message.message_id,
-                "delivery_attempt_id": attempt_id,
-                "target_role": message.target_role.value,
-                "session_id": message.session_id,
-                "session_generation": message.session_generation,
-                "model_processed": False,
-            }
-            if ack_status != "api_accepted":
-                if ack_status == "deferred":
-                    ledger.finish(candidate, api_accepted=False)
-                    self._record(attempt_id, "failed", {**ack_details, "reason": ack.get("reason")})
-                    return self._receipt(message, attempt_id, MailboxStatus.DEFERRED, {
-                        **ack_details,
-                        "reason": ack.get("reason", "public_extension_rechecked_state"),
-                        "api_called": False,
-                        "omp_processed": False,
-                    })
-                if ack_status in {"unknown_no_replay", "duplicate_api_accepted"}:
-                    ledger.finish(candidate, api_accepted=None)
-                    receipt = self._receipt(message, attempt_id, MailboxStatus.UNKNOWN, {
-                        **ack_details,
-                        "reason": ack.get("reason", "extension_refused_replay"),
-                        "automatic_replay": False,
-                    })
-                    self._record(attempt_id, "unknown", receipt.details)
-                    self._receipts[message.message_id] = receipt
-                    return receipt
-                ledger.finish(candidate, api_accepted=False)
-                receipt = self._receipt(message, attempt_id, MailboxStatus.REJECTED, {
-                    **ack_details,
-                    "reason": ack.get("reason", "extension_rejected_delivery"),
-                    "api_called": False,
-                    "omp_processed": False,
-                })
-                self._record(attempt_id, "failed", receipt.details)
-                self._receipts[message.message_id] = receipt
-                return receipt
-
-            ledger.finish(candidate, api_accepted=True)
+        ledger.finish(candidate, api_accepted=True)
+        if on_submitted is not None:
             try:
-                self._record(attempt_id, "api_returned", ack_details)
-            except Exception as exc:
-                receipt = self._receipt(message, attempt_id, MailboxStatus.UNKNOWN, {
-                    **ack_details,
-                    "reason": "api_return_persistence_failed",
-                    "error_type": type(exc).__name__,
-                    "automatic_replay": False,
-                })
-                self._receipts[message.message_id] = receipt
-                return receipt
+                on_submitted()
+            except Exception:
+                pass  # the caller's bookkeeping never changes the delivery evidence
+        try:
+            self._record(attempt_id, "api_returned", ack_details)
+        except Exception as exc:
+            receipt = self._receipt(message, attempt_id, MailboxStatus.UNKNOWN, {
+                **ack_details,
+                "reason": "api_return_persistence_failed",
+                "error_type": type(exc).__name__,
+                "automatic_replay": False,
+            })
+            self._receipts[message.message_id] = receipt
+            return receipt
 
-            expected = {
-                "messageId": message.message_id,
-                "deliveryAttemptId": attempt_id,
-                "taskId": message.task_id,
-                "revisionId": message.revision_id,
-                "runId": message.run_id,
-                "sessionId": message.session_id,
-                "generation": message.session_generation,
-            }
-            try:
-                event = self._bridge.wait_any_event(
-                    message.target_role,
-                    ("delivery_omp_processed", "delivery_processing_unknown"),
-                    expected,
-                    after_sequence=cursor,
-                    timeout=timeout,
-                )
-            except (BridgeTimeout, BridgeDisconnected) as exc:
-                receipt = self._receipt(message, attempt_id, MailboxStatus.UNKNOWN, {
-                    **ack_details,
-                    "reason": type(exc).__name__,
-                    "stage": "omp_processing_observation",
-                    "automatic_replay": False,
-                    "task_completed": False,
-                })
-                self._record(attempt_id, "unknown", receipt.details)
-                self._receipts[message.message_id] = receipt
-                return receipt
+        expected = {
+            "messageId": message.message_id,
+            "deliveryAttemptId": attempt_id,
+            "taskId": message.task_id,
+            "revisionId": message.revision_id,
+            "runId": message.run_id,
+            "sessionId": message.session_id,
+            "generation": message.session_generation,
+        }
+        try:
+            event = self._bridge.wait_any_event(
+                message.target_role,
+                ("delivery_omp_processed", "delivery_processing_unknown"),
+                expected,
+                after_sequence=cursor,
+                timeout=timeout,
+            )
+        except (BridgeTimeout, BridgeDisconnected) as exc:
+            receipt = self._receipt(message, attempt_id, MailboxStatus.UNKNOWN, {
+                **ack_details,
+                "reason": type(exc).__name__,
+                "stage": "omp_processing_observation",
+                "automatic_replay": False,
+                "task_completed": False,
+            })
+            self._record(attempt_id, "unknown", receipt.details)
+            self._receipts[message.message_id] = receipt
+            return receipt
 
-            if event.get("name") == "delivery_processing_unknown":
-                receipt = self._receipt(message, attempt_id, MailboxStatus.UNKNOWN, {
-                    **ack_details,
-                    "processing_event": event.get("name"),
-                    "provider_request_matched": event.get("providerRequestMatched") is True,
-                    "provider_response_observed": event.get("providerResponseObserved") is True,
-                    "agent_end_observed": event.get("agentEndObserved") is True,
-                    "reason": event.get("reason", "omp_processing_unknown"),
-                    "automatic_replay": False,
-                    "task_completed": False,
-                })
-                self._record(attempt_id, "unknown", receipt.details)
-                self._receipts[message.message_id] = receipt
-                return receipt
-
-            evidence = {
+        if event.get("name") == "delivery_processing_unknown":
+            receipt = self._receipt(message, attempt_id, MailboxStatus.UNKNOWN, {
                 **ack_details,
                 "processing_event": event.get("name"),
                 "provider_request_matched": event.get("providerRequestMatched") is True,
                 "provider_response_observed": event.get("providerResponseObserved") is True,
                 "agent_end_observed": event.get("agentEndObserved") is True,
+                "reason": event.get("reason", "omp_processing_unknown"),
+                "automatic_replay": False,
                 "task_completed": False,
-            }
-            if not all((evidence["provider_request_matched"], evidence["provider_response_observed"], evidence["agent_end_observed"])):
-                receipt = self._receipt(message, attempt_id, MailboxStatus.UNKNOWN, {
-                    **evidence,
-                    "reason": "processing_event_incomplete",
-                    "automatic_replay": False,
-                })
-                self._record(attempt_id, "unknown", receipt.details)
-            else:
-                receipt = self._receipt(message, attempt_id, MailboxStatus.OMP_PROCESSED, evidence)
-                self._record(attempt_id, "omp_processed", evidence)
+            })
+            self._record(attempt_id, "unknown", receipt.details)
             self._receipts[message.message_id] = receipt
             return receipt
+
+        evidence = {
+            **ack_details,
+            "processing_event": event.get("name"),
+            "provider_request_matched": event.get("providerRequestMatched") is True,
+            "provider_response_observed": event.get("providerResponseObserved") is True,
+            "agent_end_observed": event.get("agentEndObserved") is True,
+            "task_completed": False,
+        }
+        if not all((evidence["provider_request_matched"], evidence["provider_response_observed"], evidence["agent_end_observed"])):
+            receipt = self._receipt(message, attempt_id, MailboxStatus.UNKNOWN, {
+                **evidence,
+                "reason": "processing_event_incomplete",
+                "automatic_replay": False,
+            })
+            self._record(attempt_id, "unknown", receipt.details)
+        else:
+            receipt = self._receipt(message, attempt_id, MailboxStatus.OMP_PROCESSED, evidence)
+            self._record(attempt_id, "omp_processed", evidence)
+        self._receipts[message.message_id] = receipt
+        return receipt
 
     def _ready_state(self, message: MailboxMessage, state: Mapping[str, Any]) -> bool:
         peer = self._bridge.peer(message.target_role)

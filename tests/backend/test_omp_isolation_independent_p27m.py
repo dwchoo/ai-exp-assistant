@@ -19,6 +19,12 @@ result-p27-omp-iso-explore-01-agent.json), written before launcher.py was read:
 Layers: (1) static overlay + argv/env/overlay-writer contract with pure launcher calls, (2) ``check_isolation`` against a
 fake RPC OMP shaped like the real 18.4.4 output, (3) the real ``workbench start/status`` entrypoint with a fake OMP that
 records argv/env/config/RPC traffic per invocation. The live real-OMP check is ``live_omp_isolation_independent_p27m.py``.
+
+C-D64 adaptation (p27-home-test-01): the "no ``PI_CODING_AGENT_DIR``" rule above is superseded. Both OMPs now run in a
+Workbench-owned OMP home: ``PI_CODING_AGENT_DIR`` MUST be ``<data dir>/omp-root/agent`` and ``PI_CONFIG_DIR`` MUST name
+``<data dir>/omp-root`` relative to HOME; profiles stay forbidden. The user's auth reaches OMP through the
+``agent.db`` symlink, so the fake HOME of the entrypoint tests carries a fake (non-credential) ``agent.db`` regular file and
+``start`` must refuse without one. The user's OMP config (``omp config get``) is no longer read or unioned in.
 """
 from __future__ import annotations
 
@@ -54,7 +60,30 @@ AMBIENT_SKILL_FLAGS = ("enableClaudeProject", "enableClaudeUser", "enableCodexUs
 # C-D59 corrections (p27-cd59-test-02, Root-authorized): ``--append-system-prompt ""`` (blocks the ambient
 # APPEND_SYSTEM.md fallback) and ``--no-title`` (no TITLE_SYSTEM.md title call) are REQUIRED isolation args.
 FORBIDDEN_ARGS = ("--profile", "--no-skills", "--system-prompt", "--system-prompt-template")
-FORBIDDEN_ENV = ("PI_CODING_AGENT_DIR", "OMP_PROFILE", "PI_PROFILE", "OMP_CODING_AGENT_DIR")
+# C-D64: PI_CODING_AGENT_DIR is no longer forbidden; it must be the Workbench agent dir (see HOME_ENV_KEYS).
+FORBIDDEN_ENV = ("OMP_PROFILE", "PI_PROFILE", "OMP_CODING_AGENT_DIR")
+HOME_ENV_KEYS = ("PI_CONFIG_DIR", "PI_CODING_AGENT_DIR", "BUN_RUNTIME_TRANSPILER_CACHE_PATH")
+FAKE_AUTH_BYTES = b"p27u fake auth store - not a credential\n"
+
+
+def plant_fake_auth_store(home: Path) -> Path:
+    """A regular file where the user's OMP keeps agent.db (any bytes; never a real credential)."""
+    store = home / ".omp" / "agent" / "agent.db"
+    store.parent.mkdir(parents=True, exist_ok=True)
+    store.write_bytes(FAKE_AUTH_BYTES)
+    store.chmod(0o600)
+    return store
+
+
+def assert_workbench_home_env(test: unittest.TestCase, env: dict, home: Path, data: Path) -> None:
+    """C-D64: the recorded OMP environment names the Workbench home under ``data`` (relative PI_CONFIG_DIR)."""
+    root = data / "omp-root"
+    test.assertEqual(env.get("PI_CODING_AGENT_DIR"), str(root / "agent"), env)
+    value = env.get("PI_CONFIG_DIR")
+    test.assertTrue(value and not os.path.isabs(value), f"PI_CONFIG_DIR must be HOME-relative: {value!r}")
+    test.assertEqual(os.path.normpath(os.path.join(str(home), value)), str(root), "path.join(HOME, PI_CONFIG_DIR)")
+    cache = env.get("BUN_RUNTIME_TRANSPILER_CACHE_PATH")
+    test.assertTrue(cache and cache.startswith(str(root) + os.sep), f"bun cache outside the Workbench root: {cache}")
 
 
 # ---------------------------------------------------------------------------------------- tiny YAML subset reader
@@ -158,12 +187,15 @@ class StaticOverlayContractTests(unittest.TestCase):
         self.assertNotIn(str(Path.home()), self.text)
         self.assertNotIn("/home/", self.text)
 
-    def test_workbench_skills_directory_exists_without_any_skill(self):
+    def test_workbench_skills_directory_holds_exactly_the_two_role_skills(self):
+        # CW-18 (C-D64/C-D65): the only Workbench skills are to-worker (manager) and to-manager (worker).
         self.assertTrue(SKILLS_DIR.is_dir())
         self.assertEqual(launcher.default_skills_dir(), SKILLS_DIR)
         self.assertEqual(launcher.default_isolation_overlay(), STATIC_OVERLAY)
-        self.assertEqual([p.name for p in SKILLS_DIR.iterdir() if (p / "SKILL.md").exists()], [],
-                         "actual Workbench skills are CW-18, this unit adds none")
+        self.assertEqual(sorted(p.name for p in SKILLS_DIR.iterdir() if (p / "SKILL.md").exists()),
+                         ["to-manager", "to-worker"], "exactly the two CW-18 role skills, nothing else")
+        self.assertEqual(launcher.workbench_skill_names(SKILLS_DIR), ("to-manager", "to-worker"),
+                         "front matter names must equal the directory names")
         self.assertTrue((SKILLS_DIR / "README.md").is_file())
 
     def test_python_constants_match_the_static_file(self):
@@ -207,15 +239,26 @@ class ArgvEnvContractTests(unittest.TestCase):
                          ["--thinking", "high", "--flag-z"], "user args reordered")
 
     def test_environment_never_selects_a_profile_and_passes_auth_env_through_untouched(self):
-        base = {"PATH": "/usr/bin", "HOME": "/home/u", "OPENAI_API_KEY": "sk-p27m-sentinel", "LANG": "C.UTF-8"}
+        base = {"PATH": "/usr/bin", "HOME": "/home/u", "OPENAI_API_KEY": "sk-p27m-sentinel", "LANG": "C.UTF-8",
+                "OMP_PROFILE": "p", "PI_PROFILE": "p", "PI_CODING_AGENT_DIR": "/home/u/elsewhere/agent"}
         plan = plan_for()
+        home = {"PI_CONFIG_DIR": "wb/omp-root", "PI_CODING_AGENT_DIR": "/home/u/wb/omp-root/agent",
+                "BUN_RUNTIME_TRANSPILER_CACHE_PATH": "/home/u/wb/omp-root/bun-transpiler-cache"}
         for role in ("manager", "worker"):
             env = launcher.omp_environment(base, plan, role=role, token="t0k", bridge_socket=Path("/x/b.sock"))
             for key in FORBIDDEN_ENV:
                 self.assertNotIn(key, env)
-            self.assertEqual(env["OPENAI_API_KEY"], "sk-p27m-sentinel", "the user's own env auth must stay in place")
-            self.assertEqual(env["HOME"], "/home/u")
-            self.assertEqual(env["WORKBENCH_G3_ROLE"], role)
+            # C-D64: a user's own PI_CODING_AGENT_DIR is never passed on; only the Workbench home sets one
+            self.assertNotIn("PI_CODING_AGENT_DIR", env)
+            homed = launcher.omp_environment(base, plan, role=role, token="t0k", bridge_socket=Path("/x/b.sock"),
+                                             home=home)
+            for key in FORBIDDEN_ENV:
+                self.assertNotIn(key, homed)
+            self.assertEqual({k: homed[k] for k in HOME_ENV_KEYS}, home)
+            for out in (env, homed):
+                self.assertEqual(out["OPENAI_API_KEY"], "sk-p27m-sentinel", "the user's own env auth must stay in place")
+                self.assertEqual(out["HOME"], "/home/u")
+                self.assertEqual(out["WORKBENCH_G3_ROLE"], role)
 
     def test_no_credential_value_reaches_argv_or_overlays(self):
         root = self.role_files()
@@ -306,7 +349,10 @@ class RoleOverlayContractTests(unittest.TestCase):
         default = launcher.role_overlay("manager", project_dir=self.project, home=self.home)
         self.assertEqual(default["skills"]["customDirectories"], [str(SKILLS_DIR)])
         self.assertTrue(os.path.isabs(default["skills"]["customDirectories"][0]))
-        self.assertFalse(default["skills"].get("includeSkills"), "no role filter is configured yet")
+        # CW-18: the default role filter is exact (manager only to-worker, worker only to-manager).
+        self.assertEqual(default["skills"]["includeSkills"], ["to-worker"])
+        self.assertEqual(launcher.role_overlay("worker", project_dir=self.project, home=self.home)["skills"]
+                         ["includeSkills"], ["to-manager"])
         filters = {"manager": ("order-manager", "wb-*"), "worker": ("order-worker",)}
         manager = launcher.role_overlay("manager", project_dir=self.project, home=self.home, role_skills=filters)
         worker = launcher.role_overlay("worker", project_dir=self.project, home=self.home, role_skills=filters)
@@ -328,7 +374,15 @@ class RoleOverlayContractTests(unittest.TestCase):
         self.assertEqual(launcher.workbench_skill_names(skills), ("nofront", "order-one", "wb-two"))
         self.assertEqual(launcher.workbench_skill_names(skills, ("order-*",)), ("order-one",))
         self.assertEqual(launcher.workbench_skill_names(self.root / "absent"), ())
-        self.assertEqual(launcher.role_skill_allowlist("manager", SKILLS_DIR), ())
+        self.assertEqual(launcher.role_skill_allowlist("manager", SKILLS_DIR), ("to-worker",))
+        self.assertEqual(launcher.role_skill_allowlist("worker", SKILLS_DIR), ("to-manager",))
+        # The role filter is exact: look-alike or other skills in the directory are never allowed.
+        crowded = self.root / "crowded"
+        for name in ("to-worker", "to-manager", "to-worker-extra", "x-to-worker", "orca-cli", "to-managers"):
+            (crowded / name).mkdir(parents=True)
+            (crowded / name / "SKILL.md").write_text(f"---\nname: {name}\ndescription: d\n---\nbody\n")
+        self.assertEqual(launcher.role_skill_allowlist("manager", crowded), ("to-worker",))
+        self.assertEqual(launcher.role_skill_allowlist("worker", crowded), ("to-manager",))
 
     def test_written_overlay_is_private_valid_and_never_touches_the_static_file_or_home(self):
         static_hash = sha(STATIC_OVERLAY)
@@ -568,6 +622,28 @@ class CheckIsolationContractTests(unittest.TestCase):
         self.assertFalse(blocked["ok"], "a skill outside the allow-list must be reported")
         self.assertIn("order-worker", json.dumps(blocked))
 
+    def test_the_real_role_allowlists_accept_only_the_roles_own_workbench_skill(self):
+        # CW-18: manager ('to-worker',), worker ('to-manager',); the other role's skill or any other skill is a leak.
+        def shapes(*names):
+            return {"prompt_extra": "<skills>\n" + "".join(f"- {n}: d\n" for n in names) + "</skills>\n",
+                    "commands": [{"name": "init", "source": "builtin"}]
+                    + [{"name": f"skill:{n}", "source": "skill"} for n in names]}
+        for role, own, other in (("manager", "to-worker", "to-manager"), ("worker", "to-manager", "to-worker")):
+            allowed = launcher.role_skill_allowlist(role)
+            self.assertEqual(allowed, (own,))
+            with self.subTest(role=role, case="own"):
+                self.h.set_mode(shapes=shapes(own))
+                result = self.h.check(role=role, allowed=allowed)
+                self.assertEqual((result["ok"], result["leaks"]), (True, []), result["leaks"])
+            for intruder in (other, "orca-cli"):
+                with self.subTest(role=role, case=intruder):
+                    self.h.set_mode(shapes=shapes(own, intruder))
+                    result = self.h.check(role=role, allowed=allowed)
+                    self.assertFalse(result["ok"], f"{intruder} must be a leak for the {role}")
+                    self.assertEqual(result["state"], "leak")
+                    self.assertIn(f"skill:{intruder}", result["leaks"])
+                    self.assertNotIn(f"skill:{own}", result["leaks"])
+
     def test_check_failures_are_failed_state_with_a_reason_never_ok(self):
         for behaviour in ("die", "garbage", "error"):
             with self.subTest(behaviour=behaviour):
@@ -635,11 +711,13 @@ class CheckIsolationContractTests(unittest.TestCase):
         self.assertEqual((pending["checked"], pending["ok"]), (False, None))
 
     def test_version_drift_is_visible_in_the_summary(self):
-        same = launcher.summarize_isolation({"manager": self.h.check("manager")}, "omp/18.4.4")
+        same = launcher.summarize_isolation({"manager": self.h.check("manager")}, "omp/18.4.5")  # 18.4.5 = isolation evidence
         newer = launcher.summarize_isolation({"manager": self.h.check("manager")}, "omp/19.1.0")
         self.assertEqual(newer["omp_version"], "omp/19.1.0")
         self.assertTrue(newer["version_drift"], "a version other than the evidence versions must show drift")
         self.assertNotEqual(same["version_drift"], newer["version_drift"])
+        self.assertNotIn("isolation", same["version_drift"], "the running version equals the isolation evidence version")
+        self.assertIn("isolation", newer["version_drift"])
 
 
 # ------------------------------------------------------------------------- 3. the real workbench entrypoint
@@ -669,7 +747,12 @@ for i, a in enumerate(argv):
 rpc = "--mode" in argv and "rpc" in argv
 record(event="start", kind="rpc" if rpc else "pane", pid=os.getpid(), ticks=stat[19], argv=argv, cwd=os.getcwd(),
        configs=configs, env={{k: os.environ.get(k) for k in ("PI_CODING_AGENT_DIR", "OMP_PROFILE", "PI_PROFILE",
-       "OMP_CODING_AGENT_DIR", "WORKBENCH_G3_TOKEN", "WORKBENCH_G3_BRIDGE_SOCKET", "WORKBENCH_G3_ROLE", "HOME")}})
+       "OMP_CODING_AGENT_DIR", "WORKBENCH_G3_TOKEN", "WORKBENCH_G3_BRIDGE_SOCKET", "WORKBENCH_G3_ROLE", "HOME",
+       "PI_CONFIG_DIR", "BUN_RUNTIME_TRANSPILER_CACHE_PATH", "XDG_DATA_HOME", "XDG_STATE_HOME", "XDG_CACHE_HOME")}})
+held = []
+if os.environ.get("PI_CODING_AGENT_DIR") and not mode.get("no_home_files"):
+    # like the real OMP: keep a data file of its agent dir open (models.db); never touches agent.db
+    held.append(open(os.path.join(os.environ["PI_CODING_AGENT_DIR"], "models.db"), "ab"))
 if rpc:
     behaviour = mode.get("behaviour", "clean")
     if behaviour == "die":
@@ -687,7 +770,10 @@ if rpc:
         record(event="rpc", type=req.get("type"), pid=os.getpid())
         if behaviour == "silent":
             continue
-        data = state if req.get("type") == "get_state" else {{"commands": commands}} if req.get("type") == "get_available_commands" else {{}}
+        login = mode.get("login", {{"providers": [{{"id": "stubprov", "name": "Stub", "authenticated": True}},
+                                                 {{"id": "other", "name": "Other", "authenticated": False}}]}})
+        data = (state if req.get("type") == "get_state" else {{"commands": commands}} if req.get("type") == "get_available_commands"
+                else login if req.get("type") == "get_login_providers" else {{}})
         sys.stdout.write(json.dumps({{"id": req["id"], "type": "response", "command": req["type"], "success": True,
                                      "data": data}}) + "\n"); sys.stdout.flush()
     sys.exit(0)
@@ -737,6 +823,7 @@ class RealEntrypointBase(unittest.TestCase):
         (self.home / ".omp" / "agent" / "agents").mkdir(parents=True)
         (self.project / ".omp" / "agents").mkdir(parents=True)
         (self.home / ".omp" / "agent" / "agents" / "home-agent.md").write_text("---\nname: home-agent\ndescription: d\n---\nBODY-p27m\n")
+        self.auth_store = plant_fake_auth_store(self.home)  # C-D64: start needs the user's auth store (fake bytes)
         (self.project / ".omp" / "agents" / "proj-agent.md").write_text("---\nname: proj-agent\ndescription: d\n---\nBODY-p27m\n")
         (self.root / "omp").write_text(ENTRY_STUB.format(root=str(self.root)))
         (self.root / "omp").chmod(0o755)
@@ -848,7 +935,10 @@ class RealEntrypointIsolationTests(RealEntrypointBase):
             for key in FORBIDDEN_ENV:
                 self.assertIsNone(pane["env"][key], f"{role}: {key} set for the pane")
                 self.assertIsNone(check["env"][key])
-            self.assertEqual(pane["env"]["HOME"], str(self.home), "HOME must stay the user's (auth lives there)")
+            # C-D64: both the pane and its check run in the Workbench OMP home
+            assert_workbench_home_env(self, pane["env"], self.home, self.data)
+            self.assertEqual({k: check["env"][k] for k in HOME_ENV_KEYS}, {k: pane["env"][k] for k in HOME_ENV_KEYS})
+            self.assertEqual(pane["env"]["HOME"], str(self.home), "HOME must stay the user's (bash tools, git, ssh)")
             self.assertGreater(argv.index("--flag-from-cli"), max(argv.index("--no-extensions"), argv.index(configs[1])))
             # the check runs the SAME command in rpc mode, and never as the real bridge peer
             self.assertEqual(check["argv"][:len(argv)], argv, f"{role}: the check ran a different command")
@@ -859,16 +949,25 @@ class RealEntrypointIsolationTests(RealEntrypointBase):
             self.assertEqual(check["cwd"], pane["cwd"])
             # role overlay content as the OMP process saw it
             overlay = json.loads(pane["configs"][configs[1]])
-            self.assertLessEqual(set(CAPABILITY_IDS) | {"my-private-provider"}, set(overlay["disabledProviders"]))
-            # OMP loads only definitions with name AND description (fixture agents carry both); the fake `omp config get`
-            # answers the same list for both keys, so the user's task.disabledAgents value is unioned back in
-            self.assertLessEqual({"proj-agent", "home-agent", "my-private-provider"}, set(overlay["task"]["disabledAgents"]))
+            self.assertLessEqual(set(CAPABILITY_IDS), set(overlay["disabledProviders"]))
+            # C-D64: the Workbench home reads no user OMP config, so nothing of `omp config get` is unioned back, and
+            # the user's ~/.omp/agent/agents is not OMP's user agents dir any more (only the project dir counts)
+            self.assertNotIn("my-private-provider", overlay["disabledProviders"])
+            self.assertIn("proj-agent", overlay["task"]["disabledAgents"])
+            self.assertNotIn("my-private-provider", overlay["task"]["disabledAgents"])
+            self.assertNotIn("home-agent", overlay["task"]["disabledAgents"], "the user's agents dir was read")
             self.assertEqual(overlay["skills"]["customDirectories"], [str(SKILLS_DIR)])
             self.assertNotIn("BODY-p27m", json.dumps(overlay))
             self.assertEqual(stat.S_IMODE(Path(configs[1]).stat().st_mode), 0o600)
             self.assertTrue(str(Path(configs[1])).startswith(str(self.data)), "role overlays live in the data dir")
         rpc = [c["type"] for c in self.calls() if c.get("event") == "rpc"]
-        self.assertEqual(sorted(rpc), ["get_available_commands"] * 2 + ["get_state"] * 2, "zero model calls")
+        self.assertEqual(sorted(rpc), ["get_available_commands"] * 2 + ["get_login_providers"] * 2 + ["get_state"] * 2,
+                         "zero model calls")
+        self.assertEqual([c for c in self.calls() if c.get("event") == "config_get"], [], "the user's OMP config was read")
+        agent = self.data / "omp-root" / "agent"
+        self.assertTrue((agent / "agent.db").is_symlink())
+        self.assertEqual(os.readlink(agent / "agent.db"), str(self.auth_store))
+        self.assertEqual(stat.S_IMODE((agent / "config.yml").stat().st_mode), 0o600)
         self.assertEqual([c for c in self.calls() if c.get("event") == "pane_input"], [], "nothing typed into panes")
         # exact-identity cleanup of the two check processes
         for check in self.by_kind("rpc"):
@@ -931,10 +1030,12 @@ class RealEntrypointIsolationTests(RealEntrypointBase):
         self.assertIn("19.4.2", text)
 
     def test_unreadable_user_config_does_not_stop_the_start(self):
+        # C-D64: the user's OMP config is not read at all any more (an unreadable one cannot matter)
         self.set_mode(config_fail=True)
         self.start()
         snapshot = self.wait_isolation()
         self.assertEqual(snapshot["omp_isolation"]["checked"], True)
+        self.assertEqual([c for c in self.calls() if c.get("event") == "config_get"], [])
         overlay_paths = [a for a in self.by_kind("pane", "worker")[0]["argv"] if a.endswith("omp-isolation-worker.yml")]
         self.assertEqual(len(overlay_paths), 1)
 
@@ -948,6 +1049,26 @@ class RealEntrypointIsolationTests(RealEntrypointBase):
         while time.monotonic() < deadline and any(identity(p) == t for p, t in self.seen.items()):
             time.sleep(0.1)
         self.assertEqual([p for p, t in self.seen.items() if identity(p) == t], [], "processes survived shutdown")
+
+
+class StartRefusedWithoutAuthStoreTests(RealEntrypointBase):
+    """C-D64: no user OMP auth store -> no backend, exit 2, login guidance, nothing created in the user's home."""
+
+    def test_start_refuses_with_guidance_and_creates_nothing_in_the_home(self):
+        self.auth_store.unlink()
+        before = sorted(str(p.relative_to(self.home)) for p in self.home.rglob("*"))
+        out = self.start()
+        self.assertEqual(out.returncode, 2, out.stdout + out.stderr)
+        text = out.stdout + out.stderr
+        self.assertIn("omp", text)
+        self.assertIn("/login", text)
+        self.assertIn(str(self.auth_store), text)
+        self.assertEqual([c for c in self.calls() if c.get("event") == "start"], [], "an OMP was started")
+        self.assertIsNone(self.status_json(), "a backend is running")
+        self.assertEqual(sorted(str(p.relative_to(self.home)) for p in self.home.rglob("*")), before,
+                         "the user's home changed")
+        self.assertFalse((self.data / "omp-root" / "agent" / "agent.db").exists())
+        self.assertFalse(os.path.lexists(self.data / "omp-root" / "agent" / "agent.db"))
 
 
 class HungCheckStaysOffTheStartPathTests(RealEntrypointBase):

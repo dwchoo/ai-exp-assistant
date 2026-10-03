@@ -1,7 +1,7 @@
 """Host input parser: prefix commands, whole bracketed pastes, literal passthrough.
 
 Everything except the prefix key is forwarded byte-for-byte, so original OMP
-keys (Esc, Ctrl-C, Tab, arrows, slash commands, approval keys) are untouched.
+keys (Esc, Ctrl-C, Tab, arrows, slash commands) are untouched.
 The prefix pressed twice sends the literal prefix byte. The only other things the parser
 recognises are xterm SGR mouse reports and Shift+PgUp/PgDn (CSI 5;2~ / 6;2~): they become
 ``Mouse`` / ``PageScroll`` events and are never forwarded as text.

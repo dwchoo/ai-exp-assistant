@@ -11,6 +11,7 @@ from uuid import uuid4
 
 from workbench.ipc.bridge_g3.mailbox import MailboxStatus, TaskMailbox
 from workbench.tasks.repository import AuthorizationError, TaskRepository
+from workbench.terminal.shell_g2.prototype import ShellChoice
 from workbench.terminal.shell_persistent.adapter import PersistentShell
 from workbench.workflow import (
     TaskWorkflow, WorkflowHeld, WorktreePreparationError,
@@ -231,6 +232,150 @@ class WorkflowRuntimeTests(unittest.TestCase):
             self.assertEqual(len(self.mailbox.messages), 2)
         finally:
             run.close()
+
+    # -- CW-18 U2 delta: injected host shell and the deferred-report resend -------------
+    def names_task(self, command, *, shell="bash"):
+        execution = {"source": str(self.source), "commit": self.commit, "command": command,
+                     "criteria": {"log_contains": "PASS", "result_file": "outcome.txt", "result_contains": "PASS"},
+                     "environment": ["PATH"], "shell": shell}
+        task_id = self.repository.create_task({"goal": "injected shell", "execution": execution})
+        self.repository.approve_scope(task_id, 1, {"execution": execution, "paths": ["outcome.txt"]})
+        self.repository.proceed(task_id, 1, "run with the host shell")
+        return task_id
+
+    def test_injected_shell_runs_the_experiment_and_is_never_closed(self):
+        host = PersistentShell(user_environment={"PATH": "/usr/bin:/bin", "HOME": str(self.root)},
+                               choice=ShellChoice("bash", "/usr/bin/bash"))
+        host.choice = ShellChoice("bash", "/usr/bin/bash")
+        host.detach = lambda: setattr(host, "detached", True)
+        self.addCleanup(host.close)
+        task_id = self.names_task("printf 'PASS\\n'; printf PASS > outcome.txt")
+        run = self.workflow.start(task_id, 1, worktree_path=self.root / "injected", artifacts_root=self.artifacts,
+                                  automation=AUTOMATION, shell=host)
+        self.assertIs(run.shell, host)
+        self.assertFalse(run.owns_shell)
+        collected = run.collect(timeout=8)
+        self.assertTrue(collected["exit_confirmed"], collected)
+        judged = run.judge()
+        self.assertEqual(judged["worker_judgment"]["judgment"], "success")
+        record = json.loads(run.result_path.read_text())
+        self.assertEqual((record["shell_source"], record["parent_pid"], record["environment_names"]),
+                         ("injected_host_shell", host.parent_pid, ["PATH"]))
+        run.close()
+        self.assertTrue(getattr(host, "detached", False))
+        self.assertFalse(host._transport._closed, "an injected shell is never closed by the workflow")
+        self.assertIsNone(self.repository.get_current_run(task_id))
+
+    def test_injected_shell_needs_names_only_and_the_approved_shell_kind(self):
+        host = SimpleNamespace(choice=ShellChoice("sh", "/usr/bin/dash"))
+        task_id = self.names_task("true")
+        with self.assertRaises(ValueError):
+            self.workflow.start(task_id, 1, worktree_path=self.root / "x1", artifacts_root=self.artifacts,
+                                automation=AUTOMATION, environment_values={"PATH": "/bin"}, shell=host)
+        with self.assertRaisesRegex(WorkflowHeld, "shell kind"):
+            self.workflow.start(task_id, 1, worktree_path=self.root / "x2", artifacts_root=self.artifacts,
+                                automation=AUTOMATION, shell=host)
+        legacy = self.approved_task("true")  # environment values in the spec cannot use a host shell
+        with self.assertRaisesRegex(WorkflowHeld, "environment names"):
+            self.workflow.start(legacy, 1, worktree_path=self.root / "x3", artifacts_root=self.artifacts,
+                                automation=AUTOMATION, shell=SimpleNamespace(choice=ShellChoice("bash", "/bin/bash")))
+        self.assertIsNone(self.repository.get_current_run(task_id), "nothing started")
+
+    def test_a_deferred_report_is_resent_once_and_nothing_else_is_replayed(self):
+        task_id = self.approved_task("printf 'PASS\\n'; printf PASS > outcome.txt")
+        run = self.workflow.start(task_id, 1, worktree_path=self.root / "deferred-report",
+                                  artifacts_root=self.artifacts, automation=AUTOMATION)
+        try:
+            run.collect(timeout=8)
+            statuses = [MailboxStatus.DEFERRED]
+            original = self.mailbox.deliver
+
+            def deliver(message, **_):
+                original(message)
+                return SimpleNamespace(status=statuses.pop(0) if statuses else MailboxStatus.OMP_PROCESSED)
+
+            self.mailbox.deliver = deliver
+            judged = run.judge()
+            self.assertEqual(judged["report"]["status"], "deferred")
+            self.assertIsNotNone(self.repository.get_current_run(task_id), "a deferred report completes nothing")
+            again = run.retry_report()
+            self.assertEqual(again["report"]["status"], "omp_processed")
+            self.assertIsNone(self.repository.get_current_run(task_id))
+            with self.assertRaises(WorkflowHeld):
+                run.retry_report()
+        finally:
+            run.close()
+
+    # -- CW-18 review R1/R5: report acceptance and the typing hook ------------------------
+    def test_report_accepted_by_the_manager_closes_the_run_before_the_turn_ends(self):
+        task_id = self.approved_task("printf 'PASS\\n'; printf PASS > outcome.txt")
+        run = self.workflow.start(task_id, 1, worktree_path=self.root / "accepted-report",
+                                  artifacts_root=self.artifacts, automation=AUTOMATION)
+        try:
+            run.collect(timeout=8)
+            events = []
+            original = self.mailbox.deliver
+
+            def deliver(message, on_submitted=None, **_):
+                original(message)
+                on_submitted()  # the manager OMP accepted the report into its session
+                events.append(("current_run_after_ack", self.repository.get_current_run(task_id)))
+                return SimpleNamespace(status=MailboxStatus.UNKNOWN)  # its turn outlasted the receipt window
+
+            self.mailbox.deliver = deliver
+            judged = run.judge(on_report=lambda event, record: events.append((event, record["report"]["status"])))
+            self.assertEqual(events, [("sending", "delivery_unknown"), ("submitted", "api_returned"),
+                                      ("current_run_after_ack", None)])
+            self.assertEqual(judged["report"]["status"], "unknown")
+            self.assertIsNone(self.repository.get_current_run(task_id), "closed at the acceptance")
+            self.assertEqual(self.repository.get_run_history(run.run_id)[-1]["kind"], "completed")
+            with self.assertRaises(WorkflowHeld):
+                run.judge()
+        finally:
+            run.close()
+
+    def test_without_on_report_an_unknown_report_still_closes_nothing(self):
+        task_id = self.approved_task("printf 'PASS\\n'; printf PASS > outcome.txt")
+        run = self.workflow.start(task_id, 1, worktree_path=self.root / "unknown-report",
+                                  artifacts_root=self.artifacts, automation=AUTOMATION)
+        try:
+            run.collect(timeout=8)
+            original = self.mailbox.deliver
+
+            def deliver(message, on_submitted=None, **_):
+                original(message)
+                self.assertIsNone(on_submitted)
+                return SimpleNamespace(status=MailboxStatus.UNKNOWN)
+
+            self.mailbox.deliver = deliver
+            self.assertEqual(run.judge()["report"]["status"], "unknown")
+            self.assertIsNotNone(self.repository.get_current_run(task_id))
+        finally:
+            run.close()
+
+    def test_before_shell_input_runs_after_the_task_delivery_and_can_stop_any_typing(self):
+        task_id = self.names_task("printf 'PASS\\n'; printf PASS > outcome.txt")
+        host = PersistentShell(user_environment={"PATH": "/usr/bin:/bin", "HOME": str(self.root)},
+                               choice=ShellChoice("bash", "/usr/bin/bash"))
+        host.choice = ShellChoice("bash", "/usr/bin/bash")
+        host.detach = lambda: None
+        self.addCleanup(host.close)
+        typed = []
+        original_send = host.send_user
+        host.send_user = lambda data: (typed.append(data), original_send(data))[1]
+        calls = []
+
+        def refuse():
+            calls.append(len(self.mailbox.messages))
+            raise WorkflowHeld("host_terminal_busy: nothing was typed into the host shell")
+
+        with self.assertRaisesRegex(WorkflowHeld, "host_terminal_busy"):
+            self.workflow.start(task_id, 1, worktree_path=self.root / "refused-typing",
+                                artifacts_root=self.artifacts, automation=AUTOMATION, shell=host,
+                                before_shell_input=refuse)
+        self.assertEqual(calls[0] >= 1, True, "the TASK was delivered before the hook")
+        self.assertEqual(typed, [], "nothing was typed")
+        self.assertIsNone(self.repository.get_current_run(task_id))
 
     def test_preparation_failure_preserves_source_and_existing_target(self):
         task_id = self.approved_task("printf 'PASS\\n'; printf PASS > outcome.txt")

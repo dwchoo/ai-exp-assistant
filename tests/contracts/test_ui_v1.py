@@ -132,7 +132,8 @@ class NegotiationAndValidationTests(unittest.TestCase):
         extras = {"input": {"pane": "host_shell"}, "paste": {"pane": "host_shell"},
                   "resize": {"rows": 1, "cols": 1}, "focus": {"pane": "manager_omp"},
                   "restart_pane": {"pane": "worker_omp"}, "kill_pane": {"pane": "host_shell"},
-                  "shutdown_confirm": {"token": "t"}, "confirm_boot": {"boot_id": "b"}}
+                  "shutdown_confirm": {"token": "t"}, "confirm_boot": {"boot_id": "b"},
+                  "resume": {"reconciled": True}}
         for kind in ClientType:
             if kind is ClientType.HELLO:
                 continue
@@ -189,6 +190,47 @@ class NegotiationAndValidationTests(unittest.TestCase):
         for name, value in (("PANE_ALIVE", "pane_alive"), ("PANE_NOT_RESTARTABLE", "pane_not_restartable"),
                             ("RESTART_IN_PROGRESS", "restart_in_progress"), ("RESTART_FAILED", "restart_failed")):
             self.assertEqual(Reason[name].value, value)
+
+    def test_approval_decide_is_removed_and_pause_resume_shapes_stay(self):
+        # C-D66: the manager's to_worker is the user's standing delegation; there is no UI approval.
+        self.assertNotIn("approval_decide", {kind.value for kind in ClientType})
+        approval_id = "6f1c1f4e-7d55-4b49-9d1c-0f5d8a3c1b2a"
+        for header in ({"v": 1, "type": "approval_decide", "id": "a", "approval_id": approval_id,
+                        "decision": "approve"},
+                       {"v": 1, "type": "resume", "id": "r"},
+                       {"v": 1, "type": "resume", "id": "r", "reconciled": "true"},
+                       {"v": 1, "type": "resume", "id": "r", "reconciled": 1}):
+            with self.assertRaises(ContractError, msg=header):
+                self.parse(header)
+        self.assertEqual(self.parse({"v": 1, "type": "pause", "id": "p"}).fields, {})
+        self.assertEqual(self.parse({"v": 1, "type": "resume", "id": "r", "reconciled": False}).fields,
+                         {"reconciled": False})
+        with self.assertRaises(ContractError):
+            self.parse({"v": 1, "type": "pause", "id": "p"}, payload=b"x")
+        self.assertFalse(hasattr(ui_v1, "APPROVAL_DECISIONS"))
+
+    def test_automation_refusal_reasons_are_contract_values_and_approval_reasons_are_gone(self):
+        for name, value in (("HOST_SHELL_AUTOMATION", "host_shell_automation"),
+                            ("RESUME_NOT_RECONCILED", "resume_not_reconciled")):
+            self.assertEqual(Reason[name].value, value)
+        values = {reason.value for reason in Reason}
+        for gone in ("approval_unknown", "approval_not_pending", "approval_failed", "automation_paused",
+                     "automation_unavailable"):
+            self.assertNotIn(gone, values)
+
+    def test_task_and_worker_state_values_are_contract_values(self):
+        # C-D66: the snapshot's task and worker (U5 renders these instead of approval cards).
+        self.assertEqual(ui_v1.WORKER_STATES, ("idle", "busy"))
+        self.assertEqual(ui_v1.TASK_STATUSES, ("dispatched", "starting", "running", "waiting_report", "held",
+                                               "cancelling", "finished", "blocked", "closed"))
+        self.assertEqual(ui_v1.TASK_KINDS, ("experiment", "work"))
+
+    def test_automation_state_values_are_contract_values(self):
+        # CW-18 U3: the published automation state and the manager turn interruption (U5 renders these).
+        self.assertEqual(ui_v1.AUTOMATION_STATES, ("idle", "active", "held", "pausing", "paused", "resuming"))
+        self.assertEqual(ui_v1.INTERRUPTION_STATES, ("none", "not_needed", "requesting", "requested", "confirmed",
+                                                     "request_failed", "unknown"))
+        self.assertNotIn("not_configured", ui_v1.AUTOMATION_STATES)
 
     def test_results_and_rejects_carry_reasons(self):
         result = ui_v1.result("x", False, reason=Reason.PASTE_TOO_LARGE, detail="d")

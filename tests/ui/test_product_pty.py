@@ -900,6 +900,68 @@ for line in sys.stdin:
 '''
 
 
+def task_automation_snapshot(*, state, paused, task_status="running", worker="busy"):
+    """A fake backend push: a busy worker with an experiment Task and the given automation state (ui_v1, C-D66)."""
+    snap = snapshot()
+    snap["task"] = {"task_id": "t1", "kind": "experiment", "status": task_status, "summary": "lr sweep 3 runs",
+                    "since": 1.0, "active": True, "revision": 1, "run_id": "run-1", "runs_started": 1, "retry_limit": 3,
+                    "held_reason": None, "closed_reason": None, "cancel_requested": False, "last_result": None}
+    snap["worker"] = {"state": worker, "task_id": "t1" if worker == "busy" else None}
+    snap["automation"] = {"state": state, "source": "user", "detail": None, "paused": paused, "transition": None,
+                          "run": None, "tick": None, "interruption": {"state": "confirmed" if paused else "none"},
+                          "review": None if paused else {"applies": True, "interval_seconds": 60, "status": "waiting",
+                                                         "reason": None, "next_due_in_seconds": 41},
+                          "resume": None, "retry_limit": 3, "persistence_error": None}
+    return snap
+
+
+class TaskWorkerAutomationPtyTests(unittest.TestCase):
+    """CW-18 U5 on the real curses UI: a pushed busy worker / paused automation is shown; p opens the confirmation."""
+
+    def start(self):
+        server = FixtureServer()
+        self.addCleanup(server.close)
+        ui = UiProcess(server.path)
+        self.addCleanup(ui.close)
+        self.assertTrue(server.wait_for(server.attached.is_set), "attach not received")
+        self.assertTrue(ui.until(lambda: "MANAGER OMP" in ui.text()), ui.text())
+        return server, ui
+
+    def test_busy_worker_and_paused_automation_are_drawn_and_p_confirm_resumes_reconciled(self):
+        server, ui = self.start()
+        server.state(task_automation_snapshot(state="paused", paused=True))
+        self.assertTrue(ui.until(lambda: "worker: 작업 중" in ui.text() and "자동화: paused" in ui.text()
+                                  and "일시정지됨" in ui.text()), ui.text())
+        text = ui.text()
+        self.assertIn("lr sweep 3 runs", text)
+        self.assertIn("실험", text)
+        self.assertIn("실행 중", text)
+        self.assertIn("일시정지됨", text)
+        self.assertNotIn("승인", text)
+        ui.send(P + b"\x10")  # Ctrl-] Ctrl-p
+        self.assertTrue(ui.until(lambda: "대조 후 재개합니다 (p: 확인)" in ui.text()), ui.text())
+        self.assertEqual([], server.received("resume"))
+        ui.send(b"\x1b")  # lone Esc cancels
+        self.assertTrue(ui.until(lambda: "대조 후 재개합니다" not in ui.text()), ui.text())
+        ui.drain(0.2)
+        self.assertEqual([], server.received("resume") + server.received("pause") + server.received("input"))
+        ui.send(P + b"p")
+        self.assertTrue(ui.until(lambda: "대조 후 재개합니다 (p: 확인)" in ui.text()), ui.text())
+        ui.send(b"p")
+        self.assertTrue(server.wait_for(lambda: server.received("resume")), "resume not sent")
+        self.assertIs(server.received("resume")[0].header["reconciled"], True)
+        self.assertEqual([], server.received("pause") + server.received("input"))
+        server.state(task_automation_snapshot(state="idle", paused=False, task_status="waiting_report", worker="idle"))
+        self.assertTrue(ui.until(lambda: "worker: 대기" in ui.text() and "60s 대조 41s 후" in ui.text()), ui.text())
+        self.assertIn("60s 대조 41s 후", ui.text())
+        ui.send(P + b"p")
+        self.assertTrue(ui.until(lambda: "자동화를 일시정지합니다 (p: 확인)" in ui.text()), ui.text())
+        ui.send("ㅔ".encode())  # a lone jamo confirms (Hangul IME left on)
+        self.assertTrue(server.wait_for(lambda: server.received("pause")), "pause not sent")
+        ui.send(P + b"q")
+        self.assertEqual(0, ui.wait_exit())
+
+
 def _alive(pid):
     try:
         return Path(f"/proc/{pid}/stat").read_text().rsplit(") ", 1)[1][0] not in "ZX"

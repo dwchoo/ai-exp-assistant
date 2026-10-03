@@ -81,6 +81,10 @@ def draw(win: curses.window, model: ProductModel, colors: _ColorPairs) -> None:
         _cursor(False)
         _draw_box(win, rows, cols, model.kill_confirm_lines())
         _put(win, rows - 1, 0, model.footer(), cols - 1, curses.A_BOLD)
+    elif model.pause_confirm_open:
+        _cursor(False)
+        _draw_box(win, rows, cols, model.pause_confirm_lines())
+        _put(win, rows - 1, 0, model.footer(), cols - 1, curses.A_BOLD)
     elif model.menu_open:
         _cursor(False)
         _draw_menu(win, rows, cols, model)

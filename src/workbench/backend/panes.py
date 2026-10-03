@@ -11,13 +11,16 @@ from collections import deque
 import errno
 import fcntl
 import os
+from pathlib import Path
 import pty
 import select
+import shlex
 import signal
 import struct
 import termios
+import threading
 import time
-from typing import Any, Mapping, Sequence
+from typing import Any, Callable, Mapping, Sequence
 
 from workbench.contracts.ui_v1 import MAX_PASTE_BYTES, Reason
 from workbench.contracts.v1 import DisplayChunk, PaneId, new_identifier
@@ -458,6 +461,14 @@ class ShellPane(_OwnedSession, Pane):
     def __init__(self, choice: ShellChoice, environment: dict[str, str],
                  *, size: tuple[int, int] = DEFAULT_SIZE, generation: int = 1):
         super().__init__(PaneId.HOST_SHELL, size)
+        # CW-18: the backend loop and an approved run (HostShellPort, another thread)
+        # share this shell; every use of ``self.shell`` holds this lock.
+        self.io_lock = threading.RLock()
+        # Display bytes drained outside ``pump`` (for a run's raw log) wait here for the UI.
+        self._display_backlog = bytearray()
+        self._taps: list[bytearray] = []
+        # Set while Workbench types an approved run's start into the shell: user input is held.
+        self.automation_hold: str | None = None
         # A restarted host shell (C-D63) streams under a new session id and a higher generation.
         self.generation = generation
         self.choice = choice
@@ -538,8 +549,22 @@ class ShellPane(_OwnedSession, Pane):
         return [transport.master_fd, transport._control_fd]
 
     def pump(self) -> list[DisplayChunk]:
+        with self.io_lock:
+            return self._pump_locked()
+
+    def _take_display(self) -> bytes:
+        """Drain the shell's display bytes once; copies go to every open tap (caller holds io_lock)."""
+        data = self.shell.display_bytes()
+        if data:
+            for tap in self._taps:
+                tap.extend(data)
+        return data
+
+    def _pump_locked(self) -> list[DisplayChunk]:
         if self._released or self.shell._transport._closed:
             final, self._final = self._final, b""
+            final = bytes(self._display_backlog) + final
+            self._display_backlog.clear()
             return [self._chunk(final)] if final else []
         if not self._exited:
             self.poll()
@@ -550,11 +575,14 @@ class ShellPane(_OwnedSession, Pane):
         try:
             self.state = self.shell.poll(0)
             self._flush()
-            data = self.shell.display_bytes()
+            data = self._take_display()
         except (OSError, UnsafeShellState) as exc:
             self.error = f"{type(exc).__name__}: {exc}"
             self.state = self.shell.snapshot()
             data = b""
+        if self._display_backlog:
+            data = bytes(self._display_backlog) + data
+            self._display_backlog.clear()
         supervisor = self.state["lifecycle"].get("supervisor_pid")
         if supervisor and (self._supervisor_ref is None or self._supervisor_ref.pid != supervisor):
             self._supervisor_ref = process_ref("supervisor", supervisor)
@@ -562,6 +590,8 @@ class ShellPane(_OwnedSession, Pane):
 
     def _accepts_manual_input(self) -> tuple[Reason, str] | None:
         state = self.state
+        if self.automation_hold is not None:
+            return Reason.HOST_SHELL_AUTOMATION, self.automation_hold
         if state["input_owner"] != "user":
             return Reason.INPUT_OWNER_MANAGER, "manager owns shell input; request takeover first"
         if self.error is not None:
@@ -574,6 +604,10 @@ class ShellPane(_OwnedSession, Pane):
         return None
 
     def admit(self, data: bytes) -> tuple[Reason, str] | None:
+        with self.io_lock:
+            return self._admit_locked(data)
+
+    def _admit_locked(self, data: bytes) -> tuple[Reason, str] | None:
         if self._released or self.exited():
             return Reason.PANE_UNAVAILABLE, "host shell has exited; restart it first"
         if len(data) > INPUT_QUEUE_BYTES:
@@ -643,20 +677,134 @@ class ShellPane(_OwnedSession, Pane):
                 "manager_command": None if self.closed_request is None else dict(self.closed_request),
                 "restart": None if self.restart is None else dict(self.restart),
                 "kill": None if self.kill_result is None else dict(self.kill_result),
+                "automation_hold": self.automation_hold,
                 "shell": self.shell_state()}
 
     def request_takeover(self) -> dict[str, Any]:
-        self.state = self.shell.request_takeover()
-        return self.shell_state()
+        with self.io_lock:
+            self.state = self.shell.request_takeover()
+            return self.shell_state()
 
     def confirm_takeover(self) -> dict[str, Any]:
-        self.state = self.shell.confirm_takeover()
-        return self.shell_state()
+        with self.io_lock:
+            self.state = self.shell.confirm_takeover()
+            return self.shell_state()
 
     def handoff(self) -> dict[str, Any]:
-        self._pending.clear()
-        self.state = self.shell.claim_manager()
-        return self.shell_state()
+        with self.io_lock:
+            if self.automation_hold is not None:
+                raise UnsafeShellState(self.automation_hold)
+            self._pending.clear()
+            self.state = self.shell.claim_manager()
+            return self.shell_state()
+
+    # -- CW-18 approved runs (C-D65): idle-only start through HostShellPort --------
+    def automation_busy(self, own_hold: str | None = None) -> str | None:
+        """None when the shell is user-owned at a clean prompt with no jobs, else why not.
+
+        Caller holds ``io_lock``. Queued user bytes, a typed but unsubmitted line,
+        a job, a foreground program, a request in flight or any unknown keep it busy.
+        A job is any other live (running or stopped) member of the shell's own
+        session, read from /proc while the unreaped shell proves the session
+        number (CW-18 F1): nothing is typed into the shell to find out. A process
+        that called setsid has left the session and is not the shell's job.
+        ``own_hold`` is the caller's own automation hold (it does not count).
+        """
+        if self._released or self.exited():
+            return "host shell has exited"
+        if self.automation_hold is not None and self.automation_hold != own_hold:
+            return self.automation_hold
+        if self.error is not None:
+            return "host shell boundary unknown"
+        try:
+            self.state = self.shell.poll(0)
+        except (OSError, UnsafeShellState) as exc:
+            self.error = f"{type(exc).__name__}: {exc}"
+            return "host shell boundary unknown"
+        state, life = self.state, self.state["lifecycle"]
+        if state["input_owner"] != "user":
+            return "manager owns the host shell"
+        if self._pending:
+            return "user input is queued for the host shell"
+        if state["parent_mode"] != "manual_prompt":
+            return f"host shell is not at a clean prompt (mode {state['parent_mode']})"
+        busy = {"manual_jobs": "the host shell has jobs",
+                "unsubmitted_or_unconsumed_input": "a line is being typed in the host shell",
+                "unknown_or_manual_residue": "host shell state is unknown",
+                "unsupported_hook_or_trap": "host shell hook is unsupported"}
+        for reason in state["held_reasons"]:
+            if reason in busy:
+                return busy[reason]
+        # The snapshot lifecycle is a plain dict without ``returned``: compute it like the
+        # workflow's give-back (lifetime ended, input and control returned, nothing unknown).
+        returned = (not life.get("unknown") and life.get("lifetime") == "ended"
+                    and life.get("input_returned") is True and life.get("control_returned") is True)
+        if life.get("request_id") is not None and not returned:
+            return "a managed request is still in flight"
+        members = self._session_members()
+        if members is None:
+            return "host shell identity is not provable"
+        if members:
+            return "the host shell has jobs (a running or stopped process in its session)"
+        return None
+
+    def _session_members(self) -> list[int] | None:
+        """Live members of the shell's session other than the shell; None when unprovable.
+
+        The unreaped shell leads the session, so its number cannot be reused
+        while it is proven before and after the scan. Zombies are not jobs.
+        """
+        if not self._leader_proven():
+            return None
+        try:
+            names = os.listdir("/proc")
+        except OSError:
+            return None
+        members = []
+        for name in names:
+            if not name.isdecimal() or int(name) == self.pid:
+                continue
+            fields = _stat(int(name))
+            try:
+                if _live(fields) and int(fields[3]) == self.pid:
+                    members.append(int(name))
+            except (IndexError, ValueError):
+                continue
+        return members if self._leader_proven() else None
+
+    def cwd(self) -> str | None:
+        """The shell's current directory from /proc (never typed); None when unprovable."""
+        if self._released or self.exited() or not self._leader_proven():
+            return None
+        try:
+            path = os.readlink(f"/proc/{self.pid}/cwd")
+        except OSError:
+            return None
+        if not os.path.isabs(path) or path.endswith(" (deleted)") or not self._leader_proven():
+            return None
+        return path
+
+    def open_tap(self) -> bytearray:
+        with self.io_lock:
+            tap = bytearray()
+            self._taps.append(tap)
+            return tap
+
+    def close_tap(self, tap: bytearray) -> None:
+        with self.io_lock:
+            self._taps = [item for item in self._taps if item is not tap]
+
+    def drain_tap(self, tap: bytearray) -> bytes:
+        """Bytes shown since the last call; the UI still gets every byte (backlog)."""
+        with self.io_lock:
+            if not (self._released or self.shell._transport._closed):
+                try:
+                    self._display_backlog.extend(self._take_display())
+                except (OSError, UnsafeShellState):
+                    pass
+            value = bytes(tap)
+            tap.clear()
+            return value
 
     # -- force-kill (C-D63) ----------------------------------------------
     def _drain_quietly(self, timeout: float) -> None:
@@ -691,6 +839,10 @@ class ShellPane(_OwnedSession, Pane):
         return delivered
 
     def kill(self, grace: float = SHELL_KILL_GRACE) -> dict[str, Any]:
+        with self.io_lock:
+            return self._kill_locked(grace)
+
+    def _kill_locked(self, grace: float = SHELL_KILL_GRACE) -> dict[str, Any]:
         """End the parent shell and every member of its session: HUP/TERM, then KILL.
 
         Only pidfds pinned while the unreaped parent proves the session are
@@ -774,6 +926,10 @@ class ShellPane(_OwnedSession, Pane):
         self._released = True
 
     def close(self) -> dict[str, Any]:
+        with self.io_lock:
+            return self._close_locked()
+
+    def _close_locked(self) -> dict[str, Any]:
         """End the shell and its session through pinned identities, then release its PTY.
 
         Never raises for a member that cannot be signalled: it is reported in ``survivors``.
@@ -794,3 +950,165 @@ class ShellPane(_OwnedSession, Pane):
                 self._release_transport()
         self._release_pins()
         return {"pane": self.pane_id.value, "exit_status": self.returncode, "survivors": survivors}
+
+
+class HostShellPort:
+    """The product host shell as ``TaskWorkflow.start(shell=...)`` (CW-18 U2, C-D65).
+
+    It exposes the ``PersistentShell`` surface the workflow uses, under the
+    pane's ``io_lock``, so the backend loop and the run never use the shell at
+    the same time. Display bytes are tee'd: the run's raw log gets a copy and
+    the UI still receives every byte. ``hold`` starts a run only when the shell
+    is user-owned at a clean prompt with no jobs and then refuses user input
+    until ``release_hold`` (typed keystrokes are never overwritten or mixed).
+    The port never closes the shell; ``detach`` only drops its display tap.
+    """
+
+    def __init__(self, pane: ShellPane, current: Callable[[], ShellPane | None]):
+        self._pane = pane
+        self._current = current
+        self.choice = pane.choice
+        self._tap: bytearray | None = pane.open_tap()
+
+    def _check(self) -> None:
+        if self._current() is not self._pane:
+            raise UnsafeShellState("host shell was replaced")
+        if self._pane.exited():
+            raise UnsafeShellState("host shell has exited")
+
+    def busy(self) -> str | None:
+        with self._pane.io_lock:
+            if self._current() is not self._pane:
+                return "host shell was replaced"
+            return self._pane.automation_busy()
+
+    def hold(self, reason: str) -> str | None:
+        """Atomically: None and input held when idle, else the busy reason (nothing held)."""
+        with self._pane.io_lock:
+            busy = self.busy()
+            if busy is None:
+                self._pane.automation_hold = reason
+            return busy
+
+    def release_hold(self, reason: str | None = None) -> None:
+        """Release the hold (only when it is ``reason``, if given)."""
+        with self._pane.io_lock:
+            if reason is None or self._pane.automation_hold == reason:
+                self._pane.automation_hold = None
+
+    def hold_return(self, reason: str) -> bool:
+        """Hold user input while a finished run's shell comes back (no busy check: the manager owns it)."""
+        with self._pane.io_lock:
+            if self._current() is not self._pane or self._pane.exited() or self._pane.automation_hold is not None:
+                return False
+            self._pane.automation_hold = reason
+            return True
+
+    def cwd(self) -> str | None:
+        with self._pane.io_lock:
+            if self._current() is not self._pane:
+                return None
+            return self._pane.cwd()
+
+    def restore_cwd(self, target: str, inside: Path | str, *, reason: str, idle_wait: float = 0.0,
+                    confirm_wait: float = 3.0) -> str:
+        """Type ``cd -- <target>`` back into the user's idle shell when a run left it in ``inside``.
+
+        CW-18 F2: only while the shell's current directory (from /proc) is still
+        under ``inside`` (the Workbench worktrees); a user who already moved is
+        never moved again. It types only at an idle user-owned prompt with no
+        job (the same rule as a run's start) and holds user input until the
+        shell's directory is ``target`` and the prompt is back. Returns
+        ``restored``, ``unchanged``, ``user_moved``, ``target_missing``,
+        ``shell_gone`` (final) or ``busy``, ``unknown``, ``unconfirmed`` (try
+        again later). The hold ``reason`` (the caller's own, possibly already
+        set) is released here; no other hold is touched.
+        """
+        pane, inside = self._pane, os.path.realpath(inside)
+        deadline = time.monotonic() + max(idle_wait, 0.0)
+        typed_at: float | None = None
+        try:
+            while True:
+                with pane.io_lock:
+                    if self._current() is not pane or pane.exited():
+                        return "shell_gone"
+                    current = pane.cwd()
+                    if typed_at is not None:
+                        pane.state = pane.shell.poll(0)
+                        if current == target and pane.state["parent_mode"] == "manual_prompt":
+                            return "restored"
+                        if time.monotonic() >= typed_at + confirm_wait:
+                            return "unconfirmed"
+                    elif current is None:
+                        return "unknown"
+                    elif current == target:
+                        return "unchanged"
+                    elif os.path.commonpath([current, inside]) != inside:
+                        return "user_moved"
+                    elif not os.path.isdir(target):
+                        return "target_missing"
+                    elif pane.automation_busy(own_hold=reason) is None:
+                        pane.automation_hold = reason
+                        builtin = "builtin " if self.choice.kind == "bash" else ""
+                        # A leading space keeps it out of a HISTCONTROL=ignorespace history.
+                        pane.shell.send_user(f" {builtin}cd -- {shlex.quote(target)}\n".encode())
+                        typed_at = time.monotonic()
+                    elif time.monotonic() >= deadline:
+                        return "busy"
+                time.sleep(0.02)
+        except (OSError, UnsafeShellState):
+            return "unconfirmed" if typed_at is not None else "unknown"
+        finally:
+            self.release_hold(reason)
+
+    def send_user(self, data: bytes) -> None:
+        with self._pane.io_lock:
+            self._check()
+            if self._pane.automation_hold is None or self._pane._pending:
+                raise UnsafeShellState("host shell input is not held for this run")
+            self._pane.shell.send_user(data)
+
+    def poll(self, timeout: float = 0) -> dict[str, Any]:
+        if timeout > 0:
+            time.sleep(timeout)  # never block the backend loop on the shell lock
+        with self._pane.io_lock:
+            self._check()
+            self._pane.state = self._pane.shell.poll(0)
+            return self._pane.state
+
+    def snapshot(self) -> dict[str, Any]:
+        with self._pane.io_lock:
+            return self._pane.shell.snapshot()
+
+    def claim_manager(self) -> dict[str, Any]:
+        with self._pane.io_lock:
+            self._check()
+            self._pane.state = self._pane.shell.claim_manager()
+            return self._pane.state
+
+    def submit(self, control: dict, command: str | list[str], automation: dict, **kwargs: Any) -> dict[str, Any]:
+        with self._pane.io_lock:
+            self._check()
+            self._pane.state = self._pane.shell.submit(control, command, automation, **kwargs)
+            return self._pane.state
+
+    def release_input(self) -> None:
+        with self._pane.io_lock:
+            self._check()
+            self._pane.shell.release_input()
+
+    def request_takeover(self) -> dict[str, Any]:
+        """Give the shell back to the user after the run returned (the UI's takeover request)."""
+        with self._pane.io_lock:
+            self._check()
+            return self._pane.request_takeover()
+
+    def display_bytes(self) -> bytes:
+        if self._tap is None:
+            return b""
+        return self._pane.drain_tap(self._tap)
+
+    def detach(self) -> None:
+        if self._tap is not None:
+            self._pane.close_tap(self._tap)
+            self._tap = None
