@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw18-g1-test-01",
+  "status": "candidate_ready",
+  "candidate": "daebf6ee6eac9f7bcfe92910160874a8c8fbe370726ab0f8912ce3748a138d42",
+  "checks": [
+    {"cmd": "node --experimental-strip-types --test tests/gates/g3_omp/*.test.ts", "exit": 0, "tests": 37, "pass": 37, "fail": 0, "before": "5 fail (public_response cases)"},
+    {"cmd": "node --experimental-strip-types --test tests/bridge/*.test.ts", "exit": 0, "tests": 16, "pass": 16, "fail": 0},
+    {"cmd": "unittest discover -s tests/workflow (PYTHONPATH=src)", "exit": 0, "tests": 55, "result": "OK", "duration_s": 132},
+    {"cmd": "unittest discover -s tests/bridge (PYTHONPATH=src)", "exit": 0, "tests": 49, "result": "OK (skipped=1)", "duration_s": 41},
+    {"cmd": "unittest discover -s tests/backend (PYTHONPATH=src)", "exit": 0, "tests": 572, "result": "OK (skipped=28, expected failures=1)", "duration_s": 418},
+    {"cmd": "unittest discover -s tests/gates -p test_*.py (PYTHONPATH=src:.)", "exit": 5, "tests": 0, "note": "NO TESTS RAN (no discoverable unittest at that root; not in required set)"}
+  ],
+  "changes": {
+    "tests/gates/g3_omp/bridge_public_response_independent.test.ts": "model frame has no response_id; assertPublished (rest==model frame + canonical UUID v4 response_id); contract: no response_id/generate in field_order/fields/JSON; parser/strict variants response_id->two_response_ids(+split) rejected; thinking test uses assertPublished; new tests: bridge-generated id UUID v4 distinct per response (6 turns + execute/analysis same bridge, not equal any delivered identity); one model-supplied response_id (6 values x first/middle/last) ignored and never published; two -> invalid_assistant_response/bad_marker; identity_mismatch and bad decision stay exact-match with a supplied response_id",
+    "tests/workflow/live_workflow_probe.py": "_frame_from_contract no longer requires generated==1 (requires exactly one decision choice); scripted worker provider records observed_contracts",
+    "tests/workflow/live_workflow_independent.py": "run_actual_two_omp asserts delivered contracts never name response_id/generate, published response_id is canonical UUID v4, distinct, not equal to any delivered identity"
+  },
+  "caveats": [
+    "run_actual_two_omp (real 2-OMP, scripted local provider) is gated on OMP 18.2.10; installed omp is 18.4.5 so the new live assertions were compile-checked and the frame helper exercised ad hoc, not run end-to-end",
+    "tests/workflow/test_worker_port.py (outside allowed paths) still feeds a legacy contract with a generate descriptor to _frame_from_contract and asserts popping generate returns None; helper therefore still understands a legacy generate descriptor (not required) so that test stays green"
+  ],
+  "production_sha256_start_end_equal": true,
+  "residue": "none from this run (pre-existing unrelated wb-urux-sandbox backend process pid 631252 not started by me)"
+}

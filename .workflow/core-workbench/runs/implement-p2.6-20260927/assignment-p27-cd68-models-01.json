@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cd68-models-01",
+  "ticket_id": "CW-18 C-D68 (models, worker tool allowlist, Workbench subagents, code mode)",
+  "role": "worker",
+  "unit": "V-CW-18-cd68-models",
+  "approved_bundle_digest": "9aca838f3f19f3409e6a66828a67b1f1b882be711b1f412593573feb73db4616",
+  "routing": {
+    "planned_role": "worker",
+    "selected_role": "worker (wb-worker, Sonnet)",
+    "reason_codes": [
+      "bounded_config_generation"
+    ],
+    "evidence_refs": [
+      "docs/features/core-workbench/DECISIONS.md#C-D68"
+    ]
+  },
+  "base_candidate": "0a07cb8c45bc71b00274baad090a0647ce11c406bca0307e48cb91f301b27f67",
+  "decision": "docs/features/core-workbench/DECISIONS.md C-D68 items (1) tool part, (2), (3) subagent part, (4), (5), (6)",
+  "root_findings_omp_18_6_1": [
+    "Installed OMP is 18.6.1 (~/.local/bin/omp, single binary). Extracted strings: /tmp/claude-1000/-home-dwchoo-ai-exp-assistant/dd5e2cee-e10d-41c4-8ebb-7c00b50dd465/scratchpad/omp-strings.txt; model catalog JSON: /tmp/claude-1000/-home-dwchoo-ai-exp-assistant/dd5e2cee-e10d-41c4-8ebb-7c00b50dd465/scratchpad/catalog.json; bundled agent definitions unpacked: /tmp/claude-1000/-home-dwchoo-ai-exp-assistant/dd5e2cee-e10d-41c4-8ebb-7c00b50dd465/scratchpad/agents/*.md (scout/sonic model @smol, reviewer @slow, task @task, security-reviewer inherits default).",
+    "Model role ids (settings key modelRoles, record): default, smol, slow, vision, plan, commit, tiny, memory, task, advisor. Model selector syntax provider/model[:level], e.g. openai-codex/gpt-6-luna:max, openai-codex/gpt-6.1-sol:high. CLI also has --model/--smol/--slow/--plan/--thinking.",
+    "Per-subagent settings: task.agentModelOverrides (record), task.agentServiceTierOverrides (record), task.disabledAgents (array).",
+    "Fast mode = OpenAI service tier 'priority' (both gpt-6-luna and gpt-6.1-sol on openai-codex list serviceTiers ['priority']); the main session tier comes from CLI --service-tier (values none, auto, default, flex, scale, priority, ...); it is kept per provider family in the session. Find out whether a role/model selector or setting can carry the tier for roles other than the main session; if not, document the exact limitation.",
+    "--tools <list> restricts built-in tools only; Workbench extension tools stay (Root probe with a fake local provider capturing the request: default tools sent = bash, edit, eval, glob, grep, read, task, to_manager, todo, wait, web_search, write; with --tools read,grep,glob,write,edit -> edit, glob, grep, read, to_manager, write). Listing 'find' failed: 'Built-in tool unavailable in this session: find'. Probe scripts: /tmp/claude-1000/-home-dwchoo-ai-exp-assistant/dd5e2cee-e10d-41c4-8ebb-7c00b50dd465/scratchpad/probe/run2.py, dummy extension /tmp/claude-1000/-home-dwchoo-ai-exp-assistant/dd5e2cee-e10d-41c4-8ebb-7c00b50dd465/scratchpad/probe/dummy.ts, isolated HOME /tmp/claude-1000/-home-dwchoo-ai-exp-assistant/dd5e2cee-e10d-41c4-8ebb-7c00b50dd465/scratchpad/omphome (models.yml with a dummy provider).",
+    "Codex code mode: setting providers.openai-codex.codeMode enum off|on|auto, default off; when active, GPT-6 code_mode_only models get tools only through eval. Pin it to off for both roles."
+  ],
+  "required_behavior": [
+    "Workbench-owned model table file omp_bridge/omp-models.yml (no secrets) with per-role (manager/worker) OMP model roles, thinking levels and fast/service tier, exactly per C-D68 (4): Manager default/slow/plan = openai-codex/gpt-6.1-sol:high (no fast); manager smol/task/tiny/memory/commit = openai-codex/gpt-6-luna:max + fast. Worker default/task = gpt-6-luna:max + fast; worker slow/plan = gpt-6.1-sol:high + fast; worker smol = gpt-6-luna:xhigh + fast; worker tiny/memory/commit = gpt-6-luna:high + fast. Applied at every OMP start through the generated per-role overlay / launch args (modelRoles, --service-tier, task.agentModelOverrides/agentServiceTierOverrides as needed). A user /model change inside an OMP session must remain possible.",
+    "Worker OMP: built-in tool allowlist via --tools without bash and eval (keep read, grep, glob, edit, write, web_search, todo, task, plus whatever OMP itself requires such as yield/wait if needed; verify). Manager: unchanged tools.",
+    "Worker subagents: OMP bundled agents disabled for the worker; two Workbench-owned agent definitions under omp_bridge/agents/ with NO bash/eval/edit/write: an exploration agent on the smol role and an analysis/review agent on the slow role (short names, English descriptions). They must be discoverable by the worker OMP only, without re-enabling any ambient/user source (find the OMP 18.6.1 mechanism; if impossible without breaking isolation, stop and report). Manager keeps OMP bundled agents with the role models above.",
+    "providers.openai-codex.codeMode: off for both OMPs (in the isolation overlay or role overlay).",
+    "Isolation check (launcher): expected-tool/agent sets per role updated; worker reports bash/eval or a bundled agent as a leak; new keys do not create false leaks. Re-run the live isolation check (RPC get_state, no model call) on OMP 18.6.1 and update EVIDENCE_OMP_VERSIONS['isolation'] only if it passes with 0 leaks; record the live result JSON path in your report.",
+    "Live check with a fake local provider (like the Root probe, isolated HOME or the Workbench home in a /tmp data dir) that the worker request carries no bash/eval tool and the selected model/role/tier settings resolve as configured (e.g. get_state model + thinkingLevel); show the service tier actually sent if observable in the captured request body."
+  ],
+  "acceptance": [
+    "red->green unit tests in tests/backend (launcher/omp_home/overlay generation, isolation leak rules per role)",
+    "run tests/backend, tests/bridge, tests/contracts with real exit codes (unittest via /tmp/cw02-g1-venv/bin/python; node tests as the repo already does)",
+    "live probe outputs saved under /tmp and summarized"
+  ],
+  "allowed_write_paths": [
+    "src/workbench/backend/launcher.py",
+    "src/workbench/backend/omp_home.py",
+    "omp_bridge/omp-models.yml",
+    "omp_bridge/agents/**",
+    "omp_bridge/omp-isolation.yml",
+    "tests/backend/test_launcher*.py",
+    "tests/backend/test_omp_home*.py",
+    "tests/backend/test_isolation*.py",
+    "tests/backend/test_workbench_skills.py"
+  ],
+  "do_not_touch": "omp_bridge/g3/bridge.ts, src/workbench/backend/flow*.py, service.py, omp_bridge/skills/** (another unit, p27-cd68-terminal-01, edits them concurrently in the same workspace). If you need a change there, report it instead.",
+  "prohibited_paths": [
+    "tests/**/*_independent*",
+    "docs/**",
+    ".workflow/**"
+  ],
+  "rules": "No real provider requests (fake local HTTP provider capture is fine); never read credential contents (agent.db, auth files) or other processes' environ; never edit ~/.omp, ~/.agents, ~/.claude, ~/.codex or user shell/tmux/herdr configs; never use --profile; temp dirs only under /tmp; kill only PIDs you started (no pkill/pattern kill); never touch ~/wb-urux-sandbox or the user's processes; no commits, no graphify update.",
+  "result_format": "checks table first, status, changed paths + sha256, live evidence paths, open questions/residue. Korean, <=15 lines."
+}

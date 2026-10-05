@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cd68-terminal-01",
+  "ticket_id": "CW-18 C-D68 (worker terminal tool, manager to_worker rule)",
+  "role": "worker_senior",
+  "unit": "V-CW-18-cd68-terminal",
+  "approved_bundle_digest": "9aca838f3f19f3409e6a66828a67b1f1b882be711b1f412593573feb73db4616",
+  "routing": {
+    "planned_role": "worker_senior",
+    "selected_role": "worker_senior (Opus general-purpose)",
+    "reason_codes": [
+      "coupled_invariants",
+      "process_lifetime"
+    ],
+    "evidence_refs": [
+      "docs/features/core-workbench/DECISIONS.md#C-D68"
+    ]
+  },
+  "base_candidate": "0a07cb8c45bc71b00274baad090a0647ce11c406bca0307e48cb91f301b27f67",
+  "decision": "docs/features/core-workbench/DECISIONS.md C-D68 items (1) terminal part and (3) manager rule; C-D65 (2) idle-only host shell rule; C-D66; OPERATING-CONTRACT pause rules",
+  "context": "User observation: given a free-work Task ('run a hardware spec script in the terminal and summarize'), the worker ran commands with OMP's own bash, not the Workbench host terminal. Another unit (p27-cd68-models-01) removes bash/eval from the worker via --tools; extension tools stay. This unit gives the worker its only command-execution path.",
+  "required_behavior": [
+    "bridge.ts: register a worker-only tool `terminal` (strict, loadMode essential, same pattern as to_manager) with params command (string|null) and timeout_seconds (integer|null). English description: runs one shell command in the Workbench host terminal (visible to the user), returns exit code and output tail; only when the host terminal is free; one command at a time; use it for every shell command.",
+    "Backend: route the tool_request to a new service (e.g. src/workbench/backend/flow_terminal.py) wired in service.py. Run the command in the host persistent shell through the same managed dispatch the experiment run uses (idle check, hold, wb-handoff/control_wait, claim, submit in a child interpreter inheriting the parent's cwd/env; nothing typed if the shell is not a clean user-owned prompt without jobs/typing; give the shell back to the user and restore the parent cwd afterwards as TaskFlow._give_back does). The user must see command output in the host terminal pane as with experiments.",
+    "Result: wait up to timeout_seconds (default 600, max 3600); on exit return {status:'exited', exit_code, output_tail (bounded, e.g. last 8 KiB / 200 lines), log_path (full output file under the data dir), duration}. On timeout return {status:'running', output_tail, log_path}; the command keeps running; a later call with command=null waits for that running command again; a new command while one runs returns status 'terminal_command_running'. Tool-call abort stops waiting only (command continues).",
+    "Refusals without typing anything: host shell busy/typing/job/not running -> 'host_terminal_busy'; Workbench paused -> 'paused' (a running command continues, per contract); an experiment run active or starting -> 'host_terminal_busy'. Experiment start must likewise see the host busy while a terminal command runs (shared hold/lock, no race).",
+    "Journal: record each terminal command (command text, start/end, exit code, log path, refusal reason) in the handoff journal; never store env values; output is only in the log file.",
+    "Manager rule (C-D68 (3)): to_worker tool description, omp_bridge/skills/to-worker/SKILL.md and the accepted to_worker result text say the worker does the delegated task; the manager must not do it itself and waits for the worker's to_manager report. Worker skill omp_bridge/skills/to-manager/SKILL.md: run every shell command with `terminal`; no other way to execute commands.",
+    "Tests (scripted, no real provider): bridge tool registration/schema; backend refusal matrix; real PersistentShell fixture run (exit code, output tail, log file, cwd restored, user regains input); timeout+follow-up wait; abort; pause; experiment-vs-terminal mutual exclusion; journal records."
+  ],
+  "acceptance": [
+    "red->green tests",
+    "run tests/backend, tests/workflow, tests/bridge, tests/contracts, tests/terminal (real exit codes; unittest via /tmp/cw02-g1-venv/bin/python; node tests as the repo does)"
+  ],
+  "allowed_write_paths": [
+    "omp_bridge/g3/bridge.ts",
+    "omp_bridge/skills/**",
+    "src/workbench/backend/flow.py",
+    "src/workbench/backend/flow_tasks.py",
+    "src/workbench/backend/flow_terminal.py",
+    "src/workbench/backend/service.py",
+    "src/workbench/terminal/shell_persistent/adapter.py",
+    "src/workbench/contracts/ui_v1.py",
+    "tests/backend/test_*terminal*.py",
+    "tests/backend/test_flow*.py",
+    "tests/backend/test_workbench_skills.py",
+    "tests/bridge/**",
+    "tests/gates/g3_omp/*.test.ts"
+  ],
+  "do_not_touch": "src/workbench/backend/launcher.py, omp_home.py, omp_bridge/omp-models.yml, omp_bridge/agents/**, omp-isolation.yml (another unit edits them concurrently). tests/backend/test_workbench_skills.py may be touched by both: only append your own test methods.",
+  "prohibited_paths": [
+    "tests/**/*_independent*",
+    "docs/**",
+    ".workflow/**"
+  ],
+  "rules": "No real provider requests (fake local HTTP provider capture is fine); never read credential contents (agent.db, auth files) or other processes' environ; never edit ~/.omp, ~/.agents, ~/.claude, ~/.codex or user shell/tmux/herdr configs; never use --profile; temp dirs only under /tmp; kill only PIDs you started (no pkill/pattern kill); never touch ~/wb-urux-sandbox or the user's processes; no commits, no graphify update.",
+  "result_format": "checks table first, status, changed paths + sha256, design choices you made (and any that need a user decision), residue. Korean, <=15 lines."
+}

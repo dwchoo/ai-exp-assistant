@@ -1,0 +1,23 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 1944,
+  "event": {
+    "id": "limit-g1c-role-worker_senior",
+    "kind": "limit",
+    "data": {
+      "authority": "C-D55 budget delegation; result-p27-cw18-g1-review-01 P2",
+      "bucket": "role:worker_senior",
+      "decision_owner": "Root",
+      "expected_previous": {
+        "authority": "C-D55 budget delegation; result-p27-cw18-smoke-04 G1-G3",
+        "reason": "smoke-04 findings fix, review, smoke-05",
+        "value": 182
+      },
+      "origin": "operating",
+      "reason": "close the remaining G2 path before smoke-05",
+      "remaining_work_estimate": 1,
+      "scope_basis": null,
+      "value": 183
+    }
+  }
+}

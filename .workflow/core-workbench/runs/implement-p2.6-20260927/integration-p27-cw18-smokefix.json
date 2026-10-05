@@ -6,7 +6,7 @@
   "status": "integrated",
   "recorded_at": "2026-10-04",
   "base": "commit 74b147f / 801671d (CW-18 integrated)",
-  "candidate": "0c74ab64976a5b11b8638d761f1da0afeb7b8c16df64b2a8f961db74bb727aaa",
+  "candidate": "d94a7dddda1999cb970269ad2061bc524e09977e728be9aa2ba4976f2dc040e8",
   "delta": "bridge tools strict with nullable optional fields; backend normalize_arguments; project-relative path normalisation; skills end-your-turn / no wait / repo-relative / null rules",
   "verification_chain": [
     "p27-cw18-smoke-01 (real model, stopped at cap; D1-D3)",
@@ -15,17 +15,38 @@
     "p27-cw18-smoke-02 (real model: D1-D3 confirmed fixed; E1-E4)",
     "p27-cw18-smoke-fix-02 (Opus; codex Responses/WS payload, response evidence, criteria docs, start-failure notice, label)",
     "root-adjudication-p27-cw18-empty-thinking",
-    "p27-cw18-smoke-fix-review-02 (Opus; integrate)"
+    "p27-cw18-smoke-fix-review-02 (Opus; integrate)",
+    "p27-cw18-smoke-03 (real model: E1-E4 confirmed; visible thinking rejected the worker decision)",
+    "C-D67 (user: ignore thinking) + amendment p2.7j",
+    "p27-cw18-smoke-fix-03 (Opus; thinking ignored, F2 specific rejection reasons)",
+    "p27-cw18-cd67-test-01 (independent G3 update)",
+    "p27-cw18-cd67-review-01 (integrate)",
+    "p27-cw18-smoke-04 (real model: execute/host run/review/cwd/worker_busy OK; analysis response_id typo, stuck Task)",
+    "root-adjudication-p27-cw18-response-id",
+    "p27-cw18-smoke-fix-04 (Opus; G1-G3)",
+    "p27-cw18-g1-test-01",
+    "p27-cw18-g1-review-01 (integrate, P2 residual)",
+    "p27-cw18-smoke-fix-05 (Opus; analysis exceptions, busy period)",
+    "p27-cw18-f05-review-01 (integrate)",
+    "p27-cw18-smoke-05 (real model: full experiment flow PASSED - execute, host run, 60 s review, analysis success, report, close, worker_busy)"
   ],
   "carried_forward": {
-    "to verify": "real-model experiment smoke (empty thinking + message_end evidence on codex WS, host run, 60 s review, judge, cwd restore, worker_busy)",
+    "to verify": "G2/G3 rejection paths with a real model (only covered by tests); UR-USABILITY by the user",
     "polish": [
       "request with goal and empty paths dropped (goal lost)",
       "symlink-escaping absolute path normalised to relative form",
       "E3 notice only after TASK creation",
       "skill example bash-only and needs out/",
       "notice recorded as WORKER REPORT",
-      "g3_omp tui fault integration pins OMP 18.2.10 (CW-16)"
+      "g3_omp tui fault integration pins OMP 18.2.10 (CW-16)",
+      "no_thinking contract text now prompt-only",
+      "redactedThinking still rejected",
+      "F2 backend tests via stub port",
+      "test_worker_port legacy generate contract",
+      "run_actual_two_omp pinned to OMP 18.2.10",
+      "f05 P3: complete_run failure -> runner_error; _close_accepted_run swallow; type-only errors; idle/busy flapping",
+      "H1 worker to_manager during review (prompt wording)",
+      "H2 stale held_reasons after the shell returns"
     ]
   }
 }

@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw18-smoke-05",
+  "status": "passed",
+  "report": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-smoke-05.md",
+  "timeline": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-smoke-05-timeline.json",
+  "summary": {
+    "requests": "12/25 (manager 7, worker 5, 0 error/aborted), ~2.6 min",
+    "verified_real_model": [
+      "execute marker with visible thinking (42 chars) accepted (C-D67)",
+      "analysis accepted -> judgment success; response_id bridge-generated (G1)",
+      "report delivered to the manager omp_processed; Task finished; worker and automation idle",
+      "host run ./exp.sh exit 0 in the execution worktree; shell returned to the user; cwd restored",
+      "60 s review at ~61 s; analysis waited ~15 s for the review turn (worker_busy), no overlap/rejection",
+      "second to_worker -> worker_busy; manager did not retry and told the user; no second file"
+    ],
+    "not_exercised": "G2/G3 rejection paths (no rejection occurred)",
+    "observations": {
+      "H1": "worker sent to_manager during the review (+2 requests)",
+      "H2": "held_reasons kept 3 entries after the shell returned (no UI/behaviour impact)",
+      "H3": "no_thinking:true still in the analysis prompt (known polish)"
+    }
+  },
+  "observed_model": "opus"
+}

@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw18-smoke-fix-05",
+  "ticket_id": "CW-18 G2 residual (unexpected analysis exceptions) + busy_since",
+  "role": "worker_senior",
+  "unit": "V-CW-18-smoke-fix",
+  "approved_bundle_digest": "68bcebd494e90fb0773c6e6b80ed04a5b50688f36322b11834dd75fee780f296",
+  "routing": {
+    "planned_role": "worker_senior",
+    "selected_role": "worker_senior (Opus general-purpose)",
+    "reason_codes": [
+      "workflow_liveness"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-g1-review-01-agent.json"
+    ]
+  },
+  "base_candidate": "38fbfc35572ab0a01920a0388bbfaaf91c44b8c1bdf4b4a6566565b0a0a1e061",
+  "required_behavior": [
+    "P2: any unexpected exception during the analysis/judge stage (e.g. OSError, MailboxError, KeyError, persist failure) must end like the known failures: indeterminate (never success), run closed safely, worker free, automation idle, exactly one manager notice with a machine reason like analysis_error:<ExceptionType>, no resend. Careful: if the report was already submitted/accepted before the exception, do not close twice or contradict the delivered report - keep state consistent and record the error.",
+    "P3a: reset busy_since whenever the worker is observed idle, so the 180 s limit measures a continuous busy period.",
+    "Add tests: real-run level (not only FakeRun) exception injection at observe/bridge wait/persist; pause during an analysis failure keeps the hold semantics."
+  ],
+  "acceptance": [
+    "red->green tests; run tests/backend, tests/workflow, tests/bridge, tests/contracts (real exit codes, unittest with /tmp/cw02-g1-venv/bin/python)"
+  ],
+  "allowed_write_paths": [
+    "src/workbench/backend/flow_tasks.py",
+    "src/workbench/workflow/run.py",
+    "tests/backend/test_*.py",
+    "tests/workflow/test_*.py"
+  ],
+  "prohibited_paths": [
+    "tests/**/*_independent*",
+    "docs/**",
+    ".workflow/**"
+  ],
+  "rules": "No real provider requests; never read credential contents or other processes' environ; temp dirs only under /tmp; kill only PIDs you started; never touch ~/wb-urux-sandbox or the user's processes; no commits, no graphify update.",
+  "result_format": "checks table first, status, changed paths + sha256, residue. Korean, <=10 lines."
+}

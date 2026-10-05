@@ -1,0 +1,23 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 1946,
+  "event": {
+    "id": "limit-g1c-total",
+    "kind": "limit",
+    "data": {
+      "authority": "C-D55 budget delegation; result-p27-cw18-g1-review-01 P2",
+      "bucket": "total",
+      "decision_owner": "Root",
+      "expected_previous": {
+        "authority": "root-adjudication-p27-cw18-response-id; C-D55 budget delegation",
+        "reason": "independent/live test update for bridge-generated response_id",
+        "value": 612
+      },
+      "origin": "operating",
+      "reason": "close the remaining G2 path before smoke-05",
+      "remaining_work_estimate": 1,
+      "scope_basis": null,
+      "value": 613
+    }
+  }
+}

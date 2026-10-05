@@ -1,0 +1,23 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 1899,
+  "event": {
+    "id": "limit-cd67-unit-V-CW-18-smoke",
+    "kind": "limit",
+    "data": {
+      "authority": "C-D67 (user 2026-10-05), approved PLAN p2.7j, C-D55 budget delegation, workflow-contract section 8",
+      "bucket": "unit:V-CW-18-smoke",
+      "decision_owner": "Root",
+      "expected_previous": {
+        "authority": "C-D55 budget delegation, workflow-contract section 8; result-p27-cw18-smoke-02 E1-E4",
+        "reason": "smoke-02 findings: senior fix, delta review, experiment re-smoke",
+        "value": 3
+      },
+      "origin": "operating",
+      "reason": "experiment smoke after C-D67",
+      "remaining_work_estimate": 1,
+      "scope_basis": null,
+      "value": 4
+    }
+  }
+}

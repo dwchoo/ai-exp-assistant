@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cd68-test-01",
+  "ticket_id": "CW-18 C-D68 independent verification",
+  "role": "test_designer",
+  "unit": "V-CW-18-cd68-verify",
+  "approved_bundle_digest": "be5579d83f63b95c8a481adb71fc7927bba400ed471784587ea944cd3cd5fcfc",
+  "frozen_candidate": "0ac6d625f3f891c3e835147c39ec21a32ccc3889e0a6c950903948a1bc1109d6",
+  "routing": {
+    "planned_role": "test_designer",
+    "selected_role": "test_designer (Opus general-purpose; first adversarial verification of new behaviour)",
+    "reason_codes": [
+      "first_independent_verification"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd68-models-01.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd68-skill-01.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd68-terminal-01.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd68-terminal-02.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd68-terminal-03.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/root-adjudication-p27-cd68-notice.json",
+      "/tmp/wb-cd68-live/ (models unit live evidence)"
+    ]
+  },
+  "spec": "docs/features/core-workbench/DECISIONS.md C-D68 (1)-(8); tickets/CW-18.md 'C-D68 변경'; implementer evidence is NOT proof — derive tests from the decision text.",
+  "surfaces": [
+    "src/workbench/backend/flow_terminal.py (new)",
+    "src/workbench/backend/service.py (terminal wiring, notices)",
+    "src/workbench/backend/flow.py / flow_tasks.py (HostGate, terminal tool_request routing)",
+    "omp_bridge/g3/bridge.ts (`terminal` tool, notice frame, terminal_wait_abandoned)",
+    "omp_bridge/skills/to-manager, to-worker (terminal guidance, subagents, manager rule)",
+    "src/workbench/backend/launcher.py / omp_home.py (model table, worker --tools, agents install, disabledAgents, role-aware isolation leaks, EVIDENCE 18.6.1)",
+    "omp_bridge/omp-models.yml, omp_bridge/agents/{explorer,analyst}.md, omp_bridge/omp-isolation.yml (codeMode off)"
+  ],
+  "required": [
+    "Update pre-C-D68 pinned independent tests to the C-D68 contract WITHOUT weakening other assertions: tests/backend/test_omp_isolation_independent_p27n, _p27m, test_omp_home_review_independent_p27v, test_omp_home_independent_p27u, tests/bridge/test_cw18_schema_independent_p27w (worker tools now to_manager + terminal), live_omp_isolation_independent_p27m EVIDENCE; also tests/backend/test_paths_launcher.py and test_omp_isolation.py failures (2+2). For each changed assertion cite the C-D68 item.",
+    "New adversarial independent tests (new files *_independent_p27cd68*.py / .test.ts): worker cannot execute commands outside `terminal` (provider request tool list on a fake local provider has no bash/eval, no bundled agents; only explorer/analyst with no exec tools; manager unchanged); model/thinking/tier per role per C-D68 (4) incl. subagent overrides; codeMode off; isolation leak per role (negative controls); terminal: idle-only refusal matrix (typing, job, not running, experiment active, paused new command), runs in the user's current cwd after the user cd's, parent cwd/env unchanged, output visible to the pane and log file, exit code/signal, 120/1800 clamp, running -> later completion notice exactly once (also after abort), 60 s checks with merge while busy and suppression while paused, resume delivers the notice, HostGate mutual exclusion with experiment start (race), journal has no output/env values; to_worker result/description/skill carry the manager rule.",
+    "Run full suites with real exit codes: tests/backend, tests/bridge (py + node), tests/workflow, tests/contracts, tests/terminal, tests/gates/g3_omp node tests. Known load flakes: rerun once and report both results."
+  ],
+  "allowed_write_paths": [
+    "tests/**/*_independent*",
+    "tests/backend/test_paths_launcher.py",
+    "tests/backend/test_omp_isolation.py",
+    "tests/backend/live_*independent*.py"
+  ],
+  "prohibited_paths": [
+    "src/**",
+    "omp_bridge/**",
+    "docs/**",
+    ".workflow/**"
+  ],
+  "rules": "No real provider/model requests (fake local HTTP provider capture allowed); never read credential contents (agent.db, auth) or other processes' environ; never edit ~/.omp ~/.agents ~/.claude ~/.codex or user configs; never use --profile; temp only under /tmp; kill only PIDs you started (no pkill/pattern kills); never touch ~/wb-urux-sandbox or the user's processes; no commits; no graphify update.",
+  "result_format": "checks table first (commands, counts, real exit codes), verdict (pass / findings with severity P1-P3, file:line, failing test name), changed test paths + sha256. Korean, <=15 lines."
+}

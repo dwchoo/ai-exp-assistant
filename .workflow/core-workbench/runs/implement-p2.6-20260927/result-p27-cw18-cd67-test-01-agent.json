@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw18-cd67-test-01",
+  "role": "test_designer",
+  "status": "candidate_ready",
+  "candidate": "04d1ddf799feb0f6544a6336b9175baf40fda396ab2bfdc952fa2fd354deb5db",
+  "checks": [
+    {"command": "node --experimental-strip-types --no-warnings --test tests/gates/g3_omp/bridge_public_response_independent.test.ts (3 reruns)", "exit": 0, "counts": "9/9 pass each run"},
+    {"command": "node ... --test tests/gates/g3_omp/bridge_public_response_independent.test.ts tests/gates/g3_omp/bridge.test.ts", "exit": 0, "counts": "33 pass (9 + 24)", "duration_s": 2},
+    {"command": "node ... --test tests/bridge/handoff_tools.test.ts tests/bridge/provider_identity.test.ts", "exit": 0, "counts": "16 pass (9 + 7)", "duration_s": 11},
+    {"command": "python -m unittest discover -s tests/bridge -p 'test_*.py'", "exit": 0, "counts": "49 tests, 1 skipped", "duration_s": 41},
+    {"command": "python -m unittest discover -s tests/backend -p 'test_*.py'", "exit": 0, "counts": "568 tests, 27 skipped, 1 expected failure", "duration_s": 417}
+  ],
+  "note": "pytest is not installed in /tmp/cw02-g1-venv; unittest discover used instead.",
+  "changes": [
+    "tests/gates/g3_omp/bridge_public_response_independent.test.ts: removed 'thinking' from the rejection variants of 'continuation, extra provider round, tool, error, abort ...' (C-D67 ignores thinking); helper assistant() gained an optional content override.",
+    "Added 'C-D67: thinking items in any position or shape are ignored and a valid marker still publishes' (visible before/after, empty+signature, text-key-only, multiple around, thinking mimicking a hold frame): published workerResponse equals expected, no worker_response_rejected, thinking sentinel absent from every frame.",
+    "Added 'C-D67: thinking never rescues an otherwise invalid response' (thinking only, empty text, extra text before/after, prose around/suffix, toolCall item, tool_use item, tool_call event, identity mismatch, error, abort, extra provider round): nothing published, reason/detail concrete (extra_text, bad_marker, tool_activity, identity_mismatch, additional_provider_round); thinking and error sentinels never leak."
+  ],
+  "test_defects_fixed_during_authoring": "helper edit initially not applied (content override ignored); detail expectations adjusted to implementation reasons (tool_call event -> reason tool_activity; extra round -> reason additional_provider_round; provider error/abort may end as delivery_processing_unknown, as in the pre-existing variant test). All were test-side expectation errors, no production change.",
+  "frozen_production_sha256_before_and_after": {
+    "omp_bridge/g3/bridge.ts": "d4388dc8dd23a1d40abf8535bfb83c5248b138a40edce340f21d03c1280be5f8",
+    "src/workbench/workflow/__init__.py": "09a32273210e85947d48032975bd132ca76b3e8c3c83fad667c56069a20539f8",
+    "src/workbench/workflow/run.py": "aa9016eddb513d2787abd7b3958d5457beb7f86d56b4206c8c097a80880e83e3",
+    "src/workbench/workflow/worker_port.py": "a4cc1204e2c99643b0077e707094c626c07ccc99b27da91f2455db05fd29cae9",
+    "src/workbench/backend/flow_tasks.py": "d94227ed51174a86e5b75f08890ca92d86b1d295887fb71ed86540d468f16165"
+  },
+  "frozen_hash_note": "run.py start and end hashes identical (start hash was shown as the full value aa9016eddb51..., matches).",
+  "residue": "none (no /tmp cw10-public dirs, no stray node processes; debug test file removed)"
+}

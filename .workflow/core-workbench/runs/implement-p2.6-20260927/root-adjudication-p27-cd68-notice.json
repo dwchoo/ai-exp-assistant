@@ -1,0 +1,6 @@
+{"schema_version":1,"adjudication":"p27-cd68-notice","date":"2026-10-05","decided_by":"Root (technical, within C-D68 (8))",
+"items":[
+ {"choice":"terminal checks/notices use a new bridge `notice` frame (not a TASK message), serialized with other worker deliveries by the worker delivery lock","verdict":"accepted","reason":"must work without a Task; same lane discipline as existing deliveries; real-model behaviour to be confirmed in the C-D68 smoke"},
+ {"choice":"output already returned to a terminal call is not repeated in the next check; first check counts 60 s from that call's end","verdict":"accepted","reason":"avoids duplicate input; keeps 1-minute cadence relative to the worker's last view"},
+ {"choice":"aborted or bridge-timed-out wait sends terminal_wait_abandoned so the result is not considered received","verdict":"accepted","reason":"guarantees the completion notice after abort (C-D68 (8))"},
+ {"choice":"delivery with transport loss -> unknown, no resend","verdict":"accepted","reason":"same policy as report_outcome_unknown (no duplicate model turns); visible in journal"}]}

@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw18-smoke-04",
+  "status": "partial",
+  "report": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-smoke-04.md",
+  "timeline": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-smoke-04-timeline.json",
+  "summary": {
+    "requests": "9/25 (manager 5, worker 4), ~8.5 min",
+    "verified_real_model": [
+      "C-D67: execute response [thinking 45, marker] accepted",
+      "first to_worker accepted",
+      "host shell idle check, ./exp.sh in the execution worktree exit 0, log/result collected",
+      "owner manager/control_wait during the run, returned user/manual_prompt, cwd restored to project",
+      "60 s review delivered at ~61.8 s, omp_processed",
+      "second to_worker without task_id -> worker_busy, manager did not retry"
+    ],
+    "failure": "analysis response [text] rejected - reconstructed bad_marker: model-generated response_id last group 11 hex chars (needs 12) fails UUID_PATTERN; all other fields matched",
+    "defects": {
+      "G1": "contract makes the model invent a UUID (response_id generate canonical_uuid) - one-character slip loses the judgement; proposal: bridge generates response_id",
+      "G2 high": "after the rejection the Task stayed waiting_report, worker busy, automation held for >7 min; no manager notice",
+      "G3": "F2 reason recorded only for the preparation stage; analysis rejection reason not recorded"
+    },
+    "unverified": [
+      "judge success",
+      "report to manager",
+      "Task close and worker release"
+    ]
+  },
+  "observed_model": "opus"
+}

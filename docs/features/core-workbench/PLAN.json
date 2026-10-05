@@ -1660,7 +1660,10 @@
         "tests/backend/**",
         "tests/ui/**",
         "tests/workflow/**",
-        "tests/terminal/**"
+        "tests/terminal/**",
+        "omp_bridge/agents/**",
+        "omp_bridge/omp-models.yml",
+        "omp_bridge/omp-isolation.yml"
       ],
       "write_owner": "CW-18 worker workspace",
       "resource_claims": [

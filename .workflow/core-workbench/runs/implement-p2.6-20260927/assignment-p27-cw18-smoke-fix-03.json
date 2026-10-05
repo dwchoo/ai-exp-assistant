@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw18-smoke-fix-03",
+  "ticket_id": "CW-18 C-D67 (ignore thinking in staged worker responses) + F2",
+  "role": "worker_senior",
+  "unit": "V-CW-18-smoke-fix",
+  "approved_bundle_digest": "68bcebd494e90fb0773c6e6b80ed04a5b50688f36322b11834dd75fee780f296",
+  "routing": {
+    "planned_role": "worker_senior",
+    "selected_role": "worker_senior (Opus general-purpose)",
+    "reason_codes": [
+      "verified_contract_change",
+      "bridge_response_validation"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-smoke-03.md",
+      "docs/features/core-workbench/DECISIONS.md#C-D67"
+    ]
+  },
+  "required_behavior": [
+    "C-D67: in bridge.ts staged worker response validation, ignore every thinking content item (any position relative to the text? - keep it simple and safe: thinking items anywhere in the assistant content are ignored; exactly one text item carrying the marker line must remain, nothing else). Do not record thinking text anywhere (events, journals, results). Keep: no tool calls, one provider round, no extra text outside the marker, error/aborted responses rejected, identity rules unchanged. Replace the empty-thinking special case accordingly and update the G3 TS tests (non-independent) and add fixtures with visible thinking (before/after text).",
+    "Independent G3 tests that assert 'thinking is rejected': list them; do NOT edit *_independent* files - report them for the test designer.",
+    "F2: when a staged worker response is rejected, record the specific reason (e.g. invalid_assistant_response with a short machine reason: tool_activity / extra_text / bad_marker / identity_mismatch / provider_error) in the run events and the Task last_result instead of a generic ValueError; never include response text."
+  ],
+  "acceptance": [
+    "red->green TS tests with captured-shape fixtures (visible thinking accepted when the marker text is valid; tool call, extra text, two texts, error still rejected) and backend tests for F2",
+    "no-model live: local codex-like provider that emits a visible thinking item before the marker -> experiment run starts, host run, review, judge, report (reuse tests/bridge/live_codex_experiment_probe.py)",
+    "run tests/backend, tests/bridge, TS bridge + g3 tests, tests/contracts, tests/workflow, tests/ui (real exit codes, venv)"
+  ],
+  "allowed_write_paths": [
+    "omp_bridge/g3/bridge.ts",
+    "omp_bridge/contract/**",
+    "src/workbench/backend/**",
+    "src/workbench/workflow/**",
+    "src/workbench/ipc/bridge_g3/**",
+    "tests/backend/test_*.py",
+    "tests/bridge/**",
+    "tests/workflow/test_*.py",
+    "tests/gates/g3_omp/*.test.ts"
+  ],
+  "prohibited_paths": [
+    "tests/**/*_independent*",
+    "docs/**",
+    ".workflow/**",
+    "src/workbench/ui/**"
+  ],
+  "rules": "No real provider requests (local provider only); OMP only with a fake HOME/Workbench home; never read credential contents or other processes' environ; temp dirs only under /tmp; kill only PIDs you started; never touch ~/wb-urux-sandbox or the user's processes or configs; no commits, no graphify update.",
+  "result_format": "checks table first, status, fix summary, independent tests needing update, changed paths + sha256, residue. Korean, <=15 lines."
+}

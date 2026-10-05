@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw18-cd67-review-01",
+  "verdict": "integrate",
+  "findings": [
+    {"severity": "P3", "where": "omp_bridge/g3/bridge.ts:70,72", "note": "workerResponseContract still advertises no_thinking:true / 'no ... thinking' in the instruction. It is only prompt text now (C-D67 makes thinking ignored), so it is harmless, but the contract flag no longer matches enforcement."},
+    {"severity": "P3", "where": "tests/backend/test_cw18_smoke03_fixes.py:34", "note": "The flow_tasks F2 path is tested with a WorkerResponseRejected subclass on a stub port, not a bridge-produced rejection. It is covered end to end by the unit tests in test_worker_port.py and the bridge tests."},
+    {"severity": "P3", "where": "tests/gates/g3_omp/bridge_public_response_independent.test.ts", "note": "An *_independent* file was edited (thinking variant removed, C-D67 tests added). This was presumably done by the test designer (assignment cd67-test-01); recording it in the ledger is enough."}
+  ],
+  "checks": {
+    "ts provider_identity": "7/7 pass, exit 0",
+    "ts g3 bridge.test": "24/24 pass, exit 0",
+    "ts g3 bridge_public_response_independent": "9/9 pass, exit 0",
+    "py tests/workflow full discover": "54 tests OK, exit 0",
+    "py worker_port + independent": "12 OK",
+    "py backend cw18 smoke03/smoke02/review_corrections": "28 OK",
+    "full tests/backend, bridge, contracts": "not completed (the background run was still going when the review finished)"
+  }
+}

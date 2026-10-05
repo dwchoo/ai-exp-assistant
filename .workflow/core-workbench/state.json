@@ -425,7 +425,7 @@
   "implementation_p27": {
     "run_record": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
     "approved_bundle_sha256": "91fe05dc882d8c00ab0eb28c30e2b6cabcbfacb0f0fee3f0eaeecfaff5b7d3e8",
-    "status": "CW-18 + smoke fixes integrated; next: real-model re-smoke (needs user OK), UR-USABILITY, CW-19, CW-16",
+    "status": "C-D68 integrated (review approve, independent rerun pass); next: commit, real-model smoke p27-cd68-smoke-01, then UR-USABILITY retry, CW-19, CW-16",
     "resumed_from": ".codex/handoffs/2026-09-29-core-workbench-p27-cw17/HANDOFF.md",
     "units": {
       "V-CW-17-p2.7": {
@@ -490,7 +490,7 @@
     },
     "user_review_checkpoints": {
       "UR-UX": "closed 2026-10-03 (user: 'UI 적인 것은 괜찮은거 같아'); C-D64",
-      "UR-USABILITY": "pending (after CW-18)"
+      "UR-USABILITY": "ready for the user (CW-18 integrated and real-model smoke passed)"
     },
     "note": "state is an operational index; verify against ledger and run records",
     "next_after_ur_ux": "apply UR-UX feedback as CW-06 delta (if any) -> CW-18 -> UR-USABILITY -> CW-19 -> CW-16",
@@ -498,6 +498,6 @@
       "workbench status creates the data dir as a side effect (P3, record for CW-16)"
     ],
     "environment_note": "OMP upgraded by user to 18.4.4 (was 18.2.10 during CW-02..CW-06 evidence) - compatibility re-check needed (CW-16 I-COMPAT)",
-    "approved_bundle_digest": "4f4a016424bafe78c2c23437706e206bce3a3c770d13610785564a4a93f00a93"
+    "approved_bundle_digest": "be5579d83f63b95c8a481adb71fc7927bba400ed471784587ea944cd3cd5fcfc"
   }
 }

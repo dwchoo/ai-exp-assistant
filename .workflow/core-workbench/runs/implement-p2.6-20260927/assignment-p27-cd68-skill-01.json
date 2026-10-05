@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cd68-skill-01",
+  "ticket_id": "CW-18 C-D68 correction (worker subagent naming in to-manager skill)",
+  "role": "worker",
+  "unit": "V-CW-18-cd68-models",
+  "approved_bundle_digest": "9aca838f3f19f3409e6a66828a67b1f1b882be711b1f412593573feb73db4616",
+  "routing": {
+    "planned_role": "worker",
+    "selected_role": "worker (wb-worker)",
+    "reason_codes": [
+      "docs_like_text"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd68-models-01.md"
+    ]
+  },
+  "required_behavior": [
+    "omp_bridge/skills/to-manager/SKILL.md: add a short English section: the worker's subagents are only `explorer` (read-only fast exploration) and `analyst` (read-only deep analysis/review); when using the task tool always set agent to one of them (OMP's default task agent is disabled and omitting agent fails); subagents must not send to_manager reports or run terminal commands — the worker itself reports and runs commands. Keep the existing `terminal` and to_manager guidance intact.",
+    "Add/extend a test in tests/backend/test_workbench_skills.py (append only) asserting the skill names explorer and analyst and the always-set-agent rule; verify omp_bridge/agents/*.md names match."
+  ],
+  "acceptance": [
+    "unittest tests/backend/test_workbench_skills.py OK (real exit code, PYTHONPATH=src, /tmp/cw02-g1-venv/bin/python)"
+  ],
+  "allowed_write_paths": [
+    "omp_bridge/skills/to-manager/SKILL.md",
+    "tests/backend/test_workbench_skills.py"
+  ],
+  "prohibited_paths": [
+    "tests/**/*_independent*",
+    "docs/**",
+    ".workflow/**"
+  ],
+  "rules": "No provider requests; no commits; no graphify update; temp only under /tmp.",
+  "result_format": "checks table, changed paths + sha256. Korean, <=6 lines."
+}

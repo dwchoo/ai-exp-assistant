@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw18-cd67-review-01",
+  "verdict": "integrate",
+  "frozen_candidate": "27e05aff79c1f2144c19a63cbc004bd413e6da8c5a4ad7ad5f75e43f00cdadce",
+  "agent_result": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-cd67-review-01-agent.json",
+  "checks": {
+    "TS": "40 OK",
+    "tests/workflow": "54 OK",
+    "worker_port": "12 OK",
+    "backend cw18": "28 OK",
+    "note": "full backend/bridge/contracts runs not awaited by the reviewer; the test designer's full runs on the same production hashes were exit 0"
+  },
+  "findings": {
+    "P3a": "bridge.ts:70,72 contract text no_thinking:true is now prompt text only",
+    "P3b": "backend F2 tests use a stub port, not a real bridge rejection",
+    "P3c": "independent file edit is the test designer's (p27-cw18-cd67-test-01, recorded)",
+    "note": "redactedThinking items are still rejected (extra_text) - revisit for providers that emit them"
+  },
+  "observed_model": "sonnet"
+}

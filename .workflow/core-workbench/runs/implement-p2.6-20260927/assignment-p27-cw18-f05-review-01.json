@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw18-f05-review-01",
+  "ticket_id": "CW-18 fix-05 delta review",
+  "role": "reviewer",
+  "unit": "V-CW-18-smoke-fix",
+  "approved_bundle_digest": "68bcebd494e90fb0773c6e6b80ed04a5b50688f36322b11834dd75fee780f296",
+  "routing": {
+    "planned_role": "reviewer",
+    "selected_role": "reviewer (wb-delta-reviewer, Sonnet high)",
+    "reason_codes": [
+      "bounded_delta_after_full_review"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-g1-review-01-agent.json"
+    ]
+  },
+  "frozen_candidate": "d94a7dddda1999cb970269ad2061bc524e09977e728be9aa2ba4976f2dc040e8",
+  "criteria": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-g1-review-01-agent.json P2/P3a",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/assignment-p27-cw18-smoke-fix-05.json"
+  ],
+  "delta": {
+    "files": [
+      "src/workbench/backend/flow_tasks.py",
+      "src/workbench/workflow/run.py"
+    ],
+    "base": "previous candidate 38fbfc35 (reviewed)"
+  },
+  "focus": [
+    "Every analysis exception ends cleanly (indeterminate, never success, one notice, no resend, worker free) and nothing double-closes after an accepted report.",
+    "Catching broad exceptions does not swallow pause/revoke/cancel holds or hide programming errors silently (recorded with type).",
+    "busy_since/deferred_since bounds are correct."
+  ],
+  "rules": "Read-only; write only .workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-f05-review-01-agent.json. unittest with /tmp/cw02-g1-venv/bin/python; no real provider requests; never read credential contents; never pkill; never touch ~/wb-urux-sandbox or the user's processes.",
+  "result_format": "Findings P0..P3 with file:line; overall integrate/block. Write JSON; reply in Korean <=8 lines."
+}

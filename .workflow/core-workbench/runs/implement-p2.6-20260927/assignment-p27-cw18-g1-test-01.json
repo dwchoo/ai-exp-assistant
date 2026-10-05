@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw18-g1-test-01",
+  "ticket_id": "CW-18 bridge-generated response_id test update",
+  "role": "test_designer",
+  "unit": "V-CW-18-smoke-fix",
+  "approved_bundle_digest": "68bcebd494e90fb0773c6e6b80ed04a5b50688f36322b11834dd75fee780f296",
+  "routing": {
+    "planned_role": "test_designer",
+    "selected_role": "test_designer (wb-test-rerun, Sonnet high)",
+    "reason_codes": [
+      "rerun_defined_by_adjudication"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/root-adjudication-p27-cw18-response-id.json",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-smoke-fix-04.json"
+    ]
+  },
+  "frozen_candidate": "daebf6ee6eac9f7bcfe92910160874a8c8fbe370726ab0f8912ce3748a138d42",
+  "task": [
+    "Update per root-adjudication-p27-cw18-response-id (the bridge generates response_id; the model no longer supplies it; one model-supplied value is ignored, two -> bad_marker): tests/gates/g3_omp/bridge_public_response_independent.test.ts cases 42-45 and 49; tests/workflow/live_workflow_independent.py; and the shared helper tests/workflow/live_workflow_probe.py _frame_from_contract (must build a valid frame from the new contract with no generated fields). Keep all other invariants; add an independent check that the published control carries a bridge-generated canonical UUID response_id distinct per response.",
+    "Run the g3 TS tests, tests/bridge TS, tests/workflow, tests/bridge, tests/backend (real exit codes; unittest with /tmp/cw02-g1-venv/bin/python)."
+  ],
+  "allowed_write_paths": [
+    "tests/gates/g3_omp/*_independent*",
+    "tests/workflow/live_workflow_independent.py",
+    "tests/workflow/live_workflow_probe.py",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-g1-test-01-agent.json"
+  ],
+  "rules": "Never modify production code. No real provider requests; never read credential contents; temp dirs only under /tmp; kill only PIDs you started; no commits, no graphify update.",
+  "result_format": "Write the result JSON (checks with exit codes, changes). Reply in Korean, <=8 lines."
+}

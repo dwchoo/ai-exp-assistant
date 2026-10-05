@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw18-g1-test-01",
+  "status": "candidate_ready",
+  "agent_result": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-g1-test-01-agent.json",
+  "candidate": "38fbfc35572ab0a01920a0388bbfaaf91c44b8c1bdf4b4a6566565b0a0a1e061",
+  "checks": {
+    "g3 TS": "37/37 (5 failed before)",
+    "bridge TS": "16/16",
+    "workflow": "55",
+    "bridge": "49 (1 skip)",
+    "backend": "572 (28 skip, 1 xfail)"
+  },
+  "changes": [
+    "independent G3 cases 42-45, 49 updated; no response_id/generate in contracts; 1 model value ignored, 2 -> bad_marker",
+    "live_workflow_probe _frame_from_contract no longer requires generated==1",
+    "live_workflow_independent asserts bridge-generated distinct canonical UUID v4 response_id"
+  ],
+  "caveats": [
+    "run_actual_two_omp end-to-end not run (harness pins OMP 18.2.10; installed 18.4.5)",
+    "tests/workflow/test_worker_port.py still feeds the legacy generate contract to the helper (polish)"
+  ],
+  "observed_model": "sonnet"
+}

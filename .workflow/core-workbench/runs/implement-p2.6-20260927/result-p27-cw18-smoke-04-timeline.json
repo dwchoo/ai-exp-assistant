@@ -1,0 +1,739 @@
+[
+ {
+  "t": 0.1,
+  "wall": "11:51:40",
+  "event": "setup",
+  "root": "/tmp/wb-cw18-smoke-v564aeut",
+  "commit": "455fcb9dbe4b",
+  "omp": "/home/dwchoo/.local/bin/omp"
+ },
+ {
+  "t": 1.6,
+  "wall": "11:51:41",
+  "event": "start",
+  "exit": 0,
+  "stdout": "starting backend: shell bash (/usr/bin/bash), omp/18.4.5\nwaiting for the OMP isolation check ...\nbackend pid 3282224 phase ready\ndata dir /tmp/wb-cw18-smoke-v564aeut/data\n  host_shell: pid 3282286 alive=True owner=user\n  manager_omp: pid 3282287 alive=True owner=user\n  worker_omp: pid 3282288 alive=True owner=user\n  shell: bash /usr/bin/bash mode=manual_prompt\nomp isolation: ok (omp/18.4.5 evidence bridge_g3=18.2.10)\n",
+  "stderr": ""
+ },
+ {
+  "t": 1.7,
+  "wall": "11:51:41",
+  "event": "ready",
+  "isolation": "ok",
+  "leaks": [],
+  "warnings": [],
+  "notes": [],
+  "providers": {
+   "manager": [
+    "openai-codex"
+   ],
+   "worker": [
+    "openai-codex"
+   ]
+  },
+  "omp_version": "omp/18.4.5",
+  "worker": {
+   "state": "idle",
+   "task_id": null
+  },
+  "automation": {
+   "detail": "no active run",
+   "interruption": {
+    "confirmed_at": null,
+    "error": null,
+    "manager_ack": null,
+    "pause_id": null,
+    "requested_at": null,
+    "state": "none",
+    "unknown_tool_call_ids": [],
+    "worker_ack": null
+   },
+   "paused": false,
+   "persistence_error": null,
+   "resume": null,
+   "retry_limit": 3,
+   "review": {
+    "applies": false,
+    "coalesced_count": 0,
+    "exit": null,
+    "interval_seconds": 60,
+    "last_review_at": null,
+    "next_due_in_seconds": null,
+    "pending": false,
+    "reason": null,
+    "review_count": 0,
+    "status": null
+   },
+   "run": null,
+   "source": "backend",
+   "state": "idle",
+   "tick": {
+    "at": "2026-10-05T02:51:41+00:00",
+    "outcome": "idle",
+    "problems": []
+   },
+   "transition": null
+  },
+  "snapshot_keys": [
+   "attached",
+   "automation",
+   "backend",
+   "boot",
+   "bridge",
+   "contract",
+   "focus",
+   "omp_isolation",
+   "panes",
+   "phase",
+   "reason",
+   "shutdown",
+   "task",
+   "ui",
+   "worker"
+  ],
+  "host_shell": {
+   "alive": true,
+   "automation_hold": null,
+   "cols": 100,
+   "dropped_input_bytes": 0,
+   "exit_status": null,
+   "generation": 1,
+   "input_capacity": 2097152,
+   "input_owner": "user",
+   "kill": null,
+   "last_input_problem": null,
+   "manager_command": null,
+   "manager_command_in_flight": false,
+   "pane": "host_shell",
+   "process": {
+    "pid": 3282286,
+    "start_ticks": 271377072
+   },
+   "queued_input_bytes": 0,
+   "restart": null,
+   "rows": 30,
+   "sequence": 1,
+   "session_id": "ed18b2bb-6f53-4bcb-a0a9-17b826f54b04",
+   "shell": {
+    "error": null,
+    "executable": "/usr/bin/bash",
+    "generation": 1,
+    "held_reasons": [
+     "user_owner",
+     "parent_not_control_wait"
+    ],
+    "input_owner": "user",
+    "kind": "bash",
+    "owner_epoch": 2,
+    "parent": {
+     "pid": 3282286,
+     "start_ticks": 271377072
+    },
+    "parent_mode": "manual_prompt",
+    "phase": "not_sent",
+    "request_id": null,
+    "supervisor": null,
+    "takeover_confirmed": false,
+    "takeover_requested": false,
+    "unknown": []
+   }
+  }
+ },
+ {
+  "t": 1.7,
+  "wall": "11:51:41",
+  "event": "procs_initial",
+  "procs": [
+   {
+    "pid": 3282224,
+    "comm": "python",
+    "cwd": "<root>/project"
+   },
+   {
+    "pid": 3282286,
+    "comm": "bash",
+    "cwd": "<root>/project"
+   },
+   {
+    "pid": 3282287,
+    "comm": "omp",
+    "cwd": "<root>/project"
+   },
+   {
+    "pid": 3282288,
+    "comm": "omp",
+    "cwd": "<root>/project"
+   }
+  ],
+  "host_cwd": "<root>/project"
+ },
+ {
+  "t": 1.7,
+  "wall": "11:51:41",
+  "event": "agent_db_link",
+  "is_symlink": true,
+  "target_basename": "agent.db"
+ },
+ {
+  "t": 2.6,
+  "wall": "11:51:42",
+  "event": "ui_attached",
+  "status_lines": [
+   "focus: MANAGER OMP | host 입력 owner: user | shell mode: manual_prompt | worker: 대기 | 자동화: idle",
+   "backend: ready | bridge manager=ok worker=ok | 마지막 확인 11:51:42 (0s 전) | Ctrl-] ? 도움말"
+  ]
+ },
+ {
+  "t": 4.8,
+  "wall": "11:51:44",
+  "event": "typed",
+  "step": 2,
+  "requests": 0
+ },
+ {
+  "t": 4.8,
+  "wall": "11:51:44",
+  "event": "state",
+  "task_id": null,
+  "kind": null,
+  "status": null,
+  "held": null,
+  "runs": null,
+  "worker": "idle",
+  "shell_owner": "user",
+  "shell_mode": "manual_prompt",
+  "automation": "idle",
+  "reviews": 0,
+  "run": null,
+  "requests": 0,
+  "host_cwd": "<root>/project"
+ },
+ {
+  "t": 12.3,
+  "wall": "11:51:52",
+  "event": "state",
+  "task_id": "071b2e25-378b-422b-bbe6-03006a0d7d81",
+  "kind": "experiment",
+  "status": "starting",
+  "held": null,
+  "runs": 1,
+  "worker": "busy",
+  "shell_owner": "user",
+  "shell_mode": "manual_prompt",
+  "automation": "idle",
+  "reviews": 0,
+  "run": null,
+  "requests": 2,
+  "host_cwd": "<root>/project"
+ },
+ {
+  "t": 15.7,
+  "wall": "11:51:55",
+  "event": "exp_running",
+  "task": {
+   "active": true,
+   "cancel_requested": false,
+   "closed_reason": null,
+   "held_reason": null,
+   "kind": "experiment",
+   "last_result": null,
+   "retry_limit": 3,
+   "revision": 1,
+   "run_id": null,
+   "runs_started": 1,
+   "since": "2026-10-05T02:51:52Z",
+   "status": "starting",
+   "summary": "Run ./exp.sh and judge the requested success criteria.",
+   "task_id": "071b2e25-378b-422b-bbe6-03006a0d7d81"
+  },
+  "shell": {
+   "error": null,
+   "executable": "/usr/bin/bash",
+   "generation": 1,
+   "held_reasons": [
+    "user_owner",
+    "parent_not_control_wait"
+   ],
+   "input_owner": "user",
+   "kind": "bash",
+   "owner_epoch": 2,
+   "parent": {
+    "pid": 3282286,
+    "start_ticks": 271377072
+   },
+   "parent_mode": "manual_prompt",
+   "phase": "not_sent",
+   "request_id": null,
+   "supervisor": null,
+   "takeover_confirmed": false,
+   "takeover_requested": false,
+   "unknown": []
+  },
+  "automation": {
+   "detail": "no active run",
+   "interruption": {
+    "confirmed_at": null,
+    "error": null,
+    "manager_ack": null,
+    "pause_id": null,
+    "requested_at": null,
+    "state": "none",
+    "unknown_tool_call_ids": [],
+    "worker_ack": null
+   },
+   "paused": false,
+   "persistence_error": null,
+   "resume": null,
+   "retry_limit": 3,
+   "review": {
+    "applies": false,
+    "coalesced_count": 0,
+    "exit": null,
+    "interval_seconds": 60,
+    "last_review_at": null,
+    "next_due_in_seconds": null,
+    "pending": false,
+    "reason": null,
+    "review_count": 0,
+    "status": null
+   },
+   "run": null,
+   "source": "backend",
+   "state": "idle",
+   "tick": {
+    "at": "2026-10-05T02:51:51+00:00",
+    "outcome": "idle",
+    "problems": []
+   },
+   "transition": null
+  },
+  "status_lines": [
+   "focus: MANAGER OMP | host 입력 owner: user | shell mode: manual_prompt | worker: 작업 중 | 자동화: idle",
+   "작업: 실험 \"Run ./exp.sh and judge the requested su…\" [시작 중] | backend: ready | bridge manager=ok worker=ok | 마지막 확인 11:51:55 (0s 전) | Ctrl-] ? 도움말"
+  ]
+ },
+ {
+  "t": 17.7,
+  "wall": "11:51:57",
+  "event": "typed",
+  "step": 3,
+  "requests": 3
+ },
+ {
+  "t": 18.7,
+  "wall": "11:51:58",
+  "event": "state",
+  "task_id": "071b2e25-378b-422b-bbe6-03006a0d7d81",
+  "kind": "experiment",
+  "status": "running",
+  "held": null,
+  "runs": 1,
+  "worker": "busy",
+  "shell_owner": "manager",
+  "shell_mode": "control_wait",
+  "automation": "active",
+  "reviews": 0,
+  "run": null,
+  "requests": 4,
+  "host_cwd": "<root>/data/workflow/worktrees/071b2e25-378b-422b-bbe6-03006a0d7d81-r1-d08bdf8b"
+ },
+ {
+  "t": 49.7,
+  "wall": "11:52:29",
+  "event": "timeout",
+  "what": "observe-window(no-op)",
+  "task": {
+   "active": true,
+   "cancel_requested": false,
+   "closed_reason": null,
+   "held_reason": null,
+   "kind": "experiment",
+   "last_result": null,
+   "retry_limit": 3,
+   "revision": 1,
+   "run_id": "3f7e29b3-6774-4a3e-b1d2-d93e10ae8e98",
+   "runs_started": 1,
+   "since": "2026-10-05T02:51:58Z",
+   "status": "running",
+   "summary": "Run ./exp.sh and judge the requested success criteria.",
+   "task_id": "071b2e25-378b-422b-bbe6-03006a0d7d81"
+  },
+  "worker": {
+   "state": "busy",
+   "task_id": "071b2e25-378b-422b-bbe6-03006a0d7d81"
+  },
+  "automation": {
+   "detail": "automation active for the run",
+   "interruption": {
+    "confirmed_at": null,
+    "error": null,
+    "manager_ack": null,
+    "pause_id": null,
+    "requested_at": null,
+    "state": "none",
+    "unknown_tool_call_ids": [],
+    "worker_ack": null
+   },
+   "paused": false,
+   "persistence_error": null,
+   "resume": null,
+   "retry_limit": 3,
+   "review": {
+    "applies": true,
+    "coalesced_count": 0,
+    "exit": null,
+    "interval_seconds": 60,
+    "last_review_at": null,
+    "next_due_in_seconds": 30.7,
+    "pending": false,
+    "reason": "next_interval_not_due",
+    "review_count": 0,
+    "status": "waiting"
+   },
+   "run": {
+    "bound": true,
+    "error": null,
+    "kind": "experiment",
+    "revision": 1,
+    "run_id": "3f7e29b3-6774-4a3e-b1d2-d93e10ae8e98",
+    "task_id": "071b2e25-378b-422b-bbe6-03006a0d7d81"
+   },
+   "source": "backend",
+   "state": "active",
+   "tick": {
+    "at": "2026-10-05T02:52:28+00:00",
+    "outcome": "admitted",
+    "problems": []
+   },
+   "transition": null
+  }
+ },
+ {
+  "t": 89.6,
+  "wall": "11:53:09",
+  "event": "state",
+  "task_id": "071b2e25-378b-422b-bbe6-03006a0d7d81",
+  "kind": "experiment",
+  "status": "waiting_report",
+  "held": "worker_busy",
+  "runs": 1,
+  "worker": "busy",
+  "shell_owner": "user",
+  "shell_mode": "manual_prompt",
+  "automation": "active",
+  "reviews": 0,
+  "run": null,
+  "requests": 7,
+  "host_cwd": "<root>/project"
+ },
+ {
+  "t": 96.0,
+  "wall": "11:53:16",
+  "event": "state",
+  "task_id": "071b2e25-378b-422b-bbe6-03006a0d7d81",
+  "kind": "experiment",
+  "status": "waiting_report",
+  "held": null,
+  "runs": 1,
+  "worker": "busy",
+  "shell_owner": "user",
+  "shell_mode": "manual_prompt",
+  "automation": "active",
+  "reviews": 1,
+  "run": null,
+  "requests": 8,
+  "host_cwd": "<root>/project"
+ },
+ {
+  "t": 97.5,
+  "wall": "11:53:17",
+  "event": "state",
+  "task_id": "071b2e25-378b-422b-bbe6-03006a0d7d81",
+  "kind": "experiment",
+  "status": "waiting_report",
+  "held": null,
+  "runs": 1,
+  "worker": "busy",
+  "shell_owner": "user",
+  "shell_mode": "manual_prompt",
+  "automation": "held",
+  "reviews": 1,
+  "run": null,
+  "requests": 8,
+  "host_cwd": "<root>/project"
+ },
+ {
+  "t": 102.3,
+  "wall": "11:53:22",
+  "event": "state",
+  "task_id": "071b2e25-378b-422b-bbe6-03006a0d7d81",
+  "kind": "experiment",
+  "status": "waiting_report",
+  "held": "runner_error:WorkerResponseRejected",
+  "runs": 1,
+  "worker": "busy",
+  "shell_owner": "user",
+  "shell_mode": "manual_prompt",
+  "automation": "held",
+  "reviews": 1,
+  "run": null,
+  "requests": 9,
+  "host_cwd": "<root>/project"
+ },
+ {
+  "t": 470.9,
+  "wall": "11:59:30",
+  "event": "timeout",
+  "what": "experiment finished",
+  "task": {
+   "active": true,
+   "cancel_requested": false,
+   "closed_reason": null,
+   "held_reason": "runner_error:WorkerResponseRejected",
+   "kind": "experiment",
+   "last_result": null,
+   "retry_limit": 3,
+   "revision": 1,
+   "run_id": "3f7e29b3-6774-4a3e-b1d2-d93e10ae8e98",
+   "runs_started": 1,
+   "since": "2026-10-05T02:53:08Z",
+   "status": "waiting_report",
+   "summary": "Run ./exp.sh and judge the requested success criteria.",
+   "task_id": "071b2e25-378b-422b-bbe6-03006a0d7d81"
+  },
+  "worker": {
+   "state": "busy",
+   "task_id": "071b2e25-378b-422b-bbe6-03006a0d7d81"
+  },
+  "automation": {
+   "detail": "automatic work held: control_or_owner_unknown_or_drifted, run_not_ready",
+   "interruption": {
+    "confirmed_at": null,
+    "error": null,
+    "manager_ack": null,
+    "pause_id": null,
+    "requested_at": null,
+    "state": "none",
+    "unknown_tool_call_ids": [],
+    "worker_ack": null
+   },
+   "paused": false,
+   "persistence_error": null,
+   "resume": null,
+   "retry_limit": 3,
+   "review": {
+    "applies": true,
+    "coalesced_count": 0,
+    "exit": null,
+    "interval_seconds": 60,
+    "last_review_at": "2026-10-05T02:52:59+00:00",
+    "next_due_in_seconds": 0.0,
+    "pending": false,
+    "reason": null,
+    "review_count": 1,
+    "status": "dispatched"
+   },
+   "run": {
+    "bound": true,
+    "error": null,
+    "kind": "experiment",
+    "revision": 1,
+    "run_id": "3f7e29b3-6774-4a3e-b1d2-d93e10ae8e98",
+    "task_id": "071b2e25-378b-422b-bbe6-03006a0d7d81"
+   },
+   "source": "backend",
+   "state": "held",
+   "tick": {
+    "at": "2026-10-05T02:59:29+00:00",
+    "outcome": "held",
+    "problems": [
+     "control_or_owner_unknown_or_drifted",
+     "run_not_ready"
+    ]
+   },
+   "transition": null
+  }
+ },
+ {
+  "t": 471.0,
+  "wall": "11:59:31",
+  "event": "shell_back_cwd",
+  "host_cwd": "<root>/project"
+ },
+ {
+  "t": 471.0,
+  "wall": "11:59:31",
+  "event": "shell_back",
+  "shell": {
+   "error": null,
+   "executable": "/usr/bin/bash",
+   "generation": 1,
+   "held_reasons": [
+    "takeover_requested",
+    "user_owner",
+    "outstanding_request"
+   ],
+   "input_owner": "user",
+   "kind": "bash",
+   "owner_epoch": 4,
+   "parent": {
+    "pid": 3282286,
+    "start_ticks": 271377072
+   },
+   "parent_mode": "manual_prompt",
+   "phase": "control_returned",
+   "request_id": "0c899358-b1f7-418e-acd5-c82bf936757b",
+   "supervisor": {
+    "pid": 3283587,
+    "start_ticks": 271378883
+   },
+   "takeover_confirmed": true,
+   "takeover_requested": true,
+   "unknown": []
+  },
+  "hold": null
+ },
+ {
+  "t": 500.5,
+  "wall": "12:00:00",
+  "event": "final",
+  "task": {
+   "active": true,
+   "cancel_requested": false,
+   "closed_reason": null,
+   "held_reason": "runner_error:WorkerResponseRejected",
+   "kind": "experiment",
+   "last_result": null,
+   "retry_limit": 3,
+   "revision": 1,
+   "run_id": "3f7e29b3-6774-4a3e-b1d2-d93e10ae8e98",
+   "runs_started": 1,
+   "since": "2026-10-05T02:53:08Z",
+   "status": "waiting_report",
+   "summary": "Run ./exp.sh and judge the requested success criteria.",
+   "task_id": "071b2e25-378b-422b-bbe6-03006a0d7d81"
+  },
+  "worker": {
+   "state": "busy",
+   "task_id": "071b2e25-378b-422b-bbe6-03006a0d7d81"
+  },
+  "automation": {
+   "detail": "automatic work held: control_or_owner_unknown_or_drifted, run_not_ready",
+   "interruption": {
+    "confirmed_at": null,
+    "error": null,
+    "manager_ack": null,
+    "pause_id": null,
+    "requested_at": null,
+    "state": "none",
+    "unknown_tool_call_ids": [],
+    "worker_ack": null
+   },
+   "paused": false,
+   "persistence_error": null,
+   "resume": null,
+   "retry_limit": 3,
+   "review": {
+    "applies": true,
+    "coalesced_count": 0,
+    "exit": null,
+    "interval_seconds": 60,
+    "last_review_at": "2026-10-05T02:52:59+00:00",
+    "next_due_in_seconds": 0.0,
+    "pending": false,
+    "reason": null,
+    "review_count": 1,
+    "status": "dispatched"
+   },
+   "run": {
+    "bound": true,
+    "error": null,
+    "kind": "experiment",
+    "revision": 1,
+    "run_id": "3f7e29b3-6774-4a3e-b1d2-d93e10ae8e98",
+    "task_id": "071b2e25-378b-422b-bbe6-03006a0d7d81"
+   },
+   "source": "backend",
+   "state": "held",
+   "tick": {
+    "at": "2026-10-05T03:00:00+00:00",
+    "outcome": "held",
+    "problems": [
+     "control_or_owner_unknown_or_drifted",
+     "run_not_ready"
+    ]
+   },
+   "transition": null
+  },
+  "host": {
+   "error": null,
+   "executable": "/usr/bin/bash",
+   "generation": 1,
+   "held_reasons": [
+    "takeover_requested",
+    "user_owner",
+    "outstanding_request"
+   ],
+   "input_owner": "user",
+   "kind": "bash",
+   "owner_epoch": 4,
+   "parent": {
+    "pid": 3282286,
+    "start_ticks": 271377072
+   },
+   "parent_mode": "manual_prompt",
+   "phase": "control_returned",
+   "request_id": "0c899358-b1f7-418e-acd5-c82bf936757b",
+   "supervisor": {
+    "pid": 3283587,
+    "start_ticks": 271378883
+   },
+   "takeover_confirmed": true,
+   "takeover_requested": true,
+   "unknown": []
+  }
+ },
+ {
+  "t": 500.5,
+  "wall": "12:00:00",
+  "event": "requests_final",
+  "per_file": {
+   "agent/sessions/-tmp-wb-cw18-smoke-v564aeut-project/2026-10-05T02-51-40-815Z_01a109f9-618f-71dc-b21e-e838f7384f02.jsonl": {
+    "assistant": 5,
+    "error_or_aborted": 0,
+    "role_hint": "manager"
+   },
+   "agent/sessions/-tmp-wb-cw18-smoke-v564aeut-project/2026-10-05T02-51-40-811Z_01a109f9-618b-7246-a281-7096c65eeb8d.jsonl": {
+    "assistant": 4,
+    "error_or_aborted": 0,
+    "role_hint": "?"
+   }
+  },
+  "total": 9,
+  "stop_reason": null
+ },
+ {
+  "t": 500.9,
+  "wall": "12:00:00",
+  "event": "shutdown",
+  "exit": 0,
+  "out": "d2-d93e10ae8e98\", \"task_id\": \"071b2e25-378b-422b-bbe6-03006a0d7d81\"}\n{\"shutdown\": {\"panes\": [{\"exit_status\": -1, \"pane\": \"host_shell\", \"survivors\": []}, {\"exit_status\": 143, \"pane\": \"manager_omp\", \"survivors\": []}, {\"exit_status\": 143, \"pane\": \"worker_omp\", \"survivors\": []}], \"processes\": {\"host_shell\": \"dead\", \"manager_omp\": \"dead\", \"supervisor\": \"dead\", \"worker_omp\": \"dead\"}, \"verified\": true}}\n"
+ },
+ {
+  "t": 504.8,
+  "wall": "12:00:04",
+  "event": "artifacts",
+  "hello": null,
+  "second_exists": false,
+  "git_status": ""
+ },
+ {
+  "t": 505.3,
+  "wall": "12:00:05",
+  "event": "cleanup",
+  "residue_processes": [],
+  "still_alive": [],
+  "root_exists": false,
+  "elapsed_s": 505.3
+ }
+]

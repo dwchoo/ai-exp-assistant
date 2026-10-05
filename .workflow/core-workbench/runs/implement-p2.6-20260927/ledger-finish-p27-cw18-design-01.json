@@ -1,0 +1,17 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 1982,
+  "event": {
+    "id": "finished-p27-cw18-design-01",
+    "kind": "transition",
+    "data": {
+      "evidence": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-design-01.md (reconciled 2026-10-05: design result was delivered and used for C-D65; finish event had not been recorded)",
+      "invocation": "p27-cw18-design-01",
+      "not_started_evidence": null,
+      "observed_effort": "unverified",
+      "observed_model": "opus",
+      "outcome": "complete",
+      "state": "finished"
+    }
+  }
+}

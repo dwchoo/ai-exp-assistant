@@ -1,0 +1,23 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 1923,
+  "event": {
+    "id": "limit-g1-unit-V-CW-18-smoke-fix",
+    "kind": "limit",
+    "data": {
+      "authority": "C-D55 budget delegation; result-p27-cw18-smoke-04 G1-G3",
+      "bucket": "unit:V-CW-18-smoke-fix",
+      "decision_owner": "Root",
+      "expected_previous": {
+        "authority": "C-D67; C-D55 budget delegation",
+        "reason": "independent G3 test update for C-D67",
+        "value": 10
+      },
+      "origin": "operating",
+      "reason": "smoke-04 findings fix, review, smoke-05",
+      "remaining_work_estimate": 3,
+      "scope_basis": null,
+      "value": 13
+    }
+  }
+}

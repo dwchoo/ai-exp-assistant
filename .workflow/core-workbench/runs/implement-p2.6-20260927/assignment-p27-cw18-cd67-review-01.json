@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw18-cd67-review-01",
+  "ticket_id": "CW-18 C-D67 delta review",
+  "role": "reviewer",
+  "unit": "V-CW-18-smoke-fix",
+  "approved_bundle_digest": "68bcebd494e90fb0773c6e6b80ed04a5b50688f36322b11834dd75fee780f296",
+  "routing": {
+    "planned_role": "reviewer",
+    "selected_role": "reviewer (wb-delta-reviewer, Sonnet high)",
+    "reason_codes": [
+      "bounded_delta_after_full_review"
+    ],
+    "evidence_refs": []
+  },
+  "frozen_candidate": "27e05aff79c1f2144c19a63cbc004bd413e6da8c5a4ad7ad5f75e43f00cdadce",
+  "criteria": [
+    "docs/features/core-workbench/DECISIONS.md#C-D67",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/assignment-p27-cw18-smoke-fix-03.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-smoke-03.md"
+  ],
+  "delta": {
+    "base": "git HEAD (commits c3d50e7/856fb08)",
+    "files": [
+      "omp_bridge/g3/bridge.ts",
+      "src/workbench/workflow/worker_port.py",
+      "src/workbench/workflow/run.py",
+      "src/workbench/workflow/__init__.py",
+      "src/workbench/backend/flow_tasks.py"
+    ],
+    "tests": "git diff HEAD for tests/bridge, tests/gates/g3_omp, tests/workflow, tests/backend"
+  },
+  "focus": [
+    "Thinking is ignored exactly as C-D67 says and nothing else is relaxed (tool calls, extra text, two texts, error/abort, extra provider round, identity).",
+    "Thinking text never reaches records/events/results/notices.",
+    "F2 reasons are specific and contain no response text; WorkerResponseRejected keeps existing ValueError handling paths working.",
+    "Independent test update keeps invariants."
+  ],
+  "rules": "Read-only; write only .workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-cd67-review-01-agent.json. Tests with /tmp/cw02-g1-venv/bin/python (unittest), node --experimental-strip-types --test for TS; no real provider requests; never read credential contents; never pkill; never touch ~/wb-urux-sandbox or the user's processes.",
+  "result_format": "Findings P0..P3 with file:line; overall integrate/block. Write JSON; reply in Korean <=10 lines."
+}

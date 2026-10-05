@@ -1,0 +1,8 @@
+# p27-cd68-review-01 (reviewer, Opus, fresh) — 2026-10-05 — verdict: BLOCK (P2 x2, P3 x3)
+
+1. [P2] Result marked consumed although never delivered -> no terminal_done ever. flow_terminal.py:441-450 (_await marks consumed), mailbox.py:336-339 (tool_result to a replaced peer silently dropped), bridge.ts:954/962 (failPendingTools on disconnect sends no terminal_wait_abandoned). Scenario: bridge reconnect / worker respawn during a wait -> worker gets outcome_unknown only; on exit notice=not_needed. Fix: propagate tool_result write success to the handler, or treat failure/peer replacement as abandon.
+2. [P2] C-D68 (2): explorer/analyst subagents get bridge tools terminal and to_manager (probe4-worker-explorer.json; bridge.ts:889-901); SKILL.md:44 is guidance only. Fix: detect subagent context in bridge execute and refuse (subagent_not_allowed) or exclude extension tools from agents via a measured OMP mechanism.
+3. [P3] Worker leak check only bash/eval (launcher.py:156, :801-802); --omp-arg --tools could re-enable python/computer/browser/notebook unnoticed. Fix: leak = any tool outside WORKER_TOOLS + bridge tools.
+4. [P3] Abort before start still runs the command (flow_terminal.py:404-407) while TERMINAL_ABORT_DETAIL (bridge.ts:320) says only started commands continue. Fix: check abandoned key right before submit -> aborted.
+5. [P3] to-worker SKILL.md:45 held:host_terminal_busy tells the user to take over/kill a job even when the worker's own terminal command is the cause. Fix: distinct reason held:host_terminal_busy:worker_terminal_command with "wait" guidance.
+No defects found in: HostGate/hold atomicity, no typing into busy shell, cwd/log 0600/64 MiB, check merge/pause, model table (C-D68 (4), /model change), codeMode off, C-D64 isolation.

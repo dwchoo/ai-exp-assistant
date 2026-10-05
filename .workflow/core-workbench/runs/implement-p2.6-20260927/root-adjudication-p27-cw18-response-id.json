@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "record": "root-adjudication-p27-cw18-response-id",
+  "decided_by": "Root",
+  "date": "2026-10-05",
+  "issue": "The staged worker response contract asks the model to generate response_id (canonical UUID); a real model produced an 11-char last group and the whole analysis was rejected (smoke-04)",
+  "decision": "response_id is a technical identity, not a model judgement. The bridge generates it (canonical UUID v4) when it validates the worker's marker; the model no longer supplies it (instruction and field_order updated; a model-supplied response_id is ignored if present, never trusted). All other identity fields stay exact-match from the delivery. No product behaviour visible to the user changes; disclosed to the user.",
+  "authority": "workflow-contract Root adjudication; CW-10/G3 contract intent (unique response identity); result-p27-cw18-smoke-04 G1"
+}

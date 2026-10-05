@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw18-smoke-fix-05",
+  "status": "done",
+  "candidate": "d94a7dddda1999cb970269ad2061bc524e09977e728be9aa2ba4976f2dc040e8",
+  "checks": {
+    "red": "test_run 7 errors, smoke04 flow 6 fails",
+    "green": "backend 586 (30 skip, 1 xfail), workflow 56, bridge 49 (1 skip), contracts 52 - exit 0; smoke04 x3 OK"
+  },
+  "design": "any exception in run.judge analysis (incl. report build/persist) -> analysis_error:<Type> WorkerJudgmentUnavailable (host evidence, no report, worker_judgment None); run.json write failure recorded as persist_error; pause/revoke keep WorkflowHeld; flow _run_error: no report yet -> indeterminate close, worker free, run_ended, one notice, no resend; after accepted report -> keep closed run, record run_error; unknown report outcome -> report_outcome_unknown (R1); busy_since reset on idle; separate deferred_since bounds endless deferral",
+  "tests": "real WorkflowRun + real host shell injection cases (BridgeTimeout, MailboxError, observe OSError/KeyError, persist, report persist, pause) and TaskFlow-driven real judge cases",
+  "residue": "none",
+  "observed_model": "opus"
+}

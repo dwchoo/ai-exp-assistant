@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw18-cd67-test-01",
+  "ticket_id": "CW-18 C-D67 independent test update",
+  "role": "test_designer",
+  "unit": "V-CW-18-smoke-fix",
+  "approved_bundle_digest": "68bcebd494e90fb0773c6e6b80ed04a5b50688f36322b11834dd75fee780f296",
+  "routing": {
+    "planned_role": "test_designer",
+    "selected_role": "test_designer (wb-test-rerun, Sonnet high)",
+    "reason_codes": [
+      "rerun_defined_by_decision"
+    ],
+    "evidence_refs": [
+      "docs/features/core-workbench/DECISIONS.md#C-D67",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-smoke-fix-03.json"
+    ]
+  },
+  "frozen_candidate": "04d1ddf799feb0f6544a6336b9175baf40fda396ab2bfdc952fa2fd354deb5db",
+  "task": [
+    "Update tests/gates/g3_omp/bridge_public_response_independent.test.ts (line ~280) per C-D67: a thinking item (any position, with or without text) is ignored, so the 'thinking' variant must now publish worker control when the marker is valid; keep every other rejection variant (continuation, extra provider round, tool, error, abort) and add independent variants: visible thinking + extra text -> rejected; visible thinking + tool call -> rejected; thinking text never appears in published control.",
+    "Run the g3 TS tests (bridge, independent), tests/bridge TS tests, tests/bridge and tests/backend python (real exit codes)."
+  ],
+  "allowed_write_paths": [
+    "tests/gates/g3_omp/*_independent*",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-cd67-test-01-agent.json"
+  ],
+  "rules": "Never modify production code. No real provider requests; never read credential contents; temp dirs only under /tmp; no commits, no graphify update.",
+  "result_format": "Write the result JSON (checks with exit codes, changes). Reply in Korean, <=8 lines."
+}

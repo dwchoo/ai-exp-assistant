@@ -1,0 +1,17 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 1920,
+  "event": {
+    "id": "starting-p27-cw18-smoke-04",
+    "kind": "transition",
+    "data": {
+      "evidence": ".workflow/core-workbench/runs/implement-p2.6-20260927/assignment-p27-cw18-smoke-04.json",
+      "invocation": "p27-cw18-smoke-04",
+      "not_started_evidence": null,
+      "observed_effort": "unverified",
+      "observed_model": "unverified",
+      "outcome": null,
+      "state": "starting"
+    }
+  }
+}

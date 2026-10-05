@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cd68-review-02",
+  "ticket_id": "CW-18 C-D68 delta review",
+  "role": "reviewer",
+  "unit": "V-CW-18-cd68-verify",
+  "approved_bundle_digest": "be5579d83f63b95c8a481adb71fc7927bba400ed471784587ea944cd3cd5fcfc",
+  "frozen_candidate": "39acc4d902b8c5df65b1c873e322a4a89ef7c8fbd7c1274f42984acc0d1f396c",
+  "routing": {
+    "planned_role": "reviewer",
+    "selected_role": "reviewer (wb-delta-reviewer, fresh)",
+    "reason_codes": [
+      "delta_after_full_review"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd68-review-01.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd68-fix-01.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd68-fix-02.md"
+    ]
+  },
+  "scope": "Only the corrections since review-01: flow_terminal.py (undelivered handling, abandon before submit), mailbox.py (set_tool_handler undelivered), flow_tasks.py/service.py (held reason worker_terminal_command), launcher.py (worker leak rule = any tool outside allowlist + bridge tools), bridge.ts (subagent session: no bridge connection, setActiveTools removes terminal/to_manager on session_start ctx.agent.kind=='sub', execute-time subagent_not_allowed), skills to-manager/to-worker. Check each review-01 finding is actually fixed and the fixes introduce no regression (e.g. main session misclassified as sub when ctx.agent missing/odd, worker main connection loss, notice duplicates, leak false positives on legitimate OMP-required tools such as yield).",
+  "rules": "No real provider/model requests (fake local provider allowed); never read credential contents or other processes' environ; never edit user configs (~/.omp ~/.agents ~/.claude ~/.codex); never use --profile; temp only under /tmp; kill only PIDs you started; never touch ~/wb-urux-sandbox or user processes; no commits; no graphify update. Read-only.",
+  "result_format": "verdict (approve / block), per-finding status, new findings P1-P3 with file:line and scenario. Korean, <=12 lines."
+}

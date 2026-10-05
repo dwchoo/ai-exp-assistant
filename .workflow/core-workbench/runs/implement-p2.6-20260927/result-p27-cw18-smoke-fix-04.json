@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw18-smoke-fix-04",
+  "status": "done",
+  "candidate": "daebf6ee6eac9f7bcfe92910160874a8c8fbe370726ab0f8912ce3748a138d42",
+  "checks": {
+    "TS": "8 red -> green; all TS 45/50, 5 fails only in bridge_public_response_independent.test.ts (assumes model-supplied response_id)",
+    "backend": "smoke04 fixes red -> green; backend 572 OK",
+    "workflow": "6 red -> green; 55 OK (p27b load flake once)",
+    "bridge/contracts/ui": "49/52/741 OK",
+    "live no-model": "35/35: R-stage bad_marker -> one notice, indeterminate close, worker/automation idle, no resend; E-stage model-supplied bad response_id ignored, success, report delivered, Task closed"
+  },
+  "fixes": {
+    "G1": "bridge generates response_id (UUID v4) after marker validation; removed from field_order/fields (no generate fields remain); one model-supplied response_id ignored, two -> bad_marker; only model-invented value was response_id",
+    "G2": "analysis-stage rejection/timeout/validation failure/evidence conflict/unknown/rejected delivery -> WorkerJudgmentUnavailable(WorkflowHeld): no report (CW-10), TaskFlow completes run indeterminate, Task finished, worker free, automation idle, one workbench_notice run_judgment_unavailable (reason, judged/not_judged); pause/cancel/revoke keep holds; review stage: worker busy past ANALYSIS_IDLE_LIMIT 180 s (pause excluded) -> same close",
+    "G3": "reasons in run.json worker_analysis_rejected, run end record, flow run_ended, Task last_result/held_reason, preparation_report.reason, runner_error suffix; no response text; skill Notices updated"
+  },
+  "to_update": {
+    "independent": [
+      "tests/gates/g3_omp/bridge_public_response_independent.test.ts cases 42-45, 49",
+      "tests/workflow/live_workflow_independent.py"
+    ],
+    "non_independent_helper": "tests/workflow/live_workflow_probe.py _frame_from_contract requires generated==1 -> returns None with the new contract (breaks live_task_flow_probe, live_automation_probe, live_worker_review_independent)"
+  },
+  "residue": "none",
+  "observed_model": "opus"
+}

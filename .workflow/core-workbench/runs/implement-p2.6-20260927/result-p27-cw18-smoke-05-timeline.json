@@ -1,0 +1,698 @@
+[
+ {
+  "t": 0.1,
+  "wall": "14:01:37",
+  "event": "setup",
+  "root": "/tmp/wb-cw18-smoke-42o8dr5k",
+  "commit": "7861cfa43e82",
+  "omp": "/home/dwchoo/.local/bin/omp"
+ },
+ {
+  "t": 1.8,
+  "wall": "14:01:38",
+  "event": "start",
+  "exit": 0,
+  "stdout": "starting backend: shell bash (/usr/bin/bash), omp/18.4.5\nwaiting for the OMP isolation check ...\nbackend pid 3472080 phase ready\ndata dir /tmp/wb-cw18-smoke-42o8dr5k/data\n  host_shell: pid 3472137 alive=True owner=user\n  manager_omp: pid 3472138 alive=True owner=user\n  worker_omp: pid 3472139 alive=True owner=user\n  shell: bash /usr/bin/bash mode=manual_prompt\nomp isolation: ok (omp/18.4.5 evidence bridge_g3=18.2.10)\n",
+  "stderr": ""
+ },
+ {
+  "t": 1.9,
+  "wall": "14:01:38",
+  "event": "ready",
+  "isolation": "ok",
+  "leaks": [],
+  "warnings": [],
+  "notes": [],
+  "providers": {
+   "manager": [
+    "openai-codex"
+   ],
+   "worker": [
+    "openai-codex"
+   ]
+  },
+  "omp_version": "omp/18.4.5",
+  "worker": {
+   "state": "idle",
+   "task_id": null
+  },
+  "automation": {
+   "detail": "no active run",
+   "interruption": {
+    "confirmed_at": null,
+    "error": null,
+    "manager_ack": null,
+    "pause_id": null,
+    "requested_at": null,
+    "state": "none",
+    "unknown_tool_call_ids": [],
+    "worker_ack": null
+   },
+   "paused": false,
+   "persistence_error": null,
+   "resume": null,
+   "retry_limit": 3,
+   "review": {
+    "applies": false,
+    "coalesced_count": 0,
+    "exit": null,
+    "interval_seconds": 60,
+    "last_review_at": null,
+    "next_due_in_seconds": null,
+    "pending": false,
+    "reason": null,
+    "review_count": 0,
+    "status": null
+   },
+   "run": null,
+   "source": "backend",
+   "state": "idle",
+   "tick": {
+    "at": "2026-10-05T05:01:38+00:00",
+    "outcome": "idle",
+    "problems": []
+   },
+   "transition": null
+  },
+  "snapshot_keys": [
+   "attached",
+   "automation",
+   "backend",
+   "boot",
+   "bridge",
+   "contract",
+   "focus",
+   "omp_isolation",
+   "panes",
+   "phase",
+   "reason",
+   "shutdown",
+   "task",
+   "ui",
+   "worker"
+  ]
+ },
+ {
+  "t": 1.9,
+  "wall": "14:01:38",
+  "event": "agent_db_link",
+  "is_symlink": true,
+  "target_basename": "agent.db"
+ },
+ {
+  "t": 2.8,
+  "wall": "14:01:39",
+  "event": "ui_attached",
+  "status_lines": [
+   "focus: MANAGER OMP | host 입력 owner: user | shell mode: manual_prompt | worker: 대기 | 자동화: idle",
+   "backend: ready | bridge manager=ok worker=ok | 마지막 확인 14:01:39 (0s 전) | Ctrl-] ? 도움말"
+  ]
+ },
+ {
+  "t": 5.0,
+  "wall": "14:01:41",
+  "event": "typed",
+  "step": 2,
+  "requests": 0
+ },
+ {
+  "t": 5.0,
+  "wall": "14:01:42",
+  "event": "state",
+  "task_id": null,
+  "kind": null,
+  "status": null,
+  "held": null,
+  "runs": null,
+  "worker": "idle",
+  "shell_owner": "user",
+  "shell_mode": "manual_prompt",
+  "automation": "idle",
+  "reviews": 0,
+  "run": null,
+  "requests": 0
+ },
+ {
+  "t": 13.5,
+  "wall": "14:01:50",
+  "event": "state",
+  "task_id": "7fad540e-a49d-49c7-9b29-051db3cac80e",
+  "kind": "experiment",
+  "status": "starting",
+  "held": null,
+  "runs": 1,
+  "worker": "busy",
+  "shell_owner": "user",
+  "shell_mode": "manual_prompt",
+  "automation": "idle",
+  "reviews": 0,
+  "run": null,
+  "requests": 2
+ },
+ {
+  "t": 16.9,
+  "wall": "14:01:53",
+  "event": "exp_running",
+  "task": {
+   "active": true,
+   "cancel_requested": false,
+   "closed_reason": null,
+   "held_reason": null,
+   "kind": "experiment",
+   "last_result": null,
+   "retry_limit": 3,
+   "revision": 1,
+   "run_id": null,
+   "runs_started": 1,
+   "since": "2026-10-05T05:01:49Z",
+   "status": "starting",
+   "summary": "Run ./exp.sh and judge the provided success criteria.",
+   "task_id": "7fad540e-a49d-49c7-9b29-051db3cac80e"
+  },
+  "shell": {
+   "error": null,
+   "executable": "/usr/bin/bash",
+   "generation": 1,
+   "held_reasons": [
+    "user_owner",
+    "parent_not_control_wait"
+   ],
+   "input_owner": "user",
+   "kind": "bash",
+   "owner_epoch": 2,
+   "parent": {
+    "pid": 3472137,
+    "start_ticks": 272156766
+   },
+   "parent_mode": "manual_prompt",
+   "phase": "not_sent",
+   "request_id": null,
+   "supervisor": null,
+   "takeover_confirmed": false,
+   "takeover_requested": false,
+   "unknown": []
+  },
+  "automation": {
+   "detail": "no active run",
+   "interruption": {
+    "confirmed_at": null,
+    "error": null,
+    "manager_ack": null,
+    "pause_id": null,
+    "requested_at": null,
+    "state": "none",
+    "unknown_tool_call_ids": [],
+    "worker_ack": null
+   },
+   "paused": false,
+   "persistence_error": null,
+   "resume": null,
+   "retry_limit": 3,
+   "review": {
+    "applies": false,
+    "coalesced_count": 0,
+    "exit": null,
+    "interval_seconds": 60,
+    "last_review_at": null,
+    "next_due_in_seconds": null,
+    "pending": false,
+    "reason": null,
+    "review_count": 0,
+    "status": null
+   },
+   "run": null,
+   "source": "backend",
+   "state": "idle",
+   "tick": {
+    "at": "2026-10-05T05:01:50+00:00",
+    "outcome": "idle",
+    "problems": []
+   },
+   "transition": null
+  },
+  "status_lines": [
+   "focus: MANAGER OMP | host 입력 owner: user | shell mode: manual_prompt | worker: 작업 중 | 자동화: idle",
+   "작업: 실험 \"Run ./exp.sh and judge the provided suc…\" [시작 중] | backend: ready | bridge manager=ok worker=ok | 마지막 확인 14:01:53 (0s 전) | Ctrl-] ? 도움말"
+  ]
+ },
+ {
+  "t": 18.9,
+  "wall": "14:01:55",
+  "event": "typed",
+  "step": 3,
+  "requests": 3
+ },
+ {
+  "t": 21.0,
+  "wall": "14:01:58",
+  "event": "state",
+  "task_id": "7fad540e-a49d-49c7-9b29-051db3cac80e",
+  "kind": "experiment",
+  "status": "running",
+  "held": null,
+  "runs": 1,
+  "worker": "busy",
+  "shell_owner": "manager",
+  "shell_mode": "control_wait",
+  "automation": "active",
+  "reviews": 0,
+  "run": null,
+  "requests": 4
+ },
+ {
+  "t": 60.5,
+  "wall": "14:02:37",
+  "event": "timeout",
+  "what": "observe-window(no-op)",
+  "task": {
+   "active": true,
+   "cancel_requested": false,
+   "closed_reason": null,
+   "held_reason": null,
+   "kind": "experiment",
+   "last_result": null,
+   "retry_limit": 3,
+   "revision": 1,
+   "run_id": "41bc8043-cd98-4803-b0a2-b0a871a8dd8a",
+   "runs_started": 1,
+   "since": "2026-10-05T05:01:57Z",
+   "status": "running",
+   "summary": "Run ./exp.sh and judge the provided success criteria.",
+   "task_id": "7fad540e-a49d-49c7-9b29-051db3cac80e"
+  },
+  "worker": {
+   "state": "busy",
+   "task_id": "7fad540e-a49d-49c7-9b29-051db3cac80e"
+  },
+  "automation": {
+   "detail": "automation active for the run",
+   "interruption": {
+    "confirmed_at": null,
+    "error": null,
+    "manager_ack": null,
+    "pause_id": null,
+    "requested_at": null,
+    "state": "none",
+    "unknown_tool_call_ids": [],
+    "worker_ack": null
+   },
+   "paused": false,
+   "persistence_error": null,
+   "resume": null,
+   "retry_limit": 3,
+   "review": {
+    "applies": true,
+    "coalesced_count": 0,
+    "exit": null,
+    "interval_seconds": 60,
+    "last_review_at": null,
+    "next_due_in_seconds": 21.9,
+    "pending": false,
+    "reason": "next_interval_not_due",
+    "review_count": 0,
+    "status": "waiting"
+   },
+   "run": {
+    "bound": true,
+    "error": null,
+    "kind": "experiment",
+    "revision": 1,
+    "run_id": "41bc8043-cd98-4803-b0a2-b0a871a8dd8a",
+    "task_id": "7fad540e-a49d-49c7-9b29-051db3cac80e"
+   },
+   "source": "backend",
+   "state": "active",
+   "tick": {
+    "at": "2026-10-05T05:02:35+00:00",
+    "outcome": "admitted",
+    "problems": []
+   },
+   "transition": null
+  }
+ },
+ {
+  "t": 90.9,
+  "wall": "14:03:07",
+  "event": "state",
+  "task_id": "7fad540e-a49d-49c7-9b29-051db3cac80e",
+  "kind": "experiment",
+  "status": "waiting_report",
+  "held": "worker_busy",
+  "runs": 1,
+  "worker": "busy",
+  "shell_owner": "user",
+  "shell_mode": "manual_prompt",
+  "automation": "active",
+  "reviews": 0,
+  "run": null,
+  "requests": 7
+ },
+ {
+  "t": 98.3,
+  "wall": "14:03:15",
+  "event": "state",
+  "task_id": "7fad540e-a49d-49c7-9b29-051db3cac80e",
+  "kind": "experiment",
+  "status": "waiting_report",
+  "held": "worker_busy",
+  "runs": 1,
+  "worker": "busy",
+  "shell_owner": "user",
+  "shell_mode": "manual_prompt",
+  "automation": "active",
+  "reviews": 1,
+  "run": null,
+  "requests": 8
+ },
+ {
+  "t": 99.3,
+  "wall": "14:03:16",
+  "event": "state",
+  "task_id": "7fad540e-a49d-49c7-9b29-051db3cac80e",
+  "kind": "experiment",
+  "status": "waiting_report",
+  "held": "worker_busy",
+  "runs": 1,
+  "worker": "busy",
+  "shell_owner": "user",
+  "shell_mode": "manual_prompt",
+  "automation": "held",
+  "reviews": 1,
+  "run": null,
+  "requests": 8
+ },
+ {
+  "t": 105.7,
+  "wall": "14:03:22",
+  "event": "state",
+  "task_id": "7fad540e-a49d-49c7-9b29-051db3cac80e",
+  "kind": "experiment",
+  "status": "waiting_report",
+  "held": null,
+  "runs": 1,
+  "worker": "busy",
+  "shell_owner": "user",
+  "shell_mode": "manual_prompt",
+  "automation": "held",
+  "reviews": 1,
+  "run": null,
+  "requests": 9
+ },
+ {
+  "t": 111.0,
+  "wall": "14:03:28",
+  "event": "state",
+  "task_id": "7fad540e-a49d-49c7-9b29-051db3cac80e",
+  "kind": "experiment",
+  "status": "finished",
+  "held": null,
+  "runs": 1,
+  "worker": "idle",
+  "shell_owner": "user",
+  "shell_mode": "manual_prompt",
+  "automation": "idle",
+  "reviews": 0,
+  "run": null,
+  "requests": 11
+ },
+ {
+  "t": 111.0,
+  "wall": "14:03:28",
+  "event": "exp_finished",
+  "task": {
+   "active": false,
+   "cancel_requested": false,
+   "closed_reason": null,
+   "held_reason": null,
+   "kind": "experiment",
+   "last_result": {
+    "judgment": "success",
+    "outcome": "reported",
+    "report": "accepted_by_manager",
+    "run_closed": true,
+    "run_id": "41bc8043-cd98-4803-b0a2-b0a871a8dd8a"
+   },
+   "retry_limit": 3,
+   "revision": 1,
+   "run_id": null,
+   "runs_started": 1,
+   "since": "2026-10-05T05:03:27Z",
+   "status": "finished",
+   "summary": "Run ./exp.sh and judge the provided success criteria.",
+   "task_id": "7fad540e-a49d-49c7-9b29-051db3cac80e"
+  },
+  "worker": {
+   "state": "idle",
+   "task_id": null
+  },
+  "automation": {
+   "detail": "no active run",
+   "interruption": {
+    "confirmed_at": null,
+    "error": null,
+    "manager_ack": null,
+    "pause_id": null,
+    "requested_at": null,
+    "state": "none",
+    "unknown_tool_call_ids": [],
+    "worker_ack": null
+   },
+   "paused": false,
+   "persistence_error": null,
+   "resume": null,
+   "retry_limit": 3,
+   "review": {
+    "applies": false,
+    "coalesced_count": 0,
+    "exit": null,
+    "interval_seconds": 60,
+    "last_review_at": null,
+    "next_due_in_seconds": null,
+    "pending": false,
+    "reason": null,
+    "review_count": 0,
+    "status": null
+   },
+   "run": null,
+   "source": "backend",
+   "state": "idle",
+   "tick": {
+    "at": "2026-10-05T05:03:27+00:00",
+    "outcome": "idle",
+    "problems": []
+   },
+   "transition": null
+  },
+  "shell": {
+   "error": null,
+   "executable": "/usr/bin/bash",
+   "generation": 1,
+   "held_reasons": [
+    "takeover_requested",
+    "user_owner",
+    "outstanding_request"
+   ],
+   "input_owner": "user",
+   "kind": "bash",
+   "owner_epoch": 4,
+   "parent": {
+    "pid": 3472137,
+    "start_ticks": 272156766
+   },
+   "parent_mode": "manual_prompt",
+   "phase": "control_returned",
+   "request_id": "ec0bcbc1-0f53-483f-9b7b-7a20358eb60c",
+   "supervisor": {
+    "pid": 3473461,
+    "start_ticks": 272158771
+   },
+   "takeover_confirmed": true,
+   "takeover_requested": true,
+   "unknown": []
+  },
+  "requests": {
+   "agent/sessions/-tmp-wb-cw18-smoke-42o8dr5k-project/2026-10-05T05-01-37-761Z_01a10a70-5a61-7407-ab64-1f6fac6ccc72.jsonl": {
+    "assistant": 5,
+    "error_or_aborted": 0,
+    "role_hint": "worker"
+   },
+   "agent/sessions/-tmp-wb-cw18-smoke-42o8dr5k-project/2026-10-05T05-01-37-764Z_01a10a70-5a64-7327-be4a-d11eed68f8bf.jsonl": {
+    "assistant": 6,
+    "error_or_aborted": 0,
+    "role_hint": "manager"
+   }
+  }
+ },
+ {
+  "t": 111.1,
+  "wall": "14:03:28",
+  "event": "shell_back",
+  "shell": {
+   "error": null,
+   "executable": "/usr/bin/bash",
+   "generation": 1,
+   "held_reasons": [
+    "takeover_requested",
+    "user_owner",
+    "outstanding_request"
+   ],
+   "input_owner": "user",
+   "kind": "bash",
+   "owner_epoch": 4,
+   "parent": {
+    "pid": 3472137,
+    "start_ticks": 272156766
+   },
+   "parent_mode": "manual_prompt",
+   "phase": "control_returned",
+   "request_id": "ec0bcbc1-0f53-483f-9b7b-7a20358eb60c",
+   "supervisor": {
+    "pid": 3473461,
+    "start_ticks": 272158771
+   },
+   "takeover_confirmed": true,
+   "takeover_requested": true,
+   "unknown": []
+  },
+  "hold": null
+ },
+ {
+  "t": 149.1,
+  "wall": "14:04:06",
+  "event": "final",
+  "task": {
+   "active": false,
+   "cancel_requested": false,
+   "closed_reason": null,
+   "held_reason": null,
+   "kind": "experiment",
+   "last_result": {
+    "judgment": "success",
+    "outcome": "reported",
+    "report": "omp_processed",
+    "run_closed": true,
+    "run_id": "41bc8043-cd98-4803-b0a2-b0a871a8dd8a"
+   },
+   "retry_limit": 3,
+   "revision": 1,
+   "run_id": null,
+   "runs_started": 1,
+   "since": "2026-10-05T05:03:27Z",
+   "status": "finished",
+   "summary": "Run ./exp.sh and judge the provided success criteria.",
+   "task_id": "7fad540e-a49d-49c7-9b29-051db3cac80e"
+  },
+  "worker": {
+   "state": "idle",
+   "task_id": null
+  },
+  "automation": {
+   "detail": "no active run",
+   "interruption": {
+    "confirmed_at": null,
+    "error": null,
+    "manager_ack": null,
+    "pause_id": null,
+    "requested_at": null,
+    "state": "none",
+    "unknown_tool_call_ids": [],
+    "worker_ack": null
+   },
+   "paused": false,
+   "persistence_error": null,
+   "resume": null,
+   "retry_limit": 3,
+   "review": {
+    "applies": false,
+    "coalesced_count": 0,
+    "exit": null,
+    "interval_seconds": 60,
+    "last_review_at": null,
+    "next_due_in_seconds": null,
+    "pending": false,
+    "reason": null,
+    "review_count": 0,
+    "status": null
+   },
+   "run": null,
+   "source": "backend",
+   "state": "idle",
+   "tick": {
+    "at": "2026-10-05T05:04:05+00:00",
+    "outcome": "idle",
+    "problems": []
+   },
+   "transition": null
+  },
+  "host": {
+   "error": null,
+   "executable": "/usr/bin/bash",
+   "generation": 1,
+   "held_reasons": [
+    "takeover_requested",
+    "user_owner",
+    "outstanding_request"
+   ],
+   "input_owner": "user",
+   "kind": "bash",
+   "owner_epoch": 4,
+   "parent": {
+    "pid": 3472137,
+    "start_ticks": 272156766
+   },
+   "parent_mode": "manual_prompt",
+   "phase": "control_returned",
+   "request_id": "ec0bcbc1-0f53-483f-9b7b-7a20358eb60c",
+   "supervisor": {
+    "pid": 3473461,
+    "start_ticks": 272158771
+   },
+   "takeover_confirmed": true,
+   "takeover_requested": true,
+   "unknown": []
+  }
+ },
+ {
+  "t": 149.1,
+  "wall": "14:04:06",
+  "event": "requests_final",
+  "per_file": {
+   "agent/sessions/-tmp-wb-cw18-smoke-42o8dr5k-project/2026-10-05T05-01-37-761Z_01a10a70-5a61-7407-ab64-1f6fac6ccc72.jsonl": {
+    "assistant": 5,
+    "error_or_aborted": 0,
+    "role_hint": "worker"
+   },
+   "agent/sessions/-tmp-wb-cw18-smoke-42o8dr5k-project/2026-10-05T05-01-37-764Z_01a10a70-5a64-7327-be4a-d11eed68f8bf.jsonl": {
+    "assistant": 7,
+    "error_or_aborted": 0,
+    "role_hint": "manager"
+   }
+  },
+  "total": 12,
+  "stop_reason": null
+ },
+ {
+  "t": 149.5,
+  "wall": "14:04:06",
+  "event": "shutdown",
+  "exit": 0,
+  "out": "no active work reported\n{\"shutdown\": {\"panes\": [{\"exit_status\": -1, \"pane\": \"host_shell\", \"survivors\": []}, {\"exit_status\": 143, \"pane\": \"manager_omp\", \"survivors\": []}, {\"exit_status\": 143, \"pane\": \"worker_omp\", \"survivors\": []}], \"processes\": {\"host_shell\": \"dead\", \"manager_omp\": \"dead\", \"supervisor\": \"dead\", \"worker_omp\": \"dead\"}, \"verified\": true}}\n"
+ },
+ {
+  "t": 153.4,
+  "wall": "14:04:10",
+  "event": "artifacts",
+  "hello": null,
+  "second_exists": false,
+  "git_status": ""
+ },
+ {
+  "t": 154.0,
+  "wall": "14:04:10",
+  "event": "cleanup",
+  "residue_processes": [],
+  "still_alive": [],
+  "root_exists": false,
+  "elapsed_s": 154.0
+ }
+]

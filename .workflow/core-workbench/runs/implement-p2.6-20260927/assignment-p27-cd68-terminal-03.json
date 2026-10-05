@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cd68-terminal-03",
+  "ticket_id": "CW-18 C-D68 (8) terminal periodic check + completion notice",
+  "role": "worker_senior",
+  "unit": "V-CW-18-cd68-terminal",
+  "approved_bundle_digest": "be5579d83f63b95c8a481adb71fc7927bba400ed471784587ea944cd3cd5fcfc",
+  "routing": {
+    "planned_role": "worker_senior",
+    "selected_role": "worker_senior (Opus, reused agent cd68-terminal2 per user request to reuse panes)",
+    "reason_codes": [
+      "workflow_liveness",
+      "coupled_invariants"
+    ],
+    "evidence_refs": [
+      "docs/features/core-workbench/DECISIONS.md#C-D68 (8)"
+    ]
+  },
+  "required_behavior": [
+    "terminal call waits at most timeout_seconds (default 120, max 1800); if not exited, returns status running and tells the worker to END ITS TURN (no re-wait loop): Workbench will send periodic checks and a completion notice. Keep command=null result fetch (returns the finished result or current running status) but the skill/tool text must not tell the worker to loop on it.",
+    "While a terminal command runs, Workbench sends the worker a check every 60 s (reuse AutomationController/TaskFlow review machinery or the same delivery path): content = command, cwd, elapsed, exit state, new output since the last check (bounded tail), log path; asks the worker to look for errors/hangs and report to the manager via to_manager only if useful (or tell the user in its pane when there is no Task). Worker busy -> merge into one pending (latest) check; paused -> no checks.",
+    "On exit, if no terminal call is waiting for it, send the worker an immediate completion notice (command, cwd, exit code/signal, output tail, log path, duration) through the existing worker delivery lane; worker busy -> deliver when idle; paused -> deliver on resume; never twice; if a waiting call got the result, no notice. Survives the waiting call being aborted.",
+    "Experiment-run 60 s reviews and terminal checks must not double-deliver or race (only one active host command anyway, via HostGate).",
+    "Journal: record checks sent/merged/skipped(paused) and the completion notice delivery outcome.",
+    "Skill (to-manager) and terminal tool description updated accordingly (short).",
+    "Tests (scripted, no real provider): periodic check cadence with a fake clock, merge while busy, pause suppression, completion notice exactly once (incl. after abort, after waiting call timeout, not when a waiting call got the result), resume delivery, experiment/terminal no double delivery."
+  ],
+  "acceptance": [
+    "red->green tests; test_flow_terminal x3, tests/backend flow*/automation*, test_workbench_skills, node handoff_tools, tests/workflow, tests/bridge (real exit codes)"
+  ],
+  "allowed_write_paths": [
+    "src/workbench/backend/flow_terminal.py",
+    "src/workbench/backend/flow.py",
+    "src/workbench/backend/flow_tasks.py",
+    "src/workbench/backend/automation.py",
+    "src/workbench/backend/service.py",
+    "src/workbench/contracts/ui_v1.py",
+    "omp_bridge/g3/bridge.ts",
+    "omp_bridge/skills/to-manager/SKILL.md",
+    "tests/backend/test_flow_terminal*.py",
+    "tests/backend/test_automation*.py",
+    "tests/backend/test_workbench_skills.py",
+    "tests/bridge/handoff_tools.test.ts"
+  ],
+  "prohibited_paths": [
+    "tests/**/*_independent*",
+    "docs/**",
+    ".workflow/**"
+  ],
+  "rules": "No real provider requests; never read credential contents or other processes' environ; temp dirs only under /tmp; kill only PIDs you started; never touch ~/wb-urux-sandbox or user processes; no commits; no graphify update.",
+  "result_format": "checks table first, status, changed paths + sha256, design choices needing a user decision, residue. Korean, <=12 lines."
+}

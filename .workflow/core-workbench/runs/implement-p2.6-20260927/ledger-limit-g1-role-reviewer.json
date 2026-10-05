@@ -1,0 +1,23 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 1927,
+  "event": {
+    "id": "limit-g1-role-reviewer",
+    "kind": "limit",
+    "data": {
+      "authority": "C-D55 budget delegation; result-p27-cw18-smoke-04 G1-G3",
+      "bucket": "role:reviewer",
+      "decision_owner": "Root",
+      "expected_previous": {
+        "authority": "C-D67 (user 2026-10-05), approved PLAN p2.7j, C-D55 budget delegation, workflow-contract section 8",
+        "reason": "C-D67 review",
+        "value": 138
+      },
+      "origin": "operating",
+      "reason": "smoke-04 findings fix, review, smoke-05",
+      "remaining_work_estimate": 1,
+      "scope_basis": null,
+      "value": 139
+    }
+  }
+}

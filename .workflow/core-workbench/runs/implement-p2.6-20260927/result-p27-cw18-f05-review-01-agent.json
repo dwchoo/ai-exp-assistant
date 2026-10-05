@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw18-f05-review-01",
+  "frozen_candidate": "d94a7dddda1999cb970269ad2061bc524e09977e728be9aa2ba4976f2dc040e8",
+  "overall": "integrate",
+  "findings": [
+    {"severity": "P3", "where": "src/workbench/backend/flow_tasks.py:_judgment_unavailable (complete_run/_save_task/_tell_manager block)", "scenario": "A repository failure inside _judgment_unavailable itself (complete_run raising) is not caught by _run_error, so it reaches the runner's generic handler: runner_error:<Type>, Task stays active, no notice. Only reachable when the repository is already broken; _persist failures are handled.", "clause": "G2 every analysis failure ends indeterminate", "fix": "optional: wrap complete_run in try/except and still finish the Task + notice."},
+    {"severity": "P3", "where": "src/workbench/backend/flow_tasks.py:_close_accepted_run (except Exception: pass)", "scenario": "A failing fail_run/complete_run after an accepted report is swallowed silently; the run could stay current while the Task shows finished. Only the original error type is recorded, not this one.", "clause": "no silent swallowing", "fix": "record the close error type in the run_error ledger entry."},
+    {"severity": "P3", "where": "src/workbench/workflow/run.py:judge except Exception", "scenario": "Programming errors (TypeError etc.) are recorded only as analysis_error:<Type>; no detail/traceback is kept anywhere, so root cause is hard to find. Type is visible to the manager notice.", "clause": "errors recorded with type", "fix": "optional: keep str(exc)[:200] in worker_analysis_rejected.detail."},
+    {"severity": "P3", "where": "src/workbench/backend/flow_tasks.py ~1273-1300 (busy_since/deferred_since)", "scenario": "Bounds are correct for continuous busy, continuous deferred and idle gaps; pause resets both by design. A worker flapping idle/busy with a deferred delivery each idle moment resets deferred_since on every busy observation and busy_since on every idle one, so the limit never fires. Pathological; the delivery normally succeeds at an idle moment.", "clause": "G2 idle limit", "fix": "optional: keep deferred_since across busy observations or cap total attempts."}
+  ],
+  "prior_findings": {
+    "P2": "fixed: judge wraps _analyse in except Exception -> _analysis_unavailable(analysis_error:<Type>), worker_judgment reset, report marked not_sent; flow adds except Exception -> _run_error; report-stage errors: accepted keeps closed run (no double close, guarded by current run_id check), unknown outcome -> report_outcome_unknown, never resent. WorkflowHeld (pause/revoke/cancel authority) is re-raised before the broad catch and _analysis_unavailable re-checks authority first, so holds are kept; WorkerJudgmentUnavailable subclass is routed before generic WorkflowHeld.",
+    "P3a": "fixed: busy_since=None on idle observation and on pause; deferred_since covers idle-but-deferred deliveries.",
+    "P3b": "fixed: real-run tests (tests/workflow/test_run.py, tests/backend/test_cw18_smoke04_fixes.py) inject OSError/KeyError/MailboxError/BridgeTimeout/persist failures and pause-during-failure on real TaskFlow+WorkflowRun."
+  },
+  "tests": "PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest: tests/backend 586 OK exit 0; tests/workflow (discover) 56 OK exit 0; tests/bridge 49 OK exit 0; tests/contracts 52 OK exit 0."
+}

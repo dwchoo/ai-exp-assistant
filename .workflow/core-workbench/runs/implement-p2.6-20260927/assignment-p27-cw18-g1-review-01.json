@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw18-g1-review-01",
+  "ticket_id": "CW-18 smoke-04 fixes delta review",
+  "role": "reviewer",
+  "unit": "V-CW-18-smoke-fix",
+  "approved_bundle_digest": "68bcebd494e90fb0773c6e6b80ed04a5b50688f36322b11834dd75fee780f296",
+  "routing": {
+    "planned_role": "reviewer",
+    "selected_role": "reviewer (wb-delta-reviewer, Sonnet high)",
+    "reason_codes": [
+      "bounded_delta_after_full_review"
+    ],
+    "evidence_refs": []
+  },
+  "frozen_candidate": "38fbfc35572ab0a01920a0388bbfaaf91c44b8c1bdf4b4a6566565b0a0a1e061",
+  "criteria": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-smoke-04.md G1-G3",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/root-adjudication-p27-cw18-response-id.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/assignment-p27-cw18-smoke-fix-04.json"
+  ],
+  "delta": {
+    "base": "git HEAD + previously reviewed C-D67 delta (candidate 27e05aff...)",
+    "files": [
+      "omp_bridge/g3/bridge.ts",
+      "src/workbench/backend/flow_tasks.py",
+      "src/workbench/workflow/run.py",
+      "src/workbench/workflow/__init__.py",
+      "omp_bridge/skills/to-worker/SKILL.md"
+    ]
+  },
+  "focus": [
+    "Bridge-generated response_id: uniqueness, no trust in model-supplied values, other identity rules unchanged, no way to make two responses share an id or reuse an old one.",
+    "G2: every analysis-stage failure ends with indeterminate (never success), run closed, worker free, automation idle, exactly one manager notice, no resend; the 180 s idle limit cannot cut a healthy long analysis while the worker is legitimately busy in a way that loses a valid judgement (assess risk); pause/cancel keep holds.",
+    "G3: reasons recorded without response text.",
+    "Tests (incl. the independent updates) keep invariants."
+  ],
+  "rules": "Read-only; write only .workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-g1-review-01-agent.json. unittest with /tmp/cw02-g1-venv/bin/python; node --experimental-strip-types --test for TS; no real provider requests; never read credential contents; never pkill; never touch ~/wb-urux-sandbox or the user's processes.",
+  "result_format": "Findings P0..P3 with file:line; overall integrate/block. Write JSON; reply in Korean <=10 lines."
+}

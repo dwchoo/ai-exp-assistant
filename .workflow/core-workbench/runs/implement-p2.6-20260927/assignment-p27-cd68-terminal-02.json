@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cd68-terminal-02",
+  "ticket_id": "CW-18 C-D68 (7) terminal correction",
+  "role": "worker_senior",
+  "unit": "V-CW-18-cd68-terminal",
+  "approved_bundle_digest": "24135d9f591255913ab52bf362411c56c3fdcc07b4a3a81a30e9552fb0e52260",
+  "routing": {
+    "planned_role": "worker_senior",
+    "selected_role": "worker_senior (Opus general-purpose)",
+    "reason_codes": [
+      "process_lifetime"
+    ],
+    "evidence_refs": [
+      "docs/features/core-workbench/DECISIONS.md#C-D68 (7)",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd68-terminal-01.md"
+    ]
+  },
+  "required_behavior": [
+    "Working directory: run the command in the host shell's CURRENT cwd (where the user last cd'd), not the project dir. Do not cd the parent shell before the command; the child interpreter inherits the parent's cwd. Remove now-unneeded project-dir cd/restore logic (keep any cwd restore needed only if something still changes the parent cwd, e.g. if the handoff path itself requires it; explain). The result and journal record the actual cwd used (observed, e.g. via the shell's cwd probe).",
+    "Timeouts: default 120 s, max 1800 s (backend constant, bridge schema/description text, skill text if it mentions numbers).",
+    "Keep: allowed without a Task (task_id null in the journal); paused refuses only new commands, command=null wait on a running command allowed.",
+    "Update tests accordingly (cwd = user's current dir at call time incl. after the user cd's elsewhere; parent cwd unchanged afterwards; timeout defaults/max clamp)."
+  ],
+  "acceptance": [
+    "red->green tests; run tests/backend/test_flow_terminal.py x3, test_workbench_skills, tests/bridge (node handoff_tools + unittest discover), tests/workflow, tests/terminal (real exit codes; /tmp/cw02-g1-venv/bin/python, PYTHONPATH=src)"
+  ],
+  "allowed_write_paths": [
+    "src/workbench/backend/flow_terminal.py",
+    "src/workbench/backend/flow_tasks.py",
+    "src/workbench/backend/service.py",
+    "src/workbench/terminal/shell_persistent/adapter.py",
+    "omp_bridge/g3/bridge.ts",
+    "omp_bridge/skills/to-manager/SKILL.md",
+    "tests/backend/test_flow_terminal.py",
+    "tests/bridge/handoff_tools.test.ts"
+  ],
+  "prohibited_paths": [
+    "tests/**/*_independent*",
+    "docs/**",
+    ".workflow/**"
+  ],
+  "rules": "No real provider requests; never read credential contents or other processes' environ; temp dirs only under /tmp; kill only PIDs you started; never touch ~/wb-urux-sandbox or user processes; no commits; no graphify update.",
+  "result_format": "checks table first, status, changed paths + sha256, residue. Korean, <=10 lines."
+}

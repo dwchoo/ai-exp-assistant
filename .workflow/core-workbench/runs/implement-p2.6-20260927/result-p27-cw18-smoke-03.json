@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw18-smoke-03",
+  "status": "stopped_by_rule_3",
+  "report": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-smoke-03.md",
+  "timeline": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-smoke-03-timeline.json",
+  "summary": {
+    "requests": "5/30 (manager 4, worker 1), ~1 min",
+    "failure": "worker execute marker correct but preceded by a VISIBLE thinking block (48 chars; keys type, thinking) -> bridge rejects -> start_failed:ValueError 'no validated public worker assistant response'; manager also emitted 40-char thinking -> GPT-5.5 reasoning summary likely on (setting key unverified)",
+    "fixes_confirmed": {
+      "E1": "both deliveries omp_processed (provider_request_matched true)",
+      "E2": "first to_worker accepted",
+      "E3": "start-failure notice reached the manager; manager informed the user and ended its turn",
+      "E4": "status '[시작 실패 · ValueError]'"
+    },
+    "safety": "nothing typed into the host shell; owner and cwd unchanged; worker/automation idle",
+    "unverified": [
+      "host run typing",
+      "60 s review",
+      "judge",
+      "report delivery",
+      "cwd restore",
+      "worker_busy"
+    ],
+    "new": {
+      "F1": "decision needed: worker reasoning summary off vs contract change",
+      "F2 low": "rejection reason invalid_assistant_response not recorded in events/last_result (only generic ValueError)"
+    }
+  },
+  "observed_model": "opus"
+}

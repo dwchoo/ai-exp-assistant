@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cd68-test-02",
+  "ticket_id": "CW-18 C-D68 rerun on corrected candidate",
+  "role": "test_designer",
+  "unit": "V-CW-18-cd68-verify",
+  "approved_bundle_digest": "be5579d83f63b95c8a481adb71fc7927bba400ed471784587ea944cd3cd5fcfc",
+  "frozen_candidate": "39acc4d902b8c5df65b1c873e322a4a89ef7c8fbd7c1274f42984acc0d1f396c",
+  "routing": {
+    "planned_role": "test_designer",
+    "selected_role": "test_designer (wb-test-rerun)",
+    "reason_codes": [
+      "correction_reverification"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd68-test-01.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd68-review-01.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd68-fix-01.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd68-fix-02.md"
+    ]
+  },
+  "required": [
+    "Run on the frozen corrected candidate (no src/omp_bridge edits by anyone during the run; verify by sha256 of changed files before and after): tests/backend, tests/bridge (py + node incl. bridge_terminal_independent_p27cd68.test.ts), tests/workflow, tests/contracts, tests/terminal, tests/gates/g3_omp node, and live_omp_tools_independent_p27cd68 (real OMP 18.6.1, fake provider). Known load flakes: rerun the failing module once and report both.",
+    "Confirm each review-01 finding (P2-1, P2-2, P3-3..5) and test-01 P3 is covered by a passing test; if a finding lacks a test, add a minimal independent test (file *_independent_p27cd68*)."
+  ],
+  "allowed_write_paths": [
+    "tests/**/*_independent_p27cd68*"
+  ],
+  "prohibited_paths": [
+    "src/**",
+    "omp_bridge/**",
+    "docs/**",
+    ".workflow/**"
+  ],
+  "rules": "No real provider/model requests (fake local provider allowed); never read credential contents or other processes' environ; never edit user configs (~/.omp ~/.agents ~/.claude ~/.codex); never use --profile; temp only under /tmp; kill only PIDs you started; never touch ~/wb-urux-sandbox or user processes; no commits; no graphify update.",
+  "result_format": "checks table first (counts, real exit codes), candidate hash check, finding coverage table, verdict. Korean, <=12 lines."
+}

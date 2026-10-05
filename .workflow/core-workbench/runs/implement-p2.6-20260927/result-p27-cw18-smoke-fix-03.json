@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw18-smoke-fix-03",
+  "status": "done",
+  "candidate": "04d1ddf799feb0f6544a6336b9175baf40fda396ab2bfdc952fa2fd354deb5db",
+  "checks": {
+    "TS red->green": "provider_identity 2 + g3 bridge.test 2 fail on HEAD -> 7/7, 24/24, handoff 9/9",
+    "F2": "ImportError -> worker_port 6/6, test_run 1/1, smoke03_fixes 2/2",
+    "suites": "backend 568 (27 skip, 1 xfail), bridge 49, ui 741, contracts 52, workflow 54 - all exit 0",
+    "live --visible-reasoning": "websocket 22/22, sse 21/21: visible thinking (60 chars) + marker accepted, run start, host run, review, judge success, report, idle; thinking text recorded nowhere"
+  },
+  "design": "bridge drops every type:'thinking' item regardless of position/keys; remaining content must be exactly one text item with the marker frame only; no tools, one round, error/abort rejected, identity unchanged; worker_response_rejected.detail codes (extra_text, bad_marker, identity_mismatch, tool_activity, incomplete, multiple_messages, provider_error); backend WorkerResponseRejected(ValueError) reason recorded in run.json, events, Task last_result/held_reason and the manager notice (no response text)",
+  "independent_to_update": "tests/gates/g3_omp/bridge_public_response_independent.test.ts:280 'thinking' variant (thinking item after the marker) now accepted per C-D67",
+  "residue": "none",
+  "observed_model": "opus"
+}

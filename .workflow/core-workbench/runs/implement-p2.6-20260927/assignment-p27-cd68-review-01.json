@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cd68-review-01",
+  "ticket_id": "CW-18 C-D68 frozen review",
+  "role": "reviewer",
+  "unit": "V-CW-18-cd68-verify",
+  "approved_bundle_digest": "be5579d83f63b95c8a481adb71fc7927bba400ed471784587ea944cd3cd5fcfc",
+  "frozen_candidate": "0ac6d625f3f891c3e835147c39ec21a32ccc3889e0a6c950903948a1bc1109d6",
+  "routing": {
+    "planned_role": "reviewer",
+    "selected_role": "reviewer (Opus general-purpose, fresh)",
+    "reason_codes": [
+      "final_full_review"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd68-models-01.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd68-skill-01.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd68-terminal-01.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd68-terminal-02.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd68-terminal-03.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/root-adjudication-p27-cd68-notice.json",
+      "/tmp/wb-cd68-live/ (models unit live evidence)"
+    ]
+  },
+  "spec": "docs/features/core-workbench/DECISIONS.md C-D68 (1)-(8), C-D64 (isolation/home), C-D65 (2) idle-only host shell, C-D66, OPERATING-CONTRACT pause/host terminal rules; tickets/CW-18.md",
+  "surfaces": [
+    "src/workbench/backend/flow_terminal.py (new)",
+    "src/workbench/backend/service.py (terminal wiring, notices)",
+    "src/workbench/backend/flow.py / flow_tasks.py (HostGate, terminal tool_request routing)",
+    "omp_bridge/g3/bridge.ts (`terminal` tool, notice frame, terminal_wait_abandoned)",
+    "omp_bridge/skills/to-manager, to-worker (terminal guidance, subagents, manager rule)",
+    "src/workbench/backend/launcher.py / omp_home.py (model table, worker --tools, agents install, disabledAgents, role-aware isolation leaks, EVIDENCE 18.6.1)",
+    "omp_bridge/omp-models.yml, omp_bridge/agents/{explorer,analyst}.md, omp_bridge/omp-isolation.yml (codeMode off)"
+  ],
+  "focus": [
+    "Enforcement holes: any path for the worker to execute commands outside `terminal` (eval, task subagents incl. explorer/analyst, extension tools in subagents, OMP settings/tools re-enabled by project config or --omp-arg, codeMode)",
+    "Isolation regressions vs C-D64 (no ambient sources re-enabled to load Workbench agents; user ~/.omp untouched)",
+    "terminal: typing into a non-idle shell, races with experiment start/user input/takeover/kill/restart, cwd/env of parent unchanged, log file permissions/size, output visible, deadlocks with the delivery lock, notice exactly-once vs abort/timeout/unknown, pause semantics, backend restart behaviour (state lost => what does the worker see)",
+    "Model table correctness vs C-D68 (4) and that a user /model change stays possible",
+    "Manager rule text; skill accuracy vs actual tool behaviour"
+  ],
+  "rules": "No real provider/model requests (fake local HTTP provider capture allowed); never read credential contents (agent.db, auth) or other processes' environ; never edit ~/.omp ~/.agents ~/.claude ~/.codex or user configs; never use --profile; temp only under /tmp; kill only PIDs you started (no pkill/pattern kills); never touch ~/wb-urux-sandbox or the user's processes; no commits; no graphify update. Read-only: do not edit any file except your result file content in the final answer.",
+  "result_format": "verdict (approve / block), findings ranked P1-P3 with file:line, concrete failure scenario, suggested fix; no style nits. Korean, <=15 lines."
+}

@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw18-f05-review-01",
+  "verdict": "integrate",
+  "frozen_candidate": "d94a7dddda1999cb970269ad2061bc524e09977e728be9aa2ba4976f2dc040e8",
+  "agent_result": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-f05-review-01-agent.json",
+  "checks": "backend 586, workflow 56, bridge 49, contracts 52 - exit 0",
+  "findings": {
+    "P3": [
+      "complete_run failure inside _judgment_unavailable falls to runner_error",
+      "_close_accepted_run except: pass swallows silently",
+      "programming errors recorded with type only",
+      "rapid idle/busy flapping can reset the limit forever"
+    ]
+  },
+  "observed_model": "sonnet"
+}

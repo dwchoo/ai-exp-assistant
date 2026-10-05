@@ -1,0 +1,6 @@
+# p27-cd68-terminal-02 result (worker_senior, Opus) — 2026-10-05
+
+Implemented C-D68 (7): command runs in the parent shell's current cwd (/proc, checked before typing and before submit); project-dir cd, pwd file, cwd restore (_pending_home, home_cwd, restore_cwd) and TerminalService(project_dir=) removed (parent cwd never changes); cwd recorded in result and terminal_started/terminal_ended; default 120 s, max 1800 s (backend, bridge schema/description, skill). Task-less run -> task_id null; paused refuses only new commands.
+Checks: red test_flow_terminal 3 fail / handoff_tools 2 fail; green test_flow_terminal x3 (21), test_workbench_skills 28, node handoff_tools 13; tests/bridge 2 fail (p27w independent pins 1 worker tool, known); tests/workflow first run 1 error (detail not captured), rerun OK; tests/terminal OK.
+Changed: flow_terminal.py 164886f2199e, service.py 993e786c928a, bridge.ts 74365369efe8, to-manager/SKILL.md 1f5b32f6e0db, tests/backend/test_flow_terminal.py 823821097d28, tests/bridge/handoff_tools.test.ts e9f7f5771708.
+Root note: skill/tool text still says "call terminal with command null to wait again" (Root's cancel message not applied); superseded by C-D68 (8), handled in p27-cd68-terminal-03.

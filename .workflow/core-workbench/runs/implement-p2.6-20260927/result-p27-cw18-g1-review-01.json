@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw18-g1-review-01",
+  "verdict": "integrate",
+  "frozen_candidate": "38fbfc35572ab0a01920a0388bbfaaf91c44b8c1bdf4b4a6566565b0a0a1e061",
+  "agent_result": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-g1-review-01-agent.json",
+  "findings": {
+    "P2": "run.py:380-388, flow_tasks.py:843 analysis-stage exceptions other than WorkflowHeld/WorkerResponseRejected/TimeoutError/ValueError (OSError, MailboxError, KeyError, _persist failure) go to the generic runner handler -> Task stays open, no notice (G2 symptom remains for those)",
+    "P3a": "flow_tasks.py:1266-1296 busy_since not reset when the worker becomes idle (accumulates)",
+    "P3b": "flow tests use FakeRun; no pause-during-analysis-failure test",
+    "P3c": "workflow criteria_fail ERROR once (timing flake)"
+  },
+  "fixed": {
+    "G1": "bridge randomUUID response_id; model values discarded; other identity rejections intact",
+    "G2": "known failure paths -> indeterminate close, worker free, automation idle, one notice, no resend (except P2 residual)",
+    "G3": "machine codes, no response text"
+  },
+  "checks": "TS 25/12/7, backend 572, bridge 49, contracts 52, workflow 55 - exit 0",
+  "observed_model": "sonnet"
+}

@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw18-g1-review-01",
+  "frozen_candidate": "38fbfc35572ab0a01920a0388bbfaaf91c44b8c1bdf4b4a6566565b0a0a1e061",
+  "overall": "integrate",
+  "findings": [
+    {"severity": "P2", "where": "src/workbench/workflow/run.py:380-388 (analysis try/except) and src/workbench/backend/flow_tasks.py:843-847/_runner_failed:853-858",
+     "scenario": "Analysis-stage exceptions other than WorkflowHeld/WorkerResponseRejected/TimeoutError/ValueError (e.g. OSError/MailboxError/KeyError from observe or bridge wait, or _persist failure) still reach the runner thread's generic handler; with run_id set _runner_failed only records held_reason runner_error:<Type> and the Task stays active/worker busy with no manager notice - the smoke-04 G2 symptom for that exception class.",
+     "clause": "G2 'every analysis-stage failure ends indeterminate'",
+     "fix": "catch Exception (after the specific clauses) around deliver/observe in run.judge -> _analysis_unavailable('analysis_error:<Type>'), or route runner_error for a Task with a judging run through _judgment_unavailable."},
+    {"severity": "P3", "where": "src/workbench/backend/flow_tasks.py:1266-1277,1291-1296",
+     "scenario": "busy_since is only reset on pause, not when the worker turns idle; busy periods that are interrupted by an idle gap accumulate toward the 180 s limit. A worker legitimately busy (long review turn, manual user prompt) >180 s after exit yields indeterminate although no analysis was ever attempted (re-run needed). No valid judgement is lost (analysis not started), so only a liveness/usability trade-off.",
+     "clause": "G2 idle-limit assessment", "fix": "reset busy_since when _omp_idle is True; consider documenting limit / making it configurable (already injectable)."},
+    {"severity": "P3", "where": "tests/backend/test_cw18_smoke04_fixes.py",
+     "scenario": "Flow-level tests use FakeRun; no test for a pause during the failing analysis (WorkflowHeld path of _analysis_unavailable -> _finish_run held, no notice). Real-run coverage is in tests/workflow/test_run.py (reason recorded, raises WorkerJudgmentUnavailable).",
+     "clause": "pause/cancel keep holds", "fix": "add pause-during-rejection test."},
+    {"severity": "P3", "where": "tests/workflow/test_run.py (test_four_exit_and_evidence_outcomes_on_real_host_shell, case criteria_fail)",
+     "scenario": "One ERROR in the first run of 'unittest tests.workflow.test_*' (load, real host shell); passed in the rerun of test_run alone and in the full discover run (55 OK). Looks like a timing flake, not related to the delta; not reproduced."}
+  ],
+  "g1": "ok: bridge.ts generates randomUUID() per accepted parse; a model-supplied response_id token is dropped unread (never validated/trusted, at any position); a second response_id token or any wrong identity/field still fails (bad_marker/identity_mismatch); field_order no longer lists response_id; Python G3WorkerResponsePort still rejects duplicate response_id and links delivery_omp_processed.workerResponseId; second assistant message rejected (multiple_messages).",
+  "g2": "ok except P2 above: rejected/unknown analysis, non-processed delivery statuses, timeout, unverified identity, evidence-guard conflict -> WorkerJudgmentUnavailable -> run complete_run indeterminate, Task finished (worker free), automation run ended via run_ended, one REPORT notice via _tell_manager + notices[], no resend. Pause/revoked authority and cancel keep the CW-10 hold / cancelled close (_current_authority, _finish_cancel).",
+  "g3": "ok: reasons are token-validated machine codes (_token regex), recorded in run.json worker_analysis_rejected, run_ended last_result, held_reason, notice; no response text.",
+  "tests": {"ts": {"bridge.test.ts": "25/25 exit 0", "bridge_public_response_independent.test.ts": "12/12 exit 0", "provider_identity.test.ts": "7/7 exit 0"},
+            "python": {"tests/backend": "572 OK (28 skipped) exit 0", "tests/bridge": "49 OK exit 0", "tests/contracts": "52 OK exit 0", "tests/workflow": "55 OK via discover exit 0 (one flaky error once, see P3)"}},
+  "prior_findings": {"G1": "fixed", "G2": "fixed for covered classes; P2 residual for generic exceptions", "G3": "fixed"},
+  "residue": "none created (read-only; only this JSON written)"
+}

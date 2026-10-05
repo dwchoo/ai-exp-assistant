@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw18-cd67-test-01",
+  "status": "candidate_ready",
+  "agent_result": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-cd67-test-01-agent.json",
+  "candidate": "27e05aff79c1f2144c19a63cbc004bd413e6da8c5a4ad7ad5f75e43f00cdadce",
+  "checks": {
+    "independent g3 x3": "9/9",
+    "independent + bridge.test": "33",
+    "handoff + provider_identity": "16",
+    "tests/bridge": "49 (1 skip)",
+    "tests/backend": "568 (27 skip, 1 xfail)"
+  },
+  "verdict": "C-D67 satisfied: thinking (before/after/multiple/empty+signature/text key/frame-like) ignored, valid marker published, no thinking content in frames; 13 invalid variants still rejected with specific reason/detail",
+  "notes": "3 test-side expectation fixes; production hashes unchanged",
+  "observed_model": "sonnet"
+}
