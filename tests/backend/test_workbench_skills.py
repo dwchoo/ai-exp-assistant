@@ -112,7 +112,8 @@ def backticked(text: str) -> set[str]:
 class ResultDocumentationTests(unittest.TestCase):
     def test_emitted_notice_kinds_are_the_expected_ones(self):
         self.assertEqual(emitted_notice_kinds(), {"report_outcome_unknown", "report_not_delivered", "task_cancelled",
-                                                  "task_not_started", "run_start_failed"})
+                                                  "task_not_started", "run_start_failed",
+                                                  "run_judgment_unavailable"})  # smoke-04 G2
 
     def test_to_worker_documents_every_emitted_notice_and_no_stale_one(self):
         notices = section(body("to-worker"), "Notices")
@@ -228,6 +229,82 @@ class IsolationExpectationTests(unittest.TestCase):
         leaks = launcher.isolation_leaks(self.observed("to-worker", "orca-cli", "canary"),
                                          allowed_skills=launcher.role_skill_allowlist("manager"))
         self.assertEqual(leaks, ["skill:canary", "skill:orca-cli"])
+
+
+class TerminalAndManagerRuleTests(unittest.TestCase):
+    """C-D68 (1)/(3) (p27-cd68-terminal-01): the worker runs commands only with terminal; the manager does not
+    do delegated work itself."""
+
+    def test_to_manager_says_every_shell_command_goes_through_terminal(self):
+        text = body("to-manager")
+        commands = section(text, "Running commands: `terminal`")
+        self.assertRegex(commands, r"(?i)every shell command[^\n]*`terminal` tool[^\n]*no other way to execute commands")
+        for status in ("exited", "running", "host_terminal_busy", "terminal_command_running", "paused"):
+            self.assertIn(f"`{status}`", commands, status)
+        for field in ("command", "timeout_seconds", "exit_code", "output_tail", "log_path"):
+            self.assertIn(f"`{field}`", commands, field)
+        # C-D68 (8): on running the worker ends its turn; Workbench checks every 60 s and sends a completion
+        # notice. No re-wait loop is suggested.
+        self.assertRegex(commands, r"(?i)`running`[^\n]*end your turn[^\n]*do not start another command")
+        self.assertRegex(commands, r"`terminal_check`[^\n]*every 60 s")
+        self.assertRegex(commands, r"`terminal_done`")
+        self.assertNotRegex(commands, r"(?i)to wait again|wait for it again|wait for it with `command` null")
+        self.assertNotRegex(text, r"(?i)run tests\)")  # no hint at another way to run commands
+        self.assertLess(len(text.splitlines()), 70)
+
+    def test_to_worker_skill_bridge_and_result_carry_the_manager_rule(self):
+        text = body("to-worker")
+        self.assertRegex(text, r"(?i)the worker does the work you delegate: do not do it yourself")
+        self.assertRegex(text, r"(?i)wait for the worker's `to_manager` report")
+        self.assertIn("manager_rule", section(text, "Results"))
+        self.assertRegex(BRIDGE, r"The worker does the delegated task, not you: \"\s*\+\s*\"do not do it yourself")
+        self.assertIn("The worker does this Task; do not do it yourself", flow_tasks.MANAGER_RULE)
+        self.assertIn("to_manager report", flow_tasks.MANAGER_RULE)
+        self.assertGreaterEqual(FLOW_TASKS.count('"manager_rule": MANAGER_RULE'), 3)
+        self.assertLess(len(text), 9000)
+
+    def test_bridge_registers_terminal_for_the_worker_only(self):
+        self.assertRegex(BRIDGE, r'if \(role === "worker"\) \{\s*pi\.registerTool\(\{\s*name: TERMINAL_TOOL\.name')
+        self.assertRegex(BRIDGE, r"Use it for every shell command")
+
+
+class WorkerSubagentRuleTests(unittest.TestCase):
+    """C-D68 (p27-cd68-skill-01): the worker's only subagents are explorer and analyst; agent is always set."""
+
+    def test_to_manager_names_explorer_and_analyst_and_requires_agent(self):
+        text = body("to-manager")
+        sub = section(text, "Subagents: `task` tool")
+        for name in ("explorer", "analyst"):
+            self.assertIn(f"`{name}`", sub, name)
+        self.assertRegex(sub, r"(?i)always set `agent` to `explorer` or `analyst`")
+        self.assertRegex(sub, r"(?i)without `agent` fails")
+        self.assertRegex(sub, r"(?i)never send `to_manager` reports and never run terminal commands")
+        self.assertIn("`terminal`", section(text, "Running commands: `terminal`"))  # existing guidance intact
+        self.assertLess(len(text.splitlines()), 70)
+
+    def test_agent_definitions_match_the_skill(self):
+        agents = Path(launcher.default_bridge_extension()).parent.parent / "agents"
+        names = sorted(
+            re.search(r"^name: (\S+)$", p.read_text(encoding="utf-8"), re.M).group(1)
+            for p in agents.glob("*.md")
+        )
+        self.assertEqual(names, ["analyst", "explorer"])
+
+
+class ReviewFixSkillTests(unittest.TestCase):
+    """p27-cd68-fix-01: subagents are refused the bridge tools; the worker's own command holds an experiment."""
+
+    def test_to_manager_says_subagents_are_refused_the_bridge_tools(self):
+        sub = section(body("to-manager"), "Subagents: `task` tool")
+        self.assertRegex(sub, r"(?i)`to_manager`[^\n]*`terminal`[^\n]*`subagent_not_allowed`")
+        self.assertIn("subagent_not_allowed", BRIDGE)
+
+    def test_to_worker_says_wait_when_the_workers_own_command_holds_the_host_terminal(self):
+        text = body("to-worker")
+        line = next(l for l in text.splitlines() if "held:host_terminal_busy:worker_terminal_command" in l)
+        rest = line.split("held:host_terminal_busy:worker_terminal_command", 1)[1]
+        self.assertRegex(rest, r"(?i)^[^.]*the worker's own `terminal` command[^.]*\. wait")
+        self.assertRegex(rest, r"(?i)do not ask the user to take over")
 
 
 if __name__ == "__main__":

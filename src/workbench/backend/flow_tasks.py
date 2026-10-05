@@ -41,6 +41,10 @@ and the owner of the single active Task:
   the manager learns it from the notices of its next ``to_worker`` result. A
   done/blocked report and a free-work TASK are kept across a pause (never
   submitted, so delivering them after the resume is not a replay; R3).
+- Judgment unavailable (smoke-04 G2/G3): when the worker's staged analysis was rejected, its outcome is
+  unknown, or the worker stays busy past ``ANALYSIS_IDLE_LIMIT`` after the exit, the run closes as
+  ``indeterminate`` (never success) with the machine reason, the Task is ``finished`` (the worker is free), the
+  automation for the run ends and the manager gets one Workbench notice; nothing is resent.
 - Attribution (R2): a ``to_manager`` without ``task_id`` belongs to the active
   Task only once that Task's TASK reached the worker; before that it is
   ``rejected:task_not_delivered``.
@@ -58,6 +62,14 @@ and the owner of the single active Task:
   the live ``WorkflowRun`` on the runner thread, ``work_started`` once the
   free-work TASK message exists) and its close (``run_ended``). It is called
   outside the flow lock; its failure never stops the flow.
+- Host shell owner (C-D68): an experiment run holds the shared ``HostGate``
+  for its whole run (and a pending directory restore for its ``cd``); the
+  worker's ``terminal`` command holds it until its shell was given back, so
+  the two never start into each other (``held:host_terminal_busy``, or
+  ``held:host_terminal_busy:worker_terminal_command`` while the worker's own
+  command holds it). Every
+  accepted ``to_worker`` result (``dispatched``, ``queued``) carries
+  ``manager_rule``: the worker does the Task, the manager waits for its report.
 - Persistence: ``workflow/tasks-flow.jsonl`` (0600, fsync per record) keeps the
   Task state and every decision with its ids. After a backend restart nothing
   is started or resent: an unstarted Task is closed, a Task with a current run
@@ -79,11 +91,14 @@ from uuid import uuid4
 from workbench.backend.flow import (
     ActiveTask, HandoffDecision, HandoffJournal, HandoffRequest, OutboundMessage, accepts_keyword, held, rejected,
 )
+from workbench.backend.flow_terminal import HostGate
 from workbench.contracts.v1 import ActorRole, MessageKind
 from workbench.ipc.bridge_g3.mailbox import MailboxStatus
-from workbench.workflow.run import WorkflowHeld, classify_worker_request
+from workbench.workflow.run import WorkerJudgmentUnavailable, WorkflowHeld, classify_worker_request
+from workbench.workflow.worker_port import WorkerResponseRejected
 
 FLOW_LEDGER_NAME = "tasks-flow.jsonl"  # under DataLayout.workflow
+WORKER_TERMINAL_HELD = "host_terminal_busy:worker_terminal_command"
 RETRY_LIMIT = 3  # CW-13: re-runs of one experiment Task
 SUMMARY_MAX = 1024
 NOTICE_LIMIT = 16
@@ -104,6 +119,12 @@ TASK_NOT_DELIVERED_DETAIL = ("The active Task's instruction has not reached you 
                              "cannot belong to it. Finish the turn; the Task's TASK message follows.")
 # R1: how long a to_worker (to_manager) waits for a report (TASK) the lane is submitting right now.
 REPORT_SETTLE_WAIT = 2.0
+# smoke-04 G2: after the host command exited, the staged analysis waits for an idle worker at most this long
+# (a periodic review turn whose outcome is unknown must not keep the Task waiting forever; a pause does not count).
+ANALYSIS_IDLE_LIMIT = 180.0
+# C-D68 (3): every accepted to_worker result says who does the work.
+MANAGER_RULE = ("The worker does this Task; do not do it yourself (no commands, edits or checks for it). End "
+                "your turn and wait for the worker's to_manager report.")
 CANCEL_WAIT_DETAIL = ("The experiment's host command is still running; Workbench never kills it. The Task "
                       "closes as cancelled when the command exits (the user can stop it in the host shell); "
                       "no judgment is made.")
@@ -255,8 +276,12 @@ class TaskFlow:
                  paused: Callable[[], bool] = lambda: False,
                  experiment: ExperimentPorts | None = None, lifecycle: Any | None = None,
                  poll_interval: float = 0.5, collect_slice: float = 1.0,
-                 project_dir: str | Path | None = None):
+                 project_dir: str | Path | None = None, analysis_idle_limit: float = ANALYSIS_IDLE_LIMIT,
+                 host_gate: HostGate | None = None):
         self._repository_factory = repository_factory
+        # C-D68: one Workbench owner of the host shell (an experiment run or the worker's terminal command).
+        self._host_gate = host_gate or HostGate()
+        self._analysis_idle_limit = analysis_idle_limit
         self._project_dir = project_dir  # D2: absolute Task paths inside it become repo-relative
         self._handoffs = handoffs
         self._omp_idle = omp_idle
@@ -405,6 +430,19 @@ class TaskFlow:
         return ActiveTask(task.task_id, task.run_revision or task.revision, task.kind, True, task.run_id,
                           task.task_message_id)
 
+    def experiment_host_activity(self) -> str | None:
+        """C-D68: why an experiment needs the host shell now (a run starting or running, a directory restore
+        pending), else None. Called by the terminal service under the HostGate lock; takes only the flow lock."""
+        with self._lock:
+            if self._following is not None:
+                return "an experiment run uses the host terminal"
+            if any(task.kind == "experiment" and task.status != "closed" and task.pending_start
+                   for task in self.tasks.values()):
+                return "an experiment run is starting"
+            if self._home_cwd is not None:
+                return "the host shell directory is being restored after an experiment run"
+        return None
+
     def task_view(self) -> dict[str, Any] | None:
         """ui_v1 ``task``: the current Task, else the most recent one (closed), else None."""
         with self._lock:
@@ -518,7 +556,8 @@ class TaskFlow:
             self._delegate(task, request, 1, spec)
             return HandoffDecision({"status": "dispatched", "task_id": new_id, "kind": task.kind, "revision": 1,
                                     "detail": "dispatched to the worker under the user's standing delegation "
-                                              "(C-D66); it reports back with to_manager"})
+                                              "(C-D66); it reports back with to_manager",
+                                    "manager_rule": MANAGER_RULE})
         task = self.tasks.get(task_id)
         if task is None:
             return HandoffDecision(rejected("unknown_task", detail=UNKNOWN_TASK_DETAIL))
@@ -562,7 +601,8 @@ class TaskFlow:
                 revision = repository.revise_task(task.task_id, base)
         self._delegate(task, request, revision, base)
         return HandoffDecision({"status": "dispatched", "task_id": task.task_id, "kind": task.kind,
-                                "revision": revision, "retry": task.runs_started, "retry_limit": RETRY_LIMIT})
+                                "revision": revision, "retry": task.runs_started, "retry_limit": RETRY_LIMIT,
+                                "manager_rule": MANAGER_RULE})
 
     def _work_follow_up(self, task: FlowTask, request: HandoffRequest,
                         spec: dict[str, Any] | None) -> HandoffDecision:
@@ -581,7 +621,8 @@ class TaskFlow:
                                    "task_id": task.task_id}
         if spec is not None:
             payload["paths"] = list(spec["paths"])
-        return HandoffDecision({"status": "queued", "task_id": task.task_id}, message=OutboundMessage(
+        return HandoffDecision({"status": "queued", "task_id": task.task_id, "manager_rule": MANAGER_RULE},
+                               message=OutboundMessage(
             task.task_id, task.run_revision, task.run_id, ActorRole.MANAGER, ActorRole.WORKER,
             MessageKind.QUESTION, payload))
 
@@ -834,7 +875,9 @@ class TaskFlow:
                     self._following = None
                     task = self.tasks.get(job[0])
                     if task is not None and task.status != "closed":
-                        self._runner_failed(task, f"runner_error:{type(exc).__name__}")
+                        reason = getattr(exc, "reason", None)  # G3: a short machine reason when the error has one
+                        self._runner_failed(task, f"runner_error:{type(exc).__name__}"
+                                                  + (f":{reason}" if isinstance(reason, str) and reason else ""))
             with self._wake:
                 if not self._stop:
                     self._wake.wait(0.01)
@@ -968,6 +1011,13 @@ class TaskFlow:
             if ports is None:
                 self._runner_failed(task, "experiment_runner_unavailable")
                 return
+        # C-D68: a terminal command of the worker owns the host shell until it ended and was given back
+        # (p27-cd68-fix-01 P3-5: its own reason, so the manager waits instead of sending the user to clear it).
+        owner = self._host_gate.acquire("experiment")
+        if owner is not None:
+            self._set_held(task_id, WORKER_TERMINAL_HELD if owner == "terminal" else "host_terminal_busy")
+            self._wait(self._poll_interval)
+            return
         port = None
         try:
             port = ports.host_shell()
@@ -978,6 +1028,7 @@ class TaskFlow:
                 return
             self._execute(task, job, port, ports)
         finally:
+            self._host_gate.release("experiment")
             with self._lock:
                 self._following = None
             if port is not None:
@@ -1045,7 +1096,9 @@ class TaskFlow:
             except Exception as exc:
                 port.release_hold()
                 self._give_back(port, ports)
-                error = refused[0] if refused else type(exc).__name__
+                # F2: a rejected worker response keeps the bridge's machine reason, not just "ValueError".
+                error = (refused[0] if refused else exc.reason if isinstance(exc, WorkerResponseRejected)
+                         else type(exc).__name__)
                 tell_manager = False
                 with self._lock:
                     task.last_result = {"outcome": "start_failed", "error": error,
@@ -1098,24 +1151,38 @@ class TaskFlow:
         text = (f"Workbench notice: the experiment run for Task {task_id} did not start ({error}: "
                 f"{detail[:300]}). The worker is free. Tell the user; after the cause is fixed re-run it "
                 "(to_worker with this task_id and run: true) or send a new Task.")
-        payload = {"handoff": "workbench_notice", "source": "workbench", "notice": "run_start_failed",
-                   "task_id": task_id, "error": error, "message": text[:SUMMARY_MAX]}
+        self._tell_manager(task_id, failure.get("revision") or revision, run_id, message_id,
+                           {"notice": "run_start_failed", "error": error}, text, f"start_failed:{task_id}",
+                           record_type="start_failure_notice")
+
+    def _tell_manager(self, task_id: str, revision: int | None, run_id: str, message_id: Any,
+                      fields: Mapping[str, Any], text: str, origin: str, *,
+                      record_type: str = "workbench_notice") -> None:
+        """One Workbench notice to the manager (outside the flow lock), never resent: a worker->manager REPORT
+        replying to the run's TASK message, delivered by the manager lane when the manager OMP is idle."""
+        if not isinstance(message_id, str):
+            with self._lock:
+                self._record({"type": record_type, "task_id": task_id, "run_id": run_id, "state": "not_sent",
+                              "reason": "no_task_message"})
+            return
+        payload = {"handoff": "workbench_notice", "source": "workbench", **fields,
+                   "task_id": task_id, "message": text[:SUMMARY_MAX]}
 
         def listener(event: str, snapshot: Mapping[str, Any]) -> None:
             if event in ("submitted", "delivered", "unknown", "rejected", "held_paused", "withdrawn"):
                 with self._lock:
-                    self._record({"type": "start_failure_notice", "task_id": task_id, "run_id": run_id,
+                    self._record({"type": record_type, "task_id": task_id, "run_id": run_id,
                                   "state": event, "message_id": snapshot.get("message_id")})
 
         try:
             queued = self._handoffs.enqueue(OutboundMessage(
-                task_id, failure.get("revision") or revision, run_id, ActorRole.WORKER, ActorRole.MANAGER,
+                task_id, revision, run_id, ActorRole.WORKER, ActorRole.MANAGER,
                 MessageKind.REPORT, payload, in_reply_to_message_id=message_id),
-                origin=f"start_failed:{task_id}", listener=listener)
+                origin=origin, listener=listener)
         except Exception as exc:  # the notices[] entry still tells the manager
             queued = {"status": "held", "reason": type(exc).__name__}
         with self._lock:
-            self._record({"type": "start_failure_notice", "task_id": task_id, "run_id": run_id,
+            self._record({"type": record_type, "task_id": task_id, "run_id": run_id,
                           "state": queued.get("status"), "reason": queued.get("reason")})
 
     def _give_back(self, port: Any, ports: ExperimentPorts | None = None) -> None:
@@ -1184,6 +1251,8 @@ class TaskFlow:
         if ports is None:
             self._home_cwd = None
             return
+        if self._host_gate.acquire("experiment") is not None:
+            return  # a terminal command owns the host shell; tried again later
         port = None
         try:
             port = ports.host_shell()
@@ -1192,6 +1261,7 @@ class TaskFlow:
         except Exception:
             pass
         finally:
+            self._host_gate.release("experiment")
             if port is not None:
                 try:
                     port.detach()
@@ -1230,6 +1300,11 @@ class TaskFlow:
             self._save_task(task)
         accepted: list[bool] = []
         on_report = self._report_hook(task, run, accepted)
+        # G2: the worker has been busy (not idle for the analysis) since then; fix-05 P3a: one continuous busy
+        # period, so an idle observation starts a new one. ``deferred_since``: analysis deliveries deferred
+        # while the worker looked idle in between (no busy observation), which must not wait forever either.
+        busy_since: float | None = None
+        deferred_since: float | None = None
         try:
             while True:  # judge only when not paused and the worker can take the staged analysis
                 if not self._wait(0):
@@ -1238,24 +1313,43 @@ class TaskFlow:
                     self._end_cancelled_run(task, run)
                     return
                 if self._paused_now():
+                    busy_since = deferred_since = None
                     self._set_held(task.task_id, "paused")
                     self._wait(self._poll_interval)
                     continue
                 if self._omp_idle(ActorRole.WORKER) is not True:
+                    deferred_since = None
+                    busy_since = time.monotonic() if busy_since is None else busy_since
+                    if time.monotonic() - busy_since >= self._analysis_idle_limit:
+                        self._judgment_unavailable(task, run, self._worker_not_idle_reason(), None)
+                        return
                     self._set_held(task.task_id, "worker_busy")
                     self._wait(self._poll_interval)
                     continue
+                busy_since = None  # P3a: the worker is idle; a later busy observation starts a new period
                 self._set_held(task.task_id, None)
                 try:
                     record = self._call_with_report_hook(run.judge, on_report)
                     break
+                except WorkerJudgmentUnavailable as exc:  # G2: rejected or unknown worker analysis
+                    self._judgment_unavailable(task, run, exc.reason, exc.host_evidence or None)
+                    return
                 except WorkflowHeld as exc:
                     request = run._record.get("worker_analysis_request") or {}
                     if request.get("status") == MailboxStatus.DEFERRED.value:
+                        now = time.monotonic()
+                        busy_since = now if busy_since is None else busy_since
+                        deferred_since = now if deferred_since is None else deferred_since
+                        if now - min(busy_since, deferred_since) >= self._analysis_idle_limit:
+                            self._judgment_unavailable(task, run, self._worker_not_idle_reason(), None)
+                            return
                         self._set_held(task.task_id, "worker_busy")  # nothing was sent: ask again
                         self._wait(self._poll_interval)
                         continue
                     self._finish_run(task, run, "held", {"reason": str(exc)[:SUMMARY_MAX]})
+                    return
+                except Exception as exc:  # fix-05 P2: any other failure of the analysis stage or the report
+                    self._run_error(task, run, accepted, on_report, exc)
                     return
             while not accepted and (record.get("report") or {}).get("status") == MailboxStatus.DEFERRED.value:
                 self._set_held(task.task_id, "manager_busy")
@@ -1263,7 +1357,11 @@ class TaskFlow:
                     return
                 if self._paused_now() or self._omp_idle(ActorRole.MANAGER) is not True:
                     continue
-                record = self._call_with_report_hook(run.retry_report, on_report)
+                try:
+                    record = self._call_with_report_hook(run.retry_report, on_report)
+                except Exception as exc:  # fix-05: the report may have reached the manager; never resent
+                    self._run_error(task, run, accepted, on_report, exc)
+                    return
         finally:
             with self._lock:
                 self._report_inflight.discard(task.task_id)
@@ -1279,6 +1377,127 @@ class TaskFlow:
             return
         judgment = (record.get("worker_judgment") or {}).get("judgment")
         self._finish_run(task, run, "reported", {"judgment": judgment, "report": report})
+
+    def _run_error(self, task: FlowTask, run: Any, accepted: list[bool], on_report: Callable,
+                   exc: Exception) -> None:
+        """fix-05 P2: an unexpected exception from the run's analysis or report stage (runner thread).
+
+        Before any report exists it ends like a rejected analysis (``analysis_error:<Type>``: indeterminate,
+        run closed, worker free, automation ended, one manager notice, nothing resent), or keeps the CW-10 hold
+        while paused. Once a report was created it never contradicts it: a report the manager accepted keeps
+        its closed run and the error is only recorded; a report whose delivery outcome is unknown closes as
+        ``report_outcome_unknown`` (R1, never resent).
+        """
+        record = getattr(run, "_record", None)
+        record = record if isinstance(record, dict) else {}
+        report = record.get("report") if isinstance(record.get("report"), dict) else None
+        created = report is not None and report.get("status") != "not_sent"
+        reason = f"{'report' if created else 'analysis'}_error:{type(exc).__name__}"
+        if created and not accepted and report.get("accepted_by_manager") is True:
+            on_report("submitted", dict(record))  # the manager has it: the worker is free (R1)
+        if accepted:
+            self._close_accepted_run(task, run, record, reason)
+            with self._lock:
+                if task.last_result is not None and task.last_result.get("run_id") == run.run_id:
+                    task.last_result["error"] = reason
+                    self._save_task(task)
+                self._record({"type": "run_error", "task_id": task.task_id, "run_id": run.run_id,
+                              "stage": "after_report_accepted", "error": reason})
+            return
+        if created:
+            judgment = (record.get("worker_judgment") or {}).get("judgment")
+            self._finish_run(task, run, "reported", {"judgment": judgment, "error": reason,
+                                                     "report": report.get("status") or "delivery_unknown"})
+            return
+        if self._paused_now() and not self._cancelled(task):  # CW-10: a pause keeps the hold, no notice
+            self._finish_run(task, run, "held", {"reason": f"paused:{reason}"})
+            return
+        rejected = record.get("worker_analysis_rejected")
+        host = rejected.get("host_evidence") if isinstance(rejected, dict) else None
+        self._judgment_unavailable(task, run, reason, host if isinstance(host, Mapping) and host else None)
+
+    def _close_accepted_run(self, task: FlowTask, run: Any, record: Mapping[str, Any], reason: str) -> None:
+        """The report reached the manager: its run is closed once (when the run itself could not close it)."""
+        try:
+            with self._repository() as repository:
+                current = repository.get_current_run(task.task_id)
+                if current is None or current.get("run_id") != run.run_id:
+                    return
+                details = {"judgment": (record.get("worker_judgment") or {}).get("judgment"),
+                           "report": record.get("report"), "error": reason}
+                if record.get("instruction_ended") is True:
+                    repository.fail_run(run.run_id, {"requires_code_change": True, **details})
+                else:
+                    repository.complete_run(run.run_id, details)
+        except Exception:
+            pass
+
+    def _worker_not_idle_reason(self) -> str:
+        """G2/G3: why the analysis never started, with the last periodic review's outcome when it was not processed."""
+        reason = "worker_not_idle_for_analysis"
+        try:
+            review = (self._lifecycle.status() or {}).get("review") or {}
+        except Exception:
+            review = {}
+        status, detail = review.get("status"), review.get("reason")
+        if isinstance(status, str) and status not in ("dispatched", "") and isinstance(detail, str) and detail:
+            reason += f":review_{status}:{detail}"
+        return reason[:200]
+
+    def _judgment_unavailable(self, task: FlowTask, run: Any, reason: str,
+                              host_evidence: Mapping[str, Any] | None) -> None:
+        """smoke-04 G2/G3: the worker analysis was rejected or its outcome is unknown (runner thread).
+
+        CW-10: the result is indeterminate (never success) and nothing is replayed (no second analysis, no
+        report). The run closes, the worker is free (the Task is ``finished``; the manager may re-run or move
+        on), the automation for the run ends, and the manager is told once with the reason and what was and was
+        not judged. ``reason`` is a short machine code, never response text.
+        """
+        record = getattr(run, "_record", None)
+        record = record if isinstance(record, dict) else {}
+        if "worker_analysis_rejected" not in record:  # the run itself did not get to record it
+            record["worker_analysis_rejected"] = {"stage": "analysis", "reason": reason, "host_evidence": host_evidence}
+            try:
+                run._persist()
+            except Exception:
+                pass
+        judged = {"exit_status": record.get("exit_status"), "exit_confirmed": record.get("exit_confirmed") is True,
+                  "raw_log_collected": isinstance(record.get("raw_log_collected"), dict)
+                  and "error" not in record["raw_log_collected"],
+                  "result_collected": isinstance(record.get("result_collected"), dict)
+                  and "error" not in record["result_collected"],
+                  "host_evidence": None if host_evidence is None else dict(host_evidence)}
+        outcome = {"judgment": "indeterminate", "reasons": ["worker_analysis_unavailable"], "reason": reason,
+                   "judged": judged, "not_judged": ["worker_analysis"], "report": "not_sent"}
+        with self._lock:
+            with self._repository() as repository:
+                current = repository.get_current_run(task.task_id)
+                if current is not None and current.get("run_id") == run.run_id:
+                    repository.complete_run(run.run_id, outcome)
+            if self._following == task.task_id:
+                self._following = None
+            task.last_result = {"run_id": run.run_id, "outcome": "judgment_unavailable", **outcome,
+                                "run_closed": True}
+            self._record({"type": "run_ended", "task_id": task.task_id, **task.last_result})
+            revision, message_id = task.run_revision, task.task_message_id or getattr(run, "task_message_id", None)
+            if task.cancel_requested is not None:
+                self._finish_cancel(task, run.run_id)  # the cancel closes the Task and ends the automation
+                return
+            task.run_id, task.held_reason = None, f"judgment_unavailable:{reason}"
+            task.set_status("finished")  # the worker is free (C-D66)
+            self._save_task(task)
+            self._notice(kind="run_judgment_unavailable", task_id=task.task_id, run_id=run.run_id, reason=reason)
+        self._notify_lifecycle("run_ended", run.run_id)
+        host = "not checked" if host_evidence is None else (
+            f"{host_evidence.get('judgment')} ({', '.join(map(str, host_evidence.get('reasons') or []))})")
+        text = (f"Workbench notice: the experiment run of Task {task.task_id} ended (exit status "
+                f"{judged['exit_status']}, exit confirmed: {judged['exit_confirmed']}), but the worker's analysis "
+                f"was not obtained ({reason}). Workbench's own evidence check: {host}. The worker's judgment is "
+                "missing, so the result is indeterminate (not success); nothing was resent. The worker is free. "
+                "Tell the user; re-run it (to_worker with this task_id and run: true) or send a new Task.")
+        self._tell_manager(task.task_id, revision or getattr(run, "revision", None), run.run_id, message_id,
+                           {"notice": "run_judgment_unavailable", "reason": reason, "judgment": "indeterminate",
+                            "judged": judged, "not_judged": ["worker_analysis"]}, text, f"judgment_unavailable:{task.task_id}")
 
     @staticmethod
     def _call_with_report_hook(method: Callable, on_report: Callable) -> dict[str, Any]:

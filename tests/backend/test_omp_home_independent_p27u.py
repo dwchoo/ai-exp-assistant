@@ -446,7 +446,13 @@ class OverlayTests(_Tmp):
         env = launcher.omp_environment(self.env, plan_for(), role="worker", token="t", bridge_socket=Path("/x"),
                                        home=values)
         overlay = launcher.role_overlay("worker", project_dir=project, home=self.home, environment=env)
-        self.assertEqual(overlay["task"]["disabledAgents"], ["proj-agent"])
+        # C-D68: plus the worker's fixed set (OMP's bundled agents); the Workbench explorer/analyst installed in the
+        # Workbench home are not ambient and stay usable for the worker, the manager disables them.
+        self.assertEqual(p27m.ambient_disabled(overlay, "worker"), ["proj-agent"])
+        self.assertFalse(p27m.WORKBENCH_AGENTS & set(overlay["task"]["disabledAgents"]))
+        manager = launcher.role_overlay("manager", project_dir=project, home=self.home, environment=env)
+        self.assertEqual(p27m.ambient_disabled(manager, "manager"), ["proj-agent"])
+        self.assertFalse(p27m.BUNDLED_AGENTS & set(manager["task"]["disabledAgents"]))
         self.assertEqual(launcher.omp_user_dir(self.home, env), self.root / "data" / "omp-root" / "agent")
         files = launcher.ambient_prompt_files(project, env)
         self.assertFalse([f for f in files if str(self.home / ".omp") in f["path"]], files)
@@ -551,11 +557,13 @@ class ClassificationTests(_Tmp):
         self.assertEqual(set(rpc), {"get_state", "get_available_commands", "get_login_providers"}, "zero model calls")
 
     def test_version_evidence_matches_the_home_probe(self):
-        summary = launcher.summarize_isolation({"manager": {"state": "ok", "ok": True, "leaks": [], "warnings": []},
-                                                "worker": {"state": "ok", "ok": True, "leaks": [], "warnings": []}},
-                                               "omp/18.4.5")
+        # C-D68 (6): the isolation evidence is re-made with the installed OMP 18.6.1 (no drift there, drift for 18.4.5)
+        roles = {"manager": {"state": "ok", "ok": True, "leaks": [], "warnings": []},
+                 "worker": {"state": "ok", "ok": True, "leaks": [], "warnings": []}}
+        summary = launcher.summarize_isolation(roles, "omp/18.6.1")
         self.assertFalse(summary.get("version_drift", {}).get("isolation"),
-                         f"setupVersion 2 and the C-D64 evidence are OMP 18.4.5: {summary.get('version_drift')}")
+                         f"the C-D68 isolation evidence is OMP 18.6.1: {summary.get('version_drift')}")
+        self.assertEqual(launcher.summarize_isolation(roles, "omp/18.4.5")["version_drift"].get("isolation"), "18.6.1")
 
 
 HOME_RPC = r'''#!/usr/bin/env python3

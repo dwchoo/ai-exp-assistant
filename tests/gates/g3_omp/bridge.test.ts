@@ -135,8 +135,19 @@ function workerResponse(target: Frame, overrides: Frame = {}): Frame {
 		stage: "execute", kind: "task", task_id: target.taskId, revision_id: target.revisionId,
 		revision: 1, run_id: target.runId, message_id: target.messageId,
 		delivery_attempt_id: target.deliveryAttemptId, session_id: SESSION_ID,
-		session_generation: 1, response_id: randomUUID(), decision: "execute", ...overrides,
+		session_generation: 1, decision: "execute", ...overrides,
 	};
+}
+
+const CANONICAL_UUID_V4 = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
+
+/** The forwarded response is the model's fields plus the bridge-generated response_id (smoke-04 G1). */
+function assertBridgeResponse(forwarded: Frame, sent: Frame, processed: Frame, label = ""): void {
+	const { response_id: generated, ...rest } = forwarded;
+	const { response_id: _ignored, ...expected } = sent;
+	assert.deepEqual(rest, expected, label);
+	assert.match(generated, CANONICAL_UUID_V4, label);
+	assert.equal(processed.workerResponseId, generated, label);
 }
 
 async function driveWorkerTurn(bridge: Awaited<ReturnType<typeof startBridge>>, target: Frame,
@@ -147,7 +158,7 @@ async function driveWorkerTurn(bridge: Awaited<ReturnType<typeof startBridge>>, 
 	] } });
 	bridge.handlers.get("after_provider_response")!();
 	bridge.handlers.get("message_end")!({ message: {
-		role: "assistant", content: [{ type: "text", text }], stopReason: options.stopReason ?? "stop",
+		role: "assistant", content: options.content ?? [{ type: "text", text }], stopReason: options.stopReason ?? "stop",
 		...(options.errorMessage ? { errorMessage: options.errorMessage } : {}),
 	}, willContinue: options.willContinue ?? false });
 	if (options.extraMessage) bridge.handlers.get("message_end")!({ message: {
@@ -169,11 +180,29 @@ test("worker response is public only after terminal agent_end and linked to exac
 		const text = "WB_WORKER_RESPONSE:" + JSON.stringify(response);
 		const processed = await driveWorkerTurn(bridge, target, text);
 		const assistant = await bridge.waitFor(frame => frame.kind === "omp_event" && frame.name === "assistant_message_end");
-		assert.deepEqual(assistant.workerResponse, response);
+		assertBridgeResponse(assistant.workerResponse, response, processed);
 		assert.equal(assistant.messageId, target.messageId);
-		assert.equal(processed.workerResponseId, response.response_id);
 		assert.equal(JSON.stringify({ assistant, processed }).includes(text), false, "raw model text must not cross bridge");
 	} finally { await bridge.close(); }
+});
+
+test("C-D67: thinking items with visible text, before or after the marker, are ignored and never forwarded", async () => {
+	const secret = "CD67_G3_VISIBLE_THINKING";
+	for (const [label, order] of [["before", "before"], ["after", "after"], ["both", "both"]] as const) {
+		const bridge = await startBridge();
+		try {
+			const target = envelope({ event: { type: "message", messageKind: "task", payload: { stage: "execute", revision: 1 } } });
+			const response = workerResponse(target);
+			const text = "WB_WORKER_RESPONSE:" + JSON.stringify(response);
+			const thinking = { type: "thinking", thinking: secret };
+			const content = order === "before" ? [thinking, { type: "text", text }]
+				: order === "after" ? [{ type: "text", text }, thinking] : [thinking, { type: "text", text }, thinking];
+			const processed = await driveWorkerTurn(bridge, target, text, { content });
+			const assistant = await bridge.waitFor(frame => frame.kind === "omp_event" && frame.name === "assistant_message_end");
+			assertBridgeResponse(assistant.workerResponse, response, processed, label);
+			assert.equal(JSON.stringify([assistant, processed, ...bridge.frames]).includes(secret), false, label);
+		} finally { await bridge.close(); }
+	}
 });
 
 test("execute and analysis injections specify the exact self-consistent response contract", async () => {
@@ -190,7 +219,7 @@ test("execute and analysis injections specify the exact self-consistent response
 			assert.equal(contract.marker, "WB_WORKER_RESPONSE:");
 			assert.equal(contract.format, "marker_plus_compact_flat_json");
 			assert.deepEqual(contract.field_order, ["stage", "kind", "task_id", "revision_id", "revision", "run_id",
-				"message_id", "delivery_attempt_id", "session_id", "session_generation", "response_id", "decision"]);
+				"message_id", "delivery_attempt_id", "session_id", "session_generation", "decision"]);
 			assert.deepEqual(contract.fields.map((field: Frame) => field.name), contract.field_order);
 			const fields = Object.fromEntries(contract.fields.map((field: Frame) => [field.name, field]));
 			assert.equal(fields.stage.value, stage);
@@ -202,7 +231,11 @@ test("execute and analysis injections specify the exact self-consistent response
 				session_id: SESSION_ID,
 			})) assert.deepEqual(fields[name], { name, type: "canonical_uuid", value });
 			assert.deepEqual(fields.session_generation, { name: "session_generation", type: "positive_safe_integer", value: 1 });
-			assert.deepEqual(fields.response_id, { name: "response_id", type: "canonical_uuid", generate: "canonical_uuid" });
+			// smoke-04 G1: nothing is left for the model to invent; the bridge generates response_id itself.
+			assert.equal(Object.hasOwn(fields, "response_id"), false);
+			assert.equal(contract.fields.some((field: Frame) => Object.hasOwn(field, "generate")), false);
+			assert.equal(contract.fields.every((field: Frame) => Object.hasOwn(field, "value")
+				|| field.name === "decision"), true);
 			assert.deepEqual(fields.decision, { name: "decision", type: "enum_string", allowed: decisions });
 			assert.deepEqual(contract.output_rules, { exactly_one_frame: true, no_prose: true,
 				no_tools: true, no_thinking: true, no_markdown: true, no_extra_content: true });
@@ -218,6 +251,52 @@ test("execute and analysis injections specify the exact self-consistent response
 		try {
 			assert.equal((await bridge.request({ kind: "deliver", envelope: JSON.stringify(target) })).status, "api_accepted");
 			assert.equal(Object.hasOwn(JSON.parse(bridge.sent.at(-1)!.message), "response_contract"), false);
+		} finally { await bridge.close(); }
+	}
+});
+
+test("smoke-04 G1: the bridge generates response_id; a model-supplied response_id is ignored, never trusted", async () => {
+	const generated = new Set<string>();
+	for (const variant of ["absent", "model_valid", "model_malformed_old_position", "model_malformed_last",
+		"model_garbage_first"]) {
+		const bridge = await startBridge();
+		try {
+			const target = envelope({ event: { type: "message", messageKind: "question", payload: { stage: "analysis", revision: 1 } } });
+			const response = workerResponse(target, { stage: "analysis", kind: "question", decision: "success" });
+			const supplied = variant === "model_valid" ? randomUUID()
+				: variant === "absent" ? undefined : "0d4c8a3e-5b2f-4c1a-9e7d-2a6b4f8c1d3"; // smoke-04: last group 11 chars
+			let body: Frame = response;
+			if (variant === "model_valid" || variant === "model_malformed_old_position") {
+				const { decision, ...head } = response;
+				body = { ...head, response_id: supplied, decision };
+			} else if (variant === "model_malformed_last") body = { ...response, response_id: supplied };
+			else if (variant === "model_garbage_first") body = { response_id: "not-a-uuid", ...response };
+			const text = "WB_WORKER_RESPONSE:" + JSON.stringify(body);
+			const processed = await driveWorkerTurn(bridge, target, text);
+			const assistant = await bridge.waitFor(frame => frame.kind === "omp_event" && frame.name === "assistant_message_end");
+			assert.equal(bridge.frames.some(frame => frame.name === "worker_response_rejected"), false, variant);
+			assertBridgeResponse(assistant.workerResponse, response, processed, variant);
+			assert.notEqual(assistant.workerResponse.response_id, supplied, variant);
+			assert.equal(JSON.stringify(bridge.frames).includes(String(supplied ?? "not-a-uuid")), false, variant);
+			generated.add(assistant.workerResponse.response_id);
+		} finally { await bridge.close(); }
+	}
+	assert.equal(generated.size, 5, "every accepted response gets its own bridge-generated response_id");
+	// Every other field stays exact: two response_id tokens, or a wrong identity next to an ignored response_id, fail.
+	for (const [variant, expected] of [["two_response_ids", "bad_marker"], ["identity_still_exact", "identity_mismatch"],
+		["malformed_identity", "bad_marker"]] as const) {
+		const bridge = await startBridge();
+		try {
+			const target = envelope({ event: { type: "message", messageKind: "task", payload: { stage: "execute", revision: 1 } } });
+			const response = workerResponse(target, variant === "identity_still_exact" ? { message_id: randomUUID() }
+				: variant === "malformed_identity" ? { message_id: target.messageId.slice(0, -1) } : {});
+			const body = variant === "two_response_ids"
+				? { response_id: randomUUID(), ...response, response_id_dup: "x" } : { ...response, response_id: randomUUID() };
+			const text = ("WB_WORKER_RESPONSE:" + JSON.stringify(body)).replace('"response_id_dup"', '"response_id"');
+			const processed = await driveWorkerTurn(bridge, target, text);
+			const rejected = await bridge.waitFor(frame => frame.kind === "omp_event" && frame.name === "worker_response_rejected");
+			assert.deepEqual([rejected.reason, rejected.detail], ["invalid_assistant_response", expected], variant);
+			assert.equal(processed.workerResponseId, undefined, variant);
 		} finally { await bridge.close(); }
 	}
 });
@@ -252,6 +331,20 @@ test("worker response rejects malformed, ambiguous, mismatched and nonterminal a
 			});
 			const rejected = await bridge.waitFor(frame => frame.kind === "omp_event" && frame.name === "worker_response_rejected");
 			assert.equal(typeof rejected.reason, "string", variant);
+			// F2: one short machine reason per rejection (never response text).
+			const expected: Record<string, [string, string?]> = {
+				prose: ["invalid_assistant_response", "extra_text"], suffix: ["invalid_assistant_response", "extra_text"],
+				multiple: ["invalid_assistant_response", "extra_text"],
+				duplicate_key: ["invalid_assistant_response", "bad_marker"], unknown_key: ["invalid_assistant_response", "bad_marker"],
+				wrong_order: ["invalid_assistant_response", "bad_marker"], wrong_decision: ["invalid_assistant_response", "bad_marker"],
+				unsafe_revision: ["invalid_assistant_response", "bad_marker"],
+				wrong_identity: ["invalid_assistant_response", "identity_mismatch"],
+				wrong_stage: ["invalid_assistant_response", "identity_mismatch"],
+				length: ["invalid_assistant_response", "incomplete"], continuation: ["invalid_assistant_response", "incomplete"],
+				extra_message: ["invalid_assistant_response", "multiple_messages"],
+				extra_round: ["additional_provider_round"], tool: ["tool_activity"],
+			};
+			assert.deepEqual([rejected.reason, rejected.detail], [expected[variant][0], expected[variant][1]], variant);
 			assert.equal(processed.workerResponseId, undefined, variant);
 			assert.equal(bridge.frames.some(frame => frame.name === "assistant_message_end"), false, variant);
 			assert.equal(JSON.stringify({ rejected, processed }).includes(text), false, variant);

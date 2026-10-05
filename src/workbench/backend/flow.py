@@ -3,7 +3,9 @@
 The manager OMP's ``to_worker`` and the worker OMP's ``to_manager`` reach the
 backend as ``tool_request`` frames on the authenticated G3 bridge socket.
 ``HandoffService.handle`` decides each one and returns at once; it never waits
-for the other OMP. Its contract:
+for the other OMP. The worker's ``terminal`` tool (C-D68) is not handled here:
+the backend routes it to ``flow_terminal.TerminalService``, which journals
+through ``record``. Its contract:
 
 - The role is the caller's: the bridge passes the role of the peer that
   authenticated with its hello token. A tool of the other role is rejected.
@@ -732,6 +734,10 @@ class HandoffService:
             self._log_outbox(entry, "withdrawn")
             self._notify(entry, "withdrawn")
         return [entry.outbound.kind.value for entry in dropped]
+
+    def record(self, record: Mapping[str, Any]) -> dict[str, Any]:
+        """Append one record of another bridge tool (C-D68 ``terminal``) to this journal; may raise OSError."""
+        return self._journal.append(record)
 
     def pending_approvals(self) -> list[dict[str, Any]]:
         with self._lock:

@@ -128,8 +128,11 @@ class DisabledAgentsRulesTests(unittest.TestCase):
         (directory / filename).write_text(text)
 
     def agents(self, **kwargs) -> list[str]:
-        return launcher.role_overlay(kwargs.pop("role", "manager"), project_dir=self.project, home=self.home,
-                                     **kwargs)["task"]["disabledAgents"]
+        # C-D68: each role's overlay also disables a fixed set (manager: the Workbench worker agents, worker: OMP's
+        # bundled agents); ``base.ambient_disabled`` asserts it is there in full and returns the ambient part.
+        role = kwargs.pop("role", "manager")
+        return base.ambient_disabled(launcher.role_overlay(role, project_dir=self.project, home=self.home, **kwargs),
+                                     role)
 
     def test_only_the_nearest_project_dir_the_user_dir_and_valid_definitions_count(self):
         good = "---\nname: {n}\ndescription: some description\n---\nbody\n"

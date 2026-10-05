@@ -8,13 +8,13 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
 import { test } from "node:test";
-import workbenchG3Extension from "../../omp_bridge/g3/bridge.ts";
+import workbenchG3Extension, { terminalTimeoutMs } from "../../omp_bridge/g3/bridge.ts";
 
 type Frame = Record<string, any>;
 const SESSION_ID = "30000000-0000-4000-8000-000000000002";
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
 
-async function startBridge(role: "manager" | "worker") {
+async function startBridge(role: "manager" | "worker", agent?: Frame) {
 	const directory = await mkdtemp(join(tmpdir(), "cw18-u1-tools-"));
 	const socketPath = join(directory, "bridge.sock");
 	const frames: Frame[] = [];
@@ -40,16 +40,22 @@ async function startBridge(role: "manager" | "worker") {
 	process.env.WORKBENCH_G3_GENERATION = "1";
 	const handlers = new Map<string, (...args: any[]) => any>();
 	const tools = new Map<string, Frame>();
+	const userMessages: string[] = [];
+	const omp = { idle: true };
+	const activeToolSets: string[][] = [];
 	const pi = {
 		on(name: string, handler: (...args: any[]) => any) { handlers.set(name, handler); },
 		registerTool(tool: Frame) { tools.set(tool.name, tool); },
-		async sendUserMessage() {},
+		getActiveTools: () => ["read", "grep", "yield", ...tools.keys()],
+		setActiveTools(names: string[]) { activeToolSets.push([...names]); },
+		async sendUserMessage(text: string) { userMessages.push(text); },
 		logger: { error() {} },
 	};
 	const context = {
 		sessionManager: { getSessionId: () => SESSION_ID },
-		isIdle: () => true, hasPendingMessages: () => false,
+		isIdle: () => omp.idle, hasPendingMessages: () => false,
 		ui: { getEditorText: () => "" }, abort: () => {},
+		...(agent === undefined ? {} : { agent }),
 	};
 	workbenchG3Extension(pi);
 	handlers.get("session_start")!(undefined, context);
@@ -62,7 +68,7 @@ async function startBridge(role: "manager" | "worker") {
 		}
 		throw new Error("bridge frame timed out");
 	}
-	await waitFor(frame => frame.kind === "hello");
+	if (agent?.kind !== "sub") await waitFor(frame => frame.kind === "hello");
 	function reply(frame: Frame): void { sockets.at(-1)!.write(JSON.stringify(frame) + "\n"); }
 	async function close(): Promise<void> {
 		handlers.get("session_shutdown")?.();
@@ -74,7 +80,7 @@ async function startBridge(role: "manager" | "worker") {
 		}
 		await rm(directory, { recursive: true, force: true });
 	}
-	return { frames, sockets, handlers, tools, waitFor, reply, close };
+	return { frames, sockets, handlers, tools, waitFor, reply, close, userMessages, omp, activeToolSets };
 }
 
 function textOf(result: Frame): Frame {
@@ -87,7 +93,8 @@ test("manager registers only to_worker and worker only to_manager, both essentia
 	for (const [role, own, other] of [["manager", "to_worker", "to_manager"], ["worker", "to_manager", "to_worker"]] as const) {
 		const bridge = await startBridge(role);
 		try {
-			assert.deepEqual([...bridge.tools.keys()], [own], `${role} tools`);
+			// C-D68: the worker also has `terminal`, its only command execution path.
+			assert.deepEqual([...bridge.tools.keys()], role === "worker" ? [own, "terminal"] : [own], `${role} tools`);
 			assert.equal(bridge.tools.has(other), false);
 			const tool = bridge.tools.get(own)!;
 			assert.equal(tool.loadMode, "essential", "schema must reach the provider without xd:// discovery");
@@ -262,10 +269,16 @@ function schemaErrors(schema: Schema, value: unknown, path = "$"): string[] {
 			? [] : [`${path}: no anyOf branch`];
 	}
 	const types = typesOf(schema);
-	const kind = value === null ? "null" : Array.isArray(value) ? "array" : typeof value === "number" ? "number" : typeof value;
+	const kind = value === null ? "null" : Array.isArray(value) ? "array"
+		: typeof value === "number" ? (Number.isInteger(value) && types.includes("integer") ? "integer" : "number")
+		: typeof value;
 	if (types.length && !types.includes(kind)) return [`${path}: ${kind} not in ${types.join("|")}`];
 	if (schema.enum && !schema.enum.includes(value)) return [`${path}: not in enum`];
 	const errors: string[] = [];
+	if (typeof value === "number") {
+		if (schema.minimum !== undefined && value < schema.minimum) errors.push(`${path}: minimum`);
+		if (schema.maximum !== undefined && value > schema.maximum) errors.push(`${path}: maximum`);
+	}
 	if (typeof value === "string") {
 		if (schema.minLength !== undefined && value.length < schema.minLength) errors.push(`${path}: minLength`);
 		if (schema.maxLength !== undefined && value.length > schema.maxLength) errors.push(`${path}: maxLength`);
@@ -374,4 +387,183 @@ test("strict-mode placeholders (nulls, blanks, false flags) pass the registered 
 				request: { goal: "none", paths: [] } },
 		]) assert.deepEqual(schemaErrors(tool.parameters, args), [], JSON.stringify(args));
 	} finally { await worker.close(); }
+});
+
+// C-D68 (1): the worker's `terminal` tool; (3): the manager's to_worker says the worker does the task.
+test("worker registers terminal: strict, essential, nullable command and timeout_seconds; manager has none", async () => {
+	const worker = await startBridge("worker");
+	try {
+		const tool = worker.tools.get("terminal")!;
+		assert.equal(tool.strict, true);
+		assert.equal(tool.loadMode, "essential");
+		const parameters = tool.parameters as Schema;
+		assert.equal(parameters.additionalProperties, false);
+		assert.deepEqual(Object.keys(parameters.properties).sort(), ["command", "timeout_seconds"]);
+		assert.deepEqual([...parameters.required].sort(), ["command", "timeout_seconds"]);
+		assert.deepEqual(parameters.properties.command.type, ["string", "null"]);
+		assert.deepEqual(parameters.properties.timeout_seconds.type, ["integer", "null"]);
+		assert.equal(parameters.properties.timeout_seconds.maximum, 1800);
+		assert.match(parameters.properties.timeout_seconds.description, /\(1-1800\); null for 120\./);
+		// C-D68 (7): the host shell's current directory (where the user last cd'd), not the project directory.
+		assert.match(parameters.properties.command.description, /current directory of the host terminal/);
+		assert.doesNotMatch(parameters.properties.command.description, /project directory/);
+		assert.match(tool.description, /current directory \(where the user last cd'd\)/);
+		assert.doesNotMatch(tool.description, /project directory/);
+		for (const needle of [/Workbench host terminal \(visible to the user\)/, /exit code/, /every shell command/,
+			/no other way to run commands/, /only when the host terminal is free/, /host_terminal_busy/,
+			/One command at a time/, /terminal_command_running/, /keeps running/,
+			// C-D68 (8): on running the worker ends its turn; Workbench checks every 60 s and notifies the end.
+			/status running: end your turn and do not start another command/,
+			/check every 60 s while it runs and a completion notice when it exits/]) {
+			assert.match(tool.description, needle);
+		}
+		for (const text of [tool.description, parameters.properties.command.description]) {
+			assert.doesNotMatch(text, /wait for it again|waits again|to wait again/, "no re-wait loop");
+		}
+		for (const args of [{ command: "pytest -q", timeout_seconds: null }, { command: null, timeout_seconds: 60 }]) {
+			assert.deepEqual(schemaErrors(parameters, args), [], JSON.stringify(args));
+		}
+		assert.notDeepEqual(schemaErrors(parameters, { command: "ls", timeout_seconds: null, cwd: "/" }), []);
+		assert.deepEqual(schemaErrors(parameters, { command: "ls", timeout_seconds: 1800 }), []);
+		assert.notDeepEqual(schemaErrors(parameters, { command: "ls", timeout_seconds: 1801 }), []);
+		assert.notDeepEqual(schemaErrors(parameters, { command: "ls", timeout_seconds: 1.5 }), []);
+	} finally { await worker.close(); }
+	const manager = await startBridge("manager");
+	try {
+		assert.equal(manager.tools.has("terminal"), false, "the manager keeps its own OMP tools (C-D68 (3))");
+		const description = manager.tools.get("to_worker")!.description;
+		assert.match(description, /The worker does the delegated task, not you: do not do it yourself/);
+		assert.match(description, /wait for the worker's to_manager report/);
+	} finally { await manager.close(); }
+});
+
+test("terminal waits for the timeout it asks for plus a start slack; default 120 s, at most 1800 s", () => {
+	assert.equal(terminalTimeoutMs({ command: "x", timeout_seconds: 1 }), 31_000);
+	assert.equal(terminalTimeoutMs({ command: "x", timeout_seconds: null }), 150_000);
+	assert.equal(terminalTimeoutMs({ command: "x", timeout_seconds: 1800 }), 1_830_000);
+	assert.equal(terminalTimeoutMs({ command: "x", timeout_seconds: 99_999 }), 1_830_000);
+	assert.equal(terminalTimeoutMs({ command: "x", timeout_seconds: true }), 150_000);
+	assert.equal(terminalTimeoutMs(null), 150_000);
+});
+
+test("terminal sends one tool_request and outlives the 10 s handoff timeout", async () => {
+	const bridge = await startBridge("worker");
+	try {
+		const pending = bridge.tools.get("terminal")!.execute("call-term", { i: "run tests", command: "pytest -q",
+			timeout_seconds: 5 }, new AbortController().signal, () => {}, {});
+		const request = await bridge.waitFor(frame => frame.kind === "tool_request");
+		assert.equal(request.tool, "terminal");
+		assert.deepEqual(request.args, { command: "pytest -q", timeout_seconds: 5 });
+		await delay(10_400);
+		const backendResult = { status: "exited", exit_code: 0, output_tail: "1 passed", log_path: "/tmp/x.log" };
+		bridge.reply({ kind: "tool_result", requestId: request.requestId, toolCallId: "call-term", result: backendResult });
+		assert.deepEqual(textOf(await pending), backendResult);
+		assert.equal(bridge.frames.filter(frame => frame.kind === "tool_request").length, 0, "exactly one request frame");
+	} finally { await bridge.close(); }
+});
+
+test("aborting a terminal call stops only the wait: the result says the command keeps running", async () => {
+	const bridge = await startBridge("worker");
+	try {
+		const controller = new AbortController();
+		const pending = bridge.tools.get("terminal")!.execute("call-ta", { command: "sleep 100", timeout_seconds: null },
+			controller.signal, () => {}, {});
+		await bridge.waitFor(frame => frame.kind === "tool_request");
+		controller.abort();
+		const aborted = textOf(await pending);
+		assert.equal(aborted.status, "outcome_unknown");
+		assert.equal(aborted.reason, "aborted");
+		assert.match(aborted.detail, /keeps running in the host terminal; end your turn/);
+		assert.doesNotMatch(aborted.detail, /command null/);
+		// C-D68 (8): the backend learns that this call no longer waits, so the completion notice is still sent.
+		const abandoned = await bridge.waitFor(frame => frame.kind === "tool_request");
+		assert.equal(abandoned.tool, "terminal_wait_abandoned");
+		assert.deepEqual(abandoned.args, { tool_call_id: "call-ta" });
+		assert.notEqual(abandoned.toolCallId, "call-ta");
+		await delay(30);
+		assert.equal(bridge.frames.filter(frame => frame.kind !== "state").length, 0, "nothing is sent to stop the command");
+	} finally { await bridge.close(); }
+});
+
+// C-D68 (8): Workbench notices for the worker (terminal check / completion), outside any Task message.
+test("worker takes a Workbench notice only when idle and unpaused, once per notice_id", async () => {
+	const bridge = await startBridge("worker");
+	try {
+		const notice = { notice_id: randomUUID(), type: "terminal_done", command: "make", exit_code: 0 };
+		bridge.omp.idle = false;
+		bridge.reply({ kind: "notice", requestId: "n1", notice });
+		let ack = await bridge.waitFor(frame => frame.kind === "api_ack" && frame.requestId === "n1");
+		assert.equal(ack.status, "deferred");
+		assert.equal(bridge.userMessages.length, 0, "a busy worker gets nothing");
+		bridge.omp.idle = true;
+		bridge.reply({ kind: "notice", requestId: "n2", notice });
+		ack = await bridge.waitFor(frame => frame.kind === "api_ack" && frame.requestId === "n2");
+		assert.equal(ack.status, "api_accepted");
+		assert.equal(bridge.userMessages.length, 1);
+		const message = JSON.parse(bridge.userMessages[0]);
+		assert.equal(message.workbench_notice, "terminal_done");
+		assert.equal(message.notice_id, notice.notice_id);
+		assert.equal(message.exit_code, 0);
+		bridge.reply({ kind: "notice", requestId: "n3", notice });
+		ack = await bridge.waitFor(frame => frame.kind === "api_ack" && frame.requestId === "n3");
+		assert.equal(ack.status, "duplicate_api_accepted");
+		assert.equal(bridge.userMessages.length, 1, "never twice");
+		bridge.reply({ kind: "pause", requestId: "p1" });
+		await bridge.waitFor(frame => frame.kind === "api_ack" && frame.requestId === "p1");
+		bridge.reply({ kind: "notice", requestId: "n4", notice: { ...notice, notice_id: randomUUID() } });
+		ack = await bridge.waitFor(frame => frame.kind === "api_ack" && frame.requestId === "n4");
+		assert.deepEqual([ack.status, ack.reason], ["deferred", "paused"]);
+		for (const bad of [{ type: "terminal_check" }, { notice_id: randomUUID(), type: "other" }, "x"]) {
+			bridge.reply({ kind: "notice", requestId: "nb", notice: bad });
+			ack = await bridge.waitFor(frame => frame.kind === "api_ack" && frame.requestId === "nb");
+			assert.equal(ack.status, "rejected");
+		}
+		assert.equal(bridge.userMessages.length, 1);
+	} finally { await bridge.close(); }
+	const manager = await startBridge("manager");
+	try {
+		manager.reply({ kind: "notice", requestId: "m1", notice: { notice_id: randomUUID(), type: "terminal_check" } });
+		const ack = await manager.waitFor(frame => frame.kind === "api_ack" && frame.requestId === "m1");
+		assert.equal(ack.status, "rejected");
+		assert.equal(manager.userMessages.length, 0);
+	} finally { await manager.close(); }
+});
+
+// p27-cd68-review-01 P2-2 (measured on OMP 18.6.1, /tmp/cd68fix-probe): every subagent session runs its own
+// instance of this extension with ctx.agent = {kind: "sub", depth: 1, parentId, name}; the main session has
+// {kind: "main", depth: 0}. A subagent instance never connects (its hello would replace the worker's bridge
+// peer) and its tools refuse at once.
+const SUBAGENT = { kind: "sub", id: "Probe", name: "explorer", depth: 1, parentId: "Main" };
+test("a subagent session never connects to the bridge and its bridge tools refuse", async () => {
+	const sub = await startBridge("worker", SUBAGENT);
+	try {
+		await delay(100);
+		assert.equal(sub.frames.filter(frame => frame.kind === "hello").length, 0, "no second worker hello");
+		// p27-cd68-fix-02 (measured on OMP 18.6.1): no registration-time signal exists, so at the subagent's
+		// session_start the bridge tools leave the session's active tools: the subagent model is not offered them.
+		assert.deepEqual(sub.activeToolSets, [["read", "grep", "yield"]]);
+		for (const [name, args] of [["to_manager", { kind: "progress", message: "x" }],
+			["terminal", { command: "echo hi", timeout_seconds: 1 }]] as const) {
+			const result = textOf(await sub.tools.get(name)!.execute(`call-${name}`, args,
+				new AbortController().signal, () => {}, { agent: SUBAGENT }));
+			assert.deepEqual([result.status, result.reason], ["rejected", "subagent_not_allowed"], name);
+			assert.match(result.detail, /only the worker itself/);
+		}
+		await delay(30);
+		assert.equal(sub.frames.filter(frame => frame.kind !== "state").length, 0, "nothing is sent");
+	} finally { await sub.close(); }
+	const main = await startBridge("worker", { kind: "main", id: "Main", name: "main", depth: 0 });
+	try {
+		assert.deepEqual(main.activeToolSets, [], "the worker itself keeps every tool");
+		// A subagent ctx reaching the main instance's tool (shared registration) is refused as well.
+		const refused = textOf(await main.tools.get("to_manager")!.execute("call-x", { kind: "progress", message: "x" },
+			new AbortController().signal, () => {}, { agent: SUBAGENT }));
+		assert.equal(refused.reason, "subagent_not_allowed");
+		const pending = main.tools.get("to_manager")!.execute("call-main", { kind: "progress", message: "x" },
+			new AbortController().signal, () => {}, { agent: { kind: "main", depth: 0 } });
+		const request = await main.waitFor(frame => frame.kind === "tool_request");
+		assert.equal(request.toolCallId, "call-main");
+		main.reply({ kind: "tool_result", requestId: request.requestId, toolCallId: "call-main", result: { status: "queued" } });
+		assert.equal(textOf(await pending).status, "queued");
+	} finally { await main.close(); }
 });

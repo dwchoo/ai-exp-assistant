@@ -6,7 +6,7 @@ import shutil
 import sys
 import tempfile
 import threading
-from uuid import uuid4
+from uuid import RFC_4122, UUID, uuid4
 
 from test_run_independent import WorkflowIndependentTests, git
 
@@ -128,6 +128,21 @@ def run_actual_two_omp():
         collected = active.collect(timeout=8)
         judged = active.judge()
         execute, analysis = judged["worker_execution_decision"], judged["worker_analysis_response"]
+        # Root adjudication p27-cw18-response-id: the bridge generates response_id (canonical UUID v4); the model
+        # was never asked for it, so the delivered contracts name no response_id and carry no generated field.
+        delivered = [contract for contract in providers[ActorRole.WORKER].observed_contracts]
+        assert len(delivered) >= 2 and all(isinstance(contract, dict) for contract in delivered)
+        for contract in delivered:
+            assert "response_id" not in contract["field_order"]
+            assert [field["name"] for field in contract["fields"]] == contract["field_order"]
+            assert all("generate" not in field and field["name"] != "response_id"
+                       for field in contract["fields"])
+        for response in (execute, analysis):
+            generated = response["response_id"]
+            assert type(generated) is str and str(UUID(generated)) == generated
+            assert UUID(generated).version == 4 and UUID(generated).variant == RFC_4122
+            for identity in ("task_id", "run_id", "message_id", "delivery_attempt_id", "session_id"):
+                assert generated != response[identity]
         assert execute["response_id"] != analysis["response_id"]
         assert execute["stage"] == "execute" and execute["decision"] == "execute"
         assert analysis["stage"] == "analysis" and analysis["decision"] == "success"

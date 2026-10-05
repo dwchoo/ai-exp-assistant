@@ -180,5 +180,39 @@ class ToolRequestBridgeTests(unittest.TestCase):
         self.assertEqual(peer.read_kind("tool_result")["result"], {"status": "held", "reason": "paused"})
 
 
+    # p27-cd68-review-01 P2-1: a result that cannot reach its caller is reported, so it is not "consumed".
+    def test_a_result_for_a_replaced_session_is_reported_undelivered(self):
+        release, undelivered = threading.Event(), []
+
+        def slow(peer, request):
+            release.wait(5)
+            return {"status": "exited", "exit_code": 0}
+
+        self.bridge.set_tool_handler(slow, undelivered=lambda peer, request: undelivered.append(
+            (peer.session_id, request["tool_call_id"])))
+        first = self.connect("worker")
+        self.assertIsNotNone(first.read_kind("ready"))
+        first.tool_request("terminal", {"command": "make", "timeout_seconds": 30}, tool_call_id="call-wait")
+        time.sleep(0.2)
+        second = self.connect("worker")  # the bridge reconnected / the worker OMP was respawned
+        self.assertIsNotNone(second.read_kind("ready"))
+        release.set()
+        deadline = time.monotonic() + 3
+        while not undelivered and time.monotonic() < deadline:
+            time.sleep(0.02)
+        self.assertEqual(undelivered, [(first.session_id, "call-wait")])
+        self.assertIsNone(second.read_kind("tool_result", timeout=0.3), "never sent to another session")
+
+    def test_a_delivered_result_is_not_reported_undelivered(self):
+        undelivered = []
+        self.bridge.set_tool_handler(self.handler, undelivered=lambda peer, request: undelivered.append(1))
+        peer = self.connect("worker")
+        self.assertIsNotNone(peer.read_kind("ready"))
+        peer.tool_request("terminal", {"command": None, "timeout_seconds": 1})
+        self.assertIsNotNone(peer.read_kind("tool_result"))
+        time.sleep(0.1)
+        self.assertEqual(undelivered, [])
+
+
 if __name__ == "__main__":
     unittest.main()

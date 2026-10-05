@@ -64,6 +64,18 @@ FORBIDDEN_ARGS = ("--profile", "--no-skills", "--system-prompt", "--system-promp
 FORBIDDEN_ENV = ("OMP_PROFILE", "PI_PROFILE", "OMP_CODING_AGENT_DIR")
 HOME_ENV_KEYS = ("PI_CONFIG_DIR", "PI_CODING_AGENT_DIR", "BUN_RUNTIME_TRANSPILER_CACHE_PATH")
 FAKE_AUTH_BYTES = b"p27u fake auth store - not a credential\n"
+# C-D68 (1)-(3): OMP 18.6.1's bundled task agents (manager only) and the Workbench-owned worker agents.
+BUNDLED_AGENTS = frozenset({"scout", "reviewer", "security-reviewer", "task", "sonic"})
+WORKBENCH_AGENTS = frozenset({"explorer", "analyst"})
+CD68_ROLE_DISABLED = {"manager": WORKBENCH_AGENTS, "worker": BUNDLED_AGENTS}
+
+
+def ambient_disabled(overlay: dict, role: str) -> list[str]:
+    """``task.disabledAgents`` without the fixed C-D68 per-role set (which must be there in full)."""
+    names = overlay["task"]["disabledAgents"]
+    missing = CD68_ROLE_DISABLED[role] - set(names)
+    assert not missing, f"C-D68: the {role} overlay does not disable {sorted(missing)}"
+    return [name for name in names if name not in CD68_ROLE_DISABLED[role]]
 
 
 def plant_fake_auth_store(home: Path) -> Path:
@@ -300,7 +312,7 @@ class RoleOverlayContractTests(unittest.TestCase):
         self.agent(self.home / ".omp" / "agent" / "agents", "c.md", "home-agent")
         (self.project / ".omp" / "agents" / "notes.txt").write_text("not an agent")
         overlay = launcher.role_overlay("worker", project_dir=self.project, home=self.home)
-        names = set(overlay["task"]["disabledAgents"])
+        names = set(ambient_disabled(overlay, "worker"))  # C-D68: plus the worker's fixed set (bundled agents)
         self.assertEqual(names, {"project-agent", "home-agent"}, names)
         self.assertNotIn("notes", names)
         blob = json.dumps(overlay)
@@ -312,7 +324,7 @@ class RoleOverlayContractTests(unittest.TestCase):
             extra.unlink()
         (self.project / ".omp" / "agents").rmdir()
         (self.project / ".omp").rmdir()
-        again = set(launcher.role_overlay("worker", project_dir=self.project, home=self.home)["task"]["disabledAgents"])
+        again = set(ambient_disabled(launcher.role_overlay("worker", project_dir=self.project, home=self.home), "worker"))
         self.assertEqual(again, {"ancestor-agent", "home-agent"}, again)
 
     def test_agent_definition_reading_is_bounded_and_robust(self):
@@ -334,8 +346,10 @@ class RoleOverlayContractTests(unittest.TestCase):
         self.assertIn("huge-agent", overlay["task"]["disabledAgents"])
 
     def test_missing_directories_yield_an_empty_agent_list_not_an_error(self):
-        overlay = launcher.role_overlay("worker", project_dir=self.root / "nowhere", home=self.root / "nohome")
-        self.assertEqual(overlay["task"]["disabledAgents"], [])
+        for role in ("manager", "worker"):  # C-D68: only the role's fixed set remains
+            overlay = launcher.role_overlay(role, project_dir=self.root / "nowhere", home=self.root / "nohome")
+            self.assertEqual(ambient_disabled(overlay, role), [])
+            self.assertEqual(set(overlay["task"]["disabledAgents"]), CD68_ROLE_DISABLED[role])
 
     def test_disabled_providers_keep_the_users_entries_after_the_workbench_ids(self):
         overlay = launcher.role_overlay("manager", project_dir=self.project, home=self.home,
@@ -455,10 +469,32 @@ if mode.get("child"):
 if mode["behaviour"] == "die":
     sys.exit(5)
 shapes = mode.get("shapes", {})
+# C-D68 (p27-cd68-test-01): like the real OMP 18.6.1 (live-verified in live_omp_tools_independent_p27cd68.py), the
+# fake honours ``task.disabledAgents`` of every JSON ``--config`` overlay and the ``--tools`` built-in allowlist.
+# Its agent list is OMP's bundled agents plus the Workbench explorer/analyst that the Workbench home always carries.
+_argv = sys.argv[1:]
+DISABLED, TOOLS_ALLOW = set(), None
+for _i, _a in enumerate(_argv[:-1]):
+    if _a == "--config":
+        try:
+            DISABLED |= set((json.load(open(_argv[_i + 1])).get("task") or {}).get("disabledAgents") or [])
+        except Exception:
+            pass
+    if _a == "--tools":
+        TOOLS_ALLOW = set(_argv[_i + 1].split(","))
+def _agents_filter(tool):
+    if tool.get("name") != "task":
+        return tool
+    lines = [l for l in tool.get("description", "").split("\n")
+             if not (l.startswith("- `") and l[3:].split("`", 1)[0] in DISABLED)]
+    return {**tool, "description": "\n".join(lines)}
 PROMPT = "§ Role\nYou are omp's trusted coding assistant.\n" + shapes.get("prompt_extra", "") + "\n# Internal URLs\n- `skill://<name>`: x\n"
 STATE = {"model": {"provider": "stubprov", "id": "stub-model-1"}, "systemPrompt": shapes.get("prompt", PROMPT),
-         "dumpTools": shapes.get("dumpTools", [{"name": "read", "description": "read"},
-                                               {"name": "task", "description": "Launch\n# Available Agents\n- `scout` (RO): a\n- `reviewer`: b\n- `security-reviewer`: c\n- `task`: d\n- `sonic`: e\n\n# Other\n"}])}
+         "dumpTools": [_agents_filter(t) for t in shapes.get("dumpTools", [
+             {"name": "read", "description": "read"}, {"name": "bash", "description": "bash"},
+             {"name": "eval", "description": "eval"},
+             {"name": "task", "description": "Launch\n# Available Agents\n- `scout` (RO): a\n- `reviewer`: b\n- `security-reviewer`: c\n- `task`: d\n- `sonic`: e\n- `explorer` (RO): f\n- `analyst` (RO): g\n\n# Other\n"}])
+             if TOOLS_ALLOW is None or t.get("name") in TOOLS_ALLOW]}
 COMMANDS = shapes.get("commands", [{"name": "init", "source": "builtin"}, {"name": "autoresearch", "source": "extension"},
                                    {"name": "settings", "source": "builtin"}])
 for line in sys.stdin:
@@ -556,9 +592,16 @@ class Harness:
             return False
         return fields[0] not in "ZX" and fields[19] == rec["ticks"]
 
-    def check(self, role="worker", allowed=(), timeout=15.0, cancel=None) -> dict:
-        command = [str(self.script), "--config", "/x/static.yml", "--config", "/x/role.yml", "--no-extensions",
-                   "--extension", "/x/bridge.ts"]
+    def check(self, role="worker", allowed=(), timeout=15.0, cancel=None, role_config=True) -> dict:
+        # C-D68: the checked command carries the role's real overlay (task.disabledAgents) and --tools, as the
+        # pane command does; ``role_config=False`` is the negative control without them.
+        if role_config:
+            overlay = launcher.write_role_overlay(self.root, role, launcher.role_overlay(
+                role, project_dir=self.root / "no-project", home=self.root / "no-home"))
+            command = launcher.omp_command(plan_for(omp=str(self.script)), overlay)
+        else:
+            command = [str(self.script), "--config", "/x/static.yml", "--config", "/x/role.yml", "--no-extensions",
+                       "--extension", "/x/bridge.ts"]
         return launcher.check_isolation(command, cwd=self.root, environment=self.env, role=role,
                                         allowed_skills=allowed, omp_version="omp/18.4.4", timeout=timeout, cancel=cancel)
 
@@ -711,13 +754,59 @@ class CheckIsolationContractTests(unittest.TestCase):
         self.assertEqual((pending["checked"], pending["ok"]), (False, None))
 
     def test_version_drift_is_visible_in_the_summary(self):
-        same = launcher.summarize_isolation({"manager": self.h.check("manager")}, "omp/18.4.5")  # 18.4.5 = isolation evidence
+        # C-D68 (6): the isolation evidence is re-made with the installed OMP 18.6.1
+        same = launcher.summarize_isolation({"manager": self.h.check("manager")}, "omp/18.6.1")
         newer = launcher.summarize_isolation({"manager": self.h.check("manager")}, "omp/19.1.0")
         self.assertEqual(newer["omp_version"], "omp/19.1.0")
         self.assertTrue(newer["version_drift"], "a version other than the evidence versions must show drift")
         self.assertNotEqual(same["version_drift"], newer["version_drift"])
         self.assertNotIn("isolation", same["version_drift"], "the running version equals the isolation evidence version")
         self.assertIn("isolation", newer["version_drift"])
+
+    # C-D68 (p27-cd68-test-01) role-aware leaks with negative controls.
+    def test_cd68_the_real_role_commands_are_clean_and_each_role_sees_its_own_agents(self):
+        for role, agents, absent in (("manager", BUNDLED_AGENTS, WORKBENCH_AGENTS),
+                                     ("worker", WORKBENCH_AGENTS, BUNDLED_AGENTS)):
+            with self.subTest(role=role):
+                result = self.h.check(role=role)
+                self.assertEqual((result["state"], result["leaks"], result["warnings"]), ("ok", [], []), result)
+                self.assertEqual(set(result["observed"]["task_agents"]), agents)
+                self.assertFalse(set(result["observed"]["task_agents"]) & absent)
+                tools = set(result["observed"]["tools"])
+                if role == "worker":  # C-D68 (1)
+                    self.assertFalse(tools & {"bash", "eval"}, tools)
+                else:  # C-D68 (3): manager keeps OMP's tools
+                    self.assertTrue({"bash", "eval"} <= tools, tools)
+
+    def test_cd68_negative_control_worker_without_its_role_config_leaks_tools_and_bundled_agents(self):
+        result = self.h.check(role="worker", role_config=False)
+        self.assertEqual(result["state"], "leak", result)
+        for leak in ("tool:bash", "tool:eval", *(f"task_agent:{name}" for name in sorted(BUNDLED_AGENTS))):
+            self.assertIn(leak, result["leaks"])
+        self.assertNotIn("task_agent:explorer", result["leaks"])
+
+    def test_cd68_negative_control_manager_seeing_a_workbench_agent_is_a_leak(self):
+        self.h.set_mode(shapes={"dumpTools": [{"name": "task", "description":
+                                               "L\n# Available Agents\n- `scout`: a\n- `explorer`: f\n\n# Other\n"}]})
+        result = self.h.check(role="manager", role_config=False)
+        self.assertEqual(result["state"], "leak", result)
+        self.assertIn("task_agent:explorer", result["leaks"])
+        self.assertNotIn("task_agent:scout", result["leaks"])
+
+    def test_cd68_worker_missing_a_workbench_agent_is_a_warning_and_a_bundled_one_a_leak(self):
+        self.h.set_mode(shapes={"dumpTools": [{"name": "task", "description":
+                                               "L\n# Available Agents\n- `explorer`: f\n\n# Other\n"}]})
+        result = self.h.check(role="worker")
+        self.assertEqual((result["state"], result["leaks"]), ("warning", []), result)
+        self.assertEqual(result["warnings"], ["task_agent:missing:analyst"])
+        self.h.set_mode(shapes={"dumpTools": [{"name": "task", "description":
+                                               "L\n# Available Agents\n- `explorer`: f\n- `analyst`: g\n"
+                                               "- `scout`: a\n\n# Other\n"}]})
+        leak = self.h.check(role="worker", role_config=False)
+        self.assertEqual(leak["leaks"], ["task_agent:scout"])
+        self.h.set_mode(shapes={"dumpTools": [{"name": "read", "description": "r"}, {"name": "eval", "description": "e"}]})
+        self.assertIn("tool:eval", self.h.check(role="worker", role_config=False)["leaks"])
+        self.assertEqual(self.h.check(role="manager", role_config=False)["leaks"], [], "manager keeps eval")
 
 
 # ------------------------------------------------------------------------- 3. the real workbench entrypoint

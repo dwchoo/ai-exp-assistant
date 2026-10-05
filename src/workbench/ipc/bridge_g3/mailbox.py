@@ -47,6 +47,10 @@ class BridgeTimeout(MailboxError):
     """Raised when the public G3 bridge does not answer within its deadline."""
 
 
+class _ToolResultUndelivered(Exception):
+    """A tool result did not go out to the session that asked for it."""
+
+
 class BridgeDisconnected(MailboxError):
     """Raised when the bound OMP session disconnects during an operation."""
 
@@ -184,6 +188,7 @@ class G3BridgeServer:
         self._thread: Thread | None = None
         self._closed = False
         self._tool_handler: ToolHandler | None = None
+        self._tool_undelivered: Callable[[BridgePeer, dict[str, Any]], None] | None = None
         # CW-18: one serialized delivery path per target OMP. Every TaskMailbox on this
         # bridge (workflow stage deliveries and handoff outbox lanes) delivers under it.
         self._delivery_locks = {role: Lock() for role in (ActorRole.MANAGER, ActorRole.WORKER)}
@@ -284,10 +289,18 @@ class G3BridgeServer:
         """The lock every delivery to ``role``'s OMP holds from its state probe to its outcome."""
         return self._delivery_locks[_role(role)]
 
-    def set_tool_handler(self, handler: ToolHandler | None) -> None:
-        """Route ``tool_request`` frames (CW-18 ``to_worker``/``to_manager``) to ``handler``."""
+    def set_tool_handler(self, handler: ToolHandler | None, *,
+                         undelivered: Callable[[BridgePeer, dict[str, Any]], None] | None = None) -> None:
+        """Route ``tool_request`` frames (CW-18 ``to_worker``/``to_manager``) to ``handler``.
+
+        ``undelivered(peer, request)`` (p27-cd68-fix-01) is told when the
+        handler's result could not be written to the session that asked (the
+        session was replaced, the socket closed or the write timed out): the
+        caller never got it.
+        """
         with self._condition:
             self._tool_handler = handler
+            self._tool_undelivered = undelivered
 
     def _accept_tool_request(self, peer: _LivePeer, frame: dict[str, Any]) -> None:
         """Called under the condition lock; the handler runs on its own thread."""
@@ -310,11 +323,28 @@ class G3BridgeServer:
             "session_id": peer.public.session_id,
             "generation": peer.public.generation,
         }
-        Thread(target=self._run_tool_request, args=(peer, request, handler, result),
+        Thread(target=self._run_tool_request, args=(peer, request, handler, result, self._tool_undelivered),
                name="g3-tool-request", daemon=True).start()
 
     def _run_tool_request(self, peer: _LivePeer, request: dict[str, Any], handler: ToolHandler | None,
-                          result: dict[str, Any] | None) -> None:
+                          result: dict[str, Any] | None,
+                          undelivered: Callable[[BridgePeer, dict[str, Any]], None] | None = None) -> None:
+        handled = result is None and handler is not None
+        sent = False
+        try:
+            self._answer_tool_request(peer, request, handler, result)
+            sent = True
+        except _ToolResultUndelivered:
+            pass
+        if handled and not sent and undelivered is not None:
+            try:
+                undelivered(peer.public, request)
+            except Exception:
+                pass  # the hook never changes the bridge
+
+    def _answer_tool_request(self, peer: _LivePeer, request: dict[str, Any], handler: ToolHandler | None,
+                             result: dict[str, Any] | None) -> None:
+        """Run the handler and write its result; raises ``_ToolResultUndelivered`` when it did not go out."""
         if result is None and handler is not None:
             try:
                 result = dict(handler(peer.public, request))
@@ -332,14 +362,15 @@ class G3BridgeServer:
                                   separators=(",", ":")) + "\n").encode()
         deadline = time.monotonic() + TOOL_RESULT_WRITE_TIMEOUT
         if not peer.write_lock.acquire(timeout=TOOL_RESULT_WRITE_TIMEOUT):
-            return
+            raise _ToolResultUndelivered
         try:
             with self._condition:
                 if self._closed or self._peers.get(peer.public.role) is not peer:
-                    return  # a replaced session never receives another session's result
+                    raise _ToolResultUndelivered  # a replaced session never receives another session's result
             self._send_until(peer.connection, encoded, deadline)
-        except (OSError, ValueError, MailboxError):
-            pass  # the extension times out to outcome_unknown and never resends
+        except (OSError, ValueError, MailboxError) as exc:
+            # The extension times out to outcome_unknown and never resends.
+            raise _ToolResultUndelivered from exc
         finally:
             peer.write_lock.release()
 

@@ -41,7 +41,12 @@ _CONTRACT_RULES = {"exactly_one_frame": True, "no_prose": True, "no_tools": True
 
 
 def _frame_from_contract(observed: dict, decision: str) -> str | None:
-    """Fixture model obeys the delivered contract; it owns no response schema."""
+    """Fixture model obeys the delivered contract; it owns no response schema.
+
+    Root adjudication p27-cw18-response-id: response_id is a technical identity the bridge generates, so the
+    delivered contract carries only literal identity values and one decision choice. The fixture model never
+    invents an identifier; a legacy ``generate`` descriptor is still understood only so older fixed contracts
+    (tests/workflow/test_worker_port.py) keep parsing, and the live independent run asserts none is delivered."""
     contract = observed.get("response_contract")
     if (not isinstance(contract, dict)
             or set(contract) != {"version", "marker", "format", "field_order", "fields",
@@ -101,7 +106,7 @@ def _frame_from_contract(observed: dict, decision: str) -> str | None:
         else:
             return None
         response[name] = value
-    if generated != 1 or choice != 1:
+    if choice != 1:
         return None
     return marker + json.dumps(response, separators=(",", ":"))
 
@@ -158,6 +163,7 @@ def _worker_provider() -> ThreadingHTTPServer:
                             decision = "failure"
                         else:
                             decision = "success"
+                    self.server.observed_contracts.append(observed.get("response_contract"))
                     content = _frame_from_contract(observed, decision)
             if content is None:
                 content = "invalid"
@@ -184,6 +190,7 @@ def _worker_provider() -> ThreadingHTTPServer:
 
     server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
     server.request_count = 0
+    server.observed_contracts = []  # every response_contract the scripted worker was actually delivered
     return server
 
 

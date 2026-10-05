@@ -4,7 +4,8 @@ The bridge extension's registered tools (dumped by ``cw18_schema_dump_independen
 socket) must match what the backend accepts (``workbench.backend.flow.validate_arguments``), and the
 Workbench skills must describe exactly those tools (C-D64/C-D65 (3)/C-D66 (2)):
 
-- manager registers only ``to_worker``, worker only ``to_manager``;
+- manager registers only ``to_worker``; worker registers ``to_manager`` and, since C-D68 (1), ``terminal`` (its only
+  command execution path; the manager keeps OMP's own tools and gets no ``terminal``, C-D68 (3));
 - property names, kinds, required fields, limits and the variable-name rule agree on both sides;
 - the to-worker skill names every to_worker field and the one-task rule (worker_busy, no queue), the idle-only
   host terminal, the retry limit, no environment values; it also explains the results the backend really
@@ -48,13 +49,17 @@ class SchemaAgreementTests(unittest.TestCase):
     def setUpClass(cls):
         cls.tools = dump()
 
-    def tool(self, role):
-        self.assertEqual(len(self.tools[role]), 1, self.tools[role])
-        return self.tools[role][0]
+    def tool(self, role, name=None):
+        # C-D68 (1): the worker has two bridge tools (to_manager, terminal); the handoff tool is the first one.
+        name = name or {"manager": "to_worker", "worker": "to_manager"}[role]
+        found = [t for t in self.tools[role] if t["name"] == name]
+        self.assertEqual(len(found), 1, self.tools[role])
+        return found[0]
 
-    def test_one_tool_per_role(self):
+    def test_bridge_tools_per_role(self):
+        # C-D64 (3) handoff tools; C-D68 (1) adds the worker-only ``terminal`` (no manager terminal, C-D68 (3)).
         self.assertEqual([t["name"] for t in self.tools["manager"]], ["to_worker"])
-        self.assertEqual([t["name"] for t in self.tools["worker"]], ["to_manager"])
+        self.assertEqual(sorted(t["name"] for t in self.tools["worker"]), ["terminal", "to_manager"])
         self.assertEqual({name: role.value for name, role in flow.TOOL_ROLES.items()},
                          {"to_worker": "manager", "to_manager": "worker"})
 

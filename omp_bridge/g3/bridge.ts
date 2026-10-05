@@ -24,6 +24,7 @@ type DeliveryEvidence = {
 	workerRevision?: number;
 	workerResponse?: Record<string, unknown>;
 	workerResponseRejected?: string;
+	workerResponseProblem?: string;
 	providerRequestCount: number;
 	assistantMessageCount: number;
 };
@@ -34,9 +35,12 @@ type WorkerResponseField = {
 	name: string;
 	type: "literal_string" | "canonical_uuid" | "positive_safe_integer" | "enum_string";
 	value?: string | number;
-	generate?: "canonical_uuid";
 	allowed?: string[];
 };
+// Root adjudication p27-cw18-response-id (smoke-04 G1): response_id is a technical identity, not a model judgement.
+// The bridge generates it (canonical UUID v4) once the marker is valid; the model is never asked for it, and a
+// response_id the model supplies anyway is skipped unread (never trusted, never validated).
+const BRIDGE_GENERATED_FIELD = "response_id";
 
 function workerResponseFields(delivery: DeliveryEvidence): WorkerResponseField[] {
 	return [
@@ -50,7 +54,6 @@ function workerResponseFields(delivery: DeliveryEvidence): WorkerResponseField[]
 		{ name: "delivery_attempt_id", type: "canonical_uuid", value: delivery.deliveryAttemptId },
 		{ name: "session_id", type: "canonical_uuid", value: delivery.sessionId },
 		{ name: "session_generation", type: "positive_safe_integer", value: delivery.generation },
-		{ name: "response_id", type: "canonical_uuid", generate: "canonical_uuid" },
 		{ name: "decision", type: "enum_string", allowed: delivery.workerStage === "execute"
 			? ["execute", "hold"] : ["success", "failure", "indeterminate"] },
 	];
@@ -72,28 +75,65 @@ function workerResponseContract(delivery: DeliveryEvidence): Frame {
 	};
 }
 
-function parseWorkerResponse(text: string, delivery: DeliveryEvidence): Record<string, unknown> | undefined {
-	if (!text.startsWith(WORKER_RESPONSE_MARKER)) return undefined;
+// F2: a rejected staged response records one short machine reason (never response text).
+type WorkerResponseProblem = "multiple_messages" | "provider_error" | "tool_activity" | "incomplete"
+	| "extra_text" | "bad_marker" | "identity_mismatch";
+type ParsedWorkerResponse = { response: Record<string, unknown> } | { problem: WorkerResponseProblem };
+
+function parseWorkerResponse(text: string, delivery: DeliveryEvidence): ParsedWorkerResponse {
+	if (!text.startsWith(WORKER_RESPONSE_MARKER)) {
+		return { problem: text.includes(WORKER_RESPONSE_MARKER) ? "extra_text" : "bad_marker" };
+	}
 	const body = text.slice(WORKER_RESPONSE_MARKER.length);
-	if (!body.startsWith("{") || !body.endsWith("}")) return undefined;
+	if (!body.startsWith("{")) return { problem: "bad_marker" };
+	if (!body.endsWith("}") || body.indexOf("}") !== body.length - 1) {
+		return { problem: body.includes("}") ? "extra_text" : "bad_marker" };
+	}
 	const fields = workerResponseFields(delivery);
-	const tokens = body.slice(1, -1).split(",");
-	if (tokens.length !== fields.length) return undefined;
+	const all = body.slice(1, -1).split(",");
+	const tokens = all.filter(token => !token.startsWith(`"${BRIDGE_GENERATED_FIELD}":`));
+	if (all.length - tokens.length > 1 || tokens.length !== fields.length) return { problem: "bad_marker" };
 	const result: Record<string, unknown> = {};
+	let mismatch = false;
 	for (let index = 0; index < fields.length; index += 1) {
 		const field = fields[index];
 		const match = /^"([a-z_]+)":(?:"([A-Za-z0-9_-]+)"|([1-9][0-9]*))$/.exec(tokens[index]);
-		if (!match || match[1] !== field.name) return undefined;
+		if (!match || match[1] !== field.name) return { problem: "bad_marker" };
 		const value = match[3] === undefined ? match[2] : Number(match[3]);
-		if (field.type === "canonical_uuid" && (typeof value !== "string" || !UUID_PATTERN.test(value))) return undefined;
+		if (field.type === "canonical_uuid" && (typeof value !== "string" || !UUID_PATTERN.test(value))) return { problem: "bad_marker" };
 		if (field.type === "positive_safe_integer" && (typeof value !== "number"
-			|| !Number.isSafeInteger(value) || value < 1)) return undefined;
-		if ((field.type === "literal_string" || field.type === "enum_string") && typeof value !== "string") return undefined;
-		if (field.value !== undefined && value !== field.value) return undefined;
-		if (field.allowed !== undefined && !field.allowed.includes(value as string)) return undefined;
+			|| !Number.isSafeInteger(value) || value < 1)) return { problem: "bad_marker" };
+		if ((field.type === "literal_string" || field.type === "enum_string") && typeof value !== "string") return { problem: "bad_marker" };
+		if (field.allowed !== undefined && !field.allowed.includes(value as string)) return { problem: "bad_marker" };
+		if (field.value !== undefined && value !== field.value) mismatch = true;
 		result[field.name] = value;
 	}
-	return result;
+	if (mismatch) return { problem: "identity_mismatch" };
+	result[BRIDGE_GENERATED_FIELD] = randomUUID();
+	return { response: result };
+}
+
+// C-D67: thinking content items (a reasoning model's encrypted reasoning or its visible reasoning summary, at any
+// position, with any keys) are not response content: they are dropped unread and never forwarded or recorded.
+// Every other item stays: exactly one text item carrying the marker frame and nothing else.
+function classifyWorkerMessage(message: { content?: unknown; stopReason?: unknown; errorMessage?: unknown },
+	willContinue: unknown, delivery: DeliveryEvidence): ParsedWorkerResponse {
+	if (delivery.assistantMessageCount !== 1) return { problem: "multiple_messages" };
+	if (message.stopReason === "error" || message.stopReason === "aborted"
+		|| (typeof message.errorMessage === "string" && message.errorMessage.length > 0)) return { problem: "provider_error" };
+	const content = Array.isArray(message.content) ? message.content.filter(item => !isThinkingItem(item)) : undefined;
+	if (message.stopReason === "toolUse" || content?.some(item => typeof item === "object" && item !== null
+		&& ((item as Record<string, unknown>).type === "toolCall" || (item as Record<string, unknown>).type === "tool_use"))) {
+		return { problem: "tool_activity" };
+	}
+	if (message.stopReason !== "stop" || willContinue === true || message.errorMessage) return { problem: "incomplete" };
+	if (content === undefined) return { problem: "bad_marker" };
+	const texts = content.filter((item): item is { type: "text"; text: string } => typeof item === "object"
+		&& item !== null && (item as Record<string, unknown>).type === "text"
+		&& typeof (item as Record<string, unknown>).text === "string");
+	if (content.length === 0 || (texts.length === 0 && content.length === 1)) return { problem: "bad_marker" };
+	if (content.length !== 1 || texts.length !== 1) return { problem: "extra_text" };
+	return parseWorkerResponse(texts[0].text, delivery);
 }
 
 // CW-18 smoke-02 E1: the provider request payload shapes OMP 18.4.5 builds (captured with a local capture
@@ -127,15 +167,12 @@ function finalUserTexts(payload: unknown): FinalUserTexts | undefined {
 	return { list, item, texts };
 }
 
-// A reasoning model's assistant message (OMP 18.4.5 openai-codex) starts with a thinking block that carries only
-// the provider's encrypted reasoning: `thinking` is "" and the rest is the opaque `thinkingSignature`. It holds
-// no response content; visible thinking text or any other key or block is still response content (no_thinking).
-function isOpaqueThinking(block: unknown): boolean {
-	if (typeof block !== "object" || block === null || Array.isArray(block)) return false;
-	const record = block as Record<string, unknown>;
-	return record.type === "thinking" && (record.thinking === undefined || record.thinking === "")
-		&& Object.keys(record).every(key => key === "type" || key === "thinking"
-			|| (key === "thinkingSignature" && typeof record.thinkingSignature === "string"));
+// A reasoning model's assistant message (OMP 18.4.5 openai-codex) carries thinking items: the provider's encrypted
+// reasoning (`thinking` "" plus an opaque `thinkingSignature`) or, with reasoning summaries on (GPT-5.5, smoke-03),
+// visible summary text. C-D67: none of them is response content; only the `type` is looked at.
+function isThinkingItem(block: unknown): boolean {
+	return typeof block === "object" && block !== null && !Array.isArray(block)
+		&& (block as Record<string, unknown>).type === "thinking";
 }
 
 function env(name: string): string {
@@ -251,10 +288,13 @@ const TO_MANAGER_PARAMETERS = {
 		},
 	},
 };
+type BridgeTool = "to_worker" | "to_manager" | "terminal";
 const HANDOFF_TOOLS: Record<Role, { name: "to_worker" | "to_manager"; label: string; description: string; parameters: Frame }> = {
 	manager: {
 		name: "to_worker", label: "To worker", parameters: TO_WORKER_PARAMETERS,
-		description: "Send an instruction to the Workbench worker OMP. The worker does ONE task at a time. If it is "
+		description: "Send an instruction to the Workbench worker OMP. The worker does the delegated task, not you: "
+			+ "do not do it yourself (no commands, edits or checks for it); wait for the worker's to_manager report. "
+			+ "The worker does ONE task at a time. If it is "
 			+ "busy you get worker_busy with the current task; wait for its to_manager report (done/blocked) or "
 			+ "cancel the task. Without task_id (null) a new Task is dispatched at once (status dispatched; the user "
 			+ "delegated this, no approval step). With the current task_id it is a follow-up message for the "
@@ -269,6 +309,77 @@ const HANDOFF_TOOLS: Record<Role, { name: "to_worker" | "to_manager"; label: str
 			+ "while answering a message that carries a response_contract.",
 	},
 };
+
+// C-D68 (1): the worker's only way to run a command. The backend runs it in the Workbench host terminal (the
+// persistent shell the user sees) under the idle-only rule and answers when it exits or the timeout passes.
+// C-D68 (7): the command runs in the host shell's current directory; wait 120 s by default, at most 1800 s.
+const TERMINAL_DEFAULT_TIMEOUT_S = 120;
+const TERMINAL_MAX_TIMEOUT_S = 1800;
+// The backend's own wait ends at timeout_seconds; this covers its start (hold, wb-handoff, submit).
+const TERMINAL_RESULT_SLACK_MS = 30_000;
+const TERMINAL_ABORT_DETAIL = "Waiting stopped. A command that already started keeps running in the host terminal; "
+	+ "end your turn: Workbench sends a check every 60 s while it runs and a completion notice when it exits.";
+// C-D68 (8): the backend learns that a terminal call stopped waiting (abort or this bridge's own timeout), so the
+// completion notice is still sent; Workbench notices reach the worker as their own frame (no Task message).
+const TERMINAL_ABANDON_TOOL = "terminal_wait_abandoned";
+const NOTICE_TYPES = new Set(["terminal_check", "terminal_done"]);
+// p27-cd68-fix-01 P2-2, measured on OMP 18.6.1 (fake provider, /tmp/cd68fix-probe): each subagent session runs its
+// own instance of this extension (factory and session_start again, same process) and its ExtensionContext has
+// agent = {kind: "sub", depth: 1, parentId, name}; the main session has {kind: "main", depth: 0}. A subagent
+// never connects to the bridge (its hello, same role and token, would replace the worker's peer) and its bridge
+// tools refuse: only the worker itself reports to the manager and runs commands.
+// p27-cd68-fix-02, measured the same way: nothing tells the extension at load/registration time that it serves a
+// subagent (pi, pi.runtime, pi.extension and the flags are the same as in the main session, pi has no agent), so
+// the tools are registered; at the subagent's session_start they are removed from that session's active tools
+// (pi.setActiveTools), which drops them from the subagent's provider request. The refusal stays as defence.
+const BRIDGE_TOOL_NAMES = new Set(["to_worker", "to_manager", "terminal"]);
+const SUBAGENT_DETAIL = "Bridge tools are for the worker itself, not its subagents: only the worker itself reports "
+	+ "to the manager and runs commands. Return your findings to the worker instead.";
+
+export function isSubagentContext(ctx: unknown): boolean {
+	try {
+		const agent = typeof ctx === "object" && ctx !== null ? (ctx as Frame).agent : undefined;
+		if (typeof agent !== "object" || agent === null) return false;
+		return agent.kind === "sub" || (typeof agent.depth === "number" && agent.depth > 0)
+			|| typeof agent.parentId === "string";
+	} catch {
+		return true;  // an unreadable agent identity never gets the worker's tools
+	}
+}
+const TERMINAL_PARAMETERS = {
+	type: "object",
+	additionalProperties: false,
+	required: ["command", "timeout_seconds"],
+	properties: {
+		command: { type: ["string", "null"], maxLength: MESSAGE_MAX,
+			description: "One shell command line (bash -c / sh -c), run in the current directory of the host terminal "
+				+ "(where the user last cd'd; a cd inside the command does not change it); null returns the last "
+				+ "command's result or running status. No environment variable values (use $NAME)." },
+		timeout_seconds: { type: ["integer", "null"], minimum: 1, maximum: TERMINAL_MAX_TIMEOUT_S,
+			description: `How long to wait for the exit (1-${TERMINAL_MAX_TIMEOUT_S}); null for `
+				+ `${TERMINAL_DEFAULT_TIMEOUT_S}. On timeout the command keeps running.` },
+	},
+};
+const TERMINAL_TOOL = {
+	name: "terminal" as const, label: "Terminal", parameters: TERMINAL_PARAMETERS,
+	description: "Run one shell command in the Workbench host terminal (visible to the user) and get its exit code, "
+		+ "the end of its output and the path of the full log. Use it for every shell command (tests, scripts, git, "
+		+ "builds); there is no other way to run commands. It runs in the host terminal's current directory (where "
+		+ "the user last cd'd), so use absolute paths or cd inside the command when the place matters. It runs only "
+		+ "when the host terminal is free (the user's "
+		+ "idle prompt, no job, no experiment run): otherwise you get host_terminal_busy and nothing ran; paused means "
+		+ "the user paused Workbench (a running command continues). One command at a time: a new one while another runs gets terminal_command_running. "
+		+ "If the command outlives timeout_seconds it keeps running and you get status running: end your turn and do "
+		+ "not start another command; Workbench sends you a check every 60 s while it runs and a completion notice "
+		+ "when it exits. Set unused fields to null.",
+};
+
+export function terminalTimeoutMs(params: unknown): number {
+	const value = typeof params === "object" && params !== null ? (params as Frame).timeout_seconds : undefined;
+	const seconds = Number.isSafeInteger(value) && (value as number) >= 1
+		? Math.min(value as number, TERMINAL_MAX_TIMEOUT_S) : TERMINAL_DEFAULT_TIMEOUT_S;
+	return seconds * 1000 + TERMINAL_RESULT_SLACK_MS;
+}
 
 export default function workbenchG3Extension(pi: any): void {
 	const socketPath = env("WORKBENCH_G3_BRIDGE_SOCKET");
@@ -285,6 +396,7 @@ export default function workbenchG3Extension(pi: any): void {
 
 	let socket: net.Socket | undefined;
 	let context: any;
+	let subagentSession = false;  // this instance serves a subagent session: no bridge connection, tools refuse
 	let ompSessionId = "";
 	let paused = false;
 	let connected = false;
@@ -403,8 +515,11 @@ export default function workbenchG3Extension(pi: any): void {
 				...deliveryIdentity(delivery), workerResponse: delivery.workerResponse,
 			});
 		} else if (delivery.workerStage) {
+			const reason = delivery.workerResponseRejected ?? "missing_terminal_worker_response";
 			sendEvent("worker_response_rejected", {
-				...deliveryIdentity(delivery), reason: delivery.workerResponseRejected ?? "missing_terminal_worker_response",
+				...deliveryIdentity(delivery), reason,
+				...(reason === "invalid_assistant_response" && delivery.workerResponseProblem
+					? { detail: delivery.workerResponseProblem } : {}),
 			});
 		}
 			delivery.terminal = "processed";
@@ -557,6 +672,52 @@ export default function workbenchG3Extension(pi: any): void {
 			}
 			return;
 		}
+		// C-D68 (8): a Workbench notice for the worker (terminal check / completion), not a Task message. Like a
+		// delivery it goes only into an idle, unpaused worker with an empty composer, once per notice_id.
+		if (frame.kind === "notice" && typeof frame.requestId === "string") {
+			const notice = frame.notice;
+			const fields = typeof notice === "object" && notice !== null && !Array.isArray(notice)
+				? notice as Frame : undefined;
+			const noticeId = fields?.notice_id;
+			if (role !== "worker" || fields === undefined || typeof noticeId !== "string" || !UUID_PATTERN.test(noticeId)
+				|| !NOTICE_TYPES.has(fields.type)) {
+				ack(frame.requestId, "rejected", { reason: "invalid Workbench notice" });
+				return;
+			}
+			const identity = `notice:${ompSessionId}:${generation}:${noticeId}`;
+			const prior = seen.get(identity);
+			if (prior === "api_accepted") {
+				ack(frame.requestId, "duplicate_api_accepted", { noticeId });
+				return;
+			}
+			if (prior === "unknown" || prior === "sending") {
+				ack(frame.requestId, "unknown_no_replay", { noticeId });
+				return;
+			}
+			if (paused) {
+				ack(frame.requestId, "deferred", { reason: "paused" });
+				return;
+			}
+			if (!isMessageSafe()) {
+				ack(frame.requestId, "deferred", { reason: "OMP is busy, has pending work/approval, or composer state is unsafe" });
+				publishState();
+				return;
+			}
+			seen.set(identity, "sending");
+			const noticePauseEpoch = pauseEpoch;
+			const { type, ...content } = fields;
+			try {
+				await pi.sendUserMessage(JSON.stringify({ workbench_notice: type, ...content }), { attribution: "agent" });
+				const accepted = pauseEpoch === noticePauseEpoch;
+				seen.set(identity, accepted ? "api_accepted" : "unknown");
+				ack(frame.requestId, accepted ? "api_accepted" : "unknown_no_replay", { noticeId });
+			} catch {
+				seen.set(identity, "unknown");
+				ack(frame.requestId, "unknown_no_replay", { noticeId });
+			}
+			publishState();
+			return;
+		}
 		if (frame.kind !== "deliver" || typeof frame.requestId !== "string" || typeof frame.envelope !== "string") return;
 
 		const requestId = frame.requestId;
@@ -684,8 +845,11 @@ export default function workbenchG3Extension(pi: any): void {
 		}
 	}
 
-	function requestHandoff(tool: "to_worker" | "to_manager", toolCallId: unknown, params: unknown,
-		signal: AbortSignal | undefined): Promise<Frame> {
+	function requestHandoff(tool: BridgeTool, toolCallId: unknown, params: unknown,
+		signal: AbortSignal | undefined, timeoutMs = TOOL_RESULT_TIMEOUT_MS, ctx?: unknown): Promise<Frame> {
+		if (subagentSession || isSubagentContext(ctx)) {
+			return Promise.resolve({ status: "rejected", reason: "subagent_not_allowed", detail: SUBAGENT_DETAIL });
+		}
 		// The worker's staged reply is one provider round without tools; never forward a report from inside it.
 		if (activeDelivery?.workerStage && activeDelivery.terminal === "pending") {
 			return Promise.resolve({ status: "rejected", reason: "staged_delivery_pending" });
@@ -704,8 +868,20 @@ export default function workbenchG3Extension(pi: any): void {
 		const requestId = randomUUID();
 		return new Promise(resolve => {
 			let settled = false;
-			const onAbort = () => settle({ status: "outcome_unknown", reason: "aborted" });
-			const timer = setTimeout(() => settle({ status: "outcome_unknown", reason: "timeout" }), TOOL_RESULT_TIMEOUT_MS);
+			// For terminal an abort stops only this wait and the command continues; the backend is told the call no
+			// longer waits (C-D68 (8)) so the worker still gets the completion notice.
+			const onAbort = () => abandon({ status: "outcome_unknown", reason: "aborted",
+				...(tool === "terminal" ? { detail: TERMINAL_ABORT_DETAIL } : {}) });
+			const timer = setTimeout(() => abandon({ status: "outcome_unknown", reason: "timeout" }), timeoutMs);
+			function abandon(result: Frame): void {
+				if (settled) return;
+				settle(result);
+				if (tool === "terminal" && client === socket && connected && !client.destroyed) {
+					sendLine(client, { kind: "tool_request", requestId: randomUUID(), toolCallId: randomUUID(),
+						tool: TERMINAL_ABANDON_TOOL, args: { tool_call_id: toolCallId }, sessionId: ompSessionId,
+						generation });
+				}
+			}
 			function settle(result: Frame): void {
 				if (settled) return;
 				settled = true;
@@ -732,11 +908,25 @@ export default function workbenchG3Extension(pi: any): void {
 			strict: true,
 			// Ship the schema with every provider request instead of xd:// discovery.
 			loadMode: "essential",
-			async execute(toolCallId: string, params: unknown, signal?: AbortSignal) {
-				const result = await requestHandoff(tool.name, toolCallId, params, signal);
+			async execute(toolCallId: string, params: unknown, signal?: AbortSignal, _onUpdate?: unknown, ctx?: unknown) {
+				const result = await requestHandoff(tool.name, toolCallId, params, signal, TOOL_RESULT_TIMEOUT_MS, ctx);
 				return { content: [{ type: "text", text: JSON.stringify(result) }], details: result };
 			},
 		});
+		if (role === "worker") {
+			pi.registerTool({
+				name: TERMINAL_TOOL.name,
+				label: TERMINAL_TOOL.label,
+				description: TERMINAL_TOOL.description,
+				parameters: TERMINAL_TOOL.parameters,
+				strict: true,
+				loadMode: "essential",
+				async execute(toolCallId: string, params: unknown, signal?: AbortSignal, _onUpdate?: unknown, ctx?: unknown) {
+					const result = await requestHandoff("terminal", toolCallId, params, signal, terminalTimeoutMs(params), ctx);
+					return { content: [{ type: "text", text: JSON.stringify(result) }], details: result };
+				},
+			});
+		}
 	}
 
 	function clearReconnect(): void {
@@ -811,8 +1001,24 @@ export default function workbenchG3Extension(pi: any): void {
 		});
 	}
 
+	function hideBridgeTools(): void {
+		try {
+			const active = pi.getActiveTools?.();
+			if (!Array.isArray(active) || typeof pi.setActiveTools !== "function") return;
+			const kept = active.filter((name: unknown) => !BRIDGE_TOOL_NAMES.has(String(name)));
+			if (kept.length !== active.length) void Promise.resolve(pi.setActiveTools(kept)).catch(() => {});
+		} catch {
+			// The execute-time refusal still holds.
+		}
+	}
+
 	function connect(ctx: any, reason: "start" | "switch"): void {
 		if (shuttingDown) return;
+		if (isSubagentContext(ctx)) {
+			subagentSession = true;  // P2-2: a subagent session never says hello as the worker
+			hideBridgeTools();
+			return;
+		}
 		if (reason === "switch") {
 			if (activeDelivery?.workerStage) markDeliveryUnknown("session_switched");
 			probeDelivery = undefined;
@@ -970,20 +1176,12 @@ export default function workbenchG3Extension(pi: any): void {
 		}
 		if (delivery?.workerStage && delivery.terminal === "pending" && event?.message?.role === "assistant") {
 			delivery.assistantMessageCount += 1;
-			const content = event.message.content;
-			// E1: an opaque leading thinking block (encrypted reasoning, no text) is not response content.
-			let start = 0;
-			while (Array.isArray(content) && start < content.length && isOpaqueThinking(content[start])) start += 1;
-			const rest = Array.isArray(content) ? content.slice(start) : [];
-			const text = rest.length === 1
-				&& typeof rest[0] === "object" && rest[0] !== null
-				&& rest[0].type === "text" && typeof rest[0].text === "string" ? rest[0].text as string : undefined;
-			const response = text === undefined ? undefined : parseWorkerResponse(text, delivery);
-			if (delivery.assistantMessageCount !== 1 || event.message.stopReason !== "stop"
-				|| event.message.errorMessage || event.willContinue === true || !response) {
-				delivery.workerResponseRejected = "invalid_assistant_response";
+			const parsed = classifyWorkerMessage(event.message, event.willContinue, delivery);
+			if ("problem" in parsed) {
+				delivery.workerResponseRejected ??= "invalid_assistant_response"; // keep an earlier, more specific reason
+				delivery.workerResponseProblem ??= parsed.problem;
 			} else {
-				delivery.workerResponse = response;
+				delivery.workerResponse = parsed.response;
 			}
 		}
 		if (eventSurfaceProbe && event?.message?.role === "user") {

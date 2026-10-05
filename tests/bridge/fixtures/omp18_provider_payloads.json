@@ -474,6 +474,21 @@
     }
    ],
    "stopReason": "stop"
+  },
+  "openai_codex_responses_visible_reasoning": {
+   "role": "assistant",
+   "content": [
+    {
+     "type": "thinking",
+     "thinking": "{{VISIBLE_THINKING}}"
+    },
+    {
+     "type": "text",
+     "text": "{{ASSISTANT_TEXT}}"
+    }
+   ],
+   "stopReason": "stop"
   }
- }
+ },
+ "assistant_message_end_visible_reasoning_source": "C-D67: the content item shape of the worker's staged reply in the real-model smoke p27-cw18-smoke-03 (openai-codex GPT-5.5, reasoning summary on): a thinking item whose only keys are type and thinking (48 visible characters), then the marker text. Only the content types and keys were recorded; {{VISIBLE_THINKING}} and {{ASSISTANT_TEXT}} replace the text."
 }

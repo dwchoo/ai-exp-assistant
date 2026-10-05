@@ -207,20 +207,22 @@ class ObservationPredicateTests(unittest.TestCase):
         ok = {"role": "manager", "state": "ok", "ok": True, "leaks": [], "error": None}
         leak = {"role": "worker", "state": "leak", "ok": False, "leaks": ["skill:orca-cli"], "error": None}
         failed = {"role": "worker", "state": "failed", "ok": False, "leaks": [], "error": "timed out"}
-        summary = launcher.summarize_isolation({"manager": ok, "worker": leak}, "omp/18.4.5")
+        summary = launcher.summarize_isolation({"manager": ok, "worker": leak}, "omp/18.6.1")
         self.assertEqual((summary["state"], summary["checked"], summary["ok"]), ("leak", True, False))
         self.assertEqual(summary["leaks"], ["worker:skill:orca-cli"])
         self.assertIn("worker:skill:orca-cli", summary["warning"])
-        self.assertEqual(summary["omp_version"], "omp/18.4.5")
-        # isolation evidence: C-D64 home probe + live p27-home-test-01 with OMP 18.4.5
+        self.assertEqual(summary["omp_version"], "omp/18.6.1")
+        # C-D68 (6): the isolation evidence is re-made with the installed OMP 18.6.1
         self.assertEqual(summary["version_drift"], {"bridge_g3": "18.2.10"})
+        self.assertEqual(launcher.summarize_isolation({"manager": ok}, "omp/18.4.5")["version_drift"],
+                         {"bridge_g3": "18.2.10", "isolation": "18.6.1"})
         self.assertEqual(launcher.summarize_isolation({"manager": ok}, "omp/18.4.4")["version_drift"],
-                         {"bridge_g3": "18.2.10", "isolation": "18.4.5"})
+                         {"bridge_g3": "18.2.10", "isolation": "18.6.1"})
         self.assertEqual(launcher.summarize_isolation({"manager": ok, "worker": failed}, "omp/18.4.4")["state"],
                          "failed")
         clean = launcher.summarize_isolation({"manager": ok, "worker": dict(ok, role="worker")}, "omp/18.2.10")
         self.assertEqual((clean["state"], clean["ok"], clean["warning"]), ("ok", True, None))
-        self.assertEqual(clean["version_drift"], {"isolation": "18.4.5"})
+        self.assertEqual(clean["version_drift"], {"isolation": "18.6.1"})  # C-D68 (6)
         pending = launcher.pending_isolation("omp/18.4.4")
         self.assertEqual((pending["state"], pending["checked"], pending["ok"]), ("pending", False, None))
 
@@ -422,7 +424,8 @@ class CliSummaryTests(unittest.TestCase):
         stream = io.StringIO()
         _print_summary(snapshot, stream)
         text = stream.getvalue()
-        self.assertIn("omp isolation: leak (omp/18.4.4 evidence bridge_g3=18.2.10, isolation=18.4.5)", text)
+        # C-D68 (6): isolation evidence OMP 18.6.1
+        self.assertIn("omp isolation: leak (omp/18.4.4 evidence bridge_g3=18.2.10, isolation=18.6.1)", text)
         self.assertIn("WARNING: OMP isolation leak (ambient configuration loaded): worker:skill:orca-cli", text)
         self.assertIn("note: could not read", text)
 

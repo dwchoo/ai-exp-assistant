@@ -456,6 +456,10 @@ for path in order:
 held = open(os.path.join(os.environ["PI_CODING_AGENT_DIR"], "models.db"), "ab")
 tools = [{{"name": "read", "description": "r"}},
          {{"name": "eval", "description": "run code" + (" preludes: xd://eval/browser" if browser else "")}}]
+# C-D68 (1): like the real OMP 18.6.1, ``--tools`` restricts the built-in tools (the worker has no eval).
+if "--tools" in argv[:-1]:
+    allow = set(argv[argv.index("--tools") + 1].split(","))
+    tools = [tool for tool in tools if tool["name"] in allow]
 state = {{"model": {{"provider": "stubprov", "id": "m1"}}, "systemPrompt": "You are omp's trusted coding assistant.\n",
          "dumpTools": tools}}
 for line in sys.stdin:
@@ -558,6 +562,18 @@ class BrowserEntrypointTests(_WrapperBase):
                         continue
                     self.assertIsNot((json.loads(text).get("browser") or {}).get("enabled"), True, path)
         self.assertFalse(os.path.lexists(self.home / ".omp" / "browser-state"))
+        # C-D68 (1)/(3) at the real entrypoint: every worker OMP process (pane and check) gets a --tools allowlist
+        # without bash/eval; the manager keeps OMP's own tools (no --tools).
+        roles = {}
+        for item in self.started():
+            role = item["role"]
+            roles.setdefault(role, []).append(item["argv"])
+        self.assertTrue(roles.get("worker") and roles.get("manager"), roles.keys())
+        for argv in roles["worker"]:
+            self.assertEqual(argv.count("--tools"), 1, argv)
+            self.assertFalse({"bash", "eval"} & set(argv[argv.index("--tools") + 1].split(",")), argv)
+        for argv in roles["manager"]:
+            self.assertNotIn("--tools", argv)
 
     def test_an_injected_browser_enabled_true_is_reported_as_a_leak(self):
         user_config = self.project / "user-browser.json"

@@ -20,7 +20,22 @@ Stages:
      in the host shell -> periodic worker review(s) -> collect -> worker analysis -> report to the manager ->
      judged success, run closed, automation idle.
 
+smoke-04 G1/G2 (p27-cw18-smoke-fix-04): the response contract no longer asks the model for ``response_id`` (the
+bridge generates it). Between H and E:
+  R  manager to_worker experiment -> the command runs -> the worker's analysis marker carries a malformed
+     ``message_id`` (last group 11 chars) -> ``invalid_assistant_response:bad_marker`` -> the run closes as
+     indeterminate with that reason, the manager receives one Workbench notice, the worker is idle, automation
+     idle, and nothing is resent.
+In E the worker's analysis marker additionally carries a model-made malformed ``response_id`` (the smoke-04
+failure): it is ignored and the run is still judged success.
+
+C-D67 (smoke-03): ``--visible-reasoning`` gives every reasoning item a visible summary (the GPT-5.5 reasoning
+summary shape: ``response.reasoning_summary_*`` events, ``summary: [{type: "summary_text", text}]``), so each
+assistant message, including the worker's staged marker reply, starts with a thinking item carrying visible text.
+The run must still start and finish, and the summary text must not reach any Workbench record.
+
 Usage: PYTHONPATH=src python tests/bridge/live_codex_experiment_probe.py [omp] [interval_seconds] [--sse]
+       [--visible-reasoning]
 Prints one JSON object; exit 0 only when every check holds.
 """
 
@@ -68,6 +83,42 @@ FAKE_KEY = _b64({"alg": "none"}) + "." + _b64({"https://api.openai.com/auth": {
     "chatgpt_account_id": "local-probe-account"}, "exp": 4102444800}) + ".local"
 
 
+MALFORMED_UUID = "0d4c8a3e-5b2f-4c1a-9e7d-2a6b4f8c1d3"  # smoke-04: a model-made UUID whose last group has 11 chars
+
+
+def frame_from_contract(observed: dict[str, Any], decision: str, *, malformed: str | None = None,
+                        model_response_id: str | None = None) -> str | None:
+    """The fixture model obeys the delivered contract (smoke-04 G1: nothing to generate; every field but the
+    decision is given). ``malformed`` corrupts that identity field (drops its last char); ``model_response_id``
+    adds a response_id the bridge must ignore."""
+    contract = observed.get("response_contract")
+    if not isinstance(contract, dict) or contract.get("version") != 1:
+        return None
+    fields, order = contract.get("fields"), contract.get("field_order")
+    if (not isinstance(fields, list) or not isinstance(order, list)
+            or [item.get("name") for item in fields if isinstance(item, dict)] != order):
+        return None
+    response: dict[str, Any] = {}
+    for field in fields:
+        if "generate" in field:
+            return None  # the model must not be asked to invent a value any more
+        if field.get("type") == "enum_string":
+            if decision not in (field.get("allowed") or []):
+                return None
+            if model_response_id is not None:
+                response["response_id"] = model_response_id
+            response[field["name"]] = decision
+        elif "value" in field:
+            value = field["value"]
+            response[field["name"]] = value[:-1] if field["name"] == malformed else value
+        else:
+            return None
+    return str(contract.get("marker")) + json.dumps(response, separators=(",", ":"))
+
+
+U2.CW10._frame_from_contract = frame_from_contract  # U2's scripted worker answers execute/analysis through this
+
+
 class CodexModel(U2.Model):
     """U2's scripted model (tool calls / staged markers); the worker holds an execute whose commit is ``hold``."""
 
@@ -75,12 +126,42 @@ class CodexModel(U2.Model):
         super().__init__(role, experiment_spec)
         self.hold_commit = hold_commit
         self.shapes: list[dict[str, Any]] = []
+        self.corrupt_analyses = 1  # stage R: the first analysis marker carries a malformed message_id
+        self.analyses: list[dict[str, Any]] = []
+        self.notices: list[dict[str, Any]] = []  # Workbench notices the manager received (codes only)
 
     def respond(self, request: dict[str, Any]) -> dict[str, Any]:
         messages = request.get("messages") or []
         last = messages[-1] if messages else {}
         blocks = U1._text_blocks(last.get("content"))
         text = blocks[-1].strip() if blocks else ""
+        try:
+            injected = json.loads(text) if last.get("role") == "user" else None
+        except ValueError:
+            injected = None
+        payload = injected.get("payload") if isinstance(injected, dict) else None
+        if self.role == "manager" and isinstance(payload, dict) and payload.get("handoff") == "workbench_notice":
+            with self.lock:
+                self.notices.append({"notice": payload.get("notice"), "reason": payload.get("reason"),
+                                     "error": payload.get("error"), "judgment": payload.get("judgment"),
+                                     "not_judged": payload.get("not_judged"), "run_id": injected.get("run_id")})
+        if (self.role == "worker" and isinstance(payload, dict) and payload.get("stage") == "analysis"
+                and "response_contract" in injected):
+            with self.lock:
+                self.requests += 1
+                corrupt = self.corrupt_analyses > 0
+                self.corrupt_analyses -= 1 if corrupt else 0
+                self.analyses.append({"run_id": injected.get("run_id"), "corrupt": corrupt})
+                self.injected.append({"kind": injected.get("kind"), "stage": "analysis",
+                                      "message_id": injected.get("workbench_message_id"),
+                                      "run_id": injected.get("run_id")})
+            facts = payload.get("facts") or {}
+            ok = (facts.get("exit_status") == 0 and "PASS" in (facts.get("raw_log_excerpt") or "")
+                  and "PASS" in (facts.get("result_excerpt") or ""))
+            frame = (frame_from_contract(injected, "success" if ok else "failure", malformed="message_id")
+                     if corrupt else
+                     frame_from_contract(injected, "success" if ok else "failure", model_response_id=MALFORMED_UUID))
+            return {"content": frame or "invalid"}
         if self.role == "manager" and text == "stage-hold":
             with self.lock:
                 self.requests += 1
@@ -88,11 +169,6 @@ class CodexModel(U2.Model):
             spec["execution"]["commit"] = self.hold_commit
             return self._call("to_worker", {"kind": "experiment", "message": "probe experiment to hold", "spec": spec})
         if self.role == "worker" and last.get("role") == "user":
-            try:
-                injected = json.loads(text)
-            except ValueError:
-                injected = None
-            payload = injected.get("payload") if isinstance(injected, dict) else None
             if (isinstance(payload, dict) and payload.get("stage") == "execute"
                     and payload.get("commit") == self.hold_commit and "response_contract" in injected):
                 with self.lock:
@@ -124,15 +200,27 @@ def responses_to_chat(payload: dict[str, Any]) -> dict[str, Any]:
                                             for tool in payload.get("tools") or [] if isinstance(tool, dict)]}
 
 
-def responses_events(answer: dict[str, Any], number: int) -> list[dict[str, Any]]:
-    reasoning = {"type": "reasoning", "id": f"rs_{number}", "summary": [], "encrypted_content": "local-opaque"}
+VISIBLE_REASONING = "WB_PROBE_VISIBLE_REASONING_SENTINEL deciding how to answer"
+
+
+def responses_events(answer: dict[str, Any], number: int, visible_reasoning: bool = False) -> list[dict[str, Any]]:
+    summary = [{"type": "summary_text", "text": VISIBLE_REASONING}] if visible_reasoning else []
+    reasoning = {"type": "reasoning", "id": f"rs_{number}", "summary": summary, "encrypted_content": "local-opaque"}
     events: list[dict[str, Any]] = [
         {"type": "response.created", "response": {"id": f"resp_{number}", "object": "response",
                                                   "status": "in_progress", "output": []}},
         {"type": "response.output_item.added", "output_index": 0,
          "item": {"type": "reasoning", "id": reasoning["id"], "summary": []}},
-        {"type": "response.output_item.done", "output_index": 0, "item": reasoning},
     ]
+    if visible_reasoning:
+        where = {"item_id": reasoning["id"], "output_index": 0, "summary_index": 0}
+        events += [
+            {"type": "response.reasoning_summary_part.added", **where, "part": {"type": "summary_text", "text": ""}},
+            {"type": "response.reasoning_summary_text.delta", **where, "delta": VISIBLE_REASONING},
+            {"type": "response.reasoning_summary_text.done", **where, "text": VISIBLE_REASONING},
+            {"type": "response.reasoning_summary_part.done", **where, "part": summary[0]},
+        ]
+    events.append({"type": "response.output_item.done", "output_index": 0, "item": reasoning})
     output: list[dict[str, Any]] = [reasoning]
     if "tool_calls" in answer:
         for offset, (name, args, call_id) in enumerate(answer["tool_calls"], start=1):
@@ -182,7 +270,7 @@ def _shape(payload: dict[str, Any], transport: str) -> dict[str, Any]:
             "last_block_types": sorted({b.get("type") for b in content if isinstance(b, dict)})}
 
 
-def codex_server(model: CodexModel) -> ThreadingHTTPServer:
+def codex_server(model: CodexModel, visible_reasoning: bool = False) -> ThreadingHTTPServer:
     counter = {"n": 0}
     lock = threading.Lock()
 
@@ -195,7 +283,7 @@ def codex_server(model: CodexModel) -> ThreadingHTTPServer:
             reply = model.respond(responses_to_chat(payload))
         except Exception as exc:  # keep the stream well formed; the checks see the missing effect
             reply = {"content": f"probe model error {type(exc).__name__}"}
-        return responses_events(reply, number)
+        return responses_events(reply, number, visible_reasoning)
 
     class Handler(BaseHTTPRequestHandler):
         protocol_version = "HTTP/1.1"
@@ -331,10 +419,38 @@ class CodexRpcOmp(U1.RpcOmp):
         self.thread.start()
 
 
-def run(omp: str, interval: int, websocket: bool) -> dict[str, Any]:
+def _assistant_shapes(frames: list[dict[str, Any]]) -> list[list[dict[str, Any]]]:
+    """Content item shapes of each assistant message_end (types, keys, thinking length); no text."""
+    shapes = []
+    for frame in frames:
+        message = frame.get("message") if frame.get("type") == "message_end" else None
+        if not isinstance(message, dict) or message.get("role") != "assistant":
+            continue
+        shapes.append([{"type": item.get("type"), "keys": sorted(item),
+                        **({"thinking_chars": len(item.get("thinking") or "")} if item.get("type") == "thinking" else {})}
+                       for item in message.get("content") or [] if isinstance(item, dict)])
+    return shapes
+
+
+def _files_containing(root: Path, needle: bytes) -> list[str]:
+    """Workbench-owned files under the probe root holding ``needle`` (the OMP homes and their stderr excluded)."""
+    found = []
+    for path in root.rglob("*"):
+        relative = path.relative_to(root)
+        if relative.parts[0].startswith(("home-", "cwd-", "stderr-")) or not path.is_file() or path.is_symlink():
+            continue
+        try:
+            if needle in path.read_bytes():
+                found.append(str(relative))
+        except OSError:
+            continue
+    return found
+
+
+def run(omp: str, interval: int, websocket: bool, visible_reasoning: bool = False) -> dict[str, Any]:
     result: dict[str, Any] = {"mode": "two-real-omp-rpc+local-openai-codex-responses+host-shellpane+automation",
                               "transport": "websocket" if websocket else "sse", "interval_seconds": interval,
-                              "checks": {}}
+                              "visible_reasoning": visible_reasoning, "checks": {}}
     checks = result["checks"]
     version = subprocess.run([omp, "--version"], capture_output=True, text=True, timeout=30,
                              env={"PATH": os.environ.get("PATH", ""), "HOME": "/nonexistent"})
@@ -365,7 +481,7 @@ def run(omp: str, interval: int, websocket: bool) -> dict[str, Any]:
     for name in ("workflow", "worktrees", "runs", "shell-home", "raw"):
         (root / name).mkdir(mode=0o700)
     models = {role: CodexModel(role, experiment_spec, hold_commit) for role in U1.ROLES}
-    servers = {role: codex_server(models[role]) for role in U1.ROLES}
+    servers = {role: codex_server(models[role], visible_reasoning) for role in U1.ROLES}
     for server in servers.values():
         threading.Thread(target=server.serve_forever, daemon=True).start()
     tokens = {role: str(uuid4()) for role in U1.ROLES}
@@ -465,11 +581,48 @@ def run(omp: str, interval: int, websocket: bool) -> dict[str, Any]:
         result["manager_notice"] = notices()[:2]
         checks["worker_idle_after_hold"] = flow.worker_view().get("state") == "idle"
 
+        # Stage R (smoke-04 G2/G3): the worker's analysis marker is rejected -> indeterminate, one notice, clean close.
+        omps["manager"].wait(lambda f: f.get("type") == "agent_end", 30)
+        omps["manager"].send({"id": "r", "type": "prompt", "message": "stage-exp"})
+        checks["reject_dispatched"] = U2.wait_for(lambda: (flow.task_view() or {}).get("task_id")
+                                                  not in (None, hold_task.get("task_id"))
+                                                  and flow.worker_view().get("state") == "busy", 40)
+        reject_task = flow.task_view() or {}
+        reason = "invalid_assistant_response:bad_marker"
+        checks["reject_task_finished_with_reason"] = U2.wait_for(
+            lambda: ((flow.task_view() or {}).get("status"), (flow.task_view() or {}).get("held_reason"))
+            == ("finished", f"judgment_unavailable:{reason}"), duration + 120)
+        reject_view = flow.task_view() or {}
+        reject_last = reject_view.get("last_result") or {}
+        result["reject_task"] = {k: reject_view.get(k) for k in ("task_id", "status", "held_reason", "last_result")}
+        checks["reject_same_task"] = reject_view.get("task_id") == reject_task.get("task_id")
+        checks["reject_indeterminate_closed"] = (
+            reject_last.get("outcome"), reject_last.get("judgment"), reject_last.get("reason"),
+            reject_last.get("run_closed")) == ("judgment_unavailable", "indeterminate", reason, True)
+        reject_record = run_record(reject_last.get("run_id"))
+        result["reject_run_record"] = {"worker_analysis_rejected": reject_record.get("worker_analysis_rejected"),
+                                       "worker_judgment": reject_record.get("worker_judgment"),
+                                       "report": reject_record.get("report")}
+        checks["reject_reason_in_run_record"] = (
+            (reject_record.get("worker_analysis_rejected") or {}).get("reason") == reason
+            and reject_record.get("worker_judgment") is None and "report" not in reject_record)
+        checks["reject_worker_idle"] = flow.worker_view().get("state") == "idle"
+        checks["reject_manager_told_once"] = U2.wait_for(lambda: [
+            n for n in models["manager"].notices if n.get("notice") == "run_judgment_unavailable"] != [], 30)
+        time.sleep(2)
+        told = [n for n in models["manager"].notices if n.get("notice") == "run_judgment_unavailable"]
+        result["reject_manager_notice"] = told
+        checks["reject_manager_notice_once_with_reason"] = (
+            len(told) == 1 and told[0].get("reason") == reason and told[0].get("judgment") == "indeterminate"
+            and told[0].get("not_judged") == ["worker_analysis"])
+        checks["reject_automation_idle"] = U2.wait_for(lambda: state()["state"] == "idle", 20)
+        checks["reject_analysis_not_resent"] = [a["corrupt"] for a in models["worker"].analyses] == [True]
+
         # Stage E: the full experiment path.
         omps["manager"].wait(lambda f: f.get("type") == "agent_end", 30)
         omps["manager"].send({"id": "e", "type": "prompt", "message": "stage-exp"})
         checks["dispatched"] = U2.wait_for(lambda: (flow.task_view() or {}).get("task_id")
-                                           not in (None, hold_task.get("task_id"))
+                                           not in (None, hold_task.get("task_id"), reject_task.get("task_id"))
                                            and flow.worker_view().get("state") == "busy", 40)
         checks["run_bound"] = U2.wait_for(lambda: (state().get("run") or {}).get("bound") is True, 60)
         run_info = state().get("run") or {}
@@ -490,6 +643,14 @@ def run(omp: str, interval: int, websocket: bool) -> dict[str, Any]:
         final_record = run_record(run_info.get("run_id"))
         result["run_record"] = {k: final_record.get(k) for k in ("shell_state", "exit_status", "exit_confirmed")}
         result["run_record"]["worker_judgment"] = (final_record.get("worker_judgment") or {}).get("judgment")
+        # smoke-04 G1: the model-made malformed response_id was ignored; the bridge's own id was recorded.
+        recorded_id = ((final_record.get("worker_judgment") or {}).get("worker_response") or {}).get("response_id")
+        result["run_record"]["response_id_bridge_generated"] = isinstance(recorded_id, str) and len(recorded_id) == 36
+        checks["model_response_id_ignored"] = (isinstance(recorded_id, str) and recorded_id != MALFORMED_UUID
+                                               and len(recorded_id) == 36)
+        checks["success_analysis_once"] = [a["corrupt"] for a in models["worker"].analyses] == [True, False]
+        checks["no_judgment_notice_for_success"] = len(
+            [n for n in models["manager"].notices if n.get("notice") == "run_judgment_unavailable"]) == 1
         # The run closes when the manager OMP accepts the report; its provider request follows.
         checks["manager_received_report"] = U2.wait_for(lambda: any(
             item.get("kind") == "report" and item.get("judgment") == "success"
@@ -505,6 +666,18 @@ def run(omp: str, interval: int, websocket: bool) -> dict[str, Any]:
         if websocket:
             checks["websocket_delta_used"] = any(s["previous_response_id"] for s in shapes)
         result["provider_requests"] = {role: models[role].requests for role in U1.ROLES}
+        with omps["worker"].cond:
+            worker_shapes = _assistant_shapes(list(omps["worker"].frames))
+        result["worker_assistant_shapes"] = worker_shapes[:3]
+        if visible_reasoning:
+            # C-D67: each staged worker reply was [thinking with visible text, marker text] and was accepted.
+            checks["worker_replies_carry_visible_thinking"] = bool(worker_shapes) and all(
+                shape and shape[0]["type"] == "thinking" and shape[0].get("thinking_chars", 0) > 0
+                for shape in worker_shapes)
+            checks["thinking_text_not_recorded"] = (
+                not _files_containing(root, VISIBLE_REASONING.encode())
+                and VISIBLE_REASONING not in json.dumps([flow.task_view(), flow.worker_view(), state(), logs],
+                                                        default=str))
     finally:
         result["log"] = logs[-30:]
         result["omp_stop"] = {role: process.stop() for role, process in omps.items()}
@@ -531,8 +704,9 @@ def run(omp: str, interval: int, websocket: bool) -> dict[str, Any]:
 
 
 if __name__ == "__main__":
-    argv = [arg for arg in sys.argv[1:] if arg != "--sse"]
+    argv = [arg for arg in sys.argv[1:] if arg not in ("--sse", "--visible-reasoning")]
     outcome = run(argv[0] if argv else shutil.which("omp") or "omp",
-                  int(argv[1]) if len(argv) > 1 else 60, "--sse" not in sys.argv[1:])
+                  int(argv[1]) if len(argv) > 1 else 60, "--sse" not in sys.argv[1:],
+                  "--visible-reasoning" in sys.argv[1:])
     print(json.dumps(outcome, indent=1, sort_keys=True, default=str))
     sys.exit(0 if outcome["ok"] else 1)

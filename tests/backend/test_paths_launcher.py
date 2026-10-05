@@ -128,9 +128,20 @@ class StartRequirementTests(unittest.TestCase):
                          ("worker", "t0k", "1"))
         self.assertEqual(env["WORKBENCH_G3_BRIDGE_SOCKET"], "/d/bridge.sock")
         self.assertEqual(env["OPENAI_API_KEY"], "user-own")  # passed through, never stored
-        self.assertEqual(launcher.omp_command(plan, "/d/omp-isolation-worker.yml"),
+        # C-D68 (1): the worker OMP gets the built-in --tools allowlist (no bash/eval) before the user args.
+        worker_argv = launcher.omp_command(plan, "/d/omp-isolation-worker.yml")
+        self.assertEqual(worker_argv,
                          ["/x/omp", "--config", str(launcher.default_isolation_overlay()),
                           "--config", "/d/omp-isolation-worker.yml", "--no-extensions",
+                          "--append-system-prompt", "", "--no-title", "--tools", ",".join(launcher.WORKER_TOOLS),
+                          "--no-session", "--extension", "/x/bridge.ts"])
+        tools = worker_argv[worker_argv.index("--tools") + 1].split(",")
+        self.assertFalse({"bash", "eval"} & set(tools))
+        self.assertTrue({"read", "grep", "glob", "edit", "write", "web_search", "todo"} <= set(tools))
+        # C-D68 (3): the manager keeps OMP's own tools (no --tools)
+        self.assertEqual(launcher.omp_command(plan, "/d/omp-isolation-manager.yml"),
+                         ["/x/omp", "--config", str(launcher.default_isolation_overlay()),
+                          "--config", "/d/omp-isolation-manager.yml", "--no-extensions",
                           "--append-system-prompt", "", "--no-title", "--no-session",
                           "--extension", "/x/bridge.ts"])
         shell_env = launcher.shell_environment(base)
@@ -253,8 +264,13 @@ class IsolationLaunchTests(unittest.TestCase):
         # R4: Workbench-owned skill filter; user include/ignore lists are replaced, not inherited
         self.assertEqual(overlay["skills"]["includeSkills"], ["to-manager"])  # CW-18: the worker's own skill only
         self.assertEqual(overlay["skills"]["ignoredSkills"], [])
-        # R4: the user's own disabledAgents survive (union, no duplicates)
-        self.assertEqual(overlay["task"]["disabledAgents"], ["sonic", "canary-agent"])
+        # R4: the user's own disabledAgents survive (union, no duplicates); C-D68 (1)/(2): the worker also
+        # disables every OMP bundled agent (it uses only the Workbench explorer/analyst)
+        self.assertEqual(overlay["task"]["disabledAgents"][:2], ["sonic", "canary-agent"])
+        self.assertEqual(sorted(overlay["task"]["disabledAgents"]),
+                         sorted({"sonic", "canary-agent", *launcher.BUNDLED_TASK_AGENTS}))
+        self.assertEqual(len(overlay["task"]["disabledAgents"]), len(set(overlay["task"]["disabledAgents"])))
+        self.assertFalse({"explorer", "analyst"} & set(overlay["task"]["disabledAgents"]))
         self.assertEqual(overlay["disabledProviders"][:len(launcher.ISOLATION_PROVIDER_IDS)],
                          list(launcher.ISOLATION_PROVIDER_IDS))
         self.assertIn("openrouter", overlay["disabledProviders"])  # the user's own entry survives

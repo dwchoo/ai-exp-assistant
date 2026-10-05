@@ -1,0 +1,39 @@
+# OMP Workbench model table (C-D68 (4)). Read by the launcher at every OMP
+# start and written into the generated per-role --config overlay (modelRoles,
+# tier.openai, task.agentServiceTierOverrides), so these values win over the
+# Workbench OMP home's config.yml on every start. A model change the user makes
+# inside a running OMP session (/model, /fast) stays possible for that session
+# and is replaced by this table at the next start. No secrets here.
+#
+# Format (a strict subset of YAML, read by workbench.backend.launcher):
+#   <omp role>: <provider>/<model>:<thinking level>
+#   fast: [<omp role>, ...]   # OpenAI "priority" service tier (fast mode)
+# OMP roles: default, slow, plan, smol, task, tiny, memory, commit.
+# Fast mode applies to the main session through tier.openai (on when
+# `default` is fast) and to task subagents per agent through
+# task.agentServiceTierOverrides (their role decides). OMP 18.6.1 has no
+# per-role tier for other model calls (commit/tiny/memory/smol run outside a
+# subagent): those requests use the main session's tier.
+#
+# The user decided (2026-10-05): luna always max + fast; sol high. Roles the user
+# did not name follow: plan = slow, task = default, memory = tiny.
+manager:
+  default: openai-codex/gpt-6.1-sol:high
+  slow: openai-codex/gpt-6.1-sol:high
+  plan: openai-codex/gpt-6.1-sol:high
+  smol: openai-codex/gpt-6-luna:max
+  task: openai-codex/gpt-6-luna:max
+  tiny: openai-codex/gpt-6-luna:max
+  memory: openai-codex/gpt-6-luna:max
+  commit: openai-codex/gpt-6-luna:max
+  fast: [smol, task, tiny, memory, commit]
+worker:
+  default: openai-codex/gpt-6-luna:max
+  task: openai-codex/gpt-6-luna:max
+  slow: openai-codex/gpt-6.1-sol:high
+  plan: openai-codex/gpt-6.1-sol:high
+  smol: openai-codex/gpt-6-luna:xhigh
+  tiny: openai-codex/gpt-6-luna:high
+  memory: openai-codex/gpt-6-luna:high
+  commit: openai-codex/gpt-6-luna:high
+  fast: [default, task, slow, plan, smol, tiny, memory, commit]

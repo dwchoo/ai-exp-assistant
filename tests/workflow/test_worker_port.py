@@ -90,6 +90,38 @@ class WorkerResponsePortTests(unittest.TestCase):
                 with self.assertRaises((ValueError, TimeoutError)):
                     port.observe("execute", message, receipt)
 
+    def test_bridge_rejection_reason_is_kept_as_a_short_machine_reason(self):
+        # F2 (smoke-03): the bridge's rejection reason reaches the caller instead of a generic ValueError.
+        from workbench.workflow.worker_port import WorkerResponseRejected
+        cases = (
+            ({"name": "worker_response_rejected", "reason": "invalid_assistant_response", "detail": "extra_text"},
+             "invalid_assistant_response:extra_text"),
+            ({"name": "worker_response_rejected", "reason": "tool_activity"}, "tool_activity"),
+            ({"name": "worker_response_rejected", "reason": "invalid_assistant_response",
+              "detail": "identity_mismatch"}, "invalid_assistant_response:identity_mismatch"),
+            ({"name": "delivery_processing_unknown", "reason": "assistant_message_ended_with_error_or_abort"},
+             "delivery_processing_unknown:assistant_message_ended_with_error_or_abort"),
+            ({"name": "delivery_omp_processed"}, "missing_terminal_worker_response"),
+            # Anything that is not a short lowercase token is never copied.
+            ({"name": "worker_response_rejected", "reason": "invalid_assistant_response",
+              "detail": "WB_WORKER_RESPONSE:{secret text}"}, "invalid_assistant_response"),
+            ({"name": "worker_response_rejected", "reason": "Model said: hello"}, "unspecified"),
+        )
+        for event, reason in cases:
+            with self.subTest(reason=reason):
+                message, receipt, assistant, _processed = self.fixture()
+                identity = {key: value for key, value in assistant.items()
+                            if key not in ("name", "bridgeSequence", "workerResponse")}
+                port = G3WorkerResponsePort(PublicEvents([{**identity, **event, "bridgeSequence": 1}]))
+                port.arm("execute", message)
+                with self.assertRaises(WorkerResponseRejected) as caught:
+                    port.observe("execute", message, receipt)
+                self.assertIsInstance(caught.exception, ValueError)
+                self.assertEqual(caught.exception.reason, reason)
+                self.assertEqual(str(caught.exception), f"worker response rejected: {reason}")
+                self.assertNotIn("secret", str(caught.exception))
+                self.assertNotIn("hello", str(caught.exception))
+
     def test_unprocessed_receipt_and_repeated_arm_are_rejected(self):
         message, receipt, assistant, processed = self.fixture()
         port = G3WorkerResponsePort(PublicEvents([assistant, processed]))

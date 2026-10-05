@@ -451,6 +451,200 @@ class WorkflowRuntimeTests(unittest.TestCase):
             verified_worker_response("execute", mailbox.messages[0],
                                      mailbox.deliver(mailbox.messages[0]), {})
 
+    def test_rejected_worker_response_reason_is_recorded_in_run_events(self):
+        # F2 (smoke-03): the bridge's machine reason, not only "ValueError", is in the run record and events.
+        from workbench.workflow.worker_port import WorkerResponseRejected
+        workflow, mailbox, worker_port, _state, task_id = self.strict_task()
+
+        def rejected(_message):
+            raise WorkerResponseRejected("invalid_assistant_response:extra_text")
+
+        worker_port.after_execute = rejected
+        with self.assertRaises(WorkerResponseRejected):
+            workflow.start(task_id, 1, worktree_path=self.root / "rejected-response",
+                           artifacts_root=self.artifacts, automation=AUTOMATION,
+                           environment_values={"PATH": "/usr/bin:/bin", "TERM": "xterm",
+                                               "CW10_SECRET": "private-sentinel"})
+        self.assertFalse((self.root / "rejected-response").exists())
+        record = json.loads(next(self.artifacts.glob("*/run.json")).read_text())
+        expected = {"type": "WorkerResponseRejected", "reason": "invalid_assistant_response:extra_text",
+                    "detail": "worker response rejected: invalid_assistant_response:extra_text"}
+        self.assertEqual(record["preparation_error"], expected)
+        run_id = record["run_id"]
+        shell = self.repository.get_shell_history(run_id)
+        self.assertEqual(shell[-1]["kind"], "failed")
+        self.assertEqual(shell[-1]["details"]["preparation_error"], expected)
+        failed = [event for event in self.repository.get_run_history(run_id) if event["kind"] == "failed"]
+        self.assertEqual(failed[-1]["details"], {"stage": "preparation", "error": expected})
+        self.assertEqual([message.kind.value for message in mailbox.messages], ["task"])
+
+    def test_rejected_or_unknown_worker_analysis_records_reason_and_raises_unavailable(self):
+        # smoke-04 G2/G3: a rejected / unverifiable / unknown analysis is no worker judgment: the run records the
+        # machine reason (never response text) with what the host evidence guard found, sends no report and raises
+        # WorkerJudgmentUnavailable (a WorkflowHeld) so the caller closes the run and tells the manager once.
+        from workbench.workflow import WorkerJudgmentUnavailable
+        from workbench.workflow.worker_port import WorkerResponseRejected
+
+        def rejected(_message):
+            raise WorkerResponseRejected("invalid_assistant_response:bad_marker")
+
+        def timeout(_message):
+            raise TimeoutError("public worker response deadline expired")
+
+        cases = {
+            "rejected": ("invalid_assistant_response:bad_marker", "success", rejected, None),
+            "timeout": ("worker_response_timeout", "success", timeout, None),
+            "unverified": ("worker_response_unverified", "success", None, "mismatch"),
+            "conflict": ("worker_judgment_conflicts_with_evidence", "indeterminate", None, None),
+            "delivery_unknown": ("analysis_delivery_unknown", "success", None, "unknown"),
+            "delivery_rejected": ("analysis_delivery_rejected", "success", None, "rejected"),
+        }
+        for label, (reason, host_judgment, hook, special) in cases.items():
+            with self.subTest(case=label):
+                command = ("printf PASS > outcome.txt" if label == "conflict"
+                           else "printf 'PASS\\n'; printf PASS > outcome.txt")
+                workflow, mailbox, worker_port, _state, task_id = self.strict_task(command)
+                run = workflow.start(task_id, 1, worktree_path=self.root / f"analysis-{label}",
+                                     artifacts_root=self.artifacts, automation=AUTOMATION,
+                                     environment_values={"PATH": "/usr/bin:/bin", "TERM": "xterm",
+                                                         "CW10_SECRET": "private-sentinel"})
+                try:
+                    self.assertTrue(run.collect(timeout=8)["exit_confirmed"])
+                    worker_port.after_analysis = hook
+                    worker_port.mismatch = special == "mismatch"
+                    if special in ("unknown", "rejected"):
+                        status = MailboxStatus.UNKNOWN if special == "unknown" else MailboxStatus.REJECTED
+                        original = mailbox.deliver
+                        mailbox.deliver = lambda message, _o=original, _s=status: (
+                            SimpleNamespace(**{**vars(_o(message)), "status": _s}))
+                    with self.assertRaises(WorkerJudgmentUnavailable) as raised:
+                        run.judge()
+                    self.assertEqual(raised.exception.reason, reason)
+                    self.assertEqual(raised.exception.host_evidence["judgment"], host_judgment)
+                    record = json.loads(run.result_path.read_text())
+                    self.assertEqual(record["worker_analysis_rejected"]["reason"], reason)
+                    self.assertEqual(record["worker_analysis_rejected"]["host_evidence"]["judgment"], host_judgment)
+                    self.assertIsNone(record["worker_judgment"])
+                    self.assertNotIn("report", record)
+                    self.assertEqual([m.kind.value for m in mailbox.messages], ["task", "question"])
+                    self.assertIsNotNone(self.repository.get_current_run(task_id), "the caller closes the run")
+                finally:
+                    run.close()
+        # A pause while the analysis was rejected keeps the plain CW-10 hold (nothing is reported or closed).
+        workflow, mailbox, worker_port, state, task_id = self.strict_task()
+        run = workflow.start(task_id, 1, worktree_path=self.root / "analysis-rejected-paused",
+                             artifacts_root=self.artifacts, automation=AUTOMATION,
+                             environment_values={"PATH": "/usr/bin:/bin", "TERM": "xterm",
+                                                 "CW10_SECRET": "private-sentinel"})
+        try:
+            self.assertTrue(run.collect(timeout=8)["exit_confirmed"])
+
+            def paused_then_rejected(_message):
+                state["payload"]["paused"] = True
+                raise WorkerResponseRejected("invalid_assistant_response:bad_marker")
+
+            worker_port.after_analysis = paused_then_rejected
+            with self.assertRaises(WorkflowHeld) as raised:
+                run.judge()
+            self.assertNotIsInstance(raised.exception, WorkerJudgmentUnavailable)
+            self.assertNotIn("worker_analysis_rejected", json.loads(run.result_path.read_text()))
+        finally:
+            run.close()
+
+    def test_unexpected_analysis_exceptions_end_unavailable_on_a_real_run(self):
+        # fix-05 P2: any other exception in the analysis stage (bridge wait, observe, persist) is no worker
+        # judgment either: the run records analysis_error:<Type>, delivers no report and raises
+        # WorkerJudgmentUnavailable with the host evidence, so the caller closes the run indeterminate once.
+        from workbench.ipc.bridge_g3.mailbox import BridgeTimeout, MailboxError
+        from workbench.workflow import WorkerJudgmentUnavailable
+        from workbench.workflow.run import WorkflowRun
+
+        def raising(error):
+            def hook(_message):
+                raise error
+            return hook
+
+        cases = {
+            "bridge_wait": ("analysis_error:BridgeTimeout", raising(BridgeTimeout("bridge wait expired")), None),
+            "mailbox": ("analysis_error:MailboxError", raising(MailboxError("session lost")), None),
+            "observe_oserror": ("analysis_error:OSError", raising(OSError("event log unreadable")), None),
+            "observe_keyerror": ("analysis_error:KeyError", raising(KeyError("bridgeSequence")), None),
+            "persist": ("analysis_error:OSError", None, "persist"),
+            "report_persist": ("analysis_error:OSError", None, "report_persist"),
+        }
+        for label, (reason, hook, special) in cases.items():
+            with self.subTest(case=label):
+                workflow, mailbox, worker_port, _state, task_id = self.strict_task()
+                run = workflow.start(task_id, 1, worktree_path=self.root / f"analysis-error-{label}",
+                                     artifacts_root=self.artifacts, automation=AUTOMATION,
+                                     environment_values={"PATH": "/usr/bin:/bin", "TERM": "xterm",
+                                                         "CW10_SECRET": "private-sentinel"})
+                delivered = []
+                original_deliver = mailbox.deliver
+
+                def deliver(message, _o=original_deliver):
+                    delivered.append(message.kind.value)
+                    return _o(message)
+
+                mailbox.deliver = deliver
+                try:
+                    self.assertTrue(run.collect(timeout=8)["exit_confirmed"])
+                    worker_port.after_analysis = hook
+                    if special is not None:
+                        def failing_persist(_run=run, _special=special):
+                            if _special == "persist" or "report" in _run._record:
+                                raise OSError("disk full")
+                            WorkflowRun._persist(_run)
+
+                        run._persist = failing_persist
+                    with self.assertRaises(WorkerJudgmentUnavailable) as raised:
+                        run.judge()
+                    self.assertEqual(raised.exception.reason, reason)
+                    self.assertEqual(raised.exception.host_evidence,
+                                     {"judgment": "success", "reasons": ["criteria_met"]})
+                    rejected = run._record["worker_analysis_rejected"]
+                    self.assertEqual((rejected["stage"], rejected["reason"]), ("analysis", reason))
+                    self.assertIsNone(run._record["worker_judgment"])
+                    self.assertNotIn("report", delivered, "no report is delivered")
+                    self.assertEqual(delivered, ["question"])
+                    if special == "report_persist":
+                        self.assertEqual(run._record["report"]["status"], "not_sent")
+                    else:
+                        self.assertNotIn("report", run._record)
+                    if special is None:
+                        on_disk = json.loads(run.result_path.read_text())
+                        self.assertEqual(on_disk["worker_analysis_rejected"]["reason"], reason)
+                        self.assertNotIn("persist_error", on_disk["worker_analysis_rejected"])
+                    else:
+                        self.assertEqual(rejected["persist_error"], "OSError")
+                    self.assertIsNotNone(self.repository.get_current_run(task_id), "the caller closes the run")
+                    with self.assertRaises(WorkflowHeld):  # nothing is reported later
+                        run.retry_report()
+                finally:
+                    run.close()
+        # A pause that happens with the failure keeps the plain CW-10 hold (nothing is reported or closed).
+        workflow, mailbox, worker_port, state, task_id = self.strict_task()
+        run = workflow.start(task_id, 1, worktree_path=self.root / "analysis-error-paused",
+                             artifacts_root=self.artifacts, automation=AUTOMATION,
+                             environment_values={"PATH": "/usr/bin:/bin", "TERM": "xterm",
+                                                 "CW10_SECRET": "private-sentinel"})
+        try:
+            self.assertTrue(run.collect(timeout=8)["exit_confirmed"])
+
+            def paused_then_failed(_message):
+                state["payload"]["paused"] = True
+                raise OSError("event log unreadable")
+
+            worker_port.after_analysis = paused_then_failed
+            with self.assertRaises(WorkflowHeld) as raised:
+                run.judge()
+            self.assertNotIsInstance(raised.exception, WorkerJudgmentUnavailable)
+            self.assertNotIn("worker_analysis_rejected", json.loads(run.result_path.read_text()))
+            self.assertEqual([m.kind.value for m in mailbox.messages], ["task", "question"])
+            self.assertIsNotNone(self.repository.get_current_run(task_id))
+        finally:
+            run.close()
+
     def test_cancel_revoke_and_pause_at_worker_and_analysis_barriers(self):
         for action in ("cancel", "revoke", "pause"):
             with self.subTest(action=action):

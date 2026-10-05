@@ -10,11 +10,41 @@ from __future__ import annotations
 
 from typing import Any, Mapping, Protocol
 from uuid import UUID
+import re
 import time
 
 from workbench.contracts.v1 import MAX_SAFE_INTEGER
 from workbench.contracts.v1 import ActorRole
 from workbench.ipc.bridge_g3.mailbox import G3BridgeServer, MailboxStatus
+
+
+_REASON_TOKEN = re.compile(r"[a-z][a-z0-9_]{0,63}")
+
+
+class WorkerResponseRejected(ValueError):
+    """F2: no validated worker response; ``reason`` is the bridge's short machine code, never response text."""
+
+    def __init__(self, reason: str):
+        self.reason = reason
+        super().__init__(f"worker response rejected: {reason}")
+
+
+def _token(value: Any) -> str | None:
+    return value if isinstance(value, str) and _REASON_TOKEN.fullmatch(value) else None
+
+
+def _rejection_reason(event: Mapping[str, Any]) -> str:
+    """``reason[:detail]`` from a public non-response event; anything but a short lowercase code is dropped."""
+    name = event.get("name")
+    if name == "worker_response_rejected":
+        reason, detail = _token(event.get("reason")), _token(event.get("detail"))
+        if reason is None:
+            return "unspecified"
+        return f"{reason}:{detail}" if detail else reason
+    if name == "delivery_processing_unknown":
+        reason = _token(event.get("reason"))
+        return f"delivery_processing_unknown:{reason}" if reason else "delivery_processing_unknown"
+    return "missing_terminal_worker_response"
 
 
 class WorkerRolePort(Protocol):
@@ -72,7 +102,7 @@ class G3WorkerResponsePort:
         first = next_event(("assistant_message_end", "worker_response_rejected",
                             "delivery_processing_unknown", "delivery_omp_processed"), cursor)
         if first.get("name") != "assistant_message_end":
-            raise ValueError("no validated public worker assistant response")
+            raise WorkerResponseRejected(_rejection_reason(first))
         response = first.get("workerResponse")
         if not isinstance(response, dict) or set(response) != self._fields:
             raise ValueError("public worker response fields are invalid")

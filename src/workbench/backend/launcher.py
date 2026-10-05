@@ -23,6 +23,15 @@ through RPC ``get_state``/``get_available_commands``/``get_login_providers``
 only (zero model calls) and, for the Workbench home, the files the checked OMP
 holds open.
 
+C-D68 (CW-18): the per-role overlay also carries the model table
+(``omp_bridge/omp-models.yml``: modelRoles, tier.openai, per-agent service
+tiers), the worker's tool restrictions (``--tools`` allowlist without
+bash/eval plus bash/eval-backend settings off) and the subagent set per role:
+the worker loses OMP's bundled task agents and gets the two Workbench-owned
+read-only definitions of ``omp_bridge/agents`` (installed into the Workbench
+home's agent dir by ``omp_home``), the manager keeps the bundled agents and
+does not see the Workbench ones.
+
 User choices: OMP's default Personality/Tone/Reasoning Format blocks are kept
 (2026-09-30); with the Workbench home the user's PERSONALITY.md is no longer
 read, so it is not reported any more. ``--no-title`` disables OMP's
@@ -104,6 +113,14 @@ def default_skills_dir() -> Path:
     return _repository_root() / "omp_bridge" / "skills"
 
 
+def default_models_file() -> Path:
+    return _repository_root() / "omp_bridge" / "omp-models.yml"
+
+
+def default_agents_dir() -> Path:
+    return _repository_root() / "omp_bridge" / "agents"
+
+
 # -- C-D59 isolation constants (verified with OMP 18.4.4, re-run with 18.4.5) -
 # Capability-provider ids disabled per run; must equal the list in
 # omp_bridge/omp-isolation.yml (asserted by tests). None is a model provider id.
@@ -121,11 +138,35 @@ OMP_ROLE_NAMES = ("manager", "worker")
 # non-builtin-sourced commands. Anything else is reported as a leak.
 BUNDLED_TASK_AGENTS = frozenset({"scout", "reviewer", "security-reviewer", "task", "sonic"})
 BUNDLED_EXTRA_COMMANDS = frozenset({"autoresearch", "init"})
+# C-D68 (OMP 18.6.1): each bundled agent's model role (its definition names
+# "@smol"/"@slow"/"@task", or inherits the default model) and the Workbench-owned
+# worker agents of omp_bridge/agents (also read-only, named by their frontmatter).
+BUNDLED_AGENT_ROLES = {"scout": "smol", "sonic": "smol", "reviewer": "slow", "task": "task",
+                       "security-reviewer": "default"}
+WORKBENCH_AGENT_ROLES = {"explorer": "smol", "analyst": "slow"}
+# The agents each OMP role may list: the manager the bundled ones, the worker only the Workbench ones.
+ROLE_TASK_AGENTS: dict[str, frozenset[str]] = {"manager": BUNDLED_TASK_AGENTS,
+                                               "worker": frozenset(WORKBENCH_AGENT_ROLES)}
+# Built-in tools of the worker OMP (``--tools``): no bash and no eval; the worker
+# runs commands through the Workbench terminal tool (bridge extension tool, not
+# affected by --tools). Verified with OMP 18.6.1 (task/todo/web_search are what a
+# worker needs besides read/grep/glob/edit/write; ``wait`` joins background jobs).
+WORKER_TOOLS = ("read", "grep", "glob", "edit", "write", "web_search", "todo", "task", "wait")
+# Built-in tools that must not appear in the worker OMP (reported as leaks).
+WORKER_FORBIDDEN_TOOLS = frozenset({"bash", "eval"})
+# The Workbench bridge tools of the worker (extension tools, not affected by --tools). p27-cd68-fix-01 P3-3:
+# any other worker tool (e.g. python/notebook/computer re-enabled by an --omp-arg --tools) is a leak.
+WORKER_BRIDGE_TOOLS = frozenset({"to_manager", "terminal"})
+OMP_MODEL_ROLES = ("default", "slow", "plan", "smol", "task", "tiny", "memory", "commit")
+THINKING_LEVELS = ("minimal", "low", "medium", "high", "xhigh", "max")
+FAST_SERVICE_TIER = "priority"
 # OMP versions the Workbench evidence was produced with (drift is reported).
 # isolation: C-D64 Workbench home (setupVersion 2) - probe p27-home-probe-01 and
 # the live run of p27-home-test-01 with omp/18.4.5 (isolation ok, 0 leaks;
-# .workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-home-test-01-agent.json).
-EVIDENCE_OMP_VERSIONS = {"bridge_g3": "18.2.10", "isolation": "18.4.5"}
+# .workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-home-test-01-agent.json),
+# re-run with omp/18.6.1 for C-D68 (p27-cd68-models-01: both roles, RPC get_state
+# only, planted project/home canaries, 0 leaks; no model request).
+EVIDENCE_OMP_VERSIONS = {"bridge_g3": "18.2.10", "isolation": "18.6.1"}
 # Present only in OMP's bundled default system prompt. A project/user
 # SYSTEM.md (or --system-prompt) replaces it and uses another template.
 DEFAULT_PROMPT_MARKER = "You are omp's"
@@ -234,11 +275,28 @@ def isolation_args(role_overlay: Path | str, append_system_prompt: str = "") -> 
             "--append-system-prompt", append_system_prompt, "--no-title"]
 
 
-def omp_command(plan: LaunchPlan, role_overlay: Path | str, append_system_prompt: str = "") -> list[str]:
+_OVERLAY_ROLE = re.compile(r"omp-isolation-(manager|worker)\.yml$")
+
+
+def overlay_role(role_overlay: Path | str) -> str | None:
+    """The OMP role a generated per-role overlay file (``omp-isolation-<role>.yml``) belongs to."""
+    match = _OVERLAY_ROLE.search(str(role_overlay))
+    return match.group(1) if match else None
+
+
+def role_tool_args(role: str | None) -> list[str]:
+    """``--tools`` for a role: the worker gets the built-in allowlist, the manager OMP's default tools."""
+    return ["--tools", ",".join(WORKER_TOOLS)] if role == "worker" else []
+
+
+def omp_command(plan: LaunchPlan, role_overlay: Path | str, append_system_prompt: str = "",
+                role: str | None = None) -> list[str]:
+    """The OMP argv. ``role`` defaults to the role named by the generated overlay file."""
     # Order matters: user arguments follow the isolation arguments (and may
     # override them); the explicit bridge extension still loads under
     # --no-extensions.
-    return [plan.omp, *isolation_args(role_overlay, append_system_prompt), *plan.omp_args,
+    return [plan.omp, *isolation_args(role_overlay, append_system_prompt),
+            *role_tool_args(role or overlay_role(role_overlay)), *plan.omp_args,
             "--extension", plan.bridge_extension]
 
 
@@ -352,7 +410,8 @@ def omp_user_dir(home: Path | str, environment: Mapping[str, str] | None = None)
 
 
 def task_agent_names(project_dir: Path | str, home: Path | str,
-                     environment: Mapping[str, str] | None = None) -> tuple[str, ...]:
+                     environment: Mapping[str, str] | None = None,
+                     workbench_agents: Sequence[str] = ()) -> tuple[str, ...]:
     """Names of the ambient task subagent definitions OMP 18.4.4 actually loads.
 
     OMP reads only the nearest ``<ancestor>/.omp/agents`` and
@@ -361,13 +420,17 @@ def task_agent_names(project_dir: Path | str, home: Path | str,
     replaces a bundled agent of the same name, so that name is disabled too.
     A file OMP would not load is not listed, so no bundled agent is disabled
     because of it. Used for ``task.disabledAgents`` since disabledProviders
-    does not cover these dirs.
+    does not cover these dirs. ``workbench_agents`` are the Workbench-owned
+    definitions ``omp_home`` installs into the user agents dir (the Workbench
+    home): they are not ambient there. (A project definition with such a name
+    still is: it would shadow the Workbench one.)
     """
     names: set[str] = set()
     nearest = _nearest_project_agents_dir(project_dir)
     if nearest is not None:
         names.update(_definition_names(nearest))
-    names.update(_definition_names(omp_user_dir(home, environment) / "agents"))
+    names.update(name for name in _definition_names(omp_user_dir(home, environment) / "agents")
+                 if name not in set(workbench_agents))
     return tuple(sorted(names))
 
 
@@ -488,22 +551,115 @@ def user_disabled_providers(omp: str, *, cwd: Path | str, environment: Mapping[s
                             timeout=timeout)["disabledProviders"]
 
 
+_TABLE_LINE = re.compile(r"^(?P<indent> *)(?P<key>[A-Za-z][A-Za-z0-9_-]*):(?: +(?P<value>\S.*?))?\s*$")
+_SELECTOR = re.compile(r"^[a-z0-9][a-z0-9._-]*/[A-Za-z0-9][A-Za-z0-9._-]*:(" + "|".join(THINKING_LEVELS) + ")$")
+
+
+class ModelTableError(ValueError):
+    """``omp-models.yml`` is not the documented subset of YAML or has an invalid entry."""
+
+
+def parse_model_table(text: str) -> dict[str, dict[str, Any]]:
+    """The per-OMP-role model table: ``{role: {"models": {omp role: selector}, "fast": [omp role, ...]}}``.
+
+    The file is a strict YAML subset: ``<role>:`` sections with two-space
+    indented ``<omp role>: <provider>/<model>:<thinking level>`` entries and one
+    ``fast: [<omp role>, ...]`` flow list. Each Workbench OMP role must define
+    every OMP model role; anything else is refused (no guessing).
+    """
+    table: dict[str, dict[str, Any]] = {}
+    section: dict[str, Any] | None = None
+    for number, raw in enumerate(text.splitlines(), 1):
+        line = raw.split(" #", 1)[0] if not raw.lstrip().startswith("#") else ""
+        if not line.strip():
+            continue
+        match = _TABLE_LINE.match(line)
+        if match is None or len(match["indent"]) not in (0, 2):
+            raise ModelTableError(f"line {number}: cannot read {raw!r}")
+        key, value, nested = match["key"], match["value"], bool(match["indent"])
+        if not nested:
+            if value is not None or key not in OMP_ROLE_NAMES or key in table:
+                raise ModelTableError(f"line {number}: expected a section named one of {OMP_ROLE_NAMES}, got {raw!r}")
+            section = table[key] = {"models": {}, "fast": None}
+            continue
+        if section is None or value is None:
+            raise ModelTableError(f"line {number}: entry outside a section or without a value: {raw!r}")
+        if key == "fast":
+            if section["fast"] is not None or not (value.startswith("[") and value.endswith("]")):
+                raise ModelTableError(f"line {number}: 'fast' must be one flow list like [smol, task]")
+            section["fast"] = [item.strip() for item in value[1:-1].split(",") if item.strip()]
+            continue
+        if key not in OMP_MODEL_ROLES or key in section["models"] or not _SELECTOR.match(value):
+            raise ModelTableError(f"line {number}: invalid or duplicate model role entry {raw!r} "
+                                  "(expected <provider>/<model>:<thinking level>)")
+        section["models"][key] = value
+    for role in OMP_ROLE_NAMES:
+        entry = table.get(role)
+        if entry is None or set(entry["models"]) != set(OMP_MODEL_ROLES) or entry["fast"] is None:
+            raise ModelTableError(f"section {role!r} must define {', '.join(OMP_MODEL_ROLES)} and fast")
+        if not set(entry["fast"]) <= set(OMP_MODEL_ROLES) or len(set(entry["fast"])) != len(entry["fast"]):
+            raise ModelTableError(f"section {role!r}: 'fast' must list distinct OMP model roles")
+    return table
+
+
+def load_model_table(path: Path | str | None = None) -> dict[str, dict[str, Any]]:
+    try:
+        text = Path(path or default_models_file()).read_text(encoding="utf-8")
+    except OSError as exc:
+        raise ModelTableError(f"cannot read the model table: {exc}") from exc
+    return parse_model_table(text)
+
+
+def selector_model(selector: str) -> str:
+    """``provider/model`` of a ``provider/model:level`` selector."""
+    return selector.rsplit(":", 1)[0]
+
+
+def selector_level(selector: str) -> str:
+    return selector.rsplit(":", 1)[1]
+
+
+def model_overlay(role: str, table: Mapping[str, Mapping[str, Any]]) -> dict[str, Any]:
+    """The overlay part of the model table for ``role`` (C-D68 (4)).
+
+    ``modelRoles`` carries the model and thinking level of every OMP role. Fast
+    mode is OpenAI's ``priority`` service tier: ``tier.openai`` for the main
+    session (on exactly when the ``default`` role is fast) and
+    ``task.agentServiceTierOverrides`` per task agent from its model role, so
+    each subagent runs in its role's tier whatever the main session uses.
+    """
+    entry = table[role]
+    fast = set(entry["fast"])
+    agents = {**BUNDLED_AGENT_ROLES, **WORKBENCH_AGENT_ROLES}
+    return {"modelRoles": dict(entry["models"]),
+            "tier": {"openai": FAST_SERVICE_TIER if "default" in fast else "none"},
+            "agentServiceTierOverrides": {name: FAST_SERVICE_TIER if agent_role in fast else "none"
+                                          for name, agent_role in sorted(agents.items())}}
+
+
 def role_overlay(role: str, *, project_dir: Path | str, home: Path | str,
                  user_disabled_providers: Sequence[str] = (), user_disabled_agents: Sequence[str] = (),
                  skills_dir: Path | str | None = None, role_skills: Mapping[str, Sequence[str]] | None = None,
-                 environment: Mapping[str, str] | None = None) -> dict[str, Any]:
+                 environment: Mapping[str, str] | None = None,
+                 models: Mapping[str, Mapping[str, Any]] | None = None) -> dict[str, Any]:
     """The per-role ``--config`` overlay that completes omp-isolation.yml.
 
     ``task.disabledAgents`` lists the loadable definitions of the nearest
     project ``.omp/agents`` and of the user agents dir OMP sees with
-    ``environment`` (the Workbench home: ``<omp-root>/agent/agents``). Since
-    C-D64 the backend passes no user values (the Workbench home does not read
-    the user's OMP config); ``user_disabled_*`` are only unioned when given.
-    The skill filter is Workbench-owned: ``includeSkills``
+    ``environment`` (the Workbench home: ``<omp-root>/agent/agents``), except
+    the Workbench-owned definitions installed there. Since C-D64 the backend
+    passes no user values (the Workbench home does not read the user's OMP
+    config); ``user_disabled_*`` are only unioned when given. C-D68: the
+    manager also disables the Workbench agents (it keeps OMP's bundled ones), the
+    worker disables OMP's bundled agents (it keeps the Workbench ones). The
+    skill filter is Workbench-owned: ``includeSkills``
     is the role filter (``[]`` = every Workbench skill) and ``ignoredSkills`` is
     ``[]``, so the user's global include/ignore lists can neither hide
     Workbench skills nor widen the role filter; ambient skill sources are
-    already off, so those lists have nothing else to act on here.
+    already off, so those lists have nothing else to act on here. The model
+    table (``models``; default: ``omp_bridge/omp-models.yml``) is applied here,
+    so it holds at every OMP start. The worker also has the bash tool and eval
+    backends switched off (the ``--tools`` allowlist is the primary guard).
     """
     if role not in OMP_ROLE_NAMES:
         raise ValueError(f"unknown OMP role {role!r}")
@@ -513,8 +669,18 @@ def role_overlay(role: str, *, project_dir: Path | str, home: Path | str,
     skills: dict[str, Any] = {"customDirectories": [str(skills_dir or default_skills_dir())],
                               "includeSkills": list(patterns), "ignoredSkills": []}
     agents = list(dict.fromkeys(user_disabled_agents))
-    agents += [name for name in task_agent_names(project_dir, home, environment) if name not in agents]
-    return {"disabledProviders": providers, "skills": skills, "task": {"disabledAgents": agents}}
+    agents += [name for name in task_agent_names(project_dir, home, environment, tuple(WORKBENCH_AGENT_ROLES))
+               if name not in agents]
+    own = BUNDLED_AGENT_ROLES if role == "worker" else WORKBENCH_AGENT_ROLES
+    agents += [name for name in own if name not in agents]
+    table = model_overlay(role, models if models is not None else load_model_table())
+    task: dict[str, Any] = {"disabledAgents": agents,
+                            "agentServiceTierOverrides": table.pop("agentServiceTierOverrides")}
+    overlay: dict[str, Any] = {"disabledProviders": providers, "skills": skills, "task": task, **table}
+    if role == "worker":
+        overlay["bash"] = {"enabled": False}
+        overlay["eval"] = {"py": False, "js": False}
+    return overlay
 
 
 def role_skill_allowlist(role: str, skills_dir: Path | str | None = None) -> tuple[str, ...]:
@@ -618,15 +784,29 @@ def observe_isolation(state: Mapping[str, Any], commands: Sequence[Mapping[str, 
     }
 
 
-def isolation_leaks(observed: Mapping[str, Any], *, allowed_skills: Sequence[str]) -> list[str]:
+def isolation_leaks(observed: Mapping[str, Any], *, allowed_skills: Sequence[str],
+                    role: str | None = None) -> list[str]:
+    """Leaks seen in one checked OMP. With a ``role`` (C-D68) the tool and agent sets follow it.
+
+    Worker: every tool outside ``WORKER_TOOLS`` and the bridge tools (MCP tools
+    and the browser are reported on their own) and every agent except the
+    Workbench-owned ones are leaks.
+    Manager: only OMP's bundled agents are expected. Without a role the bundled
+    agents are expected (the C-D59 rule) and no tool is restricted.
+    """
     allowed = set(allowed_skills)
+    agents_allowed = ROLE_TASK_AGENTS.get(role, BUNDLED_TASK_AGENTS) if role else BUNDLED_TASK_AGENTS
     leaks = [] if observed.get("system_prompt_default", True) else ["system_prompt:replaced"]
     leaks += [f"context_file:{path}" for path in observed["context_files"]]
     leaks += [f"skill:{name}" for name in sorted(set(observed["skills"]) | set(observed["skill_commands"]))
               if name not in allowed]
     leaks += [f"rule:{rule}" for rule in observed["rules"]]
     leaks += [f"mcp:{name}" for name in observed["mcp_tools"]]
-    leaks += [f"task_agent:{name}" for name in observed["task_agents"] if name not in BUNDLED_TASK_AGENTS]
+    leaks += [f"task_agent:{name}" for name in observed["task_agents"] if name not in agents_allowed]
+    if role == "worker":
+        allowed_tools = set(WORKER_TOOLS) | WORKER_BRIDGE_TOOLS | {BROWSER_TOOL_NAME}
+        leaks += [f"tool:{name}" for name in sorted(set(observed.get("tools") or []) - allowed_tools)
+                  if not name.startswith("mcp__")]
     leaks += [f"command:{name}({source})" for name, source in observed["other_commands"]
               if name not in BUNDLED_EXTRA_COMMANDS]
     if observed.get("autoqa"):
@@ -634,6 +814,17 @@ def isolation_leaks(observed: Mapping[str, Any], *, allowed_skills: Sequence[str
     if observed.get("browser"):
         leaks.append("tool:browser")
     return leaks
+
+
+def role_expectation_warnings(role: str, observed: Mapping[str, Any]) -> list[str]:
+    """Non-leak findings: a Workbench agent the worker should offer is missing.
+
+    Only judged when the task tool is present (its agent list was observed).
+    """
+    if role != "worker" or "task" not in (observed.get("tools") or []):
+        return []
+    return [f"task_agent:missing:{name}" for name in sorted(WORKBENCH_AGENT_ROLES)
+            if name not in (observed.get("task_agents") or [])]
 
 
 def _probe_lines(text: str, count: int = 3) -> list[str]:
@@ -888,15 +1079,17 @@ def check_isolation(command: Sequence[str], *, cwd: Path | str, environment: Map
             prompt = "\n".join(str(item) for item in prompt)
         files = ambient_prompt_files(cwd, environment)
         observed["prompt_files"] = [{key: item[key] for key in ("kind", "path")} for item in files]
-        leaks = isolation_leaks(observed, allowed_skills=allowed_skills) + prompt_file_leaks(
+        observed["thinking_level"] = data["wb-iso-state"].get("thinkingLevel")
+        leaks = isolation_leaks(observed, allowed_skills=allowed_skills, role=role) + prompt_file_leaks(
             prompt, files, no_title="--no-title" in command)
         leaks += [f"profile:{item}" for item in command if _is_profile_arg(item)]
         leaks += home_env_leaks(without_user_values(environment))
-        warnings: list[str] = []
+        warnings: list[str] = role_expectation_warnings(role, observed)
         if home_mode:
-            observed["omp_home"], home_leaks, warnings = home_observation(
+            observed["omp_home"], home_leaks, home_warnings = home_observation(
                 open_paths, environment, data.get(_RPC_LOGIN_PROVIDERS[0]), observed.get("model"))
             leaks += home_leaks
+            warnings += home_warnings
         result.update(observed=observed, leaks=leaks, warnings=warnings)
         if keep_raw:
             result["raw"] = data

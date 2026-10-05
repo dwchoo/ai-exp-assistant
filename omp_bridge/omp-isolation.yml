@@ -13,7 +13,10 @@
 # filter (includeSkills/ignoredSkills) and task.disabledAgents (project agent
 # definitions). The launcher also passes --no-extensions,
 # --append-system-prompt "" (APPEND_SYSTEM.md) and --no-title. Verified against
-# OMP 18.4.5; the backend re-checks it at every start via RPC.
+# OMP 18.4.5 (re-checked with 18.6.1, C-D68); the backend re-checks it at every
+# start via RPC. C-D68 also adds to the per-role overlay: the model table
+# (omp-models.yml), the worker's tool restrictions (--tools allowlist, bash/eval
+# backends off) and the subagent set per role (omp_bridge/agents for the worker).
 #
 # What still touches the user's OMP locations (OMP 18.4.5 has no setting for
 # it): the native addon loader uses $XDG_DATA_HOME/omp/natives when
@@ -82,3 +85,8 @@ dev:
   autoqa: false
 browser:
   enabled: false
+providers:
+  # Codex code mode off for both OMPs (C-D68 (5)): GPT-6 tools stay direct tool
+  # calls instead of being routed through eval (OMP 18.6.1 default is off; pinned).
+  openai-codex:
+    codeMode: "off"

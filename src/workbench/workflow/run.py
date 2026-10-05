@@ -20,11 +20,25 @@ from workbench.tasks.repository import AuthorizationError, TaskRepository
 from workbench.terminal.shell_g2.prototype import ShellChoice
 from workbench.terminal.shell_persistent.adapter import PersistentShell
 from .worktree import PreparedWorktree, WorktreePreparationError, prepare_execution_worktree
-from .worker_port import WorkerRolePort, verified_worker_response
+from .worker_port import WorkerResponseRejected, WorkerRolePort, verified_worker_response
 
 
 class WorkflowHeld(RuntimeError):
     """No further automatic action is authorized or safely observable."""
+
+
+class WorkerJudgmentUnavailable(WorkflowHeld):
+    """smoke-04 G2/G3: the staged worker analysis was rejected, or its outcome is unknown.
+
+    No worker judgment exists and the run sent no report (CW-10: nothing is replayed). ``reason`` is a short
+    machine code (never response text); ``host_evidence`` is what Workbench itself checked (``judgment`` and
+    ``reasons`` of the evidence guard), so the caller can tell the manager what was and was not judged.
+    """
+
+    def __init__(self, reason: str, host_evidence: Mapping[str, Any]):
+        self.reason = reason
+        self.host_evidence = dict(host_evidence)
+        super().__init__(f"worker analysis unavailable ({reason}): no worker judgment, no report or replay")
 
 
 def _canonical(value: Mapping[str, Any]) -> bytes:
@@ -260,6 +274,41 @@ class WorkflowRun:
             raise WorkflowHeld("worker judgment was already reported; no replay")
         if requires_code_change and not code_change_reason.strip():
             raise ValueError("code change request needs an evidence-backed reason")
+        host: dict[str, Any] = {}  # the evidence guard's judgment once known
+        try:
+            evidence, judgment = self._analyse(requires_code_change, code_change_reason, host)
+            self._record["worker_judgment"] = evidence
+            self._persist()
+            message = self.mailbox.create_message(
+                self.task_id, self.revision, self.run_id, ActorRole.WORKER, ActorRole.MANAGER,
+                MessageKind.REPORT, evidence, in_reply_to_message_id=self.task_message_id,
+            )
+            self._reported = True  # The delivery attempt may succeed before its caller sees a receipt.
+            self._report_message = message
+            self._report_requires_code_change = requires_code_change
+            self._report_judgment = judgment
+            self._record["report"] = {"message_id": message.message_id, "status": "delivery_unknown"}
+            self._persist()
+        except WorkflowHeld:
+            raise
+        except Exception as exc:  # fix-05 P2: any other analysis-stage failure is no worker judgment either
+            self._record["worker_judgment"] = None
+            if isinstance(self._record.get("report"), dict):  # created, never delivered (nor replayed)
+                self._record["report"]["status"] = "not_sent"
+            self._analysis_unavailable(f"analysis_error:{type(exc).__name__}",
+                                       host.get("judgment"), host.get("reasons") or [])
+        if on_report is not None:
+            on_report("sending", dict(self._record))
+        try:
+            receipt = _deliver_report(self.mailbox, message, None, self._report_submitted(on_report))
+        except BaseException:
+            self._persist()
+            raise
+        return self._finish_report(receipt)
+
+    def _analyse(self, requires_code_change: bool, code_change_reason: str,
+                 host: dict[str, Any]) -> tuple[dict[str, Any], str]:
+        """The evidence guard and the staged worker analysis: (report evidence, final judgment)."""
         _current_authority(self.repository, self.task_id, self.revision, self.run_id,
                            self.approval_hash, self.automation_source)
         criteria = self.execution["criteria"]
@@ -333,6 +382,7 @@ class WorkflowRun:
             "criteria": criteria, "requires_code_change": requires_code_change,
             "code_change_reason": code_change_reason,
         }
+        host.update({"judgment": judgment, "reasons": list(reasons)})
         if self.worker_port is not None:
             question = self.mailbox.create_message(
                 self.task_id, self.revision, self.run_id, ActorRole.MANAGER, ActorRole.WORKER,
@@ -344,48 +394,63 @@ class WorkflowRun:
             self.worker_port.arm("analysis", question)
             _current_authority(self.repository, self.task_id, self.revision, self.run_id,
                                self.approval_hash, self.automation_source)
-            question_receipt = self.mailbox.deliver(question)
+            try:
+                question_receipt = self.mailbox.deliver(question)
+            except Exception as exc:
+                self._record["worker_analysis_request"] = {"message_id": question.message_id,
+                                                           "status": "delivery_error"}
+                self._analysis_unavailable(f"analysis_delivery_error:{type(exc).__name__}", judgment, reasons)
             self._record["worker_analysis_request"] = {
                 "message_id": question.message_id, "status": question_receipt.status.value,
             }
             self._persist()
-            if question_receipt.status is not MailboxStatus.OMP_PROCESSED:
+            if question_receipt.status is MailboxStatus.DEFERRED:  # nothing was submitted: the caller asks again
                 raise WorkflowHeld("worker analysis delivery was not confirmed; no report or replay")
-            response = verified_worker_response(
-                "analysis", question, question_receipt,
-                self.worker_port.observe("analysis", question, question_receipt),
-            )
+            if question_receipt.status is not MailboxStatus.OMP_PROCESSED:
+                self._analysis_unavailable(f"analysis_delivery_{question_receipt.status.value}", judgment, reasons)
+            try:
+                response = verified_worker_response(
+                    "analysis", question, question_receipt,
+                    self.worker_port.observe("analysis", question, question_receipt),
+                )
+            except WorkflowHeld:
+                raise
+            except WorkerResponseRejected as exc:  # the bridge's machine reason (no response text)
+                self._analysis_unavailable(exc.reason, judgment, reasons)
+            except TimeoutError:
+                self._analysis_unavailable("worker_response_timeout", judgment, reasons)
+            except ValueError:  # identity/linkage of the public response did not verify
+                self._analysis_unavailable("worker_response_unverified", judgment, reasons)
             if ((judgment == "indeterminate" and response["decision"] != "indeterminate")
                     or (judgment == "failure" and response["decision"] == "success")):
                 self._record["worker_analysis_response"] = response
                 self._persist()
-                raise WorkflowHeld("worker judgment conflicts with verified evidence guard")
+                self._analysis_unavailable("worker_judgment_conflicts_with_evidence", judgment, reasons)
             judgment = response["decision"]
             evidence["judgment"] = judgment
             evidence["worker_response"] = response
             self._record["worker_analysis_response"] = response
             _current_authority(self.repository, self.task_id, self.revision, self.run_id,
                                self.approval_hash, self.automation_source)
-        self._record["worker_judgment"] = evidence
-        self._persist()
-        message = self.mailbox.create_message(
-            self.task_id, self.revision, self.run_id, ActorRole.WORKER, ActorRole.MANAGER,
-            MessageKind.REPORT, evidence, in_reply_to_message_id=self.task_message_id,
-        )
-        self._reported = True  # The delivery attempt may succeed before its caller sees a receipt.
-        self._report_message = message
-        self._report_requires_code_change = requires_code_change
-        self._report_judgment = judgment
-        self._record["report"] = {"message_id": message.message_id, "status": "delivery_unknown"}
-        self._persist()
-        if on_report is not None:
-            on_report("sending", dict(self._record))
+        return evidence, judgment
+
+    def _analysis_unavailable(self, reason: str, judgment: str | None, reasons: list[str]) -> None:
+        """smoke-04 G2/G3: record why the worker analysis is unavailable and raise; nothing is reported here.
+
+        A pause, cancel or revoked authority keeps the plain CW-10 hold (``WorkflowHeld``) instead. A failing
+        ``run.json`` write does not hide the outcome (fix-05): it is noted and the caller still closes the run.
+        ``judgment`` is None when the analysis failed before the evidence guard judged (no host evidence).
+        """
+        _current_authority(self.repository, self.task_id, self.revision, self.run_id,
+                           self.approval_hash, self.automation_source)
+        host = {} if judgment is None else {"judgment": judgment, "reasons": list(reasons)}
+        rejected = {"stage": "analysis", "reason": reason, "host_evidence": host or None}
+        self._record["worker_analysis_rejected"] = rejected
         try:
-            receipt = _deliver_report(self.mailbox, message, None, self._report_submitted(on_report))
-        except BaseException:
             self._persist()
-            raise
-        return self._finish_report(receipt)
+        except Exception as exc:
+            rejected["persist_error"] = type(exc).__name__
+        raise WorkerJudgmentUnavailable(reason, host)
 
     def _close_reported_run(self) -> None:
         if self._run_closed:
@@ -406,7 +471,10 @@ class WorkflowRun:
             self._record["report"]["status"] = MailboxStatus.API_RETURNED.value
             self._record["report"]["accepted_by_manager"] = True
             self._record["instruction_ended"] = self._report_requires_code_change
-            self._persist()
+            try:  # fix-05: the report reached the manager; a failing run.json write must not contradict it
+                self._persist()
+            except Exception as exc:
+                self._record["report"]["persist_error"] = type(exc).__name__
             self._close_reported_run()
             on_report("submitted", dict(self._record))
         return submitted
@@ -677,8 +745,11 @@ class TaskWorkflow:
         except BaseException as exc:
             if shell is not None:
                 _release_shell(shell, not injected)
+            preparation_error = {"type": type(exc).__name__, "detail": str(exc)}
+            if isinstance(exc, WorkerResponseRejected):  # F2: the bridge's machine reason (no response text)
+                preparation_error["reason"] = exc.reason
             record.update({"shell_state": "unknown" if isinstance(exc, WorkflowHeld) else "preparation_failed",
-                           "preparation_error": {"type": type(exc).__name__, "detail": str(exc)}})
+                           "preparation_error": preparation_error})
             active = self.repository.get_current_run(task_id)
             still_authorized = active is not None and active["run_id"] == run_id
             if (still_authorized and task_message is not None
@@ -726,7 +797,10 @@ class TaskWorkflow:
                     preparation_receipt = self.mailbox.deliver(report)
                     record["preparation_report"]["status"] = preparation_receipt.status.value
                 except BaseException as report_exc:
-                    record.setdefault("preparation_report", {"status": "not_created"})["error"] = type(report_exc).__name__
+                    failed = record.setdefault("preparation_report", {"status": "not_created"})
+                    failed["error"] = type(report_exc).__name__
+                    if isinstance(report_exc, WorkerResponseRejected):  # G3: the bridge's machine reason
+                        failed["reason"] = report_exc.reason
             _write_json(result_path, record)
             self.repository.record_shell_event(run_id, "failed", dict(record))
             if still_authorized:

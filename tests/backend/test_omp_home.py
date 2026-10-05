@@ -120,8 +120,9 @@ class LauncherEnvironmentTests(HomeFixture):
         argv = launcher.omp_command(self.plan("--model", "m"), "/d/omp-isolation-worker.yml")
         self.assertEqual(argv, ["/x/omp", "--config", str(launcher.default_isolation_overlay()),
                                 "--config", "/d/omp-isolation-worker.yml", "--no-extensions",
-                                "--append-system-prompt", "", "--no-title", "--model", "m",
-                                "--extension", "/x/bridge.ts"])
+                                "--append-system-prompt", "", "--no-title",
+                                "--tools", ",".join(launcher.WORKER_TOOLS),  # C-D68: worker without bash/eval
+                                "--model", "m", "--extension", "/x/bridge.ts"])
         shells = self.root / "bin"
         shells.mkdir()
         (shells / "bash").symlink_to("/bin/sh")
@@ -159,7 +160,7 @@ class HomeSetupTests(HomeFixture):
         self.assertEqual(content["skills"], {"customDirectories": [str(launcher.default_skills_dir())],
                                             "includeSkills": [], "ignoredSkills": []})
         self.assertEqual(content["dev"], {"autoqa": False})
-        self.assertEqual(sorted(os.listdir(agent)), ["agent.db", "config.yml"])
+        self.assertEqual(sorted(os.listdir(agent)), ["agent.db", "agents", "config.yml"])  # C-D68: Workbench agents
         self.assertEqual(inventory(self.home), before, "the user's home must not change")
         self.assertEqual(omp_home.verify_omp_home(home), [])
 
@@ -312,12 +313,13 @@ class OverlayTests(HomeFixture):
         user_agents = self.home / ".omp" / "agent" / "agents"
         for directory, name in ((project / ".omp" / "agents", "proj-agent"), (user_agents, "user-agent"),
                                 (home.agent_dir / "agents", "wb-agent")):
-            directory.mkdir(parents=True)
+            directory.mkdir(parents=True, exist_ok=True)  # the home's agents dir holds the Workbench definitions
             (directory / f"{name}.md").write_text(f"---\nname: {name}\ndescription: d\n---\n")
         env = launcher.omp_environment(self.env, LaunchPlan(ShellChoice("bash", "/bin/bash"), "/x/omp", "v", "/x/b"),
                                        role="worker", token="t", bridge_socket=Path("/d/b"), home=home.environment())
         overlay = launcher.role_overlay("worker", project_dir=project, home=self.home, environment=env)
-        self.assertEqual(overlay["task"]["disabledAgents"], ["proj-agent", "wb-agent"])
+        # ambient definitions, then (C-D68) the worker's bundled agents; the installed Workbench ones are not ambient
+        self.assertEqual(overlay["task"]["disabledAgents"], ["proj-agent", "wb-agent", *launcher.BUNDLED_AGENT_ROLES])
         self.assertEqual(overlay["disabledProviders"], list(launcher.ISOLATION_PROVIDER_IDS))
         self.assertEqual(overlay["skills"]["customDirectories"], [str(launcher.default_skills_dir())])
 
@@ -815,7 +817,7 @@ class BrowserToolTests(HomeFixture):
         for name, tool in (("on", EVAL_WITH_BROWSER), ("off", EVAL_WITHOUT_BROWSER)):
             results[name] = launcher.check_isolation(
                 [str(fake), "--no-title"], cwd=self.root, environment={**env, "FAKE_TOOLS": json.dumps([tool])},
-                role="worker", allowed_skills=(), omp_version="omp/18.4.5", timeout=10)
+                role="manager", allowed_skills=(), omp_version="omp/18.4.5", timeout=10)  # the worker's eval is a leak itself
         self.assertEqual((results["on"]["state"], results["on"]["leaks"]), ("leak", ["tool:browser"]))
         self.assertEqual((results["off"]["state"], results["off"]["leaks"]), ("ok", []))
 

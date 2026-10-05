@@ -28,6 +28,9 @@ from workbench.app.lifecycle import LifecycleJournal
 from workbench.backend.automation import AutomationController
 from workbench.backend.flow import HANDOFF_JOURNAL_NAME, HandoffService, sensitive_environment_values
 from workbench.backend.flow_tasks import FLOW_LEDGER_NAME, ExperimentPorts, TaskFlow
+from workbench.backend.flow_terminal import (
+    ABANDON_TOOL, TERMINAL_DIRECTORY, TERMINAL_TOOL, HostGate, TerminalService,
+)
 from workbench.backend.launcher import (
     ISOLATION_PROVIDER_IDS, LaunchPlan, check_isolation, default_skills_dir, isolation_check_environment,
     omp_command, omp_environment, pending_isolation, role_overlay, role_skill_allowlist, shell_environment,
@@ -42,7 +45,7 @@ from workbench.backend.paths import (
 from workbench.backend.ui_server import Held, UiServer
 from workbench.contracts import ui_v1
 from workbench.contracts.ui_v1 import Reason
-from workbench.contracts.v1 import DisplayChunk, PaneId
+from workbench.contracts.v1 import ActorRole, DisplayChunk, PaneId
 from workbench.ipc.bridge_g3.mailbox import BridgeDisconnected, G3BridgeServer, MailboxError, TaskMailbox
 from workbench.policy.pause_automation.journal import PauseJournal
 from workbench.runtime.process_evidence import LinuxProcessProbe, ProcessRef
@@ -59,6 +62,7 @@ SHUTDOWN_TOKEN_TTL = 120.0
 OMP_ROLES = (("manager", PaneId.MANAGER_OMP), ("worker", PaneId.WORKER_OMP))
 ISOLATION_JOIN_TIMEOUT = 15.0
 RESTART_HISTORY = 20
+NOTICE_LOCK_WAIT = 0.2  # C-D68 (8): a delivery to the worker in progress defers a terminal notice
 
 
 def _log(message: str) -> None:
@@ -93,6 +97,8 @@ class Backend:
         # CW-18 to_worker/to_manager (C-D64/C-D65): HandoffService with the TaskFlow policy (U2).
         self.handoffs: HandoffService | None = None
         self.flow: TaskFlow | None = None
+        # C-D68: the worker's terminal tool (its only command execution path), sharing the host-shell gate.
+        self.terminal: TerminalService | None = None
         # ui_v1 pause/resume go to these; CW-18 U3 binds them to the AutomationController in _open.
         self.pause_hook = self._default_pause
         self.resume_hook = self._default_resume
@@ -202,6 +208,7 @@ class Backend:
         self.pause_hook = self.automation_loop.request_pause
         self.resume_hook = self.automation_loop.request_resume
         # CW-18: Tasks under the standing delegation (C-D66) and their runs (experiment: product host shell).
+        host_gate = HostGate()  # C-D68: an experiment run or a worker terminal command owns the host shell
         self.flow = TaskFlow(
             layout.workflow / FLOW_LEDGER_NAME, repository_factory=lambda: TaskRepository(layout.tasks),
             handoffs=self.handoffs, omp_idle=self._omp_idle, paused=self._automation_paused,
@@ -210,12 +217,17 @@ class Backend:
                 automation=self._automation_port, environment_names=lambda: set(self._shell_env or {}),
                 worktrees_root=ensure_private_dir(layout.workflow / "worktrees"),
                 artifacts_root=ensure_private_dir(layout.workflow / "runs")),
-            project_dir=self.project_dir, lifecycle=self.automation_loop)
+            project_dir=self.project_dir, lifecycle=self.automation_loop, host_gate=host_gate)
         self.handoffs.configure(policy=self.flow, active_task=self.flow.active_task)
+        self.terminal = TerminalService(
+            handoffs=self.handoffs, host_shell=self._host_shell_port, gate=host_gate,
+            log_root=ensure_private_dir(layout.workflow / TERMINAL_DIRECTORY), automation=self._automation_port,
+            paused=self._automation_paused, activity=self.flow.experiment_host_activity,
+            sensitive_values=self._sensitive_values, active_task=self.flow.active_task,
+            notify=self._worker_notice)  # C-D68 (8): checks and the completion notice
         self.automation = self.automation_loop.status()
-        handoffs = self.handoffs
         # The role is the peer's authenticated hello role, never a frame field.
-        self.bridge.set_tool_handler(lambda peer, request: handoffs.handle(peer.role, request))
+        self.bridge.set_tool_handler(self._tool_request, undelivered=self._tool_result_undelivered)
         self.ui = UiServer(layout.ui_socket, self)
         self._write_record()
         self._shell_env = shell_environment(self.environment)
@@ -245,6 +257,7 @@ class Backend:
         self._write_record()
         self.flow.start()
         self.automation_loop.start()
+        self.terminal.start()
         # Started after every pane fork so no fork happens while it runs.
         self._isolation_thread = threading.Thread(target=self._run_isolation_check, args=(checks,),
                                                   name="omp-isolation-check", daemon=True)
@@ -406,6 +419,8 @@ class Backend:
             self.automation_loop.close()  # the tick and pause/resume threads end first; nothing is replayed
         if self.flow is not None:
             self.flow.close()  # the runner stops before the panes close; a run left current stays unknown
+        if self.terminal is not None:
+            self.terminal.close()  # a worker command still running stays in the host shell; its wait ends
         if self._isolation_thread is not None:
             self._isolation_thread.join(ISOLATION_JOIN_TIMEOUT)
         refs = self.process_refs()
@@ -785,6 +800,61 @@ class Backend:
         """Runs on the handoff outbox thread: SQLite connections are bound to their thread."""
         repository = TaskRepository(self.layout.tasks)
         return TaskMailbox(repository, self.bridge), repository.close
+
+    def _tool_request(self, peer: Any, request: dict[str, Any]) -> dict[str, Any]:
+        """Bridge tool requests: the worker's ``terminal`` (C-D68) waits for its command; the rest is handoffs."""
+        if request.get("tool") in (TERMINAL_TOOL, ABANDON_TOOL):
+            terminal = self.terminal
+            if terminal is None:
+                return {"status": "rejected", "reason": "terminal_unavailable"}
+            if request.get("tool") == ABANDON_TOOL:  # C-D68 (8): a terminal call stopped waiting
+                return terminal.abandon(peer.role, request)
+            return terminal.handle(peer.role, request)
+        return self.handoffs.handle(peer.role, request)
+
+    def _tool_result_undelivered(self, peer: Any, request: dict[str, Any]) -> None:
+        """A tool result the bridge could not write to its session (p27-cd68-fix-01 P2-1).
+
+        Only ``terminal`` cares: that call did not get its command's result, so
+        the completion notice is still sent.
+        """
+        terminal = self.terminal
+        if request.get("tool") == TERMINAL_TOOL and terminal is not None:
+            terminal.undelivered(peer.role, request)
+
+    def _worker_notice(self, notice: Any) -> str:
+        """C-D68 (8): one Workbench notice to the worker OMP (the bridge ``notice`` frame).
+
+        It holds the worker's delivery lock, which every mailbox delivery (a
+        handoff, a workflow stage, an experiment's periodic review) holds until
+        the worker's turn ends, so a notice never goes into the same turn. The
+        bridge sends it only to an idle, unpaused worker. ``delivered``,
+        ``deferred`` (busy: try again), ``paused``, ``not_connected`` (nothing
+        sent), ``unknown`` (it may have been sent: never resent) or ``rejected``.
+        """
+        bridge = self.bridge
+        try:
+            peer = bridge.peer(ActorRole.WORKER, 0)
+        except (BridgeDisconnected, MailboxError):
+            return "not_connected"
+        lock = bridge.delivery_lock(ActorRole.WORKER)
+        if not lock.acquire(timeout=NOTICE_LOCK_WAIT):
+            return "deferred"  # a delivery to the worker is in progress: its turn
+        try:
+            ack = bridge.request(ActorRole.WORKER, {"kind": "notice", "notice": dict(notice)}, timeout=5.0,
+                                 expected_peer=(peer.session_id, peer.generation))
+        except Exception:
+            return "unknown"
+        finally:
+            lock.release()
+        status = ack.get("status") if isinstance(ack, dict) else None
+        if status in ("api_accepted", "duplicate_api_accepted"):
+            return "delivered"
+        if status == "deferred":
+            return "paused" if ack.get("reason") == "paused" else "deferred"
+        if status == "unknown_no_replay":
+            return "unknown"
+        return "rejected"
 
     def _bridge_peer(self, role: Any) -> Any:
         try:

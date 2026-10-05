@@ -5,8 +5,8 @@
 //     {role: "user", content: [{type: "input_text", text}]}
 //   - openai-codex over the Codex WebSocket: payload.type "response.create" with previous_response_id; input[] is the
 //     delta and holds only the new user item.
-// The codex provider never emits after_provider_response, and a reasoning model's assistant message starts with an
-// empty thinking block (the provider's encrypted reasoning). The identity rules stay exact: only the final user item,
+// The codex provider never emits after_provider_response, and a reasoning model's assistant message carries thinking
+// items (encrypted reasoning, or visible summary text when reasoning summaries are on; C-D67 ignores both). The identity rules stay exact: only the final user item,
 // only this delivery's ids; history, older deliveries and other item kinds never match.
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
@@ -112,7 +112,7 @@ function workerFrame(target: Frame, overrides: Frame = {}): string {
 	return "WB_WORKER_RESPONSE:" + JSON.stringify({
 		stage: "execute", kind: "task", task_id: target.taskId, revision_id: target.revisionId, revision: 1,
 		run_id: target.runId, message_id: target.messageId, delivery_attempt_id: target.deliveryAttemptId,
-		session_id: SESSION_ID, session_generation: 1, response_id: randomUUID(), decision: "execute", ...overrides,
+		session_id: SESSION_ID, session_generation: 1, decision: "execute", ...overrides,
 	});
 }
 
@@ -276,41 +276,89 @@ test("without the response hook only a clean assistant message for the matched r
 	} finally { await bridge.close(); }
 });
 
-test("worker response: only an empty leading thinking block (encrypted reasoning) is ignored", async () => {
+test("worker response: thinking items are ignored, the marker text alone is judged (C-D67, F2 reasons)", async () => {
 	const shape = "openai_codex_responses_websocket_delta_input";
 	const signature = FIXTURES.assistant_message_end.openai_codex_responses_reasoning.content[0].thinkingSignature;
-	const variants: Array<[string, (text: string) => Frame[], boolean]> = [
-		["captured codex shape", text => [{ type: "thinking", thinking: "", thinkingSignature: signature }, { type: "text", text }], true],
-		["two empty thinking blocks first", text => [{ type: "thinking", thinking: "" }, { type: "thinking", thinking: "" },
-			{ type: "text", text }], true],
-		["visible thinking text", text => [{ type: "thinking", thinking: "I will answer", thinkingSignature: signature },
-			{ type: "text", text }], false],
-		["thinking after the text", text => [{ type: "text", text }, { type: "thinking", thinking: "" }], false],
-		["thinking with another text field", text => [{ type: "thinking", thinking: "", text: "hidden" }, { type: "text", text }], false],
-		["thinking only", () => [{ type: "thinking", thinking: "" }], false],
-		["two text blocks", text => [{ type: "thinking", thinking: "" }, { type: "text", text }, { type: "text", text: "x" }], false],
-		["redacted thinking", text => [{ type: "redactedThinking", data: "x" }, { type: "text", text }], false],
+	const visible = FIXTURES.assistant_message_end.openai_codex_responses_visible_reasoning.content;
+	const SECRET = "CD67_VISIBLE_THINKING_SENTINEL";
+	const thinking = (text = SECRET): Frame => ({ type: "thinking", thinking: text });
+	const fromFixture = (text: string) => visible.map((block: Frame) => block.type === "thinking"
+		? { ...block, thinking: SECRET } : { ...block, text });
+	// [label, content, stopReason, expected rejection detail (undefined = accepted)]
+	const variants: Array<[string, (text: string) => Frame[], string, string | undefined]> = [
+		["captured empty codex reasoning", text => [{ type: "thinking", thinking: "", thinkingSignature: signature }, { type: "text", text }], "stop", undefined],
+		["captured smoke-03 visible reasoning", fromFixture, "stop", undefined],
+		["visible thinking with signature", text => [{ ...thinking(), thinkingSignature: signature }, { type: "text", text }], "stop", undefined],
+		["visible thinking after the text", text => [{ type: "text", text }, thinking()], "stop", undefined],
+		["thinking before and after", text => [thinking(), { type: "text", text }, thinking("")], "stop", undefined],
+		["thinking with other keys", text => [{ ...thinking(), text: SECRET, itemId: "rs_1" }, { type: "text", text }], "stop", undefined],
+		["thinking only", () => [thinking()], "stop", "bad_marker"],
+		["no content", () => [], "stop", "bad_marker"],
+		["two text items", text => [thinking(), { type: "text", text }, { type: "text", text: "x" }], "stop", "extra_text"],
+		["prose before the marker", text => [thinking(), { type: "text", text: "Sure. " + text }], "stop", "extra_text"],
+		["prose after the marker", text => [{ type: "text", text: text + " done" }, thinking()], "stop", "extra_text"],
+		["redacted thinking is not thinking", text => [{ type: "redactedThinking", data: "x" }, { type: "text", text }], "stop", "extra_text"],
+		["tool call", text => [thinking(), { type: "text", text }, { type: "toolCall", id: "c1", name: "bash", arguments: {} }], "toolUse", "tool_activity"],
+		["not a marker", () => [thinking(), { type: "text", text: "execute" }], "stop", "bad_marker"],
+		["truncated", text => [thinking(), { type: "text", text }], "length", "incomplete"],
 	];
-	for (const [label, content, accepted] of variants) {
+	for (const [label, content, stopReason, detail] of variants) {
 		const bridge = await startBridge("worker");
 		try {
 			const target = envelope("worker");
 			assert.equal((await bridge.request({ kind: "deliver", envelope: JSON.stringify(target) })).status, "api_accepted");
 			bridge.handlers.get("before_provider_request")!({ payload: payload(shape, bridge.sent.at(-1)!, priorDelivery("worker")) });
-			bridge.handlers.get("message_end")!({ message: { role: "assistant", stopReason: "stop",
+			bridge.handlers.get("message_end")!({ message: { role: "assistant", stopReason,
 				content: content(workerFrame(target)) }, willContinue: false });
 			bridge.handlers.get("agent_end")!();
 			const processed = await bridge.terminal();
 			assert.equal(processed.name, "delivery_omp_processed", label);
-			if (accepted) {
+			const seen: Frame[] = [processed];
+			if (detail === undefined) {
 				assert.equal(typeof processed.workerResponseId, "string", label);
-				await bridge.waitFor(bridge.event("assistant_message_end"));
+				const response = await bridge.waitFor(bridge.event("assistant_message_end"));
+				seen.push(response);
+				assert.equal(response.workerResponse.response_id, processed.workerResponseId, label);
+				assert.equal(response.workerResponse.decision, "execute", label);
 			} else {
 				assert.equal(processed.workerResponseId, undefined, label);
 				const rejected = await bridge.waitFor(bridge.event("worker_response_rejected"));
+				seen.push(rejected);
 				assert.equal(rejected.reason, "invalid_assistant_response", label);
-				assert.equal(JSON.stringify(rejected).includes("I will answer"), false, label);
+				assert.equal(rejected.detail, detail, label);
+				assert.equal(rejected.messageId, target.messageId, label);
 			}
+			assert.equal(JSON.stringify([...seen, ...bridge.frames]).includes(SECRET), false, label);
+			assert.equal(JSON.stringify([...seen, ...bridge.frames]).includes("Sure."), false, label);
+		} finally { await bridge.close(); }
+	}
+});
+
+test("worker response: identity mismatch, a second message and provider errors keep their own reason", async () => {
+	const shape = "openai_codex_responses_websocket_delta_input";
+	for (const variant of ["identity_mismatch", "multiple_messages", "error", "aborted"]) {
+		const bridge = await startBridge("worker");
+		try {
+			const target = envelope("worker");
+			assert.equal((await bridge.request({ kind: "deliver", envelope: JSON.stringify(target) })).status, "api_accepted");
+			bridge.handlers.get("before_provider_request")!({ payload: payload(shape, bridge.sent.at(-1)!, priorDelivery("worker")) });
+			const text = workerFrame(target, variant === "identity_mismatch" ? { task_id: randomUUID() } : {});
+			const message = { role: "assistant", stopReason: variant === "error" || variant === "aborted" ? variant : "stop",
+				content: [{ type: "thinking", thinking: "CD67_VISIBLE_THINKING_SENTINEL" }, { type: "text", text }] };
+			bridge.handlers.get("message_end")!({ message, willContinue: false });
+			if (variant === "multiple_messages") bridge.handlers.get("message_end")!({ message, willContinue: false });
+			bridge.handlers.get("agent_end")!();
+			const terminal = await bridge.terminal();
+			if (variant === "error" || variant === "aborted") {
+				// A failed provider response is never response evidence: the delivery is unknown, never processed.
+				assert.equal(terminal.name, "delivery_processing_unknown", variant);
+			} else {
+				assert.equal(terminal.name, "delivery_omp_processed", variant);
+				const rejected = await bridge.waitFor(bridge.event("worker_response_rejected"));
+				assert.deepEqual([rejected.reason, rejected.detail], ["invalid_assistant_response", variant], variant);
+			}
+			assert.equal(bridge.frames.some(frame => frame.name === "assistant_message_end"), false, variant);
+			assert.equal(JSON.stringify([terminal, ...bridge.frames]).includes("CD67_VISIBLE_THINKING_SENTINEL"), false, variant);
 		} finally { await bridge.close(); }
 	}
 });
