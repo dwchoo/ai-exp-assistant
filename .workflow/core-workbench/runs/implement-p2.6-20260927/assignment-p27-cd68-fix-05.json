@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cd68-fix-05",
+  "ticket_id": "CW-18 C-D68 drop worker wait tool",
+  "role": "worker_senior",
+  "unit": "V-CW-18-cd68-terminal",
+  "approved_bundle_digest": "348e50ee41ca8bc7f20f307dff77c13be5beefc0e1ccf30a524c95cb5fe98902",
+  "routing": {
+    "planned_role": "worker_senior",
+    "selected_role": "worker_senior (Opus, reused cd68-terminal2)",
+    "reason_codes": [
+      "enforcement"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/root-adjudication-p27-cd68-wait.json"
+    ]
+  },
+  "required_behavior": [
+    "Remove `wait` from WORKER_TOOLS (launcher --tools allowlist) so the worker OMP has no wait tool; `wait` in the worker becomes a leak per the role-aware rule; manager unchanged. Remove skill lines that only made sense with wait present (keep 'do not wait with repeated terminal calls').",
+    "Verify on real OMP 18.6.1 with a fake provider that the worker provider request has no `wait` and that task subagents (explorer/analyst) still work and auto-deliver; launcher isolation check stays ok with 0 leaks for both roles.",
+    "Update non-independent tests; list independent tests pinning wait in WORKER_TOOLS."
+  ],
+  "acceptance": [
+    "test_launcher_models, omp_home*, skills, live_omp_tools_independent_p27cd68 (may need independent update — report), backend launcher*/isolation (real exit codes)"
+  ],
+  "allowed_write_paths": [
+    "src/workbench/backend/launcher.py",
+    "omp_bridge/skills/**",
+    "tests/backend/test_launcher_models.py",
+    "tests/backend/test_omp_home*.py",
+    "tests/backend/test_workbench_skills.py"
+  ],
+  "prohibited_paths": [
+    "tests/**/*_independent*",
+    "docs/**",
+    ".workflow/**"
+  ],
+  "rules": "No real provider requests; never read credential contents or other processes' environ; temp only under /tmp; kill only PIDs you started; never touch ~/wb-urux-sandbox or user processes; no commits; no graphify update.",
+  "result_format": "checks table, live result, changed paths + sha256, independent tests needing updates. Korean, <=8 lines."
+}

@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cd68-review-04",
+  "ticket_id": "CW-18 C-D68 (10) + wait removal delta review",
+  "role": "reviewer",
+  "unit": "V-CW-18-cd68-verify",
+  "approved_bundle_digest": "348e50ee41ca8bc7f20f307dff77c13be5beefc0e1ccf30a524c95cb5fe98902",
+  "frozen_candidate": "b71c57e334ca0ee6e6461a2a11e5cf93ce40591231cb30e58b63f4f1499675cf",
+  "routing": {
+    "planned_role": "reviewer",
+    "selected_role": "reviewer (wb-delta-reviewer, fresh)",
+    "reason_codes": [
+      "delta_after_full_review"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd68-fix-04.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd68-fix-05.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd68-smoke-02.md"
+    ]
+  },
+  "scope": "Only `git diff 74fc955 -- src omp_bridge` (fix-04 non-blocking fetch, text; fix-05 wait removal). Check: fetch never blocks and never counts as a waiting call; received-result accounting (no lost or duplicate terminal_done when a fetch races with exit or with a check/notice delivery); journal terminal_fetch; bridge 10 s limit; wait removal does not break task subagent flow or isolation; text consistency between skill, tool description and results.",
+  "rules": "No real provider/model requests (fake local provider allowed); never read credential contents or other processes' environ; temp only under /tmp; kill only PIDs you started; never touch ~/wb-urux-sandbox or user processes; no commits; no graphify update. Read-only.",
+  "result_format": "verdict (approve / block), findings P1-P3 with file:line and scenario. Korean, <=10 lines."
+}

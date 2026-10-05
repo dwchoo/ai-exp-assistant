@@ -1,0 +1,17 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 2041,
+  "event": {
+    "id": "finished-p27-cd68-fix-04",
+    "kind": "transition",
+    "data": {
+      "evidence": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd68-fix-04.md",
+      "invocation": "p27-cd68-fix-04",
+      "not_started_evidence": null,
+      "observed_effort": "unverified",
+      "observed_model": "opus",
+      "outcome": "complete",
+      "state": "finished"
+    }
+  }
+}

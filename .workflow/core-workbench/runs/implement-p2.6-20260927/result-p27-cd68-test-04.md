@@ -1,0 +1,5 @@
+# p27-cd68-test-04 result (wb-test-rerun) — 2026-10-06 — candidate_ready
+
+Frozen candidate b71c57e3 (hashes identical start/end). backend 761, 1 fail (test_a_foreground_program_refuses, pty timing) -> module rerun 23 OK; bridge py 52 OK; node 28 pass; ui 743 OK; workflow 56 OK; contracts 52 OK; terminal 108, 10 fail (test_manual_input_*, pty timing under parallel load) -> rerun 40 OK; g3_omp 37 pass; live_omp_tools_independent_p27cd68 13 OK.
+Updated: fix03 peer_gone test now uses a command call as the waiter (C-D68 (10)); two stale comments. New: test_terminal_fetch_independent_p27cd68.py (9: immediate return + new output only, checks continue, finished fetch suppresses terminal_done / running fetch does not, worker wait leak + manager keeps, one-short-text-line wording); node 1 (null command <=10 s limit + description).
+Changed: test_terminal_independent_p27cd68.py 41c985acacb3, test_terminal_fix03_independent_p27cd68.py ab986fe2b7cc, test_terminal_fetch_independent_p27cd68.py (new) 33c24930394f, bridge_terminal_independent_p27cd68.test.ts 5d8debda680f.

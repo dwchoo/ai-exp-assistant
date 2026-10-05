@@ -1,0 +1,5 @@
+# p27-cd68-review-04 (delta reviewer, fresh) — 2026-10-06 — verdict: APPROVE (no P1+)
+
+Scope git diff 74fc955 -- src omp_bridge (fix-04, fix-05). flow_terminal + notices 56 OK.
+Verified: fetch not in _waiters, does not touch check_base/since (no check delay); exit race keeps terminal_done (final + consumed.add under lock, _refresh_notice after); journal terminal_fetch wait_seconds 0; wait removal (WORKER_TOOLS, tool:wait leak, manager keeps, task kept); skill/tool description/RUNNING_DETAIL/CHECK_INSTRUCTION consistent.
+P3 (polish): flow_terminal.py:185 validator text "or null to wait for the running command" -> "or null for the current state"; flow_terminal.py:484-491 take_unseen clears output even if the fetch reply is undelivered (log_path has it; checks keep their own window); bridge.ts:381 10 s limit only for command === null (blank command handled as fetch by backend keeps 150 s; strict schema makes it rare). Known benign: result + terminal_done may both arrive when notice is already sending (same as _await).

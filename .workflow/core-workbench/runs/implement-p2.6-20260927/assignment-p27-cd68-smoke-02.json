@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cd68-smoke-02",
+  "ticket_id": "CW-18 C-D68 real-model smoke 2 (terminal_check, fixed wait, display)",
+  "role": "test_designer",
+  "unit": "V-CW-18-smoke",
+  "approved_bundle_digest": "e6ab604db157e8b09f7e43db52b08b779d85c483f5e41aef1096f603b2557d8a",
+  "candidate_commit": "74fc955",
+  "routing": {
+    "planned_role": "test_designer",
+    "selected_role": "test_designer (Opus general-purpose)",
+    "reason_codes": [
+      "live_real_model"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/assignment-p27-cd68-smoke-01.json",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd68-smoke-01.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd68-fix-03.md"
+    ]
+  },
+  "user_authorization": "User 2026-10-05: '재실행 끝나면 커밋하고 smoke 돌려줘' (continuation; the remaining unverified terminal_check path). Cap 30 requests / 20 min. No commits.",
+  "setup": "Exactly as p27-cd68-smoke-01 (new /tmp data dir and project, real product entrypoint, ui_v1 client, PTY screenshot of status lines; record start isolation per role).",
+  "scenario": [
+    "One free-work Task: manager asks the worker to run `for i in $(seq 1 24); do echo tick $i; sleep 10; done; echo DONE` (~240 s) in the terminal and report when finished.",
+    "Observe: host pane shows `[worker] $ <command>`; status shows owner: worker during the command; first wait ends at ~120 s with running and the worker ends its turn with no progress reports; at least one terminal_check delivered ~60 s later (new ticks only) and the worker's reaction (expected: no report unless a problem); terminal_done after exit; worker reports DONE once (no duplicate done); Task closed, worker idle, shell returned.",
+    "Record request counts per OMP and the journal records terminal_check / terminal_notice."
+  ],
+  "limits": [
+    "Hard cap 30 provider requests, 20 min wall clock; at a cap pause, shut down (verified), report.",
+    "Never touch ~/wb-urux-sandbox or the user's processes; kill only PIDs you started; never read credential contents or other processes' environ; never print tokens; no commits; no graphify update; remove temp dirs afterwards."
+  ],
+  "result_format": "Write .workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd68-smoke-02.md (+ -timeline.json), Korean: timeline, request counts, what worked / not (product vs model), screenshots. Reply in Korean <=15 lines."
+}
