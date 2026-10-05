@@ -406,6 +406,7 @@ test("worker registers terminal: strict, essential, one nullable command (no wai
 		assert.match(tool.description, /waits up to 120 s for the exit/);
 		// C-D68 (7): the host shell's current directory (where the user last cd'd), not the project directory.
 		assert.match(parameters.properties.command.description, /current directory of the host terminal/);
+		assert.match(parameters.properties.command.description, /null returns the current state at once \(never waits\)/);
 		assert.doesNotMatch(parameters.properties.command.description, /project directory/);
 		assert.match(tool.description, /current directory \(where the user last cd'd\)/);
 		assert.doesNotMatch(tool.description, /project directory/);
@@ -416,7 +417,10 @@ test("worker registers terminal: strict, essential, one nullable command (no wai
 			/status running: end your turn and do not start another command/,
 			/check every 60 s while it runs and a completion notice when it exits/,
 			// smoke-01 M3: no progress spam after running.
-			/do not send progress reports about it unless the user or the manager asks or a check shows a problem/]) {
+			/do not send progress reports about it unless the user or the manager asks or a check shows a problem/,
+			// smoke-02 P3/M4: OMP 18.6.1 retries an empty stop; the OMP wait tool does not wait for it.
+			/end your turn with one short text line/, /never an empty reply/,
+			/do not use the wait tool or repeated terminal calls to wait/]) {
 			assert.match(tool.description, needle);
 		}
 		for (const text of [tool.description, parameters.properties.command.description]) {
@@ -442,6 +446,8 @@ test("terminal waits a fixed 120 s plus a start slack (C-D68 (9))", () => {
 	for (const params of [{ command: "x" }, { command: "x", timeout_seconds: 1800 }, { command: "x", timeout_seconds: 1 }, null]) {
 		assert.equal(terminalTimeoutMs(params), 150_000, JSON.stringify(params));
 	}
+	// C-D68 (10): a call without a command returns the current state at once (the handoff timeout).
+	assert.equal(terminalTimeoutMs({ command: null }), 10_000);
 });
 
 test("terminal sends one tool_request and outlives the 10 s handoff timeout", async () => {

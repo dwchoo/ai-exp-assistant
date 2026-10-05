@@ -181,11 +181,16 @@ class Notices(base.RealShellFixture):
         self.assertNotIn(MARK.encode(), Path(done[0]["log_path"]).read_bytes())
 
     def test_peer_gone_clears_the_waiter_so_checks_and_the_notice_resume(self):
-        self.start_slow()
-        waiter = threading.Thread(target=lambda: self.tool({"command": None, "wait": 30}))
+        # C-D68 (10): a command-less call never waits, so the waiting call is the one that runs the command
+        # (it waits up to the fixed time); that is the call whose waiter peer_gone drops.
+        self.flag = self.root / "slow-go"
+        command = (f"i=0; while [ ! -e {shlex.quote(str(self.flag))} ]; do i=$((i+1)); echo line-$i; sleep 0.1; done;"
+                   " echo slow-done")
+        waiter = threading.Thread(target=lambda: self.tool({"command": command, "wait": 30}))
         waiter.start()
         self.addCleanup(waiter.join, 15)
-        self.assertTrue(wait_until(lambda: self.terminal._waiting_now(), 5), "control: the null call waits")
+        self.assertTrue(wait_until(lambda: self.terminal._waiting_now(), 5), "control: the command call waits")
+        time.sleep(0.4)
         self.advance(61)
         self.assertEqual(self.notices.of("terminal_check"), [], "control: no check while a call waits")
         self.terminal.peer_gone(ActorRole.MANAGER, base.SESSION, 1)  # another role: nothing changes

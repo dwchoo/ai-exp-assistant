@@ -33,14 +33,16 @@ through ``HandoffService.handle`` (which answers at once): this call may wait.
   host shell, an experiment run that is active or starting, or a pending
   directory restore of an experiment are ``host_terminal_busy``; a paused
   Workbench is ``paused`` for a new command only (a command already running
-  continues and ``command: null`` may still wait for it); a new command while
+  continues and ``command: null`` still returns its state); a new command while
   one runs is ``terminal_command_running``. No Task is needed (the journal then
   has ``task_id: null``).
 - One command at a time. The tool call waits up to ``WAIT_SECONDS`` (120 s, fixed;
   C-D68 (9): the worker sets no wait): ``exited`` gives the exit code, a bounded output tail and
   the full log file; otherwise ``running``: the command keeps running and the
   worker ends its turn (C-D68 (8); no re-wait loop). A call with ``command:
-  null`` still returns the last command's result or running status. Aborting
+  null`` never waits (C-D68 (10)): it returns at once the running state (the
+  output not yet returned, elapsed time) or the finished result, which then
+  counts as received; it does not hold back the checks. Aborting
   the tool call stops only the waiting (the bridge answers it, the command
   continues) and the bridge sends ``terminal_wait_abandoned`` so that call does
   not count as having received the result. A call abandoned before its command
@@ -117,14 +119,17 @@ ECHO_SCRIPT = 'printf \'[worker] $ %s\\n\' "$1"; exec "$0" -c "$1"'
 _ANSI = re.compile(rb"\x1b\[[0-?]*[ -/]*[@-~]|\x1b\][^\x07\x1b]*(?:\x07|\x1b\\)|\x1b[P^_][^\x1b]*\x1b\\|\x1b[@-Z\\-_]")
 _CONTROL = re.compile(r"[\x00-\x08\x0b-\x1f\x7f]")
 
-RUNNING_DETAIL = ("The command keeps running in the host terminal. End your turn now. Do not send progress reports "
-                  "about it unless the user or the manager asks or a check shows a problem, and do not start "
-                  "another command (a new one is refused until it ends): Workbench sends you a check every 60 s "
-                  "while it runs and a completion notice when it exits. The user can stop it in the host terminal.")
+RUNNING_DETAIL = ("The command keeps running in the host terminal. End your turn now with one short text line (for "
+                  "example 'Waiting for the Workbench notice.'), never an empty reply. Do not use the wait tool or "
+                  "repeated terminal calls to wait for it, and do not start another command (a new one is refused "
+                  "until it ends). Do not send progress reports about it unless the user or the manager asks or a "
+                  "check shows a problem: Workbench sends you a check every 60 s while it runs and a completion "
+                  "notice when it exits. The user can stop it in the host terminal.")
 CHECK_INSTRUCTION = ("Workbench check (automatic, every 60 s while your terminal command runs). Look at the new "
                      "output for errors or a hang. Do not start another command and do not wait for it. If it is "
                      "useful, report to the manager with to_manager (with no Task, tell the user in your reply); "
-                     "then end your turn. The completion notice follows when the command exits.")
+                     "then end your turn with one short text line (never an empty reply). The completion notice "
+                     "follows when the command exits.")
 DONE_INSTRUCTION = ("Workbench notice: your terminal command ended. Read the result (the full output is in "
                     "log_path) and continue your work.")
 BUSY_DETAIL = ("Nothing was run. The host terminal runs a command only when it is free (the user's idle prompt, "
@@ -223,6 +228,8 @@ class _Command:
     lock: threading.Lock = field(default_factory=threading.Lock)
     since: bytearray = field(default_factory=bytearray)  # output since the last check (or waiting call)
     since_dropped: bool = False
+    unseen: bytearray = field(default_factory=bytearray)  # output not yet returned by a terminal call (C-D68 (10))
+    unseen_dropped: bool = False
     waiters: set = field(default_factory=set)  # keys of terminal calls waiting for it now
     consumed: set = field(default_factory=set)  # keys of terminal calls that got its final result
     check_base: float = 0.0  # the clock time the next check counts from
@@ -254,6 +261,10 @@ class _Command:
             if len(self.since) > 4 * TAIL_BYTES:
                 del self.since[:-4 * TAIL_BYTES]
                 self.since_dropped = True
+            self.unseen.extend(data)
+            if len(self.unseen) > 4 * TAIL_BYTES:
+                del self.unseen[:-4 * TAIL_BYTES]
+                self.unseen_dropped = True
         if self.log_error is not None:
             return
         room = LOG_MAX - self.log_bytes
@@ -278,6 +289,12 @@ class _Command:
     def tail(self) -> dict[str, Any]:
         text, truncated = output_tail(bytes(self.recent))
         return {"output_tail": text, "output_tail_truncated": truncated or self.log_bytes > len(self.recent)}
+
+    def take_unseen(self) -> tuple[bytes, bool]:
+        with self.lock:
+            data, dropped = bytes(self.unseen), self.unseen_dropped
+            self.unseen, self.unseen_dropped = bytearray(), False
+        return data, dropped
 
     def take_since(self) -> tuple[bytes, bool]:
         with self.lock:
@@ -426,10 +443,10 @@ class TerminalService:
                             detail="Never put environment variable values in a command; use $NAME references.")
         task = self._task_id()
         self._journal({"type": "terminal_request", "key": key_dict, "request_id": parsed.request_id,
-                       "command": command, "wait_seconds": timeout, "task_id": task})
+                       "command": command, "wait_seconds": timeout if command is not None else 0, "task_id": task})
         deadline = time.monotonic() + timeout
         if command is None:
-            return self._wait_again(key_dict, deadline, key)
+            return self._fetch(key_dict, key)
         started = self._start(command, key_dict, task, key)
         if isinstance(started, dict):
             return started
@@ -447,13 +464,34 @@ class TerminalService:
         self._journal({"type": "terminal_refused", "key": key_dict, "status": status, "reason": reason})
         return {"status": status, "reason": reason, "detail": detail, **extra}
 
-    def _wait_again(self, key_dict: dict[str, Any], deadline: float, key: tuple) -> dict[str, Any]:
+    def _fetch(self, key_dict: dict[str, Any], key: tuple) -> dict[str, Any]:
+        """C-D68 (10): ``command: null`` never waits; it returns the current state at once.
+
+        Running: the output not yet returned by a terminal call (bounded), the
+        elapsed time and the running detail; it is not a waiting call, so the
+        checks go on. Ended: the result, which counts as received (no
+        ``terminal_done`` is sent afterwards).
+        """
         command = self._current
         if command is None:
             return self._refuse(key_dict, "rejected", "no_terminal_command",
                                 "No command was run; give a command to run one.")
-        self._journal({"type": "terminal_wait", "key": key_dict, "command_id": command.command_id})
-        return self._await(command, deadline, key)
+        self._journal({"type": "terminal_fetch", "key": key_dict, "command_id": command.command_id})
+        with self._lock:
+            self._calls[key] = command
+            while len(self._calls) > CALLS_KEPT:
+                del self._calls[next(iter(self._calls))]
+            final = command.done.is_set() and command.result is not None
+            if final:
+                command.consumed.add(key)
+                self._refresh_notice(command)
+        if final:
+            return {**command.result, **command.tail()}
+        data, dropped = command.take_unseen()
+        text, truncated = output_tail(data)
+        return {"status": "running", "command_id": command.command_id, "command": command.command,
+                "log_path": str(command.log_path), "elapsed_seconds": round(time.monotonic() - command.started, 3),
+                "output_tail": text, "output_tail_truncated": truncated or dropped, "detail": RUNNING_DETAIL}
 
     def _await(self, command: _Command, deadline: float, key: tuple) -> dict[str, Any]:
         with self._lock:
@@ -475,6 +513,7 @@ class TerminalService:
                 else:  # the call saw the output so far: the next check counts from now
                     command.check_base = self._clock()
                     command.take_since()
+                    command.take_unseen()  # the running result below returns the output so far
                     self._drop_check(command, "superseded")
                 self._refresh_notice(command)
         if final:

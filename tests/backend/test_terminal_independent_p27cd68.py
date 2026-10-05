@@ -394,7 +394,8 @@ class CompletionNotice(RealShellFixture):
         self.assertEqual((done[0]["command"], done[0]["exit_code"]), (command, 0))
         self.assertIn("ended-a", done[0]["output_tail"])
         self.assertEqual(done[0]["log_path"], first["log_path"])
-        again = self.tool({"command": None, "wait": 5})  # the result can still be fetched
+        # C-D68 (10): a command-less call returns the finished result at once (it never waits); fetchable again
+        again = self.tool({"command": None, "wait": 5})
         self.assertEqual((again["status"], again["exit_code"]), ("exited", 0))
         time.sleep(0.3)
         self.assertEqual(len(self.notices.sent_of("terminal_done")), 1, "never twice")
@@ -448,9 +449,10 @@ class CompletionNotice(RealShellFixture):
         self.assertTrue(wait_until(lambda: self.terminal.current()["running"] is False, 10))
         time.sleep(0.6)
         self.assertEqual(self.notices.sent_of("terminal_done"), [], "a notice was sent while paused")
-        waited = self.tool({"command": None, "wait": 5})  # waiting for it is allowed while paused
+        # C-D68 (10): a command-less call (no waiting) still returns the finished result while paused
+        waited = self.tool({"command": None, "wait": 5})
         self.assertEqual((waited["status"], waited["exit_code"]), ("exited", 0), waited)
-        # That wait received the result: the notice is then not needed; a fresh command proves the resume path.
+        # That fetch received the result: the notice is then not needed; a fresh command proves the resume path.
         self.paused = False
         flag2, command2 = self.gated("e")
         self.assertEqual(self.tool({"command": command2, "wait": 1})["status"], "running")

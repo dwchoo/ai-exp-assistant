@@ -150,8 +150,12 @@ ROLE_TASK_AGENTS: dict[str, frozenset[str]] = {"manager": BUNDLED_TASK_AGENTS,
 # Built-in tools of the worker OMP (``--tools``): no bash and no eval; the worker
 # runs commands through the Workbench terminal tool (bridge extension tool, not
 # affected by --tools). Verified with OMP 18.6.1 (task/todo/web_search are what a
-# worker needs besides read/grep/glob/edit/write; ``wait`` joins background jobs).
-WORKER_TOOLS = ("read", "grep", "glob", "edit", "write", "web_search", "todo", "task", "wait")
+# worker needs besides read/grep/glob/edit/write). No ``wait`` (p27-cd68-fix-05,
+# root-adjudication-p27-cd68-wait): it only joins background jobs the session
+# started; task subagent results auto-deliver and the worker has no async bash,
+# and in smoke-02 it was used to "wait" on a terminal command. A worker ``wait``
+# is a leak (outside this allowlist); the manager keeps it.
+WORKER_TOOLS = ("read", "grep", "glob", "edit", "write", "web_search", "todo", "task")
 # Built-in tools that must not appear in the worker OMP (reported as leaks).
 WORKER_FORBIDDEN_TOOLS = frozenset({"bash", "eval"})
 # The Workbench bridge tools of the worker (extension tools, not affected by --tools). p27-cd68-fix-01 P3-3:

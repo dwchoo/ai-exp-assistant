@@ -127,6 +127,28 @@ test("C-D68 (9): the wait is fixed at 120 s; no timeout_seconds in the schema or
 	}
 });
 
+test("C-D68 (10): a command-less terminal call is answered at once, so the bridge waits only briefly for it", async () => {
+	const command = terminalTimeoutMs({ command: "x" });
+	for (const params of [{ command: null }, { command: null, timeout_seconds: 1800 }]) {
+		const limit = terminalTimeoutMs(params);
+		assert.ok(limit <= 15_000, `a command-less call must not get the 120 s wait: ${limit}`);
+		assert.ok(limit < command, "shorter than a command call's wait");
+	}
+	assert.equal(terminalTimeoutMs({ command: "make" }), command, "a command call keeps the fixed wait");
+	const worker = await startBridge("worker");
+	try {
+		const terminal = worker.tools.get("terminal")!;
+		assert.match(terminal.description, /one short text line/i);
+		assert.match(terminal.description, /never an empty reply/i);
+		const pending = terminal.execute("fetch-1", { command: null }, new AbortController().signal, () => {}, {});
+		const request = await worker.waitFor(frame => frame.kind === "tool_request" && frame.tool === "terminal");
+		assert.deepEqual(request.args, { command: null });
+		worker.reply({ kind: "tool_result", requestId: request.requestId, toolCallId: "fetch-1",
+			result: { status: "running", output_tail: "more" } });
+		assert.equal(textOf(await pending).status, "running");
+	} finally { await worker.close(); }
+});
+
 test("C-D68 (8): a terminal call answered by the backend is not abandoned; an abort after the answer sends nothing", async () => {
 	const worker = await startBridge("worker");
 	try {

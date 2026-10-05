@@ -207,8 +207,8 @@ class RefusalTests(ServiceFixture):
     def test_wait_without_a_command_and_duplicate_calls(self):
         result = self.run_tool({"command": None})
         self.assertEqual((result["status"], result["reason"]), ("rejected", "no_terminal_command"))
-        first = self.run_tool({"command": None, "wait": 5}, call_id="same")
-        again = self.run_tool({"command": None, "wait": 5}, call_id="same")
+        first = self.run_tool({"command": None}, call_id="same")
+        again = self.run_tool({"command": None}, call_id="same")
         self.assertEqual(first, again)
         self.assertTrue(any(r["type"] == "terminal_duplicate" for r in journal(self.root)))
 
@@ -368,7 +368,8 @@ class RealHostShellTerminalTests(ServiceFixture):
         self.assertIsNotNone(self.gate.acquire("experiment"), "an experiment sees the host busy meanwhile")
         self.assertEqual(self.gate.owner, "terminal")
         flag.touch()
-        waited = self.run_tool({"command": None, "wait": 30})
+        self.assertTrue(wait_until(lambda: self.terminal.current()["running"] is False, 10))
+        waited = self.run_tool({"command": None})  # C-D68 (10): returns the finished result at once
         self.assertEqual((waited["status"], waited["exit_code"], waited["command_id"]),
                          ("exited", 0, first["command_id"]), waited)
         self.assertIn("late-done", waited["output_tail"])
@@ -391,8 +392,11 @@ class RealHostShellTerminalTests(ServiceFixture):
         self.paused = True
         refused = self.run_tool({"command": "echo while-paused", "wait": 5})
         self.assertEqual(refused["status"], "terminal_command_running")
+        still = self.run_tool({"command": None})  # allowed while paused; never waits
+        self.assertEqual(still["status"], "running", still)
         flag.touch()
-        waited = self.run_tool({"command": None, "wait": 30})
+        self.assertTrue(wait_until(lambda: self.terminal.current()["running"] is False, 10))
+        waited = self.run_tool({"command": None})
         self.assertEqual((waited["status"], waited["exit_code"]), ("exited", 0), waited)
         self.assertIn("resumed-output", waited["output_tail"])
         self.assert_user_owns_the_shell_again()

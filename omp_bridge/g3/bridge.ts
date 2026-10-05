@@ -353,8 +353,9 @@ const TERMINAL_PARAMETERS = {
 	properties: {
 		command: { type: ["string", "null"], maxLength: MESSAGE_MAX,
 			description: "One shell command line (bash -c / sh -c), run in the current directory of the host terminal "
-				+ "(where the user last cd'd; a cd inside the command does not change it); null returns the last "
-				+ "command's result or running status. No environment variable values (use $NAME)." },
+				+ "(where the user last cd'd; a cd inside the command does not change it); null returns the current state at once (never waits): "
+				+ "the last command's result, or that it is still running with its new output. No environment "
+				+ "variable values (use $NAME)." },
 	},
 };
 const TERMINAL_TOOL = {
@@ -367,14 +368,17 @@ const TERMINAL_TOOL = {
 		+ "idle prompt, no job, no experiment run): otherwise you get host_terminal_busy and nothing ran; paused means "
 		+ "the user paused Workbench (a running command continues). One command at a time: a new one while another runs gets terminal_command_running. "
 		+ `The call waits up to ${TERMINAL_WAIT_S} s for the exit. If the command outlives that it keeps running and `
-		+ "you get status running: end your turn and do not start another command; do not send progress reports "
-		+ "about it unless the user or the manager asks or a check shows a problem. Workbench sends you a check "
-		+ "every 60 s while it runs and a completion notice when it exits.",
+		+ "you get status running: end your turn and do not start another command; end your turn with one short text "
+		+ "line (never an empty reply); do not use the wait tool or repeated terminal calls to wait; do not send "
+		+ "progress reports about it unless the user or the manager asks or a check shows a problem. Workbench "
+		+ "sends you a check every 60 s while it runs and a completion notice when it exits.",
 };
 
 // How long this bridge waits for the backend's terminal result (C-D68 (9): fixed; the call's arguments do not
 // change it).
-export function terminalTimeoutMs(_params?: unknown): number {
+export function terminalTimeoutMs(params?: unknown): number {
+	// C-D68 (10): a call without a command returns the current state at once.
+	if (typeof params === "object" && params !== null && (params as Frame).command === null) return TOOL_RESULT_TIMEOUT_MS;
 	return TERMINAL_WAIT_S * 1000 + TERMINAL_RESULT_SLACK_MS;
 }
 

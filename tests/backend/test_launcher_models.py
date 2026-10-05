@@ -216,6 +216,20 @@ class LeakRuleTests(unittest.TestCase):
         leaks = launcher.isolation_leaks(seen, allowed_skills=(), role="worker")
         self.assertEqual(leaks, ["task_agent:scout", "task_agent:task", "tool:bash", "tool:eval"])
 
+    def test_the_worker_has_no_wait_tool_and_wait_is_a_worker_leak(self):
+        # p27-cd68-fix-05 (root-adjudication-p27-cd68-wait): task subagent results auto-deliver in OMP 18.6.1 and
+        # the worker has no async bash job, so `wait` only invited waiting on a terminal command (smoke-02 M4).
+        self.assertNotIn("wait", launcher.WORKER_TOOLS)
+        self.assertEqual(set(launcher.WORKER_TOOLS),
+                         {"read", "grep", "glob", "edit", "write", "web_search", "todo", "task"})
+        worker = observed(tools=list(launcher.WORKER_TOOLS) + ["to_manager", "terminal", "wait"],
+                          task_agents=["analyst", "explorer"])
+        self.assertEqual(launcher.isolation_leaks(worker, allowed_skills=(), role="worker"), ["tool:wait"])
+        manager = observed(tools=["bash", "eval", "task", "wait", "to_worker"], task_agents=sorted(launcher.BUNDLED_TASK_AGENTS))
+        self.assertEqual(launcher.isolation_leaks(manager, allowed_skills=(), role="manager"), [], "manager keeps wait")
+        command = launcher.omp_command(plan(), "/d/omp-isolation-worker.yml")
+        self.assertNotIn("wait", command[command.index("--tools") + 1].split(","))
+
     def test_any_worker_tool_outside_the_allowlist_is_a_leak(self):
         # p27-cd68-review-01 P3-3: --omp-arg --tools could re-enable python/notebook/computer/browser.
         seen = observed(tools=list(launcher.WORKER_TOOLS) + ["to_manager", "terminal", "python", "notebook",

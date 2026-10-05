@@ -256,8 +256,7 @@ class PeriodicCheckTests(NoticeFixture):
         self.finish()
 
     def test_no_check_while_a_terminal_call_waits_for_the_command(self):
-        self.start_running()
-        waiting = threading.Thread(target=self.run_tool, args=({"command": None, "wait": 30},))
+        waiting = threading.Thread(target=self.run_tool, args=({"command": "make long", "wait": 30},))
         waiting.start()
         self.assertTrue(wait_until(lambda: self.terminal._waiting_now()))
         self.advance(61)
@@ -349,15 +348,17 @@ class CompletionNoticeTests(NoticeFixture):
         self.advance(120)
         self.assertEqual(self.notices.attempts, [])
 
-    def test_a_null_wait_that_got_the_result_needs_no_notice(self):
+    def test_a_null_fetch_of_the_finished_result_counts_as_received(self):
+        # C-D68 (10): the fetch returns the finished result at once; no terminal_done follows it.
         self.start_running()
-        waiting = threading.Thread(target=self.run_tool, args=({"command": None, "wait": 30},))
-        waiting.start()
-        self.assertTrue(wait_until(lambda: self.terminal._waiting_now()))
-        self.finish(0)
-        waiting.join(10)
+        self.finish(0, b"the end\n")
+        fetched = self.run_tool({"command": None})
+        self.assertEqual((fetched["status"], fetched["exit_code"]), ("exited", 0), fetched)
+        self.assertIn("the end", fetched["output_tail"])
         self.advance(1)
+        self.advance(60)
         self.assertEqual(self.done(), [])
+        self.assertIn("not_needed", [r["outcome"] for r in self.journal("terminal_notice")])
 
     def test_an_aborted_waiting_call_does_not_swallow_the_notice(self):
         result = {}
@@ -529,8 +530,7 @@ class SmokeFixTests(NoticeFixture):
         self.assertEqual(sorted(p.name for p in log_root.iterdir()) if log_root.exists() else [], [])
 
     def test_a_waiter_of_a_gone_worker_session_does_not_hold_back_checks(self):
-        self.start_running()
-        waiting = threading.Thread(target=self.run_tool, args=({"command": None, "wait": 30},))
+        waiting = threading.Thread(target=self.run_tool, args=({"command": "make long", "wait": 30},))
         waiting.start()
         self.assertTrue(wait_until(lambda: self.terminal._waiting_now()))
         self.advance(61)
@@ -545,6 +545,49 @@ class SmokeFixTests(NoticeFixture):
         self.advance(1)
         self.assertEqual(len(self.notices.of("terminal_done")), 1, "its result reached nobody")
         self.assertTrue(any(r["type"] == "terminal_peer_gone" for r in self.journal()))
+
+
+class NonBlockingFetchTests(NoticeFixture):
+    """C-D68 (10) (user, 2026-10-06): a call without a command never waits; it returns the current state."""
+
+    def test_a_fetch_while_running_returns_at_once_with_the_output_not_yet_returned(self):
+        first = self.start_running(b"first line\n", after=b"second line\n")
+        started = time.monotonic()
+        fetched = self.run_tool({"command": None, "wait": 30})
+        self.assertLess(time.monotonic() - started, 1.0, "no waiting")
+        self.assertEqual((fetched["status"], fetched["command_id"]), ("running", first["command_id"]), fetched)
+        self.assertIn("second line", fetched["output_tail"])
+        self.assertNotIn("first line", fetched["output_tail"], "already returned with the running result")
+        self.assertGreaterEqual(fetched["elapsed_seconds"], 0)
+        self.assertIn("End your turn now", fetched["detail"])
+        again = self.run_tool({"command": None})
+        self.assertEqual((again["status"], again["output_tail"]), ("running", ""), "nothing new since")
+        self.emit(b"third line\n")
+        self.assertIn("third line", self.run_tool({"command": None})["output_tail"])
+        self.assertTrue(any(r["type"] == "terminal_fetch" for r in self.journal()))
+        self.finish()
+
+    def test_a_fetch_does_not_hold_back_the_check(self):
+        self.start_running(after=b"progress\n")
+        self.advance(30)
+        self.run_tool({"command": None})
+        self.assertFalse(self.terminal._waiting_now())
+        self.advance(30)  # 60 s after the first call returned: the fetch did not move the check
+        checks = self.notices.of("terminal_check")
+        self.assertEqual(len(checks), 1)
+        self.assertIn("progress", checks[0]["new_output"], "the check keeps its own output window")
+        self.finish()
+
+    def test_a_fetch_before_the_notice_was_sent_makes_it_unneeded_and_after_it_changes_nothing(self):
+        self.start_running()
+        self.notices.outcome = "deferred"  # the worker is busy: the notice waits
+        self.finish(7)
+        self.advance(1)
+        self.assertEqual(self.run_tool({"command": None})["exit_code"], 7)
+        self.notices.outcome = "delivered"
+        self.advance(5)
+        self.assertEqual(self.notices.of("terminal_done"), [], "the fetch received it")
+        self.assertEqual(self.run_tool({"command": None})["exit_code"], 7, "the result stays fetchable")
 
 
 class AbandonTests(NoticeFixture):

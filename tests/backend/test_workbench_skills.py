@@ -324,5 +324,23 @@ class SmokeWordingSkillTests(unittest.TestCase):
         self.assertRegex(text, r"(?i)`queued`[^\n]*accepted[^\n]*never send the same report again")
 
 
+class SmokeTwoSkillTests(unittest.TestCase):
+    """p27-cd68-fix-04 (C-D68 (10), smoke-02 P3/M4/M2')."""
+
+    def test_running_ends_the_turn_with_one_text_line_and_no_wait_tool(self):
+        commands = section(body("to-manager"), "Running commands: `terminal`")
+        line = next(l for l in commands.splitlines() if l.startswith("- `running`"))
+        self.assertRegex(line, r"(?i)one short text line")
+        self.assertRegex(line, r"(?i)never an empty reply")
+        self.assertRegex(line, r"(?i)do not wait with repeated `terminal` calls")
+        # p27-cd68-fix-05: the worker has no `wait` tool, so its skill does not mention one.
+        self.assertNotIn("`wait`", body("to-manager"))
+        self.assertRegex(commands, r"(?i)`command` null returns the current state at once")
+
+    def test_no_further_report_after_done(self):
+        text = body("to-manager")
+        self.assertRegex(text, r"(?i)after `done`, do not send another report for the same task")
+
+
 if __name__ == "__main__":
     unittest.main()
