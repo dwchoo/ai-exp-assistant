@@ -85,5 +85,39 @@
     "tests/backend/test_omp_home_agents.py": "f2de717b9d51b4ebc0fe947f385289c07645e3bb3d4093b0ac16502d1584b017",
     "tests/backend/test_terminal_independent_p27cd68.py": "b59220f6c948c1eb027bc6d316e07c8639ba045b197f0c57978a49fa071d20ab",
     "tests/bridge/bridge_terminal_independent_p27cd68.test.ts": "a4eb1c00c56ec1faf6d75bb1d9d439a5adaa508bed739c81985d21c4ebbcf0b7"
+  },
+  "followups": {
+    "commits": [
+      "fc62bdd",
+      "396b8e2",
+      "74fc955",
+      "cdbbd23",
+      "0c9c774",
+      "003106c"
+    ],
+    "decisions": [
+      "C-D68 (9) fixed 120 s wait (amendment n)",
+      "C-D68 (10) non-blocking fetch (amendment o)",
+      "root-adjudication-p27-cd68-wait (worker wait tool dropped)"
+    ],
+    "smokes": {
+      "p27-cd68-smoke-01": "terminal-only execution, 120 s running, terminal_done; model M1-M3; display P1/P2 -> fixed",
+      "p27-cd68-smoke-02": "fixed wait/display verified; terminal_check skipped due to empty-stop retry + blocking re-wait -> C-D68 (10)",
+      "p27-cd68-smoke-03": "terminal_check delivered on a real model (+180 s, new ticks only), worker one-line reaction, terminal_done once, done once; 10 requests"
+    },
+    "verification": [
+      "review-03 approve",
+      "review-04 approve",
+      "test-03 pass",
+      "test-04 pass (flakes rerun)"
+    ],
+    "carried_polish_added": [
+      "O1 OMP notification wrapped for tmux (DCS passthrough, OSC 777 warp notify) rendered as text in the manager pane when Workbench runs inside tmux(+Warp) -> pane emulator should consume/ignore DCS tmux passthrough (CW-06/CW-16)",
+      "O2 to_worker delivery record becomes unknown/BridgeTimeout after 20 s when the worker's first turn includes a 120 s terminal wait (delivery itself fine, no resend) -> journal noise",
+      "validator text 'or null to wait', fetch take_unseen on undelivered reply, bridge 10 s limit only for null",
+      "review-03 P3: peer_gone same-key race, RUN payload 4096 B vs COMMAND_MAX 8192, BASH_ENV sourced twice by wrapper, echo-skip misalignment",
+      "bridge.ts/flow_terminal running text still mentions 'wait tool'",
+      "terminal_fetch path not exercised by a real model (deterministic tests only)"
+    ]
   }
 }

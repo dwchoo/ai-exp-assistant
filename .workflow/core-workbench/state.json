@@ -425,7 +425,7 @@
   "implementation_p27": {
     "run_record": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
     "approved_bundle_sha256": "91fe05dc882d8c00ab0eb28c30e2b6cabcbfacb0f0fee3f0eaeecfaff5b7d3e8",
-    "status": "C-D68 integrated (review approve, independent rerun pass); next: commit, real-model smoke p27-cd68-smoke-01, then UR-USABILITY retry, CW-19, CW-16",
+    "status": "C-D68 (1)-(10) integrated and verified with real-model smokes 01-03 (terminal_check confirmed); next: UR-USABILITY retry by the user (sandbox restart needed), CW-19, CW-16 (polish list in integration-p27-cd68.json)",
     "resumed_from": ".codex/handoffs/2026-09-29-core-workbench-p27-cw17/HANDOFF.md",
     "units": {
       "V-CW-17-p2.7": {
@@ -498,6 +498,6 @@
       "workbench status creates the data dir as a side effect (P3, record for CW-16)"
     ],
     "environment_note": "OMP upgraded by user to 18.4.4 (was 18.2.10 during CW-02..CW-06 evidence) - compatibility re-check needed (CW-16 I-COMPAT)",
-    "approved_bundle_digest": "be5579d83f63b95c8a481adb71fc7927bba400ed471784587ea944cd3cd5fcfc"
+    "approved_bundle_digest": "348e50ee41ca8bc7f20f307dff77c13be5beefc0e1ccf30a524c95cb5fe98902"
   }
 }
