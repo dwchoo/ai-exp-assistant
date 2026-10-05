@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cd68-review-03",
+  "ticket_id": "CW-18 C-D68 (9) delta review",
+  "role": "reviewer",
+  "unit": "V-CW-18-cd68-verify",
+  "approved_bundle_digest": "e6ab604db157e8b09f7e43db52b08b779d85c483f5e41aef1096f603b2557d8a",
+  "frozen_candidate": "550128e6414bd48b97374f17dc27784b82089bd453432950a0d624eb2f73de7b",
+  "routing": {
+    "planned_role": "reviewer",
+    "selected_role": "reviewer (wb-delta-reviewer, fresh)",
+    "reason_codes": [
+      "delta_after_full_review"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd68-fix-03.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd68-smoke-01.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd68-review-02.md"
+    ]
+  },
+  "scope": "Only fix-03 changes vs commit fc62bdd: `git diff fc62bdd -- src omp_bridge` (flow_terminal.py, flow.py, service.py, mailbox.py, ui_v1.py, ui/product/model.py, bridge.ts, to-manager SKILL.md). Check: printf/exec wrapper quoting/injection safety for arbitrary command text (quotes, newlines, %, leading '-', unicode), exit code/signal/PID semantics unchanged, sh vs bash, nothing typed into the parent shell; operated_by lifecycle (set/cleared on every path incl. abort/failure/kill/restart); timeout_seconds rejection; wording; empty log removal race; peer_gone waiter cleanup vs a reconnecting main session (must not drop a live waiter).",
+  "rules": "No real provider/model requests (fake local provider allowed); never read credential contents or other processes' environ; temp only under /tmp; kill only PIDs you started; never touch ~/wb-urux-sandbox or user processes; no commits; no graphify update. Read-only.",
+  "result_format": "verdict (approve / block), findings P1-P3 with file:line and scenario. Korean, <=10 lines."
+}

@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cd68-test-03",
+  "ticket_id": "CW-18 C-D68 (9) rerun",
+  "role": "test_designer",
+  "unit": "V-CW-18-cd68-verify",
+  "approved_bundle_digest": "e6ab604db157e8b09f7e43db52b08b779d85c483f5e41aef1096f603b2557d8a",
+  "frozen_candidate": "550128e6414bd48b97374f17dc27784b82089bd453432950a0d624eb2f73de7b",
+  "routing": {
+    "planned_role": "test_designer",
+    "selected_role": "test_designer (wb-test-rerun)",
+    "reason_codes": [
+      "correction_reverification"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd68-fix-03.md",
+      "docs/features/core-workbench/DECISIONS.md#C-D68 (9)"
+    ]
+  },
+  "required": [
+    "Update the p27cd68 independent tests pinned to the removed timeout_seconds / 1800 wording to C-D68 (9) (fixed 120 s; timeout_seconds rejected as invalid_arguments) without weakening other assertions; cite C-D68 (9) at each change (files listed in result-p27-cd68-fix-03.md).",
+    "Add minimal independent tests for fix-03 behaviours if missing: pane shows '[worker] $ <command>' but output_tail/log/check exclude it and exit code/PID semantics unchanged; ui_v1 operated_by worker during a worker command and not during experiments; queued detail says do not send again; running result says end your turn; empty log removed on abort before submit; peer_gone clears waiters so checks resume.",
+    "Run on the frozen candidate (verify src/omp_bridge hashes before/after): tests/backend, tests/bridge (py+node), tests/ui, tests/workflow, tests/contracts, tests/terminal, tests/gates/g3_omp node, live_omp_tools_independent_p27cd68. Load flakes: rerun the module once, report both."
+  ],
+  "allowed_write_paths": [
+    "tests/**/*_independent_p27cd68*"
+  ],
+  "prohibited_paths": [
+    "src/**",
+    "omp_bridge/**",
+    "docs/**",
+    ".workflow/**"
+  ],
+  "rules": "No real provider/model requests (fake local provider allowed); never read credential contents or other processes' environ; temp only under /tmp; kill only PIDs you started; never touch ~/wb-urux-sandbox or user processes; no commits; no graphify update.",
+  "result_format": "checks table first (counts, real exit codes), hash check, verdict, changed test paths + sha256. Korean, <=12 lines."
+}

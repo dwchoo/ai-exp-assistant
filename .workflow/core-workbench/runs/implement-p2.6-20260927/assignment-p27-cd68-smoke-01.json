@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cd68-smoke-01",
+  "ticket_id": "CW-18 C-D68 real-model smoke",
+  "role": "test_designer",
+  "unit": "V-CW-18-smoke",
+  "approved_bundle_digest": "be5579d83f63b95c8a481adb71fc7927bba400ed471784587ea944cd3cd5fcfc",
+  "candidate_commit": "fc62bdd",
+  "routing": {
+    "planned_role": "test_designer",
+    "selected_role": "test_designer (Opus general-purpose)",
+    "reason_codes": [
+      "live_real_model",
+      "authority_boundary"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/integration-p27-cd68.json",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/assignment-p27-cw18-smoke-05.json",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-smoke-05.md"
+    ]
+  },
+  "user_authorization": "User 2026-10-05: '재실행 끝나면 커밋하고 smoke 돌려줘'. Cap 40 requests / 25 min. No commits authorized for this invocation.",
+  "goal": "One end-to-end real-model smoke of C-D68 through the real product entrypoint; record Workbench behaviour, not model quality.",
+  "setup": [
+    "NEW temp data dir under /tmp and a temp project dir (tiny git repo) — never ~/wb-urux-sandbox. Start like smoke-05 (`python -m workbench start --data-dir <tmp> --no-attach` from the project dir) so the Workbench OMP home is created with the agent.db symlink (metadata only; never read it). Record the start isolation-check result for both roles (ok/leaks/warnings; this also checks the new worker leak rule against real get_state dumpTools).",
+    "Drive via a ui_v1 client as smoke-05 did; attach the real product UI in a PTY at least once for text screenshots of status lines."
+  ],
+  "scenario": [
+    "1. Manager prompt (free-work Task): ask it to have the worker check this machine's hardware specs in the terminal (e.g. lscpu/free -h/nproc/df -h) and summarize. Observe: worker uses `terminal` (never OMP bash/eval — verify from worker session jsonl tool calls), command visible in the host terminal pane, runs in the shell's current cwd, exit/result returned, to_manager report reaches the manager, Task closes, worker idle, shell returned to the user.",
+    "2. Manager prompt (free-work Task): have the worker run `for i in $(seq 1 15); do echo tick $i; sleep 10; done; echo DONE` (~150 s) in the terminal and report when finished. Observe: first wait ends ~120 s with status running, worker ends its turn (no re-wait loop), at least one terminal_check ~60 s later (if the command is still running), terminal_done completion notice after exit, worker reports DONE to the manager.",
+    "3. Record models actually used per OMP from the session jsonl/state (manager gpt-6.1-sol high; worker gpt-6-luna max; service tier if observable) — metadata only.",
+    "4. If a step fails, do not retry more than once; record the journal/notice records and classify product defect vs model behaviour."
+  ],
+  "limits": [
+    "Hard cap 40 provider requests total (count assistant messages in the temp home session jsonl, poll >=1/s, pause at the cap); wall clock 25 min. At a cap: pause automation, shut down (verified), report.",
+    "Never touch ~/wb-urux-sandbox or the user's running Workbench/OMP processes; kill only PIDs you started; never read credential contents or other processes' environ; never print tokens; no commits; no graphify update; remove temp dirs afterwards (keep short logs/timeline under the run dir without secrets)."
+  ],
+  "result_format": "Write .workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd68-smoke-01.md (Korean): timeline with timestamps, provider request count per OMP, isolation result, models observed, what worked / what did not (product defect vs model behaviour), text screenshots, residue. Reply in Korean <=20 lines."
+}

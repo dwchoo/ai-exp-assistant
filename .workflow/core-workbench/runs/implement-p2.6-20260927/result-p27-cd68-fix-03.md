@@ -1,0 +1,12 @@
+# p27-cd68-fix-03 result (worker_senior, Opus, reused cd68-terminal2) — 2026-10-05
+
+All items fixed:
+- C-D68 (9): timeout_seconds removed from schema/description/backend/skill; wait fixed 120 s; sending it -> invalid_arguments; command=null fetch kept.
+- Smoke P1: child runs `<shell> -c 'printf …; exec "$0" -c "$1"' <shell> <command>` -> pane shows `[worker] $ <command>` first; execution identical to `<shell> -c <command>` (same PID, $0, no args, same exit code); nothing typed into the parent shell (no history); the line is excluded from output_tail/log/check.
+- Smoke P2: ui_v1 host_shell pane `operated_by: "worker"` from command start to shell return; status line and pane title show `owner: worker`; input_owner and experiment display unchanged.
+- M2: queued detail -> "Accepted by Workbench; it is delivered to the other OMP once … Do not send it again" (+ skill).
+- M3: running result + skill: "End your turn now. Do not send progress reports … unless the user or the manager asks or a check shows a problem".
+- review-02 P3: (1) UI text "worker 명령 실행 중 (끝나면 시작)" without the jobs note; (2) empty log removed on abort before submit; (3) bridge `peer_gone` clears waiters of a lost session so checks resume.
+Checks: red (old code waited 120 s -> timeout 124 / ui 2 fail / bridge py 1 error / node 2 fail) -> green: flow_terminal*+skills 85 x3, backend flow*/automation*/task_flow/launcher*/handoff* OK, ui model+p27w OK, contracts OK, bridge py OK, live_omp_tools_independent_p27cd68 OK; node 63 pass / 1 fail and p27cd68 independent py 19 fail + 4 error — all pinned to the old timeout contract.
+Independent tests needing update: test_terminal_independent_p27cd68.py (22 send timeout_seconds; test_timeouts_default_120_max_1800), test_manager_rule_independent_p27cd68.py::test_to_manager_skill_sends_every_command_through_terminal ("1800"), bridge_terminal_independent_p27cd68.test.ts (C-D68 (7) wait 120/1800 schema), live_omp_tools_independent_p27cd68.py:335,343 (passes; carries timeout_seconds).
+Changed: flow_terminal.py ad0fbc645397, flow.py 6fe3247d43dc, service.py b2e6afd9b9d0, mailbox.py de6af4350a36, ui_v1.py bc822b47be15, ui/product/model.py 212143ec0101, bridge.ts 4384a7781dc8, to-manager/SKILL.md 3323e6c4a3ae, test_flow_terminal.py 3687c158c6dd, test_flow_terminal_notices.py 9752fa6d109a, test_workbench_skills.py 480deeba8c22, test_product_model.py fdaae6d2dde9, handoff_tools.test.ts b0c4d242b455, test_tool_request_bridge.py 8cb58dd2e801.

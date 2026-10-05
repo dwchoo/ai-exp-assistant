@@ -1,0 +1,6 @@
+# p27-cd68-test-03 result (wb-test-rerun) — 2026-10-05 — candidate_ready
+
+Frozen candidate 550128e6 (src/omp_bridge hashes identical start/end). All first-run green: backend 746 OK (skip 30, xfail 1); bridge py 52 OK; bridge node 27 pass; ui 743 OK; workflow 56 OK; contracts 52 OK; terminal 108 OK (skip 2); g3_omp node 37 pass; live_omp_tools_independent_p27cd68 13 OK.
+C-D68 (9) updates: pinned timeout_seconds/1800 tests moved to fixed 120 s (timeout_seconds -> invalid_arguments), each citing C-D68 (9); no other assertion weakened.
+New fix-03 independent tests (10, 6 behaviours): echo line excluded from tail/log/check/notice with exit/signal semantics kept; operated_by worker only during worker commands (null for experiments), UI owner: worker; queued "Do not send it again"; running "End your turn"; no empty log on abort before submit; peer_gone cleanup resumes checks. Three test-assumption errors fixed in tests (supervisor parent PID, history grep self-match, missing sleep before check). Red run on pre-fix code not done (old code blocks 120 s).
+Changed: test_terminal_independent_p27cd68.py e65be137c2a4, test_manager_rule_independent_p27cd68.py 5467f7d6315e, live_omp_tools_independent_p27cd68.py d54d4d0734c0, bridge_terminal_independent_p27cd68.test.ts 9d5a290a19ce, new test_terminal_fix03_independent_p27cd68.py 668ec3079737.

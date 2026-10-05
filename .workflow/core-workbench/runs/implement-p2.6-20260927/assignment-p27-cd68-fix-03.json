@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cd68-fix-03",
+  "ticket_id": "CW-18 C-D68 (9) + smoke-01 fixes + review-02 polish",
+  "role": "worker_senior",
+  "unit": "V-CW-18-cd68-terminal",
+  "approved_bundle_digest": "e6ab604db157e8b09f7e43db52b08b779d85c483f5e41aef1096f603b2557d8a",
+  "routing": {
+    "planned_role": "worker_senior",
+    "selected_role": "worker_senior (Opus, reused cd68-terminal2)",
+    "reason_codes": [
+      "workflow_liveness"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd68-smoke-01.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd68-smoke-01-timeline.json",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd68-review-02.md"
+    ]
+  },
+  "required_behavior": [
+    "C-D68 (9): remove the worker-supplied timeout_seconds from the `terminal` tool (schema, description, backend, skill); first wait is fixed at 120 s. Keep command=null result fetch.",
+    "Smoke P1: the host terminal pane must show the command text being run (e.g. a visible '$ <command>' line before its output, without typing anything extra into the user's parent shell history if avoidable; secrets: command text is the worker's own; never print env values). Explain where it is printed and how it looks.",
+    "Smoke P2: while a worker terminal command runs, the host terminal owner/status shown in ui_v1 state and the product UI is `worker` (not `manager`); experiment runs keep their current display.",
+    "Smoke M2: after a to_manager done/blocked report, the result text must make clear it was accepted/queued and must not be resent (remove/replace the 'not yet processed' wording that the model read as unprocessed); the duplicate should be harmless anyway.",
+    "Smoke M3: after `terminal` returns running, the tool result/skill must say clearly: end your turn now; do not send progress reports unless the user/manager asks or a check shows a problem.",
+    "review-02 P3: (1) ui/product/model.py shows a readable text for host_terminal_busy:worker_terminal_command (+ the job-held note logic stays correct); (2) no empty .log left when aborted before submit; (3) a dead waiter after worker disconnect must not suppress terminal_check (drop the waiter on undelivered/disconnect).",
+    "Tests red->green for each item."
+  ],
+  "acceptance": [
+    "test_flow_terminal*, backend flow*/automation*/launcher*/skills, ui tests touched, node handoff_tools + g3_omp, tests/bridge py, the p27cd68 independent tests (real exit codes; if an independent test pins timeout_seconds or old wording, report it — do not edit *_independent*)"
+  ],
+  "allowed_write_paths": [
+    "src/workbench/backend/flow_terminal.py",
+    "src/workbench/backend/flow.py",
+    "src/workbench/backend/flow_tasks.py",
+    "src/workbench/backend/service.py",
+    "src/workbench/contracts/ui_v1.py",
+    "src/workbench/ui/product/**",
+    "src/workbench/terminal/shell_persistent/adapter.py",
+    "src/workbench/ipc/bridge_g3/mailbox.py",
+    "omp_bridge/g3/bridge.ts",
+    "omp_bridge/skills/**",
+    "tests/backend/test_flow_terminal*.py",
+    "tests/backend/test_workbench_skills.py",
+    "tests/ui/test_*.py",
+    "tests/bridge/handoff_tools.test.ts",
+    "tests/bridge/test_tool_request_bridge.py",
+    "tests/contracts/test_ui_v1*.py"
+  ],
+  "prohibited_paths": [
+    "tests/**/*_independent*",
+    "docs/**",
+    ".workflow/**"
+  ],
+  "rules": "No real provider requests; never read credential contents or other processes' environ; temp only under /tmp; kill only PIDs you started; never touch ~/wb-urux-sandbox or user processes; no commits; no graphify update.",
+  "result_format": "checks table first (real exit codes), status per item, changed paths + sha256, independent tests that need updating, residue. Korean, <=14 lines."
+}
