@@ -148,6 +148,44 @@ class ResultDocumentationTests(unittest.TestCase):
         self.assertRegex(text, r"(?i)wait for (it|the task)")
 
 
+class SmokeCorrectionSkillTests(unittest.TestCase):
+    """CW-18 smoke D1-D3 (p27-cw18-smoke-fix-01): null for unused fields, repo-relative paths, end the turn."""
+
+    def test_to_worker_says_end_the_turn_and_never_wait_or_poll(self):
+        text = body("to-worker")
+        self.assertRegex(text, r"(?i)end your turn")
+        self.assertRegex(text, r"(?i)arrives as a new message")
+        self.assertRegex(text, r"(?i)never (use|call) the `wait` tool")
+        self.assertRegex(text, r"(?i)(do not|never) poll")
+        results = section(text, "Results")
+        self.assertRegex(results, r"(?i)`dispatched`[^\n]*end your turn")
+        self.assertRegex(results, r"(?i)`queued`[^\n]*end your turn")
+
+    def test_to_worker_says_paths_are_repo_relative_and_unused_fields_null(self):
+        text = body("to-worker")
+        self.assertRegex(text, r"(?i)repo-relative")
+        self.assertRegex(text, r"(?i)null")
+        self.assertRegex(text, r"(?i)`spec\.execution`[^\n]*null[^\n]*work")
+        self.assertNotRegex(text, r"(?i)wait for the report\.")
+
+    def test_to_manager_says_end_the_turn_after_done_or_blocked_and_null_fields(self):
+        text = body("to-manager")
+        self.assertRegex(text, r"(?i)after (a )?`done` or `blocked`[^\n]*end your turn")
+        self.assertRegex(text, r"(?i)null")
+        self.assertRegex(text, r"(?i)`request`[^\n]*null")
+        self.assertRegex(text, r"(?i)`requires_code_change`[^\n]*null")
+
+    def test_bridge_descriptions_match_the_skills(self):
+        self.assertRegex(BRIDGE, r"end your turn")
+        self.assertRegex(BRIDGE, r"null when not used")
+
+    def test_skills_stay_about_one_page(self):
+        for name in ("to-worker", "to-manager"):
+            text = body(name)
+            self.assertLess(len(text.splitlines()), 70, name)
+            self.assertLess(len(text), 9000, name)
+
+
 class RoleFilterTests(unittest.TestCase):
     def test_role_patterns(self):
         self.assertEqual(launcher.ROLE_SKILL_PATTERNS["manager"], ("to-worker",))

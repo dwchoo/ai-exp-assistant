@@ -3515,6 +3515,27 @@ class TaskWorkerStatusTests(unittest.TestCase):
         self.assertGreater(line.count("prefix t,c"), 1, line)
         self.assertNotIn("wb-handoff", self.render(base).status_lines()[1], "no jobs reported: no hint")
 
+    def test_task_that_never_ran_shows_start_failure_not_report_done(self):
+        # CW-18 smoke-02 E4: a finished experiment whose run failed to start was shown as "보고 완료".
+        cases = (
+            ({"status": "finished", "held_reason": "start_failed:WorkflowHeld",
+              "last_result": {"outcome": "start_failed", "error": "WorkflowHeld"}}, "[시작 실패 · WorkflowHeld]"),
+            ({"status": "finished", "held_reason": "start_failed:host_terminal_busy",
+              "last_result": {"outcome": "start_failed", "error": "host_terminal_busy"}},
+             "[시작 실패 · host terminal 사용 중]"),
+            ({"status": "finished", "held_reason": "runner_error:OSError",
+              "last_result": {"outcome": "not_started", "reason": "runner_error:OSError"}},
+             "[시작 실패 · runner_error:OSError]"),
+        )
+        for task, expected in cases:
+            with self.subTest(task=task):
+                line = self.render(task_state(task={"kind": "experiment", "summary": "run exp", **task})).status_lines()[1]
+                self.assertIn(expected, line)
+                self.assertNotIn("보고 완료", line)
+        done = self.render(task_state(task={"kind": "experiment", "status": "finished", "summary": "run exp",
+                                            "last_result": {"outcome": "reported"}})).status_lines()[1]
+        self.assertIn("[보고 완료]", done, "a run that reported keeps its label")
+
     def test_closed_task_shows_its_reason(self):
         for reason, text in (("done", "완료"), ("cancelled", "취소됨"), ("superseded_by_new_task", "새 작업으로 대체"),
                              ("mystery", "mystery")):

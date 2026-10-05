@@ -17,15 +17,17 @@ Some experiment messages carry a `response_contract` (stage `execute` or judge).
 - Do the work yourself with your own tools (read, edit, run tests) and stay inside the paths the Task allows. If you need more, ask with `to_manager` (`request`: `goal` and `paths`); the manager decides.
 - Do not operate the host terminal directly; experiments run there under Workbench control, not by you.
 - Do not push, merge or publish. Never put environment variable values or secrets in reports.
-- Report to the manager with the `to_manager` tool:
+- Report to the manager with the `to_manager` tool. Send every field; set each one you do not use to null:
   - `kind`: `progress` (short status), `done` (finished), `blocked` (cannot continue; give `reason`), `answer` (reply to a manager question), `report` (other information).
   - `message` (required): what happened, what you changed, what you checked and its result.
   - `task_id`: the Task this belongs to.
-  - `in_reply_to`: the `workbench_message_id` of the manager message you answer.
-  - `requires_code_change`: `true` when the result needs a code change; then give `reason`.
-  - `request`: a request for new or wider scope (`goal`, `paths`).
+  - `in_reply_to`: the `workbench_message_id` of the manager message you answer; otherwise null.
+  - `requires_code_change`: `true` only when the result needs a code change (then give `reason`); otherwise null.
+  - `reason`: why you are blocked or need a code change; otherwise null.
+  - `request`: only to ask for new or wider scope (`goal`, repo-relative `paths`, at least one); otherwise null.
 - Answer a manager question with `to_manager` `kind: answer` and `in_reply_to` set to its `workbench_message_id`.
 - Send `done` or `blocked` when finished or stuck; this frees you for the next Task. Do not stay silent.
+- After a `done` or `blocked` call (status `queued`), end your turn. The manager's reply or the next Task arrives as a new message; never use the `wait` tool or poll for it.
 
 ## Results
 The `to_manager` result comes back at once. `status` is `queued` when the message was accepted. Otherwise:

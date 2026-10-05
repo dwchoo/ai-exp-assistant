@@ -13,6 +13,11 @@ for the other OMP. Its contract:
 - Journal: every request and result goes to ``workflow/handoffs.jsonl``
   (0600, fsync per record). Arguments carrying an environment variable value
   are rejected and journaled only as field names.
+- Strict schemas (CW-18 smoke D1): a provider with strict tool schemas makes the
+  model send every field; ``normalize_arguments`` drops optional fields that are
+  null, blank, an empty list/object or ``false`` for a flag before validation,
+  so the policy and the journal see only what was meant. A rejection's
+  ``errors`` name the field and the expected value, never the value sent.
 - Pause: while paused every request is ``held:paused``; nothing is queued and
   nothing is sent after resume (the manager decides again). A queued message
   that reaches the lane while paused is dropped (``held_paused``), except one
@@ -56,7 +61,7 @@ is never shown to the user); U3 supplies the real pause source.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from datetime import datetime, timezone
 import inspect
 import json
@@ -267,83 +272,192 @@ def _paths(value: object) -> bool:
             and all(_text(item, SHORT_MAX) for item in value))
 
 
+_FLAG_KEYS = frozenset({"run", "cancel", "requires_code_change"})  # false means "not used"
+EXECUTION_SHAPE = ("{source, commit, command, criteria: {log_contains, result_file, result_contains}, "
+                   "environment: [variable NAMES], shell: bash|sh}")
+# Smoke-02 E2: the CW-10 judge uses all three (success = exit 0, log_contains in the raw log, result_file
+# written by this run and non-empty, result_contains in it), so none of them is optional.
+CRITERIA_RULE = ("spec.execution.criteria: all three are required and non-empty: log_contains (text the command "
+                 "prints to its output, the raw log), result_file (repo-relative path of a file the command writes "
+                 "during this run; a file the run does not write, such as the script itself, makes the result "
+                 "indeterminate) and result_contains (text that file must contain); do not invent a condition the "
+                 "user did not ask for: ask the user, or make the command write a result file")
+PATHS_RULE = (f"a list (at most {LIST_MAX}) of repo-relative path strings such as \"src/app/\" or "
+              "\"work/hello.txt\"")
+
+
+def _blank(value: object) -> bool:
+    """A strict-schema placeholder: null, a blank string, or an empty (or all-blank) list/object."""
+    if value is None:
+        return True
+    if isinstance(value, str):
+        return not value.strip()
+    if isinstance(value, (list, tuple)):
+        return all(_blank(item) for item in value)
+    if isinstance(value, dict):
+        return all(_blank(item) for item in value.values())
+    return False
+
+
+def _blank_execution(value: object) -> bool:
+    """An execution placeholder: every field blank (``shell`` is an enum, so it never is)."""
+    return _blank(value) or (isinstance(value, dict) and all(
+        _blank(item) for name, item in value.items() if name != "shell"))
+
+
+def _absent(name: str, value: object) -> bool:
+    return _blank(value) or (name in _FLAG_KEYS and value is False)
+
+
+def normalize_arguments(tool: str, args: object) -> object:
+    """Drop optional fields a strict-schema model filled with placeholders (D1).
+
+    Optional fields that are null, blank, an empty list/object, or ``false`` for a flag are ABSENT. A spec whose
+    fields are all blank is absent; inside a spec a blank ``instructions`` and a clearly empty ``execution`` are
+    absent, ``paths`` loses blank items (null means none). A ``request`` without any path is no scope request.
+    Required fields (``kind``, ``message``) and unknown keys are kept as sent, so validation still names them.
+    """
+    if not isinstance(args, dict):
+        return args
+    optional = (_TO_WORKER_KEYS if tool == "to_worker" else _TO_MANAGER_KEYS) - {"kind", "message"}
+    result: dict[str, Any] = {}
+    for name, value in args.items():
+        if name in optional and _absent(name, value):
+            continue
+        if tool == "to_worker" and name == "spec" and isinstance(value, dict):
+            value = _normalize_spec(value)
+            if value is None:
+                continue
+        if tool == "to_manager" and name == "request" and isinstance(value, dict):
+            value = _normalize_request(value)
+            if value is None:
+                continue
+        result[name] = value
+    return result
+
+
+def _clean_paths(value: object) -> object:
+    if value is None:
+        return []
+    if isinstance(value, list):
+        return [item for item in value if not (item is None or isinstance(item, str) and not item.strip())]
+    return value
+
+
+def _normalize_spec(spec: dict[str, Any]) -> dict[str, Any] | None:
+    if all(_blank_execution(item) if name == "execution" else _blank(item) for name, item in spec.items()):
+        return None
+    result: dict[str, Any] = {}
+    for name, value in spec.items():
+        if name == "instructions" and _blank(value):
+            continue
+        if name == "execution" and _blank_execution(value):
+            continue
+        if name == "goal" and value is None:
+            continue
+        result[name] = _clean_paths(value) if name == "paths" else value
+    return result
+
+
+def _normalize_request(request: dict[str, Any]) -> dict[str, Any] | None:
+    if "paths" not in request or not set(request) <= {"goal", "paths"}:
+        return request  # a malformed request is named by validation
+    paths = _clean_paths(request["paths"])
+    if isinstance(paths, list) and not paths:
+        return None  # a scope request needs at least one path; the message carries any text
+    return {**request, "paths": paths}
+
+
 def _check_execution(execution: object, errors: list[str]) -> None:
     if not isinstance(execution, dict) or set(execution) != _EXECUTION_KEYS:
-        errors.append("spec.execution: needs exactly source, commit, command, criteria, environment, shell")
+        errors.append(f"spec.execution: must be an object with exactly {EXECUTION_SHAPE}")
         return
     for name in ("source", "commit"):
         if not _text(execution[name], SHORT_MAX):
-            errors.append(f"spec.execution.{name}: must be a non-empty string")
+            errors.append(f"spec.execution.{name}: must be a non-empty string (at most {SHORT_MAX} characters)")
     command = execution["command"]
     if not (_text(command) or isinstance(command, list) and 0 < len(command) <= LIST_MAX
             and all(_text(item) for item in command)):
-        errors.append("spec.execution.command: must be shell text or a non-empty argv list")
+        errors.append("spec.execution.command: must be shell text or a non-empty argv list of strings")
     criteria = execution["criteria"]
     if (not isinstance(criteria, dict) or set(criteria) != _CRITERIA_KEYS
             or not all(_text(criteria[name], SHORT_MAX) for name in _CRITERIA_KEYS)):
-        errors.append("spec.execution.criteria: needs non-empty log_contains, result_file, result_contains")
+        errors.append(CRITERIA_RULE)
     environment = execution["environment"]
     if (not isinstance(environment, list) or len(environment) > LIST_MAX
             or not all(isinstance(name, str) and len(name) <= 128 and ENV_NAME.fullmatch(name)
                        for name in environment)
             or len(set(environment)) != len(environment)):
-        errors.append("spec.execution.environment: must be a list of unique variable names (never values)")
+        errors.append("spec.execution.environment: must be a list of unique variable names (never values), "
+                      "[] when none")
     if execution["shell"] not in ("bash", "sh"):
         errors.append("spec.execution.shell: must be bash or sh")
 
 
 def validate_arguments(tool: str, args: object) -> list[str]:
-    """Schema errors (field paths and rules only, never the values)."""
+    """Schema errors (field paths, rules and the expected value; never the values sent).
+
+    The arguments are normalised first (``normalize_arguments``): placeholders of unused fields are absent.
+    """
+    args = normalize_arguments(tool, args)
     if not isinstance(args, dict):
         return ["arguments: must be an object"]
     errors: list[str] = []
     allowed = _TO_WORKER_KEYS if tool == "to_worker" else _TO_MANAGER_KEYS
-    errors += [f"{name}: unknown argument" for name in sorted(set(args) - allowed)]
+    errors += [f"{name}: unknown argument (allowed: {', '.join(sorted(allowed))})"
+               for name in sorted(set(args) - allowed)]
     kinds = TO_WORKER_KINDS if tool == "to_worker" else TO_MANAGER_KINDS
     if args.get("kind") not in kinds:
         errors.append(f"kind: must be one of {', '.join(kinds)}")
     if not _text(args.get("message")):
         errors.append(f"message: must be a non-empty string of at most {MESSAGE_MAX} characters")
     if "task_id" in args and not _is_uuid(args["task_id"]):
-        errors.append("task_id: must be a canonical UUID")
+        errors.append("task_id: must be the canonical UUID of the active Task from a to_worker result, "
+                      "or null for a new Task" if tool == "to_worker"
+                      else "task_id: must be the canonical UUID of your active Task, or null")
     if tool == "to_worker":
         if "run" in args and not isinstance(args["run"], bool):
-            errors.append("run: must be a boolean")
+            errors.append("run: must be true (re-run the experiment), false or null")
         if "cancel" in args:
             if not isinstance(args["cancel"], bool):
-                errors.append("cancel: must be a boolean")
+                errors.append("cancel: must be true (cancel the Task), false or null")
             elif args["cancel"] and ("spec" in args or args.get("run") is True):
-                errors.append("cancel: takes no spec or run")
+                errors.append("cancel: with cancel true, spec and run must be null")
         if "spec" in args:
             spec = args["spec"]
             if not isinstance(spec, dict):
-                errors.append("spec: must be an object")
+                errors.append("spec: must be an object {goal, paths, instructions, execution}, or null for a "
+                              "follow-up")
             else:
-                errors += [f"spec.{name}: unknown field" for name in sorted(set(spec) - _SPEC_KEYS)]
+                errors += [f"spec.{name}: unknown field (allowed: goal, paths, instructions, execution)"
+                           for name in sorted(set(spec) - _SPEC_KEYS)]
                 if not _text(spec.get("goal")):
-                    errors.append("spec.goal: must be a non-empty string")
+                    errors.append(f"spec.goal: must be a non-empty string (at most {MESSAGE_MAX} characters)")
                 if not _paths(spec.get("paths")):
-                    errors.append("spec.paths: must be a list of non-empty path strings")
+                    errors.append(f"spec.paths: must be {PATHS_RULE}; [] when the worker changes nothing")
                 if "instructions" in spec and not _text(spec["instructions"]):
-                    errors.append("spec.instructions: must be a non-empty string")
+                    errors.append("spec.instructions: must be a non-empty string, or null")
                 if "execution" in spec:
                     if args.get("kind") != "experiment":
-                        errors.append("spec.execution: only an experiment Task has an execution")
-                    _check_execution(spec["execution"], errors)
+                        errors.append("spec.execution: must be null for kind work (only an experiment Task has "
+                                      "an execution); send spec.execution: null, or kind experiment to run it")
+                    else:
+                        _check_execution(spec["execution"], errors)
                 elif args.get("kind") == "experiment":
-                    errors.append("spec.execution: an experiment Task needs an execution")
+                    errors.append(f"spec.execution: kind experiment needs an execution object {EXECUTION_SHAPE}")
     else:
         if "in_reply_to" in args and not _is_uuid(args["in_reply_to"]):
-            errors.append("in_reply_to: must be a canonical UUID")
+            errors.append("in_reply_to: must be the workbench_message_id (UUID) of the manager message you "
+                          "answer, or null")
         if "requires_code_change" in args and not isinstance(args["requires_code_change"], bool):
-            errors.append("requires_code_change: must be a boolean")
+            errors.append("requires_code_change: must be true, false or null")
         if "reason" in args and not _text(args["reason"]):
-            errors.append("reason: must be a non-empty string")
+            errors.append("reason: must be a non-empty string, or null")
         if "request" in args:
             request = args["request"]
             if (not isinstance(request, dict) or set(request) != {"goal", "paths"}
                     or not _text(request.get("goal")) or not _paths(request.get("paths"))):
-                errors.append("request: needs exactly goal and paths")
+                errors.append(f"request: must be null, or exactly {{goal: non-empty string, paths: {PATHS_RULE}}}")
     return errors
 
 
@@ -640,6 +754,8 @@ class HandoffService:
         if isinstance(parsed, dict):
             self._journal.append({"type": "invalid", "reason": parsed["reason"]})
             return parsed
+        # D1: the policy and the journal see the arguments without strict-schema placeholders.
+        parsed = replace(parsed, args=normalize_arguments(parsed.tool, parsed.args))
         with self._lock:
             key = parsed.key
             if key in self._results:

@@ -16,6 +16,10 @@ and the owner of the single active Task:
   the first keystroke the shell is checked idle again and held (if the user
   started a line meanwhile nothing is typed and the start fails as
   ``start_failed:host_terminal_busy``).
+- Paths (CW-18 smoke D2): Task paths are repo-relative. With ``project_dir`` an
+  absolute path inside the project becomes relative to it; the project root, a
+  path outside it or any other invalid path is ``rejected:invalid_paths`` with
+  ``errors`` naming ``spec.paths[i]`` and the expected form.
 - One Task at a time: while a Task is active (dispatched, starting, running,
   held, waiting for the worker's report, cancelling) a new ``to_worker``
   answers ``worker_busy`` with ``{task_id, kind, summary, status, since}``.
@@ -94,6 +98,8 @@ INACTIVE_STATUSES = ("finished", "blocked", "closed")
 BUSY_DETAIL = ("The worker does one task at a time and is busy with this Task. Wait for its to_manager "
                "report (done/blocked), send a follow-up with this task_id, or cancel it with "
                "{task_id, cancel: true}.")
+UNKNOWN_TASK_DETAIL = ("task_id: no such Task. For a follow-up, cancel or re-run use the task_id from your "
+                       "dispatched result; for a new Task send task_id null.")
 TASK_NOT_DELIVERED_DETAIL = ("The active Task's instruction has not reached you yet; a report without task_id "
                              "cannot belong to it. Finish the turn; the Task's TASK message follows.")
 # R1: how long a to_worker (to_manager) waits for a report (TASK) the lane is submitting right now.
@@ -123,6 +129,60 @@ def _valid_paths(paths: list[str]) -> bool:
     except ValueError:
         return False
     return True
+
+
+RELATIVE_RULE = ("use a repo-relative path (relative to the project root, without '.', '..', empty segments or "
+                 "backslashes), such as src/app/ or work/hello.txt")
+
+
+def repo_relative_paths(paths: list[str], project_dir: str | Path | None,
+                        field_name: str = "spec.paths") -> tuple[list[str], list[str]]:
+    """(normalised paths, errors) for Task paths (D2).
+
+    A leading ``./`` is dropped; an absolute path inside ``project_dir`` becomes relative to it (a trailing
+    ``/`` is kept); the project root itself, a path outside it, or any other invalid path is an error naming
+    ``field_name[index]`` and the expected form (never the value).
+    """
+    roots: list[str] = []
+    if project_dir is not None:
+        for root in (os.path.normpath(os.path.abspath(project_dir)), os.path.realpath(project_dir)):
+            if root not in roots:
+                roots.append(root)
+    result: list[str] = []
+    errors: list[str] = []
+    for index, path in enumerate(paths):
+        where = f"{field_name}[{index}]"
+        directory = path.endswith("/")
+        if path.startswith("/"):
+            if not roots:
+                errors.append(f"{where}: absolute paths are not accepted; {RELATIVE_RULE}")
+                continue
+            relative = None
+            for candidate in dict.fromkeys((os.path.normpath(path), os.path.realpath(path))):
+                for root in roots:
+                    if candidate == root:
+                        relative = ""
+                        break
+                    if os.path.commonpath([candidate, root]) == root:
+                        relative = os.path.relpath(candidate, root)
+                        break
+                if relative is not None:
+                    break
+            if relative is None:
+                errors.append(f"{where}: absolute path outside the project directory; {RELATIVE_RULE}")
+                continue
+            if relative == "":
+                errors.append(f"{where}: is the project root itself; list the repo-relative files or directories "
+                              "the worker may change (e.g. src/)")
+                continue
+            path = relative + ("/" if directory else "")
+        while path.startswith("./"):
+            path = path[2:]
+        if not _valid_paths([path]):
+            errors.append(f"{where}: invalid path; {RELATIVE_RULE}")
+            continue
+        result.append(path)
+    return result, errors
 
 
 # -- state ------------------------------------------------------------------------
@@ -194,8 +254,10 @@ class TaskFlow:
                  handoffs: Any, omp_idle: Callable[[ActorRole], bool | None],
                  paused: Callable[[], bool] = lambda: False,
                  experiment: ExperimentPorts | None = None, lifecycle: Any | None = None,
-                 poll_interval: float = 0.5, collect_slice: float = 1.0):
+                 poll_interval: float = 0.5, collect_slice: float = 1.0,
+                 project_dir: str | Path | None = None):
         self._repository_factory = repository_factory
+        self._project_dir = project_dir  # D2: absolute Task paths inside it become repo-relative
         self._handoffs = handoffs
         self._omp_idle = omp_idle
         self._paused = paused
@@ -380,16 +442,22 @@ class TaskFlow:
         self.notices.append(notice)
         self._record({"type": "notice", "notice": notice})
 
-    @staticmethod
-    def _spec_document(args: Mapping[str, Any]) -> dict[str, Any]:
+    def _spec_document(self, args: Mapping[str, Any]) -> tuple[dict[str, Any], list[str]]:
+        """(the Task spec document, path errors); paths are repo-relative (D2)."""
         spec = dict(args["spec"])
-        document: dict[str, Any] = {"kind": args["kind"], "goal": spec["goal"], "paths": list(spec["paths"])}
+        paths, errors = repo_relative_paths(list(spec["paths"]), self._project_dir)
+        document: dict[str, Any] = {"kind": args["kind"], "goal": spec["goal"], "paths": paths}
         if "instructions" in spec:
             document["instructions"] = spec["instructions"]
         if "execution" in spec:
             document["execution"] = dict(spec["execution"])
         document["source"] = "manager_to_worker"
-        return document
+        return document, errors
+
+    @staticmethod
+    def _invalid_paths(errors: list[str]) -> HandoffDecision:
+        return HandoffDecision(rejected("invalid_paths", errors=errors,
+                                        detail="nothing was dispatched; fix spec.paths and send again"))
 
     @staticmethod
     def _worker_busy(task: FlowTask, **extra: Any) -> HandoffDecision:
@@ -433,10 +501,12 @@ class TaskFlow:
             if active is not None and active.busy():
                 return self._worker_busy(active)
             if "spec" not in args:
-                return HandoffDecision(rejected("spec_required"))
-            spec = self._spec_document(args)
-            if not _valid_paths(spec["paths"]):
-                return HandoffDecision(rejected("invalid_paths"))
+                return HandoffDecision(rejected("spec_required", errors=[
+                    "spec: a new Task (task_id null) needs spec {goal, paths, instructions, execution}; "
+                    "for a follow-up give the active Task's task_id"]))
+            spec, path_errors = self._spec_document(args)
+            if path_errors:
+                return self._invalid_paths(path_errors)
             if active is not None:  # a finished or blocked Task is ended by a new Task
                 self._end_inactive(active, "superseded_by_new_task")
             with self._repository() as repository:
@@ -451,7 +521,7 @@ class TaskFlow:
                                               "(C-D66); it reports back with to_manager"})
         task = self.tasks.get(task_id)
         if task is None:
-            return HandoffDecision(rejected("unknown_task"))
+            return HandoffDecision(rejected("unknown_task", detail=UNKNOWN_TASK_DETAIL))
         if task.status == "closed":
             return HandoffDecision(rejected("task_closed") | {"closed_reason": task.closed_reason})
         if active is not task:  # only the latest Task is open; kept for safety
@@ -459,9 +529,11 @@ class TaskFlow:
                 else HandoffDecision(rejected("task_closed"))
         if args["kind"] != task.kind:
             return HandoffDecision(rejected("task_kind_mismatch") | {"task_kind": task.kind})
-        spec = self._spec_document(args) if "spec" in args else None
-        if spec is not None and not _valid_paths(spec["paths"]):
-            return HandoffDecision(rejected("invalid_paths"))
+        spec = None
+        if "spec" in args:
+            spec, path_errors = self._spec_document(args)
+            if path_errors:
+                return self._invalid_paths(path_errors)
         if task.kind == "experiment":
             return self._experiment_follow_up(task, request, spec)
         return self._work_follow_up(task, request, spec)
@@ -517,10 +589,11 @@ class TaskFlow:
     def _cancel(self, request: HandoffRequest) -> HandoffDecision:
         task_id = request.args.get("task_id")
         if task_id is None:
-            return HandoffDecision(rejected("task_id_required"))
+            return HandoffDecision(rejected("task_id_required", detail="task_id: cancel true needs the task_id of "
+                                                                       "the Task to cancel"))
         task = self.tasks.get(task_id)
         if task is None:
-            return HandoffDecision(rejected("unknown_task"))
+            return HandoffDecision(rejected("unknown_task", detail=UNKNOWN_TASK_DETAIL))
         if task.status == "closed":
             return HandoffDecision(rejected("task_closed") | {"closed_reason": task.closed_reason})
         record = {"by": "manager", "message": request.args["message"][:SUMMARY_MAX], "at": _now(),
@@ -612,11 +685,17 @@ class TaskFlow:
             if name in args:
                 payload[name] = args[name]
         if "request" in args:  # a worker's own request: classified only, never dispatched
+            request_paths, path_errors = repo_relative_paths(list(args["request"]["paths"]), self._project_dir,
+                                                             "request.paths")
             try:
-                category = classify_worker_request(args["request"], list(task.spec.get("paths") or []))
+                if path_errors:
+                    raise ValueError(path_errors[0])
+                category = classify_worker_request({**args["request"], "paths": request_paths},
+                                                   list(task.spec.get("paths") or []))
             except ValueError:
-                category = "invalid_paths"
-            payload["request"] = {**args["request"], "classification": category, "dispatch_authorized": False}
+                category, request_paths = "invalid_paths", list(args["request"]["paths"])
+            payload["request"] = {**args["request"], "paths": request_paths, "classification": category,
+                                  "dispatch_authorized": False}
         if args["kind"] == "answer":
             if args.get("in_reply_to") is None:
                 return HandoffDecision(rejected("in_reply_to_required"))
@@ -967,6 +1046,7 @@ class TaskFlow:
                 port.release_hold()
                 self._give_back(port, ports)
                 error = refused[0] if refused else type(exc).__name__
+                tell_manager = False
                 with self._lock:
                     task.last_result = {"outcome": "start_failed", "error": error,
                                         "detail": str(exc)[:SUMMARY_MAX]}
@@ -979,6 +1059,10 @@ class TaskFlow:
                         task.set_status("finished")  # the worker is free; the manager may re-run or move on
                         self._save_task(task)
                         self._notice(kind="run_start_failed", task_id=task.task_id, error=error)
+                        tell_manager = True
+                if tell_manager:
+                    self._tell_manager_start_failed(task.task_id, revision, error, str(exc),
+                                                    getattr(exc, "workbench_start_failure", None))
                 return
             port.release_hold()
             with self._lock:
@@ -994,6 +1078,45 @@ class TaskFlow:
             if run is not None:
                 run.close()
             repository.close()
+
+    def _tell_manager_start_failed(self, task_id: str, revision: int, error: str, detail: str,
+                                   failure: Any) -> None:
+        """Smoke-02 E3: tell the manager once that the experiment run did not start (outside the flow lock).
+
+        Besides ``notices[]`` (seen only with the next ``to_worker`` result), the manager gets one Workbench
+        notice through the existing delivery path: a worker->manager REPORT replying to the failed run's TASK
+        message (the path the workflow's own preparation report uses), delivered by the manager lane when
+        the manager OMP is idle and never resent. Nothing is sent when the run never got a TASK message (the
+        mailbox can address only a reply to it), or when the workflow already reported to the manager.
+        """
+        if not isinstance(failure, Mapping):
+            return
+        run_id, message_id = failure.get("run_id"), failure.get("task_message_id")
+        if (not isinstance(run_id, str) or not isinstance(message_id, str)
+                or failure.get("manager_report") not in (None, "not_created")):
+            return
+        text = (f"Workbench notice: the experiment run for Task {task_id} did not start ({error}: "
+                f"{detail[:300]}). The worker is free. Tell the user; after the cause is fixed re-run it "
+                "(to_worker with this task_id and run: true) or send a new Task.")
+        payload = {"handoff": "workbench_notice", "source": "workbench", "notice": "run_start_failed",
+                   "task_id": task_id, "error": error, "message": text[:SUMMARY_MAX]}
+
+        def listener(event: str, snapshot: Mapping[str, Any]) -> None:
+            if event in ("submitted", "delivered", "unknown", "rejected", "held_paused", "withdrawn"):
+                with self._lock:
+                    self._record({"type": "start_failure_notice", "task_id": task_id, "run_id": run_id,
+                                  "state": event, "message_id": snapshot.get("message_id")})
+
+        try:
+            queued = self._handoffs.enqueue(OutboundMessage(
+                task_id, failure.get("revision") or revision, run_id, ActorRole.WORKER, ActorRole.MANAGER,
+                MessageKind.REPORT, payload, in_reply_to_message_id=message_id),
+                origin=f"start_failed:{task_id}", listener=listener)
+        except Exception as exc:  # the notices[] entry still tells the manager
+            queued = {"status": "held", "reason": type(exc).__name__}
+        with self._lock:
+            self._record({"type": "start_failure_notice", "task_id": task_id, "run_id": run_id,
+                          "state": queued.get("status"), "reason": queued.get("reason")})
 
     def _give_back(self, port: Any, ports: ExperimentPorts | None = None) -> None:
         """Return the host shell to the user when the manager holds it with nothing in flight.

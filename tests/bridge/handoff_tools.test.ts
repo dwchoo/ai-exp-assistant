@@ -109,7 +109,7 @@ test("manager registers only to_worker and worker only to_manager, both essentia
 	try {
 		const props = manager.tools.get("to_worker")!.parameters.properties;
 		assert.deepEqual(Object.keys(props).sort(), ["cancel", "kind", "message", "run", "spec", "task_id"]);
-		assert.equal(props.cancel.type, "boolean");
+		assert.deepEqual(props.cancel.type, ["boolean", "null"]);
 		assert.deepEqual(Object.keys(props.spec.properties).sort(), ["execution", "goal", "instructions", "paths"]);
 		assert.deepEqual(Object.keys(props.spec.properties.execution.properties).sort(),
 			["command", "commit", "criteria", "environment", "shell", "source"]);
@@ -243,4 +243,135 @@ test("to_manager during a staged worker delivery is rejected without a frame and
 			&& (frame.name === "worker_response_rejected" || frame.name === "delivery_processing_unknown"));
 		assert.notEqual(rejected.name, "assistant_message_end");
 	} finally { await bridge.close(); }
+});
+
+// CW-18 smoke D1 (p27-cw18-smoke-fix-01): OMP 18.4.5 ships an extension tool to openai-codex without `strict`
+// unless the tool sets it; with `strict: true` OMP converts the schema (every property required, optional
+// ones `anyOf [T, null]`). The registered schema must therefore accept null (and blank placeholders) for
+// every optional field, so OMP's local argument validation lets them through and the backend decides.
+type Schema = Record<string, any>;
+
+function typesOf(schema: Schema): string[] {
+	return Array.isArray(schema.type) ? schema.type : schema.type === undefined ? [] : [schema.type];
+}
+
+// A small JSON-schema check (the keywords the bridge schemas use) standing in for OMP's local validation.
+function schemaErrors(schema: Schema, value: unknown, path = "$"): string[] {
+	if (Array.isArray(schema.anyOf)) {
+		return schema.anyOf.some((branch: Schema) => schemaErrors(branch, value, path).length === 0)
+			? [] : [`${path}: no anyOf branch`];
+	}
+	const types = typesOf(schema);
+	const kind = value === null ? "null" : Array.isArray(value) ? "array" : typeof value === "number" ? "number" : typeof value;
+	if (types.length && !types.includes(kind)) return [`${path}: ${kind} not in ${types.join("|")}`];
+	if (schema.enum && !schema.enum.includes(value)) return [`${path}: not in enum`];
+	const errors: string[] = [];
+	if (typeof value === "string") {
+		if (schema.minLength !== undefined && value.length < schema.minLength) errors.push(`${path}: minLength`);
+		if (schema.maxLength !== undefined && value.length > schema.maxLength) errors.push(`${path}: maxLength`);
+		if (schema.pattern !== undefined && !new RegExp(schema.pattern).test(value)) errors.push(`${path}: pattern`);
+	}
+	if (Array.isArray(value)) {
+		if (schema.minItems !== undefined && value.length < schema.minItems) errors.push(`${path}: minItems`);
+		if (schema.maxItems !== undefined && value.length > schema.maxItems) errors.push(`${path}: maxItems`);
+		value.forEach((item, index) => errors.push(...schemaErrors(schema.items ?? {}, item, `${path}[${index}]`)));
+	}
+	if (kind === "object") {
+		const object = value as Record<string, unknown>;
+		for (const name of schema.required ?? []) if (!(name in object)) errors.push(`${path}.${name}: required`);
+		for (const [name, item] of Object.entries(object)) {
+			const child = schema.properties?.[name];
+			if (child === undefined) {
+				if (schema.additionalProperties === false) errors.push(`${path}.${name}: unknown`);
+			} else errors.push(...schemaErrors(child, item, `${path}.${name}`));
+		}
+	}
+	return errors;
+}
+
+function objectNodes(schema: Schema, path = "$"): [string, Schema][] {
+	const nodes: [string, Schema][] = [];
+	if (typesOf(schema).includes("object")) nodes.push([path, schema]);
+	for (const [name, child] of Object.entries(schema.properties ?? {})) nodes.push(...objectNodes(child as Schema, `${path}.${name}`));
+	if (schema.items) nodes.push(...objectNodes(schema.items, `${path}[]`));
+	for (const branch of schema.anyOf ?? []) nodes.push(...objectNodes(branch, path));
+	return nodes;
+}
+
+const OPTIONAL: Record<string, string[]> = {
+	to_worker: ["task_id", "spec", "run", "cancel"],
+	to_manager: ["task_id", "in_reply_to", "requires_code_change", "reason", "request"],
+};
+
+test("both tools are strict-mode compatible: strict flag, closed objects, every optional field nullable", async () => {
+	for (const [role, own] of [["manager", "to_worker"], ["worker", "to_manager"]] as const) {
+		const bridge = await startBridge(role);
+		try {
+			const tool = bridge.tools.get(own)!;
+			assert.equal(tool.strict, true, "OMP sends strict: true (and a strict schema) only when the tool asks");
+			const parameters = tool.parameters as Schema;
+			assert.deepEqual([...parameters.required].sort(), ["kind", "message"]);
+			for (const [path, node] of objectNodes(parameters)) {
+				assert.equal(node.additionalProperties, false, `${path} must be closed`);
+				assert.equal(node.patternProperties, undefined, path);
+				assert.equal(typeof node.properties, "object", path);
+			}
+			for (const name of OPTIONAL[own]) {
+				const property = parameters.properties[name];
+				assert.ok(typesOf(property).includes("null"), `${own}.${name} must accept null`);
+				assert.match(property.description, /null when not used/, `${own}.${name} description`);
+			}
+			for (const name of ["kind", "message"]) assert.ok(!typesOf(parameters.properties[name]).includes("null"), name);
+		} finally { await bridge.close(); }
+	}
+	const manager = await startBridge("manager");
+	try {
+		const spec = manager.tools.get("to_worker")!.parameters.properties.spec;
+		for (const name of ["goal", "paths", "instructions", "execution"]) {
+			assert.ok(typesOf(spec.properties[name]).includes("null"), `spec.${name} must accept null`);
+		}
+		assert.match(spec.properties.execution.description, /null when not used/);
+		assert.match(spec.properties.execution.description, /kind work/);
+		assert.match(spec.properties.paths.description, /repo-relative/i);
+		assert.match(manager.tools.get("to_worker")!.description, /end your turn/);
+	} finally { await manager.close(); }
+});
+
+test("strict-mode placeholders (nulls, blanks, false flags) pass the registered schema and reach the backend unchanged", async () => {
+	const manager = await startBridge("manager");
+	try {
+		const tool = manager.tools.get("to_worker")!;
+		const smoke = {
+			i: "dispatch", task_id: null, kind: "work", message: "Create work/hello.txt",
+			spec: { goal: "create hello.txt", paths: ["work/hello.txt"], instructions: null, execution: null },
+			run: null, cancel: null,
+		};
+		const blanks = {
+			task_id: "", kind: "work", message: "m",
+			spec: { goal: "g", paths: [], instructions: "", execution: {
+				source: "", commit: "", command: "", environment: [], shell: "bash",
+				criteria: { log_contains: "", result_file: "", result_contains: "" } } },
+			run: false, cancel: false,
+		};
+		// OMP adds its intent field `i` to the provider copy of the schema and strips it before execute.
+		const { i: _i, ...smokeArgs } = smoke;
+		for (const args of [smokeArgs, blanks]) assert.deepEqual(schemaErrors(tool.parameters, args), [], JSON.stringify(args));
+		assert.notDeepEqual(schemaErrors(tool.parameters, { kind: "work", message: null }), []);
+		assert.notDeepEqual(schemaErrors(tool.parameters, { kind: "work", message: "m", role: null }), []);
+		const pending = tool.execute("call-null", smoke, new AbortController().signal, () => {}, {});
+		const request = await manager.waitFor(frame => frame.kind === "tool_request");
+		const { i: _intent, ...forwarded } = smoke;
+		assert.deepEqual(request.args, forwarded, "the backend, not the bridge, decides what null means");
+		manager.reply({ kind: "tool_result", requestId: request.requestId, toolCallId: "call-null", result: { status: "dispatched" } });
+		assert.equal(textOf(await pending).status, "dispatched");
+	} finally { await manager.close(); }
+	const worker = await startBridge("worker");
+	try {
+		const tool = worker.tools.get("to_manager")!;
+		for (const args of [
+			{ kind: "done", message: "m", task_id: null, in_reply_to: null, requires_code_change: null, reason: null, request: null },
+			{ kind: "done", message: "m", task_id: "", in_reply_to: "", requires_code_change: false, reason: "",
+				request: { goal: "none", paths: [] } },
+		]) assert.deepEqual(schemaErrors(tool.parameters, args), [], JSON.stringify(args));
+	} finally { await worker.close(); }
 });

@@ -96,6 +96,48 @@ function parseWorkerResponse(text: string, delivery: DeliveryEvidence): Record<s
 	return result;
 }
 
+// CW-18 smoke-02 E1: the provider request payload shapes OMP 18.4.5 builds (captured with a local capture
+// server; tests/bridge/fixtures/omp18_provider_payloads.json):
+//   - chat (openai-completions and similar): payload.messages[-1] = {role: "user", content: string | [{type: "text", text}]}
+//   - Responses (openai-codex, openai-responses): payload.input[-1] = {role: "user", content: [{type: "input_text", text}]}
+//     (item type absent or "message"); over the Codex WebSocket payload.input is only the delta after
+//     previous_response_id, and the delivered prompt is its single user item.
+// Only the final item of the one list present counts; a payload with both lists, or any other final item
+// (assistant, developer, tool output, another item type or block type), establishes no identity.
+type FinalUserTexts = { list: "messages" | "input"; item: Record<string, unknown> | undefined; texts: string[] };
+
+function finalUserTexts(payload: unknown): FinalUserTexts | undefined {
+	if (typeof payload !== "object" || payload === null || Array.isArray(payload)) return undefined;
+	const request = payload as Record<string, unknown>;
+	const messages = Array.isArray(request.messages) ? request.messages : undefined;
+	const input = Array.isArray(request.input) ? request.input : undefined;
+	if ((messages === undefined) === (input === undefined)) return undefined;
+	const list = messages !== undefined ? "messages" : "input";
+	const last = (messages ?? input)!.at(-1);
+	const item = typeof last === "object" && last !== null && !Array.isArray(last) ? last as Record<string, unknown> : undefined;
+	if (item === undefined || item.role !== "user") return { list, item, texts: [] };
+	if (list === "input" && item.type !== undefined && item.type !== "message") return { list, item, texts: [] };
+	const blockType = list === "messages" ? "text" : "input_text";
+	const content = item.content;
+	const texts = typeof content === "string" ? [content]
+		: Array.isArray(content) ? content.filter((block): block is { type: string; text: string } =>
+			typeof block === "object" && block !== null && "type" in block && block.type === blockType
+			&& "text" in block && typeof block.text === "string").map(block => block.text)
+		: [];
+	return { list, item, texts };
+}
+
+// A reasoning model's assistant message (OMP 18.4.5 openai-codex) starts with a thinking block that carries only
+// the provider's encrypted reasoning: `thinking` is "" and the rest is the opaque `thinkingSignature`. It holds
+// no response content; visible thinking text or any other key or block is still response content (no_thinking).
+function isOpaqueThinking(block: unknown): boolean {
+	if (typeof block !== "object" || block === null || Array.isArray(block)) return false;
+	const record = block as Record<string, unknown>;
+	return record.type === "thinking" && (record.thinking === undefined || record.thinking === "")
+		&& Object.keys(record).every(key => key === "type" || key === "thinking"
+			|| (key === "thinkingSignature" && typeof record.thinkingSignature === "string"));
+}
+
 function env(name: string): string {
 	const value = process.env[name];
 	if (!value) throw new Error(`missing ${name}`);
@@ -118,37 +160,65 @@ function roleAllows(role: Role, senderRole: string, kind: string): boolean {
 // the other OMP. A lost answer is outcome_unknown and is never resent.
 const TOOL_RESULT_TIMEOUT_MS = 10_000;
 const MESSAGE_MAX = 8192;
+// Smoke D1 (OMP 18.4.5, openai-codex): the tools are registered with `strict: true`, so OMP sends a strict
+// schema (every property required, the optional ones `anyOf [T, null]`; OMP drops length/pattern keywords on
+// that wire copy). Every optional field therefore accepts null here as well (OMP validates the arguments
+// against this schema locally) and its description says "null when not used". Optional strings carry no
+// minLength and the UUID pattern also matches "": the backend treats null, blank strings, empty lists/objects
+// and false flags as absent and names the field when it rejects a call.
+const NOT_USED = "null when not used.";
 const TEXT = { type: "string", minLength: 1, maxLength: MESSAGE_MAX };
-const SHORT = { type: "string", minLength: 1, maxLength: 1024 };
-const UUID_TEXT = { type: "string", pattern: UUID_PATTERN.source };
-const PATHS = { type: "array", items: SHORT, maxItems: 64 };
+const OPTIONAL_TEXT = { type: ["string", "null"], maxLength: MESSAGE_MAX };
+const SHORT = { type: "string", maxLength: 1024 };
+const OPTIONAL_UUID = { type: ["string", "null"], pattern: `^(?:${UUID_PATTERN.source.slice(1, -1)})?$` };
+const OPTIONAL_FLAG = { type: ["boolean", "null"] };
+const PATHS = {
+	type: ["array", "null"], items: SHORT, maxItems: 64,
+	description: "Repo-relative paths (relative to the project root, e.g. \"src/app/\" or \"work/hello.txt\"); "
+		+ "[] or null when none.",
+};
 const TO_WORKER_PARAMETERS = {
 	type: "object",
 	additionalProperties: false,
 	required: ["kind", "message"],
 	properties: {
-		task_id: { ...UUID_TEXT, description: "The active Task this follow-up or cancel belongs to; omit for a new Task." },
+		task_id: { ...OPTIONAL_UUID,
+			description: `The active Task this follow-up, cancel or re-run belongs to (from a to_worker result); ${NOT_USED} `
+				+ "null starts a new Task." },
 		kind: { type: "string", enum: ["experiment", "work"],
 			description: "experiment: run a command and judge criteria; work: the worker does the work itself." },
 		message: { ...TEXT, description: "The instruction or summary for the worker (no secret values)." },
 		spec: {
-			type: "object", additionalProperties: false, required: ["goal", "paths"],
-			description: "The Task: goal and the paths the worker may change (required for a new Task).",
+			type: ["object", "null"], additionalProperties: false, required: ["goal", "paths"],
+			description: `The Task: goal and the paths the worker may change (required for a new Task); ${NOT_USED} `
+				+ "null for a follow-up or cancel.",
 			properties: {
-				goal: TEXT,
-				paths: { ...PATHS, description: "Paths the worker may change." },
-				instructions: TEXT,
+				goal: { ...OPTIONAL_TEXT, description: "What the Task must achieve." },
+				paths: { ...PATHS, description: `Paths the worker may change. ${PATHS.description}` },
+				instructions: { ...OPTIONAL_TEXT, description: `Extra instructions for the worker; ${NOT_USED}` },
 				execution: {
-					type: "object", additionalProperties: false,
+					type: ["object", "null"], additionalProperties: false,
 					required: ["source", "commit", "command", "criteria", "environment", "shell"],
-					description: "Experiment run (kind experiment only).",
+					description: `Experiment run (kind experiment only). Must be null for kind work; ${NOT_USED}`,
 					properties: {
 						source: SHORT, commit: SHORT,
-						command: { anyOf: [TEXT, { type: "array", items: TEXT, minItems: 1, maxItems: 64 }] },
+						command: { anyOf: [{ type: "string", maxLength: MESSAGE_MAX },
+							{ type: "array", items: { type: "string", maxLength: MESSAGE_MAX }, maxItems: 64 }] },
 						criteria: {
 							type: "object", additionalProperties: false,
 							required: ["log_contains", "result_file", "result_contains"],
-							properties: { log_contains: SHORT, result_file: SHORT, result_contains: SHORT },
+							// Smoke-02 E2: the CW-10 judge needs all three; none is optional.
+							description: "All three are required and non-empty. Success = exit 0 AND log_contains in the "
+								+ "command output AND result_file written by this run AND result_contains in it. Do not "
+								+ "invent a condition the user did not ask for: ask the user, or make the command write a "
+								+ "result file.",
+							properties: {
+								log_contains: { ...SHORT, description: "Text the command prints (stdout/stderr, the raw log)." },
+								result_file: { ...SHORT, description: "Repo-relative path of a file the command writes during "
+									+ "this run (e.g. out/result.txt). A file the run does not write or leaves unchanged "
+									+ "(such as the script itself) makes the result indeterminate." },
+								result_contains: { ...SHORT, description: "Text result_file must contain after the run." },
+							},
 						},
 						environment: { type: "array", maxItems: 64, description: "Environment variable NAMES only, never values.",
 							items: { type: "string", pattern: "^[A-Za-z_][A-Za-z0-9_]*$", maxLength: 128 } },
@@ -157,8 +227,8 @@ const TO_WORKER_PARAMETERS = {
 				},
 			},
 		},
-		run: { type: "boolean", description: "Re-run the current experiment Task (at most 3 re-runs per Task)." },
-		cancel: { type: "boolean", description: "With task_id: cancel that Task; the worker is told and becomes free." },
+		run: { ...OPTIONAL_FLAG, description: `true re-runs the current experiment Task (at most 3 re-runs per Task); ${NOT_USED}` },
+		cancel: { ...OPTIONAL_FLAG, description: `true (with task_id) cancels that Task; the worker is told and becomes free; ${NOT_USED}` },
 	},
 };
 const TO_MANAGER_PARAMETERS = {
@@ -168,14 +238,16 @@ const TO_MANAGER_PARAMETERS = {
 	properties: {
 		kind: { type: "string", enum: ["answer", "progress", "done", "blocked", "report"] },
 		message: { ...TEXT, description: "The report for the manager (no secret values)." },
-		task_id: UUID_TEXT,
-		in_reply_to: { ...UUID_TEXT, description: "workbench_message_id of the manager message answered." },
-		requires_code_change: { type: "boolean" },
-		reason: TEXT,
+		task_id: { ...OPTIONAL_UUID, description: `The Task this belongs to; ${NOT_USED}` },
+		in_reply_to: { ...OPTIONAL_UUID,
+			description: `workbench_message_id of the manager message answered (needed for kind answer); ${NOT_USED}` },
+		requires_code_change: { ...OPTIONAL_FLAG, description: `true only when the result needs a code change; ${NOT_USED}` },
+		reason: { ...OPTIONAL_TEXT, description: `Why (for blocked or requires_code_change); ${NOT_USED}` },
 		request: {
-			type: "object", additionalProperties: false, required: ["goal", "paths"],
-			description: "A request for new or wider scope; the manager decides whether to send it as a Task.",
-			properties: { goal: TEXT, paths: PATHS },
+			type: ["object", "null"], additionalProperties: false, required: ["goal", "paths"],
+			description: "A request for new or wider scope (at least one path); the manager decides whether to send it "
+				+ `as a Task; ${NOT_USED}`,
+			properties: { goal: OPTIONAL_TEXT, paths: PATHS },
 		},
 	},
 };
@@ -184,15 +256,17 @@ const HANDOFF_TOOLS: Record<Role, { name: "to_worker" | "to_manager"; label: str
 		name: "to_worker", label: "To worker", parameters: TO_WORKER_PARAMETERS,
 		description: "Send an instruction to the Workbench worker OMP. The worker does ONE task at a time. If it is "
 			+ "busy you get worker_busy with the current task; wait for its to_manager report (done/blocked) or "
-			+ "cancel the task. Without task_id a new Task is dispatched at once (status dispatched; the user "
+			+ "cancel the task. Without task_id (null) a new Task is dispatched at once (status dispatched; the user "
 			+ "delegated this, no approval step). With the current task_id it is a follow-up message for the "
-			+ "worker (status queued), run: true re-runs an experiment, cancel: true cancels the Task. The result "
-			+ "returns at once; the worker reports back with to_manager.",
+			+ "worker (status queued), run: true re-runs an experiment, cancel: true cancels the Task. Set every "
+			+ "field you do not use to null. The result returns at once; then end your turn: the worker's to_manager "
+			+ "report arrives as a new message (never wait or poll for it).",
 	},
 	worker: {
 		name: "to_manager", label: "To manager", parameters: TO_MANAGER_PARAMETERS,
 		description: "Report to the Workbench manager OMP about the active Task: answer, progress, done, blocked "
-			+ "or report. Never use it while answering a message that carries a response_contract.",
+			+ "or report. Set every field you do not use to null. After done or blocked, end your turn. Never use it "
+			+ "while answering a message that carries a response_contract.",
 	},
 };
 
@@ -371,20 +445,7 @@ export default function workbenchG3Extension(pi: any): void {
 
 	function providerRequestContainsActiveDelivery(event: unknown, delivery: DeliveryEvidence): boolean {
 		if (typeof event !== "object" || event === null) return false;
-		const payload = (event as Record<string, unknown>).payload;
-		if (typeof payload !== "object" || payload === null || Array.isArray(payload)) return false;
-		const messages = (payload as Record<string, unknown>).messages;
-		if (!Array.isArray(messages)) return false;
-		const last = messages.at(-1);
-		if (typeof last !== "object" || last === null) return false;
-		const lastMessage = last as Record<string, unknown>;
-		if (lastMessage.role !== "user") return false;
-		const content = lastMessage.content;
-		const blocks = typeof content === "string" ? [content]
-			: Array.isArray(content) ? content.filter((block): block is { type: string; text: string } =>
-				typeof block === "object" && block !== null && "type" in block && block.type === "text"
-				&& "text" in block && typeof block.text === "string").map(block => block.text)
-			: [];
+		const blocks = finalUserTexts((event as Record<string, unknown>).payload)?.texts ?? [];
 		for (const text of blocks) {
 			try {
 				const value: unknown = JSON.parse(text);
@@ -667,6 +728,8 @@ export default function workbenchG3Extension(pi: any): void {
 			label: tool.label,
 			description: tool.description,
 			parameters: tool.parameters,
+			// OMP sends a strict (all required, optional nullable) schema to providers that support it (smoke D1).
+			strict: true,
 			// Ship the schema with every provider request instead of xd:// discovery.
 			loadMode: "essential",
 			async execute(toolCallId: string, params: unknown, signal?: AbortSignal) {
@@ -846,21 +909,17 @@ export default function workbenchG3Extension(pi: any): void {
 		const payloadShape = payload === null ? "null" : Array.isArray(payload) ? "array"
 			: typeof payload === "object" ? "object" : typeof payload === "string" ? "string" : "other";
 		const request = payloadShape === "object" ? payload as Record<string, unknown> : undefined;
-		const payloadKeys = ["messages", "model", "stream", "tools", "temperature"]
+		const payloadKeys = ["messages", "input", "model", "stream", "tools", "temperature"]
 			.filter(key => request !== undefined && Object.hasOwn(request, key));
 		const messages = Array.isArray(request?.messages) ? request.messages : undefined;
-		const last = messages?.at(-1);
-		const lastMessage = typeof last === "object" && last !== null ? last as Record<string, unknown> : undefined;
+		// E1: the same final-item rule as the identity check (chat messages or Responses input).
+		const final = finalUserTexts(payload);
+		const lastMessage = final?.item;
 		const lastRole = lastMessage?.role;
 		const content = lastMessage?.content;
 		const contentShape = typeof content === "string" ? "string" : Array.isArray(content) ? "blocks" : "other";
-		const textBlocks = Array.isArray(content)
-			? content.filter((block): block is { type: string; text: string } =>
-				typeof block === "object" && block !== null
-				&& "type" in block && block.type === "text"
-				&& "text" in block && typeof block.text === "string")
-				.map(block => block.text) : [];
-		const candidateTexts = typeof content === "string" ? [content] : textBlocks;
+		const textBlocks = Array.isArray(content) ? final?.texts ?? [] : [];
+		const candidateTexts = final?.texts ?? [];
 		const structured: Record<string, unknown>[] = [];
 		let observed: Record<string, unknown> | undefined;
 		if (lastRole === "user") {
@@ -901,12 +960,24 @@ export default function workbenchG3Extension(pi: any): void {
 	});
 	pi.on("message_end", (event: { message?: { role?: string; content?: unknown; stopReason?: unknown; errorMessage?: unknown }; willContinue?: unknown }) => {
 		const delivery = activeDelivery;
+		if (delivery?.terminal === "pending" && delivery.awaitingProviderResponse && event?.message?.role === "assistant"
+			&& event.message.stopReason !== "error" && event.message.stopReason !== "aborted"
+			&& !(typeof event.message.errorMessage === "string" && event.message.errorMessage.length > 0)) {
+			// E1: OMP 18.4.5's openai-codex provider never emits after_provider_response (its transport does not call
+			// onResponse). The assistant message that ends the matched provider request is that request's response.
+			delivery.providerResponseObserved = true;
+			delivery.awaitingProviderResponse = false;
+		}
 		if (delivery?.workerStage && delivery.terminal === "pending" && event?.message?.role === "assistant") {
 			delivery.assistantMessageCount += 1;
 			const content = event.message.content;
-			const text = Array.isArray(content) && content.length === 1
-				&& typeof content[0] === "object" && content[0] !== null
-				&& content[0].type === "text" && typeof content[0].text === "string" ? content[0].text : undefined;
+			// E1: an opaque leading thinking block (encrypted reasoning, no text) is not response content.
+			let start = 0;
+			while (Array.isArray(content) && start < content.length && isOpaqueThinking(content[start])) start += 1;
+			const rest = Array.isArray(content) ? content.slice(start) : [];
+			const text = rest.length === 1
+				&& typeof rest[0] === "object" && rest[0] !== null
+				&& rest[0].type === "text" && typeof rest[0].text === "string" ? rest[0].text as string : undefined;
 			const response = text === undefined ? undefined : parseWorkerResponse(text, delivery);
 			if (delivery.assistantMessageCount !== 1 || event.message.stopReason !== "stop"
 				|| event.message.errorMessage || event.willContinue === true || !response) {

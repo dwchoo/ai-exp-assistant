@@ -95,6 +95,7 @@ SUMMARY_MAX_COLS = 40  # the Task summary in the status line is shortened to at 
 SUMMARY_MIN_COLS = 8
 WORKER_TEXT = {"idle": "대기", "busy": "작업 중"}
 TASK_KIND_TEXT = {"experiment": "실험", "work": "작업"}
+# "finished" with a run that failed to start is shown as 시작 실패 (smoke-02 E4; see task_text)
 TASK_STATUS_TEXT = {"dispatched": "전달됨", "starting": "시작 중", "running": "실행 중", "waiting_report": "보고 대기",
                     "held": "보류", "cancelling": "취소 중", "finished": "보고 완료", "blocked": "막힘", "closed": "종료"}
 TASK_HELD_TEXT = {"host_terminal_busy": "host terminal 사용 중"}
@@ -1799,6 +1800,12 @@ class ProductModel:
             status_text = f"종료({TASK_CLOSED_TEXT.get(reason) or reason})" if reason else status_text
         notes = []
         held = _plain(task.get("held_reason"))
+        last = task.get("last_result") if isinstance(task.get("last_result"), dict) else {}
+        if status == "finished" and (held.startswith("start_failed:")
+                                     or _plain(last.get("outcome")) in ("start_failed", "not_started")):
+            # CW-18 smoke-02 E4: the run never started, so nothing was reported.
+            status_text = "시작 실패"
+            held = held.removeprefix("start_failed:") or _plain(last.get("error")) or _plain(last.get("reason"))
         if held:
             notes.append(TASK_HELD_TEXT.get(held) or held)
             if held == "host_terminal_busy" and any(r in JOB_HELD_REASONS for r in self._held_reasons({})):

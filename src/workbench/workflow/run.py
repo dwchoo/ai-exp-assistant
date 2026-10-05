@@ -731,4 +731,12 @@ class TaskWorkflow:
             self.repository.record_shell_event(run_id, "failed", dict(record))
             if still_authorized:
                 self.repository.fail_run(run_id, {"stage": "preparation", "error": record["preparation_error"]})
+            try:  # CW-18 smoke-02 E3: the caller may tell the manager once, unless this run already reported
+                exc.workbench_start_failure = {
+                    "run_id": run_id, "revision": revision,
+                    "task_message_id": None if task_message is None else task_message.message_id,
+                    "manager_report": (record.get("preparation_report") or {}).get("status"),
+                }
+            except AttributeError:
+                pass
             raise

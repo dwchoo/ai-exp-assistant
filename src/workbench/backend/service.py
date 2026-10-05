@@ -210,7 +210,7 @@ class Backend:
                 automation=self._automation_port, environment_names=lambda: set(self._shell_env or {}),
                 worktrees_root=ensure_private_dir(layout.workflow / "worktrees"),
                 artifacts_root=ensure_private_dir(layout.workflow / "runs")),
-            lifecycle=self.automation_loop)
+            project_dir=self.project_dir, lifecycle=self.automation_loop)
         self.handoffs.configure(policy=self.flow, active_task=self.flow.active_task)
         self.automation = self.automation_loop.status()
         handoffs = self.handoffs

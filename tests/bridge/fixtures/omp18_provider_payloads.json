@@ -1,0 +1,479 @@
+{
+ "source": "OMP 18.4.5 (omp --mode rpc, fake HOME, no credentials) before_provider_request payloads and assistant message_end messages captured on 2026-10-05 with a local capture server on 127.0.0.1 (no real provider). The delivered Workbench envelopes were sent with pi.sendUserMessage(JSON, {attribution: 'agent'}) after the first prompt. Only the system prompt, tools (names kept) and long context text were shortened; {{CURRENT_DELIVERY}} / {{PRIOR_DELIVERY}} replace the exact envelope JSON text and {{ASSISTANT_TEXT}} the assistant text.",
+ "provider_requests": {
+  "openai_completions_messages": {
+   "model": "gpt-5.5",
+   "messages": [
+    {
+     "role": "system",
+     "content": "RFC 2119 keywords: MUST, REQUIRED, SHOULD, RECOMMENDED, MAY, OPTIONAL. `NEVER` = …(shortened)"
+    },
+    {
+     "role": "user",
+     "content": [
+      {
+       "type": "text",
+       "text": "<system-reminder>\nToday: 2026-10-05; current working directory: '/tmp/wb-fix02-c …(shortened)"
+      },
+      {
+       "type": "text",
+       "text": "hello first prompt"
+      }
+     ]
+    },
+    {
+     "role": "assistant",
+     "content": "ok"
+    },
+    {
+     "role": "user",
+     "content": [
+      {
+       "type": "text",
+       "text": "{{PRIOR_DELIVERY}}"
+      }
+     ]
+    },
+    {
+     "role": "assistant",
+     "content": "ok"
+    },
+    {
+     "role": "user",
+     "content": [
+      {
+       "type": "text",
+       "text": "{{CURRENT_DELIVERY}}"
+      }
+     ]
+    }
+   ],
+   "stream": true,
+   "stream_options": {
+    "include_usage": true
+   },
+   "store": false,
+   "tools": [
+    {
+     "type": "function",
+     "function": {
+      "name": "read"
+     }
+    },
+    {
+     "type": "function",
+     "function": {
+      "name": "bash"
+     }
+    },
+    {
+     "type": "function",
+     "function": {
+      "name": "edit"
+     }
+    },
+    {
+     "type": "function",
+     "function": {
+      "name": "eval"
+     }
+    },
+    {
+     "type": "function",
+     "function": {
+      "name": "glob"
+     }
+    },
+    {
+     "type": "function",
+     "function": {
+      "name": "grep"
+     }
+    },
+    {
+     "type": "function",
+     "function": {
+      "name": "task"
+     }
+    },
+    {
+     "type": "function",
+     "function": {
+      "name": "wait"
+     }
+    },
+    {
+     "type": "function",
+     "function": {
+      "name": "todo"
+     }
+    },
+    {
+     "type": "function",
+     "function": {
+      "name": "web_search"
+     }
+    },
+    {
+     "type": "function",
+     "function": {
+      "name": "write"
+     }
+    }
+   ],
+   "max_completion_tokens": 1024,
+   "reasoning_effort": "high"
+  },
+  "openai_codex_responses_sse_full_input": {
+   "model": "gpt-5.5",
+   "input": [
+    {
+     "type": "message",
+     "role": "developer",
+     "content": [
+      {
+       "type": "input_text",
+       "text": "<project-context>\n<workstation>\n- OS: linux 7.0.0-30-generic\n- Arch: x64\n- Model …(shortened)"
+      }
+     ]
+    },
+    {
+     "role": "user",
+     "content": [
+      {
+       "type": "input_text",
+       "text": "<system-reminder>\nToday: 2026-10-05; current working directory: '/tmp/wb-fix02-c …(shortened)"
+      },
+      {
+       "type": "input_text",
+       "text": "hello first prompt"
+      }
+     ]
+    },
+    {
+     "type": "reasoning",
+     "summary": [],
+     "encrypted_content": "opaque-local-test"
+    },
+    {
+     "type": "message",
+     "role": "assistant",
+     "content": [
+      {
+       "type": "output_text",
+       "text": "ok",
+       "annotations": []
+      }
+     ]
+    },
+    {
+     "role": "user",
+     "content": [
+      {
+       "type": "input_text",
+       "text": "{{PRIOR_DELIVERY}}"
+      }
+     ]
+    },
+    {
+     "type": "reasoning",
+     "summary": [],
+     "encrypted_content": "opaque-local-test"
+    },
+    {
+     "type": "message",
+     "role": "assistant",
+     "content": [
+      {
+       "type": "output_text",
+       "text": "ok",
+       "annotations": []
+      }
+     ]
+    },
+    {
+     "role": "user",
+     "content": [
+      {
+       "type": "input_text",
+       "text": "{{CURRENT_DELIVERY}}"
+      }
+     ]
+    }
+   ],
+   "stream": true,
+   "prompt_cache_key": "01a10972-fa0d-7200-a4bd-8ab0909c149e",
+   "tools": [
+    {
+     "type": "function",
+     "name": "read"
+    },
+    {
+     "type": "function",
+     "name": "bash"
+    },
+    {
+     "type": "function",
+     "name": "edit"
+    },
+    {
+     "type": "function",
+     "name": "eval"
+    },
+    {
+     "type": "function",
+     "name": "glob"
+    },
+    {
+     "type": "function",
+     "name": "grep"
+    },
+    {
+     "type": "function",
+     "name": "task"
+    },
+    {
+     "type": "function",
+     "name": "wait"
+    },
+    {
+     "type": "function",
+     "name": "todo"
+    },
+    {
+     "type": "function",
+     "name": "web_search"
+    },
+    {
+     "type": "function",
+     "name": "write"
+    }
+   ],
+   "instructions": "<omitted: system prompt>",
+   "store": false,
+   "reasoning": {
+    "effort": "high",
+    "summary": "auto"
+   },
+   "include": [
+    "reasoning.encrypted_content"
+   ],
+   "client_metadata": {
+    "x-codex-installation-id": "0c3f1a8b-19dc-48b3-b613-e11131594a6b",
+    "session_id": "01a10972-fa0d-7200-a4bd-8ab0909c149e",
+    "thread_id": "c639bbae-242b-4880-9d10-e4581c8c52da",
+    "x-codex-window-id": "0d9adcae-74b6-47e4-b5b2-2264a5af9f0b",
+    "turn_id": "a430aded-f63f-43bd-b873-3da05f2e9b7b",
+    "x-codex-turn-metadata": "{\"installation_id\":\"0c3f1a8b-19dc-48b3-b613-e11131594a6b\",\"session_id\":\"01a10972-fa0d-7200-a4bd-8ab0909c149e\",\"thread_id\":\"c639bbae-242b-4880-9d10-e4581c8c52da\",\"turn_id\":\"a430aded-f63f-43bd-b873-3da05f2e9b7b\",\"window_id\":\"0d9adcae-74b6-47e4-b5b2-2264a5af9f0b\",\"request_kind\":\"turn\",\"turn_started_at_unix_ms\":1791159895016}"
+   }
+  },
+  "openai_codex_responses_websocket_delta_input": {
+   "type": "response.create",
+   "model": "gpt-5.5",
+   "input": [
+    {
+     "role": "user",
+     "content": [
+      {
+       "type": "input_text",
+       "text": "{{CURRENT_DELIVERY}}"
+      }
+     ]
+    }
+   ],
+   "stream": true,
+   "prompt_cache_key": "01a10972-e87b-730d-a806-5bdbb7872d5b",
+   "tools": [
+    {
+     "type": "function",
+     "name": "read"
+    },
+    {
+     "type": "function",
+     "name": "bash"
+    },
+    {
+     "type": "function",
+     "name": "edit"
+    },
+    {
+     "type": "function",
+     "name": "eval"
+    },
+    {
+     "type": "function",
+     "name": "glob"
+    },
+    {
+     "type": "function",
+     "name": "grep"
+    },
+    {
+     "type": "function",
+     "name": "task"
+    },
+    {
+     "type": "function",
+     "name": "wait"
+    },
+    {
+     "type": "function",
+     "name": "todo"
+    },
+    {
+     "type": "function",
+     "name": "web_search"
+    },
+    {
+     "type": "function",
+     "name": "write"
+    }
+   ],
+   "instructions": "<omitted: system prompt>",
+   "store": false,
+   "reasoning": {
+    "effort": "high",
+    "summary": "auto"
+   },
+   "include": [
+    "reasoning.encrypted_content"
+   ],
+   "client_metadata": {
+    "x-codex-installation-id": "06150b63-ec0e-440a-be7d-08a989e1d409",
+    "session_id": "01a10972-e87b-730d-a806-5bdbb7872d5b",
+    "thread_id": "53b83cc4-193b-450e-bbc1-392f84a0da0a",
+    "x-codex-window-id": "4db610be-62c6-4048-a496-47133288cfa3",
+    "turn_id": "51f2a1ee-8b0c-4e85-b9aa-fe64e5d260fd",
+    "x-codex-turn-metadata": "{\"installation_id\":\"06150b63-ec0e-440a-be7d-08a989e1d409\",\"session_id\":\"01a10972-e87b-730d-a806-5bdbb7872d5b\",\"thread_id\":\"53b83cc4-193b-450e-bbc1-392f84a0da0a\",\"turn_id\":\"51f2a1ee-8b0c-4e85-b9aa-fe64e5d260fd\",\"window_id\":\"4db610be-62c6-4048-a496-47133288cfa3\",\"request_kind\":\"turn\",\"turn_started_at_unix_ms\":1791159890474}"
+   },
+   "previous_response_id": "resp_2"
+  },
+  "openai_codex_responses_websocket_first_prompt": {
+   "type": "response.create",
+   "model": "gpt-5.5",
+   "input": [
+    {
+     "type": "message",
+     "role": "developer",
+     "content": [
+      {
+       "type": "input_text",
+       "text": "<project-context>\n<workstation>\n- OS: linux 7.0.0-30-generic\n- Arch: x64\n- Model …(shortened)"
+      }
+     ]
+    },
+    {
+     "role": "user",
+     "content": [
+      {
+       "type": "input_text",
+       "text": "<system-reminder>\nToday: 2026-10-05; current working directory: '/tmp/wb-fix02-c …(shortened)"
+      },
+      {
+       "type": "input_text",
+       "text": "hello first prompt"
+      }
+     ]
+    }
+   ],
+   "stream": true,
+   "prompt_cache_key": "01a10972-e87b-730d-a806-5bdbb7872d5b",
+   "tools": [
+    {
+     "type": "function",
+     "name": "read"
+    },
+    {
+     "type": "function",
+     "name": "bash"
+    },
+    {
+     "type": "function",
+     "name": "edit"
+    },
+    {
+     "type": "function",
+     "name": "eval"
+    },
+    {
+     "type": "function",
+     "name": "glob"
+    },
+    {
+     "type": "function",
+     "name": "grep"
+    },
+    {
+     "type": "function",
+     "name": "task"
+    },
+    {
+     "type": "function",
+     "name": "wait"
+    },
+    {
+     "type": "function",
+     "name": "todo"
+    },
+    {
+     "type": "function",
+     "name": "web_search"
+    },
+    {
+     "type": "function",
+     "name": "write"
+    }
+   ],
+   "instructions": "<omitted: system prompt>",
+   "store": false,
+   "reasoning": {
+    "effort": "high",
+    "summary": "auto"
+   },
+   "include": [
+    "reasoning.encrypted_content"
+   ],
+   "client_metadata": {
+    "x-codex-installation-id": "06150b63-ec0e-440a-be7d-08a989e1d409",
+    "session_id": "01a10972-e87b-730d-a806-5bdbb7872d5b",
+    "thread_id": "53b83cc4-193b-450e-bbc1-392f84a0da0a",
+    "x-codex-window-id": "4db610be-62c6-4048-a496-47133288cfa3",
+    "turn_id": "abcb57dd-7efe-4e7f-b377-0e0fab6cc9c6",
+    "x-codex-turn-metadata": "{\"installation_id\":\"06150b63-ec0e-440a-be7d-08a989e1d409\",\"session_id\":\"01a10972-e87b-730d-a806-5bdbb7872d5b\",\"thread_id\":\"53b83cc4-193b-450e-bbc1-392f84a0da0a\",\"turn_id\":\"abcb57dd-7efe-4e7f-b377-0e0fab6cc9c6\",\"window_id\":\"4db610be-62c6-4048-a496-47133288cfa3\",\"request_kind\":\"turn\",\"turn_started_at_unix_ms\":1791159889752}"
+   }
+  }
+ },
+ "after_provider_response_emitted": {
+  "openai_completions": true,
+  "openai_codex_responses_sse": false,
+  "openai_codex_responses_websocket": false
+ },
+ "assistant_message_end": {
+  "openai_completions": {
+   "role": "assistant",
+   "content": [
+    {
+     "type": "text",
+     "text": "{{ASSISTANT_TEXT}}"
+    }
+   ],
+   "stopReason": "stop"
+  },
+  "openai_codex_responses_reasoning": {
+   "role": "assistant",
+   "content": [
+    {
+     "type": "thinking",
+     "thinking": "",
+     "thinkingSignature": "{\"type\":\"reasoning\",\"id\":\"rs_2\",\"summary\":[],\"encrypted_content\":\"opaque-local-test\"}"
+    },
+    {
+     "type": "text",
+     "text": "{{ASSISTANT_TEXT}}",
+     "textSignature": "{\"v\":1,\"id\":\"msg_2\"}"
+    }
+   ],
+   "stopReason": "stop"
+  }
+ }
+}
