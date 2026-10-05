@@ -98,7 +98,9 @@ TASK_KIND_TEXT = {"experiment": "실험", "work": "작업"}
 # "finished" with a run that failed to start is shown as 시작 실패 (smoke-02 E4; see task_text)
 TASK_STATUS_TEXT = {"dispatched": "전달됨", "starting": "시작 중", "running": "실행 중", "waiting_report": "보고 대기",
                     "held": "보류", "cancelling": "취소 중", "finished": "보고 완료", "blocked": "막힘", "closed": "종료"}
-TASK_HELD_TEXT = {"host_terminal_busy": "host terminal 사용 중"}
+TASK_HELD_TEXT = {"host_terminal_busy": "host terminal 사용 중",
+                  # p27-cd68-fix-03 (review-02 P3 (1)): the worker's own terminal command; nothing for the user to clear
+                  "host_terminal_busy:worker_terminal_command": "worker 명령 실행 중 (끝나면 시작)"}
 # host-shell held reasons that mean user jobs (or a state left unknown by them) keep the handoff / automation held
 JOB_HELD_REASONS = ("manual_jobs", "unknown_or_manual_residue")
 JOB_HELD_HINT = ("해제: prefix t,c로 인수 → jobs 종료(fg/kill) → host shell에서 wb-handoff 다시 실행 → "
@@ -1679,6 +1681,17 @@ class ProductModel:
         owner = self.host_info().get("input_owner")
         return owner if owner in {"user", "manager"} else "unknown"
 
+    def shown_owner(self) -> str:
+        """The host owner as shown: ``worker`` while the worker's terminal command runs (smoke-01 P2).
+
+        The shell is claimed by the manager side then (managed dispatch), so
+        ``input_owner`` (used for takeover logic) stays ``manager``.
+        """
+        owner = self.input_owner()
+        if owner == "manager" and self.host_info().get("operated_by") == "worker":
+            return "worker"
+        return owner
+
     def pane_status(self, pane: PaneId) -> str:
         info = self.state.get("panes", {}).get(pane.value)
         if not info:
@@ -1736,7 +1749,7 @@ class ProductModel:
     def pane_title(self, pane: PaneId) -> str:
         extra = ""
         if pane is PaneId.HOST_SHELL:
-            extra = f" owner={self.input_owner()}"
+            extra = f" owner={self.shown_owner()}"
         note = " 따라잡음" if self.catching_up(pane) else ""
         if self.pane_exited(pane):
             note += " 다시 시작 중…" if pane in self._restarting else " 종료됨 (Enter: 다시 시작)"
@@ -1766,7 +1779,7 @@ class ProductModel:
             age = max(0, int(self.clock() - self.last_seen))
             seen = f"{time.strftime('%H:%M:%S', time.localtime(self.last_seen))} ({age}s 전)"
         worker = self.worker_text()
-        line1 = (f"focus: {TITLES[self.focus]} | host 입력 owner: {self.input_owner()} | "
+        line1 = (f"focus: {TITLES[self.focus]} | host 입력 owner: {self.shown_owner()} | "
                  f"shell mode: {mode}" + (f" | worker: {worker}" if worker else "") + f" | 자동화: {automation}")
         line2 = (f"backend: {self.state.get('phase', 'unknown')} | bridge manager={peer('manager')} "
                  f"worker={peer('worker')} | 마지막 확인 {seen} | Ctrl-] ? 도움말")

@@ -332,7 +332,7 @@ class LiveRoleRequests(unittest.TestCase):
 
     def test_worker_terminal_call_reaches_the_backend_positive_control(self):
         # Positive control for the next test: the worker's own terminal call does reach the bridge socket.
-        script = [("main", "terminal", {"command": "echo MAIN_TERMINAL", "timeout_seconds": 1})]
+        script = [("main", "terminal", {"command": "echo MAIN_TERMINAL"})]
         self.run_role("worker", None, label="worker-main-terminal", wait_requests=2, script=script, bridge=True)
         self.assertTrue(self.bridge.hellos(), "the worker bridge extension did not connect")
         self.assertEqual([f["args"]["command"] for f in self.bridge.requests("terminal")], ["echo MAIN_TERMINAL"])
@@ -340,7 +340,7 @@ class LiveRoleRequests(unittest.TestCase):
     def test_a_worker_subagent_cannot_run_a_command_through_terminal(self):
         # C-D68 (2): even if a subagent's model calls ``terminal``, no command request may reach the backend.
         script = [("main", "task", self.task_args("explorer")),
-                  ("sub", "terminal", {"command": "echo SUBAGENT_TERMINAL", "timeout_seconds": 1})]
+                  ("sub", "terminal", {"command": "echo SUBAGENT_TERMINAL"})]
         _, requests = self.run_role("worker", None, label="worker-sub-terminal", wait_requests=3, script=script,
                                     bridge=True)
         self.assertIsNotNone(self.subagent(requests), "control invalid: the explorer subagent never ran")

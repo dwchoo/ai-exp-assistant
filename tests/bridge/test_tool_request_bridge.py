@@ -214,5 +214,24 @@ class ToolRequestBridgeTests(unittest.TestCase):
         self.assertEqual(undelivered, [])
 
 
+    # p27-cd68-fix-03 (review-02 P3 (3)): a closed or replaced session is reported, so its waiters are dropped.
+    def test_a_gone_peer_is_reported(self):
+        gone = []
+        self.bridge.set_tool_handler(self.handler, peer_gone=lambda peer: gone.append(peer.session_id))
+        first = self.connect("worker")
+        self.assertIsNotNone(first.read_kind("ready"))
+        second = self.connect("worker")  # replaces the first
+        self.assertIsNotNone(second.read_kind("ready"))
+        deadline = time.monotonic() + 3
+        while len(gone) < 1 and time.monotonic() < deadline:
+            time.sleep(0.02)
+        self.assertEqual(gone, [first.session_id])
+        second.close()
+        deadline = time.monotonic() + 3
+        while len(gone) < 2 and time.monotonic() < deadline:
+            time.sleep(0.02)
+        self.assertEqual(gone, [first.session_id, second.session_id])
+
+
 if __name__ == "__main__":
     unittest.main()

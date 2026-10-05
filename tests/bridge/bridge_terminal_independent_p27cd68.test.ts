@@ -1,6 +1,6 @@
 // C-D68 independent bridge tests (p27-cd68-test-01): the worker `terminal` tool, Workbench notices and the manager
 // rule, against a fake backend peer on a real Unix socket. No OMP, no provider. Expectations from DECISIONS.md C-D68
-// (1), (3), (7), (8), not from bridge.ts.
+// (1), (3), (7), (8), (9), not from bridge.ts.
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 import { mkdtemp, rm } from "node:fs/promises";
@@ -105,35 +105,37 @@ test("C-D68 (1)/(3): terminal exists only for the worker; the manager keeps to_w
 	} finally { await manager.close(); }
 });
 
-test("C-D68 (7): wait default 120 s, at most 1800 s (schema and the bridge's own wait)", async () => {
+test("C-D68 (9): the wait is fixed at 120 s; no timeout_seconds in the schema or description", async () => {
+	// C-D68 (9) replaces (7)'s "default 120 s, at most 1800 s": the worker sets no wait.
 	const worker = await startBridge("worker");
 	try {
-		const schema = worker.tools.get("terminal")!.parameters.properties.timeout_seconds;
-		assert.equal(schema.maximum, 1800);
-		assert.equal(schema.minimum, 1);
-		assert.match(schema.description, /null for 120/);
+		const terminal = worker.tools.get("terminal")!;
+		assert.deepEqual(Object.keys(terminal.parameters.properties), ["command"]);
+		assert.deepEqual(terminal.parameters.required, ["command"]);
+		assert.equal(terminal.parameters.additionalProperties, false);
+		assert.doesNotMatch(JSON.stringify(terminal), /timeout_seconds|1800/);
+		assert.match(terminal.description, /120 s/);
+		assert.match(terminal.description, /end your turn/i);
+		assert.match(terminal.description, /do not send progress reports/i);
 	} finally { await worker.close(); }
-	// The bridge waits for the backend's answer a bit longer than the asked wait, never past 1800 s (+ start slack).
-	const base = terminalTimeoutMs({ command: "x", timeout_seconds: null });
-	assert.ok(base >= 120_000 && base <= 180_000, `default ${base}`);
-	const max = terminalTimeoutMs({ command: "x", timeout_seconds: 1800 });
-	assert.ok(max >= 1_800_000 && max <= 1_860_000, `max ${max}`);
-	assert.equal(terminalTimeoutMs({ command: "x", timeout_seconds: 50_000 }), max, "clamped to the maximum");
-	assert.equal(terminalTimeoutMs({ command: "x", timeout_seconds: 0 }), base);
-	assert.equal(terminalTimeoutMs({ command: "x", timeout_seconds: -3 }), base);
-	assert.equal(terminalTimeoutMs({ command: "x", timeout_seconds: 1.5 }), base);
-	assert.equal(terminalTimeoutMs({ command: "x", timeout_seconds: "60" }), base);
+	// The bridge waits for the backend's answer a bit longer than the fixed wait, whatever the arguments are.
+	const base = terminalTimeoutMs({ command: "x" });
+	assert.ok(base >= 120_000 && base <= 180_000, `fixed ${base}`);
+	for (const params of [{ command: "x", timeout_seconds: 1800 }, { command: "x", timeout_seconds: 50_000 },
+		{ command: "x", timeout_seconds: null }, { command: "x", timeout_seconds: "60" }, undefined, null]) {
+		assert.equal(terminalTimeoutMs(params), base, JSON.stringify(params));
+	}
 });
 
 test("C-D68 (8): a terminal call answered by the backend is not abandoned; an abort after the answer sends nothing", async () => {
 	const worker = await startBridge("worker");
 	try {
 		const controller = new AbortController();
-		const pending = worker.tools.get("terminal")!.execute("call-ok", { command: "make", timeout_seconds: 3 },
+		const pending = worker.tools.get("terminal")!.execute("call-ok", { command: "make" },
 			controller.signal, () => {}, {});
 		const request = await worker.waitFor(frame => frame.kind === "tool_request");
 		assert.equal(request.tool, "terminal");
-		assert.deepEqual(request.args, { command: "make", timeout_seconds: 3 });
+		assert.deepEqual(request.args, { command: "make" });
 		worker.reply({ kind: "tool_result", requestId: request.requestId, toolCallId: "call-ok",
 			result: { status: "exited", exit_code: 2, output_tail: "boom" } });
 		assert.deepEqual(textOf(await pending), { status: "exited", exit_code: 2, output_tail: "boom" });
@@ -149,7 +151,7 @@ test("C-D68 (8): two aborted terminal calls each name their own call in the aban
 	try {
 		for (const id of ["call-a1", "call-a2"]) {
 			const controller = new AbortController();
-			const pending = worker.tools.get("terminal")!.execute(id, { command: null, timeout_seconds: 60 },
+			const pending = worker.tools.get("terminal")!.execute(id, { command: null },
 				controller.signal, () => {}, {});
 			const request = await worker.waitFor(frame => frame.kind === "tool_request" && frame.tool === "terminal");
 			assert.equal(request.toolCallId, id);

@@ -3864,5 +3864,35 @@ class PauseResumeTests(unittest.TestCase):
         self.assertEqual([], self.calls("pause"))
 
 
+class WorkerTerminalDisplayTests(unittest.TestCase):
+    """p27-cd68-fix-03: smoke-01 P2 (owner shown as worker) and review-02 P3 (1) (readable held reason)."""
+
+    def render(self, snap):
+        model = ProductModel(FakeSender(), 30, 120, clock=lambda: 1000.0)
+        model.apply_snapshot(snap)
+        return model
+
+    def test_a_worker_terminal_command_shows_worker_as_the_host_owner(self):
+        snap = snapshot(owner="manager", mode="control_wait")
+        snap["panes"]["host_shell"]["operated_by"] = "worker"
+        model = self.render(snap)
+        self.assertIn("host 입력 owner: worker", model.status_lines()[0])
+        self.assertIn("owner=worker", model.pane_title(PaneId.HOST_SHELL))
+        self.assertEqual(model.input_owner(), "manager", "the control logic still sees the manager claim")
+        experiment = self.render(snapshot(owner="manager", mode="control_wait"))
+        self.assertIn("host 입력 owner: manager", experiment.status_lines()[0], "experiment runs unchanged")
+        returned = snapshot(owner="user")
+        returned["panes"]["host_shell"]["operated_by"] = "worker"
+        self.assertIn("host 입력 owner: user", self.render(returned).status_lines()[0], "the user owns it again")
+
+    def test_the_workers_own_command_held_reason_is_readable_without_the_job_hint(self):
+        snap = task_state(task={"status": "dispatched", "held_reason": "host_terminal_busy:worker_terminal_command"})
+        snap["panes"]["host_shell"]["shell"]["held_reasons"] = ["manual_jobs"]
+        line = self.render(snap).status_lines()[1]
+        self.assertIn("worker 명령 실행 중", line)
+        self.assertNotIn("host_terminal_busy:", line)
+        self.assertNotIn("wb-handoff", line, "the user has nothing to clear")
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -390,7 +390,7 @@ test("strict-mode placeholders (nulls, blanks, false flags) pass the registered 
 });
 
 // C-D68 (1): the worker's `terminal` tool; (3): the manager's to_worker says the worker does the task.
-test("worker registers terminal: strict, essential, nullable command and timeout_seconds; manager has none", async () => {
+test("worker registers terminal: strict, essential, one nullable command (no wait input); manager has none", async () => {
 	const worker = await startBridge("worker");
 	try {
 		const tool = worker.tools.get("terminal")!;
@@ -398,12 +398,12 @@ test("worker registers terminal: strict, essential, nullable command and timeout
 		assert.equal(tool.loadMode, "essential");
 		const parameters = tool.parameters as Schema;
 		assert.equal(parameters.additionalProperties, false);
-		assert.deepEqual(Object.keys(parameters.properties).sort(), ["command", "timeout_seconds"]);
-		assert.deepEqual([...parameters.required].sort(), ["command", "timeout_seconds"]);
+		// C-D68 (9): the wait is fixed at 120 s; the worker sets none.
+		assert.deepEqual(Object.keys(parameters.properties), ["command"]);
+		assert.deepEqual([...parameters.required], ["command"]);
 		assert.deepEqual(parameters.properties.command.type, ["string", "null"]);
-		assert.deepEqual(parameters.properties.timeout_seconds.type, ["integer", "null"]);
-		assert.equal(parameters.properties.timeout_seconds.maximum, 1800);
-		assert.match(parameters.properties.timeout_seconds.description, /\(1-1800\); null for 120\./);
+		assert.doesNotMatch(JSON.stringify(parameters) + tool.description, /timeout_seconds|1800/);
+		assert.match(tool.description, /waits up to 120 s for the exit/);
 		// C-D68 (7): the host shell's current directory (where the user last cd'd), not the project directory.
 		assert.match(parameters.properties.command.description, /current directory of the host terminal/);
 		assert.doesNotMatch(parameters.properties.command.description, /project directory/);
@@ -414,19 +414,19 @@ test("worker registers terminal: strict, essential, nullable command and timeout
 			/One command at a time/, /terminal_command_running/, /keeps running/,
 			// C-D68 (8): on running the worker ends its turn; Workbench checks every 60 s and notifies the end.
 			/status running: end your turn and do not start another command/,
-			/check every 60 s while it runs and a completion notice when it exits/]) {
+			/check every 60 s while it runs and a completion notice when it exits/,
+			// smoke-01 M3: no progress spam after running.
+			/do not send progress reports about it unless the user or the manager asks or a check shows a problem/]) {
 			assert.match(tool.description, needle);
 		}
 		for (const text of [tool.description, parameters.properties.command.description]) {
 			assert.doesNotMatch(text, /wait for it again|waits again|to wait again/, "no re-wait loop");
 		}
-		for (const args of [{ command: "pytest -q", timeout_seconds: null }, { command: null, timeout_seconds: 60 }]) {
+		for (const args of [{ command: "pytest -q" }, { command: null }]) {
 			assert.deepEqual(schemaErrors(parameters, args), [], JSON.stringify(args));
 		}
-		assert.notDeepEqual(schemaErrors(parameters, { command: "ls", timeout_seconds: null, cwd: "/" }), []);
-		assert.deepEqual(schemaErrors(parameters, { command: "ls", timeout_seconds: 1800 }), []);
-		assert.notDeepEqual(schemaErrors(parameters, { command: "ls", timeout_seconds: 1801 }), []);
-		assert.notDeepEqual(schemaErrors(parameters, { command: "ls", timeout_seconds: 1.5 }), []);
+		assert.notDeepEqual(schemaErrors(parameters, { command: "ls", cwd: "/" }), []);
+		assert.notDeepEqual(schemaErrors(parameters, { command: "ls", timeout_seconds: 180 }), [], "no wait input");
 	} finally { await worker.close(); }
 	const manager = await startBridge("manager");
 	try {
@@ -437,23 +437,20 @@ test("worker registers terminal: strict, essential, nullable command and timeout
 	} finally { await manager.close(); }
 });
 
-test("terminal waits for the timeout it asks for plus a start slack; default 120 s, at most 1800 s", () => {
-	assert.equal(terminalTimeoutMs({ command: "x", timeout_seconds: 1 }), 31_000);
-	assert.equal(terminalTimeoutMs({ command: "x", timeout_seconds: null }), 150_000);
-	assert.equal(terminalTimeoutMs({ command: "x", timeout_seconds: 1800 }), 1_830_000);
-	assert.equal(terminalTimeoutMs({ command: "x", timeout_seconds: 99_999 }), 1_830_000);
-	assert.equal(terminalTimeoutMs({ command: "x", timeout_seconds: true }), 150_000);
-	assert.equal(terminalTimeoutMs(null), 150_000);
+test("terminal waits a fixed 120 s plus a start slack (C-D68 (9))", () => {
+	// C-D68 (9): fixed 120 s + the start slack, whatever the call carries.
+	for (const params of [{ command: "x" }, { command: "x", timeout_seconds: 1800 }, { command: "x", timeout_seconds: 1 }, null]) {
+		assert.equal(terminalTimeoutMs(params), 150_000, JSON.stringify(params));
+	}
 });
 
 test("terminal sends one tool_request and outlives the 10 s handoff timeout", async () => {
 	const bridge = await startBridge("worker");
 	try {
-		const pending = bridge.tools.get("terminal")!.execute("call-term", { i: "run tests", command: "pytest -q",
-			timeout_seconds: 5 }, new AbortController().signal, () => {}, {});
+		const pending = bridge.tools.get("terminal")!.execute("call-term", { i: "run tests", command: "pytest -q" }, new AbortController().signal, () => {}, {});
 		const request = await bridge.waitFor(frame => frame.kind === "tool_request");
 		assert.equal(request.tool, "terminal");
-		assert.deepEqual(request.args, { command: "pytest -q", timeout_seconds: 5 });
+		assert.deepEqual(request.args, { command: "pytest -q" });
 		await delay(10_400);
 		const backendResult = { status: "exited", exit_code: 0, output_tail: "1 passed", log_path: "/tmp/x.log" };
 		bridge.reply({ kind: "tool_result", requestId: request.requestId, toolCallId: "call-term", result: backendResult });
@@ -466,7 +463,7 @@ test("aborting a terminal call stops only the wait: the result says the command 
 	const bridge = await startBridge("worker");
 	try {
 		const controller = new AbortController();
-		const pending = bridge.tools.get("terminal")!.execute("call-ta", { command: "sleep 100", timeout_seconds: null },
+		const pending = bridge.tools.get("terminal")!.execute("call-ta", { command: "sleep 100" },
 			controller.signal, () => {}, {});
 		await bridge.waitFor(frame => frame.kind === "tool_request");
 		controller.abort();
@@ -543,7 +540,7 @@ test("a subagent session never connects to the bridge and its bridge tools refus
 		// session_start the bridge tools leave the session's active tools: the subagent model is not offered them.
 		assert.deepEqual(sub.activeToolSets, [["read", "grep", "yield"]]);
 		for (const [name, args] of [["to_manager", { kind: "progress", message: "x" }],
-			["terminal", { command: "echo hi", timeout_seconds: 1 }]] as const) {
+			["terminal", { command: "echo hi" }]] as const) {
 			const result = textOf(await sub.tools.get(name)!.execute(`call-${name}`, args,
 				new AbortController().signal, () => {}, { agent: SUBAGENT }));
 			assert.deepEqual([result.status, result.reason], ["rejected", "subagent_not_allowed"], name);

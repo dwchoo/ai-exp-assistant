@@ -189,6 +189,7 @@ class G3BridgeServer:
         self._closed = False
         self._tool_handler: ToolHandler | None = None
         self._tool_undelivered: Callable[[BridgePeer, dict[str, Any]], None] | None = None
+        self._peer_gone: Callable[[BridgePeer], None] | None = None
         # CW-18: one serialized delivery path per target OMP. Every TaskMailbox on this
         # bridge (workflow stage deliveries and handoff outbox lanes) delivers under it.
         self._delivery_locks = {role: Lock() for role in (ActorRole.MANAGER, ActorRole.WORKER)}
@@ -290,17 +291,20 @@ class G3BridgeServer:
         return self._delivery_locks[_role(role)]
 
     def set_tool_handler(self, handler: ToolHandler | None, *,
-                         undelivered: Callable[[BridgePeer, dict[str, Any]], None] | None = None) -> None:
+                         undelivered: Callable[[BridgePeer, dict[str, Any]], None] | None = None,
+                         peer_gone: Callable[[BridgePeer], None] | None = None) -> None:
         """Route ``tool_request`` frames (CW-18 ``to_worker``/``to_manager``) to ``handler``.
 
         ``undelivered(peer, request)`` (p27-cd68-fix-01) is told when the
         handler's result could not be written to the session that asked (the
         session was replaced, the socket closed or the write timed out): the
-        caller never got it.
+        caller never got it. ``peer_gone(peer)`` (p27-cd68-fix-03) is told when
+        a session's connection ended (closed or replaced by a new hello).
         """
         with self._condition:
             self._tool_handler = handler
             self._tool_undelivered = undelivered
+            self._peer_gone = peer_gone
 
     def _accept_tool_request(self, peer: _LivePeer, frame: dict[str, Any]) -> None:
         """Called under the condition lock; the handler runs on its own thread."""
@@ -382,6 +386,12 @@ class G3BridgeServer:
                 if pending_peer is peer:
                     self._pending_acks.pop(request_id, None)
             self._condition.notify_all()
+            gone = self._peer_gone
+        if gone is not None:
+            try:
+                gone(peer.public)
+            except Exception:
+                pass  # the hook never changes the bridge
 
     def _receive(self, peer: _LivePeer, frame: dict[str, Any]) -> None:
         with self._condition:

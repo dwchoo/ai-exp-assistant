@@ -13,6 +13,14 @@ through ``HandoffService.handle`` (which answers at once): this call may wait.
   that inherits the parent's cwd and exported environment. The user sees the
   output in the host pane (the pane keeps every byte; the service only reads a
   copy).
+- What the user sees (p27-cd68-fix-03, smoke-01 P1): the child prints
+  ``[worker] $ <command>`` into the host pane before the command runs; the
+  child is ``<shell> -c 'printf ...; exec "$0" -c "$1"' <shell> <command>``, so
+  the command itself still runs exactly as ``<shell> -c <command>`` (same PID,
+  ``$0``, no positional parameters) and nothing is typed into the parent
+  shell or its history. While the command holds the host shell,
+  ``host_operator()`` is ``worker`` (the UI shows the worker as the user of
+  the host terminal; smoke-01 P2).
 - Where (C-D68 (7)): the host shell's current directory, where the user last
   cd'd. Nothing changes the parent shell's directory (no ``cd`` is typed; a
   ``cd`` inside the command stays in the child), so nothing is restored
@@ -28,8 +36,8 @@ through ``HandoffService.handle`` (which answers at once): this call may wait.
   continues and ``command: null`` may still wait for it); a new command while
   one runs is ``terminal_command_running``. No Task is needed (the journal then
   has ``task_id: null``).
-- One command at a time. The tool call waits up to ``timeout_seconds`` (default
-  120, at most 1800; C-D68 (7)): ``exited`` gives the exit code, a bounded output tail and
+- One command at a time. The tool call waits up to ``WAIT_SECONDS`` (120 s, fixed;
+  C-D68 (9): the worker sets no wait): ``exited`` gives the exit code, a bounded output tail and
   the full log file; otherwise ``running``: the command keeps running and the
   worker ends its turn (C-D68 (8); no re-wait loop). A call with ``command:
   null`` still returns the last command's result or running status. Aborting
@@ -90,8 +98,8 @@ from workbench.contracts.v1 import ActorRole
 
 TERMINAL_TOOL = "terminal"
 ABANDON_TOOL = "terminal_wait_abandoned"  # the bridge: a terminal call stopped waiting (abort or its timeout)
-DEFAULT_TIMEOUT = 120  # C-D68 (7): 2 minutes
-MAX_TIMEOUT = 1800  # C-D68 (7): 30 minutes
+WAIT_SECONDS = 120  # C-D68 (9): the first wait, fixed (no worker-supplied timeout)
+DEFAULT_TIMEOUT = WAIT_SECONDS  # the earlier name
 COMMAND_MAX = 8192
 TAIL_BYTES = 8192
 TAIL_LINES = 200
@@ -103,13 +111,16 @@ CHECK_INTERVAL = 60  # C-D68 (8): 1 minute
 NOTICE_RETRY = 2.0  # a busy or unreachable worker: the next delivery attempt
 NOTIFIER_TICK = 0.5
 CALLS_KEPT = 256  # terminal calls remembered for a late abandon signal
-_KEYS = frozenset({"command", "timeout_seconds"})
+_KEYS = frozenset({"command"})
+# The child prints the command line for the user, then becomes ``<shell> -c <command>`` (same PID).
+ECHO_SCRIPT = 'printf \'[worker] $ %s\\n\' "$1"; exec "$0" -c "$1"'
 _ANSI = re.compile(rb"\x1b\[[0-?]*[ -/]*[@-~]|\x1b\][^\x07\x1b]*(?:\x07|\x1b\\)|\x1b[P^_][^\x1b]*\x1b\\|\x1b[@-Z\\-_]")
 _CONTROL = re.compile(r"[\x00-\x08\x0b-\x1f\x7f]")
 
-RUNNING_DETAIL = ("The command keeps running in the host terminal. End your turn now and do not start another "
-                  "command (a new one is refused until it ends): Workbench sends you a check every 60 s while it "
-                  "runs and a completion notice when it exits. The user can stop it in the host terminal.")
+RUNNING_DETAIL = ("The command keeps running in the host terminal. End your turn now. Do not send progress reports "
+                  "about it unless the user or the manager asks or a check shows a problem, and do not start "
+                  "another command (a new one is refused until it ends): Workbench sends you a check every 60 s "
+                  "while it runs and a completion notice when it exits. The user can stop it in the host terminal.")
 CHECK_INSTRUCTION = ("Workbench check (automatic, every 60 s while your terminal command runs). Look at the new "
                      "output for errors or a hang. Do not start another command and do not wait for it. If it is "
                      "useful, report to the manager with to_manager (with no Task, tell the user in your reply); "
@@ -163,15 +174,12 @@ class HostGate:
 def validate_terminal_arguments(args: object) -> list[str]:
     """Errors naming the field and the expected value (never the value sent)."""
     if not isinstance(args, dict):
-        return ["arguments: must be an object {command, timeout_seconds}"]
-    errors = [f"{name}: unknown field; only command and timeout_seconds" for name in sorted(set(args) - _KEYS)]
+        return ["arguments: must be an object {command}"]
+    errors = [f"{name}: unknown field; only command" for name in sorted(set(args) - _KEYS)]
     command = args.get("command")
     if command is not None and (not isinstance(command, str) or len(command) > COMMAND_MAX or "\x00" in command):
         errors.append(f"command: a shell command string (at most {COMMAND_MAX} characters, no NUL), or null to "
                       "wait for the running command")
-    timeout = args.get("timeout_seconds")
-    if timeout is not None and (type(timeout) is not int or not 1 <= timeout <= MAX_TIMEOUT):
-        errors.append(f"timeout_seconds: an integer from 1 to {MAX_TIMEOUT}, or null for {DEFAULT_TIMEOUT}")
     return errors
 
 
@@ -210,6 +218,7 @@ class _Command:
     log_bytes: int = 0
     log_truncated: bool = False
     log_error: str | None = None
+    echo: bytes = b""  # the command line the child prints first, still to be skipped (as the PTY shows it)
     # C-D68 (8) notices; ``since`` is guarded by ``lock``, the rest by the service lock.
     lock: threading.Lock = field(default_factory=threading.Lock)
     since: bytearray = field(default_factory=bytearray)  # output since the last check (or waiting call)
@@ -227,6 +236,14 @@ class _Command:
     notice_logged: set = field(default_factory=set)
 
     def write(self, data: bytes) -> None:
+        if data and self.echo:  # the "[worker] $ <command>" line is for the user's pane, not the output
+            n = 0
+            while n < min(len(data), len(self.echo)) and data[n] == self.echo[n]:
+                n += 1
+            if n == len(data):
+                self.echo = self.echo[n:]
+                return
+            data, self.echo = (data[n:] if n == len(self.echo) else data), b""
         if not data:
             return
         self.recent.extend(data)
@@ -289,7 +306,8 @@ class TerminalService:
                  poll_interval: float = 0.03,
                  notify: Callable[[Mapping[str, Any]], str] | None = None,
                  clock: Callable[[], float] = time.monotonic, check_interval: float = CHECK_INTERVAL,
-                 notice_retry: float = NOTICE_RETRY, tick_interval: float = NOTIFIER_TICK):
+                 notice_retry: float = NOTICE_RETRY, tick_interval: float = NOTIFIER_TICK,
+                 wait_seconds: float = WAIT_SECONDS):
         self._handoffs = handoffs
         self._host_shell = host_shell
         self._gate = gate
@@ -309,6 +327,7 @@ class TerminalService:
         self._threads: list[threading.Thread] = []
         # C-D68 (8): checks and the completion notice (module docstring).
         self._notify = notify
+        self._wait_seconds = wait_seconds
         self._clock = clock
         self._check_interval = check_interval
         self._notice_retry = notice_retry
@@ -393,7 +412,7 @@ class TerminalService:
         command = args.get("command")
         if isinstance(command, str) and not command.strip():
             command = None  # strict schema: a blank optional field means "not used" (D1)
-        timeout = args.get("timeout_seconds") or DEFAULT_TIMEOUT
+        timeout = self._wait_seconds
         try:
             sensitive = tuple(self._sensitive_values())
         except Exception:
@@ -407,7 +426,7 @@ class TerminalService:
                             detail="Never put environment variable values in a command; use $NAME references.")
         task = self._task_id()
         self._journal({"type": "terminal_request", "key": key_dict, "request_id": parsed.request_id,
-                       "command": command, "timeout_seconds": timeout, "task_id": task})
+                       "command": command, "wait_seconds": timeout, "task_id": task})
         deadline = time.monotonic() + timeout
         if command is None:
             return self._wait_again(key_dict, deadline, key)
@@ -493,6 +512,28 @@ class TerminalService:
         if isinstance(parsed, dict) or parsed.role is not ActorRole.WORKER:
             return
         self._mark_abandoned(parsed.key, "terminal_result_undelivered")
+
+    def peer_gone(self, role: ActorRole | str, session_id: str, generation: int) -> None:
+        """The bridge connection of a session ended (closed or replaced; review-02 P3 (3)).
+
+        Its waiting ``terminal`` calls can no longer get a result: they are
+        dropped as abandoned, so checks resume and the completion notice is sent.
+        """
+        role_value = getattr(role, "value", role)
+        if role_value != ActorRole.WORKER.value:
+            return
+        with self._lock:
+            keys = [key for key, command in self._calls.items()
+                    if key[:3] == (role_value, session_id, generation) and key in command.waiters]
+        if keys:
+            self._journal({"type": "terminal_peer_gone", "session_id": session_id, "generation": generation,
+                           "calls": len(keys)})
+        for key in keys:
+            self._mark_abandoned(key, "terminal_wait_abandoned")
+
+    def host_operator(self) -> str | None:
+        """``worker`` while the worker's terminal command holds the host shell (smoke-01 P2), else None."""
+        return "worker" if self._gate.owner == "terminal" else None
 
     def _mark_abandoned(self, key: tuple, kind: str) -> None:
         with self._lock:
@@ -724,6 +765,10 @@ class TerminalService:
             except _CallAbandoned:
                 port.release_hold(HOLD_REASON)
                 self._give_back(port, after_failure=True)
+                try:
+                    command.log_path.unlink()  # nothing ran: no empty log is left (review-02 P3 (2))
+                except OSError:
+                    pass
                 self._journal({"type": "terminal_aborted", "key": key_dict, "stage": "before_submit",
                                "command_id": command.command_id})
                 return {"status": "aborted", "reason": "call_abandoned", "command_id": command.command_id,
@@ -801,7 +846,12 @@ class TerminalService:
             raise _CallAbandoned
         command.started, command.started_at = time.monotonic(), _now()
         command.check_base = self._clock()
-        port.submit(control, command.command, dict(self._automation()))
+        executable = getattr(getattr(port, "choice", None), "executable", None)
+        if not isinstance(executable, str) or not executable:
+            raise RuntimeError("host shell executable unknown; no command sent")
+        command.echo = f"[worker] $ {command.command}\n".encode().replace(b"\n", b"\r\n")
+        port.submit(control, [executable, "-c", ECHO_SCRIPT, executable, command.command],
+                    dict(self._automation()))
 
     # -- following a command ----------------------------------------------------------------
     def _follow(self, port: Any, command: _Command) -> None:

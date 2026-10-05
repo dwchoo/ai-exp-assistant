@@ -47,10 +47,16 @@ class SkillTextTests(unittest.TestCase):
         self.assertRegex(text, re.compile(r"no other way to (run|execute) commands", re.I))
         self.assertNotRegex(text, re.compile(r"\buse (the )?`?bash`?\b|\buse (the )?`?eval`?\b", re.I))
         # (7)/(8): the decided behaviour, in the worker's words
-        for needle in ("120", "1800", "terminal_check", "terminal_done", "host_terminal_busy", "End your turn"):
+        # C-D68 (9): the wait is fixed at 120 s; the worker's wait input (and the 1800 s maximum) is gone.
+        for needle in ("120", "terminal_check", "terminal_done", "host_terminal_busy", "End your turn"):
             self.assertIn(needle, text)
         self.assertNotRegex(text, re.compile(r"call `?terminal`? (again )?with `?command`?:? null to wait again", re.I),
                             "C-D68 (8): no re-wait loop")
+        self.assertNotIn("1800", text, "C-D68 (9): no 1800 s maximum")
+        self.assertNotIn("timeout_seconds", text, "C-D68 (9): the worker sets no wait")
+        # C-D68 (9) / smoke M2, M3: end the turn and send no progress reports while it runs; a queued handoff is not resent
+        self.assertRegex(text, re.compile(r"end your turn[^.]*\.[^.]*do not send progress", re.I | re.S))
+        self.assertRegex(text, re.compile(r"never send the same report again|do not send it again", re.I))
 
     def test_to_manager_skill_names_only_the_workbench_subagents(self):
         text = body("to-manager")

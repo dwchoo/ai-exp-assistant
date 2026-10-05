@@ -311,11 +311,11 @@ const HANDOFF_TOOLS: Record<Role, { name: "to_worker" | "to_manager"; label: str
 };
 
 // C-D68 (1): the worker's only way to run a command. The backend runs it in the Workbench host terminal (the
-// persistent shell the user sees) under the idle-only rule and answers when it exits or the timeout passes.
-// C-D68 (7): the command runs in the host shell's current directory; wait 120 s by default, at most 1800 s.
-const TERMINAL_DEFAULT_TIMEOUT_S = 120;
-const TERMINAL_MAX_TIMEOUT_S = 1800;
-// The backend's own wait ends at timeout_seconds; this covers its start (hold, wb-handoff, submit).
+// persistent shell the user sees) under the idle-only rule and answers when it exits or its wait ends.
+// C-D68 (7): the command runs in the host shell's current directory. C-D68 (9): the wait is fixed at 120 s; the
+// worker sets none (a model chose 180 s in smoke-01 and skipped the running/notice flow).
+const TERMINAL_WAIT_S = 120;
+// The backend's own wait ends after TERMINAL_WAIT_S; this covers its start (hold, wb-handoff, submit).
 const TERMINAL_RESULT_SLACK_MS = 30_000;
 const TERMINAL_ABORT_DETAIL = "Waiting stopped. A command that already started keeps running in the host terminal; "
 	+ "end your turn: Workbench sends a check every 60 s while it runs and a completion notice when it exits.";
@@ -349,15 +349,12 @@ export function isSubagentContext(ctx: unknown): boolean {
 const TERMINAL_PARAMETERS = {
 	type: "object",
 	additionalProperties: false,
-	required: ["command", "timeout_seconds"],
+	required: ["command"],
 	properties: {
 		command: { type: ["string", "null"], maxLength: MESSAGE_MAX,
 			description: "One shell command line (bash -c / sh -c), run in the current directory of the host terminal "
 				+ "(where the user last cd'd; a cd inside the command does not change it); null returns the last "
 				+ "command's result or running status. No environment variable values (use $NAME)." },
-		timeout_seconds: { type: ["integer", "null"], minimum: 1, maximum: TERMINAL_MAX_TIMEOUT_S,
-			description: `How long to wait for the exit (1-${TERMINAL_MAX_TIMEOUT_S}); null for `
-				+ `${TERMINAL_DEFAULT_TIMEOUT_S}. On timeout the command keeps running.` },
 	},
 };
 const TERMINAL_TOOL = {
@@ -369,16 +366,16 @@ const TERMINAL_TOOL = {
 		+ "when the host terminal is free (the user's "
 		+ "idle prompt, no job, no experiment run): otherwise you get host_terminal_busy and nothing ran; paused means "
 		+ "the user paused Workbench (a running command continues). One command at a time: a new one while another runs gets terminal_command_running. "
-		+ "If the command outlives timeout_seconds it keeps running and you get status running: end your turn and do "
-		+ "not start another command; Workbench sends you a check every 60 s while it runs and a completion notice "
-		+ "when it exits. Set unused fields to null.",
+		+ `The call waits up to ${TERMINAL_WAIT_S} s for the exit. If the command outlives that it keeps running and `
+		+ "you get status running: end your turn and do not start another command; do not send progress reports "
+		+ "about it unless the user or the manager asks or a check shows a problem. Workbench sends you a check "
+		+ "every 60 s while it runs and a completion notice when it exits.",
 };
 
-export function terminalTimeoutMs(params: unknown): number {
-	const value = typeof params === "object" && params !== null ? (params as Frame).timeout_seconds : undefined;
-	const seconds = Number.isSafeInteger(value) && (value as number) >= 1
-		? Math.min(value as number, TERMINAL_MAX_TIMEOUT_S) : TERMINAL_DEFAULT_TIMEOUT_S;
-	return seconds * 1000 + TERMINAL_RESULT_SLACK_MS;
+// How long this bridge waits for the backend's terminal result (C-D68 (9): fixed; the call's arguments do not
+// change it).
+export function terminalTimeoutMs(_params?: unknown): number {
+	return TERMINAL_WAIT_S * 1000 + TERMINAL_RESULT_SLACK_MS;
 }
 
 export default function workbenchG3Extension(pi: any): void {

@@ -7,7 +7,7 @@ Expectations come from DECISIONS.md C-D68 (1), (7), (8) and C-D65 (2), not from 
   output) and returns the exit code and the end of the output (plus the log file).
 - (7): it runs in the host terminal's current directory (where the user last cd'd); the parent shell's directory
   and environment are not changed; usable without a Task; paused -> only a NEW command is refused (a running one
-  continues and may still be waited for); default wait 120 s, at most 1800 s; the command outlives the wait.
+  continues and may still be waited for); wait fixed at 120 s (C-D68 (9) replaced the 1800 s maximum; timeout_seconds is invalid); the command outlives the wait.
 - (8): "running" after the wait; while it runs a check every 60 s (merged into the latest while the worker is
   busy, none while paused); when it ends and no waiting call received it, ONE completion notice (also after an
   aborted wait); paused -> delivered at the resume.
@@ -189,7 +189,12 @@ class RealShellFixture(unittest.TestCase):
         self.assertTrue(wait_until(self.idle, 8))
         return printed[-1][len(marker) + 1:]
 
-    def tool(self, args, call_id=None):
+    def tool(self, args, call_id=None, raw=False):
+        # "wait" is test-only (C-D68 (9): the worker sets no wait): the service's fixed wait for this call. It is
+        # never sent to the tool; raw=True sends args exactly as given (to check rejected fields).
+        if not raw and isinstance(args, dict):
+            args = dict(args)
+            self.terminal._wait_seconds = args.pop("wait", None) or 30
         return self.terminal.handle(ActorRole.WORKER, call(args, call_id))
 
     def journal_text(self) -> str:
@@ -215,12 +220,12 @@ class IdleOnlyRefusalMatrix(RealShellFixture):
         self.user_types(b"sleep 30 &\r")
         self.assertTrue(wait_until(lambda: not self.idle(), 8), "the job did not make the shell busy")
         before = len(self.screen())
-        result = self.tool({"command": "echo JOB-NEVER", "timeout_seconds": 5})
+        result = self.tool({"command": "echo JOB-NEVER", "wait": 5})
         self.assertEqual(result["status"], "host_terminal_busy", result)
         self.assert_nothing_ran("JOB-NEVER", before)
         self.user_types(b"kill %1; wait\r")
         self.assertTrue(wait_until(self.idle, 10), "the shell did not become idle after the job ended")
-        done = self.tool({"command": "echo JOB-AFTER", "timeout_seconds": 20})
+        done = self.tool({"command": "echo JOB-AFTER", "wait": 20})
         self.assertEqual((done["status"], done["exit_code"]), ("exited", 0), done)
 
     def test_a_stopped_job_refuses_without_typing(self):
@@ -231,7 +236,7 @@ class IdleOnlyRefusalMatrix(RealShellFixture):
         self.assertTrue(wait_until(lambda: b"Stopped" in self.screen(), 8), self.screen()[-300:])
         self.assertTrue(wait_until(lambda: self.pane.state["parent_mode"] == "manual_prompt", 8))
         before = len(self.screen())
-        result = self.tool({"command": "echo STOPPED-NEVER", "timeout_seconds": 5})
+        result = self.tool({"command": "echo STOPPED-NEVER", "wait": 5})
         self.assertEqual(result["status"], "host_terminal_busy", result)
         self.assertIn("job", result["reason"], result)  # refused because of the stopped job, at a prompt
         self.assert_nothing_ran("STOPPED-NEVER", before)
@@ -245,7 +250,7 @@ class IdleOnlyRefusalMatrix(RealShellFixture):
         self.user_types(b"sleep 30\r")
         self.assertTrue(wait_until(lambda: not self.idle(), 8))
         before = len(self.screen())
-        result = self.tool({"command": "echo FG-NEVER", "timeout_seconds": 5})
+        result = self.tool({"command": "echo FG-NEVER", "wait": 5})
         self.assertEqual(result["status"], "host_terminal_busy", result)
         self.assert_nothing_ran("FG-NEVER", before)
         self.user_types(b"\x03")
@@ -255,7 +260,7 @@ class IdleOnlyRefusalMatrix(RealShellFixture):
         self.user_types(b"echo half-typed-by-user")
         self.assertTrue(wait_until(lambda: not self.idle(), 8))
         before = len(self.screen())
-        result = self.tool({"command": "echo TYPED-NEVER", "timeout_seconds": 5})
+        result = self.tool({"command": "echo TYPED-NEVER", "wait": 5})
         self.assertEqual(result["status"], "host_terminal_busy", result)
         self.assert_nothing_ran("TYPED-NEVER", before)
         self.user_types(b"\r")  # the user's own line still runs as typed
@@ -265,19 +270,19 @@ class IdleOnlyRefusalMatrix(RealShellFixture):
     def test_an_exited_shell_refuses(self):
         self.user_types(b"exit\r")
         self.assertTrue(wait_until(self.pane.exited, 8))
-        result = self.tool({"command": "echo EXITED-NEVER", "timeout_seconds": 5})
+        result = self.tool({"command": "echo EXITED-NEVER", "wait": 5})
         self.assertEqual(result["status"], "host_terminal_busy", result)
         self.assertEqual(self.logs(), [])
 
     def test_an_active_experiment_refuses_and_so_does_a_starting_one(self):
         self.assertIsNone(self.gate.acquire("experiment"))
         before = len(self.screen())
-        result = self.tool({"command": "echo EXP-NEVER", "timeout_seconds": 5})
+        result = self.tool({"command": "echo EXP-NEVER", "wait": 5})
         self.assertEqual(result["status"], "host_terminal_busy", result)
         self.assert_nothing_ran("EXP-NEVER", before)
         self.gate.release("experiment")
         self.activity = "an experiment run is starting"
-        result = self.tool({"command": "echo EXP-NEVER", "timeout_seconds": 5})
+        result = self.tool({"command": "echo EXP-NEVER", "wait": 5})
         self.assertEqual(result["status"], "host_terminal_busy", result)
         self.assert_nothing_ran("EXP-NEVER", before)
         self.assertIsNone(self.gate.owner, "a refusal leaves the gate free")
@@ -285,23 +290,31 @@ class IdleOnlyRefusalMatrix(RealShellFixture):
     def test_paused_refuses_a_new_command_only(self):
         self.paused = True
         before = len(self.screen())
-        result = self.tool({"command": "echo PAUSED-NEVER", "timeout_seconds": 5})
+        result = self.tool({"command": "echo PAUSED-NEVER", "wait": 5})
         self.assertEqual(result["status"], "paused", result)
         self.assert_nothing_ran("PAUSED-NEVER", before)
         self.paused = False
-        ok = self.tool({"command": "echo PAUSED-AFTER", "timeout_seconds": 20})
+        ok = self.tool({"command": "echo PAUSED-AFTER", "wait": 20})
         self.assertEqual((ok["status"], ok["exit_code"]), ("exited", 0), ok)
 
-    def test_timeouts_default_120_max_1800(self):
-        # C-D68 (7): the default is 120 s and 1800 s is the maximum; more is not accepted silently.
-        self.paused = True  # nothing runs; the journaled request shows the wait used
-        self.tool({"command": "true", "timeout_seconds": None})
-        self.tool({"command": "true", "timeout_seconds": 1800})
-        waits = [r["timeout_seconds"] for r in self.journal() if r["type"] == "terminal_request"]
-        self.assertEqual(waits, [120, 1800])
-        for bad in (1801, 0, -5, 3600):
-            result = self.tool({"command": "true", "timeout_seconds": bad})
+    def test_wait_is_fixed_at_120_and_timeout_seconds_is_rejected(self):
+        # C-D68 (9) replaces (7)'s "max 1800": the wait is fixed at 120 s; the worker supplies none, so
+        # timeout_seconds (any value, null included) is invalid_arguments and nothing runs or is journaled as run.
+        fresh = TerminalService(handoffs=self.handoffs, host_shell=lambda: HostShellPort(self.pane, lambda: self.pane),
+                                gate=HostGate(), log_root=self.root / "workflow" / "terminal2",
+                                automation=lambda: AUTOMATION, paused=lambda: True, check_interval=3600)
+        self.addCleanup(fresh.close)
+        out = fresh.handle(ActorRole.WORKER, call({"command": "true"}))  # paused: nothing runs, request journaled
+        self.assertEqual(out["status"], "paused", out)
+        waits = [r for r in self.journal() if r["type"] == "terminal_request"]
+        self.assertEqual([r.get("wait_seconds") for r in waits], [120], "fixed 120 s wait")
+        self.assertTrue(all("timeout_seconds" not in r for r in waits))
+        before = len(self.screen())
+        for bad in (1800, 5, None, 0, "60"):
+            result = self.tool({"command": "echo TS-NEVER", "timeout_seconds": bad}, raw=True)
             self.assertEqual((result["status"], result["reason"]), ("rejected", "invalid_arguments"), bad)
+            self.assertIn("timeout_seconds", json.dumps(result))
+        self.assert_nothing_ran("TS-NEVER", before)
 
 
 class WhereAndWhat(RealShellFixture):
@@ -310,7 +323,7 @@ class WhereAndWhat(RealShellFixture):
         target.mkdir()
         self.user_cds(target)
         result = self.tool({"command": "pwd; cd /; export WB_CHILD_ONLY=leaked; unset WB_KEEP; echo moved-to-$PWD",
-                           "timeout_seconds": 20})
+                           "wait": 20})
         self.assertEqual((result["status"], result["exit_code"]), ("exited", 0), result)
         self.assertEqual(result["output_tail"].replace("\r", "").split("\n")[0], str(target))
         self.assertEqual(result.get("cwd"), str(target))
@@ -322,7 +335,7 @@ class WhereAndWhat(RealShellFixture):
     def test_exit_code_output_visible_in_pane_and_log(self):
         marker = f"visible-{uuid4().hex[:8]}"
         before = len(self.screen())
-        result = self.tool({"command": f"echo {marker}-out; echo {marker}-err >&2; exit 7", "timeout_seconds": 20})
+        result = self.tool({"command": f"echo {marker}-out; echo {marker}-err >&2; exit 7", "wait": 20})
         self.assertEqual((result["status"], result["exit_code"]), ("exited", 7), result)
         self.assertIn(f"{marker}-out", result["output_tail"])
         self.assertIn(f"{marker}-err", result["output_tail"])
@@ -334,7 +347,7 @@ class WhereAndWhat(RealShellFixture):
         self.assertEqual(self.user_sees('echo "BACK=$?"', "BACK"), "0", "the user's prompt is clean again")
 
     def test_signal_exit_is_reported(self):
-        result = self.tool({"command": "echo before-signal; kill -KILL $$", "timeout_seconds": 20})
+        result = self.tool({"command": "echo before-signal; kill -KILL $$", "wait": 20})
         self.assertEqual(result["status"], "exited", result)
         self.assertEqual(result["exit_code"], 137, result)
         self.assertEqual(result.get("signal"), 9, result)
@@ -343,7 +356,7 @@ class WhereAndWhat(RealShellFixture):
 
     def test_no_task_needed_and_the_journal_has_no_output_or_env_value(self):
         marker = f"journal-out-{uuid4().hex[:8]}"
-        result = self.tool({"command": f'echo {marker}; echo "tok=$WB_CD68_TOKEN"', "timeout_seconds": 20})
+        result = self.tool({"command": f'echo {marker}; echo "tok=$WB_CD68_TOKEN"', "wait": 20})
         self.assertEqual((result["status"], result["exit_code"]), ("exited", 0), result)
         self.assertIn(SECRET_VALUE, Path(result["log_path"]).read_text(), "the log holds the full output")
         text = self.journal_text()
@@ -356,7 +369,7 @@ class WhereAndWhat(RealShellFixture):
             blob = json.dumps(record)
             for key in ('"output_tail":', '"new_output":', '"output":'):
                 self.assertNotIn(key, blob, record)
-        refused = self.tool({"command": f"echo {SECRET_VALUE}", "timeout_seconds": 5})
+        refused = self.tool({"command": f"echo {SECRET_VALUE}", "wait": 5})
         self.assertEqual(refused["status"], "rejected")
         self.assertNotIn(SECRET_VALUE, self.journal_text())
 
@@ -370,7 +383,7 @@ class CompletionNotice(RealShellFixture):
 
     def test_running_then_exactly_one_completion_notice(self):
         flag, command = self.gated("a")
-        first = self.tool({"command": command, "timeout_seconds": 1})
+        first = self.tool({"command": command, "wait": 1})
         self.assertEqual(first["status"], "running", first)
         self.assertEqual(self.notices.sent_of("terminal_done"), [])
         flag.touch()
@@ -381,13 +394,13 @@ class CompletionNotice(RealShellFixture):
         self.assertEqual((done[0]["command"], done[0]["exit_code"]), (command, 0))
         self.assertIn("ended-a", done[0]["output_tail"])
         self.assertEqual(done[0]["log_path"], first["log_path"])
-        again = self.tool({"command": None, "timeout_seconds": 5})  # the result can still be fetched
+        again = self.tool({"command": None, "wait": 5})  # the result can still be fetched
         self.assertEqual((again["status"], again["exit_code"]), ("exited", 0))
         time.sleep(0.3)
         self.assertEqual(len(self.notices.sent_of("terminal_done")), 1, "never twice")
 
     def test_a_waiting_call_that_gets_the_result_needs_no_notice(self):
-        result = self.tool({"command": "sleep 0.3; echo quick", "timeout_seconds": 20})
+        result = self.tool({"command": "sleep 0.3; echo quick", "wait": 20})
         self.assertEqual(result["status"], "exited")
         time.sleep(0.6)
         self.assertEqual(self.notices.sent_of("terminal_done"), [])
@@ -395,7 +408,7 @@ class CompletionNotice(RealShellFixture):
     def test_an_aborted_wait_still_gets_exactly_one_notice(self):
         flag, command = self.gated("b")
         out = {}
-        waiter = threading.Thread(target=lambda: out.update(self.tool({"command": command, "timeout_seconds": 30},
+        waiter = threading.Thread(target=lambda: out.update(self.tool({"command": command, "wait": 30},
                                                                      call_id="abort-me")))
         waiter.start()
         self.assertTrue(wait_until(lambda: self.terminal.current() is not None, 10))
@@ -414,7 +427,7 @@ class CompletionNotice(RealShellFixture):
 
     def test_a_busy_worker_gets_it_later_once(self):
         flag, command = self.gated("c")
-        self.assertEqual(self.tool({"command": command, "timeout_seconds": 1})["status"], "running")
+        self.assertEqual(self.tool({"command": command, "wait": 1})["status"], "running")
         self.notices.outcome = "deferred"
         flag.touch()
         self.assertTrue(wait_until(lambda: len(self.notices.of("terminal_done")) >= 2, 10), "not retried")
@@ -426,21 +439,21 @@ class CompletionNotice(RealShellFixture):
 
     def test_paused_holds_the_notice_and_the_resume_delivers_it(self):
         flag, command = self.gated("d")
-        first = self.tool({"command": command, "timeout_seconds": 1})
+        first = self.tool({"command": command, "wait": 1})
         self.assertEqual(first["status"], "running")
         self.paused = True
-        refused = self.tool({"command": "echo NEW-WHILE-PAUSED", "timeout_seconds": 5})
+        refused = self.tool({"command": "echo NEW-WHILE-PAUSED", "wait": 5})
         self.assertIn(refused["status"], ("paused", "terminal_command_running"), refused)
         flag.touch()  # the running command continues and ends while paused
         self.assertTrue(wait_until(lambda: self.terminal.current()["running"] is False, 10))
         time.sleep(0.6)
         self.assertEqual(self.notices.sent_of("terminal_done"), [], "a notice was sent while paused")
-        waited = self.tool({"command": None, "timeout_seconds": 5})  # waiting for it is allowed while paused
+        waited = self.tool({"command": None, "wait": 5})  # waiting for it is allowed while paused
         self.assertEqual((waited["status"], waited["exit_code"]), ("exited", 0), waited)
         # That wait received the result: the notice is then not needed; a fresh command proves the resume path.
         self.paused = False
         flag2, command2 = self.gated("e")
-        self.assertEqual(self.tool({"command": command2, "timeout_seconds": 1})["status"], "running")
+        self.assertEqual(self.tool({"command": command2, "wait": 1})["status"], "running")
         self.paused = True
         flag2.touch()
         self.assertTrue(wait_until(lambda: self.terminal.current()["running"] is False, 10))
@@ -463,7 +476,7 @@ class PeriodicChecks(RealShellFixture):
         self.counter = self.root / "count"
         command = (f"i=0; while [ ! -e {shlex.quote(str(self.flag))} ]; do i=$((i+1)); echo line-$i; "
                    f"echo $i > {shlex.quote(str(self.counter))}; sleep 0.1; done; echo slow-done")
-        result = self.tool({"command": command, "timeout_seconds": 1})
+        result = self.tool({"command": command, "wait": 1})
         self.assertEqual(result["status"], "running", result)
         return command
 
@@ -627,7 +640,7 @@ class HostGateRace(flow_fixtures.FlowFixture):
         self.addCleanup(terminal.close)
         out = {}
         thread = threading.Thread(target=lambda: out.update(terminal.handle(
-            ActorRole.WORKER, call({"command": "true", "timeout_seconds": 1}))))
+            ActorRole.WORKER, call({"command": "true"}))))
         thread.start()
         self.assertTrue(holding.wait(10))
         self.assertEqual(seen["owner_at_hold"], "terminal")

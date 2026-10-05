@@ -80,6 +80,9 @@ from workbench.contracts.v1 import ActorRole, MessageKind
 from workbench.ipc.bridge_g3.mailbox import BridgeDisconnected, BridgePeer, MailboxError, MailboxStatus
 
 HANDOFF_JOURNAL_NAME = "handoffs.jsonl"  # under DataLayout.workflow
+# p27-cd68-fix-03 (smoke-01 M2): "not yet processed" was read as "send it again".
+QUEUED_DETAIL = ("Accepted by Workbench; it is delivered to the other OMP once, in order. Do not send it again; "
+                 "a reply, if any, arrives as a new message.")
 TOOL_ROLES: dict[str, ActorRole] = {"to_worker": ActorRole.MANAGER, "to_manager": ActorRole.WORKER}
 TO_WORKER_KINDS = ("experiment", "work")
 TO_MANAGER_KINDS = ("answer", "progress", "done", "blocked", "report")
@@ -860,8 +863,7 @@ class HandoffService:
         with self._outbox_cv:
             self._outbox.append(entry)
             self._outbox_cv.notify_all()
-        return {"status": "queued", "handoff_id": entry.handoff_id,
-                "detail": "queued for delivery; not yet processed by the other OMP"}
+        return {"status": "queued", "handoff_id": entry.handoff_id, "detail": QUEUED_DETAIL}
 
     # -- outbox thread ------------------------------------------------------------
     def _next_due(self, role: ActorRole) -> tuple[_OutboxEntry | None, float | None]:

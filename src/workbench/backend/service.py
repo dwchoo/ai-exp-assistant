@@ -227,7 +227,8 @@ class Backend:
             notify=self._worker_notice)  # C-D68 (8): checks and the completion notice
         self.automation = self.automation_loop.status()
         # The role is the peer's authenticated hello role, never a frame field.
-        self.bridge.set_tool_handler(self._tool_request, undelivered=self._tool_result_undelivered)
+        self.bridge.set_tool_handler(self._tool_request, undelivered=self._tool_result_undelivered,
+                                     peer_gone=self._bridge_peer_gone)
         self.ui = UiServer(layout.ui_socket, self)
         self._write_record()
         self._shell_env = shell_environment(self.environment)
@@ -506,13 +507,25 @@ class Backend:
                 "phase": self.phase, "reason": self.reason,
                 "attached": self.ui is not None and self.ui.attached is not None,
                 "focus": self.focus.value,
-                "panes": {pane_id.value: pane.info() for pane_id, pane in self.panes.items()},
+                "panes": {pane_id.value: self._pane_info(pane, host=pane_id is PaneId.HOST_SHELL)
+                          for pane_id, pane in self.panes.items()},
                 "bridge": self.bridge_state(), "automation": self._automation_view(),
                 "task": self.flow.task_view() if self.flow else None,
                 "worker": self.flow.worker_view() if self.flow else {"state": "idle", "task_id": None},
                 "omp_isolation": self.omp_isolation,
                 "boot": dict(self.boot), "shutdown": {"pending": self._shutdown_token is not None},
                 "ui": dict(self.ui.stats) if self.ui else {}}
+
+    def _pane_info(self, pane: Any, *, host: bool) -> dict[str, Any]:
+        """A pane's ui_v1 info; the host shell also says who operates it (``operated_by``, smoke-01 P2)."""
+        info = dict(pane.info())
+        if host:
+            terminal = getattr(self, "terminal", None)
+            try:
+                info["operated_by"] = terminal.host_operator() if terminal is not None else None
+            except Exception:
+                info["operated_by"] = None
+        return info
 
     @staticmethod
     def _state_view(snapshot: dict[str, Any]) -> dict[str, Any]:
@@ -811,6 +824,12 @@ class Backend:
                 return terminal.abandon(peer.role, request)
             return terminal.handle(peer.role, request)
         return self.handoffs.handle(peer.role, request)
+
+    def _bridge_peer_gone(self, peer: Any) -> None:
+        """A bridge session ended (closed or replaced): its waiting terminal calls are dropped (review-02 P3 (3))."""
+        terminal = self.terminal
+        if terminal is not None:
+            terminal.peer_gone(peer.role, peer.session_id, peer.generation)
 
     def _tool_result_undelivered(self, peer: Any, request: dict[str, Any]) -> None:
         """A tool result the bridge could not write to its session (p27-cd68-fix-01 P2-1).

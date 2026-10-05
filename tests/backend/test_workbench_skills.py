@@ -241,7 +241,9 @@ class TerminalAndManagerRuleTests(unittest.TestCase):
         self.assertRegex(commands, r"(?i)every shell command[^\n]*`terminal` tool[^\n]*no other way to execute commands")
         for status in ("exited", "running", "host_terminal_busy", "terminal_command_running", "paused"):
             self.assertIn(f"`{status}`", commands, status)
-        for field in ("command", "timeout_seconds", "exit_code", "output_tail", "log_path"):
+        self.assertNotIn("timeout_seconds", commands, "C-D68 (9): the wait is fixed")
+        self.assertRegex(commands, r"waits up to 120 s")
+        for field in ("command", "exit_code", "output_tail", "log_path"):
             self.assertIn(f"`{field}`", commands, field)
         # C-D68 (8): on running the worker ends its turn; Workbench checks every 60 s and sends a completion
         # notice. No re-wait loop is suggested.
@@ -305,6 +307,21 @@ class ReviewFixSkillTests(unittest.TestCase):
         rest = line.split("held:host_terminal_busy:worker_terminal_command", 1)[1]
         self.assertRegex(rest, r"(?i)^[^.]*the worker's own `terminal` command[^.]*\. wait")
         self.assertRegex(rest, r"(?i)do not ask the user to take over")
+
+
+class SmokeWordingSkillTests(unittest.TestCase):
+    """p27-cd68-fix-03 (smoke-01 M2/M3)."""
+
+    def test_running_means_end_the_turn_without_progress_reports(self):
+        commands = section(body("to-manager"), "Running commands: `terminal`")
+        line = next(l for l in commands.splitlines() if l.startswith("- `running`"))
+        self.assertRegex(line, r"End your turn now")
+        self.assertRegex(line, r"(?i)do not send progress reports[^.]*unless the user or the manager asks or a check "
+                               r"shows a problem")
+
+    def test_a_queued_report_is_not_resent(self):
+        text = body("to-manager")
+        self.assertRegex(text, r"(?i)`queued`[^\n]*accepted[^\n]*never send the same report again")
 
 
 if __name__ == "__main__":

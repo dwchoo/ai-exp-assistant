@@ -30,7 +30,7 @@ from uuid import uuid4
 
 from workbench.backend.flow import HandoffService
 from workbench.backend.flow_terminal import (
-    DEFAULT_TIMEOUT, MAX_TIMEOUT, TAIL_BYTES, TAIL_LINES, HostGate, TerminalService, output_tail,
+    TAIL_BYTES, TAIL_LINES, WAIT_SECONDS, HostGate, TerminalService, output_tail,
     validate_terminal_arguments,
 )
 from workbench.backend.panes import HostShellPort, ShellPane
@@ -56,6 +56,8 @@ def wait_until(predicate, timeout=5.0):
 
 
 def call(args, call_id=None, role_session=WORKER_SESSION, tool="terminal"):
+    # "wait" is test-only: the service's fixed wait (C-D68 (9)) for this call, never sent to the tool.
+    args = {k: v for k, v in args.items() if k != "wait"} if isinstance(args, dict) else args
     return {"request_id": str(uuid4()), "tool_call_id": call_id or f"t-{uuid4().hex[:8]}", "tool": tool,
             "args": args, "session_id": role_session, "generation": 1}
 
@@ -125,6 +127,7 @@ class ServiceFixture(unittest.TestCase):
         self.tmp.cleanup()
 
     def run_tool(self, args, role=ActorRole.WORKER, **kwargs):
+        self.terminal._wait_seconds = args.get("wait", 30) if isinstance(args, dict) else 30
         return self.terminal.handle(role, call(args, **kwargs))
 
 
@@ -135,44 +138,44 @@ class RefusalTests(ServiceFixture):
         self.assertIsNone(self.gate.owner)
 
     def test_only_the_worker_may_use_the_tool(self):
-        result = self.run_tool({"command": "true", "timeout_seconds": None}, role=ActorRole.MANAGER)
+        result = self.run_tool({"command": "true"}, role=ActorRole.MANAGER)
         self.assertEqual((result["status"], result["reason"]), ("rejected", "tool_not_allowed_for_role"))
         self.assert_nothing_typed()
 
     def test_invalid_arguments_name_the_field(self):
-        for args, field in (({"command": "ls", "timeout_seconds": 0}, "timeout_seconds"),
-                            ({"command": "ls", "timeout_seconds": MAX_TIMEOUT + 1}, "timeout_seconds"),
-                            ({"command": "ls", "timeout_seconds": True}, "timeout_seconds"),
-                            ({"command": 5, "timeout_seconds": None}, "command"),
-                            ({"command": "ls", "timeout_seconds": None, "cwd": "/"}, "cwd")):
+        for args, field in (({"command": "ls", "timeout_seconds": 60}, "timeout_seconds"),
+                            ({"command": "ls", "timeout_seconds": None}, "timeout_seconds"),
+                            ({"command": 5}, "command"),
+                            ({"command": "ls", "cwd": "/"}, "cwd")):
             result = self.run_tool(args)
             self.assertEqual((result["status"], result["reason"]), ("rejected", "invalid_arguments"), args)
             self.assertTrue(any(error.startswith(field) for error in result["errors"]), result)
         self.assert_nothing_typed()
 
-    def test_default_wait_is_120_seconds_and_at_most_1800(self):
-        # C-D68 (7) user decision 2026-10-05: "2분, 최대 30분".
-        self.assertEqual((DEFAULT_TIMEOUT, MAX_TIMEOUT), (120, 1800))
-        self.assertEqual(validate_terminal_arguments({"command": "ls", "timeout_seconds": 1800}), [])
-        self.assertEqual(validate_terminal_arguments({"command": "ls", "timeout_seconds": None}), [])
-        errors = validate_terminal_arguments({"command": "ls", "timeout_seconds": 1801})
-        self.assertEqual(len(errors), 1)
-        self.assertIn("1 to 1800", errors[0])
-        self.assertIn("null for 120", errors[0])
-        self.paused = True  # nothing runs; the journaled request shows the timeout used
-        self.run_tool({"command": "true", "timeout_seconds": None})
+    def test_the_wait_is_fixed_at_120_seconds(self):
+        # C-D68 (9) user decision 2026-10-05: "120초 고정"; the worker sets no wait.
+        self.assertEqual(WAIT_SECONDS, 120)
+        self.assertEqual(validate_terminal_arguments({"command": "ls"}), [])
+        errors = validate_terminal_arguments({"command": "ls", "timeout_seconds": 1800})
+        self.assertEqual(errors, ["timeout_seconds: unknown field; only command"])
+        fresh = self.make_terminal(lambda: self.port)
+        self.assertEqual(fresh._wait_seconds, 120)
+        fresh.close()
+        self.paused = True  # nothing runs; the journaled request shows the wait used
+        self.terminal.handle(ActorRole.WORKER, call({"command": "true"}))
         request = next(r for r in journal(self.root) if r["type"] == "terminal_request")
-        self.assertEqual(request["timeout_seconds"], 120)
+        self.assertEqual(request["wait_seconds"], 120)
+        self.assertNotIn("timeout_seconds", request)
 
     def test_a_command_with_an_environment_value_is_refused_and_never_journaled(self):
-        result = self.run_tool({"command": f"echo {SECRET}", "timeout_seconds": None})
+        result = self.run_tool({"command": f"echo {SECRET}"})
         self.assertEqual((result["status"], result["reason"]), ("rejected", "environment_value"))
         self.assertNotIn(SECRET, (self.root / "workflow" / "handoffs.jsonl").read_text())
         self.assert_nothing_typed()
 
     def test_paused_refuses_a_new_command(self):
         self.paused = True
-        result = self.run_tool({"command": "true", "timeout_seconds": None})
+        result = self.run_tool({"command": "true"})
         self.assertEqual(result["status"], "paused")
         self.assert_nothing_typed()
 
@@ -180,41 +183,41 @@ class RefusalTests(ServiceFixture):
         for reason in ("a line is being typed in the host shell", "the host shell has jobs",
                        "manager owns the host shell", "host shell has exited"):
             self.port.busy_reason = reason
-            result = self.run_tool({"command": "true", "timeout_seconds": None})
+            result = self.run_tool({"command": "true"})
             self.assertEqual((result["status"], result["reason"]), ("host_terminal_busy", reason))
             self.assert_nothing_typed()
         self.port.busy_reason = None
         missing = self.make_terminal(lambda: None)
-        result = missing.handle(ActorRole.WORKER, call({"command": "true", "timeout_seconds": None}))
+        result = missing.handle(ActorRole.WORKER, call({"command": "true"}))
         self.assertEqual(result["status"], "host_terminal_busy")
         self.assert_nothing_typed()
 
     def test_an_active_or_starting_experiment_is_host_terminal_busy(self):
         self.activity = "an experiment run is starting"
-        result = self.run_tool({"command": "true", "timeout_seconds": None})
+        result = self.run_tool({"command": "true"})
         self.assertEqual((result["status"], result["reason"]), ("host_terminal_busy", "an experiment run is starting"))
         self.activity = None
         self.assertIsNone(self.gate.acquire("experiment"))
-        result = self.run_tool({"command": "true", "timeout_seconds": None})
+        result = self.run_tool({"command": "true"})
         self.assertEqual(result["status"], "host_terminal_busy")
         self.assertIn("experiment", result["reason"])
         self.gate.release("experiment")
         self.assert_nothing_typed()
 
     def test_wait_without_a_command_and_duplicate_calls(self):
-        result = self.run_tool({"command": None, "timeout_seconds": None})
+        result = self.run_tool({"command": None})
         self.assertEqual((result["status"], result["reason"]), ("rejected", "no_terminal_command"))
-        first = self.run_tool({"command": None, "timeout_seconds": 5}, call_id="same")
-        again = self.run_tool({"command": None, "timeout_seconds": 5}, call_id="same")
+        first = self.run_tool({"command": None, "wait": 5}, call_id="same")
+        again = self.run_tool({"command": None, "wait": 5}, call_id="same")
         self.assertEqual(first, again)
         self.assertTrue(any(r["type"] == "terminal_duplicate" for r in journal(self.root)))
 
     def test_refusals_are_journaled_with_their_reason(self):
         self.port.busy_reason = "the host shell has jobs"
-        self.run_tool({"command": "make test", "timeout_seconds": None})
+        self.run_tool({"command": "make test"})
         records = journal(self.root)
         request = next(r for r in records if r["type"] == "terminal_request")
-        self.assertEqual((request["command"], request["timeout_seconds"]), ("make test", DEFAULT_TIMEOUT))
+        self.assertEqual((request["command"], request["wait_seconds"]), ("make test", 30))
         refused = next(r for r in records if r["type"] == "terminal_refused")
         self.assertEqual((refused["status"], refused["reason"]), ("host_terminal_busy", "the host shell has jobs"))
         result = next(r for r in records if r["type"] == "terminal_result")
@@ -289,7 +292,7 @@ class RealHostShellTerminalTests(ServiceFixture):
 
     def test_a_command_runs_in_the_host_shell_and_returns_exit_code_tail_and_log(self):
         result = self.run_tool({"command": "printf 'hello from %s\\n' \"$WB_FIXTURE_NAME\"; pwd; exit 3",
-                                "timeout_seconds": 30})
+                                "wait": 30})
         self.assertEqual(result["status"], "exited", result)
         self.assertEqual(result["exit_code"], 3)
         self.assertIn("hello from exported-by-user", result["output_tail"], "the child inherits the exported env")
@@ -321,11 +324,30 @@ class RealHostShellTerminalTests(ServiceFixture):
         self.assertNotIn("hello from exported-by-user", text, "output is only in the log file")
         self.assertNotIn("exported-by-user", text, "no environment value is stored")
 
+    def test_the_host_pane_shows_the_worker_command_without_changing_how_it_runs(self):
+        # p27-cd68-fix-03 (smoke-01 P1): the user sees which command the worker runs, before its output.
+        command = "echo \"args=$# zero=${0##*/}\"; echo 'quote \"ok\"'; exit 4"
+        result = self.run_tool({"command": command, "wait": 30})
+        self.assertEqual((result["status"], result["exit_code"]), ("exited", 4), result)
+        self.assertIn("args=0 zero=bash", result["output_tail"], "the same as <shell> -c <command>")
+        self.assertIn("quote \"ok\"", result["output_tail"])
+        self.assertNotIn("[worker] $", result["output_tail"], "the worker gets the output, not its own command")
+        self.assertNotIn(b"[worker] $", Path(result["log_path"]).read_bytes())
+        shown = bytes(self.ui).decode("utf-8", "replace")
+        self.assertIn(f"[worker] $ {command}", shown)
+        self.assertLess(shown.index(f"[worker] $ {command}"), shown.index("args=0"), "the command line comes first")
+        self.assertEqual(shown.count(f"[worker] $ {command}"), 1)
+        self.assert_user_owns_the_shell_again()
+        self.user_types(b"history | tail -3\r")
+        self.assertTrue(wait_until(lambda: b"history | tail -3" in bytes(self.ui)[len(shown.encode()):], 5))
+        time.sleep(0.3)
+        self.assertNotIn(b"args=", bytes(self.ui)[len(shown.encode()):], "nothing went into the parent's history")
+
     def test_typing_user_refuses_without_typing(self):
         self.user_types(b"echo half-typed")
         self.assertTrue(wait_until(lambda: not self.idle(), 5))
         before = bytes(self.ui)
-        result = self.run_tool({"command": "echo never-run", "timeout_seconds": 5})
+        result = self.run_tool({"command": "echo never-run", "wait": 5})
         self.assertEqual(result["status"], "host_terminal_busy", result)
         time.sleep(0.3)
         self.assertNotIn(b"never-run", bytes(self.ui)[len(before):])
@@ -335,18 +357,18 @@ class RealHostShellTerminalTests(ServiceFixture):
     def test_timeout_then_wait_again_and_one_command_at_a_time(self):
         flag = self.root / "go"
         first = self.run_tool({"command": f"echo started; while [ ! -e {flag} ]; do sleep 0.05; done; echo late-done",
-                               "timeout_seconds": 1})
+                               "wait": 1})
         self.assertEqual(first["status"], "running", first)
         self.assertIn("started", first["output_tail"])
         self.assertIn("End your turn", first["detail"])  # C-D68 (8): no re-wait loop
         self.assertNotIn("command null", first["detail"])
-        second = self.run_tool({"command": "echo other", "timeout_seconds": 5})
+        second = self.run_tool({"command": "echo other", "wait": 5})
         self.assertEqual(second["status"], "terminal_command_running", second)
         self.assertEqual(second["command_id"], first["command_id"])
         self.assertIsNotNone(self.gate.acquire("experiment"), "an experiment sees the host busy meanwhile")
         self.assertEqual(self.gate.owner, "terminal")
         flag.touch()
-        waited = self.run_tool({"command": None, "timeout_seconds": 30})
+        waited = self.run_tool({"command": None, "wait": 30})
         self.assertEqual((waited["status"], waited["exit_code"], waited["command_id"]),
                          ("exited", 0, first["command_id"]), waited)
         self.assertIn("late-done", waited["output_tail"])
@@ -355,7 +377,7 @@ class RealHostShellTerminalTests(ServiceFixture):
 
     def test_abandoned_wait_lets_the_command_finish_and_free_the_shell(self):
         # The bridge answers an aborted tool call itself; the backend keeps following the command.
-        result = self.run_tool({"command": "sleep 0.5; echo finished-alone", "timeout_seconds": 1})
+        result = self.run_tool({"command": "sleep 0.5; echo finished-alone", "wait": 1})
         self.assertIn(result["status"], ("running", "exited"))
         self.assertTrue(wait_until(lambda: self.terminal.current()["running"] is False, 10))
         self.assertEqual(self.terminal.current()["status"], "exited")
@@ -364,17 +386,17 @@ class RealHostShellTerminalTests(ServiceFixture):
     def test_pause_refuses_new_commands_while_the_running_one_continues(self):
         flag = self.root / "go"
         first = self.run_tool({"command": f"while [ ! -e {flag} ]; do sleep 0.05; done; echo resumed-output",
-                               "timeout_seconds": 1})
+                               "wait": 1})
         self.assertEqual(first["status"], "running", first)
         self.paused = True
-        refused = self.run_tool({"command": "echo while-paused", "timeout_seconds": 5})
+        refused = self.run_tool({"command": "echo while-paused", "wait": 5})
         self.assertEqual(refused["status"], "terminal_command_running")
         flag.touch()
-        waited = self.run_tool({"command": None, "timeout_seconds": 30})
+        waited = self.run_tool({"command": None, "wait": 30})
         self.assertEqual((waited["status"], waited["exit_code"]), ("exited", 0), waited)
         self.assertIn("resumed-output", waited["output_tail"])
         self.assert_user_owns_the_shell_again()
-        paused = self.run_tool({"command": "echo while-paused", "timeout_seconds": 5})
+        paused = self.run_tool({"command": "echo while-paused", "wait": 5})
         self.assertEqual(paused["status"], "paused")
         self.assertEqual(self.terminal.current()["command_id"], first["command_id"], "nothing new was run")
         self.assertNotIn(b"while-paused", bytes(self.ui))
@@ -391,7 +413,7 @@ class RealHostShellTerminalTests(ServiceFixture):
         for place in (elsewhere, self.project, self.home):
             self.user_cds(place)
             before = len(self.ui)
-            result = self.run_tool({"command": "pwd -P; cd / && pwd -P", "timeout_seconds": 30})
+            result = self.run_tool({"command": "pwd -P; cd / && pwd -P", "wait": 30})
             self.assertEqual((result["status"], result["exit_code"], result["cwd"]), ("exited", 0, str(place)),
                              result)
             self.assertEqual(result["output_tail"].splitlines()[0], str(place), result["output_tail"])
@@ -434,7 +456,7 @@ class ExperimentExclusionTests(flow_fixtures.FlowFixture):
         result = self.new_experiment()
         self.assertEqual(result["status"], "dispatched", result)
         self.assertTrue(wait_until(lambda: self.flow.task_view()["status"] == "running"))
-        refused = terminal.handle(ActorRole.WORKER, call({"command": "true", "timeout_seconds": 1}))
+        refused = terminal.handle(ActorRole.WORKER, call({"command": "true", "wait": 1}))
         self.assertEqual(refused["status"], "host_terminal_busy", refused)
         self.gates.exit.set()
         self.assertTrue(wait_until(lambda: self.flow.task_view()["status"] == "finished"))

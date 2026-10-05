@@ -49,6 +49,7 @@ def wait_until(predicate, timeout=5.0):
 
 
 def call(args, call_id=None, tool="terminal"):
+    args = {k: v for k, v in args.items() if k != "wait"} if isinstance(args, dict) else args  # test-only
     return {"request_id": str(uuid4()), "tool_call_id": call_id or f"t-{uuid4().hex[:8]}", "tool": tool,
             "args": args, "session_id": WORKER_SESSION, "generation": 1}
 
@@ -64,7 +65,7 @@ class FakeClock:
 class ScriptedPort:
     """A host shell port whose command runs until the test ends it (the dispatch protocol, no real shell)."""
 
-    choice = SimpleNamespace(kind="bash")
+    choice = SimpleNamespace(kind="bash", executable="/usr/bin/bash")
 
     def __init__(self, cwd="/tmp/where-the-user-is"):
         self._cwd = cwd
@@ -183,12 +184,13 @@ class NoticeFixture(unittest.TestCase):
         return [r for r in records if kind is None or r["type"] == kind]
 
     def run_tool(self, args, call_id=None):
+        self.terminal._wait_seconds = args.get("wait", 30)  # the fixed 120 s wait, shortened for the test
         return self.terminal.handle(ActorRole.WORKER, call(args, call_id))
 
     def start_running(self, output=b"first line\n", after=b""):
         """A command whose call returned ``running`` (the worker ended its turn); ``after`` comes later."""
         self.port.initial = output
-        result = self.run_tool({"command": "make long", "timeout_seconds": 1})
+        result = self.run_tool({"command": "make long", "wait": 1})
         self.assertEqual(result["status"], "running", result)
         self.assertIn(output.decode().strip(), result["output_tail"])
         self.emit(after)
@@ -255,7 +257,7 @@ class PeriodicCheckTests(NoticeFixture):
 
     def test_no_check_while_a_terminal_call_waits_for_the_command(self):
         self.start_running()
-        waiting = threading.Thread(target=self.run_tool, args=({"command": None, "timeout_seconds": 30},))
+        waiting = threading.Thread(target=self.run_tool, args=({"command": None, "wait": 30},))
         waiting.start()
         self.assertTrue(wait_until(lambda: self.terminal._waiting_now()))
         self.advance(61)
@@ -337,7 +339,7 @@ class CompletionNoticeTests(NoticeFixture):
         result = {}
         self.port.emit(b"quick\n")
         waiting = threading.Thread(target=lambda: result.update(
-            self.run_tool({"command": "make quick", "timeout_seconds": 30})))
+            self.run_tool({"command": "make quick", "wait": 30})))
         waiting.start()
         self.assertTrue(wait_until(lambda: self.terminal._waiting_now()))
         self.finish(0)
@@ -349,7 +351,7 @@ class CompletionNoticeTests(NoticeFixture):
 
     def test_a_null_wait_that_got_the_result_needs_no_notice(self):
         self.start_running()
-        waiting = threading.Thread(target=self.run_tool, args=({"command": None, "timeout_seconds": 30},))
+        waiting = threading.Thread(target=self.run_tool, args=({"command": None, "wait": 30},))
         waiting.start()
         self.assertTrue(wait_until(lambda: self.terminal._waiting_now()))
         self.finish(0)
@@ -360,7 +362,7 @@ class CompletionNoticeTests(NoticeFixture):
     def test_an_aborted_waiting_call_does_not_swallow_the_notice(self):
         result = {}
         waiting = threading.Thread(target=lambda: result.update(
-            self.run_tool({"command": "make test", "timeout_seconds": 30}, call_id="call-aborted")))
+            self.run_tool({"command": "make test", "wait": 30}, call_id="call-aborted")))
         waiting.start()
         self.assertTrue(wait_until(lambda: self.terminal._waiting_now()))
         abandoned = self.terminal.abandon(ActorRole.WORKER, call({"tool_call_id": "call-aborted"},
@@ -377,7 +379,7 @@ class CompletionNoticeTests(NoticeFixture):
 
     def test_an_abort_that_arrives_after_the_result_still_gets_one_notice(self):
         waiting = threading.Thread(target=self.run_tool,
-                                   args=({"command": "make test", "timeout_seconds": 30}, "call-late"))
+                                   args=({"command": "make test", "wait": 30}, "call-late"))
         waiting.start()
         self.assertTrue(wait_until(lambda: self.terminal._waiting_now()))
         self.finish(0)
@@ -393,7 +395,7 @@ class CompletionNoticeTests(NoticeFixture):
     def test_an_abort_before_the_call_registered_runs_nothing(self):
         # p27-cd68-review-01 P3-4: the bridge said "only a command that already started keeps running".
         self.terminal.abandon(ActorRole.WORKER, call({"tool_call_id": "call-early"}, tool=ABANDON_TOOL))
-        result = self.run_tool({"command": "make test", "timeout_seconds": 30}, "call-early")
+        result = self.run_tool({"command": "make test", "wait": 30}, "call-early")
         self.assertEqual((result["status"], result["reason"]), ("aborted", "call_abandoned"), result)
         self.assertEqual(self.port.submitted, [])
         self.assertEqual(self.port.typed, [], "nothing typed")
@@ -406,7 +408,7 @@ class CompletionNoticeTests(NoticeFixture):
     def test_an_abort_during_the_start_sends_no_command_and_gives_the_shell_back(self):
         self.port.on_claim = lambda: self.terminal.abandon(
             ActorRole.WORKER, call({"tool_call_id": "call-mid"}, tool=ABANDON_TOOL))
-        result = self.run_tool({"command": "make test", "timeout_seconds": 30}, "call-mid")
+        result = self.run_tool({"command": "make test", "wait": 30}, "call-mid")
         self.assertEqual((result["status"], result["reason"]), ("aborted", "call_abandoned"), result)
         self.assertEqual(self.port.submitted, [], "the command was never submitted")
         self.assertEqual(self.port.typed, [b"wb-handoff\n"])
@@ -415,7 +417,7 @@ class CompletionNoticeTests(NoticeFixture):
 
     def test_a_result_that_never_reached_the_worker_still_gets_the_notice(self):
         # p27-cd68-review-01 P2-1: a bridge reconnect or worker respawn during the wait drops the tool_result.
-        request = call({"command": "make test", "timeout_seconds": 30}, "call-lost")
+        request = call({"command": "make test", "wait": 30}, "call-lost")
         result = {}
         waiting = threading.Thread(target=lambda: result.update(self.terminal.handle(ActorRole.WORKER, request)))
         waiting.start()
@@ -479,13 +481,70 @@ class CompletionNoticeTests(NoticeFixture):
         self.finish(4)
         self.advance(1)
         self.port = ScriptedPort()
-        second = self.run_tool({"command": "echo next", "timeout_seconds": 1})
+        second = self.run_tool({"command": "echo next", "wait": 1})
         self.assertEqual(second["status"], "running")
         self.notices.outcome = "delivered"
         self.advance(2)
         self.assertEqual([n["exit_code"] for n in self.done()], [4])
         self.port.finish(0)
         self.assertTrue(wait_until(lambda: self.terminal.current()["running"] is False, 10))
+
+
+class SmokeFixTests(NoticeFixture):
+    """p27-cd68-fix-03: C-D68 (9) and smoke-01 / review-02 corrections."""
+
+    def test_the_host_pane_shows_the_command_and_it_still_runs_as_shell_dash_c(self):
+        result = self.start_running()
+        argv = self.port.submitted[0]
+        self.assertIsInstance(argv, list, "an argv, so nothing is typed into the parent shell")
+        self.assertEqual(argv[0], "/usr/bin/bash")
+        self.assertEqual(argv[-1], "make long", "the command text is an argument, never re-quoted")
+        self.assertEqual(result["command"], "make long")
+        self.finish()
+
+    def test_running_tells_the_worker_to_end_its_turn_without_progress_reports(self):
+        result = self.start_running()
+        self.assertIn("End your turn now", result["detail"])
+        self.assertIn("Do not send progress reports", result["detail"])
+        self.assertIn("unless the user or the manager asks or a check shows a problem", result["detail"])
+        self.finish()
+
+    def test_a_queued_report_says_it_was_accepted_and_must_not_be_resent(self):
+        from workbench.backend.flow import OutboundMessage
+        from workbench.contracts.v1 import MessageKind
+        outbound = OutboundMessage(str(uuid4()), 1, str(uuid4()), ActorRole.WORKER, ActorRole.MANAGER,
+                                   MessageKind.REPORT, {"kind": "done"})
+        result = self.handoffs.enqueue(outbound, origin="test")
+        self.assertEqual(result["status"], "queued")
+        self.assertNotIn("not yet processed", result["detail"])
+        self.assertIn("Accepted", result["detail"])
+        self.assertIn("Do not send it again", result["detail"])
+
+    def test_an_abort_before_the_submit_leaves_no_log_file(self):
+        self.port.on_claim = lambda: self.terminal.abandon(
+            ActorRole.WORKER, call({"tool_call_id": "call-nolog"}, tool=ABANDON_TOOL))
+        result = self.run_tool({"command": "make test", "wait": 30}, "call-nolog")
+        self.assertEqual(result["status"], "aborted")
+        log_root = self.root / "workflow" / "terminal"
+        self.assertEqual(sorted(p.name for p in log_root.iterdir()) if log_root.exists() else [], [])
+
+    def test_a_waiter_of_a_gone_worker_session_does_not_hold_back_checks(self):
+        self.start_running()
+        waiting = threading.Thread(target=self.run_tool, args=({"command": None, "wait": 30},))
+        waiting.start()
+        self.assertTrue(wait_until(lambda: self.terminal._waiting_now()))
+        self.advance(61)
+        self.assertEqual(self.notices.attempts, [])
+        self.terminal.peer_gone(ActorRole.WORKER, WORKER_SESSION, 1)  # the worker's bridge connection ended
+        self.assertFalse(self.terminal._waiting_now())
+        self.advance(60)
+        self.assertEqual(len(self.notices.of("terminal_check")), 1)
+        self.terminal.peer_gone(ActorRole.MANAGER, WORKER_SESSION, 1)  # another role: ignored
+        self.finish(0)
+        waiting.join(10)
+        self.advance(1)
+        self.assertEqual(len(self.notices.of("terminal_done")), 1, "its result reached nobody")
+        self.assertTrue(any(r["type"] == "terminal_peer_gone" for r in self.journal()))
 
 
 class AbandonTests(NoticeFixture):
@@ -552,6 +611,24 @@ class NoticePortTests(unittest.TestCase):
         backend._tool_result_undelivered(SimpleNamespace(role=ActorRole.WORKER), {"tool": "to_manager"})
         self.assertEqual(seen, [(ActorRole.WORKER, "terminal")])
 
+    def test_a_gone_worker_peer_goes_to_the_terminal_service(self):
+        seen = []
+        backend = Backend.__new__(Backend)
+        backend.terminal = SimpleNamespace(peer_gone=lambda role, session, generation: seen.append((role, session)))
+        backend._bridge_peer_gone(SimpleNamespace(role=ActorRole.WORKER, session_id="s", generation=1))
+        self.assertEqual(seen, [(ActorRole.WORKER, "s")])
+
+    def test_the_host_pane_is_operated_by_the_worker_during_its_command(self):
+        backend = Backend.__new__(Backend)
+        backend.terminal = SimpleNamespace(host_operator=lambda: "worker")
+        info = backend._pane_info(SimpleNamespace(info=lambda: {"pane": "host_shell", "input_owner": "manager"}),
+                                  host=True)
+        self.assertEqual(info["operated_by"], "worker")
+        backend.terminal = SimpleNamespace(host_operator=lambda: None)
+        self.assertIsNone(backend._pane_info(SimpleNamespace(info=lambda: {"pane": "host_shell"}), host=True)
+                          ["operated_by"])
+        self.assertNotIn("operated_by", backend._pane_info(SimpleNamespace(info=lambda: {"pane": "x"}), host=False))
+
     def test_the_backend_routes_the_bridge_abandon_signal(self):
         seen = []
         backend = Backend.__new__(Backend)
@@ -583,7 +660,7 @@ class ExperimentExclusionNoticeTests(flow_fixtures.FlowFixture):
         self.gates.exit.clear()
         self.assertEqual(self.new_experiment()["status"], "dispatched")
         self.assertTrue(wait_until(lambda: self.flow.task_view()["status"] == "running"))
-        refused = terminal.handle(ActorRole.WORKER, call({"command": "true", "timeout_seconds": 1}))
+        refused = terminal.handle(ActorRole.WORKER, call({"command": "true", "wait": 1}))
         self.assertEqual(refused["status"], "host_terminal_busy")
         for _ in range(5):
             clock.now += 60

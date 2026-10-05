@@ -77,6 +77,11 @@ manager request closed by an exit or kill), ``restart`` and ``kill`` (the last
 force-kill result) next to the ``shell`` control state. ``automation_hold`` is
 a reason while Workbench types an experiment run's start into the idle host shell
 (user input is then refused with ``host_shell_automation``), else null.
+``operated_by`` (additive, C-D68) is ``"worker"`` while the worker OMP's
+``terminal`` command holds the host shell (its start through its give-back),
+else null; a client shows the worker as the host terminal's user then (the
+shell itself is claimed on the manager side, so ``input_owner`` stays
+``manager``). Experiment runs leave it null.
 
 Task and worker (CW-18, C-D66; additive)
 ----------------------------------------
