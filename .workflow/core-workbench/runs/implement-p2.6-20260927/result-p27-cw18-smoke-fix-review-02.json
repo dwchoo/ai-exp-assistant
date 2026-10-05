@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw18-smoke-fix-review-02",
+  "verdict": "integrate",
+  "frozen_candidate": "0c74ab64976a5b11b8638d761f1da0afeb7b8c16df64b2a8f961db74bb727aaa",
+  "agent_result": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-smoke-fix-review-02-agent.json",
+  "focus": {
+    "identity": "OK (single list's last user item, both lists -> reject, 6 exact ids, WS delta + SSE history; adversarial probes fail-closed)",
+    "response evidence": "OK (same delivery matched request, non-error assistant message_end, agent_end, same session/generation)",
+    "empty thinking": "as narrow as adjudicated; several empty leading thinkings also accepted (P3 to confirm) - Root: consistent with the adjudication (no content)",
+    "E2-E4": "OK"
+  },
+  "findings": {
+    "P3a": "E3 proactive notice only after TASK creation; earlier failures only via notices[] (flow_tasks.py:1092)",
+    "P3b": "skill example `set -o pipefail; ... | tee out/result.txt` is bash-only and fails without out/ (SKILL.md:25)",
+    "P3c": "notice recorded as a WORKER REPORT"
+  },
+  "checks": "backend 566, bridge 49, contracts 52, workflow 52, ui 741, TS provider_identity 6, handoff 9, g3 bridge 23, g3 independent 7, harness contracts 12 - all exit 0",
+  "observed_model": "opus"
+}

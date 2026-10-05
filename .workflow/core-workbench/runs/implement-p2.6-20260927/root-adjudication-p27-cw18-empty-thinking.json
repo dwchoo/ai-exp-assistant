@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "record": "root-adjudication-p27-cw18-empty-thinking",
+  "decided_by": "Root",
+  "date": "2026-10-05",
+  "issue": "Codex reasoning responses carry an assistant content item thinking with empty text plus a signature before the text; the G3 worker response contract rejects any thinking ('no thinking'), so every staged worker response would be rejected",
+  "decision": "Accept the narrow reading: the rule protects against visible reasoning/prose and tool use in the one-round marker response. An empty, signature-only thinking item carries no content and is ignored ONLY when it precedes the text; any visible thinking text, thinking after the text, tool calls or other keys keep the response rejected. Identity rules (exact ids, final user item) are unchanged. To be confirmed by a fresh review and the next real-model smoke; if a real model emits visible reasoning summaries for the worker, stop and decide a configuration change (e.g. worker reasoning summary off) with the user instead of relaxing further.",
+  "authority": "workflow-contract Root adjudication; G3 contract intent; result-p27-cw18-smoke-02 E1"
+}

@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw18-smoke-fix-review-02",
+  "reviewer": "fresh Opus general-purpose (read-only)",
+  "frozen_candidate": "0c74ab64976a5b11b8638d761f1da0afeb7b8c16df64b2a8f961db74bb727aaa",
+  "candidate_note": "The digest tool was not available to this reviewer; reviewed the working tree (git diff HEAD) with these file sha256: bridge.ts 494ee13f82a4e46a838cfc66f67bf6c166cb7d989433c796852840cd43c58d83, to-worker/SKILL.md d41c27cfd079f8369b3f4373cbf515cb5e3416f1d05416fef27e162731922fae, flow.py f235fafe46a0fb62f78d106ee31369f57278d17035db11eac9350e70b01dbe42, flow_tasks.py f46d655bf74d8e5d5d7f64909a92f9d5432a41e98e7893780a8ad69114da8cc7, run.py 44973f3719da54ad1aca3211c85e46c6d989e82268eb6c9df31cd5bcd549fd55, model.py 1dd1a6a0bbb8d0dd8fbb293e174831edd2fc378d56d880d353c317b60f5e8301",
+  "verdict": "integrate",
+  "findings": [
+    {
+      "p": "P3",
+      "where": "src/workbench/backend/flow_tasks.py:1092-1096 (with src/workbench/workflow/run.py:734-742)",
+      "what": "The proactive E3 notice is sent only when workflow.start failed after the TASK message was created (exc.workbench_start_failure set). Failures before that point (AuthorizationError, 'existing artifacts root is required', artifact_setup OSError, mailbox UUID ValueError) end the Task as finished/start_failed and reach the manager only through notices[] on the next to_worker call. This is narrower than assignment-02 E3 ('start_failed / run_start_failed ... proactively deliver a notice').",
+      "failure_scenario": "The artifacts root is missing -> WorkflowHeld before create_message -> Task finished with start_failed:WorkflowHeld, no notice is queued; the manager ended its turn after 'dispatched' and does not learn of the failure until its next to_worker call (the smoke-02b symptom, for this subset only).",
+      "fix": "Accept and record it as a known limitation (the worker documented it: the mailbox can address only a reply to a TASK), or add a TASK-less Workbench notice path later. Not blocking: these are local or config faults; the common real-world case (receipt not OMP_PROCESSED, host_terminal_busy/paused at the typing hold) is after TASK creation and is covered."
+    },
+    {
+      "p": "P3",
+      "where": "omp_bridge/skills/to-worker/SKILL.md:25",
+      "what": "The suggested `set -o pipefail; ./exp.sh | tee out/result.txt` assumes shell bash and an existing out/ directory. With shell sh, pipefail may not be supported (depends on the /bin/sh version). If out/ does not exist, tee cannot open the file and the run is judged failure or indeterminate, not success.",
+      "failure_scenario": "The manager follows the example with shell 'sh', or in a repo without out/ -> nonzero exit or missing result_file -> failure/indeterminate even though exp.sh succeeded.",
+      "fix": "Optional wording: 'with shell bash; e.g. `mkdir -p out && set -o pipefail && ./exp.sh | tee out/result.txt`'."
+    },
+    {
+      "p": "P3",
+      "where": "src/workbench/backend/flow_tasks.py:1111-1113",
+      "what": "The Workbench notice uses a worker->manager REPORT (sender_role WORKER) that replies to the failed TASK. Only payload.handoff='workbench_notice'/source='workbench' marks it as a Workbench message. The skill explains this to the manager. Mailbox and journal records attribute it to the worker role.",
+      "failure_scenario": "An audit or UI that counts worker REPORTs per run would count this notice as a worker report for a run whose worker never reported. No current state effect was found: Task stays finished, worker idle, and it is skipped when the workflow already created a preparation report.",
+      "fix": "None required now; keep in mind for any future per-run report counting."
+    },
+    {
+      "p": "P3",
+      "where": "omp_bridge/g3/bridge.ts:133-140,976",
+      "what": "isOpaqueThinking is skipped in a loop, so several leading empty signature-only thinking blocks are accepted. The adjudication says 'an empty, signature-only thinking item'. Each block still has to be empty with only type/thinking/thinkingSignature keys, and any visible text, thinking after the text, an extra key, redactedThinking or a missing text block is still rejected. This is consistent with the adjudication's intent, and the TS test 'two empty thinking blocks first' pins it.",
+      "failure_scenario": "None found that admits visible reasoning or tool use. Noted only so Root can confirm that 'one or more' matches its reading.",
+      "fix": "None, or limit it to exactly one if Root wants the literal reading."
+    }
+  ],
+  "focus_verdicts": {
+    "identity": "OK. finalUserTexts takes only the final item of the single list that is present: messages[-1] with text blocks, or input[-1] with role user, type absent or 'message', and input_text blocks or string content. If both messages and input are arrays it returns undefined, so the delivery is unknown. Every text block must be an exact JSON envelope whose message_id, delivery_attempt_id, kind, task_id, revision_id and run_id all match (unchanged). WS delta (single user item after previous_response_id) and SSE full history (current delivery last, prior delivery only in history) both match. An adversarial node probe confirmed fail-closed results for: trailing reasoning item, output_text in a user item, function_call_output with role user, input_text inside messages, a non-object payload, input as a string, empty input, and a null last item. An older delivery or another attempt or run never matches. A first unmatched request still marks the delivery unknown, and a later round cannot un-match it. The worker stage keeps providerRequestCount==1.",
+    "response_evidence": "OK. message_end counts as response evidence only when the delivery is pending AND awaitingProviderResponse (set only by the matched before_provider_request of this activeDelivery; fields reset per delivery) AND role assistant AND stopReason is not error or aborted AND errorMessage is empty. The processed state still requires agent_end, the same session and generation, and apiAccepted. Error, aborted or errorMessage still mark the delivery unknown, and a user message_end is not evidence (all tested). This matches the G3 decision that after_provider_response is diagnostic only and that the assistant reply plus agent_end are required. A response from another turn cannot be accepted, because injection happens only when the session is idle and awaiting is set only after the matched request. Empty thinking: only leading blocks with thinking==='' or undefined and only type/thinking/thinkingSignature(string) keys are skipped. After that, exactly one text block must remain. Visible thinking, thinking after the text, extra keys, redactedThinking, thinking only and two text blocks are all rejected (TS-tested). This is as narrow as the adjudication requires (see the P3 note on 'one or more').",
+    "e2_e3_e4": "E2 OK: CRITERIA_RULE, the tool description and the skill match the CW-10 judge in run.py:306-323 (exit 0, log_contains in the raw log, result_file present, non-empty and changed by the run (otherwise indeterminate), result_contains in it). Rejecting execution for kind work no longer double-reports. E3 OK within its scope: the notice is enqueued once, only on the finished/start_failed branch (not on cancel), outside the lock, and it is skipped when the workflow already created a preparation report. The lane never resends after unknown; paused gives held_paused and the notice is dropped; withdraw on supersede drops it. Task stays finished with start_failed:<err>, the worker is idle and notices[] is kept (tested). See P3 for failures before the TASK. E4 OK: a finished Task with start_failed:/not_started shows '[시작 실패 · <reason>]'.",
+    "regression": "OK. All suites ran with real exit codes and venv python (/tmp/cw02-g1-venv, PYTHONPATH=src): backend 566 OK (27 skip, 1 xfail), bridge 49 OK (1 skip), contracts 52 OK, workflow 52 OK, ui 741 OK. TS (node --experimental-strip-types --test): provider_identity 6/6, handoff_tools 9/9, g3_omp bridge 23/23, g3 bridge_public_response_independent 7/7, harness contracts 12/12. All exit 0."
+  },
+  "checks": {
+    "py_backend": "exit 0",
+    "py_bridge": "exit 0",
+    "py_contracts": "exit 0",
+    "py_workflow": "exit 0",
+    "py_ui": "exit 0",
+    "ts_provider_identity": "exit 0",
+    "ts_handoff_tools": "exit 0",
+    "ts_g3_bridge": "exit 0",
+    "ts_g3_independent": "exit 0",
+    "ts_harness_contracts": "exit 0",
+    "adversarial_finalUserTexts_probe": "all fail-closed (scratch only)"
+  },
+  "unverified": "No real-model run, as the rules require. The empty-thinking reading and message_end response evidence on real openai-codex WS still need confirmation in the next real-model smoke, as the adjudication says. No OMP was launched by this reviewer.",
+  "residue": "none (scratch files only in the session scratchpad; no OMP or processes started besides test runners, which exited)",
+  "overall": "integrate"
+}

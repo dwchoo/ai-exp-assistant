@@ -1,0 +1,24 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 1863,
+  "event": {
+    "id": "limit-cw18sf-unit",
+    "kind": "limit",
+    "data": {
+      "authority": "C-D55 budget delegation, workflow-contract section 8; result-p27-cw18-smoke-01 D1-D3",
+      "bucket": "unit:V-CW-18-smoke-fix",
+      "decision_owner": "Root",
+      "expected_previous": null,
+      "origin": "operating",
+      "reason": "smoke findings: senior fix, rerun, delta review, reserve",
+      "remaining_work_estimate": 4,
+      "scope_basis": {
+        "evidence_refs": [
+          ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-smoke-01.md"
+        ],
+        "status": "known-empty"
+      },
+      "value": 4
+    }
+  }
+}

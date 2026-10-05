@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "units": [
+    "V-CW-18-smoke-fix"
+  ],
+  "status": "integrated",
+  "recorded_at": "2026-10-04",
+  "base": "commit 74b147f / 801671d (CW-18 integrated)",
+  "candidate": "0c74ab64976a5b11b8638d761f1da0afeb7b8c16df64b2a8f961db74bb727aaa",
+  "delta": "bridge tools strict with nullable optional fields; backend normalize_arguments; project-relative path normalisation; skills end-your-turn / no wait / repo-relative / null rules",
+  "verification_chain": [
+    "p27-cw18-smoke-01 (real model, stopped at cap; D1-D3)",
+    "p27-cw18-smoke-fix-01 (Opus)",
+    "p27-cw18-smoke-fix-review-01 (integrate)",
+    "p27-cw18-smoke-02 (real model: D1-D3 confirmed fixed; E1-E4)",
+    "p27-cw18-smoke-fix-02 (Opus; codex Responses/WS payload, response evidence, criteria docs, start-failure notice, label)",
+    "root-adjudication-p27-cw18-empty-thinking",
+    "p27-cw18-smoke-fix-review-02 (Opus; integrate)"
+  ],
+  "carried_forward": {
+    "to verify": "real-model experiment smoke (empty thinking + message_end evidence on codex WS, host run, 60 s review, judge, cwd restore, worker_busy)",
+    "polish": [
+      "request with goal and empty paths dropped (goal lost)",
+      "symlink-escaping absolute path normalised to relative form",
+      "E3 notice only after TASK creation",
+      "skill example bash-only and needs out/",
+      "notice recorded as WORKER REPORT",
+      "g3_omp tui fault integration pins OMP 18.2.10 (CW-16)"
+    ]
+  }
+}

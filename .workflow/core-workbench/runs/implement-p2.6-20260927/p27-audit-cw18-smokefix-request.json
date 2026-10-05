@@ -1,0 +1,1 @@
+{"before": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-cw18-integrated-checkpoint.json", "after": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-cw18-smokefix-after.json", "allowed": ["omp_bridge/g3/bridge.ts", "omp_bridge/skills/**", "src/workbench/backend/**", "tests/backend/test_*.py", "tests/bridge/**", "graphify-out/**"]}

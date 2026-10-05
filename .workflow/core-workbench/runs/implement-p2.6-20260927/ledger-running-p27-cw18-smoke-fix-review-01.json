@@ -1,0 +1,17 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 1874,
+  "event": {
+    "id": "running-p27-cw18-smoke-fix-review-01",
+    "kind": "transition",
+    "data": {
+      "evidence": "host: Claude Code Agent spawn requested (name smokefix-review, wb-delta-reviewer sonnet), 2026-10-04",
+      "invocation": "p27-cw18-smoke-fix-review-01",
+      "not_started_evidence": null,
+      "observed_effort": "unverified",
+      "observed_model": "unverified",
+      "outcome": null,
+      "state": "running"
+    }
+  }
+}

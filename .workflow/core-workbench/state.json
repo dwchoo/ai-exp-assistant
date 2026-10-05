@@ -425,7 +425,7 @@
   "implementation_p27": {
     "run_record": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
     "approved_bundle_sha256": "91fe05dc882d8c00ab0eb28c30e2b6cabcbfacb0f0fee3f0eaeecfaff5b7d3e8",
-    "status": "CW-18 integrated (C-D64..C-D66: wb OMP home, to_worker/to_manager, one task at a time, idle-only host runs, lifecycle, C-D58); next: real-model smoke (needs user OK), UR-USABILITY, CW-19, CW-16",
+    "status": "CW-18 + smoke fixes integrated; next: real-model re-smoke (needs user OK), UR-USABILITY, CW-19, CW-16",
     "resumed_from": ".codex/handoffs/2026-09-29-core-workbench-p27-cw17/HANDOFF.md",
     "units": {
       "V-CW-17-p2.7": {
@@ -482,6 +482,10 @@
       "V-CW-18-p2.7": {
         "status": "integrated",
         "record": ".workflow/core-workbench/runs/implement-p2.6-20260927/integration-p27-cw18.json"
+      },
+      "V-CW-18-smoke-fix": {
+        "status": "integrated",
+        "record": ".workflow/core-workbench/runs/implement-p2.6-20260927/integration-p27-cw18-smokefix.json"
       }
     },
     "user_review_checkpoints": {

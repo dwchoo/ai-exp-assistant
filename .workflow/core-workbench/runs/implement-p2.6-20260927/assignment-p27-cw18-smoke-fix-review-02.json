@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw18-smoke-fix-review-02",
+  "ticket_id": "CW-18 smoke-02 fixes review (bridge identity)",
+  "role": "reviewer",
+  "unit": "V-CW-18-smoke-fix",
+  "approved_bundle_digest": "4f4a016424bafe78c2c23437706e206bce3a3c770d13610785564a4a93f00a93",
+  "routing": {
+    "planned_role": "reviewer",
+    "selected_role": "reviewer (fresh Opus general-purpose)",
+    "reason_codes": [
+      "bridge_identity_rules",
+      "verified_contract_change"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-smoke-02.md"
+    ]
+  },
+  "frozen_candidate": "0c74ab64976a5b11b8638d761f1da0afeb7b8c16df64b2a8f961db74bb727aaa",
+  "criteria": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-smoke-02.md E1-E4",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/assignment-p27-cw18-smoke-fix-02.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/root-adjudication-p27-cw18-empty-thinking.json",
+    "G3 bridge contract: omp_bridge/contract and existing G3 tests (identity, no_tools, one provider round, no_thinking)"
+  ],
+  "delta": {
+    "base": "the candidate reviewed in p27-cw18-smoke-fix-review-01 (git diff against HEAD shows both deltas; focus on the files listed)",
+    "files": [
+      "omp_bridge/g3/bridge.ts",
+      "omp_bridge/skills/to-worker/SKILL.md",
+      "src/workbench/backend/flow.py",
+      "src/workbench/backend/flow_tasks.py",
+      "src/workbench/workflow/run.py",
+      "src/workbench/ui/product/model.py"
+    ]
+  },
+  "focus": [
+    "Identity: finalUserTexts cannot be fooled into matching an older delivery, a history item, a non-user item, or a crafted payload with both messages and input; WS (previous_response_id, single item) and SSE (full history) both correct; no false positives.",
+    "Response evidence: matched request + error-free assistant message_end as evidence is sound for providers without after_provider_response; cannot accept a response from a different turn; the empty-thinking exception is exactly as narrow as the adjudication says.",
+    "E2 documentation matches the CW-10 judge; E3 notice exactly once, no replay, consistent Task/worker state; E4 label.",
+    "No regression: run tests/bridge, TS bridge + g3 tests, tests/backend, tests/workflow, tests/contracts (real exit codes, venv)."
+  ],
+  "rules": "Read-only; write only .workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-smoke-fix-review-02-agent.json. No real provider requests (local capture/scripted only); OMP only with a fake HOME/Workbench home; never read credential contents or other processes' environ; never pkill or pattern kills; never touch ~/wb-urux-sandbox or the user's processes.",
+  "result_format": "Findings P0..P3 with file:line and a concrete failure scenario; verdict per focus; overall integrate/block. Write JSON; reply in Korean <=12 lines."
+}

@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw18-smoke-fix-01",
+  "status": "done",
+  "candidate": "39343b59a53356c19a778057ba4f39541501d89f86621fcc313472026aeeead9",
+  "audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-cw18-smokefix.json",
+  "checks": {
+    "backend": "556 OK (27 skip, 1 xfail)",
+    "bridge": "48 OK (1 skip opt-in)",
+    "TS handoff": "9/9",
+    "contracts/ui/workflow": "52/740/52",
+    "live WB_LIVE_CW18": "3 OK (scripted provider, fake HOME)",
+    "red first": "backend 25, TS 2"
+  },
+  "step0": "OMP 18.4.5 sends extension tools without strict (schema as-is, OMP adds required 'i'); built-in tools are strict:true (all required, optional anyOf[T,null]); OMP converts to strict only when tool.strict is true; so the placeholders were model behaviour mimicking strict tools (not re-verified with a real model)",
+  "fixes": {
+    "D1": "bridge tools strict:true with nullable optional fields and 'null when not used'; backend normalize_arguments treats null/empty/false-flags as absent; empty execution placeholder ignored, real-looking execution for work rejected with field-precise message; request without paths ignored; all rejections name field + expected value",
+    "D2": "TaskFlow gets project_dir; absolute paths inside -> relative; outside/root/.. -> rejected naming spec.paths[i]; worker request paths normalised too",
+    "D3": "skills: end your turn after to_worker / after done-blocked; never use wait tool; do not poll; repo-relative paths; null rules"
+  },
+  "regression": "live_strict_placeholder_probe 8/8",
+  "residue": "none",
+  "observed_model": "opus"
+}

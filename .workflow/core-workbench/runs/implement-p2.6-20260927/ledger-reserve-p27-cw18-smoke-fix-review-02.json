@@ -1,0 +1,24 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 1890,
+  "event": {
+    "id": "reserve-p27-cw18-smoke-fix-review-02",
+    "kind": "reserve",
+    "data": {
+      "buckets": [
+        "total",
+        "role:reviewer",
+        "unit:V-CW-18-smoke-fix"
+      ],
+      "effort": "high",
+      "incident": "",
+      "invocation": "p27-cw18-smoke-fix-review-02",
+      "model": "claude-opus-5-5",
+      "purpose": "review of smoke-02 fixes (bridge identity)",
+      "role": "reviewer",
+      "unit": "V-CW-18-smoke-fix",
+      "workspace": "/home/dwchoo/ai-exp-assistant",
+      "writer": false
+    }
+  }
+}

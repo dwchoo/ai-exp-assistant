@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw18-smoke-fix-02",
+  "ticket_id": "CW-18 smoke-02 findings E1-E4",
+  "role": "worker_senior",
+  "unit": "V-CW-18-smoke-fix",
+  "approved_bundle_digest": "4f4a016424bafe78c2c23437706e206bce3a3c770d13610785564a4a93f00a93",
+  "routing": {
+    "planned_role": "worker_senior",
+    "selected_role": "worker_senior (Opus general-purpose)",
+    "reason_codes": [
+      "bridge_protocol",
+      "provider_payload_shape"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-smoke-02.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-smoke-02-timeline.json"
+    ]
+  },
+  "required_behavior": [
+    "E1 step 0 (no real model): capture the exact provider request payload OMP 18.4.5 builds for the openai-codex provider (Responses API) with a local capture server (the earlier smoke-fix worker used api openai-codex-responses with a fake HOME); record where the delivered user message (with the delivery identity markers) appears (e.g. input[] items with content[].text of type input_text).",
+    "E1 fix: make bridge.ts providerRequestContainsActiveDelivery (and any sibling identity checks) recognise the active delivery in every payload shape OMP uses (chat messages, Responses input items, string or content-array forms) without weakening the identity rules (exact ids, no false positives from history/older deliveries); keep the existing verified behaviour for the shapes already covered. Add TS tests with captured payload fixtures for each shape (redact nothing secret - the fixtures must not contain tokens; build them from the local capture).",
+    "E2: decide from the CW-10 contract whether all three criteria are really required; if the verified contract requires them, document exactly in the to_worker tool description and the to-worker skill (what each means, how to choose result_file); if not, accept any subset with at least one and document it. Do not weaken verified judge semantics.",
+    "E3: when an experiment run fails to start (start_failed / run_start_failed / held reasons that end the attempt), proactively deliver a short notice message to the manager (when it is idle, via the existing delivery path, once) in addition to notices[]; the Task state and worker state stay consistent.",
+    "E4: a Task that never ran shows a status like '[시작 실패 · <reason>]' instead of '보고 완료'."
+  ],
+  "acceptance": [
+    "red->green tests (TS fixtures for E1 in each payload shape; backend tests for E2/E3; UI test for E4)",
+    "no-model live check: two real OMPs with a local provider that mimics the openai-codex Responses payload (or the captured shape) -> experiment run starts (OMP_PROCESSED observed), host shell run, review, judge, report",
+    "run tests/backend, tests/bridge, TS bridge + g3_omp tests, tests/contracts, tests/ui, tests/workflow (real exit codes, no pipes, venv python)"
+  ],
+  "allowed_write_paths": [
+    "omp_bridge/g3/bridge.ts",
+    "omp_bridge/skills/**",
+    "src/workbench/backend/**",
+    "src/workbench/ui/product/**",
+    "src/workbench/workflow/**",
+    "tests/backend/test_*.py",
+    "tests/bridge/**",
+    "tests/ui/test_product_model.py",
+    "tests/workflow/test_*.py"
+  ],
+  "prohibited_paths": [
+    "tests/**/*_independent*",
+    "docs/**",
+    ".workflow/**"
+  ],
+  "rules": "No real provider requests (local capture/scripted provider only); OMP only with the Workbench home or a fake HOME; never read credential contents or other processes' environ; temp dirs only under /tmp; kill only PIDs you started; never touch ~/wb-urux-sandbox or the user's processes or configs; no commits, no graphify update. If the fix requires weakening a verified identity rule, stop and report.",
+  "result_format": "checks table first, status, step-0 payload facts, fix summary per item, changed paths + sha256, residue. Korean, <=20 lines."
+}

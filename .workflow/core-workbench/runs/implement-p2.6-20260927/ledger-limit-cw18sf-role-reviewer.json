@@ -1,0 +1,23 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 1867,
+  "event": {
+    "id": "limit-cw18sf-role-reviewer",
+    "kind": "limit",
+    "data": {
+      "authority": "C-D55 budget delegation, workflow-contract section 8; result-p27-cw18-smoke-01 D1-D3",
+      "bucket": "role:reviewer",
+      "decision_owner": "Root",
+      "expected_previous": {
+        "authority": "C-D55 budget delegation, workflow-contract section 8; result-p27-cw18-review-01 block R1",
+        "reason": "CW-18 delta review",
+        "value": 135
+      },
+      "origin": "operating",
+      "reason": "CW-18 smoke findings",
+      "remaining_work_estimate": 1,
+      "scope_basis": null,
+      "value": 136
+    }
+  }
+}

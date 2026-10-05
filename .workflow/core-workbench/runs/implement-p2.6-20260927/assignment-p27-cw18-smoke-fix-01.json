@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw18-smoke-fix-01",
+  "ticket_id": "CW-18 smoke findings D1-D3",
+  "role": "worker_senior",
+  "unit": "V-CW-18-smoke-fix",
+  "approved_bundle_digest": "4f4a016424bafe78c2c23437706e206bce3a3c770d13610785564a4a93f00a93",
+  "routing": {
+    "planned_role": "worker_senior",
+    "selected_role": "worker_senior (Opus general-purpose)",
+    "reason_codes": [
+      "tool_contract",
+      "provider_schema_behaviour"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-smoke-01.md"
+    ]
+  },
+  "required_behavior": [
+    "Step 0 (no model): find out exactly how OMP 18.4.5 sends the extension tool schemas to the openai-codex provider (strict function schema? all properties required? nullable handling? additionalProperties) - capture the outgoing request with the existing scripted/local provider configured to look like openai-codex if possible, or read OMP's provider adapter in the binary; record the facts.",
+    "D1: make to_worker and to_manager robust under strict schemas: every property present-but-nullable (type [T,'null'] or the form OMP/openai accept) with descriptions saying 'null when not used'; nested objects strict-compatible; the backend treats null, empty string, empty list/object and false-for-boolean-flags as ABSENT for optional fields; for kind work, spec.execution must be null (a placeholder execution object is ignored only if it is clearly empty/null - do not silently accept a real-looking execution for a work Task: reject with a precise message naming the field); task_id null -> new Task; to_manager requires_code_change false/null and request null mean nothing. Error messages for rejections must name the offending field and the expected value so a model can fix the call in one try.",
+    "D2: spec.paths accept repo-relative paths; absolute paths inside the project dir are normalised to relative; outside -> reject with a precise message. Update the skill to say repo-relative.",
+    "D3: skills - to-worker: after a to_worker call (or any time you are waiting for the worker), END YOUR TURN; the worker's report arrives as a new message; never use the wait tool or poll for worker results. to-manager: after to_manager done/blocked, end your turn. Keep both skills about one page and keep test_workbench_skills consistent.",
+    "Add a scripted-provider regression that mimics the smoke: the model fills every field with placeholders/nulls -> dispatched for work; to_manager placeholder fields do not show up as requests/requires_code_change."
+  ],
+  "acceptance": [
+    "red->green tests (backend + bridge TS) for D1/D2, skill tests for D3",
+    "run tests/backend, tests/bridge, TS bridge tests, tests/contracts, tests/ui, tests/workflow (real exit codes, no pipes); live WB_LIVE_CW18=1 once (scripted provider)"
+  ],
+  "allowed_write_paths": [
+    "omp_bridge/g3/bridge.ts",
+    "omp_bridge/skills/**",
+    "src/workbench/backend/**",
+    "tests/backend/test_*.py",
+    "tests/bridge/**"
+  ],
+  "prohibited_paths": [
+    "src/workbench/ui/**",
+    "tests/**/*_independent*",
+    "docs/**",
+    ".workflow/**"
+  ],
+  "rules": "No model prompts (scripted/local provider only; no real provider requests); OMP only with the Workbench home or a fake HOME; never read credential contents or other processes' environ; temp dirs only under /tmp; kill only PIDs you started; never touch ~/wb-urux-sandbox or the user's processes or configs; no commits, no graphify update.",
+  "result_format": "checks table first, status, step-0 facts, fix summary per item, changed paths + sha256, residue. Korean, <=20 lines."
+}

@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw18-smoke-fix-02",
+  "status": "done",
+  "candidate": "0c74ab64976a5b11b8638d761f1da0afeb7b8c16df64b2a8f961db74bb727aaa",
+  "audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-audit-cw18-smokefix2.json",
+  "checks": {
+    "red->green": "TS provider_identity 5 red -> 6/6; backend 7 red -> 10/10 (x5); UI 1 red -> green",
+    "suites": "backend 566 (rerun; 1st had a race in its own new test, fixed), bridge 49, contracts 52, ui 741, workflow 52, TS handoff 9/9, provider_identity 6/6, g3 bridge 23/23, g3 independent 7/7",
+    "g3_omp py": "1 error pre-existing: tui extension fault integration pins OMP 18.2.10 (installed 18.4.5)",
+    "live (2 real OMPs, fake HOME, local codex provider)": "WS interval 60: 20/20; SSE interval 15: 19/19 - execute TASK omp_processed, host run exit 0, review >=1, judge success, report accepted, run closed, automation idle, hold-stage manager notice exactly once"
+  },
+  "step0": "codex uses websockets (preferWebsockets); payload has input[] not messages; last item {role:user, content:[{type:input_text, text:<envelope>}]}; WS sends only the new user item with previous_response_id, SSE sends full history; codex provider emits no after_provider_response; reasoning responses have assistant content [thinking('' + thinkingSignature), text]",
+  "fixes": {
+    "E1": "bridge finalUserTexts(): messages[-1] text or input[-1] input_text only; both present -> reject; id rules unchanged; matched request + error-free assistant message_end accepted as response evidence (same as the G3 hook-as-diagnostic decision); empty leading thinking ignored, visible thinking / thinking after text / other keys still rejected; 4 captured fixtures",
+    "E2": "criteria all three required (CW-10 judge uses all) - documented in flow.py errors, tool description and to-worker skill (result_file must be written by the run, else indeterminate)",
+    "E3": "run_start_failed with a TASK and no workflow report -> one worker->manager REPORT notice via the existing lane (no resend); before-TASK failures only via notices[]",
+    "E4": "never-run Task shows '[시작 실패 · <reason>]'"
+  },
+  "needs_root_judgement": "ignoring an empty (signature-only) thinking block narrows the no_thinking rule to visible content; a real model emitting reasoning summary text would still be rejected (unverified with a real model)",
+  "residue": "none",
+  "observed_model": "opus"
+}

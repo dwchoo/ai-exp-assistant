@@ -1,0 +1,382 @@
+[
+ {
+  "t": 0.1,
+  "wall": "23:59:26",
+  "event": "setup",
+  "root": "/tmp/wb-cw18-smoke-9atfd6gh",
+  "commit": "bfa81404319b",
+  "omp": "/home/dwchoo/.local/bin/omp"
+ },
+ {
+  "t": 1.6,
+  "wall": "23:59:28",
+  "event": "start",
+  "exit": 0,
+  "stdout": "starting backend: shell bash (/usr/bin/bash), omp/18.4.5\nwaiting for the OMP isolation check ...\nbackend pid 1593779 phase ready\ndata dir /tmp/wb-cw18-smoke-9atfd6gh/data\n  host_shell: pid 1593836 alive=True owner=user\n  manager_omp: pid 1593837 alive=True owner=user\n  worker_omp: pid 1593838 alive=True owner=user\n  shell: bash /usr/bin/bash mode=manual_prompt\nomp isolation: ok (omp/18.4.5 evidence bridge_g3=18.2.10)\n",
+  "stderr": ""
+ },
+ {
+  "t": 1.7,
+  "wall": "23:59:28",
+  "event": "ready",
+  "isolation": "ok",
+  "leaks": [],
+  "warnings": [],
+  "notes": [],
+  "providers": {
+   "manager": [
+    "openai-codex"
+   ],
+   "worker": [
+    "openai-codex"
+   ]
+  },
+  "omp_version": "omp/18.4.5",
+  "worker": {
+   "state": "idle",
+   "task_id": null
+  },
+  "automation": {
+   "detail": "no active run",
+   "interruption": {
+    "confirmed_at": null,
+    "error": null,
+    "manager_ack": null,
+    "pause_id": null,
+    "requested_at": null,
+    "state": "none",
+    "unknown_tool_call_ids": [],
+    "worker_ack": null
+   },
+   "paused": false,
+   "persistence_error": null,
+   "resume": null,
+   "retry_limit": 3,
+   "review": {
+    "applies": false,
+    "coalesced_count": 0,
+    "exit": null,
+    "interval_seconds": 60,
+    "last_review_at": null,
+    "next_due_in_seconds": null,
+    "pending": false,
+    "reason": null,
+    "review_count": 0,
+    "status": null
+   },
+   "run": null,
+   "source": "backend",
+   "state": "idle",
+   "tick": {
+    "at": "2026-10-03T14:59:28+00:00",
+    "outcome": "idle",
+    "problems": []
+   },
+   "transition": null
+  },
+  "snapshot_keys": [
+   "attached",
+   "automation",
+   "backend",
+   "boot",
+   "bridge",
+   "contract",
+   "focus",
+   "omp_isolation",
+   "panes",
+   "phase",
+   "reason",
+   "shutdown",
+   "task",
+   "ui",
+   "worker"
+  ]
+ },
+ {
+  "t": 1.7,
+  "wall": "23:59:28",
+  "event": "agent_db_link",
+  "is_symlink": true,
+  "target_basename": "agent.db"
+ },
+ {
+  "t": 2.6,
+  "wall": "23:59:29",
+  "event": "ui_attached",
+  "status_lines": [
+   "focus: MANAGER OMP | host 입력 owner: user | shell mode: manual_prompt | worker: 대기 | 자동화: idle",
+   "backend: ready | bridge manager=ok worker=ok | 마지막 확인 23:59:29 (0s 전) | Ctrl-] ? 도움말"
+  ]
+ },
+ {
+  "t": 4.7,
+  "wall": "23:59:31",
+  "event": "typed",
+  "step": 1,
+  "requests": 0
+ },
+ {
+  "t": 167.2,
+  "wall": "00:02:13",
+  "event": "state",
+  "task_id": "8177ac12-c598-4b6c-bd25-c957533c44e7",
+  "kind": "work",
+  "status": "running",
+  "held": null,
+  "runs": 1,
+  "worker": "busy",
+  "shell_owner": "user",
+  "shell_mode": "manual_prompt",
+  "automation": "active",
+  "requests": 20
+ },
+ {
+  "t": 167.9,
+  "wall": "00:02:14",
+  "event": "ui_busy",
+  "status_lines": [
+   "focus: MANAGER OMP | host 입력 owner: user | shell mode: manual_prompt | worker: 작업 중 | 자동화: active",
+   "작업: 작업 \"Create work/hello.txt containing exactl…\" [실행 중] | backend: ready | bridge manager=ok worker=ok | 마지막 확인 00:02:14 (0s 전) | Ctrl-] ? 도움말",
+   "x│ to_manager\\\"}\",\"details\":{\"status\":\"dispatched\",\"task_id\":\"8177ac12-c598-4b6c-b │xx /tmp/wb-cw18-smoke-9atfd6gh/project/work/hello.txt containing exactly the single  x",
+   "x│ under the user's standing delegation (C-D66); it reports back with              │xx When complete, report done with to_manager.\",\"kind\":\"work\",\"message\":\"Create      x",
+   "x│ to_manager\"}}                                                                   │xx work/hello.txt containing exactly one line: hello from worker. Only change that   x",
+   "x│ … 1 more lines (Ctrl+O to expand)                                               │xx path. Report done with to_manager when                                            x"
+  ]
+ },
+ {
+  "t": 182.9,
+  "wall": "00:02:29",
+  "event": "state",
+  "task_id": "8177ac12-c598-4b6c-bd25-c957533c44e7",
+  "kind": "work",
+  "status": "running",
+  "held": "done_report_pending",
+  "runs": 1,
+  "worker": "busy",
+  "shell_owner": "user",
+  "shell_mode": "manual_prompt",
+  "automation": "active",
+  "requests": 27
+ },
+ {
+  "t": 192.4,
+  "wall": "00:02:39",
+  "event": "cap",
+  "reason": "request cap reached (30)"
+ },
+ {
+  "t": 192.9,
+  "wall": "00:02:39",
+  "event": "step1_settled",
+  "requests": {
+   "agent/sessions/-tmp-wb-cw18-smoke-9atfd6gh-project/2026-10-03T14-59-27-457Z_01a10246-f661-75b5-866f-5fd5dd837acb.jsonl": {
+    "assistant": 5,
+    "error_or_aborted": 0,
+    "role_hint": "worker"
+   },
+   "agent/sessions/-tmp-wb-cw18-smoke-9atfd6gh-project/2026-10-03T14-59-27-520Z_01a10246-f6a0-74c4-9d08-faf4dbdf0e17.jsonl": {
+    "assistant": 25,
+    "error_or_aborted": 0,
+    "role_hint": "manager"
+   }
+  },
+  "status_lines": [
+   "focus: MANAGER OMP | host 입력 owner: user | shell mode: manual_prompt | worker: 작업 중 | 자동화: active",
+   "작업: 작업 \"Create work/hello.txt containing exactl…\" [실행 중 · done_report_pending] | backend: ready | bridge manager=ok worker=ok | 마지막 확인 00:02:39 (0s 전) | Ctrl",
+   "x│ c44e7\",\"handoff_id\":\"74c5ec29-ad94-469c-8470-1be71b55dc10\",\"detail\":\"queued for │xx to_manager now. Do not modify any additional                                      x",
+   "x╰─────────────────────────────────────────────────────────────────────────────────╯xx Completing manager question response                                              x",
+   "x                                                                                   xx ⣷ To manager                                                                      x"
+  ]
+ },
+ {
+  "t": 192.9,
+  "wall": "00:02:39",
+  "event": "final",
+  "task": {
+   "active": true,
+   "cancel_requested": false,
+   "closed_reason": null,
+   "held_reason": "done_report_pending",
+   "kind": "work",
+   "last_result": null,
+   "retry_limit": 3,
+   "revision": 1,
+   "run_id": "9557d872-772b-46a4-805b-897442667326",
+   "runs_started": 1,
+   "since": "2026-10-03T15:02:13Z",
+   "status": "running",
+   "summary": "Create work/hello.txt containing exactly one line: hello from worker. Only change that path. Report done with to_manager when complete.",
+   "task_id": "8177ac12-c598-4b6c-bd25-c957533c44e7"
+  },
+  "worker": {
+   "state": "busy",
+   "task_id": "8177ac12-c598-4b6c-bd25-c957533c44e7"
+  },
+  "automation": {
+   "detail": "free-work run: no host run to review; pause/resume apply",
+   "interruption": {
+    "confirmed_at": null,
+    "error": null,
+    "manager_ack": null,
+    "pause_id": null,
+    "requested_at": null,
+    "state": "none",
+    "unknown_tool_call_ids": [],
+    "worker_ack": null
+   },
+   "paused": false,
+   "persistence_error": null,
+   "resume": null,
+   "retry_limit": 3,
+   "review": {
+    "applies": false,
+    "coalesced_count": 0,
+    "exit": null,
+    "interval_seconds": 60,
+    "last_review_at": null,
+    "next_due_in_seconds": null,
+    "pending": false,
+    "reason": null,
+    "review_count": 0,
+    "status": null
+   },
+   "run": {
+    "bound": true,
+    "error": null,
+    "kind": "work",
+    "revision": 1,
+    "run_id": "9557d872-772b-46a4-805b-897442667326",
+    "task_id": "8177ac12-c598-4b6c-bd25-c957533c44e7"
+   },
+   "source": "backend",
+   "state": "active",
+   "tick": {
+    "at": "2026-10-03T15:02:39+00:00",
+    "outcome": "held",
+    "problems": [
+     "user_owner_or_control_hold"
+    ]
+   },
+   "transition": null
+  },
+  "host": {
+   "error": null,
+   "executable": "/usr/bin/bash",
+   "generation": 1,
+   "held_reasons": [
+    "user_owner",
+    "parent_not_control_wait"
+   ],
+   "input_owner": "user",
+   "kind": "bash",
+   "owner_epoch": 2,
+   "parent": {
+    "pid": 1593836,
+    "start_ticks": 258463739
+   },
+   "parent_mode": "manual_prompt",
+   "phase": "not_sent",
+   "request_id": null,
+   "supervisor": null,
+   "takeover_confirmed": false,
+   "takeover_requested": false,
+   "unknown": []
+  }
+ },
+ {
+  "t": 196.3,
+  "wall": "00:02:43",
+  "event": "paused_on_cap",
+  "automation": {
+   "detail": "paused by the user; collection continues, new automatic work is held",
+   "interruption": {
+    "confirmed_at": "2026-10-03T15:02:40Z",
+    "error": null,
+    "manager_ack": "abort_requested",
+    "pause_id": "25c7e51d-4dfc-4ac6-b4b1-cae9e0a3a48c",
+    "requested_at": "2026-10-03T15:02:40Z",
+    "state": "confirmed",
+    "unknown_tool_call_ids": [],
+    "worker_ack": "paused"
+   },
+   "paused": true,
+   "persistence_error": null,
+   "resume": null,
+   "retry_limit": 3,
+   "review": {
+    "applies": false,
+    "coalesced_count": 0,
+    "exit": null,
+    "interval_seconds": 60,
+    "last_review_at": null,
+    "next_due_in_seconds": null,
+    "pending": false,
+    "reason": null,
+    "review_count": 0,
+    "status": null
+   },
+   "run": {
+    "bound": true,
+    "error": null,
+    "kind": "work",
+    "revision": 1,
+    "run_id": "9557d872-772b-46a4-805b-897442667326",
+    "task_id": "8177ac12-c598-4b6c-bd25-c957533c44e7"
+   },
+   "source": "backend",
+   "state": "paused",
+   "tick": {
+    "at": "2026-10-03T15:02:42+00:00",
+    "outcome": "held",
+    "problems": [
+     "pause_or_cancel_active_or_unknown",
+     "user_owner_or_control_hold"
+    ]
+   },
+   "transition": null
+  }
+ },
+ {
+  "t": 196.3,
+  "wall": "00:02:43",
+  "event": "requests_final",
+  "per_file": {
+   "agent/sessions/-tmp-wb-cw18-smoke-9atfd6gh-project/2026-10-03T14-59-27-457Z_01a10246-f661-75b5-866f-5fd5dd837acb.jsonl": {
+    "assistant": 7,
+    "error_or_aborted": 0,
+    "role_hint": "worker"
+   },
+   "agent/sessions/-tmp-wb-cw18-smoke-9atfd6gh-project/2026-10-03T14-59-27-520Z_01a10246-f6a0-74c4-9d08-faf4dbdf0e17.jsonl": {
+    "assistant": 26,
+    "error_or_aborted": 1,
+    "role_hint": "manager"
+   }
+  },
+  "total": 33,
+  "stop_reason": "request cap reached (30)"
+ },
+ {
+  "t": 196.7,
+  "wall": "00:02:43",
+  "event": "shutdown",
+  "exit": 0,
+  "out": "\"9557d872-772b-46a4-805b-897442667326\", \"task_id\": \"8177ac12-c598-4b6c-bd25-c957533c44e7\"}\n{\"shutdown\": {\"panes\": [{\"exit_status\": -1, \"pane\": \"host_shell\", \"survivors\": []}, {\"exit_status\": 143, \"pane\": \"manager_omp\", \"survivors\": []}, {\"exit_status\": 143, \"pane\": \"worker_omp\", \"survivors\": []}], \"processes\": {\"host_shell\": \"dead\", \"manager_omp\": \"dead\", \"worker_omp\": \"dead\"}, \"verified\": true}}\n"
+ },
+ {
+  "t": 200.5,
+  "wall": "00:02:47",
+  "event": "artifacts",
+  "hello": "hello from worker\n",
+  "second_exists": false,
+  "git_status": "?? work/hello.txt"
+ },
+ {
+  "t": 201.1,
+  "wall": "00:02:47",
+  "event": "cleanup",
+  "residue_processes": [],
+  "still_alive": [],
+  "root_exists": false,
+  "elapsed_s": 201.1
+ }
+]

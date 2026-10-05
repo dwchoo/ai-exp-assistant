@@ -1,0 +1,48 @@
+{
+ "schema_version": 1,
+ "invocation": "p27-cw18-smoke-fix-review-01",
+ "reviewer": "wb-delta-reviewer",
+ "verdict": "integrate",
+ "findings": [
+  {
+   "p": "P2",
+   "where": "tests/bridge/live_strict_placeholder_probe.py:83-89 / bridge.ts:690",
+   "what": "live probe의 provider wire는 strict=None, required=[i,kind,message]. 즉 strict 변환 경로(openai-codex)는 재현·검증되지 않았고 D1 근본원인(strict schema)은 여전히 추정. 수정은 모델이 null을 보내도, 예전 placeholder를 보내도 동작하도록 backend 정규화에 의존하므로 안전하나, 실모델 재-smoke로만 확인 가능.",
+   "fix": "integration 후 실모델 smoke 재실행(보고서에 미검증으로 명시)."
+  },
+  {
+   "p": "P3",
+   "where": "src/workbench/backend/flow.py:314-320",
+   "what": "to_manager request에 실제 goal이 있고 paths가 []이면 request 전체가 조용히 삭제됨(goal 텍스트 손실). authority/dispatch에는 영향 없음(dispatch_authorized False).",
+   "fix": "drop 대신 goal을 message에 덧붙이거나 rejection 메시지로 안내."
+  },
+  {
+   "p": "P3",
+   "where": "src/workbench/backend/flow_tasks.py:477-524",
+   "what": "프로젝트 안 symlink가 밖을 가리키는 절대경로(/proj/out/passwd)는 'out/passwd'로 정규화됨. 상대경로와 동일 의미라 사전 계약 대비 확대는 아님.",
+   "fix": "필요하면 후속에서 symlink 해석 후 scope 검사."
+  },
+  {
+   "p": "P3",
+   "where": "env",
+   "what": "tests/ui, tests/workflow는 이 시스템 python에 wcwidth/pyte가 없어 import 오류(delta 무관). 첫 workflow 실행에 1 failure가 있었으나 재실행에서 재현되지 않음(부하 flaky 추정, workflow 미변경)."
+  }
+ ],
+ "focus_verdicts": {
+  "normalisation": "OK. task_id 실값, cancel:true, run:true, 실 execution(work 거부/experiment 유지)은 absent로 바뀌지 않음. 빈 execution placeholder(shell만 non-blank)만 absent. 알 수 없는 키는 null이어도 거부.",
+  "strict_schema": "OK. optional 전부 [T,'null'], nested spec/execution/request nullable, additionalProperties false 유지, required는 kind/message만이라 local validation은 null 허용. TS 9/9, live 8/8.",
+  "paths": "OK. '..' 정규화 후 밖이면 거부, 루트 자체 거부, 이중 슬래시/symlink 프로젝트 루트(realpath) 처리, 상대 결과가 '..'로 시작하는 경우 없음, 후행 '/' 보존.",
+  "skills": "OK. to-worker/to-manager에 end-your-turn·no wait/poll·repo-relative·null 규칙, tool 이름·status 일치, 70줄/9000자 이내.",
+  "regression": "backend 556 OK(27 skip,1 xfail), bridge 48 OK, TS 9/9, contracts 52 OK, live probe exit 0(8/8)."
+ },
+ "checks": {
+  "backend": "unittest exit 0",
+  "bridge": "exit 0",
+  "ts": "exit 0",
+  "contracts": "exit 0",
+  "live_probe": "exit 0",
+  "ui": "import error wcwidth (env)",
+  "workflow": "import error pyte (env)"
+ },
+ "overall": "integrate"
+}

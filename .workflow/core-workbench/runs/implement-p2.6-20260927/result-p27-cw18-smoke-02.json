@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw18-smoke-02",
+  "status": "complete_with_new_defect",
+  "report": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-smoke-02.md",
+  "timeline": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-smoke-02-timeline.json",
+  "summary": {
+    "requests": "25/40 (manager 14, worker 11), ~9 min",
+    "fixed_confirmed": "first native to_worker dispatched 3/3 (no eval), unused fields null, manager ended its turn after dispatch (no wait/poll), both work reports reached the manager -> closed done -> worker idle, no done_report_pending",
+    "defects": {
+      "E1 high": "all 7 deliveries became unknown (provider_request_identity_not_observed) 20-40 ms after api_accepted; work/report proceed on api_accepted but the experiment run start needs OMP_PROCESSED (run.py:612) -> always start_failed:WorkflowHeld; suspected bridge.ts providerRequestContainsActiveDelivery checks only payload.messages, not the openai-codex Responses payload shape",
+      "E2": "criteria log_contains/result_file/result_contains all required but undocumented -> manager invents result_file",
+      "E3": "start_failed reaches the manager only via the next to_worker notices[]",
+      "E4 low": "a never-run Task shows '[보고 완료 · start_failed…]'"
+    },
+    "unverified": [
+      "host run typing",
+      "60 s review",
+      "judge",
+      "cwd restore",
+      "worker_busy"
+    ]
+  },
+  "observed_model": "opus"
+}

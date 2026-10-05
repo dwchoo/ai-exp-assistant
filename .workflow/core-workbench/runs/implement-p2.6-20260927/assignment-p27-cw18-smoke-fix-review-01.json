@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw18-smoke-fix-review-01",
+  "ticket_id": "CW-18 smoke fixes delta review",
+  "role": "reviewer",
+  "unit": "V-CW-18-smoke-fix",
+  "approved_bundle_digest": "4f4a016424bafe78c2c23437706e206bce3a3c770d13610785564a4a93f00a93",
+  "routing": {
+    "planned_role": "reviewer",
+    "selected_role": "reviewer (wb-delta-reviewer, Sonnet high)",
+    "reason_codes": [
+      "bounded_delta_after_full_review"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-smoke-01.md"
+    ]
+  },
+  "frozen_candidate": "39343b59a53356c19a778057ba4f39541501d89f86621fcc313472026aeeead9",
+  "criteria": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-smoke-01.md D1-D3",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/assignment-p27-cw18-smoke-fix-01.json required_behavior",
+    "docs/features/core-workbench/DECISIONS.md C-D65, C-D66"
+  ],
+  "delta": {
+    "base": "git HEAD (commit 74b147f/801671d = integrated CW-18)",
+    "files": [
+      "omp_bridge/g3/bridge.ts",
+      "omp_bridge/skills/to-worker/SKILL.md",
+      "omp_bridge/skills/to-manager/SKILL.md",
+      "src/workbench/backend/flow.py",
+      "src/workbench/backend/flow_tasks.py",
+      "src/workbench/backend/service.py"
+    ],
+    "tests": "git diff HEAD / new files"
+  },
+  "focus": [
+    "Normalisation never turns a meaningful value into 'absent' in a way that changes authority or scope (e.g. a real task_id, cancel:true, run:true, a real execution for an experiment); absent-vs-null semantics consistent between bridge schema and backend.",
+    "Strict schema validity for OMP/openai (all properties required, nullable types, additionalProperties false on nested objects) and that the non-strict local validation still accepts null.",
+    "Path normalisation is safe (symlinks, .., root itself, case, trailing slash) and cannot widen scope outside the project.",
+    "Skill wording now prevents the wait/poll loop and matches tool results; no stale names.",
+    "No regression; run tests/backend, tests/bridge, TS bridge tests, tests/contracts (real exit codes)."
+  ],
+  "rules": "Read-only; write only .workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-smoke-fix-review-01-agent.json. No model prompts; OMP only with a fake HOME/Workbench home; never read credential contents or other processes' environ; never pkill or pattern kills; never touch ~/wb-urux-sandbox or the user's processes.",
+  "result_format": "Findings P0..P3 with file:line; verdict per focus; overall integrate/block. Write JSON; reply in Korean <=12 lines."
+}

@@ -1,0 +1,1083 @@
+{
+ "02a": [
+  {
+   "t": 0.1,
+   "wall": "09:04:57",
+   "event": "setup",
+   "root": "/tmp/wb-cw18-smoke-5oofcqm2",
+   "commit": "72e07649b8c4",
+   "omp": "/home/dwchoo/.local/bin/omp"
+  },
+  {
+   "t": 1.6,
+   "wall": "09:04:58",
+   "event": "start",
+   "exit": 0,
+   "stdout": "starting backend: shell bash (/usr/bin/bash), omp/18.4.5\nwaiting for the OMP isolation check ...\nbackend pid 3064277 phase ready\ndata dir /tmp/wb-cw18-smoke-5oofcqm2/data\n  host_shell: pid 3064334 alive=True owner=user\n  manager_omp: pid 3064335 alive=True owner=user\n  worker_omp: pid 3064336 alive=True owner=user\n  shell: bash /usr/bin/bash mode=manual_prompt\nomp isolation: ok (omp/18.4.5 evidence bridge_g3=18.2.10)\n",
+   "stderr": ""
+  },
+  {
+   "t": 1.7,
+   "wall": "09:04:58",
+   "event": "ready",
+   "isolation": "ok",
+   "leaks": [],
+   "warnings": [],
+   "notes": [],
+   "providers": {
+    "manager": [
+     "openai-codex"
+    ],
+    "worker": [
+     "openai-codex"
+    ]
+   },
+   "omp_version": "omp/18.4.5",
+   "worker": {
+    "state": "idle",
+    "task_id": null
+   },
+   "automation": {
+    "detail": "no active run",
+    "interruption": {
+     "confirmed_at": null,
+     "error": null,
+     "manager_ack": null,
+     "pause_id": null,
+     "requested_at": null,
+     "state": "none",
+     "unknown_tool_call_ids": [],
+     "worker_ack": null
+    },
+    "paused": false,
+    "persistence_error": null,
+    "resume": null,
+    "retry_limit": 3,
+    "review": {
+     "applies": false,
+     "coalesced_count": 0,
+     "exit": null,
+     "interval_seconds": 60,
+     "last_review_at": null,
+     "next_due_in_seconds": null,
+     "pending": false,
+     "reason": null,
+     "review_count": 0,
+     "status": null
+    },
+    "run": null,
+    "source": "backend",
+    "state": "idle",
+    "tick": {
+     "at": "2026-10-05T00:04:58+00:00",
+     "outcome": "idle",
+     "problems": []
+    },
+    "transition": null
+   },
+   "snapshot_keys": [
+    "attached",
+    "automation",
+    "backend",
+    "boot",
+    "bridge",
+    "contract",
+    "focus",
+    "omp_isolation",
+    "panes",
+    "phase",
+    "reason",
+    "shutdown",
+    "task",
+    "ui",
+    "worker"
+   ]
+  },
+  {
+   "t": 1.7,
+   "wall": "09:04:58",
+   "event": "agent_db_link",
+   "is_symlink": true,
+   "target_basename": "agent.db"
+  },
+  {
+   "t": 2.6,
+   "wall": "09:04:59",
+   "event": "ui_attached",
+   "status_lines": [
+    "focus: MANAGER OMP | host 입력 owner: user | shell mode: manual_prompt | worker: 대기 | 자동화: idle",
+    "backend: ready | bridge manager=ok worker=ok | 마지막 확인 09:04:59 (0s 전) | Ctrl-] ? 도움말"
+   ]
+  },
+  {
+   "t": 4.6,
+   "wall": "09:05:01",
+   "event": "typed",
+   "step": 1,
+   "requests": 0
+  },
+  {
+   "t": 12.1,
+   "wall": "09:05:09",
+   "event": "state",
+   "task_id": "4cca28cb-c061-4d5d-b0df-0080fbb67003",
+   "kind": "work",
+   "status": "running",
+   "held": null,
+   "runs": 1,
+   "worker": "busy",
+   "shell_owner": "user",
+   "shell_mode": "manual_prompt",
+   "automation": "active",
+   "reviews": 0,
+   "run": null,
+   "requests": 2
+  },
+  {
+   "t": 12.9,
+   "wall": "09:05:10",
+   "event": "ui_busy",
+   "status_lines": [
+    "focus: MANAGER OMP | host 입력 owner: user | shell mode: manual_prompt | worker: 작업 중 | 자동화: active",
+    "작업: 작업 \"Create work/hello.txt containing exactl…\" [실행 중] | backend: ready | bridge manager=ok worker=ok | 마지막 확인 09:05:09 (0s 전) | Ctrl-] ? 도움말"
+   ]
+  },
+  {
+   "t": 25.7,
+   "wall": "09:05:22",
+   "event": "state",
+   "task_id": "4cca28cb-c061-4d5d-b0df-0080fbb67003",
+   "kind": "work",
+   "status": "closed",
+   "held": null,
+   "runs": 1,
+   "worker": "idle",
+   "shell_owner": "user",
+   "shell_mode": "manual_prompt",
+   "automation": "idle",
+   "reviews": 0,
+   "run": null,
+   "requests": 7
+  },
+  {
+   "t": 25.7,
+   "wall": "09:05:22",
+   "event": "work_closed",
+   "task": {
+    "active": false,
+    "cancel_requested": false,
+    "closed_reason": "done",
+    "held_reason": null,
+    "kind": "work",
+    "last_result": {
+     "outcome": "done",
+     "run_id": "59fc8fe7-f0de-493c-8f03-a0aae96058d9"
+    },
+    "retry_limit": 3,
+    "revision": 1,
+    "run_id": null,
+    "runs_started": 1,
+    "since": "2026-10-05T00:05:22Z",
+    "status": "closed",
+    "summary": "Create work/hello.txt containing exactly one line: hello from worker",
+    "task_id": "4cca28cb-c061-4d5d-b0df-0080fbb67003"
+   },
+   "worker": {
+    "state": "idle",
+    "task_id": null
+   },
+   "hello_exists": true,
+   "hello": "hello from worker\n",
+   "requests": {
+    "agent/sessions/-tmp-wb-cw18-smoke-5oofcqm2-project/2026-10-05T00-04-57-863Z_01a10960-bf87-702a-8832-6d00802185f5.jsonl": {
+     "assistant": 4,
+     "error_or_aborted": 0,
+     "role_hint": "worker"
+    },
+    "agent/sessions/-tmp-wb-cw18-smoke-5oofcqm2-project/2026-10-05T00-04-57-858Z_01a10960-bf82-71e9-b14b-e2b561325fd7.jsonl": {
+     "assistant": 3,
+     "error_or_aborted": 0,
+     "role_hint": "manager"
+    }
+   }
+  },
+  {
+   "t": 56.0,
+   "wall": "09:05:53",
+   "event": "step1_settled",
+   "requests": {
+    "agent/sessions/-tmp-wb-cw18-smoke-5oofcqm2-project/2026-10-05T00-04-57-863Z_01a10960-bf87-702a-8832-6d00802185f5.jsonl": {
+     "assistant": 5,
+     "error_or_aborted": 0,
+     "role_hint": "worker"
+    },
+    "agent/sessions/-tmp-wb-cw18-smoke-5oofcqm2-project/2026-10-05T00-04-57-858Z_01a10960-bf82-71e9-b14b-e2b561325fd7.jsonl": {
+     "assistant": 4,
+     "error_or_aborted": 0,
+     "role_hint": "manager"
+    }
+   },
+   "status_lines": [
+    "focus: MANAGER OMP | host 입력 owner: user | shell mode: manual_prompt | worker: 대기 | 자동화: idle",
+    "작업: 작업 \"Create work/hello.txt containing exactl…\" [종료(완료)] | backend: ready | bridge manager=ok worker=ok | 마지막 확인 09:05:52 (0s 전) | Ctrl-] ? 도움말",
+    "x 561325fd7\",\"session_generation\":1,\"payload\":{\"handoff\":\"to_manager\",\"kind\":\"done\" xx                                                                                   x",
+    "x Verified by reading work/hello.txt:raw; content matched exactly.\"}}               xx • To manager                                                                      x",
+    "x                                                                                   xx • To manager                                                                      x"
+   ]
+  },
+  {
+   "t": 58.1,
+   "wall": "09:05:55",
+   "event": "typed",
+   "step": 2,
+   "requests": 9
+  },
+  {
+   "t": 82.6,
+   "wall": "09:06:19",
+   "event": "state",
+   "task_id": "6a29289d-0671-42b4-b2d4-1224d155d6f3",
+   "kind": "experiment",
+   "status": "dispatched",
+   "held": null,
+   "runs": 0,
+   "worker": "busy",
+   "shell_owner": "user",
+   "shell_mode": "manual_prompt",
+   "automation": "idle",
+   "reviews": 0,
+   "run": null,
+   "requests": 12
+  },
+  {
+   "t": 82.7,
+   "wall": "09:06:19",
+   "event": "state",
+   "task_id": "6a29289d-0671-42b4-b2d4-1224d155d6f3",
+   "kind": "experiment",
+   "status": "finished",
+   "held": "start_failed:WorkflowHeld",
+   "runs": 1,
+   "worker": "idle",
+   "shell_owner": "user",
+   "shell_mode": "manual_prompt",
+   "automation": "idle",
+   "reviews": 0,
+   "run": null,
+   "requests": 12
+  },
+  {
+   "t": 86.0,
+   "wall": "09:06:23",
+   "event": "exp_running",
+   "task": {
+    "active": false,
+    "cancel_requested": false,
+    "closed_reason": null,
+    "held_reason": "start_failed:WorkflowHeld",
+    "kind": "experiment",
+    "last_result": {
+     "detail": "worker instruction was not confirmed processed; no execution or replay",
+     "error": "WorkflowHeld",
+     "outcome": "start_failed"
+    },
+    "retry_limit": 3,
+    "revision": 1,
+    "run_id": null,
+    "runs_started": 1,
+    "since": "2026-10-05T00:06:19Z",
+    "status": "finished",
+    "summary": "Run ./exp.sh and judge success by log containing RESULT=ok. The tool requires a file criterion too; use exp.sh contains RESULT=ok as a stable no-change auxiliary check.",
+    "task_id": "6a29289d-0671-42b4-b2d4-1224d155d6f3"
+   },
+   "shell": {
+    "error": null,
+    "executable": "/usr/bin/bash",
+    "generation": 1,
+    "held_reasons": [
+     "user_owner",
+     "parent_not_control_wait"
+    ],
+    "input_owner": "user",
+    "kind": "bash",
+    "owner_epoch": 2,
+    "parent": {
+     "pid": 3064334,
+     "start_ticks": 270376778
+    },
+    "parent_mode": "manual_prompt",
+    "phase": "not_sent",
+    "request_id": null,
+    "supervisor": null,
+    "takeover_confirmed": false,
+    "takeover_requested": false,
+    "unknown": []
+   },
+   "automation": {
+    "detail": "no active run",
+    "interruption": {
+     "confirmed_at": null,
+     "error": null,
+     "manager_ack": null,
+     "pause_id": null,
+     "requested_at": null,
+     "state": "none",
+     "unknown_tool_call_ids": [],
+     "worker_ack": null
+    },
+    "paused": false,
+    "persistence_error": null,
+    "resume": null,
+    "retry_limit": 3,
+    "review": {
+     "applies": false,
+     "coalesced_count": 0,
+     "exit": null,
+     "interval_seconds": 60,
+     "last_review_at": null,
+     "next_due_in_seconds": null,
+     "pending": false,
+     "reason": null,
+     "review_count": 0,
+     "status": null
+    },
+    "run": null,
+    "source": "backend",
+    "state": "idle",
+    "tick": {
+     "at": "2026-10-05T00:06:19+00:00",
+     "outcome": "idle",
+     "problems": []
+    },
+    "transition": null
+   },
+   "status_lines": [
+    "focus: MANAGER OMP | host 입력 owner: user | shell mode: manual_prompt | worker: 대기 | 자동화: idle",
+    "작업: 실험 \"Run ./exp.sh and judge success by log c…\" [보고 완료 · start_failed:WorkflowHeld] | backend: ready | bridge manager=ok worker=ok | 마지막 확인 09:06:23 (0s 전"
+   ]
+  },
+  {
+   "t": 88.0,
+   "wall": "09:06:25",
+   "event": "typed",
+   "step": 3,
+   "requests": 13
+  },
+  {
+   "t": 91.2,
+   "wall": "09:06:28",
+   "event": "state",
+   "task_id": "81a3d05e-6b09-4f9f-bfa0-67ef1227f7ab",
+   "kind": "work",
+   "status": "running",
+   "held": null,
+   "runs": 1,
+   "worker": "busy",
+   "shell_owner": "user",
+   "shell_mode": "manual_prompt",
+   "automation": "active",
+   "reviews": 0,
+   "run": null,
+   "requests": 15
+  },
+  {
+   "t": 99.7,
+   "wall": "09:06:36",
+   "event": "state",
+   "task_id": "81a3d05e-6b09-4f9f-bfa0-67ef1227f7ab",
+   "kind": "work",
+   "status": "closed",
+   "held": null,
+   "runs": 1,
+   "worker": "idle",
+   "shell_owner": "user",
+   "shell_mode": "manual_prompt",
+   "automation": "idle",
+   "reviews": 0,
+   "run": null,
+   "requests": 19
+  },
+  {
+   "t": 129.5,
+   "wall": "09:07:06",
+   "event": "timeout",
+   "what": "observe-window(no-op)",
+   "task": {
+    "active": false,
+    "cancel_requested": false,
+    "closed_reason": "done",
+    "held_reason": null,
+    "kind": "work",
+    "last_result": {
+     "outcome": "done",
+     "run_id": "a713d138-3afa-4fc9-b307-60068decb5ca"
+    },
+    "retry_limit": 3,
+    "revision": 1,
+    "run_id": null,
+    "runs_started": 1,
+    "since": "2026-10-05T00:06:35Z",
+    "status": "closed",
+    "summary": "Create work/second.txt.",
+    "task_id": "81a3d05e-6b09-4f9f-bfa0-67ef1227f7ab"
+   },
+   "worker": {
+    "state": "idle",
+    "task_id": null
+   },
+   "automation": {
+    "detail": "no active run",
+    "interruption": {
+     "confirmed_at": null,
+     "error": null,
+     "manager_ack": null,
+     "pause_id": null,
+     "requested_at": null,
+     "state": "none",
+     "unknown_tool_call_ids": [],
+     "worker_ack": null
+    },
+    "paused": false,
+    "persistence_error": null,
+    "resume": null,
+    "retry_limit": 3,
+    "review": {
+     "applies": false,
+     "coalesced_count": 0,
+     "exit": null,
+     "interval_seconds": 60,
+     "last_review_at": null,
+     "next_due_in_seconds": null,
+     "pending": false,
+     "reason": null,
+     "review_count": 0,
+     "status": null
+    },
+    "run": null,
+    "source": "backend",
+    "state": "idle",
+    "tick": {
+     "at": "2026-10-05T00:07:05+00:00",
+     "outcome": "idle",
+     "problems": []
+    },
+    "transition": null
+   }
+  },
+  {
+   "t": 207.0,
+   "wall": "09:08:24",
+   "event": "requests_final",
+   "per_file": {
+    "agent/sessions/-tmp-wb-cw18-smoke-5oofcqm2-project/2026-10-05T00-04-57-863Z_01a10960-bf87-702a-8832-6d00802185f5.jsonl": {
+     "assistant": 10,
+     "error_or_aborted": 0,
+     "role_hint": "worker"
+    },
+    "agent/sessions/-tmp-wb-cw18-smoke-5oofcqm2-project/2026-10-05T00-04-57-858Z_01a10960-bf82-71e9-b14b-e2b561325fd7.jsonl": {
+     "assistant": 11,
+     "error_or_aborted": 0,
+     "role_hint": "manager"
+    }
+   },
+   "total": 21,
+   "stop_reason": null
+  },
+  {
+   "t": 207.4,
+   "wall": "09:08:24",
+   "event": "shutdown",
+   "exit": 0,
+   "out": "no active work reported\n{\"shutdown\": {\"panes\": [{\"exit_status\": -1, \"pane\": \"host_shell\", \"survivors\": []}, {\"exit_status\": 143, \"pane\": \"manager_omp\", \"survivors\": []}, {\"exit_status\": 143, \"pane\": \"worker_omp\", \"survivors\": []}], \"processes\": {\"host_shell\": \"dead\", \"manager_omp\": \"dead\", \"worker_omp\": \"dead\"}, \"verified\": true}}\n"
+  },
+  {
+   "t": 211.3,
+   "wall": "09:08:28",
+   "event": "artifacts",
+   "hello": "hello from worker\n",
+   "second_exists": true,
+   "git_status": "?? work/hello.txt\n?? work/second.txt"
+  },
+  {
+   "t": 211.8,
+   "wall": "09:08:28",
+   "event": "cleanup",
+   "residue_processes": [],
+   "still_alive": [
+    3071677
+   ],
+   "root_exists": false,
+   "elapsed_s": 211.8
+  }
+ ],
+ "02b": [
+  {
+   "t": 0.1,
+   "wall": "09:12:23",
+   "event": "setup",
+   "root": "/tmp/wb-cw18-smoke-du3q3pny",
+   "commit": "2b960e1815ad",
+   "omp": "/home/dwchoo/.local/bin/omp"
+  },
+  {
+   "t": 1.6,
+   "wall": "09:12:24",
+   "event": "start",
+   "exit": 0,
+   "stdout": "starting backend: shell bash (/usr/bin/bash), omp/18.4.5\nwaiting for the OMP isolation check ...\nbackend pid 3075613 phase ready\ndata dir /tmp/wb-cw18-smoke-du3q3pny/data\n  host_shell: pid 3075672 alive=True owner=user\n  manager_omp: pid 3075673 alive=True owner=user\n  worker_omp: pid 3075674 alive=True owner=user\n  shell: bash /usr/bin/bash mode=manual_prompt\nomp isolation: ok (omp/18.4.5 evidence bridge_g3=18.2.10)\n",
+   "stderr": ""
+  },
+  {
+   "t": 1.7,
+   "wall": "09:12:24",
+   "event": "ready",
+   "isolation": "ok",
+   "leaks": [],
+   "warnings": [],
+   "notes": [],
+   "providers": {
+    "manager": [
+     "openai-codex"
+    ],
+    "worker": [
+     "openai-codex"
+    ]
+   },
+   "omp_version": "omp/18.4.5",
+   "worker": {
+    "state": "idle",
+    "task_id": null
+   },
+   "automation": {
+    "detail": "no active run",
+    "interruption": {
+     "confirmed_at": null,
+     "error": null,
+     "manager_ack": null,
+     "pause_id": null,
+     "requested_at": null,
+     "state": "none",
+     "unknown_tool_call_ids": [],
+     "worker_ack": null
+    },
+    "paused": false,
+    "persistence_error": null,
+    "resume": null,
+    "retry_limit": 3,
+    "review": {
+     "applies": false,
+     "coalesced_count": 0,
+     "exit": null,
+     "interval_seconds": 60,
+     "last_review_at": null,
+     "next_due_in_seconds": null,
+     "pending": false,
+     "reason": null,
+     "review_count": 0,
+     "status": null
+    },
+    "run": null,
+    "source": "backend",
+    "state": "idle",
+    "tick": {
+     "at": "2026-10-05T00:12:24+00:00",
+     "outcome": "idle",
+     "problems": []
+    },
+    "transition": null
+   },
+   "snapshot_keys": [
+    "attached",
+    "automation",
+    "backend",
+    "boot",
+    "bridge",
+    "contract",
+    "focus",
+    "omp_isolation",
+    "panes",
+    "phase",
+    "reason",
+    "shutdown",
+    "task",
+    "ui",
+    "worker"
+   ]
+  },
+  {
+   "t": 1.7,
+   "wall": "09:12:24",
+   "event": "agent_db_link",
+   "is_symlink": true,
+   "target_basename": "agent.db"
+  },
+  {
+   "t": 2.6,
+   "wall": "09:12:25",
+   "event": "ui_attached",
+   "status_lines": [
+    "focus: MANAGER OMP | host 입력 owner: user | shell mode: manual_prompt | worker: 대기 | 자동화: idle",
+    "backend: ready | bridge manager=ok worker=ok | 마지막 확인 09:12:25 (0s 전) | Ctrl-] ? 도움말"
+   ]
+  },
+  {
+   "t": 4.8,
+   "wall": "09:12:27",
+   "event": "typed",
+   "step": 2,
+   "requests": 0
+  },
+  {
+   "t": 4.8,
+   "wall": "09:12:27",
+   "event": "state",
+   "task_id": null,
+   "kind": null,
+   "status": null,
+   "held": null,
+   "runs": null,
+   "worker": "idle",
+   "shell_owner": "user",
+   "shell_mode": "manual_prompt",
+   "automation": "idle",
+   "reviews": 0,
+   "run": null,
+   "requests": 0
+  },
+  {
+   "t": 11.3,
+   "wall": "09:12:34",
+   "event": "state",
+   "task_id": "dc0bd2d3-34bd-4304-8ba9-67d963587745",
+   "kind": "experiment",
+   "status": "finished",
+   "held": "start_failed:WorkflowHeld",
+   "runs": 1,
+   "worker": "idle",
+   "shell_owner": "user",
+   "shell_mode": "manual_prompt",
+   "automation": "idle",
+   "reviews": 0,
+   "run": null,
+   "requests": 2
+  },
+  {
+   "t": 14.6,
+   "wall": "09:12:37",
+   "event": "exp_running",
+   "task": {
+    "active": false,
+    "cancel_requested": false,
+    "closed_reason": null,
+    "held_reason": "start_failed:WorkflowHeld",
+    "kind": "experiment",
+    "last_result": {
+     "detail": "worker instruction was not confirmed processed; no execution or replay",
+     "error": "WorkflowHeld",
+     "outcome": "start_failed"
+    },
+    "retry_limit": 3,
+    "revision": 1,
+    "run_id": null,
+    "runs_started": 1,
+    "since": "2026-10-05T00:12:34Z",
+    "status": "finished",
+    "summary": "Run ./exp.sh and judge success criteria.",
+    "task_id": "dc0bd2d3-34bd-4304-8ba9-67d963587745"
+   },
+   "shell": {
+    "error": null,
+    "executable": "/usr/bin/bash",
+    "generation": 1,
+    "held_reasons": [
+     "user_owner",
+     "parent_not_control_wait"
+    ],
+    "input_owner": "user",
+    "kind": "bash",
+    "owner_epoch": 2,
+    "parent": {
+     "pid": 3075672,
+     "start_ticks": 270421379
+    },
+    "parent_mode": "manual_prompt",
+    "phase": "not_sent",
+    "request_id": null,
+    "supervisor": null,
+    "takeover_confirmed": false,
+    "takeover_requested": false,
+    "unknown": []
+   },
+   "automation": {
+    "detail": "no active run",
+    "interruption": {
+     "confirmed_at": null,
+     "error": null,
+     "manager_ack": null,
+     "pause_id": null,
+     "requested_at": null,
+     "state": "none",
+     "unknown_tool_call_ids": [],
+     "worker_ack": null
+    },
+    "paused": false,
+    "persistence_error": null,
+    "resume": null,
+    "retry_limit": 3,
+    "review": {
+     "applies": false,
+     "coalesced_count": 0,
+     "exit": null,
+     "interval_seconds": 60,
+     "last_review_at": null,
+     "next_due_in_seconds": null,
+     "pending": false,
+     "reason": null,
+     "review_count": 0,
+     "status": null
+    },
+    "run": null,
+    "source": "backend",
+    "state": "idle",
+    "tick": {
+     "at": "2026-10-05T00:12:33+00:00",
+     "outcome": "idle",
+     "problems": []
+    },
+    "transition": null
+   },
+   "status_lines": [
+    "focus: MANAGER OMP | host 입력 owner: user | shell mode: manual_prompt | worker: 대기 | 자동화: idle",
+    "작업: 실험 \"Run ./exp.sh and judge success criteria.\" [보고 완료 · start_failed:WorkflowHeld] | backend: ready | bridge manager=ok worker=ok | 마지막 확인 09:12:37 (0s 전"
+   ]
+  },
+  {
+   "t": 56.2,
+   "wall": "09:13:19",
+   "event": "timeout",
+   "what": "observe-window(no-op)",
+   "task": {
+    "active": false,
+    "cancel_requested": false,
+    "closed_reason": null,
+    "held_reason": "start_failed:WorkflowHeld",
+    "kind": "experiment",
+    "last_result": {
+     "detail": "worker instruction was not confirmed processed; no execution or replay",
+     "error": "WorkflowHeld",
+     "outcome": "start_failed"
+    },
+    "retry_limit": 3,
+    "revision": 1,
+    "run_id": null,
+    "runs_started": 1,
+    "since": "2026-10-05T00:12:34Z",
+    "status": "finished",
+    "summary": "Run ./exp.sh and judge success criteria.",
+    "task_id": "dc0bd2d3-34bd-4304-8ba9-67d963587745"
+   },
+   "worker": {
+    "state": "idle",
+    "task_id": null
+   },
+   "automation": {
+    "detail": "no active run",
+    "interruption": {
+     "confirmed_at": null,
+     "error": null,
+     "manager_ack": null,
+     "pause_id": null,
+     "requested_at": null,
+     "state": "none",
+     "unknown_tool_call_ids": [],
+     "worker_ack": null
+    },
+    "paused": false,
+    "persistence_error": null,
+    "resume": null,
+    "retry_limit": 3,
+    "review": {
+     "applies": false,
+     "coalesced_count": 0,
+     "exit": null,
+     "interval_seconds": 60,
+     "last_review_at": null,
+     "next_due_in_seconds": null,
+     "pending": false,
+     "reason": null,
+     "review_count": 0,
+     "status": null
+    },
+    "run": null,
+    "source": "backend",
+    "state": "idle",
+    "tick": {
+     "at": "2026-10-05T00:13:17+00:00",
+     "outcome": "idle",
+     "problems": []
+    },
+    "transition": null
+   }
+  },
+  {
+   "t": 56.8,
+   "wall": "09:13:19",
+   "event": "exp_finished",
+   "task": {
+    "active": false,
+    "cancel_requested": false,
+    "closed_reason": null,
+    "held_reason": "start_failed:WorkflowHeld",
+    "kind": "experiment",
+    "last_result": {
+     "detail": "worker instruction was not confirmed processed; no execution or replay",
+     "error": "WorkflowHeld",
+     "outcome": "start_failed"
+    },
+    "retry_limit": 3,
+    "revision": 1,
+    "run_id": null,
+    "runs_started": 1,
+    "since": "2026-10-05T00:12:34Z",
+    "status": "finished",
+    "summary": "Run ./exp.sh and judge success criteria.",
+    "task_id": "dc0bd2d3-34bd-4304-8ba9-67d963587745"
+   },
+   "automation": {
+    "detail": "no active run",
+    "interruption": {
+     "confirmed_at": null,
+     "error": null,
+     "manager_ack": null,
+     "pause_id": null,
+     "requested_at": null,
+     "state": "none",
+     "unknown_tool_call_ids": [],
+     "worker_ack": null
+    },
+    "paused": false,
+    "persistence_error": null,
+    "resume": null,
+    "retry_limit": 3,
+    "review": {
+     "applies": false,
+     "coalesced_count": 0,
+     "exit": null,
+     "interval_seconds": 60,
+     "last_review_at": null,
+     "next_due_in_seconds": null,
+     "pending": false,
+     "reason": null,
+     "review_count": 0,
+     "status": null
+    },
+    "run": null,
+    "source": "backend",
+    "state": "idle",
+    "tick": {
+     "at": "2026-10-05T00:13:19+00:00",
+     "outcome": "idle",
+     "problems": []
+    },
+    "transition": null
+   },
+   "shell": {
+    "error": null,
+    "executable": "/usr/bin/bash",
+    "generation": 1,
+    "held_reasons": [
+     "user_owner",
+     "parent_not_control_wait"
+    ],
+    "input_owner": "user",
+    "kind": "bash",
+    "owner_epoch": 2,
+    "parent": {
+     "pid": 3075672,
+     "start_ticks": 270421379
+    },
+    "parent_mode": "manual_prompt",
+    "phase": "not_sent",
+    "request_id": null,
+    "supervisor": null,
+    "takeover_confirmed": false,
+    "takeover_requested": false,
+    "unknown": []
+   },
+   "requests": {
+    "agent/sessions/-tmp-wb-cw18-smoke-du3q3pny-project/2026-10-05T00-12-23-873Z_01a10967-8dc1-72fb-9190-435611cc7f48.jsonl": {
+     "assistant": 3,
+     "error_or_aborted": 0,
+     "role_hint": "manager"
+    },
+    "agent/sessions/-tmp-wb-cw18-smoke-du3q3pny-project/2026-10-05T00-12-23-872Z_01a10967-8dc0-7122-bb8f-1bc20274081c.jsonl": {
+     "assistant": 1,
+     "error_or_aborted": 0,
+     "role_hint": "?"
+    }
+   }
+  },
+  {
+   "t": 56.8,
+   "wall": "09:13:19",
+   "event": "shell_back",
+   "shell": {
+    "error": null,
+    "executable": "/usr/bin/bash",
+    "generation": 1,
+    "held_reasons": [
+     "user_owner",
+     "parent_not_control_wait"
+    ],
+    "input_owner": "user",
+    "kind": "bash",
+    "owner_epoch": 2,
+    "parent": {
+     "pid": 3075672,
+     "start_ticks": 270421379
+    },
+    "parent_mode": "manual_prompt",
+    "phase": "not_sent",
+    "request_id": null,
+    "supervisor": null,
+    "takeover_confirmed": false,
+    "takeover_requested": false,
+    "unknown": []
+   },
+   "hold": null
+  },
+  {
+   "t": 86.3,
+   "wall": "09:13:49",
+   "event": "final",
+   "task": {
+    "active": false,
+    "cancel_requested": false,
+    "closed_reason": null,
+    "held_reason": "start_failed:WorkflowHeld",
+    "kind": "experiment",
+    "last_result": {
+     "detail": "worker instruction was not confirmed processed; no execution or replay",
+     "error": "WorkflowHeld",
+     "outcome": "start_failed"
+    },
+    "retry_limit": 3,
+    "revision": 1,
+    "run_id": null,
+    "runs_started": 1,
+    "since": "2026-10-05T00:12:34Z",
+    "status": "finished",
+    "summary": "Run ./exp.sh and judge success criteria.",
+    "task_id": "dc0bd2d3-34bd-4304-8ba9-67d963587745"
+   },
+   "worker": {
+    "state": "idle",
+    "task_id": null
+   },
+   "automation": {
+    "detail": "no active run",
+    "interruption": {
+     "confirmed_at": null,
+     "error": null,
+     "manager_ack": null,
+     "pause_id": null,
+     "requested_at": null,
+     "state": "none",
+     "unknown_tool_call_ids": [],
+     "worker_ack": null
+    },
+    "paused": false,
+    "persistence_error": null,
+    "resume": null,
+    "retry_limit": 3,
+    "review": {
+     "applies": false,
+     "coalesced_count": 0,
+     "exit": null,
+     "interval_seconds": 60,
+     "last_review_at": null,
+     "next_due_in_seconds": null,
+     "pending": false,
+     "reason": null,
+     "review_count": 0,
+     "status": null
+    },
+    "run": null,
+    "source": "backend",
+    "state": "idle",
+    "tick": {
+     "at": "2026-10-05T00:13:48+00:00",
+     "outcome": "idle",
+     "problems": []
+    },
+    "transition": null
+   },
+   "host": {
+    "error": null,
+    "executable": "/usr/bin/bash",
+    "generation": 1,
+    "held_reasons": [
+     "user_owner",
+     "parent_not_control_wait"
+    ],
+    "input_owner": "user",
+    "kind": "bash",
+    "owner_epoch": 2,
+    "parent": {
+     "pid": 3075672,
+     "start_ticks": 270421379
+    },
+    "parent_mode": "manual_prompt",
+    "phase": "not_sent",
+    "request_id": null,
+    "supervisor": null,
+    "takeover_confirmed": false,
+    "takeover_requested": false,
+    "unknown": []
+   }
+  },
+  {
+   "t": 86.3,
+   "wall": "09:13:49",
+   "event": "requests_final",
+   "per_file": {
+    "agent/sessions/-tmp-wb-cw18-smoke-du3q3pny-project/2026-10-05T00-12-23-873Z_01a10967-8dc1-72fb-9190-435611cc7f48.jsonl": {
+     "assistant": 3,
+     "error_or_aborted": 0,
+     "role_hint": "manager"
+    },
+    "agent/sessions/-tmp-wb-cw18-smoke-du3q3pny-project/2026-10-05T00-12-23-872Z_01a10967-8dc0-7122-bb8f-1bc20274081c.jsonl": {
+     "assistant": 1,
+     "error_or_aborted": 0,
+     "role_hint": "?"
+    }
+   },
+   "total": 4,
+   "stop_reason": null
+  },
+  {
+   "t": 86.7,
+   "wall": "09:13:49",
+   "event": "shutdown",
+   "exit": 0,
+   "out": "no active work reported\n{\"shutdown\": {\"panes\": [{\"exit_status\": -1, \"pane\": \"host_shell\", \"survivors\": []}, {\"exit_status\": 143, \"pane\": \"manager_omp\", \"survivors\": []}, {\"exit_status\": 143, \"pane\": \"worker_omp\", \"survivors\": []}], \"processes\": {\"host_shell\": \"dead\", \"manager_omp\": \"dead\", \"worker_omp\": \"dead\"}, \"verified\": true}}\n"
+  },
+  {
+   "t": 90.6,
+   "wall": "09:13:53",
+   "event": "artifacts",
+   "hello": null,
+   "second_exists": false,
+   "git_status": ""
+  },
+  {
+   "t": 91.1,
+   "wall": "09:13:54",
+   "event": "cleanup",
+   "residue_processes": [],
+   "still_alive": [],
+   "root_exists": false,
+   "elapsed_s": 91.1
+  }
+ ]
+}

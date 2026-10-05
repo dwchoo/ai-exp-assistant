@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw18-smoke-01",
+  "status": "stopped_at_request_cap",
+  "report": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-smoke-01.md",
+  "timeline": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-smoke-01-timeline.json",
+  "summary": {
+    "requests": "33 (manager 26, worker 7; 3 already in flight at cap)",
+    "duration_s": 201,
+    "worked": [
+      "real entrypoint, isolation ok, shared login via agent.db symlink",
+      "work Task dispatched (via eval), worker wrote work/hello.txt, to_manager done queued",
+      "follow-up queued -> question",
+      "status lines",
+      "pause aborted the manager turn and confirmed",
+      "shutdown verified, residue 0"
+    ],
+    "defects": {
+      "D1 high": "native to_worker rejected 18x: the model fills every optional field (fake task_id, run/cancel false, spec.execution for work); to_manager always carries requires_code_change/request placeholders and the backend accepts them; suspected strict function-schema conversion on the openai-codex path",
+      "D2 medium": "absolute spec.paths -> invalid_paths; skill does not say repo-relative",
+      "D3 medium": "manager interprets 'wait for the report' as the OMP wait tool and never ends its turn -> done_report_pending, requests burned"
+    },
+    "unverified": [
+      "experiment path (idle check, Workbench run, 60 s review, judge, cwd restore)",
+      "worker_busy",
+      "Task close after done",
+      "manager receiving the report"
+    ]
+  },
+  "observed_model": "opus"
+}

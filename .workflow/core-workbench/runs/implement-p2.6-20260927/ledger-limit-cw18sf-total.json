@@ -1,0 +1,23 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 1864,
+  "event": {
+    "id": "limit-cw18sf-total",
+    "kind": "limit",
+    "data": {
+      "authority": "C-D55 budget delegation, workflow-contract section 8; result-p27-cw18-smoke-01 D1-D3",
+      "bucket": "total",
+      "decision_owner": "Root",
+      "expected_previous": {
+        "authority": "user 2026-10-03 '\uacc4\uc18d \uc9c4\ud589\ud574\uc918' after the smoke question (C-D65 (4)); C-D55 budget delegation, workflow-contract section 8",
+        "reason": "CW-18 real-model smoke",
+        "value": 595
+      },
+      "origin": "operating",
+      "reason": "CW-18 smoke findings",
+      "remaining_work_estimate": 4,
+      "scope_basis": null,
+      "value": 599
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw18-smoke-fix-review-01",
+  "verdict": "integrate",
+  "frozen_candidate": "39343b59a53356c19a778057ba4f39541501d89f86621fcc313472026aeeead9",
+  "agent_result": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw18-smoke-fix-review-01-agent.json",
+  "incident": "Root recorded this review as running in the ledger before spawning it and only spawned it after the user asked why it was still waiting (2026-10-04); no work was lost",
+  "findings": {
+    "P2": "live_strict_placeholder_probe wire is strict=None; the openai-codex strict path is not reproduced - D1 cause remains a hypothesis; backend normalisation handles both nulls and the old placeholders; only a real-model re-smoke confirms",
+    "P3a": "flow.py:314-320 a to_manager request with a real goal and paths [] is dropped entirely (goal text lost; dispatch_authorized stays False)",
+    "P3b": "flow_tasks.py:477-524 an absolute path through an in-project symlink pointing outside becomes a relative path like out/passwd - same meaning as the relative form, not wider than before"
+  },
+  "checks": {
+    "backend": "556 OK (27 skip, 1 xfail)",
+    "bridge": "48",
+    "contracts": "52",
+    "TS": "9/9",
+    "live probe": "8/8",
+    "note": "ui/workflow import errors with system python (no pyte/wcwidth) - worker's venv runs were exit 0"
+  },
+  "observed_model": "sonnet"
+}
