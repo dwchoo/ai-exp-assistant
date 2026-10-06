@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cd69-smoke-01",
+  "ticket_id": "CW-18 C-D69 real-model smoke (role boundary + /copy)",
+  "role": "test_designer",
+  "unit": "V-CW-18-smoke",
+  "approved_bundle_digest": "068d62647e1385fd1c5b0ad6d4e6debb1f288a99ee10feb1aecea7b4a958ba72",
+  "candidate_commit": "707bcf9",
+  "routing": {
+    "planned_role": "test_designer",
+    "selected_role": "test_designer (Opus general-purpose)",
+    "reason_codes": [
+      "live_real_model"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/assignment-p27-cd68-smoke-03.json",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd68-smoke-03.md",
+      "docs/features/core-workbench/DECISIONS.md#C-D69"
+    ]
+  },
+  "user_authorization": "User 2026-10-05 '재실행 끝나면 커밋하고 smoke 돌려줘' (continuation for C-D69 verification). Cap 30 requests / 20 min. No commits.",
+  "setup": "Exactly as p27-cd68-smoke-01 (new /tmp data dir and project, real product entrypoint, ui_v1 client, PTY screenshot of status lines; record start isolation per role).",
+  "scenario": [
+    "1. Type into the manager pane exactly the user's original request: '현재 하드웨어의 스팩을 확인하는 스크립트를 터미널에서 실행해서 결과를 정리해서 나에게 줘'. Observe and record: the to_worker arguments the manager sends (procedure-style? analysis value), the worker's TASK message (full message, Analysis line), worker tool calls (only the given steps via terminal; any scope widening = extra investigation not in the procedure), number of worker requests and time from TASK to to_manager done, the report content shape (what ran / key output / failures-missing, summary-level analysis), and the manager's final answer to the user. Compare with the pre-C-D69 behaviour described by the user (worker did a full, detailed investigation) and with result-p27-cd68-smoke-01.md scenario 1 (8 worker requests).",
+    "2. /copy: in the attached product UI (PTY, outer terminal = your PTY), focus the manager pane and run OMP `/copy` (copy the last answer); capture the outer terminal bytes and confirm a clean OSC 52 write (`ESC]52;c;<base64>BEL`, tmux-wrapped only if TMUX is set in the UI env) whose decoded text matches the manager's last answer prefix; no base64 drawn in panes. Optionally repeat inside a private `tmux -L` server to see the passthrough form.",
+    "3. If a step fails, do not retry more than once; record and classify (product defect vs model behaviour)."
+  ],
+  "limits": [
+    "Hard cap 30 provider requests, 20 min wall clock; at a cap pause, shut down (verified), report.",
+    "Never touch ~/wb-urux-sandbox or the user's processes; kill only PIDs you started; never read credential contents or other processes' environ; never print tokens; no commits; no graphify update; remove temp dirs afterwards."
+  ],
+  "result_format": "Write .workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd69-smoke-01.md (+ -timeline.json), Korean: timeline, request counts per OMP, to_worker args (no secrets), worker tool calls, report excerpt (short), /copy bytes evidence (lengths/hash, not the full text), what worked / not. Reply in Korean <=15 lines."
+}

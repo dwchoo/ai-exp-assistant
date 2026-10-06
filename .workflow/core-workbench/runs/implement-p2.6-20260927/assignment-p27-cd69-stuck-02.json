@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cd69-stuck-02",
+  "ticket_id": "C-D69 (5) review/test P3 x3",
+  "role": "worker_senior",
+  "unit": "V-CW-18-cd69-stuck",
+  "approved_bundle_digest": "da78fd72e54b37bc02ba2f5262a39c3c334e0726b72f9ce53597c9601877d6b3",
+  "routing": {
+    "planned_role": "worker_senior",
+    "selected_role": "worker_senior (Opus, reused cd69-fix)",
+    "reason_codes": [
+      "process_lifetime"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd69-stuck-review-01.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd69-stuck-test-01.md"
+    ]
+  },
+  "required_behavior": [
+    "P3-1: when Workbench typed wb-handoff but the claim failed because control_wait came late, keep polling for a bounded time and, on seeing control_wait with request_id None (Workbench-initiated only, never a user handoff per C-D58), request takeover again so the shell returns to the user; text stays truthful.",
+    "P3-2: experiment command size: recheck with the real host shell path right before start (no typing on failure) and/or use a safe margin at creation; the creation check must never pass a command that the start check will refuse for size on the current shell.",
+    "P3-3: guidance numbers 'about 2,800' (skill, bridge description, flow.py message).",
+    "Red->green tests; keep the p27cd69c independent tests green (do not edit them)."
+  ],
+  "acceptance": [
+    "tests/backend flow*/terminal*/task_flow/skills + p27cd69c independent, tests/terminal test_oversize*, tests/gates/g2_shell, node handoff_tools (real exit codes)"
+  ],
+  "allowed_write_paths": [
+    "src/workbench/backend/flow_terminal.py",
+    "src/workbench/backend/flow.py",
+    "src/workbench/backend/flow_tasks.py",
+    "omp_bridge/g3/bridge.ts",
+    "omp_bridge/skills/**",
+    "tests/backend/test_flow_terminal.py",
+    "tests/backend/test_task_flow.py",
+    "tests/backend/test_workbench_skills.py",
+    "tests/terminal/test_oversize_request_return.py",
+    "tests/bridge/handoff_tools.test.ts"
+  ],
+  "prohibited_paths": [
+    "tests/**/*_independent*",
+    "docs/**",
+    ".workflow/**"
+  ],
+  "rules": "No real provider requests; never touch the user's tmux server or ~/wb-urux-sandbox and its processes; temp only under /tmp; kill only PIDs you started; no commits; no graphify update.",
+  "result_format": "checks table, status per item, changed paths + sha256. Korean, <=8 lines."
+}

@@ -1,0 +1,8 @@
+# p27-cd69-stuck-test-01 (test_designer, Opus) — 2026-10-06 — candidate_ready (P3 x3)
+
+backend 856 (skip 30, xfail 1) exit 1: 2 fails in own dash test_pause_and_cancel_after_claim (load: pwd not confirmed within 3 s before wb-handoff; assertion premise, not a product defect; shell returned) -> module rerun 12/12 OK; terminal 208, workflow 56, g2_shell 142, bridge py 52, node 33, contracts 52, ui 815 all exit 0. Frozen 7c4e6f5b at start; only own 4 test files differ at end.
+Verified (bash+dash real shell): 4093 B request runs, 4097 B nothing typed/started; command_too_long room boundary exact (+1 char sent unchecked is refused by the shell); UTF-8 boundary; pipe refusal / claim failure / submit failure / pause-cancel during start all return the shell, manual and next commands work; unconfirmed returns say "could not confirm"; experiment creation refusal; user-typed wb-handoff (C-D58) kept; skills guidance. 5 mutants caught.
+P3-1 flow_terminal.py:1008, flow_tasks.py:1223: wb-handoff slower than PREPARE_WAIT (3 s) -> claim fails, shell stays user/control_wait (repro with PREPARE_WAIT=0); truthful text, recoverable via prefix t,c, but no takeover retry. (same as review P3-2)
+P3-2 flow.py:386 64-char shell path assumption; Nix ~76 / 106-char symlink -> passes creation, start_failed (shell returned). (same as review P3-1)
+P3-3 to-manager SKILL.md:38, bridge.ts:370, flow.py:412 "about 2,900" > real 2,812 (/usr/bin/bash). (same as review P3-3)
+New: tests/terminal/test_oversize_boundary_independent_p27cd69c.py 1744d2e21209, tests/backend/test_flow_terminal_independent_p27cd69c.py e16752c3908b, tests/backend/test_task_flow_independent_p27cd69c.py 9ac10ec69fbf, tests/backend/test_workbench_skills_independent_p27cd69c.py d61d3ec76756.

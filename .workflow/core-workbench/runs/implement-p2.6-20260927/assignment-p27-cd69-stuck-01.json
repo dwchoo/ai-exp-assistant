@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cd69-stuck-01",
+  "ticket_id": "C-D69 (5) stuck host shell + long command",
+  "role": "worker_senior",
+  "unit": "V-CW-18-cd69-stuck",
+  "approved_bundle_digest": "da78fd72e54b37bc02ba2f5262a39c3c334e0726b72f9ce53597c9601877d6b3",
+  "routing": {
+    "planned_role": "worker_senior",
+    "selected_role": "worker_senior (Opus, reused cd69-fix)",
+    "reason_codes": [
+      "process_lifetime",
+      "shell_protocol"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd69-smoke-01.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd69-smoke-01-timeline.json"
+    ]
+  },
+  "required_behavior": [
+    "(a) Reproduce first: a terminal command whose RUN request exceeds 4096 bytes -> lifecycle fail_unknown('request_too_large') leaves the parent shell in control_wait with owner manager; Workbench refuses further commands (host_terminal_busy) and the user cannot recover. Fix so that after ANY start failure of a terminal command (and the experiment start path that uses the same dispatch) the parent shell leaves control_wait and is returned to the user (input owner user, prompt usable), and the result/journal text matches the real state; if return cannot be confirmed, say so truthfully and keep a path for the user (e.g. existing host shell restart/kill) — never claim 'the host terminal is the user's again' falsely. Check every fail_unknown/raise branch in dispatch_managed and the terminal/experiment start paths.",
+    "(b) terminal: compute the real encoded RUN size before typing anything (same encoding as dispatch_managed incl. the display wrapper) and refuse oversize commands immediately with status like command_too_long + guidance: write the script with the `write` tool to a file and run `bash <file>`; validator limit text consistent; experiment to_worker run commands get the same early check at Task creation.",
+    "(c) Skills: worker (to-manager) — prefer several short terminal commands or a script file written with `write`; never inline a long multi-line script. Manager (to-worker + to_worker description) — keep procedures as concise as needed: key commands, allowed fallbacks, stop condition, values to return; no multi-section essays.",
+    "Tests red->green incl. a real PersistentShell test: oversize request -> refused before typing; forced start failure after handoff -> shell back to the user and the next command runs."
+  ],
+  "acceptance": [
+    "tests/backend flow*/terminal*/task_flow/skills, tests/terminal (shell_g2, persistent), tests/workflow, tests/bridge node handoff_tools, all p27cd68/p27cd69 independent tests (real exit codes; report independent tests needing updates, do not edit them)"
+  ],
+  "allowed_write_paths": [
+    "src/workbench/backend/flow_terminal.py",
+    "src/workbench/backend/flow.py",
+    "src/workbench/backend/flow_tasks.py",
+    "src/workbench/backend/service.py",
+    "src/workbench/terminal/shell_g2/lifecycle.py",
+    "src/workbench/terminal/shell_persistent/adapter.py",
+    "src/workbench/workflow/run.py",
+    "omp_bridge/g3/bridge.ts",
+    "omp_bridge/skills/**",
+    "tests/backend/test_flow*.py",
+    "tests/backend/test_task_flow.py",
+    "tests/backend/test_workbench_skills.py",
+    "tests/terminal/test_*.py",
+    "tests/workflow/test_*.py",
+    "tests/bridge/handoff_tools.test.ts"
+  ],
+  "note": "shell_g2/lifecycle.py is a G2-verified component: minimal change, keep G2 tests green.",
+  "prohibited_paths": [
+    "tests/**/*_independent*",
+    "docs/**",
+    ".workflow/**"
+  ],
+  "rules": "No real provider requests; never read credential contents or other processes' environ; never touch the user's tmux server or ~/wb-urux-sandbox and its processes; temp only under /tmp; kill only PIDs you started; no commits; no graphify update.",
+  "result_format": "checks table first (real exit codes), root cause of the stuck shell, status per item, changed paths + sha256, independent tests needing updates. Korean, <=12 lines."
+}

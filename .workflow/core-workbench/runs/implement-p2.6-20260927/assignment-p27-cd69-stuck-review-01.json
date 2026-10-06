@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cd69-stuck-review-01",
+  "ticket_id": "C-D69 (5) review",
+  "role": "reviewer",
+  "unit": "V-CW-18-cd69-stuck",
+  "approved_bundle_digest": "da78fd72e54b37bc02ba2f5262a39c3c334e0726b72f9ce53597c9601877d6b3",
+  "frozen_candidate": "7c4e6f5b0dbffbff6510404e312dac9c3d4e8968caf726db134b0741bdbda712",
+  "routing": {
+    "planned_role": "reviewer",
+    "selected_role": "reviewer (Opus general-purpose, fresh)",
+    "reason_codes": [
+      "g2_component_change",
+      "process_lifetime"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd69-smoke-01.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd69-stuck-01.md"
+    ]
+  },
+  "scope": "`git diff HEAD -- src omp_bridge` (lifecycle.py dispatch_managed size check order, flow_terminal.py start-failure return/truthful text/size precheck, flow.py/flow_tasks.py experiment checks and returns, bridge.ts/skills text). Focus: G2 invariants of dispatch_managed (no state change before rejecting; no replay; request ids), every start-failure path returns the shell or reports truthfully, races with user typing/takeover/kill/restart during the return, C-D58 user handoff untouched, precheck size equals the real dispatched size (encoding, wrapper, unicode), no double hold release, experiment Task creation check consistency.",
+  "rules": "No real provider requests; never read credential contents or other processes' environ; never touch the user's tmux server or ~/wb-urux-sandbox and its processes; temp only under /tmp; kill only PIDs you started; no commits; no graphify update. Read-only.",
+  "result_format": "verdict (approve / block), findings P1-P3 with file:line and scenario. Korean, <=12 lines."
+}

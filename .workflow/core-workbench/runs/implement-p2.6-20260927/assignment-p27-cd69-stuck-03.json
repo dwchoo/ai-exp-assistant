@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cd69-stuck-03",
+  "ticket_id": "run.py parent-cwd file race (pre-existing flake root cause)",
+  "role": "worker_senior",
+  "unit": "V-CW-18-cd69-stuck",
+  "approved_bundle_digest": "da78fd72e54b37bc02ba2f5262a39c3c334e0726b72f9ce53597c9601877d6b3",
+  "routing": {
+    "planned_role": "worker_senior",
+    "selected_role": "worker_senior (Opus, reused cd69-fix)",
+    "reason_codes": [
+      "race"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd69-stuck-02.md"
+    ]
+  },
+  "required_behavior": [
+    "run.py:707-712: wait until the parent-cwd file content is complete (non-empty and newline-terminated, or stable) within the existing deadline before comparing; same pattern anywhere else the code reads a file written by `pwd -P >` (e.g. flow_terminal cwd probes if any). Behaviour otherwise unchanged (WorkflowHeld when it really differs/times out).",
+    "Red->green with a deterministic test (simulate empty-then-filled file); then rerun the p27cd69c DashExperimentTests 10x and tests/workflow 3x (report pass counts)."
+  ],
+  "allowed_write_paths": [
+    "src/workbench/workflow/run.py",
+    "src/workbench/backend/flow_terminal.py",
+    "tests/workflow/test_run.py",
+    "tests/workflow/test_*.py"
+  ],
+  "prohibited_paths": [
+    "tests/**/*_independent*",
+    "docs/**",
+    ".workflow/**"
+  ],
+  "rules": "No real provider requests; never touch the user's tmux server or ~/wb-urux-sandbox and its processes; temp only under /tmp; kill only PIDs you started; no commits; no graphify update.",
+  "result_format": "checks table (real exit codes, repeat counts), changed paths + sha256. Korean, <=6 lines."
+}

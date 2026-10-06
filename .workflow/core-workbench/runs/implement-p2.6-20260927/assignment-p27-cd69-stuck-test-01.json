@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cd69-stuck-test-01",
+  "ticket_id": "C-D69 (5) independent verification",
+  "role": "test_designer",
+  "unit": "V-CW-18-cd69-stuck",
+  "approved_bundle_digest": "da78fd72e54b37bc02ba2f5262a39c3c334e0726b72f9ce53597c9601877d6b3",
+  "frozen_candidate": "7c4e6f5b0dbffbff6510404e312dac9c3d4e8968caf726db134b0741bdbda712",
+  "routing": {
+    "planned_role": "test_designer",
+    "selected_role": "test_designer (Opus general-purpose)",
+    "reason_codes": [
+      "first_independent_verification",
+      "process_lifetime"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd69-smoke-01.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd69-stuck-01.md"
+    ]
+  },
+  "spec": "DECISIONS.md C-D69 (5); derive from the decision, not the implementation.",
+  "required": [
+    "Adversarial independent tests (new *_independent_p27cd69c* files) with real PersistentShell (bash and dash/sh): oversize terminal command refused before anything is typed (shell history/prompt unchanged, no hold left), boundary sizes (exactly at / one over the limit, multi-byte UTF-8), command_too_long guidance; every start-failure branch (pipe refusal, claim failure, supervisor failure if reachable, cancel/pause during start) returns the shell to the user (input owner user, a following manual command and a following terminal command both work) and the result text is truthful (returned_to_user true only when actually returned); experiment Task with an oversize command rejected at creation; experiment start failure after wb-handoff returns the shell; user-initiated wb-handoff (C-D58) is not taken away; skills contain the short-commands/script-file and concise-procedure guidance.",
+    "Run tests/backend, tests/terminal, tests/workflow, tests/gates/g2_shell, tests/bridge (py+node), tests/contracts, tests/ui on the frozen candidate with hash checks; flakes: module rerun once (note test_task_message_independent_p27cd69b OldRecordFallbackTests flake)."
+  ],
+  "allowed_write_paths": [
+    "tests/**/*_independent_p27cd69c*"
+  ],
+  "prohibited_paths": [
+    "src/**",
+    "omp_bridge/**",
+    "docs/**",
+    ".workflow/**"
+  ],
+  "rules": "No real provider requests; never read credential contents or other processes' environ; never touch the user's tmux server or ~/wb-urux-sandbox and its processes; temp only under /tmp; kill only PIDs you started; no commits; no graphify update.",
+  "result_format": "checks table first (counts, real exit codes), hash check, findings P1-P3 with file:line, verdict, changed test paths + sha256. Korean, <=12 lines."
+}
