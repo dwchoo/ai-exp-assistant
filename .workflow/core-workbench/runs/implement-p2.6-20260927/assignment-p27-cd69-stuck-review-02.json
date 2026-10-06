@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cd69-stuck-review-02",
+  "ticket_id": "C-D69 (5) delta review",
+  "role": "reviewer",
+  "unit": "V-CW-18-cd69-stuck",
+  "approved_bundle_digest": "da78fd72e54b37bc02ba2f5262a39c3c334e0726b72f9ce53597c9601877d6b3",
+  "candidate_commit": "1ea7c2f",
+  "routing": {
+    "planned_role": "reviewer",
+    "selected_role": "reviewer (wb-delta-reviewer, fresh)",
+    "reason_codes": [
+      "delta_after_full_review"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd69-stuck-review-01.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd69-stuck-test-01.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd69-stuck-02.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd69-stuck-03.md"
+    ]
+  },
+  "scope": "Changes after the first stuck-shell review: the stuck-02 and stuck-03 parts of commit 1ea7c2f (flow_terminal.py RETURN_WAIT takeover retry, flow.py/flow_tasks.py real-path size checks at creation and start, guidance numbers, run.py _complete_line). Check: retry never takes over a user-initiated handoff (C-D58) or a shell the user is typing in; hold kept/released correctly on every path; no double takeover; deadline behaviour; creation check outside the flow lock races; run.py line compare correctness (paths with spaces/newlines/unicode, trailing slash, symlink realpath) and no new hang beyond the deadline.",
+  "rules": "No real provider requests; never touch the user's tmux server or ~/wb-urux-sandbox and its processes; temp only under /tmp; kill only PIDs you started. Read-only.",
+  "result_format": "verdict (approve / block), findings P1-P3 with file:line and scenario. Korean, <=8 lines."
+}

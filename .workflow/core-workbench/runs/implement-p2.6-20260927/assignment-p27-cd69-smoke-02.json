@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cd69-smoke-02",
+  "ticket_id": "CW-18 C-D69 (5) re-smoke (role boundary + stuck-shell fix)",
+  "role": "test_designer",
+  "unit": "V-CW-18-smoke",
+  "approved_bundle_digest": "da78fd72e54b37bc02ba2f5262a39c3c334e0726b72f9ce53597c9601877d6b3",
+  "candidate_commit": "1ea7c2f",
+  "routing": {
+    "planned_role": "test_designer",
+    "selected_role": "test_designer (Opus general-purpose)",
+    "reason_codes": [
+      "live_real_model"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd69-smoke-01.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd69-stuck-01.md",
+      "docs/features/core-workbench/DECISIONS.md#C-D69"
+    ]
+  },
+  "user_authorization": "User 2026-10-05 '재실행 끝나면 커밋하고 smoke 돌려줘' (continuation for C-D69 verification). Cap 30 requests / 20 min. No commits.",
+  "setup": "Exactly as p27-cd68-smoke-01 (new /tmp data dir and project, real product entrypoint, ui_v1 client, PTY screenshot of status lines; record start isolation per role).",
+  "scenario": [
+    "1. Same as smoke-01 scenario 1: type exactly '현재 하드웨어의 스팩을 확인하는 스크립트를 터미널에서 실행해서 결과를 정리해서 나에게 줘' into the manager pane. Record to_worker args size/shape (concise procedure?), analysis value, worker tool calls (short commands or a script file written with `write` + bash <file>; any command_too_long / start_failed and whether the shell stayed usable), TASK->first terminal and TASK->to_manager done times, worker request count, report shape (what ran / key output / failures-missing, summary-level analysis), manager's final answer. Compare with smoke-01 (blocked after 105.7 s) and cd68 smoke-01 (8 worker requests).",
+    "2. If any start failure happens, confirm the host shell returns to the user (state + a follow-up command works).",
+    "3. /copy is not required again (verified in smoke-01)."
+  ],
+  "limits": [
+    "Hard cap 30 provider requests, 20 min wall clock; at a cap pause, shut down (verified), report.",
+    "Never touch ~/wb-urux-sandbox or the user's processes; kill only PIDs you started; never read credential contents or other processes' environ; never print tokens; no commits; no graphify update; remove temp dirs afterwards."
+  ],
+  "result_format": "Write .workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd69-smoke-02.md (+ -timeline.json), Korean: timeline, request counts, to_worker args shape (no secrets), worker tool calls, report excerpt (short), timings, what worked / not. Reply in Korean <=12 lines."
+}
