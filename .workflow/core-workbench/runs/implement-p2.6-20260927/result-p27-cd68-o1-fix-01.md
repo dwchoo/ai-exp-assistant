@@ -1,0 +1,6 @@
+# p27-cd68-o1-fix-01 result (worker_senior, Opus, reused cd68-terminal2) — 2026-10-06
+
+Root cause: OMP 18.6.1 wraps OSC 777 notifications in a tmux DCS passthrough when TMUX is set (`ESC P tmux; <OSC with doubled ESC> ESC \`, sometimes + BEL; OMP tui/src/tmux.ts). pyte 0.8.2 (pane VT parser) has no DCS state: it drops `ESC P` and prints `tmux;`, and the following `ESC ESC ]` breaks OSC handling so the notification body stays on screen. Plain OSC 777/9/99 were already hidden.
+Fix: only vt_g1/screen.py TerminalByteStream.feed — before pyte, drop DCS/SOS/PM/APC strings up to ST, treat inner `ESC ESC` as tmux escaping, abort on CAN/SUB, resumable across chunk boundaries (incl. trailing ESC). One stream covers all three panes. OMP env (TMUX), outer tmux and OSC 52 copy unchanged; notifications not forwarded.
+Checks: red new unit 151 subtest fail / PTY test 1 fail (reproduced `BEFORE-tmux;]777;notify;warp://…-AFTER`); green test_vt_string_sequences 6, PTY test, inside a private `tmux -L cd68o1` PTY + OSC 52 copy test OK; tests/ui 744, gates/g1_vt 114, backend panes 85, tests/terminal 47 OK.
+Changed: src/workbench/terminal/vt_g1/screen.py dc9846fc697d, tests/terminal/test_vt_string_sequences.py (new) 6b5006c61e8c, tests/ui/test_product_vt_passthrough.py (new) a7cb76abf1e8. Private tmux server killed; user tmux untouched.

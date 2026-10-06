@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cd68-o1-fix-03",
+  "ticket_id": "O1 _align recursion",
+  "role": "worker_senior",
+  "unit": "V-CW-18-cd68-o1",
+  "approved_bundle_digest": "348e50ee41ca8bc7f20f307dff77c13be5beefc0e1ccf30a524c95cb5fe98902",
+  "routing": {
+    "planned_role": "worker_senior",
+    "selected_role": "worker_senior (Opus, reused cd68-terminal2)",
+    "reason_codes": [
+      "crash_risk"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd68-o1-review-02.md"
+    ]
+  },
+  "required_behavior": [
+    "model.py:209-222 _align: replace recursion with a bounded loop (b'x'+b'\\x1b\\\\'*5000 and larger must not raise and must return a clean tail); also do not drop a leading plain '\\' when the cut is not inside a string (model.py:214) if that can be decided safely, else document.",
+    "Add tests (non-independent) for both; then run tests/ui test_product_vt_passthrough*, tests/ui test_product_model*, the p27o1 independent tests, tests/terminal test_vt_string_sequences* (real exit codes)."
+  ],
+  "allowed_write_paths": [
+    "src/workbench/ui/product/model.py",
+    "tests/ui/test_product_vt_passthrough.py"
+  ],
+  "prohibited_paths": [
+    "tests/**/*_independent*",
+    "docs/**",
+    ".workflow/**"
+  ],
+  "rules": "No real provider requests; never touch the user's tmux server or ~/wb-urux-sandbox processes; temp only under /tmp; kill only PIDs you started; no commits; no graphify update.",
+  "result_format": "checks table, changed paths + sha256. Korean, <=6 lines."
+}

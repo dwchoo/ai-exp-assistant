@@ -117,7 +117,27 @@
       "validator text 'or null to wait', fetch take_unseen on undelivered reply, bridge 10 s limit only for null",
       "review-03 P3: peer_gone same-key race, RUN payload 4096 B vs COMMAND_MAX 8192, BASH_ENV sourced twice by wrapper, echo-skip misalignment",
       "bridge.ts/flow_terminal running text still mentions 'wait tool'",
-      "terminal_fetch path not exercised by a real model (deterministic tests only)"
+      "terminal_fetch path not exercised by a real model (deterministic tests only)",
+      "terminal command length: tool validation allows 8192 chars but the RUN pipe line is limited to 4096 bytes (base64 JSON) -> ~2.9k chars; align validation with an early clear refusal + skill 'write long scripts to a file and run bash <file>' (also experiment run command). User 2026-10-06: messages are fine, defer."
+    ]
+  },
+  "o1": {
+    "decision": "user 2026-10-06 'tmux 안에서 깨진 글자만 수정하자.'",
+    "invocations": [
+      "p27-cd68-o1-fix-01",
+      "p27-cd68-o1-test-01 (needs_reroute)",
+      "p27-cd68-o1-review-01 (approve+P2)",
+      "p27-cd68-o1-fix-02",
+      "p27-cd68-o1-test-02 (candidate_ready)",
+      "p27-cd68-o1-review-02 (approve)",
+      "p27-cd68-o1-fix-03 (_align loop)"
+    ],
+    "summary": "pane VT filter drops DCS/SOS/PM/APC strings (tmux passthrough of OMP OSC 777 notifications) before pyte; CAN/SUB abort; ESC+non-ST ends a string; 8 MiB cap; ESC ESC P; stream reset with screen; _align loop and ST-aware tail",
+    "root_check": "tests/ui test_product_vt_passthrough* 19 OK, tests/terminal test_vt_string_sequences* 59 OK after fix-03",
+    "carried_polish": [
+      "pyte quirk: read boundary right after CAN/SUB changes rendering",
+      "notifications are not forwarded to the outer terminal",
+      "C1 ST U+009C not handled (8-bit C1 not used)"
     ]
   }
 }

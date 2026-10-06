@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cd68-o1-test-02",
+  "ticket_id": "O1 rerun after correction",
+  "role": "test_designer",
+  "unit": "V-CW-18-cd68-o1",
+  "approved_bundle_digest": "348e50ee41ca8bc7f20f307dff77c13be5beefc0e1ccf30a524c95cb5fe98902",
+  "frozen_candidate": "4fee13864339effaad606559d79015432281adda214ad6544be4ec13bbfda21a",
+  "routing": {
+    "planned_role": "test_designer",
+    "selected_role": "test_designer (wb-test-rerun)",
+    "reason_codes": [
+      "correction_reverification"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd68-o1-fix-02.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd68-o1-review-01.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd68-o1-test-01.md"
+    ]
+  },
+  "required": [
+    "Unpin the 3 expectedFailure edges that now pass and assert the correct behaviour; update test_random_fuzz_… and test_nested_and_garbage_payloads to the corrected rules (CAN/SUB always abort; inside a string ESC + non-`\\`/non-tmux-doubled ESC ends the string and is re-parsed; outside, ESC ESC P starts a DCS; 8 MiB cap) — derive the reference from these rules independently, do not copy the implementation.",
+    "Add tests for review P2s if missing: lost ST does not blank the pane (output after ESC c / ESC [ etc. visible), RIS works after an aborted string, session restart mid-string shows the new session.",
+    "Run tests/terminal, tests/ui, tests/gates/g1_vt, backend pane tests on the frozen candidate with hash checks; flakes: module rerun once."
+  ],
+  "allowed_write_paths": [
+    "tests/**/*_independent_p27o1*"
+  ],
+  "prohibited_paths": [
+    "src/**",
+    "omp_bridge/**",
+    "docs/**",
+    ".workflow/**"
+  ],
+  "rules": "No real provider requests; never read credential contents or other processes' environ; never touch the user's tmux server (private tmux -L only); temp only under /tmp; kill only PIDs you started; never touch ~/wb-urux-sandbox or its processes; no commits; no graphify update.",
+  "result_format": "checks table first (counts, real exit codes), hash check, findings, verdict, changed test paths + sha256. Korean, <=10 lines."
+}

@@ -1,0 +1,24 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 2074,
+  "event": {
+    "id": "reserve-p27-cd68-o1-review-01",
+    "kind": "reserve",
+    "data": {
+      "buckets": [
+        "total",
+        "role:reviewer",
+        "unit:V-CW-18-cd68-o1"
+      ],
+      "effort": "high",
+      "incident": "",
+      "invocation": "p27-cd68-o1-review-01",
+      "model": "claude-sonnet-5-5",
+      "purpose": "O1 delta review",
+      "role": "reviewer",
+      "unit": "V-CW-18-cd68-o1",
+      "workspace": "/home/dwchoo/ai-exp-assistant",
+      "writer": false
+    }
+  }
+}

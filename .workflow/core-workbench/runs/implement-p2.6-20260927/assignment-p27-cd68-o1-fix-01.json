@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cd68-o1-fix-01",
+  "ticket_id": "CW-18/CW-06 smoke-03 O1: tmux-wrapped OMP notification shown as text",
+  "role": "worker_senior",
+  "unit": "V-CW-18-cd68-o1",
+  "approved_bundle_digest": "348e50ee41ca8bc7f20f307dff77c13be5beefc0e1ccf30a524c95cb5fe98902",
+  "routing": {
+    "planned_role": "worker_senior",
+    "selected_role": "worker_senior (Opus, reused cd68-terminal2 per user request)",
+    "reason_codes": [
+      "terminal_protocol"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd68-smoke-03.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd68-smoke-03-timeline.json"
+    ]
+  },
+  "user_request": "2026-10-06: 'tmux 안에서 깨진 글자만 수정하자.'",
+  "problem": "When Workbench runs inside tmux (+Warp), the manager OMP pane showed OMP's notification as literal text: `tmux;]777;notify;warp://…` including the user's input and the reply text. OMP sees TMUX in its environment and wraps OSC 777 notifications in a tmux DCS passthrough (ESC P tmux; ESC ESC ] 777;notify;… BEL ESC \\); the Workbench pane VT path renders it as text.",
+  "required_behavior": [
+    "Find where it breaks (env passed to OMP panes: TMUX/TERM_PROGRAM; the pane VT parser in src/workbench/terminal/vt_g1/screen.py or the product UI feed) and fix it so no control-sequence text ever appears in any pane (manager, worker, host shell) for: DCS tmux passthrough (any payload), plain OSC 777/9/99 notifications (BEL or ST terminated), split across read chunks. The Workbench must still work inside the user's tmux/herdr (ADR-0001) and keep the existing outer-tmux/OSC 52 copy behaviour (model.py uses TMUX for copy). Prefer consuming/ignoring these sequences in the pane VT path; changing the OMP pane environment is acceptable only if it does not change the host shell environment or OMP features the user relies on — explain the choice.",
+    "Do not forward notifications to the outer terminal in this unit (just never render them as text).",
+    "Reproduce first with a real OMP 18.6.1 notification-like byte stream (no model call: feed captured bytes or run a tiny program inside a pane that prints the exact sequence), then red->green tests (unit + one PTY-level test)."
+  ],
+  "acceptance": [
+    "tests/ui, tests/gates/g1_vt (if touched), backend panes tests, tests/terminal relevant modules (real exit codes)"
+  ],
+  "allowed_write_paths": [
+    "src/workbench/terminal/vt_g1/screen.py",
+    "src/workbench/ui/product/**",
+    "src/workbench/backend/panes.py",
+    "src/workbench/backend/launcher.py",
+    "tests/ui/test_*.py",
+    "tests/terminal/test_*.py",
+    "tests/backend/test_panes*.py"
+  ],
+  "note": "vt_g1/screen.py is a G1-verified component (CW-01): keep the change minimal and keep existing G1 tests green; report if the fix needs anything outside the allowed paths.",
+  "prohibited_paths": [
+    "tests/**/*_independent*",
+    "docs/**",
+    ".workflow/**"
+  ],
+  "rules": "No real provider requests; never read credential contents or other processes' environ; never touch the user's tmux server/sessions or ~/wb-urux-sandbox (use your own tmux -L <private socket> for any tmux test and kill only that server); temp only under /tmp; kill only PIDs you started; no commits; no graphify update.",
+  "result_format": "checks table first (real exit codes), root cause, fix, changed paths + sha256, residue. Korean, <=10 lines."
+}

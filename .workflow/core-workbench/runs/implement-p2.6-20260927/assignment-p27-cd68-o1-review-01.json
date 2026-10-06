@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cd68-o1-review-01",
+  "ticket_id": "O1 delta review",
+  "role": "reviewer",
+  "unit": "V-CW-18-cd68-o1",
+  "approved_bundle_digest": "348e50ee41ca8bc7f20f307dff77c13be5beefc0e1ccf30a524c95cb5fe98902",
+  "frozen_candidate": "a98b0a7aa3f143491eab3bb254d7dac5f37aaa7baeb63ef26a95ed563cfe7781",
+  "routing": {
+    "planned_role": "reviewer",
+    "selected_role": "reviewer (wb-delta-reviewer, fresh)",
+    "reason_codes": [
+      "small_bounded_correction"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd68-o1-fix-01.md"
+    ]
+  },
+  "scope": "`git diff HEAD -- src/workbench/terminal/vt_g1/screen.py` (TerminalByteStream.feed string-sequence filter). Check: correctness of DCS/SOS/PM/APC handling per ECMA-48 (ST = ESC \\ or 0x9c in 8-bit? C1 handling vs UTF-8), CAN/SUB, ESC ESC tmux escaping, state across chunks, unbounded buffering/DoS, UTF-8 multi-byte sequences containing 0x9c/0x90 bytes must not be misread as C1 controls, interaction with OSC handling, performance on large output, G1 invariants (copy, resize, colors).",
+  "rules": "No real provider requests; never read credential contents or other processes' environ; never touch the user's tmux server/sessions (private `tmux -L <name>` only, kill only that server); temp only under /tmp; kill only PIDs you started; never touch ~/wb-urux-sandbox; no commits; no graphify update. Read-only.",
+  "result_format": "verdict (approve / block), findings P1-P3 with file:line and scenario. Korean, <=8 lines."
+}

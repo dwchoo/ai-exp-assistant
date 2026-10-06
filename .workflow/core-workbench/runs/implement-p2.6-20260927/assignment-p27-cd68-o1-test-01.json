@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cd68-o1-test-01",
+  "ticket_id": "O1 independent verification",
+  "role": "test_designer",
+  "unit": "V-CW-18-cd68-o1",
+  "approved_bundle_digest": "348e50ee41ca8bc7f20f307dff77c13be5beefc0e1ccf30a524c95cb5fe98902",
+  "frozen_candidate": "a98b0a7aa3f143491eab3bb254d7dac5f37aaa7baeb63ef26a95ed563cfe7781",
+  "routing": {
+    "planned_role": "test_designer",
+    "selected_role": "test_designer (wb-test-rerun)",
+    "reason_codes": [
+      "correction_reverification"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd68-o1-fix-01.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd68-smoke-03.md"
+    ]
+  },
+  "required": [
+    "Independent adversarial tests (new file tests/terminal/test_vt_string_sequences_independent_p27o1.py and/or tests/ui/*_independent_p27o1.py): no control text in any pane for DCS tmux passthrough wrapping OSC 777/9/99 (BEL and ST terminated, trailing BEL), byte-at-a-time and random chunk splits incl. split at ESC, CAN/SUB abort, SOS/PM/APC strings, nested/garbage payloads, very long payloads (no unbounded buffering / memory growth), and normal text/colors/cursor moves before and after unchanged; legit sequences still work (OSC 0/2 titles if supported, OSC 52 path unaffected, CSI, UTF-8 Korean text split across chunks).",
+    "Run tests/terminal, tests/ui, tests/gates/g1_vt, backend panes tests on the frozen candidate with hash checks; load flakes: module rerun once."
+  ],
+  "allowed_write_paths": [
+    "tests/**/*_independent_p27o1*"
+  ],
+  "prohibited_paths": [
+    "src/**",
+    "omp_bridge/**",
+    "docs/**",
+    ".workflow/**"
+  ],
+  "rules": "No real provider requests; never read credential contents or other processes' environ; never touch the user's tmux server/sessions (private `tmux -L <name>` only, kill only that server); temp only under /tmp; kill only PIDs you started; never touch ~/wb-urux-sandbox; no commits; no graphify update.",
+  "result_format": "checks table first (counts, real exit codes), hash check, findings P1-P3 with file:line, verdict, changed test paths + sha256. Korean, <=10 lines."
+}

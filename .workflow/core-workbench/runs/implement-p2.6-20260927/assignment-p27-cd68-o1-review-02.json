@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cd68-o1-review-02",
+  "ticket_id": "O1 delta review 2",
+  "role": "reviewer",
+  "unit": "V-CW-18-cd68-o1",
+  "approved_bundle_digest": "348e50ee41ca8bc7f20f307dff77c13be5beefc0e1ccf30a524c95cb5fe98902",
+  "frozen_candidate": "4fee13864339effaad606559d79015432281adda214ad6544be4ec13bbfda21a",
+  "routing": {
+    "planned_role": "reviewer",
+    "selected_role": "reviewer (wb-delta-reviewer, fresh)",
+    "reason_codes": [
+      "small_bounded_correction"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd68-o1-review-01.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd68-o1-test-01.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd68-o1-fix-02.md"
+    ]
+  },
+  "scope": "`git diff HEAD -- src/workbench/terminal/vt_g1/screen.py src/workbench/ui/product/model.py`. Verify each review-01 P2/P3 and test-01 P2 is fixed; check the new ESC-aborts-string rule against real producers (tmux passthrough with doubled ESC, OMP notifications, sixel/kitty APC with embedded ESC? — kitty graphics payloads are base64, sixel has no ESC), the 8 MiB cap, regex scan correctness/perf, _align changes, stream recreation on every reset path, no G1 regressions.",
+  "rules": "No real provider requests; never read credential contents or other processes' environ; never touch the user's tmux server (private tmux -L only); temp only under /tmp; kill only PIDs you started; never touch ~/wb-urux-sandbox or its processes; no commits; no graphify update. Read-only.",
+  "result_format": "verdict (approve / block), findings P1-P3 with file:line and scenario. Korean, <=8 lines."
+}
