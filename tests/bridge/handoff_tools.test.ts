@@ -115,7 +115,7 @@ test("manager registers only to_worker and worker only to_manager, both essentia
 	const manager = await startBridge("manager");
 	try {
 		const props = manager.tools.get("to_worker")!.parameters.properties;
-		assert.deepEqual(Object.keys(props).sort(), ["analysis", "cancel", "kind", "message", "run", "spec", "task_id"]);
+		assert.deepEqual(Object.keys(props).sort(), ["analysis", "cancel", "commands", "kind", "message", "run", "spec", "task_id"]);
 		assert.deepEqual(props.cancel.type, ["boolean", "null"]);
 		assert.deepEqual(Object.keys(props.spec.properties).sort(), ["execution", "goal", "instructions", "paths"]);
 		assert.deepEqual(Object.keys(props.spec.properties.execution.properties).sort(),
@@ -312,7 +312,7 @@ function objectNodes(schema: Schema, path = "$"): [string, Schema][] {
 }
 
 const OPTIONAL: Record<string, string[]> = {
-	to_worker: ["task_id", "spec", "analysis", "run", "cancel"],
+	to_worker: ["task_id", "spec", "analysis", "commands", "run", "cancel"],
 	to_manager: ["task_id", "in_reply_to", "requires_code_change", "reason", "request"],
 };
 
@@ -398,6 +398,21 @@ test("strict-mode placeholders (nulls, blanks, false flags) pass the registered 
 	} finally { await worker.close(); }
 });
 
+// C-D69 (6): the manager writes the exact commands of a work Task.
+test("to_worker has a nullable commands list of exact command strings", async () => {
+	const manager = await startBridge("manager");
+	try {
+		const commands = (manager.tools.get("to_worker")!.parameters as Schema).properties.commands;
+		assert.deepEqual(commands.type, ["array", "null"]);
+		assert.deepEqual(commands.items, { type: "string", minLength: 1, maxLength: 8192 });
+		assert.equal(commands.maxItems, 32);
+		assert.match(commands.description, /exact shell commands the worker runs, in order, written by you/);
+		assert.match(commands.description, /Workbench refuses any other command/);
+		assert.match(commands.description, /A follow-up with commands replaces the list; null keeps it/);
+		assert.match(commands.description, /Must be null for kind experiment/);
+	} finally { await manager.close(); }
+});
+
 // C-D68 (1): the worker's `terminal` tool; (3): the manager's to_worker says the worker does the task.
 test("worker registers terminal: strict, essential, one nullable command (no wait input); manager has none", async () => {
 	const worker = await startBridge("worker");
@@ -417,10 +432,11 @@ test("worker registers terminal: strict, essential, one nullable command (no wai
 		assert.match(parameters.properties.command.description, /current directory of the host terminal/);
 		assert.match(parameters.properties.command.description, /null returns the current state at once \(never waits\)/);
 		assert.doesNotMatch(parameters.properties.command.description, /project directory/);
-		// C-D69 (5)(b): the real limit is the host shell request; a long script goes to a file.
+		// C-D69 (6): a Task's commands are the only ones run; a long one runs from a Workbench script file.
 		assert.match(parameters.properties.command.description, /about 2,800 plain ASCII characters/);
-		assert.match(parameters.properties.command.description, /command_too_long and nothing runs/);
-		assert.match(parameters.properties.command.description, /write it to a file with the write tool and run bash <file>/);
+		assert.match(parameters.properties.command.description, /not_in_task_commands and nothing runs/);
+		assert.match(parameters.properties.command.description, /runs from a script file Workbench writes \(<shell> <file>\)/);
+		assert.doesNotMatch(parameters.properties.command.description, /command_too_long/);
 		assert.match(tool.description, /current directory \(where the user last cd'd\)/);
 		assert.doesNotMatch(tool.description, /project directory/);
 		for (const needle of [/Workbench host terminal \(visible to the user\)/, /exit code/, /every shell command/,

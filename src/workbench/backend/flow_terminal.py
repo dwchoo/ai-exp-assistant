@@ -138,11 +138,15 @@ BUSY_DETAIL = ("Nothing was run. The host terminal runs a command only when it i
                "no job, no typed line, no experiment run). Do not work around it; try again later or tell the "
                "manager with to_manager.")
 ABORTED_DETAIL = "The call was aborted before the command started: nothing was run."
-TOO_LONG_DETAIL = ("Nothing was typed into the host terminal: this command is too long to hand to the host shell "
-                   "(it needs {need} bytes as a request; the limit is {limit}, about {room} plain ASCII characters; "
-                   "non-ASCII characters, newlines and quotes take more). Write the script to a file with the "
-                   "`write` tool (for example a temporary file under /tmp) and run `bash <file>`, or split it into "
-                   "several short commands.")
+# C-D69 (6)(c): a command too long for one host shell request runs from a script file Workbench writes
+SPILL_SCRIPT = 'printf \'[worker] $ %s\\n\' "$1"; exec "$0" "$2"'
+SPILL_SHOWN = 200  # characters of the command's first line shown for a script-run command
+NOT_IN_TASK_DETAIL = ("Nothing was typed into the host terminal: this Task lists the exact commands to run, and this "
+                      "command is not one of them (Workbench compares the text as given). Run the listed commands "
+                      "exactly as given, in order; if none fits, report blocked to the manager with to_manager. "
+                      "Allowed commands:\n{listing}")
+RUNS_KEPT = 64  # commands remembered per Task for the done report's list (C-D69 (6)(d))
+TASKS_KEPT = 32
 START_FAILED_DETAIL = "The command was not started; the host terminal is the user's again."
 START_FAILED_UNCONFIRMED = ("The command was not started, and Workbench could not confirm that the host terminal is "
                             "back at the user's prompt (input owner {owner}, mode {mode}). Do not retry: report "
@@ -198,9 +202,8 @@ def validate_terminal_arguments(args: object) -> list[str]:
     errors = [f"{name}: unknown field; only command" for name in sorted(set(args) - _KEYS)]
     command = args.get("command")
     if command is not None and (not isinstance(command, str) or len(command) > COMMAND_MAX or "\x00" in command):
-        errors.append(f"command: a shell command string (at most {COMMAND_MAX} characters, no NUL; the host shell "
-                      f"takes one request of at most {RUN_REQUEST_MAX} bytes, about 2,800 plain ASCII characters, "
-                      "so write a longer script to a file and run bash <file>), or null for the current state")
+        errors.append(f"command: a shell command string (at most {COMMAND_MAX} characters, no NUL; one longer than "
+                      "a host shell request runs from a script file Workbench writes), or null for the current state")
     return errors
 
 
@@ -209,6 +212,41 @@ def command_request_bytes(executable: str, command: str) -> int:
     (``RUN:`` + base64 of the request JSON with the display wrapper); at most ``RUN_REQUEST_MAX``."""
     argv = [executable, "-c", ECHO_SCRIPT, executable, command]
     return len(f"RUN:{encode_run(normalize_run(executable, argv, _SIZING_ID))}\n".encode())
+
+
+def _exact(command: str) -> str:
+    """The text compared for the Task's exact commands: only trailing ASCII space, tab and newline are ignored
+    (the shell keeps every other trailing character, e.g. \\r, \\v, \\f, \\xa0, in the last word)."""
+    return command.rstrip(" \t\n")
+
+
+def shown_command(command: str, limit: int = SPILL_SHOWN) -> str:
+    """The command's first line, at most ``limit`` characters; `` …`` when anything is left out."""
+    first, _, rest = command.strip("\n").partition("\n")
+    cut = first[:limit]
+    return cut + (" …" if rest or len(first) > limit else "")
+
+
+def spill_shown(executable: str, command: str, script: Path | str) -> str:
+    """The pane/argv text of a script-run command: its first line and the script path, cut (never failed) so
+    that the whole request stays within ``RUN_REQUEST_MAX``; the path alone when no first line fits."""
+    def build(limit: int) -> str:
+        return f"{shown_command(command, limit)} (script {script})"
+
+    def fits(text: str) -> bool:
+        argv = [executable, "-c", SPILL_SCRIPT, executable, text, str(script)]
+        return len(f"RUN:{encode_run(normalize_run(executable, argv, _SIZING_ID))}\n".encode()) <= RUN_REQUEST_MAX
+
+    if fits(build(SPILL_SHOWN)):
+        return build(SPILL_SHOWN)
+    low, high = 0, SPILL_SHOWN  # the longest first line (in characters) that still fits
+    while low < high:
+        middle = (low + high + 1) // 2
+        if fits(build(middle)):
+            low = middle
+        else:
+            high = middle - 1
+    return build(low) if fits(build(low)) else f"(script {script})"
 
 
 def command_room(executable: str) -> int:
@@ -242,6 +280,32 @@ def _now() -> str:
     return time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
 
 
+class CommandRuns(list):
+    """The commands run for a Task (``runs_for_task``): a plain list of entries, with ``notes`` that say what is
+    not complete (rebuilt after a restart, older runs omitted, journal unreadable)."""
+
+    def __init__(self, entries: Iterable[dict[str, Any]] = (), notes: Iterable[str] = ()):
+        super().__init__(entries)
+        self.notes = list(notes)
+
+
+@dataclass(eq=False)
+class _TaskRuns:
+    runs: list[tuple[str, dict[str, Any]]] = field(default_factory=list)  # (command_id, entry), start order
+    omitted: int = 0  # older runs dropped past ``RUNS_KEPT``
+
+
+def _run_entry(command: str, log_path: str, script_path: str | None, result: Mapping[str, Any] | None) -> dict[str, Any]:
+    """One entry of a done/blocked report's ``commands_run``."""
+    result = result or {}
+    entry: dict[str, Any] = {"command": shown_command(command), "status": result.get("status") or "running",
+                             "exit_code": result.get("exit_code"), "signal": result.get("signal"),
+                             "duration_seconds": result.get("duration_seconds"), "log_path": log_path}
+    if script_path is not None:
+        entry["script_path"] = script_path
+    return entry
+
+
 @dataclass(eq=False)
 class _Command:
     command_id: str
@@ -259,6 +323,7 @@ class _Command:
     log_truncated: bool = False
     log_error: str | None = None
     handoff_typed: bool = False  # Workbench typed wb-handoff for this command (C-D69 (5)(a))
+    script_path: Path | None = None  # C-D69 (6)(c): the command runs from this script file (too long for one request)
     echo: bytes = b""  # the command line the child prints first, still to be skipped (as the PTY shows it)
     # C-D68 (8) notices; ``since`` is guarded by ``lock``, the rest by the service lock.
     lock: threading.Lock = field(default_factory=threading.Lock)
@@ -356,6 +421,7 @@ class TerminalService:
                  activity: Callable[[], str | None] = lambda: None,
                  sensitive_values: Callable[[], Iterable[str]] = lambda: (),
                  active_task: Callable[[], Any] = lambda: None,
+                 task_commands: Callable[[], list[str] | None] = lambda: None,
                  poll_interval: float = 0.03,
                  notify: Callable[[Mapping[str, Any]], str] | None = None,
                  clock: Callable[[], float] = time.monotonic, check_interval: float = CHECK_INTERVAL,
@@ -370,6 +436,11 @@ class TerminalService:
         self._activity = activity
         self._sensitive_values = sensitive_values
         self._active_task = active_task
+        self._task_commands = task_commands
+        self._runs_lock = threading.Lock()  # never held while calling out
+        # Task -> light records of its commands, in start order, and how many older ones were dropped
+        # (C-D69 (6)(d)); never the _Command objects (their output buffers would stay)
+        self._task_runs: dict[str, _TaskRuns] = {}
         self._poll = poll_interval
         self._lock = threading.Lock()
         self._results: dict[tuple, dict[str, Any]] = {}
@@ -483,10 +554,26 @@ class TerminalService:
         deadline = time.monotonic() + timeout
         if command is None:
             return self._fetch(key_dict, key)
+        refused = self._not_in_task_commands(command, key_dict)
+        if refused is not None:
+            return refused
         started = self._start(command, key_dict, task, key)
         if isinstance(started, dict):
             return started
         return self._await(started, deadline, key)
+
+    def _not_in_task_commands(self, command: str, key_dict: dict[str, Any]) -> dict[str, Any] | None:
+        """C-D69 (6)(b): while the worker's active Task lists commands, only those run (text as given; only
+        trailing space, tab and newline are ignored). No Task, or a Task without commands: no restriction."""
+        try:
+            allowed = self._task_commands()
+        except Exception:
+            allowed = None
+        if not allowed or _exact(command) in {_exact(item) for item in allowed}:
+            return None
+        listing = "\n".join(f"{index}. {shown_command(item)}" for index, item in enumerate(allowed, 1))
+        return self._refuse(key_dict, "not_in_task_commands", "not_in_task_commands",
+                            NOT_IN_TASK_DETAIL.format(listing=listing), allowed_commands=list(allowed))
 
     def _task_id(self) -> str | None:
         try:
@@ -824,12 +911,8 @@ class TerminalService:
                 return self._refuse(key_dict, "host_terminal_busy", "host terminal is not running", BUSY_DETAIL)
             executable = getattr(getattr(port, "choice", None), "executable", None)
             executable = executable if isinstance(executable, str) and executable else _UNKNOWN_SHELL
-            need = command_request_bytes(executable, text)
-            if need > RUN_REQUEST_MAX:  # C-D69 (5)(b): refused before anything is held or typed
-                return self._refuse(key_dict, "command_too_long", "command_too_long",
-                                    TOO_LONG_DETAIL.format(need=need, limit=RUN_REQUEST_MAX,
-                                                           room=command_room(executable)),
-                                    request_bytes=need, limit_bytes=RUN_REQUEST_MAX)
+            # C-D69 (6)(c) (replaces the (5)(b) refusal): too long for one request -> run from a script file
+            spill = command_request_bytes(executable, text) > RUN_REQUEST_MAX
             try:
                 reason = port.busy() or port.hold(HOLD_REASON)
             except Exception as exc:
@@ -839,7 +922,7 @@ class TerminalService:
             if self._paused_now():  # a pause between the first check and the hold: nothing typed
                 port.release_hold(HOLD_REASON)
                 return self._refuse(key_dict, "paused", "paused", PAUSED_DETAIL)
-            command = self._new_command(text, key_dict, task)
+            command = self._new_command(text, key_dict, task, spill=spill)
             if isinstance(command, dict):
                 port.release_hold(HOLD_REASON)
                 return command
@@ -850,10 +933,12 @@ class TerminalService:
                 requested = self._give_back(port, after_failure=True)
                 returned = self._returned_state(port, retake=command.handoff_typed and not requested)
                 port.release_hold(HOLD_REASON)
-                try:
-                    command.log_path.unlink()  # nothing ran: no empty log is left (review-02 P3 (2))
-                except OSError:
-                    pass
+                for path in (command.log_path, command.script_path):
+                    try:
+                        if path is not None:
+                            path.unlink()  # nothing ran: no empty log (review-02 P3 (2)) or unused script is left
+                    except OSError:
+                        pass
                 self._journal({"type": "terminal_aborted", "key": key_dict, "stage": "before_submit",
                                "command_id": command.command_id, "returned_to_user": _is_returned(returned)})
                 return {"status": "aborted", "reason": "call_abandoned", "command_id": command.command_id,
@@ -875,9 +960,13 @@ class TerminalService:
             port.release_hold(HOLD_REASON)
             with self._lock:
                 self._current = command
-            self._journal({"type": "terminal_started", "command_id": command.command_id, "key": key_dict,
-                           "task_id": task, "command": command.command, "cwd": command.cwd,
-                           "started_at": command.started_at, "log_path": str(command.log_path)})
+            started = {"type": "terminal_started", "command_id": command.command_id, "key": key_dict,
+                       "task_id": task, "command": command.command, "cwd": command.cwd,
+                       "started_at": command.started_at, "log_path": str(command.log_path)}
+            if command.script_path is not None:
+                started["script_path"] = str(command.script_path)
+            self._journal(started)
+            self._remember_run(command)
             thread = threading.Thread(target=self._follow, args=(port, command), daemon=True,
                                       name=f"terminal-{command.command_id[:8]}")
             self._threads = [item for item in self._threads if item.is_alive()] + [thread]
@@ -893,7 +982,8 @@ class TerminalService:
                         pass
                 self._gate.release("terminal")
 
-    def _new_command(self, text: str, key_dict: dict[str, Any], task: str | None) -> _Command | dict[str, Any]:
+    def _new_command(self, text: str, key_dict: dict[str, Any], task: str | None, *,
+                     spill: bool = False) -> _Command | dict[str, Any]:
         command_id = str(uuid4())
         try:
             self._log_root.mkdir(mode=0o700, parents=True, exist_ok=True)
@@ -902,7 +992,117 @@ class TerminalService:
         except OSError as exc:  # no durable log: nothing is run (C-D46)
             return self._refuse(key_dict, "rejected", "log_unavailable",
                                 f"The command log could not be created ({type(exc).__name__}); nothing was run.")
-        return _Command(command_id, text, key_dict, task, log_path)
+        command = _Command(command_id, text, key_dict, task, log_path)
+        if spill:  # C-D69 (6)(c): next to its log (same 0700 directory, kept and removed with it), 0600
+            script = self._log_root / f"{command_id}.sh"
+            try:
+                fd = os.open(script, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW | os.O_CLOEXEC, 0o600)
+                with os.fdopen(fd, "w", encoding="utf-8") as stream:
+                    stream.write(text if text.endswith("\n") else text + "\n")
+            except OSError as exc:
+                try:
+                    log_path.unlink()
+                except OSError:
+                    pass
+                return self._refuse(key_dict, "rejected", "script_unavailable",
+                                    f"The command is too long for one host shell request and its script file "
+                                    f"could not be written ({type(exc).__name__}); nothing was run.")
+            command.script_path = script
+        return command
+
+    def _remember_run(self, command: _Command) -> None:
+        if command.task_id is None:
+            return
+        entry = _run_entry(command.command, str(command.log_path),
+                           None if command.script_path is None else str(command.script_path), None)
+        with self._runs_lock:
+            held = self._task_runs.pop(command.task_id, None) or _TaskRuns()
+            held.runs.append((command.command_id, entry))
+            if len(held.runs) > RUNS_KEPT:
+                held.omitted += len(held.runs) - RUNS_KEPT
+                held.runs = held.runs[-RUNS_KEPT:]
+            self._task_runs[command.task_id] = held  # the most recent Task last
+            while len(self._task_runs) > TASKS_KEPT:
+                self._task_runs.pop(next(iter(self._task_runs)))
+
+    def _finish_run(self, command: _Command, result: Mapping[str, Any]) -> None:
+        """The command ended: its light record takes the result (the output buffers are not kept)."""
+        if command.task_id is None:
+            return
+        with self._runs_lock:
+            held = self._task_runs.get(command.task_id)
+            for command_id, entry in reversed(held.runs if held is not None else ()):
+                if command_id == command.command_id:
+                    entry.update(status=result.get("status") or "unknown", exit_code=result.get("exit_code"),
+                                 signal=result.get("signal"), duration_seconds=result.get("duration_seconds"))
+                    break
+
+    def _journal_runs(self, task_id: str) -> list[tuple[str, dict[str, Any]]] | None:
+        """The Task's runs as the terminal journal holds them (start order), or None when it cannot be read."""
+        reader = getattr(getattr(self, "_handoffs", None), "read_records", None)
+        if reader is None:
+            return None
+        try:
+            records = reader(("terminal_started", "terminal_ended"))
+        except Exception:
+            return None
+        with self._lock:
+            current = None if self._current is None else self._current.command_id
+        runs: dict[str, dict[str, Any]] = {}
+        ends: dict[str, dict[str, Any]] = {}
+        for record in records:
+            command_id = record.get("command_id")
+            if not isinstance(command_id, str):
+                continue
+            if record.get("type") == "terminal_ended":
+                ends[command_id] = record
+            elif record.get("task_id") == task_id and isinstance(record.get("command"), str):
+                runs.setdefault(command_id, record)
+        listed = []
+        for command_id, started in runs.items():
+            ended = ends.get(command_id)
+            result = ({"status": ended.get("status"), "exit_code": ended.get("exit_code"),
+                       "signal": ended.get("signal"), "duration_seconds": ended.get("duration_seconds")}
+                      if ended is not None else {"status": "running" if command_id == current else "unknown"})
+            script = started.get("script_path")
+            listed.append((command_id, _run_entry(started["command"], str(started.get("log_path") or ""),
+                                                  script if isinstance(script, str) else None, result)))
+        return listed
+
+    def runs_for_task(self, task_id: str) -> CommandRuns:
+        """C-D69 (6)(d): the commands run for ``task_id`` (as journaled), for the worker's done report.
+
+        The terminal journal is the record: runs this process did not see (before a backend restart) are rebuilt
+        from it, and the in-memory light records give the live status. The last ``RUNS_KEPT`` are listed; the
+        ``notes`` say when older runs are omitted, runs were rebuilt, or the journal could not be read.
+        """
+        with self._runs_lock:
+            held = self._task_runs.get(task_id)
+            memory = [(command_id, dict(entry)) for command_id, entry in (held.runs if held is not None else ())]
+            dropped = held.omitted if held is not None else 0
+        journal = self._journal_runs(task_id)
+        notes: list[str] = []
+        if journal is None:
+            runs, omitted = memory, dropped
+            notes.append("The terminal journal could not be read back, so this list is what this backend process "
+                         "recorded and may be incomplete or empty; it does not show that nothing ran.")
+        else:
+            seen = {command_id for command_id, _ in memory}
+            live = dict(memory)
+            runs = [(command_id, live.get(command_id, entry)) for command_id, entry in journal]
+            known = {command_id for command_id, _ in journal}
+            runs += [item for item in memory if item[0] not in known]  # journal write failed: the process knows it
+            omitted = 0
+            if any(command_id not in seen for command_id, _ in journal):
+                notes.append("Runs from before a backend restart were rebuilt from the terminal journal; a "
+                             "command that was still running at the restart shows status unknown.")
+        if len(runs) > RUNS_KEPT:
+            omitted += len(runs) - RUNS_KEPT
+            runs = runs[-RUNS_KEPT:]
+        if omitted:
+            notes.append(f"{omitted} older runs omitted: only the last {RUNS_KEPT} runs of the Task are listed "
+                         "(their logs are in the terminal log directory).")
+        return CommandRuns((entry for _, entry in runs), notes)
 
     def _dispatch(self, port: Any, command: _Command, key: tuple = ()) -> None:
         """The experiment start's managed dispatch for one command (input is held by the caller).
@@ -941,8 +1141,14 @@ class TerminalService:
         executable = getattr(getattr(port, "choice", None), "executable", None)
         if not isinstance(executable, str) or not executable:
             raise RuntimeError("host shell executable unknown; no command sent")
-        command.echo = f"[worker] $ {command.command}\n".encode().replace(b"\n", b"\r\n")
-        port.submit(control, [executable, "-c", ECHO_SCRIPT, executable, command.command],
+        if command.script_path is not None:  # C-D69 (6)(c): `<shell> <file>`, shown by its first line
+            shown = spill_shown(executable, command.command, command.script_path)
+            command.echo = f"[worker] $ {shown}\n".encode().replace(b"\n", b"\r\n")
+            argv = [executable, "-c", SPILL_SCRIPT, executable, shown, str(command.script_path)]
+        else:
+            command.echo = f"[worker] $ {command.command}\n".encode().replace(b"\n", b"\r\n")
+            argv = [executable, "-c", ECHO_SCRIPT, executable, command.command]
+        port.submit(control, argv,
                     dict(self._automation()))
 
     # -- following a command ----------------------------------------------------------------
@@ -965,6 +1171,8 @@ class TerminalService:
         duration = round(time.monotonic() - command.started, 3)
         result.update({"command_id": command.command_id, "command": command.command, "cwd": command.cwd,
                        "log_path": str(command.log_path), "duration_seconds": duration})
+        if command.script_path is not None:
+            result["script_path"] = str(command.script_path)
         if command.log_truncated:
             result["log_truncated"] = True
         if command.log_error is not None:
@@ -975,6 +1183,7 @@ class TerminalService:
                        "duration_seconds": duration, "log_path": str(command.log_path),
                        "log_bytes": command.log_bytes, "log_truncated": command.log_truncated,
                        "cwd": command.cwd})
+        self._finish_run(command, result)
         command.result = result
         command.done.set()
         with self._lock:

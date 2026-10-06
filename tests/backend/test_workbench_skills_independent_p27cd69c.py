@@ -1,7 +1,8 @@
-"""C-D69 (5)(b)(c) independent (p27-cd69-stuck-test-01): the shipped guidance.
+"""C-D69 (5)(b)(c) independent (p27-cd69-stuck-test-01), updated for C-D69 (6)(c) (p27-cd69-cmds-test-01).
 
-(b) the worker is told to use several short commands or a script file (``write`` + ``bash <file>``), what
-``command_too_long`` and ``start_failed`` mean, and the stated limit matches the real host shell room;
+(b) as replaced by C-D69 (6)(c): the worker is told to prefer several short commands, that a command longer than
+one host shell request runs from a script file Workbench writes (``<shell> <file>``; no ``command_too_long``
+refusal any more), what ``start_failed`` means, and the stated limit matches the real host shell room;
 (c) the manager is told to keep procedures concise (key commands, fallbacks, when to stop, values to return).
 Reads the files the launcher ships (skills dir, bridge extension).
 """
@@ -40,24 +41,29 @@ def stated_room(text: str) -> int:
 
 class WorkerGuidanceTests(unittest.TestCase):
     def test_worker_skill_short_commands_or_script_file(self):
+        # C-D69 (6)(c): the harness writes the script file; the worker is no longer told to write one itself
         text = skill("to-manager")
-        self.assertRegex(text, r"(?i)short")
         self.assertRegex(text, r"(?i)several short `?terminal`? commands")
-        self.assertRegex(text, r"(?i)write it to a file with `write`")
-        self.assertIn("bash <file>", text)
-        self.assertRegex(text, r"(?i)never put a long (multi-line )?script inline")
+        self.assertRegex(text, r"(?i)longer than one host shell request")
+        self.assertRegex(text, r"(?i)written by Workbench to a script file and run as `<shell> <file>`")
+        self.assertRegex(text, r"(?i)shows its first line and the script path")
 
-    def test_worker_skill_explains_too_long_and_start_failed(self):
+    def test_worker_skill_explains_refusals_and_start_failed(self):
         text = skill("to-manager")
-        self.assertRegex(text, r"`command_too_long`: nothing ran and nothing was typed")
+        self.assertNotIn("command_too_long", text, "C-D69 (6)(c) replaced the oversize refusal")
+        self.assertRegex(text, r"`not_in_task_commands`: nothing ran")
         self.assertRegex(text, r"`start_failed`: nothing ran; its detail says whether the host terminal is the "
                                r"user's again; if not, report `blocked`")
 
     def test_terminal_tool_description(self):
         text = terminal_description()
-        self.assertIn("command_too_long", text)
-        self.assertRegex(text, r"(?i)write it to a file with the write tool and run bash <file>")
+        self.assertNotIn("command_too_long", text)
+        self.assertRegex(text, r"(?i)runs from a script file Workbench writes \(<shell> <file>\)")
+        self.assertIn("not_in_task_commands", text)
         self.assertRegex(text, r"(?i)non-ASCII")
+        validation = " ".join(flow_terminal.validate_terminal_arguments({"command": "x" * 9000}))
+        self.assertIn("script file", validation)
+        self.assertNotIn("bash <file>", validation)
 
     def test_stated_limit_matches_the_real_room(self):
         # the number the worker reads must not promise more than the host shell takes (within 5 %)

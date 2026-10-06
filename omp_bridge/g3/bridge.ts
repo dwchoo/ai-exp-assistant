@@ -226,8 +226,8 @@ const TO_WORKER_PARAMETERS = {
 			description: "experiment: run a command and judge criteria; work: the worker does the work itself." },
 		message: { ...TEXT, description: "The instruction or summary for the worker (no secret values). For kind work "
 			+ "give an executable procedure (commands or steps, allowed fallbacks, when to stop, the result you need "
-			+ "back), not an open question; keep it as concise as the task needs: key commands, allowed fallbacks, "
-			+ "when to stop, the values to return (no multi-section essays)." },
+			+ "back), not an open question, with the exact commands themselves in commands; keep it as concise as the "
+			+ "task needs: key commands, allowed fallbacks, when to stop, the values to return (no multi-section essays)." },
 		spec: {
 			type: ["object", "null"], additionalProperties: false, required: ["goal", "paths"],
 			description: `The Task: goal and the paths the worker may change (required for a new Task); ${NOT_USED} `
@@ -271,6 +271,12 @@ const TO_WORKER_PARAMETERS = {
 			description: "kind work only: how much analysis the worker returns. summary (null means summary): the worker "
 				+ "runs only your steps and reports facts plus a short summary. detailed: use only when you really need "
 				+ `the worker to analyse. Must be null for kind experiment; ${NOT_USED}` },
+		commands: { type: ["array", "null"], items: { type: "string", minLength: 1, maxLength: MESSAGE_MAX }, maxItems: 32,
+			description: "kind work only: the exact shell commands the worker runs, in order, written by you (put any "
+				+ "allowed alternative in as another entry and say in message when to use it). The worker runs them as "
+				+ "given with its terminal tool and summarises the results; while this Task is active Workbench refuses "
+				+ "any other command. A follow-up with commands replaces the list; null keeps it. Must be null for kind "
+				+ `experiment; ${NOT_USED}` },
 		run: { ...OPTIONAL_FLAG, description: `true re-runs the current experiment Task (at most 3 re-runs per Task); ${NOT_USED}` },
 		cancel: { ...OPTIONAL_FLAG, description: `true (with task_id) cancels that Task; the worker is told and becomes free; ${NOT_USED}` },
 	},
@@ -367,9 +373,10 @@ const TERMINAL_PARAMETERS = {
 			description: "One shell command line (bash -c / sh -c), run in the current directory of the host terminal "
 				+ "(where the user last cd'd; a cd inside the command does not change it); null returns the current state at once (never waits): "
 				+ "the last command's result, or that it is still running with its new output. No environment "
-				+ "variable values (use $NAME). Keep it short: the host shell takes about 2,800 plain ASCII characters "
-				+ "(non-ASCII, newlines and quotes take more); a longer one gets command_too_long and nothing runs. "
-				+ "For a long script, write it to a file with the write tool and run bash <file>." },
+				+ "variable values (use $NAME). While your Task lists commands, only those run, exactly as given "
+				+ "(another gets not_in_task_commands and nothing runs). A command longer than one host shell request "
+				+ "(about 2,800 plain ASCII characters; non-ASCII, newlines and quotes take more) runs from a script file "
+				+ "Workbench writes (<shell> <file>)." },
 	},
 };
 const TERMINAL_TOOL = {

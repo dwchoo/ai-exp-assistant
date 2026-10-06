@@ -105,7 +105,9 @@ ENV_NAME = re.compile(r"[A-Za-z_][A-Za-z0-9_]*")
 SECRET_NAME = re.compile(r"(?i)(token|secret|passw(?:or)?d|api_?key|access_?key|private_?key|credential"
                          r"|(?:^|_)auth(?:$|_))")
 _ASSIGNMENT = re.compile(r"(?<![A-Za-z0-9_$])([A-Za-z_][A-Za-z0-9_]*)=(\S+)")
-_TO_WORKER_KEYS = frozenset({"task_id", "kind", "message", "spec", "run", "cancel", "analysis"})
+_TO_WORKER_KEYS = frozenset({"task_id", "kind", "message", "spec", "run", "cancel", "analysis", "commands"})
+# C-D69 (6): the exact shell commands of a work Task, written by the manager (alternatives are more entries)
+COMMANDS_MAX = 32
 _TO_MANAGER_KEYS = frozenset({"kind", "message", "task_id", "in_reply_to", "requires_code_change", "reason",
                               "request"})
 _SPEC_KEYS = frozenset({"goal", "paths", "instructions", "execution"})
@@ -343,6 +345,10 @@ def normalize_arguments(tool: str, args: object) -> object:
             value = _normalize_spec(value)
             if value is None:
                 continue
+        if tool == "to_worker" and name == "commands" and isinstance(value, list):
+            value = [item for item in value if not _blank(item)]  # placeholder entries of a strict model
+            if not value:
+                continue  # only placeholders: no commands (null), not an error
         if tool == "to_manager" and name == "request" and isinstance(value, dict):
             value = _normalize_request(value)
             if value is None:
@@ -475,6 +481,16 @@ def validate_arguments(tool: str, args: object) -> list[str]:
                 errors.append(f"analysis: must be {' or '.join(ANALYSIS_LEVELS)}, or null (summary)")
             elif args.get("kind") != "work":
                 errors.append("analysis: must be null for kind experiment (it applies to kind work only)")
+        if "commands" in args:
+            commands = args["commands"]
+            if (not isinstance(commands, list) or not 0 < len(commands) <= COMMANDS_MAX
+                    or not all(_text(item) and "\x00" not in item for item in commands)):
+                errors.append(f"commands: must be a list of 1 to {COMMANDS_MAX} exact shell command strings (each "
+                              f"at most {MESSAGE_MAX} characters, no NUL), or null")
+            elif args.get("kind") != "work":
+                errors.append("commands: must be null for kind experiment (its command is spec.execution.command)")
+            elif args.get("cancel") is True:
+                errors.append("commands: with cancel true, commands must be null")
         if "cancel" in args:
             if not isinstance(args["cancel"], bool):
                 errors.append("cancel: must be true (cancel the Task), false or null")
@@ -626,6 +642,11 @@ class HandoffJournal:
             if isinstance(record, dict):
                 records.append(record)
         return records
+
+    def read_all(self) -> list[dict[str, Any]]:
+        """Every record now in the file (a fresh read; ``records`` is only the state at open)."""
+        with self._lock:
+            return self._read()
 
     def append(self, record: Mapping[str, Any]) -> dict[str, Any]:
         with self._lock:
@@ -793,6 +814,12 @@ class HandoffService:
     def record(self, record: Mapping[str, Any]) -> dict[str, Any]:
         """Append one record of another bridge tool (C-D68 ``terminal``) to this journal; may raise OSError."""
         return self._journal.append(record)
+
+    def read_records(self, types: Iterable[str]) -> list[dict[str, Any]]:
+        """The journal's records of the given ``types``, read back from the file in order (C-D69 (6)(d): the
+        terminal records of a Task after a backend restart); may raise OSError."""
+        wanted = set(types)
+        return [item for item in self._journal.read_all() if item.get("type") in wanted]
 
     def pending_approvals(self) -> list[dict[str, Any]]:
         with self._lock:

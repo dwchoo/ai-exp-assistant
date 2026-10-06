@@ -224,7 +224,9 @@ class Backend:
             log_root=ensure_private_dir(layout.workflow / TERMINAL_DIRECTORY), automation=self._automation_port,
             paused=self._automation_paused, activity=self.flow.experiment_host_activity,
             sensitive_values=self._sensitive_values, active_task=self.flow.active_task,
+            task_commands=self.flow.active_commands,  # C-D69 (6): a Task's commands are the only ones run
             notify=self._worker_notice)  # C-D68 (8): checks and the completion notice
+        self.flow.terminal_runs = self.terminal.runs_for_task  # C-D69 (6)(d): the done report's commands run
         self.automation = self.automation_loop.status()
         # The role is the peer's authenticated hello role, never a frame field.
         self.bridge.set_tool_handler(self._tool_request, undelivered=self._tool_result_undelivered,

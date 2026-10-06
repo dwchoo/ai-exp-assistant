@@ -22,7 +22,7 @@ from uuid import uuid4
 
 from workbench.backend import flow as flow_module
 from workbench.backend.flow import ANALYSIS_RULES, HandoffService
-from workbench.backend.flow_tasks import RETRY_LIMIT, ExperimentPorts, TaskFlow
+from workbench.backend.flow_tasks import HOLD_REASON as HOLD_REASON_FLOW, RETRY_LIMIT, ExperimentPorts, TaskFlow
 from workbench.backend.panes import HostShellPort, ShellPane
 from workbench.backend.service import Backend
 from workbench.backend.client import UiClient
@@ -32,7 +32,7 @@ from workbench.contracts.v1 import ActorRole, MessageKind
 from workbench.ipc.bridge_g3.mailbox import DeliveryReceipt, MailboxStatus
 from workbench.tasks.repository import TaskRepository
 from workbench.terminal.shell_g2.prototype import ShellChoice
-from workbench.workflow.run import TaskWorkflow
+from workbench.workflow.run import TaskWorkflow, WorkflowHeld
 
 MANAGER_SESSION = str(uuid4())
 WORKER_SESSION = str(uuid4())
@@ -469,6 +469,201 @@ class FollowUpTests(FlowFixture):
                          "unknown_task")
         self.assertEqual(self.to_worker({"kind": "experiment", "message": "x", "task_id": work["task_id"],
                                          "run": True})["reason"], "task_kind_mismatch")
+
+
+class TaskCommandsTests(FlowFixture):
+    """C-D69 (6): the manager writes the exact commands; the worker runs them and summarises."""
+
+    COMMANDS = ["lscpu", "free -h", "lspci | grep -i vga || echo 'no lspci'"]
+
+    def work_with_commands(self, commands=None, **extra):
+        return self.to_worker({"kind": "work", "message": "collect the hardware facts; stop on the first error",
+                               "spec": {"goal": "hardware facts", "paths": []},
+                               "commands": list(commands or self.COMMANDS), **extra})
+
+    def test_the_commands_are_validated_and_normalised(self):
+        base = {"kind": "work", "message": "m", "spec": {"goal": "g", "paths": []}}
+        self.assertEqual(flow_module.validate_arguments("to_worker", {**base, "commands": ["ls"]}), [])
+        self.assertEqual(flow_module.normalize_arguments("to_worker", {**base, "commands": ["ls", " ", ""]})["commands"],
+                         ["ls"])
+        self.assertNotIn("commands", flow_module.normalize_arguments("to_worker", {**base, "commands": [""]}))
+        self.assertNotIn("commands", flow_module.normalize_arguments("to_worker", {**base, "commands": None}))
+        for bad in (["ls\x00"], ["x" * 8193], ["ls"] * 33, "ls", [3]):
+            with self.subTest(bad=str(bad)[:20]):
+                errors = flow_module.validate_arguments("to_worker", {**base, "commands": bad})
+                self.assertTrue([e for e in errors if e.startswith("commands")], errors)
+        experiment = {"kind": "experiment", "message": "m", "commands": ["ls"],
+                      "spec": {"goal": "g", "paths": ["out.txt"], "execution": execution()}}
+        self.assertTrue([e for e in flow_module.validate_arguments("to_worker", experiment)
+                         if e.startswith("commands: must be null for kind experiment")])
+        self.assertIn("commands", flow_module._TO_WORKER_KEYS)
+
+    def test_the_task_message_shows_the_commands_numbered_with_the_rule(self):
+        result = self.work_with_commands()
+        self.assertEqual(result["status"], "dispatched", result)
+        self.assertTrue(wait_until(lambda: len(self.mailbox.created) == 1))
+        payload = self.mailbox.created[0].payload
+        self.assertEqual(payload["commands"], [{"number": 1, "command": "lscpu"}, {"number": 2, "command": "free -h"},
+                                               {"number": 3, "command": self.COMMANDS[2]}])
+        rule = payload["commands_rule"]
+        for needle in ("exactly as given", "in order", "Do not write, change", "refuses any other command",
+                       "summary of the results", "do not paste commands"):
+            self.assertIn(needle, rule)
+        decisions = self.decisions(result["task_id"], 1)
+        self.assertEqual(decisions[0]["details"]["commands"], self.COMMANDS, "the commands are part of the scope")
+        self.assertTrue(wait_until(lambda: self.flow.task_view()["status"] == "running"))
+        self.assertEqual(self.flow.active_commands(), self.COMMANDS)
+
+    def test_a_task_without_commands_shows_none_and_restricts_nothing(self):
+        self.running_work()
+        self.assertNotIn("commands", self.mailbox.created[0].payload)
+        self.assertNotIn("commands_rule", self.mailbox.created[0].payload)
+        self.assertIsNone(self.flow.active_commands())
+
+    def test_a_follow_up_with_commands_replaces_the_list_and_null_keeps_it(self):
+        result = self.work_with_commands()
+        self.assertTrue(wait_until(lambda: self.flow.task_view()["status"] == "running"
+                                   and len(self.mailbox.created) == 1))
+        kept = self.to_worker({"kind": "work", "message": "also tell me the disk sizes", "task_id": result["task_id"]})
+        self.assertEqual(kept["status"], "queued", kept)
+        self.assertTrue(wait_until(lambda: len(self.mailbox.created) == 2))
+        self.assertNotIn("commands", self.mailbox.created[1].payload)
+        self.assertEqual(self.flow.active_commands(), self.COMMANDS)
+        replaced = self.to_worker({"kind": "work", "message": "run this instead", "task_id": result["task_id"],
+                                   "commands": ["df -h"]})
+        self.assertEqual(replaced["status"], "queued", replaced)
+        self.assertTrue(wait_until(lambda: len(self.mailbox.created) == 3))
+        self.assertEqual(self.mailbox.created[2].payload["commands"], [{"number": 1, "command": "df -h"}])
+        self.assertIn("commands_rule", self.mailbox.created[2].payload)
+        self.assertTrue(wait_until(lambda: self.flow.active_commands() == ["df -h"]), "once the worker has it")
+        self.assertIn("commands_replaced", [r["type"] for r in self.ledger()])
+
+    def test_a_follow_up_that_is_not_delivered_keeps_the_old_commands(self):
+        result = self.work_with_commands()
+        self.assertTrue(wait_until(lambda: self.flow.task_view()["status"] == "running"
+                                   and len(self.mailbox.delivered) == 1))
+        original = self.mailbox.deliver
+        for status in (MailboxStatus.REJECTED, MailboxStatus.UNKNOWN):
+            with self.subTest(status=status.value):
+                before = len(self.mailbox.created)
+
+                def failing(message, *, timeout=20, _status=status):
+                    self.mailbox.delivered.append(message.message_id)
+                    return DeliveryReceipt(message.message_id, str(uuid4()), message.target_role,
+                                           message.session_id, 1, _status, {"reason": "test"})
+                self.mailbox.deliver = failing
+                queued = self.to_worker({"kind": "work", "message": "use these instead", "commands": ["df -h"],
+                                         "task_id": result["task_id"]})
+                self.assertEqual(queued["status"], "queued", queued)
+                self.assertTrue(wait_until(lambda: len(self.mailbox.created) == before + 1))
+                self.assertTrue(wait_until(lambda: len(self.mailbox.delivered) == before + 1))
+                time.sleep(0.2)
+                self.assertEqual(self.flow.active_commands(), self.COMMANDS, "the old list stays")
+                self.assertNotIn("commands_replaced", [r["type"] for r in self.ledger()])
+        self.mailbox.deliver = original
+        queued = self.to_worker({"kind": "work", "message": "use these now", "commands": ["df -h"],
+                                 "task_id": result["task_id"]})
+        self.assertEqual(queued["status"], "queued", queued)
+        self.assertTrue(wait_until(lambda: self.flow.active_commands() == ["df -h"]), "delivered: replaced")
+        self.assertIn("commands_replaced", [r["type"] for r in self.ledger()])
+
+    def test_blank_only_commands_mean_no_commands(self):
+        base = {"kind": "work", "message": "m", "spec": {"goal": "g", "paths": []}}
+        for blank in ([" "], ["", "  ", "\t\n"], [None]):
+            with self.subTest(blank=blank):
+                normalized = flow_module.normalize_arguments("to_worker", {**base, "commands": blank})
+                self.assertNotIn("commands", normalized)
+                self.assertEqual(flow_module.validate_arguments("to_worker", normalized), [])
+        result = self.to_worker({**base, "commands": [" ", ""]})
+        self.assertEqual(result["status"], "dispatched", result)
+        self.assertIsNone(self.flow.active_commands())
+
+    def test_the_report_note_carries_the_run_list_notes(self):
+        from workbench.backend.flow_terminal import CommandRuns
+        runs = CommandRuns([{"command": "lscpu", "status": "exited", "exit_code": 0, "signal": None,
+                             "duration_seconds": 0.1, "log_path": "/x/1.log"}],
+                           ["3 older runs omitted: only the last 64 runs are listed."])
+        self.flow.terminal_runs = lambda task_id: runs
+        self.work_with_commands()
+        self.assertTrue(wait_until(lambda: self.flow.task_view()["status"] == "running"))
+        self.to_manager({"kind": "done", "message": "done"})
+        self.assertTrue(wait_until(lambda: len(self.mailbox.created) == 2))
+        payload = self.mailbox.created[1].payload
+        self.assertEqual(payload["commands_run"], list(runs))
+        self.assertIsInstance(payload["commands_run"], list)
+        self.assertTrue(payload["commands_run_note"].startswith("Recorded by Workbench"))
+        self.assertIn("3 older runs omitted", payload["commands_run_note"])
+
+    def test_the_restriction_ends_with_the_task(self):
+        self.work_with_commands()
+        self.assertTrue(wait_until(lambda: self.flow.task_view()["status"] == "running"))
+        self.to_manager({"kind": "done", "message": "facts collected"})
+        self.assertTrue(wait_until(lambda: self.flow.worker_view()["state"] == "idle"))
+        self.assertIsNone(self.flow.active_commands(), "no Task: the user's direct requests are not restricted")
+
+    def test_the_done_report_carries_the_commands_run_from_the_terminal_record(self):
+        runs = [{"command": "lscpu", "status": "exited", "exit_code": 0, "signal": None, "duration_seconds": 0.1,
+                 "log_path": "/x/1.log"}]
+        asked = []
+        self.flow.terminal_runs = lambda task_id: asked.append(task_id) or runs
+        result = self.work_with_commands()
+        self.assertTrue(wait_until(lambda: self.flow.task_view()["status"] == "running"))
+        self.to_manager({"kind": "done", "message": "CPU: 8 cores; RAM 16 GiB; no GPU"})
+        self.assertTrue(wait_until(lambda: len(self.mailbox.created) == 2))
+        payload = self.mailbox.created[1].payload
+        self.assertEqual(payload["message"], "CPU: 8 cores; RAM 16 GiB; no GPU", "the worker's text is unchanged")
+        self.assertEqual(payload["commands_run"], runs)
+        self.assertIn("Recorded by Workbench", payload["commands_run_note"])
+        self.assertEqual(asked, [result["task_id"]])
+        self.flow.terminal_runs = lambda task_id: []
+        self.running_work()
+        self.to_manager({"kind": "progress", "message": "half way"})
+        self.assertTrue(wait_until(lambda: len(self.mailbox.created) == 4))
+        self.assertNotIn("commands_run", self.mailbox.created[3].payload, "only done/blocked reports carry it")
+
+
+class StartFailureHoldTests(FlowFixture):
+    """stuck-review-02 P3: a failed experiment start keeps its hold until the shell is given back, and only a
+    wb-handoff the start really typed counts (it may reach the control wait late)."""
+
+    def failing_start(self, type_handoff):
+        typed, seen = [], {}
+        self.port.send_user = lambda data: typed.append(data)
+        original = TaskFlow._give_back
+        settled = []
+
+        def give_back(flow, port, ports=None, *, after_failure=False, hold_reason=None):
+            seen.update(after_failure=after_failure, hold_reason=hold_reason, held=port.held)
+            return original(flow, port, ports, after_failure=after_failure, hold_reason=hold_reason)
+
+        def start(workflow, task_id, revision, *, worktree_path, artifacts_root, automation, shell):
+            self.assertIs(shell, self.port, "the workflow gets the product port itself")
+            shell.send_user(b"cd /somewhere && pwd -P > /x\n")
+            if type_handoff:
+                shell.send_user(b"wb-handoff\n")
+            raise WorkflowHeld("forced start failure")
+
+        with mock.patch.object(FakeWorkflow, "start", start), \
+                mock.patch.object(TaskFlow, "_give_back", give_back), \
+                mock.patch.object(TaskFlow, "_await_settled", staticmethod(lambda port: settled.append(1))):
+            result = self.new_experiment()
+            self.assertEqual(result["status"], "dispatched", result)
+            self.assertTrue(wait_until(lambda: self.flow.task_view()["status"] == "finished"), self.flow.task_view())
+        self.assertFalse(self.port.held, "released after the give-back")
+        self.assertEqual(self.port.send_user.__name__, "<lambda>", "the port's own send_user is put back")
+        return seen, settled, typed
+
+    def test_a_failure_before_wb_handoff_is_not_treated_as_a_handoff(self):
+        seen, settled, typed = self.failing_start(type_handoff=False)
+        self.assertEqual(seen, {"after_failure": False, "hold_reason": HOLD_REASON_FLOW, "held": True})
+        self.assertEqual(settled, [], "no wait for a control wait that cannot come")
+        self.assertEqual(len(typed), 1)
+
+    def test_a_failure_after_wb_handoff_waits_for_it_under_the_hold(self):
+        seen, settled, typed = self.failing_start(type_handoff=True)
+        self.assertEqual(seen, {"after_failure": True, "hold_reason": HOLD_REASON_FLOW, "held": True})
+        self.assertEqual(settled, [1])
+        self.assertEqual(typed[-1], b"wb-handoff\n")
 
 
 class CompletionTests(FlowFixture):

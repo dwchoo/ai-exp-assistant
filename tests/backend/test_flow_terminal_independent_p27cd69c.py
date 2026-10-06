@@ -1,9 +1,10 @@
-"""C-D69 (5) independent (p27-cd69-stuck-test-01): the worker ``terminal`` tool on a real host shell.
+"""C-D69 (5) independent (p27-cd69-stuck-test-01), updated for C-D69 (6)(c) (p27-cd69-cmds-test-01).
 
 Derived from DECISIONS.md C-D69 (5): (a) after any start failure the host shell returns to the user and the
-result text matches the real state; (b) an oversize command is refused before anything is typed, with
-write-a-file / ``bash <file>`` guidance, and the limit itself stays. Real backend ShellPane through
-HostShellPort, bash and dash. No OMP, no provider.
+result text matches the real state. C-D69 (6)(c) replaces the (5)(b) refusal: a command too long for one host
+shell request is no longer refused (``command_too_long``) but written by the harness to a script file and run
+(``script_path``); the request limit itself stays (the shell still refuses an oversize request, which is why the
+size check exists). Real backend ShellPane through HostShellPort, bash and dash. No OMP, no provider.
 """
 
 from __future__ import annotations
@@ -89,60 +90,49 @@ class _RealShell(tf.ServiceFixture):
                                       and self.pane.state["parent_mode"] == "manual_prompt", 10), self.pane.state)
 
     def room(self):
-        """The room the service itself reports in its refusal (black box)."""
-        result = self.run_tool({"command": "echo " + "r" * 5000})
-        self.assertEqual(result["status"], "command_too_long", result)
-        match = re.search(r"about (\d+) plain ASCII characters", result["detail"])
-        self.assertIsNotNone(match, result["detail"])
-        return int(match.group(1))
+        """The longest plain ASCII command that still runs inline (no script file), found on the service."""
+        return flow_terminal.command_room(self.CHOICE.executable)
 
-    # -- (b) oversize ---------------------------------------------------------------------------------
-    def test_oversize_is_refused_before_anything_is_typed(self):
-        time.sleep(0.3)
-        state = dict(self.pane.state)
-        before = len(self.ui)
-        for command in ("echo " + "q" * 5000, "printf '%s\\n' " + "한" * 800, "echo 'a\"b'\n" * 400):
+    # -- C-D69 (6)(c) replaces (5)(b): oversize runs from a script file -------------------------------
+    def test_oversize_runs_from_a_script_file_instead_of_being_refused(self):
+        for command, marker in (("echo " + "q" * 5000, "q" * 100), ("printf '%s\\n' " + "한" * 800, "한" * 50),
+                                ("echo 'a\"b'\n" * 400, 'a"b')):
             with self.subTest(size=len(command)):
-                result = self.run_tool({"command": command})
-                self.assertEqual((result["status"], result["reason"]), ("command_too_long", "command_too_long"),
-                                 result)
-                self.assertEqual(result["limit_bytes"], LIMIT)
-                self.assertGreater(result["request_bytes"], LIMIT)
-                self.assertIn("write", result["detail"])
-                self.assertIn("bash <file>", result["detail"])
-                self.assertNotIn("command_id", result, "no command was created")
-        time.sleep(0.4)
-        self.assertEqual(bytes(self.ui[before:]), b"", "nothing typed, no new prompt drawn")
-        self.assertIsNone(self.pane.automation_hold, "no hold left")
-        self.assertIsNone(self.gate.owner)
-        now = self.pane.state
-        for key in ("input_owner", "parent_mode", "generation", "owner_epoch"):
-            self.assertEqual(now[key], state[key], key)
-        self.assertEqual(self.records("terminal_started"), [])
-        self.assertEqual({r["status"] for r in self.records("terminal_refused")}, {"command_too_long"})
-        logs = self.root / "workflow" / "terminal"
-        self.assertEqual(list(logs.glob("*.log")) if logs.exists() else [], [], "no log for a refused command")
+                before = len(self.ui)
+                result = self.run_tool({"command": command, "wait": 30})
+                self.assertEqual((result.get("status"), result.get("exit_code")), ("exited", 0), result)
+                self.assertNotEqual(result.get("status"), "command_too_long")
+                self.assertIn(marker, result["output_tail"])
+                script = Path(result["script_path"])
+                self.assertEqual(script.read_text(encoding="utf-8").rstrip("\n"), command.rstrip("\n"))
+                shown = bytes(self.ui[before:]).decode("utf-8", "replace")
+                self.assertIn(f"(script {script})", shown)
+                self.assertTrue(tf.wait_until(lambda: self.pane.state["parent_mode"] == "manual_prompt", 10))
+        self.assertEqual({r["status"] for r in self.records("terminal_refused")}, set(), "nothing refused")
         if self.CHOICE.kind == "bash":
+            before = len(self.ui)
             self.type(b"history 5\r")
             self.assertTrue(tf.wait_until(lambda: b"history 5" in self.ui[before:], 5))
             time.sleep(0.3)
-            shown = bytes(self.ui[before:])
-            self.assertNotIn(b"qqqq", shown, "the oversize command is not in the shell history")
-            self.assertNotIn(b"wb-handoff", shown, "no handoff was typed")
+            self.assertNotIn(b"qqqq", bytes(self.ui[before:]), "the long command is not in the user's history")
         self.assert_returned()
 
-    def test_the_reported_room_is_the_exact_boundary_on_the_real_shell(self):
+    def test_the_room_is_the_exact_inline_boundary_on_the_real_shell(self):
         room = self.room()
         self.assertGreater(room, 2500)
         fits = "echo " + "a" * (room - 5)
         over = fits + "a"
-        refused = self.run_tool({"command": over})
-        self.assertEqual(refused["status"], "command_too_long", refused)
         ran = self.run_tool({"command": fits, "wait": 30})
         self.assertEqual((ran.get("status"), ran.get("exit_code")), ("exited", 0), ran)
+        self.assertNotIn("script_path", ran, "the room still runs inline")
         self.assertIn("a" * 200, ran["output_tail"])
         self.assertTrue(tf.wait_until(lambda: self.pane.state["parent_mode"] == "manual_prompt", 10))
-        # the refusal was necessary: without the early check the shell itself refuses room + 1
+        spilled = self.run_tool({"command": over, "wait": 30})
+        self.assertEqual((spilled.get("status"), spilled.get("exit_code")), ("exited", 0), spilled)
+        self.assertIn("script_path", spilled, "room + 1 runs from a script file")
+        self.assertIn("a" * 200, spilled["output_tail"])
+        self.assertTrue(tf.wait_until(lambda: self.pane.state["parent_mode"] == "manual_prompt", 10))
+        # the size check is necessary: without it the shell itself refuses room + 1 (the limit stays)
         with mock.patch.object(flow_terminal, "command_request_bytes", lambda executable, command: 0):
             failed = self.run_tool({"command": over, "wait": 10})
         self.assertEqual(failed["status"], "start_failed", failed)
@@ -158,10 +148,14 @@ class _RealShell(tf.ServiceFixture):
         self.assertLess(n, 700)
         ran = self.run_tool({"command": "printf '%s\\n' " + "가" * n, "wait": 30})
         self.assertEqual((ran.get("status"), ran.get("exit_code")), ("exited", 0), ran)
+        self.assertNotIn("script_path", ran)
         self.assertIn("가" * 50, ran["output_tail"])
         self.assertTrue(tf.wait_until(lambda: self.pane.state["parent_mode"] == "manual_prompt", 10))
-        over = self.run_tool({"command": "printf '%s\\n' " + "가" * (n + 1)})
-        self.assertEqual(over["status"], "command_too_long", over)
+        over = self.run_tool({"command": "printf '%s\\n' " + "가" * (n + 1), "wait": 30})
+        self.assertEqual((over.get("status"), over.get("exit_code")), ("exited", 0), over)
+        self.assertIn("script_path", over)
+        self.assertIn("가" * (n + 1), over["output_tail"])
+        self.assertTrue(tf.wait_until(lambda: self.pane.state["parent_mode"] == "manual_prompt", 10))
         with mock.patch.object(flow_terminal, "command_request_bytes", lambda executable, command: 0):
             failed = self.run_tool({"command": "printf '%s\\n' " + "가" * (n + 1), "wait": 10})
         self.assertEqual(failed["status"], "start_failed", failed)
@@ -271,8 +265,10 @@ class _RealShell(tf.ServiceFixture):
         self.assertTrue(tf.wait_until(lambda: self.pane.state["parent_mode"] == "control_wait", 5), self.pane.state)
         result = self.run_tool({"command": "echo never-runs", "wait": 10})
         self.assertEqual(result["status"], "host_terminal_busy", result)
-        too_long = self.run_tool({"command": "echo " + "x" * 5000})
-        self.assertEqual(too_long["status"], "command_too_long", too_long)
+        too_long = self.run_tool({"command": "echo " + "x" * 5000})  # C-D69 (6)(c): busy, no script left
+        self.assertEqual(too_long["status"], "host_terminal_busy", too_long)
+        logs = self.root / "workflow" / "terminal"
+        self.assertEqual(list(logs.glob("*.sh")) if logs.exists() else [], [], "no script file for a refusal")
         time.sleep(1.0)
         state = self.pane.state
         self.assertEqual((state["input_owner"], state["parent_mode"]), ("user", "control_wait"), state)

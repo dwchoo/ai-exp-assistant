@@ -155,22 +155,26 @@ class RefusalTests(ServiceFixture):
             self.assertTrue(any(error.startswith(field) for error in result["errors"]), result)
         self.assert_nothing_typed()
 
-    def test_an_oversize_command_is_refused_before_anything_is_typed(self):
-        # C-D69 (5)(b): the real encoded RUN line (base64 JSON incl. the display wrapper) is checked first
-        for command in ("echo " + "x" * 5000, "echo " + "한" * 700, "printf '%s\\n' " + "'a\"b' " * 600):
-            with self.subTest(size=len(command)):
+    def test_a_command_outside_the_task_commands_is_refused_and_nothing_is_typed(self):
+        # C-D69 (6)(b): while the worker's active Task lists commands, only those run
+        allowed = ["echo one", "printf 'two\\n' | tee /tmp/x"]
+        self.terminal._task_commands = lambda: allowed
+        for command in ("echo other", "echo one; echo extra", "echo  one"):
+            with self.subTest(command=command):
                 result = self.run_tool({"command": command})
-                self.assertEqual((result["status"], result["reason"]), ("command_too_long", "command_too_long"),
-                                 result)
-                self.assertGreater(result["request_bytes"], result["limit_bytes"])
-                self.assertEqual(result["limit_bytes"], 4096)
-                self.assertIn("`write`", result["detail"])
-                self.assertIn("bash <file>", result["detail"])
+                self.assertEqual((result["status"], result["reason"]), ("not_in_task_commands", "not_in_task_commands"))
+                self.assertEqual(result["allowed_commands"], allowed)
+                self.assertIn("1. echo one", result["detail"])
+                self.assertIn("2. printf 'two\\n' | tee /tmp/x", result["detail"])
                 self.assertIn("Nothing was typed", result["detail"])
                 self.assert_nothing_typed()
-        self.assertLess(len("echo " + "한" * 700), 1000, "non-ASCII counts by its encoded size, not characters")
+        fetched = self.run_tool({"command": None})  # the state fetch is not restricted
+        self.assertNotEqual(fetched.get("status"), "not_in_task_commands", fetched)
+        self.terminal._task_commands = lambda: None  # no Task (or no commands): no restriction
+        self.assertNotEqual(self.run_tool({"command": "echo other"})["status"], "not_in_task_commands")
         refused = [r for r in journal(self.root) if r["type"] == "terminal_refused"]
-        self.assertEqual({r["status"] for r in refused}, {"command_too_long"})
+        self.assertEqual([r["status"] for r in refused if r["status"] == "not_in_task_commands"],
+                         ["not_in_task_commands"] * 3)
 
     def test_the_size_check_matches_the_dispatch_encoding(self):
         executable = "/usr/bin/bash"
@@ -305,11 +309,13 @@ class RefusalTests(ServiceFixture):
 class RealHostShellTerminalTests(ServiceFixture):
     """The TerminalService on a real backend ShellPane through HostShellPort."""
 
+    CHOICE = ShellChoice("bash", "/usr/bin/bash")
+
     def setUp(self):
         super().setUp()
         self.home = self.root / "home"
         self.home.mkdir()
-        self.pane = ShellPane(ShellChoice("bash", "/usr/bin/bash"),
+        self.pane = ShellPane(self.CHOICE,
                               {"PATH": "/usr/bin:/bin", "HOME": str(self.home), "LANG": "C.UTF-8",
                                "WB_FIXTURE_NAME": "exported-by-user"})
         self.ui = bytearray()
@@ -409,17 +415,58 @@ class RealHostShellTerminalTests(ServiceFixture):
         time.sleep(0.3)
         self.assertNotIn(b"args=", bytes(self.ui)[len(shown.encode()):], "nothing went into the parent's history")
 
-    def test_an_oversize_command_is_refused_and_the_shell_stays_the_users(self):
-        # p27-cd69-smoke-01 P1: a 5,058-char command used to strand the shell in control_wait (manager)
+    def test_a_long_multi_line_script_runs_from_a_script_file(self):
+        # C-D69 (6)(c): too long for one host shell request -> the harness writes it to a script and runs it
+        body = "\n".join(f"echo 'line {index:03d} 한글 \"quoted\" $((index={index}))' > /dev/null" for index in range(120))
+        script = ("printf 'spill-start\\n'\n" + body + "\ncat <<'EOF'\nheredoc $HOME stays literal\nEOF\n"
+                  "printf 'spill-done %s\\n' \"$WB_FIXTURE_NAME\"\nexit 6\n")
+        self.assertGreater(flow_terminal.command_request_bytes("/usr/bin/bash", script), 4096)
         before = len(self.ui)
-        result = self.run_tool({"command": "echo " + "y" * 5053, "wait": 10})
-        self.assertEqual(result["status"], "command_too_long", result)
-        time.sleep(0.3)
-        self.assertNotIn(b"wb-handoff", bytes(self.ui)[before:], "nothing was typed")
+        result = self.run_tool({"command": script, "wait": 30})
+        self.assertEqual((result["status"], result["exit_code"]), ("exited", 6), result)
+        self.assertIn("spill-start", result["output_tail"])
+        self.assertIn("heredoc $HOME stays literal", result["output_tail"])
+        self.assertIn("spill-done exported-by-user", result["output_tail"])
+        script_path = Path(result["script_path"])
+        self.assertEqual(script_path.parent, self.root / "workflow" / "terminal")
+        self.assertEqual(stat.S_IMODE(script_path.stat().st_mode), 0o600)
+        self.assertEqual(script_path.read_text(), script)
+        shown = bytes(self.ui)[before:].decode("utf-8", "replace")
+        self.assertIn(f"[worker] $ printf 'spill-start\\n' … (script {script_path})", shown)
+        self.assertNotIn("line 050", shown, "the script text is not typed or echoed")
+        log = Path(result["log_path"]).read_bytes()
+        self.assertNotIn(b"[worker] $", log, "the shown line is not command output")
+        self.assertIn(b"spill-done", log)
+        started = next(r for r in journal(self.root) if r["type"] == "terminal_started")
+        self.assertEqual((started["command"], started["script_path"]), (script, str(script_path)))
         self.assert_user_owns_the_shell_again()
         after = self.run_tool({"command": "echo next-ok", "wait": 30})
         self.assertEqual((after["status"], after["exit_code"]), ("exited", 0), after)
-        self.assertIn("next-ok", after["output_tail"])
+        self.assertNotIn("script_path", after)
+
+    def test_only_the_task_commands_run_and_the_runs_are_listed_for_the_task(self):
+        # C-D69 (6)(b)(d) on a real shell: a refused command types nothing; the runs are kept per Task
+        long_command = "printf 'long-ok\\n'; : " + "w" * 4000
+        self.terminal._task_commands = lambda: ["echo allowed-one", long_command]
+        self.terminal._active_task = lambda: SimpleNamespace(task_id="task-cmds")
+        before = len(self.ui)
+        refused = self.run_tool({"command": "echo not-listed", "wait": 10})
+        self.assertEqual(refused["status"], "not_in_task_commands", refused)
+        time.sleep(0.3)
+        self.assertNotIn(b"wb-handoff", bytes(self.ui)[before:], "nothing was typed")
+        self.assertNotIn(b"not-listed", bytes(self.ui)[before:])
+        first = self.run_tool({"command": "echo allowed-one\n", "wait": 30})  # trailing whitespace only
+        self.assertEqual((first["status"], first["exit_code"]), ("exited", 0), first)
+        second = self.run_tool({"command": long_command, "wait": 30})
+        self.assertEqual((second["status"], second["exit_code"]), ("exited", 0), second)
+        self.assertIn("long-ok", second["output_tail"])
+        runs = self.terminal.runs_for_task("task-cmds")
+        self.assertEqual([r["command"] for r in runs], ["echo allowed-one", long_command[:200] + " …"])
+        self.assertEqual([(r["status"], r["exit_code"]) for r in runs], [("exited", 0), ("exited", 0)])
+        self.assertEqual(runs[0]["log_path"], first["log_path"])
+        self.assertEqual(runs[1]["script_path"], second["script_path"])
+        self.assertIsInstance(runs[0]["duration_seconds"], float)
+        self.assertEqual(self.terminal.runs_for_task("other-task"), [])
         self.assert_user_owns_the_shell_again()
 
     def test_a_start_failure_after_the_handoff_gives_the_shell_back_to_the_user(self):
@@ -532,6 +579,141 @@ class RealHostShellTerminalTests(ServiceFixture):
         self.assertEqual([r["cwd"] for r in ended], [str(elsewhere), str(self.project), str(self.home)])
 
 
+class DashHostShellTerminalTests(RealHostShellTerminalTests):
+    """C-D69 (6) on dash: the script-file run and the Task command restriction."""
+
+    CHOICE = ShellChoice("sh", "/usr/bin/dash")
+    KEPT = ("test_only_the_task_commands_run_and_the_runs_are_listed_for_the_task",)
+
+    def test_a_long_multi_line_script_runs_from_a_script_file_on_dash(self):
+        script = "printf 'dash-start\\n'\n" + "\n".join(f": line {index:04d} {'z' * 40}" for index in range(120)) \
+            + "\nprintf 'dash-done\\n'\nexit 9\n"
+        result = self.run_tool({"command": script, "wait": 30})
+        self.assertEqual((result["status"], result["exit_code"]), ("exited", 9), result)
+        self.assertIn("dash-done", result["output_tail"])
+        self.assertIn(f"[worker] $ printf 'dash-start\\n' … (script {result['script_path']})",
+                      bytes(self.ui).decode("utf-8", "replace"))
+        self.assert_user_owns_the_shell_again()
+
+
+for _name in [name for name in dir(RealHostShellTerminalTests) if name.startswith("test_")]:
+    if _name not in DashHostShellTerminalTests.KEPT:
+        setattr(DashHostShellTerminalTests, _name, None)  # bash-specific expectations stay with the bash class
+
+
+class CommandRecordCorrectionTests(ServiceFixture):
+    """p27-cd69-cmds-fix-01: light run records, the report list after a restart, the exact match, the spill cap."""
+
+    def started(self, command_id, task_id, command="echo x", **extra):
+        self.handoffs.record({"type": "terminal_started", "command_id": command_id, "task_id": task_id,
+                              "command": command, "log_path": f"/logs/{command_id}.log", **extra})
+
+    def ended(self, command_id, status="exited", exit_code=0):
+        self.handoffs.record({"type": "terminal_ended", "command_id": command_id, "status": status,
+                              "exit_code": exit_code, "signal": None, "duration_seconds": 0.5})
+
+    def test_a_finished_run_keeps_a_light_record_not_the_command_object(self):
+        import gc
+        import weakref
+        command = flow_terminal._Command("cid-1", "echo " + "q" * 3000, {}, "task-light", Path("/logs/cid-1.log"))
+        command.recent.extend(b"o" * 30000)
+        command.since.extend(b"s" * 30000)
+        command.unseen.extend(b"u" * 30000)
+        command.script_path = Path("/logs/cid-1.sh")
+        ref = weakref.ref(command)
+        self.terminal._remember_run(command)
+        self.terminal._finish_run(command, {"status": "exited", "exit_code": 3, "signal": None,
+                                            "duration_seconds": 1.5})
+        del command
+        gc.collect()
+        self.assertIsNone(ref(), "the Task's run record must not keep the command (and its output buffers)")
+        (_, entry), = self.terminal._task_runs["task-light"].runs
+        self.assertEqual((entry["status"], entry["exit_code"], entry["duration_seconds"]), ("exited", 3, 1.5))
+        self.assertEqual(entry["script_path"], "/logs/cid-1.sh")
+        self.assertLessEqual(len(entry["command"]), 210, "the command is shortened")
+
+    def test_runs_are_rebuilt_from_the_journal_after_a_restart(self):
+        self.started("c1", "T", "echo one")
+        self.ended("c1")
+        self.started("c2", "T", "printf 'two\\n'\nmore", script_path="/logs/c2.sh")
+        self.ended("c2", "exited", 7)
+        self.started("c3", "T", "sleep 99")  # no end record: the backend restarted while it ran
+        self.started("c4", "OTHER", "echo other")
+        self.ended("c4")
+        runs = self.terminal.runs_for_task("T")  # this service never saw them (a restarted backend)
+        self.assertEqual([(r["command"], r["status"], r["exit_code"]) for r in runs],
+                         [("echo one", "exited", 0), ("printf 'two\\n' …", "exited", 7), ("sleep 99", "unknown", None)])
+        self.assertEqual(runs[1]["script_path"], "/logs/c2.sh")
+        self.assertEqual(runs[0]["log_path"], "/logs/c1.log")
+        self.assertTrue(any("rebuilt from the terminal journal" in note and "restart" in note for note in runs.notes),
+                        runs.notes)
+        self.assertEqual(self.terminal.runs_for_task("NONE"), [])
+        self.assertEqual(self.terminal.runs_for_task("NONE").notes, [], "nothing ran and the journal says so")
+
+    def test_an_unreadable_journal_is_said_not_shown_as_an_empty_list(self):
+        def broken(types):
+            raise OSError("journal unreadable")
+        self.terminal._handoffs = SimpleNamespace(read_records=broken, record=lambda record: {})
+        runs = self.terminal.runs_for_task("T")
+        self.assertEqual(runs, [])
+        self.assertTrue(any("could not be read" in note and "does not show that nothing ran" in note
+                            for note in runs.notes), runs.notes)
+
+    def test_older_runs_past_the_cap_are_counted(self):
+        kept = flow_terminal.RUNS_KEPT
+        for index in range(kept + 6):
+            self.started(f"id-{index:03d}", "MANY", f"echo run-{index}")
+            self.ended(f"id-{index:03d}")
+        runs = self.terminal.runs_for_task("MANY")
+        self.assertEqual(len(runs), kept)
+        self.assertEqual(runs[0]["command"], "echo run-6", "the most recent runs are listed")
+        self.assertEqual(runs[-1]["command"], f"echo run-{kept + 5}")
+        self.assertTrue(any(f"6 older runs omitted" in note for note in runs.notes), runs.notes)
+
+    def test_older_runs_past_the_cap_are_counted_from_memory_when_the_journal_is_unreadable(self):
+        self.terminal._handoffs = SimpleNamespace(record=lambda record: {})  # no read_records
+        kept = flow_terminal.RUNS_KEPT
+        for index in range(kept + 6):
+            command = flow_terminal._Command(f"id-{index}", f"echo run-{index}", {}, "MEM", Path(f"/logs/{index}.log"))
+            self.terminal._remember_run(command)
+            self.terminal._finish_run(command, {"status": "exited", "exit_code": 0, "duration_seconds": 0.1})
+        runs = self.terminal.runs_for_task("MEM")
+        self.assertEqual(len(runs), kept)
+        self.assertTrue(any("6 older runs omitted" in note for note in runs.notes), runs.notes)
+        self.assertTrue(any("could not be read" in note for note in runs.notes), runs.notes)
+
+    def test_the_exact_match_ignores_only_trailing_space_tab_and_newline(self):
+        self.terminal._task_commands = lambda: ["echo a", "echo b \t"]
+        for fine in ("echo a", "echo a \t\n\n", "echo b", "echo b\n"):
+            with self.subTest(fine=repr(fine)):
+                self.assertIsNone(self.terminal._not_in_task_commands(fine, {}))
+        for bad in ("echo a\r", "echo a\x0b", "echo a\x0c", "echo a\x1c", "echo a\x1f", "echo a\x85", "echo a\xa0",
+                    "echo a\u2028", "echo a\u3000", "echo a\r\n", "echo a \x0b", " echo a", "echo a;"):
+            with self.subTest(bad=repr(bad)):
+                result = self.run_tool({"command": bad, "wait": 5})
+                self.assertEqual(result["status"], "not_in_task_commands", result)
+        self.assertEqual(self.port.sent, [], "nothing was typed")
+
+    def test_the_script_request_never_exceeds_the_request_limit(self):
+        from workbench.terminal.shell_g2.lifecycle import RUN_REQUEST_MAX, encode_run, normalize_run
+        executable = "/usr/bin/bash"
+        script = Path("/tmp") / ("d" * 200) / ("e" * 200) / ("f" * 200) / ("g" * 200) / ("h" * 200) / "0123.sh"
+
+        def size(shown):
+            argv = [executable, "-c", flow_terminal.SPILL_SCRIPT, executable, shown, str(script)]
+            return len(f"RUN:{encode_run(normalize_run(executable, argv, flow_terminal._SIZING_ID))}\n".encode())
+
+        command = "\U0001F642" * 300 + "\nsecond line"
+        plain = f"{flow_terminal.shown_command(command)} (script {script})"
+        self.assertGreater(size(plain), RUN_REQUEST_MAX, "without the cap this request would be refused")
+        shown = flow_terminal.spill_shown(executable, command, script)
+        self.assertLessEqual(size(shown), RUN_REQUEST_MAX)
+        self.assertTrue(shown.endswith(f"(script {script})"))
+        self.assertTrue(shown.startswith("\U0001F642"), "the first line is cut, not dropped")
+        short = flow_terminal.spill_shown(executable, "echo hi\nmore", Path("/tmp/x/a.sh"))
+        self.assertEqual(short, "echo hi … (script /tmp/x/a.sh)", "a normal command is shown as before")
+
+
 class ExperimentExclusionTests(flow_fixtures.FlowFixture):
     """The real TaskFlow and a TerminalService share one HostGate."""
 
@@ -556,6 +738,33 @@ class ExperimentExclusionTests(flow_fixtures.FlowFixture):
         self.gate.release("terminal")
         self.assertTrue(wait_until(lambda: len(self.runs) == 1 and self.flow.task_view()["status"] == "finished"))
         self.assertTrue(wait_until(lambda: self.gate.owner is None), "the experiment releases the gate after its run")
+
+    def test_the_flow_s_task_commands_restrict_the_terminal_and_feed_the_done_report(self):
+        # C-D69 (6): the backend wiring (service.py) on the real TaskFlow and TerminalService
+        terminal = TerminalService(handoffs=self.service, host_shell=lambda: FakeHostPort(), gate=self.gate,
+                                   log_root=self.root / "terminal", automation=lambda: AUTOMATION,
+                                   activity=self.flow.experiment_host_activity, active_task=self.flow.active_task,
+                                   task_commands=self.flow.active_commands)
+        self.addCleanup(terminal.close)
+        self.flow.terminal_runs = terminal.runs_for_task
+        result = self.to_worker({"kind": "work", "message": "facts", "spec": {"goal": "g", "paths": []},
+                                 "commands": ["echo listed"]})
+        self.assertEqual(result["status"], "dispatched", result)
+        self.assertTrue(wait_until(lambda: self.flow.task_view()["status"] == "running"))
+        refused = terminal.handle(ActorRole.WORKER, call({"command": "echo mine"}))
+        self.assertEqual(refused["status"], "not_in_task_commands", refused)
+        listed = terminal.handle(ActorRole.WORKER, call({"command": "echo listed"}))
+        self.assertNotEqual(listed["status"], "not_in_task_commands", listed)
+        self.to_manager({"kind": "done", "message": "done"})
+        self.assertTrue(wait_until(lambda: self.flow.worker_view()["state"] == "idle"))
+        report = [m.payload for m in self.mailbox.created if m.payload.get("handoff") == "to_manager"][-1]
+        self.assertEqual(report["commands_run"], [], "nothing ran (the fake shell cannot start a command)")
+        self.assertIsNone(self.flow.active_commands())
+        after = terminal.handle(ActorRole.WORKER, call({"command": "echo mine"}))
+        self.assertNotEqual(after["status"], "not_in_task_commands", "no Task: no restriction")
+        source = Path(flow_terminal.__file__).with_name("service.py").read_text()
+        self.assertIn("task_commands=self.flow.active_commands", source)
+        self.assertIn("self.flow.terminal_runs = self.terminal.runs_for_task", source)
 
     def test_an_experiment_starting_or_running_refuses_the_terminal(self):
         terminal = TerminalService(handoffs=self.service, host_shell=lambda: FakeHostPort(), gate=self.gate,

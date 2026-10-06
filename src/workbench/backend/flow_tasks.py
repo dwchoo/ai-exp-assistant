@@ -130,6 +130,23 @@ def _analysis_fields(level: object) -> dict[str, str]:
     return {"analysis": level, "analysis_rule": ANALYSIS_RULES[level]}
 
 
+COMMANDS_RULE = ("Run these commands exactly as given with the terminal tool, one per call, in order (number 1 first); "
+                 "use an alternative entry only as the message says. Do not write, change, split or combine "
+                 "commands: while this Task is active Workbench refuses any other command. Then report a short "
+                 "summary of the results (key values, failures); Workbench attaches the list of commands run, so "
+                 "do not paste commands or scripts back.")
+COMMANDS_RUN_NOTE = ("Recorded by Workbench from the terminal journal: the commands the worker ran for this Task "
+                     "(command shortened for display, exit code or signal, duration, full output in log_path).")
+
+
+def _commands_fields(commands: list[str] | None) -> dict[str, Any]:
+    """C-D69 (6): the TASK/follow-up lines of a Task's exact commands (numbered, with the rule)."""
+    if not commands:
+        return {}
+    return {"commands": [{"number": index, "command": command} for index, command in enumerate(commands, 1)],
+            "commands_rule": COMMANDS_RULE}
+
+
 MANAGER_RULE = ("The worker does this Task; do not do it yourself (no commands, edits or checks for it). End "
                 "your turn and wait for the worker's to_manager report.")
 CANCEL_WAIT_DETAIL = ("The experiment's host command is still running; Workbench never kills it. The Task "
@@ -214,6 +231,40 @@ def repo_relative_paths(paths: list[str], project_dir: str | Path | None,
 
 
 # -- state ------------------------------------------------------------------------
+class _HandoffWatch:
+    """Notes the moment an experiment start types wb-handoff into the host shell port (the same port object is
+    handed to the workflow; only its ``send_user`` is wrapped until ``close``)."""
+
+    def __init__(self, port: Any) -> None:
+        self._port = port
+        self.handoff_typed = False
+        self._original = getattr(port, "send_user", None)
+        self._own = "send_user" in getattr(port, "__dict__", {})  # an instance attribute is put back on close
+        self._installed = False
+        if callable(self._original):
+            try:
+                port.send_user = self._send
+                self._installed = True
+            except (AttributeError, TypeError):
+                pass
+
+    def _send(self, data: bytes) -> Any:
+        if bytes(data).strip() == b"wb-handoff":
+            self.handoff_typed = True
+        return self._original(data)
+
+    def close(self) -> None:
+        if self._installed:
+            self._installed = False
+            try:
+                if self._own:
+                    self._port.send_user = self._original
+                else:
+                    del self._port.send_user
+            except AttributeError:
+                pass
+
+
 @dataclass
 class FlowTask:
     task_id: str
@@ -223,6 +274,7 @@ class FlowTask:
     spec: dict[str, Any] = field(default_factory=dict)  # the spec of ``revision`` (delegated)
     summary: str = ""  # the first SUMMARY_MAX chars of ``message``, for status views only
     message: str = ""  # the manager's full to_worker message (<= MESSAGE_MAX); the first TASK carries it
+    commands: list[str] | None = None  # C-D69 (6): the exact commands of a work Task (terminal accepts only these)
     since: str = ""
     scope_decision_id: str | None = None
     run_id: str | None = None
@@ -305,6 +357,8 @@ class TaskFlow:
         self._following: str | None = None  # the Task whose experiment run the runner thread is driving
         # F2: the user's host shell directory before Workbench typed a run's ``cd`` (restored after the run).
         self._home_cwd: str | None = None
+        # C-D69 (6): the terminal service's record of the commands run for a Task (set by the backend)
+        self.terminal_runs: Callable[[str], list[dict[str, Any]]] | None = None
         # R1/R2 (in memory): Tasks whose report the lane/runner is submitting right now, and each free-work
         # Task's TASK message state (queued | delivering | sent | not_sent).
         self._report_inflight: set[str] = set()
@@ -438,6 +492,15 @@ class TaskFlow:
         return ActiveTask(task.task_id, task.run_revision or task.revision, task.kind, True, task.run_id,
                           task.task_message_id)
 
+    def active_commands(self) -> list[str] | None:
+        """C-D69 (6): the exact commands the worker's terminal accepts now: those of the active (busy) work Task
+        that has them; None means no restriction (no Task, or a Task without commands)."""
+        with self._lock:
+            task = self.active()
+            if task is None or not task.busy() or task.kind != "work" or not task.commands:
+                return None
+            return list(task.commands)
+
     def experiment_host_activity(self) -> str | None:
         """C-D68: why an experiment needs the host shell now (a run starting or running, a directory restore
         pending), else None. Called by the terminal service under the HostGate lock; takes only the flow lock."""
@@ -526,6 +589,8 @@ class TaskFlow:
             document["execution"] = dict(spec["execution"])
         if args.get("analysis") is not None:  # C-D69 (2): kept with the Task for later follow-ups
             document["analysis"] = args["analysis"]
+        if args.get("commands"):  # C-D69 (6): part of the delegated spec/scope
+            document["commands"] = list(args["commands"])
         document["source"] = "manager_to_worker"
         return document, errors
 
@@ -548,7 +613,7 @@ class TaskFlow:
         scope: dict[str, Any] = {"kind": task.kind, "goal": spec["goal"], "paths": list(spec["paths"]),
                                  "commit_policy": "manager_local_commits", "retry_limit": RETRY_LIMIT,
                                  **self._standing(request)}
-        for name in ("execution", "instructions", "analysis"):
+        for name in ("execution", "instructions", "analysis", "commands"):
             if name in spec:
                 scope[name] = spec[name]
         with self._repository() as repository:
@@ -587,7 +652,7 @@ class TaskFlow:
             with self._repository() as repository:
                 new_id = repository.create_task(spec)
             task = FlowTask(new_id, args["kind"], spec=spec, summary=args["message"][:SUMMARY_MAX],
-                            message=args["message"])
+                            message=args["message"], commands=list(args["commands"]) if args.get("commands") else None)
             task.set_status("dispatched")
             self.tasks[new_id] = task
             self._record({"type": "task_created", "task_id": new_id, "request_key": request.key_dict()})
@@ -657,14 +722,34 @@ class TaskFlow:
     def _question(self, task: FlowTask, request: HandoffRequest, spec: dict[str, Any] | None) -> HandoffDecision:
         payload: dict[str, Any] = {"handoff": "to_worker", "kind": task.kind, "message": request.args["message"],
                                    "task_id": task.task_id}
+        listener = None
         if spec is not None:
             payload["paths"] = list(spec["paths"])
         if task.kind == "work":
             payload.update(_analysis_fields(request.args.get("analysis") or (task.spec or {}).get("analysis")))
+            if request.args.get("commands"):  # C-D69 (6): a follow-up's commands replace the Task's list ...
+                replacement = list(request.args["commands"])
+                payload.update(_commands_fields(replacement))
+                listener = self._commands_listener(task.task_id, task.run_id, replacement)  # ... once delivered
         return HandoffDecision({"status": "queued", "task_id": task.task_id, "manager_rule": MANAGER_RULE},
                                message=OutboundMessage(
             task.task_id, task.run_revision, task.run_id, ActorRole.MANAGER, ActorRole.WORKER,
-            MessageKind.QUESTION, payload))
+            MessageKind.QUESTION, payload), listener=listener)
+
+    def _commands_listener(self, task_id: str, run_id: str | None, commands: list[str]) -> Callable:
+        """The follow-up's new commands take effect when the worker's OMP accepted the message (a failed or
+        unconfirmed delivery keeps the old list, which the message that did not arrive never replaced)."""
+        def listener(event: str, snapshot: Mapping[str, Any]) -> None:
+            if event not in ("submitted", "delivered"):
+                return
+            with self._lock:
+                task = self.tasks.get(task_id)
+                if task is None or task.run_id != run_id or task.status == "closed" or task.commands == commands:
+                    return
+                task.commands = list(commands)
+                self._record({"type": "commands_replaced", "task_id": task_id, "count": len(commands)})
+                self._save_task(task)
+        return listener
 
     # -- cancel ---------------------------------------------------------------------
     def _cancel(self, request: HandoffRequest) -> HandoffDecision:
@@ -789,6 +874,15 @@ class TaskFlow:
             kind, reply_to = MessageKind.REPORT, task.task_message_id
         listener = None
         report = task.kind == "work" and args["kind"] in {"done", "blocked"}
+        if report and self.terminal_runs is not None:  # C-D69 (6)(d): the worker need not repeat its commands
+            try:
+                runs = self.terminal_runs(task.task_id)
+            except Exception:
+                runs = None
+            if runs is not None:
+                payload["commands_run"] = list(runs)
+                payload["commands_run_note"] = " ".join(
+                    [COMMANDS_RUN_NOTE, *(note for note in getattr(runs, "notes", ()) if isinstance(note, str))])
         if report:
             listener = self._report_listener(task.task_id, task.run_id, args["kind"], request.tool_call_id)
             task.held_reason = f"{args['kind']}_report_pending"
@@ -982,6 +1076,7 @@ class TaskFlow:
             if "instructions" in spec:
                 payload["instructions"] = spec["instructions"]
             payload.update(_analysis_fields(spec.get("analysis")))
+            payload.update(_commands_fields(task.commands))
             outbound = OutboundMessage(task_id, revision, run_id, ActorRole.MANAGER, ActorRole.WORKER,
                                        MessageKind.TASK, payload)
             self._task_message_state[task_id] = "queued"
@@ -1125,18 +1220,13 @@ class TaskFlow:
                 self._following = task.task_id
                 self._save_task(task)
             refused: list[str] = []
-            typing: list[bool] = []  # the workflow may type into the host shell from here (C-D69 (5)(a))
+            # stuck-review-02 P3-2: set right before the start types wb-handoff (like the terminal's handoff_typed)
+            watch = _HandoffWatch(port)
             options: dict[str, Any] = {}
             if late_hold:
-                hold = self._typing_hold(task, port, ports, refused)
-
-                def before_shell_input() -> None:
-                    hold()
-                    typing.append(True)
-                options["before_shell_input"] = before_shell_input
+                options["before_shell_input"] = self._typing_hold(task, port, ports, refused)
             else:
                 self._remember_home_cwd(port, ports)
-                typing.append(True)
             slot = ports.worktrees_root / f"{task.task_id}-r{revision}-{uuid4().hex[:8]}"
             try:
                 executable = getattr(getattr(port, "choice", None), "executable", None)
@@ -1149,10 +1239,12 @@ class TaskFlow:
                                      artifacts_root=ports.artifacts_root, automation=ports.automation(), shell=port,
                                      **options)
             except Exception as exc:
-                if typing:  # a wb-handoff the workflow typed may reach the control wait late (input still held)
+                watch.close()
+                if watch.handoff_typed:  # its wb-handoff may reach the control wait late (input still held)
                     self._await_settled(port)
+                # stuck-review-02 P3-1: the start's hold stays until the shell is given back (as in terminal)
+                self._give_back(port, ports, after_failure=watch.handoff_typed, hold_reason=HOLD_REASON)
                 port.release_hold()
-                self._give_back(port, ports, after_failure=bool(typing))
                 # F2: a rejected worker response keeps the bridge's machine reason, not just "ValueError".
                 error = (refused[0] if refused else exc.reason if isinstance(exc, WorkerResponseRejected)
                          else type(exc).__name__)
@@ -1174,6 +1266,7 @@ class TaskFlow:
                     self._tell_manager_start_failed(task.task_id, revision, error, str(exc),
                                                     getattr(exc, "workbench_start_failure", None))
                 return
+            watch.close()
             port.release_hold()
             with self._lock:
                 task.run_id, task.run_revision, task.task_message_id = run.run_id, revision, run.task_message_id
@@ -1260,14 +1353,17 @@ class TaskFlow:
                     state.get("parent_mode") == "control_wait" and life.get("request_id") is None):
                 return
 
-    def _give_back(self, port: Any, ports: ExperimentPorts | None = None, *, after_failure: bool = False) -> None:
+    def _give_back(self, port: Any, ports: ExperimentPorts | None = None, *, after_failure: bool = False,
+                   hold_reason: str | None = None) -> None:
         """Return the host shell to the user when the manager holds it with nothing in flight.
 
         CW-18 F2: then the user's directory from before the run is restored. User
         input stays held from the takeover until that ``cd`` is done, so nothing
-        the user types mixes with it.
+        the user types mixes with it. ``hold_reason``: the caller's own hold, kept through the takeover and the
+        restore and released at the end (a failed start).
         """
-        held = False
+        held = hold_reason is not None
+        reason = hold_reason or RETURN_REASON
         try:
             state = port.snapshot()
             life = state.get("lifecycle") or {}
@@ -1277,7 +1373,7 @@ class TaskFlow:
             idle_wait = (after_failure and life.get("request_id") is None
                          and state.get("parent_mode") == "control_wait")
             if (state.get("input_owner") == "manager" and (life.get("request_id") is None or returned)) or idle_wait:
-                if self._home_cwd is not None and ports is not None:
+                if not held and self._home_cwd is not None and ports is not None:
                     try:
                         held = port.hold_return(RETURN_REASON) is True
                     except Exception:
@@ -1287,11 +1383,11 @@ class TaskFlow:
             pass
         try:
             if ports is not None:
-                self._restore_home_cwd(port, ports, RESTORE_IDLE_WAIT)
+                self._restore_home_cwd(port, ports, RESTORE_IDLE_WAIT, reason=reason)
         finally:
             if held:
                 try:
-                    port.release_hold(RETURN_REASON)
+                    port.release_hold(reason)
                 except Exception:
                     pass
 
@@ -1308,12 +1404,13 @@ class TaskFlow:
             self._home_cwd = current  # the user's own directory
         # else the shell is still in an earlier run's worktree: the pending directory stays the target
 
-    def _restore_home_cwd(self, port: Any, ports: ExperimentPorts, idle_wait: float) -> str | None:
+    def _restore_home_cwd(self, port: Any, ports: ExperimentPorts, idle_wait: float,
+                          reason: str = RETURN_REASON) -> str | None:
         target = self._home_cwd
         if target is None:
             return None
         try:
-            outcome = port.restore_cwd(target, ports.worktrees_root, reason=RETURN_REASON, idle_wait=idle_wait)
+            outcome = port.restore_cwd(target, ports.worktrees_root, reason=reason, idle_wait=idle_wait)
         except Exception as exc:
             outcome = f"error:{type(exc).__name__}"
         if outcome in {"restored", "unchanged", "user_moved", "target_missing", "shell_gone"}:
