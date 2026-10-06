@@ -203,17 +203,32 @@ def _safe_tail(segment: bytes, keep: int) -> bytes:
     """Newest ``keep`` bytes, advanced to a boundary: after a newline, else at an ESC that starts a sequence."""
     if len(segment) <= keep:
         return bytes(segment)
-    return _align(bytes(segment[-keep:]))
+    return _align(bytes(segment[-keep:]), before=bytes(segment[-keep - 1:-keep]))
 
 
-def _align(tail: bytes) -> bytes:
-    """``tail`` cut out of a longer stream, advanced to a safe start (see ``_safe_tail``)."""
+def _align(tail: bytes, before: bytes | None = None) -> bytes:
+    """``tail`` cut out of a longer stream, advanced to a safe start (see ``_safe_tail``).
+
+    ``before`` is the byte just before the cut when known: a leading ``\\`` is
+    dropped only when it is the second half of a split ``ESC \\`` (``before`` is
+    ESC, or unknown). A bounded loop (o1-fix-03): any number of string
+    terminators in the tail is fine.
+    """
     newline = tail.find(b"\n")
     if newline >= 0:
         return tail[newline + 1:]
+    if tail[:1] == b"\\" and before in (None, b"\x1b"):
+        tail = tail[1:]  # the cut fell between the ESC and the \ of a string terminator
     at = tail.find(b"\x1b")
-    while at >= 0 and tail[at + 1:at + 2] == b"\\":  # ESC \ is a string terminator, not a start
-        at = tail.find(b"\x1b", at + 1)
+    if at >= 0 and tail[at + 1:at + 2] == b"\\":
+        # ESC \ (ST) ends a string the cut started inside (e.g. a tmux-wrapped notification): start after it
+        # (and after any terminators right behind it; a loop, so any number of them is fine).
+        start = at + 2
+        while tail[start:start + 2] == b"\x1b\\":
+            start += 2
+        return tail[start:]
+    if at >= 0 and tail[at + 1:at + 2] == b"\x1b":
+        at += 1  # a tmux-doubled ESC: the cut is inside a passthrough; its inner sequence starts here
     if at >= 0:
         return tail[at:]
     while tail and tail[0] & 0xC0 == 0x80:
@@ -512,6 +527,7 @@ class ProductModel:
         """Feed pyte. ``quiet``: replayed/skipped-ahead output must not answer (stale) terminal queries."""
         if view.identity is not None and identity != view.identity:
             view.screen.reset()  # the pane's process/session was replaced
+            view.stream = make_stream(view.screen)  # o1-fix-02: no escape/string state carries over
             self._history_cleared(view)
         view.identity = identity
         self._replaying = quiet
@@ -581,19 +597,20 @@ class ProductModel:
         pending = view.backlog_bytes + view.tail_bytes
         newest = view.backlog[-1][0]
         parts: list[memoryview] = []
-        size, cut = 0, False
+        size, cut, before = 0, False, None
         for identity, _, payload in reversed(view.backlog):
             if identity != newest:
                 break  # keep only what belongs to the newest session (its start is a natural boundary)
             room = CATCHUP_KEEP_BYTES - size
             if len(payload) > room:
                 parts.append(payload[len(payload) - room:])
+                before = bytes(payload[len(payload) - room - 1:len(payload) - room])
                 cut = True  # older output of this session is dropped: start the tail at a safe boundary
                 break
             parts.append(payload)
             size += len(payload)
         segment = b"".join(reversed(parts))
-        tail = _align(segment) if cut else segment
+        tail = _align(segment, before=before) if cut else segment
         dropped = self._history_cleared(view)
         view.screen.reset()
         view.stream = make_stream(view.screen)
