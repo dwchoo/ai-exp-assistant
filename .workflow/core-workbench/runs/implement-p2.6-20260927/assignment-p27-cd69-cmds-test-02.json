@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cd69-cmds-test-02",
+  "ticket_id": "C-D69 (6) rerun after corrections",
+  "role": "test_designer",
+  "unit": "V-CW-18-cd69-cmds",
+  "approved_bundle_digest": "5854f70db2d11e821e53b3b37db174e411c56e4f03e8b301780fba3532c02510",
+  "frozen_candidate": "327e5ed43ac8dbd66c3382cbd0e9ce6a856cce1b55a7673e5f94fc6f68f7077b",
+  "routing": {
+    "planned_role": "test_designer",
+    "selected_role": "test_designer (wb-test-rerun, Sonnet)",
+    "reason_codes": [
+      "correction_reverification"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd69-cmds-review-01.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd69-cmds-test-01.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd69-cmds-fix-01.md"
+    ]
+  },
+  "required": [
+    "Unpin the 4 unexpected successes listed in result-p27-cd69-cmds-fix-01.md to positive asserts; update test_more_runs_than_kept_are_not_silently_dropped to the design (64 kept + explicit 'N older runs omitted' note, never silent); update TaskMessageTests.test_follow_ups_replace_or_keep_and_the_old_list_is_refused to wait for delivery before asserting the replacement, and add a case: failed delivery keeps the old list. Cite C-D69 (6) and the review/test findings.",
+    "Add minimal tests if missing: light records free buffers (bounded memory), commands_run rebuilt from the journal after a restart (and the unreadable-journal note), spill request never exceeds the limit with a 200-emoji first line and a deep path, blank-only commands -> null.",
+    "Run tests/backend, tests/bridge (py+node), tests/terminal, tests/workflow, tests/gates/g2_shell, tests/contracts, tests/ui on the frozen candidate with hash checks; flakes: module rerun once."
+  ],
+  "allowed_write_paths": [
+    "tests/**/*_independent_p27cd69c*",
+    "tests/**/*_independent_p27cd69d*",
+    "tests/**/*_independent_p27cd69e*"
+  ],
+  "prohibited_paths": [
+    "src/**",
+    "omp_bridge/**",
+    "docs/**",
+    ".workflow/**"
+  ],
+  "rules": "No real provider requests; never read credential contents or other processes' environ; never touch the user's tmux server or ~/wb-urux-sandbox and its processes; temp only under /tmp; kill only PIDs you started; no commits; no graphify update.",
+  "result_format": "checks table first (counts, real exit codes), hash check, findings, verdict, changed test paths + sha256. Korean, <=10 lines."
+}

@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cd69-cmds-review-02",
+  "ticket_id": "C-D69 (6) delta review",
+  "role": "reviewer",
+  "unit": "V-CW-18-cd69-cmds",
+  "approved_bundle_digest": "5854f70db2d11e821e53b3b37db174e411c56e4f03e8b301780fba3532c02510",
+  "frozen_candidate": "327e5ed43ac8dbd66c3382cbd0e9ce6a856cce1b55a7673e5f94fc6f68f7077b",
+  "routing": {
+    "planned_role": "reviewer",
+    "selected_role": "reviewer (wb-delta-reviewer, Sonnet, fresh)",
+    "reason_codes": [
+      "delta_after_full_review"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd69-cmds-review-01.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd69-cmds-test-01.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd69-cmds-fix-01.md"
+    ]
+  },
+  "scope": "Corrections only (cmds-fix-01: flow_terminal.py, flow_tasks.py, flow.py). Check each review-01/test-01 finding is fixed; regressions: journal rebuild correctness (task_id matching, ordering, partial/corrupt records, cost of reading the journal on every report), delivery-time replacement races (report/terminal call between enqueue and delivery uses the right list), exact-match change still accepts trailing newline from models, spill_shown byte cap on unicode boundaries.",
+  "rules": "No real provider requests; never read credential contents or other processes' environ; never touch the user's tmux server or ~/wb-urux-sandbox and its processes; temp only under /tmp; kill only PIDs you started; no commits; no graphify update. Read-only.",
+  "result_format": "verdict (approve / block), per-finding status, new findings P1-P3 with file:line and scenario. Korean, <=8 lines."
+}

@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cd69-cmds-test-01",
+  "ticket_id": "C-D69 (6) independent verification",
+  "role": "test_designer",
+  "unit": "V-CW-18-cd69-cmds",
+  "approved_bundle_digest": "5854f70db2d11e821e53b3b37db174e411c56e4f03e8b301780fba3532c02510",
+  "frozen_candidate": "3103c9678f140bdbcc90db17021ef7774bc2be568c19f41df6e27ffccf43d8cf",
+  "routing": {
+    "planned_role": "test_designer",
+    "selected_role": "test_designer (Opus general-purpose; enforcement bypass + shell)",
+    "reason_codes": [
+      "first_independent_verification",
+      "enforcement"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd69-cmds-01.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd69-smoke-02.md"
+    ]
+  },
+  "spec": "DECISIONS.md C-D69 (6) (and (5)); derive from the decision.",
+  "required": [
+    "Update p27cd69c independent tests pinned to the replaced command_too_long behaviour to C-D69 (6)(c) auto-spill (cite it), keep the rest (start-failure returns, C-D58).",
+    "New adversarial tests (*_independent_p27cd69d*): commands schema (count/size/NUL/env rule, experiment/cancel rejection, follow-up replace/keep); TASK message shows numbered commands + rule; enforcement bypass attempts (prefix/suffix, extra `; cmd`, `&&`, newline injection, unicode lookalikes, leading spaces, case, a listed command with different trailing args, command=null fetch, terminal after Task closed/cancelled, two Tasks), refused attempts type nothing; no restriction without Task/commands; auto-spill with real PersistentShell (bash+dash): long multi-line script with quotes/heredoc/unicode, exit codes/signals, output tail/log, pane shows first line + script path, file perms 0600/dir 0700, abort before start removes the script; done/blocked report carries a correct commands_run appendix (incl. refused attempts not listed as run); experiment start-failure hold/typing timing (g).",
+    "Run tests/backend, tests/bridge (py+node), tests/terminal, tests/workflow, tests/gates/g2_shell, tests/contracts, tests/ui on the frozen candidate with hash checks; flakes: module rerun once."
+  ],
+  "allowed_write_paths": [
+    "tests/**/*_independent_p27cd69c*",
+    "tests/**/*_independent_p27cd69d*"
+  ],
+  "prohibited_paths": [
+    "src/**",
+    "omp_bridge/**",
+    "docs/**",
+    ".workflow/**"
+  ],
+  "rules": "No real provider requests; never read credential contents or other processes' environ; never touch the user's tmux server or ~/wb-urux-sandbox and its processes; temp only under /tmp; kill only PIDs you started; no commits; no graphify update.",
+  "result_format": "checks table first (counts, real exit codes), hash check, findings P1-P3 with file:line, verdict, changed test paths + sha256. Korean, <=14 lines."
+}

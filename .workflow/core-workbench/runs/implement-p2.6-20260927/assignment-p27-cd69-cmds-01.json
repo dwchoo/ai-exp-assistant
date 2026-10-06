@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cd69-cmds-01",
+  "ticket_id": "C-D69 (6) worker executes manager-authored commands",
+  "role": "worker_senior",
+  "unit": "V-CW-18-cd69-cmds",
+  "approved_bundle_digest": "5854f70db2d11e821e53b3b37db174e411c56e4f03e8b301780fba3532c02510",
+  "routing": {
+    "planned_role": "worker_senior",
+    "selected_role": "worker_senior (Opus, reused cd69-fix)",
+    "reason_codes": [
+      "contract_change",
+      "enforcement",
+      "shell_protocol"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd69-smoke-02.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd69-stuck-review-02.md",
+      "docs/features/core-workbench/DECISIONS.md#C-D69"
+    ]
+  },
+  "required_behavior": [
+    "(a) to_worker kind work: nullable `commands` — ordered list of exact shell command strings written by the manager (each non-empty, no NUL, no env values per existing rules; sensible max count e.g. 32 and per-command max 8192 chars; fallbacks are just more entries). Strict schema (nullable optional), backend normalize/validate, stored in the Task spec/scope, rejected on experiment Tasks. Follow-up to_worker on the same Task may add/replace commands (define and document).",
+    "(b) Worker TASK message: when commands exist, show them numbered with an explicit rule: run them exactly as given with `terminal`, in order (use listed alternatives only as the procedure says), do not write or change commands, then report a summary of the results.",
+    "(c) Harness enforcement in flow_terminal: while the worker's active Task has commands, a `terminal` command must equal one of them exactly (compare as given; you may normalise only trailing whitespace/newline) else refuse with status not_in_task_commands (nothing typed) and the allowed list in the detail. No restriction when there is no active Task or the Task has no commands. command=null fetch unaffected.",
+    "(d) Auto-spill: a command whose RUN request would exceed the pipe limit is written by the harness to a temp script file (0700 dir/0600 file under the data dir terminal area, unique name, cleaned with the log retention) and run as `<shell> <file>`; the host pane shows `[worker] $ <first line of the command> … (script <path>)`; exit code/output semantics unchanged; replaces the (5)(b) command_too_long refusal for terminal (experiment run commands keep their creation/start checks unless trivially reusable — explain).",
+    "(e) to_manager done report: Workbench appends a machine-made 'Commands run' section from the journal for that Task (command (truncated for display), exit code/signal, duration, log path) so the worker need not repeat commands; update the worker skill: run the given commands as-is, never author new ones for a Task with commands, report a summary of results (values, failures), do not paste commands or scripts back.",
+    "(f) Manager skill (to-worker) + to_worker description: the manager writes the exact commands (and alternatives) in `commands`; the worker only runs them and summarises; keep `message` for goal/stop conditions/what to return.",
+    "(g) stuck-review-02 P3: experiment start-failure path keeps the hold until _give_back finishes (like terminal), and the `typing` flag is set right before actually typing (like terminal handoff_typed).",
+    "Tests red->green for each; real PersistentShell test for auto-spill (long multi-line script, exit code, output, pane line) and for enforcement (refused command types nothing)."
+  ],
+  "acceptance": [
+    "tests/backend, tests/bridge (py+node), tests/terminal, tests/workflow, tests/gates/g2_shell, tests/contracts, tests/ui (real exit codes); list independent tests needing updates (do not edit them)"
+  ],
+  "allowed_write_paths": [
+    "src/workbench/backend/flow_terminal.py",
+    "src/workbench/backend/flow.py",
+    "src/workbench/backend/flow_tasks.py",
+    "src/workbench/backend/service.py",
+    "src/workbench/contracts/ui_v1.py",
+    "src/workbench/ui/product/**",
+    "omp_bridge/g3/bridge.ts",
+    "omp_bridge/skills/**",
+    "tests/backend/test_flow*.py",
+    "tests/backend/test_task_flow.py",
+    "tests/backend/test_workbench_skills.py",
+    "tests/terminal/test_*.py",
+    "tests/bridge/handoff_tools.test.ts",
+    "tests/bridge/test_*.py",
+    "tests/ui/test_product_model*.py"
+  ],
+  "prohibited_paths": [
+    "tests/**/*_independent*",
+    "docs/**",
+    ".workflow/**"
+  ],
+  "rules": "No real provider requests; never read credential contents or other processes' environ; never touch the user's tmux server or ~/wb-urux-sandbox and its processes; temp only under /tmp; kill only PIDs you started; no commits; no graphify update.",
+  "result_format": "checks table first (real exit codes), status per item, design choices made, changed paths + sha256, independent tests needing updates. Korean, <=14 lines."
+}

@@ -1,0 +1,7 @@
+# p27-cd69-cmds-test-01 (test_designer, Opus) — 2026-10-06 — candidate_ready (P3 x2)
+
+backend 910 OK (skip 30, xfail 6 = 1 old + 5 new); bridge py 52 (skip 1); node 37 pass; terminal 208 (skip 2); workflow 58; g2_shell 142 (skip 1); contracts 52; ui 815 — all exit 0, no flakes. Frozen 3103c967 at start; only 6 test files differ; src/omp_bridge/docs unchanged.
+Verified (bash+dash real shell): 26 enforcement bypass attempts refused, nothing typed; auto-spill equals inline (heredoc, quotes, unicode, exit/signal), perms 0600/0700, script removed on abort; commands_run appendix correct; (g) hold/typing timing; 8 runtime mutants caught.
+P3-1 flow_terminal.py:516 rstrip() also strips characters the shell keeps in words (\r \v \f \x1c-\x1f \x85 \xa0   　) -> unlisted `echo listed-ok\x1f` runs (bash+dash; pinned xfail x3). Fix: strip only space/tab/newline.
+P3-2 flow_tasks.py:138, flow_terminal.py:148,957 commands_run memory-only: after a backend restart a surviving Task's done report has [] while the note says "from the terminal journal" (journal has 1 run); > 64 runs silently drop old entries (pinned xfail x2). (overlaps review P2-2)
+Changed tests: test_flow_terminal_independent_p27cd69c.py 0ffb0a346392, test_workbench_skills_independent_p27cd69c.py 56420321c973, test_terminal_commands_independent_p27cd69d.py 86390033130a, test_task_commands_independent_p27cd69d.py 1f29b79adccb, test_task_flow_independent_p27cd69d.py f38bdf7e2a70, bridge_commands_independent_p27cd69d.test.ts c51088c5437d.

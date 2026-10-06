@@ -1,0 +1,6 @@
+# p27-cd69-cmds-review-02 (wb-delta-reviewer, Sonnet, fresh) — 2026-10-07 — verdict: APPROVE (no P0-P2)
+
+All review-01/test-01 findings fixed: light _TaskRuns (RUNS_KEPT 64, TASKS_KEPT 32, no buffers); runs_for_task (flow_terminal.py:1040) rebuilds from the journal by task_id pairing terminal_started/ended by command_id in start order, corrupt lines skipped, in-flight at restart -> unknown, unreadable -> explicit note, > 64 -> "N older runs omitted"; spill_shown (:228) byte binary search, unicode-safe (200 emoji + 110-char path = 3845 B); _exact (:217) ignores only trailing space/tab/\n (\x1f refused, model trailing newline accepted); blank-only commands -> null (flow.py:348); follow-up replacement on submitted/delivered (flow_tasks.py:739), single-lane outbox prevents an older late `delivered` from overwriting, rejected/unknown keep the old list.
+New P3-a flow.py:818 / flow_tasks.py:877: every report reads and parses the whole journal under the handoff lock (tens of MB -> hundreds of ms); index by task_id or tail read if needed.
+New P3-b flow_terminal.py:243: an abnormally long path (~600+ chars) makes the "(script path)" fallback exceed the limit; fixed log root makes it unrealistic.
+test_flow_terminal + test_task_flow + test_workbench_skills 121 OK.

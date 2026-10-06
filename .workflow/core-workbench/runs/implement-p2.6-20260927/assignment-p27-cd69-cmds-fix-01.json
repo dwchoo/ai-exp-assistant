@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cd69-cmds-fix-01",
+  "ticket_id": "C-D69 (6) review/test corrections",
+  "role": "worker",
+  "unit": "V-CW-18-cd69-cmds",
+  "approved_bundle_digest": "5854f70db2d11e821e53b3b37db174e411c56e4f03e8b301780fba3532c02510",
+  "routing": {
+    "planned_role": "worker",
+    "selected_role": "worker (wb-worker, Sonnet high; bounded corrections per user 2026-10-06 routing preference)",
+    "reason_codes": [
+      "bounded_corrections"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd69-cmds-review-01.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd69-cmds-test-01.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd69-cmds-01.md"
+    ]
+  },
+  "required_behavior": [
+    "review P2-1 flow_terminal.py:955-964: _task_runs must not keep whole _Command objects; on completion store a light record (truncated command, status, exit_code/signal, duration, log_path, script_path) and drop output buffers.",
+    "review P2-2 + test P3-2 (flow_tasks.py:138/862-869, flow_terminal.py:148/957): commands_run must survive a backend restart — rebuild a Task's runs from the terminal journal (terminal_started/terminal_ended records with task_id) when the in-memory list is missing; if it cannot be rebuilt say so explicitly in the note (never an empty list described as 'from the terminal journal'); when more than the per-Task cap ran, say how many older runs were omitted.",
+    "test P3-1 flow_terminal.py:516: the exact-match comparison may ignore only trailing ASCII space, tab and newline (\\n); every other trailing character (\\r, \\v, \\f, \\x1c-\\x1f, \\x85, \\xa0, \\u2028, \\u3000, ...) must make the command differ.",
+    "review P3: (a) cap the spill request (`shown` first line by bytes and script path) so the spill RUN request can never exceed RUN_REQUEST_MAX (truncate `shown`, never fail); (b) `commands` with only blank entries -> treated as null (not an error); (c) follow-up `commands` replacement takes effect only when the follow-up is actually delivered to the worker (failed delivery keeps the old list).",
+    "Red->green tests for each in non-independent test files; the 5 xfail-pinned independent tests (p27cd69d) will be unpinned by the test designer — report which of them now pass (unexpected success)."
+  ],
+  "acceptance": [
+    "tests/backend (incl. independent p27cd69c/p27cd69d), tests/terminal test_oversize*, tests/bridge node handoff_tools (real exit codes; PYTHONPATH=src, /tmp/cw02-g1-venv/bin/python)"
+  ],
+  "allowed_write_paths": [
+    "src/workbench/backend/flow_terminal.py",
+    "src/workbench/backend/flow_tasks.py",
+    "src/workbench/backend/flow.py",
+    "src/workbench/backend/service.py",
+    "omp_bridge/g3/bridge.ts",
+    "tests/backend/test_flow_terminal.py",
+    "tests/backend/test_task_flow.py",
+    "tests/backend/test_flow*.py",
+    "tests/bridge/handoff_tools.test.ts"
+  ],
+  "prohibited_paths": [
+    "tests/**/*_independent*",
+    "docs/**",
+    ".workflow/**"
+  ],
+  "rules": "No real provider requests; never read credential contents or other processes' environ; never touch the user's tmux server or ~/wb-urux-sandbox and its processes; temp only under /tmp; kill only PIDs you started; no commits; no graphify update.",
+  "result_format": "checks table first (real exit codes), status per item, unexpected successes, changed paths + sha256. Korean, <=10 lines."
+}

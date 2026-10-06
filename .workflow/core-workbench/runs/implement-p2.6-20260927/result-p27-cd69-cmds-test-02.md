@@ -1,0 +1,6 @@
+# p27-cd69-cmds-test-02 (wb-test-rerun, Sonnet) — 2026-10-07 — candidate_ready (no implementation findings)
+
+backend 928 OK (skip 30, xfail 1 old pin); bridge py 52 (skip 1); node 37; terminal 208 (skip 2); workflow 58; g2_shell 142 (skip 1); contracts 52; ui 815 — all exit 0. First-run failures (backend 1, terminal 10, g2_shell 22) were environmental: the agent's `( … &)` background launcher left SIGINT ignored (SigIgn) and children inherited it; rerun with SIGINT/SIGQUIT SIG_DFL -> all pass. Hashes of 7 changed src/omp_bridge files equal start/end.
+Unpinned 4 xfails (trailing chars \r \x0b \x0c \xa0 　 refused; restart report asserts commands_run == ["echo before-restart"] + rebuilt note). Updated: 64 kept + "N older runs omitted"; follow-up replacement asserted after delivery. Added: REJECTED/UNKNOWN delivery keeps the old list then delivered replaces; light record frees buffers (weakref); journal read failure note (unit + done report); spill request <= 4096 with 200-emoji/wide first line + deep path (pure and real bash/dash); real run with an 800+ char log dir.
+Observation (< P3): a script path itself over ~1.9 KB still exceeds 4096 even with `shown` cut (excluded; log root is short).
+Changed: test_task_commands_independent_p27cd69d.py 131dfae6255c, test_terminal_commands_independent_p27cd69d.py cc0e15771e8f.

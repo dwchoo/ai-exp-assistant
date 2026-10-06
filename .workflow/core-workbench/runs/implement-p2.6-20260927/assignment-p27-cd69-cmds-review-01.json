@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cd69-cmds-review-01",
+  "ticket_id": "C-D69 (6) review",
+  "role": "reviewer",
+  "unit": "V-CW-18-cd69-cmds",
+  "approved_bundle_digest": "5854f70db2d11e821e53b3b37db174e411c56e4f03e8b301780fba3532c02510",
+  "frozen_candidate": "3103c9678f140bdbcc90db17021ef7774bc2be568c19f41df6e27ffccf43d8cf",
+  "routing": {
+    "planned_role": "reviewer",
+    "selected_role": "reviewer (wb-delta-reviewer, Sonnet high; user 2026-10-06 asked to use Sonnet for non-difficult work, Opus covers the adversarial test)",
+    "reason_codes": [
+      "bounded_delta"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd69-cmds-01.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd69-smoke-02.md"
+    ]
+  },
+  "scope": "`git diff HEAD -- src omp_bridge` (C-D69 (6)). Check enforcement correctness (exact match only, refusal types nothing, scope of restriction: active busy Task with commands, Task closed/cancel/replace transitions), auto-spill safety (file creation race/permissions/symlink attacks in the terminal dir, `exec \"$0\" \"$2\"` quoting, cleanup), commands_run accuracy and memory bounds, experiment start-failure hold/typing changes (no C-D58 regression), schema strictness/back-compat, skill text consistency with behaviour.",
+  "rules": "No real provider requests; never read credential contents or other processes' environ; never touch the user's tmux server or ~/wb-urux-sandbox and its processes; temp only under /tmp; kill only PIDs you started; no commits; no graphify update. Read-only.",
+  "result_format": "verdict (approve / block), findings P1-P3 with file:line and scenario. Korean, <=10 lines."
+}

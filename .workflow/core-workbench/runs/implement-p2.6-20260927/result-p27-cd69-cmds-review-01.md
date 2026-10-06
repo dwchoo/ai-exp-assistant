@@ -1,0 +1,8 @@
+# p27-cd69-cmds-review-01 (wb-delta-reviewer, Sonnet high, fresh) — 2026-10-06 — verdict: APPROVE (no P0/P1; Root: fix P2s before integration)
+
+P2 flow_terminal.py:955-964 _task_runs keeps whole _Command objects (recent/since/unseen buffers up to 32 KB each + 8 KB command): 64 x 32 Tasks -> worst ~200 MB. Fix: drop buffers on completion or store a light record.
+P2 flow_tasks.py:862-869 commands_run only in memory: after a backend restart done/blocked reports carry `commands_run: []` (reads as "nothing ran"). Fix: omit when empty / mark lost after restart / rebuild from the journal.
+P3 flow_terminal.py:1021-1033 spill request (`shown` first line 200 chars + script path twice) not size-checked: 200 emoji + ~110-char path = 3841 B, deeper paths could exceed 4096 -> start_failed (shell returned). Cap `shown` by bytes.
+P3 flow.py:346-347 commands of only blank entries -> [] -> "1 to 32" error; treat as null.
+P3 flow_tasks.py:729-733 follow-up commands replaced at enqueue, before delivery; a failed delivery still changed the list.
+OK: enforcement only for an active busy work Task with commands (null fetch, no Task, no commands, finished/blocked/closed unrestricted), refusal before _start (nothing typed, no hold); spill file O_EXCL|O_NOFOLLOW 0600 uuid in 0700 dir, `exec "$0" "$2"` quoting OK on bash/dash, removed on pre-start abort; experiment start-failure hold kept through _give_back with restore_cwd(own_hold), typing flag only when wb-handoff is sent (no C-D58 regression); schema back-compatible, limits consistent, skills match. Existing test_flow_terminal/test_task_flow/test_workbench_skills 111 OK.

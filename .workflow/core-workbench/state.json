@@ -425,7 +425,7 @@
   "implementation_p27": {
     "run_record": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
     "approved_bundle_sha256": "91fe05dc882d8c00ab0eb28c30e2b6cabcbfacb0f0fee3f0eaeecfaff5b7d3e8",
-    "status": "C-D68 (1)-(10) integrated and verified with real-model smokes 01-03 (terminal_check confirmed); next: UR-USABILITY retry by the user (sandbox restart needed), CW-19, CW-16 (polish list in integration-p27-cd68.json)",
+    "status": "C-D69 (6) implemented (p27-cd69-cmds-01, uncommitted on disk), review-01 approve with P2x2+P3x3, independent test-01 candidate_ready with P3x2; NEXT on resume: one correction unit (review P2: _task_runs memory -> light records; commands_run lost after restart -> rebuild from journal or mark lost; P3: spill request byte cap, blank commands -> null, replace commands on delivery; test P3: exact match strips only space/tab/newline; unpin the 5 new xfails), then rerun (Sonnet wb-test-rerun) + delta review (Sonnet), Sonnet real-model smoke with the hardware request, then commit",
     "resumed_from": ".codex/handoffs/2026-09-29-core-workbench-p27-cw17/HANDOFF.md",
     "units": {
       "V-CW-17-p2.7": {
@@ -498,6 +498,6 @@
       "workbench status creates the data dir as a side effect (P3, record for CW-16)"
     ],
     "environment_note": "OMP upgraded by user to 18.4.4 (was 18.2.10 during CW-02..CW-06 evidence) - compatibility re-check needed (CW-16 I-COMPAT)",
-    "approved_bundle_digest": "348e50ee41ca8bc7f20f307dff77c13be5beefc0e1ccf30a524c95cb5fe98902"
+    "approved_bundle_digest": "5854f70db2d11e821e53b3b37db174e411c56e4f03e8b301780fba3532c02510"
   }
 }
