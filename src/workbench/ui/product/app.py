@@ -206,6 +206,9 @@ def loop(win: "curses.window", client: UiClient, model: ProductModel, stdin_fd: 
                 if model.has_backlog():
                     model.feed_pending()
                     dirty = True
+                    copied = model.take_output()  # OSC 52 an OMP pane wrote just now (C-D69 (1), live output only)
+                    if copied:
+                        _safe_write(stdout_fd, copied)
                 now = time.monotonic()
                 if now - last_snapshot >= SNAPSHOT_INTERVAL:
                     last_snapshot = now

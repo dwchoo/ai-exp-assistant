@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import base64
+import binascii
 from collections import deque
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
@@ -15,7 +16,7 @@ from wcwidth import wcswidth
 from workbench.contracts import ui_v1
 from workbench.contracts.ui_v1 import ClientType
 from workbench.contracts.v1 import PaneId
-from workbench.terminal.vt_g1.screen import TerminalScreen, make_stream
+from workbench.terminal.vt_g1.screen import STRING_MAX, TerminalScreen, make_stream
 from workbench.ui.product.input import (PASTE_END, PREFIX, PASTE_START, Command, InputParser, Mouse, PageScroll, Paste,
                                        PasteRejected, Passthrough, _sequence_length)
 from workbench.ui.product.layout import (DEFAULT_LAYOUT, Layout, clamp_height, clamp_width, left_width,
@@ -23,6 +24,11 @@ from workbench.ui.product.layout import (DEFAULT_LAYOUT, Layout, clamp_height, c
 
 _PRIVATE_MODE = re.compile(rb"\x1b\[\?([0-9;]*)([hl])")
 _PARTIAL_MODE = re.compile(rb"\x1b(?:\[(?:\?[0-9;]*)?)?$")
+# p27-cd69-review-01 P2-2: OSC 52 bodies are found on receipt. Plain (ESC ] 52 ;) and tmux-wrapped
+# (ESC P tmux; ESC ESC ] 52 ;) bodies both start after ``52;`` and end at BEL, ESC, CAN or SUB, as in the stream.
+_OSC52_PREFIX = b"\x1b]52;"
+_OSC52_START = re.compile(re.escape(_OSC52_PREFIX))
+_OSC52_STOP = re.compile(rb"[\x07\x1b\x18\x1a]")
 
 PANES = (PaneId.MANAGER_OMP, PaneId.WORKER_OMP, PaneId.HOST_SHELL)
 TITLES = {PaneId.MANAGER_OMP: "MANAGER OMP", PaneId.WORKER_OMP: "WORKER OMP", PaneId.HOST_SHELL: "HOST SHELL"}
@@ -35,9 +41,16 @@ FEED_SLICE_BYTES = 64 * 1024  # pyte work per loop iteration (bytes) ...
 FEED_SLICE_SECONDS = 0.02  # ... or seconds, whichever comes first
 CATCHUP_BACKLOG_BYTES = 256 * 1024  # unfed backlog per pane that triggers UI catch-up
 CATCHUP_KEEP_BYTES = 64 * 1024  # newest bytes kept (and fed) when catching up
+# p27-cd69-review-02: unfed OSC 52 body bytes left out of the catch-up accounting, per pane, at most; beyond it
+# body bytes count like other output (a catch-up drops them with a "copy skipped" notice), so memory stays bounded
+CLIP_BACKLOG_MAX = 2 * STRING_MAX
 CATCHUP_NOTE_SECONDS = 10.0
 WHEEL_LINES = 3  # history lines (or alternate-screen arrow keys) per mouse-wheel notch
 MAX_COPY_BYTES = 1024 * 1024  # drag-to-copy: larger selections are refused (C-D62)
+# C-D69 (1): an OMP pane's OSC 52 body (Pc;Pd) longer than base64 of MAX_COPY_BYTES (+ room for Pc) is refused
+OSC52_MAX_BYTES = 4 * -(-MAX_COPY_BYTES // 3) + 16
+OSC52_PANES = (PaneId.MANAGER_OMP, PaneId.WORKER_OMP)  # never the host shell (C-D69 (1))
+_OSC52_SELECTIONS = frozenset(b"cpqs01234567")
 AUTOSCROLL_SECONDS = 0.05  # while a drag is held outside the pane, its history scrolls one line per this interval
 TMUX_HINT = " (tmux는 set-clipboard on 또는 allow-passthrough on 필요)"
 ALT_SCREEN_MODES = {47, 1047, 1049}
@@ -130,6 +143,7 @@ CATCHUP_NUDGE_SECONDS = 0.5  # repaint nudges while catch-ups repeat under a sus
 REPLAY = "replay"  # attach replay (header replay=true): fed completely, never trimmed; blocks catch-up while pending
 TAIL = "tail"  # the kept tail of a catch-up: fed quietly (no query replies); a later catch-up may replace it
 LIVE = "live"  # live output: counted in ``backlog_bytes``; subject to catch-up
+CLIP_NONE, CLIP_COUNTED, CLIP_EXEMPT = 0, 1, 2  # backlog item: not in an OSC 52 body / in one, counted / not counted
 
 # Provisional key choices (UR-UX will review). Shown only in the help overlay.
 HELP_LINES = (
@@ -364,10 +378,15 @@ class PaneView:
     modes: set = field(default_factory=set)  # DECSET modes seen on receipt: 1 (DECCKM), 1000/1002/1003/1006, 47/1047/1049
     tail: bytes = b""  # possibly split private-mode sequence at the end of the previous received chunk
     received_identity: tuple[Any, Any] | None = None  # identity of the last received frame (2004 tracking)
-    backlog: deque = field(default_factory=deque)  # (identity, kind, memoryview) received but not yet fed
-    backlog_bytes: int = 0  # unfed LIVE bytes
+    # (identity, kind, memoryview, CLIP_*: in an OSC 52 body, and whether out of the accounting) received, not fed
+    backlog: deque = field(default_factory=deque)
+    backlog_bytes: int = 0  # unfed LIVE bytes (outside OSC 52 bodies): the catch-up accounting
+    clip_bytes: int = 0  # unfed LIVE bytes inside OSC 52 bodies: cheap to feed (never drawn), never trigger catch-up
+    clip_body: int | None = None  # receipt: bytes of the OSC 52 body being received; None outside one
+    clip_carry: bytes = b""  # receipt: a possibly split ``ESC ] 52 ;`` at the end of the previous received chunk
     replay_bytes: int = 0  # unfed REPLAY bytes
     tail_bytes: int = 0  # unfed TAIL bytes
+    clipboard: Callable[[bytes | None], None] | None = None  # OSC 52 writes of this pane (OMP panes only)
     skipped_bytes: int = 0  # total bytes the UI skipped while catching up
     catchup_until: float = 0.0  # monotonic time until which the indicator is shown
     nudge_after: float = 0.0  # no repaint nudge before this monotonic time
@@ -381,8 +400,10 @@ class PaneView:
     def alt_screen(self) -> bool:
         return bool(self.modes & ALT_SCREEN_MODES)
 
-    def count(self, kind: str, size: int) -> None:
-        if kind is LIVE:
+    def count(self, kind: str, size: int, body: int = CLIP_NONE) -> None:
+        if kind is LIVE and body == CLIP_EXEMPT:
+            self.clip_bytes += size
+        elif kind is LIVE:
             self.backlog_bytes += size
         elif kind is REPLAY:
             self.replay_bytes += size
@@ -434,7 +455,15 @@ class ProductModel:
             r, c = self.sizes[pane]
             screen = PaneScreen(c, r, history=HOST_SCROLLBACK if pane is PaneId.HOST_SHELL else SCROLLBACK,
                                 reply=lambda data, pane=pane: self._query_reply(pane, data))
-            self.panes[pane] = PaneView(screen, make_stream(screen))
+            view = PaneView(screen, None)
+            if pane in OSC52_PANES:
+                view.clipboard = lambda body, pane=pane: self._pane_clipboard(pane, body)
+            view.stream = self._new_stream(view)
+            self.panes[pane] = view
+
+    @staticmethod
+    def _new_stream(view: PaneView) -> Any:
+        return make_stream(view.screen, clipboard=view.clipboard, clipboard_max=OSC52_MAX_BYTES)
 
     # -- sending ---------------------------------------------------------
     def _send(self, kind: ClientType, payload: bytes = b"", pane: PaneId | None = None, **fields: Any) -> str:
@@ -487,8 +516,9 @@ class ProductModel:
             return
         view, identity = self.panes[pane], _identity(frame)
         self._note_new_session(pane, identity)
-        self._receive(view, identity, frame.payload)
-        self._apply(view, identity, bool(frame.header.get("replay")), frame.payload)
+        payload = memoryview(frame.payload)
+        for start, end, body in self._receive(view, identity, frame.payload):
+            self._apply(view, identity, bool(frame.header.get("replay")), bytes(payload[start:end]), body)
 
     def _display_pane(self, frame: ui_v1.Frame) -> PaneId | None:
         self.touch()
@@ -515,26 +545,81 @@ class ProductModel:
             if self.notice == RESTARTING_NOTICE:
                 self.notice = ""
 
-    def _receive(self, view: PaneView, identity: tuple[Any, Any], payload: bytes) -> None:
-        """Receipt-time bookkeeping, once per received byte: 2004 state of the pane's current session."""
+    def _receive(self, view: PaneView, identity: tuple[Any, Any], payload: bytes) -> list[tuple[int, int, bool]]:
+        """Receipt-time bookkeeping, once per received byte: 2004 state of the pane's current session.
+
+        Returns ``payload`` as ``(start, end, in an OSC 52 body)`` segments (p27-cd69-review-01 P2-2).
+        """
         if view.received_identity is not None and identity != view.received_identity:
             view.bracketed, view.tail = None, b""  # the pane's process/session was replaced
             view.modes.clear()
+            view.clip_body, view.clip_carry = None, b""
         view.received_identity = identity
         self._track_bracketed(view, payload)
+        segments: list[tuple[int, int, bool]] = []
+        at = 0
+        for start, end in self._clip_ranges(view, payload):
+            if start > at:
+                segments.append((at, start, False))
+            segments.append((start, end, True))
+            at = end
+        if at < len(payload):
+            segments.append((at, len(payload), False))
+        return segments
 
-    def _apply(self, view: PaneView, identity: tuple[Any, Any], quiet: bool, payload: bytes) -> None:
-        """Feed pyte. ``quiet``: replayed/skipped-ahead output must not answer (stale) terminal queries."""
+    @staticmethod
+    def _clip_ranges(view: PaneView, payload: bytes) -> list[tuple[int, int]]:
+        """The ranges of ``payload`` inside OSC 52 bodies (plain or tmux-wrapped), also across chunks.
+
+        Like the stream, a body ends at BEL, ESC, CAN or SUB, and is given up after STRING_MAX bytes.
+        """
+        carry, view.clip_carry = view.clip_carry, b""
+        data = carry + payload if carry else payload
+        offset, n = len(carry), len(data)
+        ranges: list[tuple[int, int]] = []
+        i = 0
+        while i < n:
+            if view.clip_body is None:
+                match = _OSC52_START.search(data, i)
+                if match is None:
+                    esc = data.rfind(b"\x1b", max(i, n - len(_OSC52_PREFIX) + 1))
+                    if esc >= 0 and _OSC52_PREFIX.startswith(data[esc:]):
+                        view.clip_carry = data[esc:]
+                    break
+                i, view.clip_body = match.end(), 0  # a complete prefix never stays in the carry: i >= offset
+                continue
+            limit = min(n, i + STRING_MAX - view.clip_body)
+            match = _OSC52_STOP.search(data, i, limit)
+            stop = limit if match is None else match.start()
+            if stop > i:
+                ranges.append((i - offset, stop - offset))
+                view.clip_body += stop - i
+            if match is not None or view.clip_body >= STRING_MAX:
+                view.clip_body = None  # ended (the terminator is ordinary output) or given up like the stream
+            i = stop
+        return ranges
+
+    def _apply(self, view: PaneView, identity: tuple[Any, Any], quiet: bool, payload: bytes,
+               body: bool = False) -> None:
+        """Feed pyte. ``quiet``: replayed/skipped-ahead output must not answer (stale) terminal queries.
+
+        ``body``: ``payload`` is inside an OSC 52 body; skipped when the stream did not see that body begin
+        (it started over inside it: catch-up), so it is never drawn as base64 (p27-cd69-review-01 P2-2).
+        """
         if view.identity is not None and identity != view.identity:
             view.screen.reset()  # the pane's process/session was replaced
-            view.stream = make_stream(view.screen)  # o1-fix-02: no escape/string state carries over
+            view.stream = self._new_stream(view)  # o1-fix-02: no escape/string state carries over
             self._history_cleared(view)
         view.identity = identity
+        if body and not view.stream.in_clipboard_body:
+            return
         self._replaying = quiet
+        view.stream.quiet = quiet  # C-D69 (1): replayed/skipped-ahead output never copies
         try:
             view.stream.feed(payload)
         finally:
             self._replaying = False
+            view.stream.quiet = False
         self._sync_scroll()
 
     # -- decoupled intake: drain the socket fast, feed pyte in bounded slices ----
@@ -544,11 +629,23 @@ class ProductModel:
             return
         view, identity = self.panes[pane], _identity(frame)
         self._note_new_session(pane, identity)
-        self._receive(view, identity, frame.payload)
-        # backend replay is bounded by its retained tail: never part of the catch-up accounting
+        segments = self._receive(view, identity, frame.payload)
+        # backend replay is bounded by its retained tail: never part of the catch-up accounting; nor are OSC 52
+        # bodies (p27-cd69-review-01 P2-2: a /copy up to the 1 MiB cap must not be dropped by a catch-up)
         kind = REPLAY if frame.header.get("replay") else LIVE
-        view.backlog.append((identity, kind, memoryview(frame.payload)))
-        view.count(kind, len(frame.payload))
+        payload = memoryview(frame.payload)
+        for start, end, body in segments:
+            if not body:
+                parts = [(start, end, CLIP_NONE)]
+            elif kind is not LIVE:
+                parts = [(start, end, CLIP_COUNTED)]
+            else:  # at most CLIP_BACKLOG_MAX body bytes wait outside the accounting
+                split = min(end, start + max(0, CLIP_BACKLOG_MAX - view.clip_bytes))
+                parts = [(start, split, CLIP_EXEMPT), (split, end, CLIP_COUNTED)]
+            for a, b, clip in parts:
+                if b > a:
+                    view.backlog.append((identity, kind, payload[a:b], clip))
+                    view.count(kind, b - a, clip)
 
     def has_backlog(self) -> bool:
         return any(view.backlog for view in self.panes.values())
@@ -568,14 +665,15 @@ class ProductModel:
                 view = self.panes[pane]
                 if not view.backlog:
                     continue
-                identity, kind, payload = view.backlog[0]
-                chunk = bytes(payload[:FEED_CHUNK_BYTES])
-                if len(payload) > FEED_CHUNK_BYTES:
-                    view.backlog[0] = (identity, kind, payload[FEED_CHUNK_BYTES:])  # memoryview: O(1) slice
+                identity, kind, payload, body = view.backlog[0]
+                step = FEED_SLICE_BYTES if body else FEED_CHUNK_BYTES  # an OSC 52 body never reaches pyte
+                chunk = bytes(payload[:step])
+                if len(payload) > step:
+                    view.backlog[0] = (identity, kind, payload[step:], body)  # memoryview: O(1) slice
                 else:
                     view.backlog.popleft()
-                view.count(kind, -len(chunk))
-                self._apply(view, identity, kind is not LIVE, chunk)
+                view.count(kind, -len(chunk), body)
+                self._apply(view, identity, kind is not LIVE, chunk, body)
                 fed += len(chunk)
                 progress = True
         for pane in PANES:  # a rate-limited nudge is sent later, at the latest once the pane's backlog is fed
@@ -594,32 +692,43 @@ class ProductModel:
         usual resize nudge (rate limited while catch-ups repeat).
         """
         view = self.panes[pane]
-        pending = view.backlog_bytes + view.tail_bytes
+        pending = view.backlog_bytes + view.clip_bytes + view.tail_bytes
         newest = view.backlog[-1][0]
-        parts: list[memoryview] = []
+        # a copy is lost when an OSC 52 body is queued (dropped, or in the quiet tail) or still being received
+        copy_lost = view.clip_body is not None or any(item[3] for item in view.backlog)
+        parts: list[tuple[memoryview, bool]] = []
         size, cut, before = 0, False, None
-        for identity, _, payload in reversed(view.backlog):
+        for identity, _, payload, body in reversed(view.backlog):
             if identity != newest:
                 break  # keep only what belongs to the newest session (its start is a natural boundary)
             room = CATCHUP_KEEP_BYTES - size
             if len(payload) > room:
-                parts.append(payload[len(payload) - room:])
+                parts.append((payload[len(payload) - room:], body))
                 before = bytes(payload[len(payload) - room - 1:len(payload) - room])
                 cut = True  # older output of this session is dropped: start the tail at a safe boundary
                 break
-            parts.append(payload)
+            parts.append((payload, body))
             size += len(payload)
-        segment = b"".join(reversed(parts))
+        parts.reverse()
+        segment = b"".join(part for part, _ in parts)
         tail = _align(segment, before=before) if cut else segment
+        # the tail keeps its OSC 52 body marks: a body the new stream did not see begin is skipped, never drawn
+        skip, at, kept = len(segment) - len(tail), 0, deque()
+        for part, body in parts:
+            end = at + len(part)
+            if end > skip:
+                kept.append((newest, TAIL, memoryview(tail)[max(at, skip) - skip:end - skip], body))
+            at = end
         dropped = self._history_cleared(view)
         view.screen.reset()
-        view.stream = make_stream(view.screen)
-        view.backlog = deque([(newest, TAIL, memoryview(tail))] if tail else ())  # stale queries not answered
-        view.backlog_bytes, view.tail_bytes = 0, len(tail)
+        view.stream = self._new_stream(view)
+        view.backlog = kept  # stale queries not answered
+        view.backlog_bytes, view.clip_bytes, view.tail_bytes = 0, 0, len(tail)
         view.skipped_bytes += pending - len(tail)
         now = time.monotonic()
         view.catchup_until = now + CATCHUP_NOTE_SECONDS
         self.notice = (f"[{TITLES[pane]}] 출력 따라잡음: {pending - len(tail)} bytes 건너뜀"
+                       + (" · 복사 건너뜀" if copy_lost and pane in OSC52_PANES else "")
                        + (" · scroll 보기는 live로 복귀" if dropped else ""))
         view.nudge_due = True
         if now >= view.nudge_after:
@@ -1310,12 +1419,41 @@ class ProductModel:
         if len(data) > MAX_COPY_BYTES:
             self.notice = f"복사 거부: 선택이 1 MiB를 넘음 ({len(data)} bytes)"
             return
+        self._copy(data, f"복사됨: {len(text)}자")
+
+    def _copy(self, data: bytes, notice: str) -> None:
+        """Queue ``data`` for the outer terminal clipboard (OSC 52, selection c); the app loop writes it."""
         osc = b"\x1b]52;c;" + base64.b64encode(data) + b"\x07"
         environ = os.environ if self._environ is None else self._environ
         tmux = bool(environ.get("TMUX"))
         # inside tmux the plain sequence works with set-clipboard on; the passthrough copy with allow-passthrough on
-        self._out = osc + (b"\x1bPtmux;" + osc.replace(b"\x1b", b"\x1b\x1b") + b"\x1b\\" if tmux else b"")
-        self.notice = f"복사됨: {len(text)}자" + (TMUX_HINT if tmux else "")
+        self._out += osc + (b"\x1bPtmux;" + osc.replace(b"\x1b", b"\x1b\x1b") + b"\x1b\\" if tmux else b"")
+        self.notice = notice + (TMUX_HINT if tmux else "")
+
+    def _pane_clipboard(self, pane: PaneId, body: bytes | None) -> None:
+        """C-D69 (1): an OMP pane wrote OSC 52 (e.g. OMP ``/copy``): forward a clipboard write like a drag copy.
+
+        Only live output reaches here (the stream is quiet for replay and catch-up tails). Reads (``?``),
+        malformed or invalid base64 and empty data are ignored; data over MAX_COPY_BYTES is refused, never cut.
+        """
+        if pane not in OSC52_PANES or self._replaying:
+            return
+        if body is None:
+            self.notice = f"[{TITLES[pane]}] 복사 거부: 1 MiB를 넘음"
+            return
+        selection, sep, data = body.partition(b";")
+        if not sep or not set(selection) <= _OSC52_SELECTIONS or data == b"?":
+            return
+        try:
+            decoded = base64.b64decode(data + b"=" * (-len(data) % 4), validate=True)
+        except (binascii.Error, ValueError):
+            return
+        if not decoded:
+            return
+        if len(decoded) > MAX_COPY_BYTES:
+            self.notice = f"[{TITLES[pane]}] 복사 거부: 1 MiB를 넘음 ({len(decoded)} bytes)"
+            return
+        self._copy(decoded, f"[{TITLES[pane]}] 복사됨: {len(decoded.decode('utf-8', 'replace'))}자")
 
     def take_output(self) -> bytes:
         """Terminal bytes queued for the app loop to write (OSC 52 copy); empty when there are none."""

@@ -143,7 +143,7 @@ BUNDLED_EXTRA_COMMANDS = frozenset({"autoresearch", "init"})
 # worker agents of omp_bridge/agents (also read-only, named by their frontmatter).
 BUNDLED_AGENT_ROLES = {"scout": "smol", "sonic": "smol", "reviewer": "slow", "task": "task",
                        "security-reviewer": "default"}
-WORKBENCH_AGENT_ROLES = {"explorer": "smol", "analyst": "slow"}
+WORKBENCH_AGENT_ROLES = {"explorer": "smol"}  # C-D69 (3): no analyst
 # The agents each OMP role may list: the manager the bundled ones, the worker only the Workbench ones.
 ROLE_TASK_AGENTS: dict[str, frozenset[str]] = {"manager": BUNDLED_TASK_AGENTS,
                                                "worker": frozenset(WORKBENCH_AGENT_ROLES)}

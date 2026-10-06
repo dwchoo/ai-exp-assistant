@@ -446,8 +446,8 @@ class OverlayTests(_Tmp):
         env = launcher.omp_environment(self.env, plan_for(), role="worker", token="t", bridge_socket=Path("/x"),
                                        home=values)
         overlay = launcher.role_overlay("worker", project_dir=project, home=self.home, environment=env)
-        # C-D68: plus the worker's fixed set (OMP's bundled agents); the Workbench explorer/analyst installed in the
-        # Workbench home are not ambient and stay usable for the worker, the manager disables them.
+        # C-D68: plus the worker's fixed set (OMP's bundled agents); the Workbench explorer installed in the Workbench
+        # home (C-D69 (3): no analyst any more) is not ambient and stays usable for the worker, the manager disables it.
         self.assertEqual(p27m.ambient_disabled(overlay, "worker"), ["proj-agent"])
         self.assertFalse(p27m.WORKBENCH_AGENTS & set(overlay["task"]["disabledAgents"]))
         manager = launcher.role_overlay("manager", project_dir=project, home=self.home, environment=env)

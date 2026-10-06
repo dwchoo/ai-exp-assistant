@@ -224,7 +224,9 @@ const TO_WORKER_PARAMETERS = {
 				+ "null starts a new Task." },
 		kind: { type: "string", enum: ["experiment", "work"],
 			description: "experiment: run a command and judge criteria; work: the worker does the work itself." },
-		message: { ...TEXT, description: "The instruction or summary for the worker (no secret values)." },
+		message: { ...TEXT, description: "The instruction or summary for the worker (no secret values). For kind work "
+			+ "give an executable procedure (commands or steps, allowed fallbacks, when to stop, the result you need "
+			+ "back), not an open question." },
 		spec: {
 			type: ["object", "null"], additionalProperties: false, required: ["goal", "paths"],
 			description: `The Task: goal and the paths the worker may change (required for a new Task); ${NOT_USED} `
@@ -264,6 +266,10 @@ const TO_WORKER_PARAMETERS = {
 				},
 			},
 		},
+		analysis: { type: ["string", "null"], enum: ["summary", "detailed", null],
+			description: "kind work only: how much analysis the worker returns. summary (null means summary): the worker "
+				+ "runs only your steps and reports facts plus a short summary. detailed: use only when you really need "
+				+ `the worker to analyse. Must be null for kind experiment; ${NOT_USED}` },
 		run: { ...OPTIONAL_FLAG, description: `true re-runs the current experiment Task (at most 3 re-runs per Task); ${NOT_USED}` },
 		cancel: { ...OPTIONAL_FLAG, description: `true (with task_id) cancels that Task; the worker is told and becomes free; ${NOT_USED}` },
 	},
@@ -294,6 +300,11 @@ const HANDOFF_TOOLS: Record<Role, { name: "to_worker" | "to_manager"; label: str
 		name: "to_worker", label: "To worker", parameters: TO_WORKER_PARAMETERS,
 		description: "Send an instruction to the Workbench worker OMP. The worker does the delegated task, not you: "
 			+ "do not do it yourself (no commands, edits or checks for it); wait for the worker's to_manager report. "
+			+ "The worker is an executor: delegate a procedure (commands or steps to run, fallbacks it may use, when "
+			+ "to stop, what to return); you decide scope and interpretation and write up the result for the user. "
+			+ "E.g. good: \"collect CPU/RAM/GPU/disk with these read-only commands; if one is missing or denied, "
+			+ "report that fact only; return key values and errors\"; bad: \"find out everything about this "
+			+ "machine's hardware\". analysis detailed only when you really need the worker to analyse. "
 			+ "The worker does ONE task at a time. If it is "
 			+ "busy you get worker_busy with the current task; wait for its to_manager report (done/blocked) or "
 			+ "cancel the task. Without task_id (null) a new Task is dispatched at once (status dispatched; the user "

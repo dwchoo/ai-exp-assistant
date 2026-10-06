@@ -211,8 +211,15 @@ class WorkerToolsTests(unittest.TestCase):
 
 
 class LeakRuleTests(unittest.TestCase):
+    def test_analyst_is_retired_and_a_worker_that_still_lists_it_leaks(self):
+        # C-D69 (3): the worker's only Workbench subagent is explorer.
+        self.assertEqual(set(launcher.WORKBENCH_AGENT_ROLES), {"explorer"})
+        self.assertEqual(launcher.ROLE_TASK_AGENTS["worker"], frozenset({"explorer"}))
+        seen = observed(tools=["read", "task", "to_manager"], task_agents=["analyst", "explorer"])
+        self.assertEqual(launcher.isolation_leaks(seen, allowed_skills=(), role="worker"), ["task_agent:analyst"])
+
     def test_worker_bash_eval_and_bundled_agents_are_leaks(self):
-        seen = observed(tools=["read", "bash", "eval", "task"], task_agents=["scout", "task", "explorer", "analyst"])
+        seen = observed(tools=["read", "bash", "eval", "task"], task_agents=["scout", "task", "explorer"])
         leaks = launcher.isolation_leaks(seen, allowed_skills=(), role="worker")
         self.assertEqual(leaks, ["task_agent:scout", "task_agent:task", "tool:bash", "tool:eval"])
 
@@ -223,7 +230,7 @@ class LeakRuleTests(unittest.TestCase):
         self.assertEqual(set(launcher.WORKER_TOOLS),
                          {"read", "grep", "glob", "edit", "write", "web_search", "todo", "task"})
         worker = observed(tools=list(launcher.WORKER_TOOLS) + ["to_manager", "terminal", "wait"],
-                          task_agents=["analyst", "explorer"])
+                          task_agents=["explorer"])
         self.assertEqual(launcher.isolation_leaks(worker, allowed_skills=(), role="worker"), ["tool:wait"])
         manager = observed(tools=["bash", "eval", "task", "wait", "to_worker"], task_agents=sorted(launcher.BUNDLED_TASK_AGENTS))
         self.assertEqual(launcher.isolation_leaks(manager, allowed_skills=(), role="manager"), [], "manager keeps wait")
@@ -234,7 +241,7 @@ class LeakRuleTests(unittest.TestCase):
         # p27-cd68-review-01 P3-3: --omp-arg --tools could re-enable python/notebook/computer/browser.
         seen = observed(tools=list(launcher.WORKER_TOOLS) + ["to_manager", "terminal", "python", "notebook",
                                                               "computer", "ssh", "mcp__x__y"],
-                        task_agents=["analyst", "explorer"])
+                        task_agents=["explorer"])
         self.assertEqual(launcher.isolation_leaks(seen, allowed_skills=(), role="worker"),
                          ["tool:computer", "tool:notebook", "tool:python", "tool:ssh"])
         self.assertEqual(launcher.WORKER_BRIDGE_TOOLS, frozenset({"to_manager", "terminal"}))
@@ -242,7 +249,7 @@ class LeakRuleTests(unittest.TestCase):
         self.assertEqual(launcher.isolation_leaks(manager, allowed_skills=(), role="manager"), [])
 
     def test_clean_worker_has_no_leaks(self):
-        seen = observed(tools=["read", "grep", "task", "to_manager"], task_agents=["analyst", "explorer"])
+        seen = observed(tools=["read", "grep", "task", "to_manager"], task_agents=["explorer"])
         self.assertEqual(launcher.isolation_leaks(seen, allowed_skills=(), role="worker"), [])
 
     def test_manager_keeps_bash_and_bundled_agents_but_not_workbench_agents(self):
@@ -258,13 +265,13 @@ class LeakRuleTests(unittest.TestCase):
 
     def test_new_overlay_keys_create_no_false_leaks(self):
         # the observed set of a correctly configured role is exactly what the overlay produces
-        for role, agents in (("manager", sorted(launcher.BUNDLED_TASK_AGENTS)), ("worker", ["analyst", "explorer"])):
+        for role, agents in (("manager", sorted(launcher.BUNDLED_TASK_AGENTS)), ("worker", ["explorer"])):
             self.assertEqual(launcher.isolation_leaks(observed(task_agents=agents), allowed_skills=(), role=role), [])
 
     def test_a_missing_workbench_agent_is_a_warning_not_a_leak(self):
-        self.assertEqual(launcher.role_expectation_warnings("worker", observed(tools=["task"], task_agents=["analyst"])),
+        self.assertEqual(launcher.role_expectation_warnings("worker", observed(tools=["task"], task_agents=[])),
                          ["task_agent:missing:explorer"])
-        self.assertEqual(launcher.role_expectation_warnings("worker", observed(tools=["task"], task_agents=["analyst", "explorer"])), [])
+        self.assertEqual(launcher.role_expectation_warnings("worker", observed(tools=["task"], task_agents=["explorer"])), [])
         self.assertEqual(launcher.role_expectation_warnings("worker", observed(tools=[], task_agents=[])), [])
         self.assertEqual(launcher.role_expectation_warnings("manager", observed(tools=["task"], task_agents=[])), [])
 
@@ -299,20 +306,20 @@ class FakeCheckTests(unittest.TestCase):
                                         omp_version="omp/18.6.1", timeout=10.0)
 
     def test_worker_with_bash_and_a_bundled_agent_is_reported(self):
-        result = self.check("worker", ["read", "bash", "eval", "task"], ["scout", "explorer", "analyst"])
+        result = self.check("worker", ["read", "bash", "eval", "task"], ["scout", "explorer"])
         self.assertEqual((result["state"], result["ok"]), ("leak", False))
         self.assertEqual(result["leaks"], ["task_agent:scout", "tool:bash", "tool:eval"])
         self.assertEqual(result["observed"]["thinking_level"], "max")
         self.assertEqual(result["observed"]["model"], LUNA)
 
     def test_correct_worker_and_manager_are_ok(self):
-        worker = self.check("worker", ["read", "task", "to_manager"], ["analyst", "explorer"])
+        worker = self.check("worker", ["read", "task", "to_manager"], ["explorer"])
         manager = self.check("manager", ["read", "bash", "eval", "task"], sorted(launcher.BUNDLED_TASK_AGENTS))
         self.assertEqual((worker["state"], worker["leaks"], worker["warnings"]), ("ok", [], []))
         self.assertEqual((manager["state"], manager["leaks"], manager["warnings"]), ("ok", [], []))
 
     def test_worker_missing_a_workbench_agent_warns(self):
-        result = self.check("worker", ["read", "task"], ["analyst"])
+        result = self.check("worker", ["read", "task"], [])
         self.assertEqual((result["state"], result["leaks"], result["warnings"]),
                          ("warning", [], ["task_agent:missing:explorer"]))
 

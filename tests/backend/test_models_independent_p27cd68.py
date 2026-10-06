@@ -35,7 +35,9 @@ DECISION = {
 }
 # Subagent -> model role: OMP 18.6.1 bundled agents (manager) and the Workbench definitions (worker, C-D68 (2)).
 MANAGER_AGENTS = {"scout": "smol", "reviewer": "slow", "task": "task"}
-WORKER_AGENTS = {"explorer": "smol", "analyst": "slow"}
+# C-D69 (3): the worker's ``analyst`` is removed; ``explorer`` (smol) is its only Workbench agent.
+WORKER_AGENTS = {"explorer": "smol"}
+RETIRED_WORKER_AGENTS = ("analyst",)
 BUNDLED = p27m.BUNDLED_AGENTS
 REPO = Path(__file__).resolve().parents[2]
 
@@ -163,6 +165,8 @@ class WorkerRestrictionTests(unittest.TestCase):
         self.assertFalse(set(WORKER_AGENTS) & set(worker), worker)
         self.assertTrue(set(WORKER_AGENTS) <= set(manager), manager)
         self.assertFalse(BUNDLED & set(manager), manager)
+        # C-D69 (3): the worker keeps no analyst definition whose use would need disabling
+        self.assertNotIn("analyst", worker)
 
     def test_the_workbench_agent_definitions_have_no_command_or_write_tool_and_their_role_model(self):
         directory = REPO / "omp_bridge" / "agents"
@@ -170,7 +174,8 @@ class WorkerRestrictionTests(unittest.TestCase):
         for path in sorted(directory.glob("*.md")):
             data = frontmatter(path)
             found[data["name"]] = data
-        self.assertEqual(set(found), set(WORKER_AGENTS), "only an exploration and an analysis agent (C-D68 (2))")
+        self.assertEqual(set(found), set(WORKER_AGENTS), "only an exploration agent (C-D68 (2), C-D69 (3))")
+        self.assertFalse((directory / "analyst.md").exists(), "C-D69 (3): analyst removed from the source")
         for name, role in WORKER_AGENTS.items():
             tools = set(found[name].get("tools") or [])
             self.assertTrue(tools, f"{name}: an explicit tool list (no inherited default tools)")
@@ -210,6 +215,10 @@ class RoleLeakTests(unittest.TestCase):
                              [])
         self.assertEqual(launcher.isolation_leaks(self.observed(agents=["canary"]), allowed_skills=(),
                                                   role="worker"), ["task_agent:canary"])
+        # C-D69 (3): analyst is no Workbench worker agent any more, so a worker seeing one is a leak
+        for name in RETIRED_WORKER_AGENTS:
+            self.assertEqual(launcher.isolation_leaks(self.observed(agents=["explorer", name]), allowed_skills=(),
+                                                      role="worker"), [f"task_agent:{name}"])
 
 
 if __name__ == "__main__":

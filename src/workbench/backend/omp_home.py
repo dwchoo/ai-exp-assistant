@@ -331,6 +331,10 @@ def default_agents_dir() -> Path:
     return Path(__file__).resolve().parents[3] / "omp_bridge" / "agents"
 
 
+# C-D69 (3): Workbench-owned definitions that were removed from the source; an older home may still hold them.
+RETIRED_AGENT_FILES = ("analyst.md",)
+
+
 def install_agents(agent_dir: Path, agents_dir: Path | str) -> tuple[str, ...]:
     """Copy the Workbench-owned subagent definitions into ``<agent dir>/agents`` (C-D68).
 
@@ -338,7 +342,8 @@ def install_agents(agent_dir: Path, agents_dir: Path | str) -> tuple[str, ...]:
     ``~/.omp``). Both OMPs see the directory; the per-role ``task.disabledAgents``
     decides who may use which. Rewritten at every start/restart (0600) so repo
     edits apply; a definition removed from the source is left (the launcher
-    disables unknown definitions it finds there). Returns the file names.
+    disables unknown definitions it finds there), except the retired Workbench
+    ones (``RETIRED_AGENT_FILES``), which are deleted. Returns the file names.
     """
     try:
         sources = sorted(item for item in Path(agents_dir).iterdir() if item.suffix == ".md" and item.is_file())
@@ -347,6 +352,14 @@ def install_agents(agent_dir: Path, agents_dir: Path | str) -> tuple[str, ...]:
     target = ensure_private_dir(agent_dir / AGENTS_DIR_NAME)
     for source in sources:
         write_private_bytes(target / source.name, source.read_bytes())
+    for retired in RETIRED_AGENT_FILES:
+        if retired not in {source.name for source in sources}:
+            try:
+                (target / retired).unlink()
+            except FileNotFoundError:
+                pass
+            except OSError as exc:
+                raise OmpHomeError(f"cannot remove the retired agent definition {retired}: {exc}") from exc
     return tuple(item.name for item in sources)
 
 

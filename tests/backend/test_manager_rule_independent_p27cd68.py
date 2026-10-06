@@ -61,7 +61,8 @@ class SkillTextTests(unittest.TestCase):
     def test_to_manager_skill_names_only_the_workbench_subagents(self):
         text = body("to-manager")
         self.assertIn("`explorer`", text)
-        self.assertIn("`analyst`", text)
+        # C-D69 (3): the worker's analyst subagent is removed; the skill must not offer it
+        self.assertNotRegex(text, re.compile(r"\banalyst\b", re.I))
         for bundled in ("scout", "reviewer", "sonic", "security-reviewer"):
             self.assertNotRegex(text, re.compile(rf"`{bundled}`"), f"bundled agent {bundled} offered to the worker")
 

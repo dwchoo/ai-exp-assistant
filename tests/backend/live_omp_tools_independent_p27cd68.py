@@ -14,8 +14,10 @@ service_tier, tool names, the task tool's agent description).
 Expectations come from DECISIONS.md C-D68, not from the implementation:
 - (1) worker main request: no ``bash``/``eval`` (and no other command tool), keeps
   read/grep/glob/edit/write/web_search/todo, has the Workbench ``terminal`` and ``to_manager``;
-- (2) worker subagents: only the Workbench ``explorer`` (smol) / ``analyst`` (slow) and they have NO
-  command execution tool (``bash``, ``eval``, ``terminal``); OMP's bundled agents are not usable;
+- (2) worker subagents: only the Workbench ``explorer`` (smol) and it has NO command execution tool
+  (``bash``, ``eval``, ``terminal``); OMP's bundled agents are not usable. C-D69 (3) (p27-cd69-test-01):
+  the worker's ``analyst`` is removed - not offered, not startable, and a stale ``analyst.md`` left in an
+  existing Workbench home is removed at the next start;
 - (3) manager: OMP's tools unchanged (bash/eval/task present) and OMP's bundled subagents, no
   ``terminal``; the Workbench agents are not offered to it;
 - (4) model / thinking / fast (``priority`` service tier) per role, subagents follow their role;
@@ -44,6 +46,9 @@ from workbench.backend import launcher, omp_home
 OMP = shutil.which("omp")
 ROUTING_HINT = "Compress into one routing hint"
 EXEC_TOOLS = {"bash", "eval", "terminal", "python", "shell", "exec", "browser"}
+# C-D69 (3): the definition an older Workbench home carried (frontmatter as installed before the removal).
+STALE_ANALYST = ("---\nname: analyst\ndescription: Read-only deep analysis for the Workbench worker.\ntools:\n"
+                 "  - read\n  - grep\n  - glob\n  - yield\nmodel:\n  - \"@slow\"\n---\nAnalyse.\n")
 
 
 def _sse(events):
@@ -207,7 +212,8 @@ class LiveRoleRequests(unittest.TestCase):
     def tearDownClass(cls):
         shutil.rmtree(cls.base, ignore_errors=True)
 
-    def run_role(self, role, task_args, *, label, wait_requests=2, budget=45.0, script=None, bridge=False):
+    def run_role(self, role, task_args, *, label, wait_requests=2, budget=45.0, script=None, bridge=False,
+                 stale_analyst=False):
         root = self.base / label
         home = root / "home"
         project = root / "project"
@@ -223,6 +229,13 @@ class LiveRoleRequests(unittest.TestCase):
                "LANG": "C.UTF-8"}
         wb_home = omp_home.prepare_omp_home(home / "data", env, skills_dir=launcher.default_skills_dir(),
                                             provider_ids=launcher.ISOLATION_PROVIDER_IDS)
+        if stale_analyst:
+            # C-D69 (3): a home prepared before the removal still holds analyst.md; the next start prepares again.
+            stale = wb_home.agent_dir / "agents" / "analyst.md"
+            stale.write_text(STALE_ANALYST)
+            wb_home = omp_home.prepare_omp_home(home / "data", env, skills_dir=launcher.default_skills_dir(),
+                                                provider_ids=launcher.ISOLATION_PROVIDER_IDS)
+            self.assertFalse(stale.exists(), "C-D69 (3): the stale analyst definition stayed in the home")
         (wb_home.agent_dir / "models.yml").write_text(
             "providers:\n  openai-codex:\n"
             f"    baseUrl: http://127.0.0.1:{provider.port}/v1\n"
@@ -282,8 +295,8 @@ class LiveRoleRequests(unittest.TestCase):
         _, requests = self.run_role("worker", None, label="worker-agents", wait_requests=1)
         task = requests[0]["task_tool"]
         self.assertIsNotNone(task, "the worker keeps the task tool for its Workbench subagents (C-D68 (2))")
-        for name in ("explorer", "analyst"):
-            self.assertIn(name, task)
+        self.assertIn("explorer", task)
+        self.assertNotIn("analyst", task, "C-D69 (3): the worker's analyst subagent is removed")
         for bundled in ("scout", "reviewer", "security-reviewer", "sonic"):
             self.assertNotIn(f'"{bundled}"', task, f"C-D68 (1)/(2): bundled agent {bundled} offered to the worker")
             self.assertNotIn(f"- {bundled}", task)
@@ -303,15 +316,17 @@ class LiveRoleRequests(unittest.TestCase):
         self.assertFalse(set(sub["tools"]) & (EXEC_TOOLS - {"terminal"}),
                          f"C-D68 (2): a worker subagent has no command execution tool: {sub['tools']}")
 
-    def test_worker_analyst_subagent_has_no_command_tool_and_its_role_model(self):
-        _, requests = self.run_role("worker", self.task_args("analyst"), label="worker-analyst")
-        sub = self.subagent(requests)
-        self.assertIsNotNone(sub, f"no analyst request: {[r['tools'] for r in requests]}")
-        # slow = gpt-6.1-sol high + fast
-        self.assertEqual((sub["model"], sub["effort"], sub["tier"]), ("gpt-6.1-sol", "high", "priority"))
-        self.assertFalse(set(sub["tools"]) & {"edit", "write"}, "analyst is read-only")
-        self.assertFalse(set(sub["tools"]) & (EXEC_TOOLS - {"terminal"}),
-                         f"C-D68 (2): a worker subagent has no command execution tool: {sub['tools']}")
+    def test_worker_cannot_start_the_removed_analyst_even_from_a_stale_home(self):
+        # C-D69 (3) (replaces the C-D68 analyst positive test): the worker has no analyst any more; also when an
+        # older Workbench home still carried analyst.md before this start.
+        for stale in (False, True):
+            with self.subTest(stale_home=stale):
+                _, requests = self.run_role("worker", self.task_args("analyst"), label=f"worker-analyst-{stale}",
+                                            wait_requests=3, budget=25.0, stale_analyst=stale)
+                self.assertNotIn("analyst", requests[0]["task_tool"] or "")
+                self.assertIsNone(self.subagent(requests),
+                                  f"C-D69 (3): the removed analyst ran for the worker: "
+                                  f"{[(r['model'], r['tools']) for r in requests]}")
 
     def test_worker_subagent_is_not_offered_terminal(self):
         # C-D68 (2) strictly: the subagent's model should not even see ``terminal`` (it refuses when called, see
@@ -366,7 +381,7 @@ class LiveRoleRequests(unittest.TestCase):
         for bundled in ("scout", "reviewer"):
             self.assertIn(bundled, task, f"C-D68 (3): the manager keeps OMP's bundled agent {bundled}")
         self.assertNotIn("explorer", task, "the Workbench worker agents are not the manager's")
-        self.assertNotIn("analyst", task)
+        self.assertNotIn("analyst", task)  # C-D69 (3): removed altogether
 
     def test_manager_subagents_follow_their_role(self):
         cases = {"scout": ("gpt-6-luna", "max", "priority"),        # smol = luna max + fast

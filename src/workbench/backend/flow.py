@@ -85,6 +85,15 @@ QUEUED_DETAIL = ("Accepted by Workbench; it is delivered to the other OMP once, 
                  "a reply, if any, arrives as a new message.")
 TOOL_ROLES: dict[str, ActorRole] = {"to_worker": ActorRole.MANAGER, "to_manager": ActorRole.WORKER}
 TO_WORKER_KINDS = ("experiment", "work")
+# C-D69 (2): how much analysis the manager wants back from the worker for a work Task; null means "summary".
+ANALYSIS_LEVELS = ("summary", "detailed")
+DEFAULT_ANALYSIS = "summary"
+ANALYSIS_RULES = {
+    "summary": "Analysis: summary - run only the given steps and allowed fallbacks; report facts and a short "
+               "summary; do not investigate or plan beyond the given steps.",
+    "detailed": "Analysis: detailed - the manager asked for detailed analysis of this Task; give it, still "
+                "only within the given steps and paths.",
+}
 TO_MANAGER_KINDS = ("answer", "progress", "done", "blocked", "report")
 MESSAGE_MAX = 8192
 SHORT_MAX = 1024
@@ -95,7 +104,7 @@ ENV_NAME = re.compile(r"[A-Za-z_][A-Za-z0-9_]*")
 SECRET_NAME = re.compile(r"(?i)(token|secret|passw(?:or)?d|api_?key|access_?key|private_?key|credential"
                          r"|(?:^|_)auth(?:$|_))")
 _ASSIGNMENT = re.compile(r"(?<![A-Za-z0-9_$])([A-Za-z_][A-Za-z0-9_]*)=(\S+)")
-_TO_WORKER_KEYS = frozenset({"task_id", "kind", "message", "spec", "run", "cancel"})
+_TO_WORKER_KEYS = frozenset({"task_id", "kind", "message", "spec", "run", "cancel", "analysis"})
 _TO_MANAGER_KEYS = frozenset({"kind", "message", "task_id", "in_reply_to", "requires_code_change", "reason",
                               "request"})
 _SPEC_KEYS = frozenset({"goal", "paths", "instructions", "execution"})
@@ -423,6 +432,11 @@ def validate_arguments(tool: str, args: object) -> list[str]:
     if tool == "to_worker":
         if "run" in args and not isinstance(args["run"], bool):
             errors.append("run: must be true (re-run the experiment), false or null")
+        if "analysis" in args:
+            if args["analysis"] not in ANALYSIS_LEVELS:
+                errors.append(f"analysis: must be {' or '.join(ANALYSIS_LEVELS)}, or null (summary)")
+            elif args.get("kind") != "work":
+                errors.append("analysis: must be null for kind experiment (it applies to kind work only)")
         if "cancel" in args:
             if not isinstance(args["cancel"], bool):
                 errors.append("cancel: must be true (cancel the Task), false or null")
@@ -1044,7 +1058,7 @@ class HandoffService:
 
 
 __all__ = [
-    "HANDOFF_JOURNAL_NAME", "ActiveTask", "HandoffDecision", "HandoffJournal", "HandoffPolicy", "HandoffRequest", "HandoffService",
+    "ANALYSIS_LEVELS", "ANALYSIS_RULES", "DEFAULT_ANALYSIS", "HANDOFF_JOURNAL_NAME", "ActiveTask", "HandoffDecision", "HandoffJournal", "HandoffPolicy", "HandoffRequest", "HandoffService",
     "OutboundMessage", "OutboxListener", "PlaceholderPolicy", "TOOL_ROLES", "accepts_keyword",
     "environment_value_findings", "held", "rejected",
     "sensitive_environment_values", "validate_arguments",

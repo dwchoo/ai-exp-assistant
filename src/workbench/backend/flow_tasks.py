@@ -89,7 +89,7 @@ from contextlib import contextmanager
 from uuid import uuid4
 
 from workbench.backend.flow import (
-    ActiveTask, HandoffDecision, HandoffJournal, HandoffRequest, OutboundMessage, accepts_keyword, held, rejected,
+    ANALYSIS_RULES, DEFAULT_ANALYSIS, ActiveTask, HandoffDecision, HandoffJournal, HandoffRequest, OutboundMessage, accepts_keyword, held, rejected,
 )
 from workbench.backend.flow_terminal import HostGate
 from workbench.contracts.v1 import ActorRole, MessageKind
@@ -123,6 +123,12 @@ REPORT_SETTLE_WAIT = 2.0
 # (a periodic review turn whose outcome is unknown must not keep the Task waiting forever; a pause does not count).
 ANALYSIS_IDLE_LIMIT = 180.0
 # C-D68 (3): every accepted to_worker result says who does the work.
+def _analysis_fields(level: object) -> dict[str, str]:
+    """The TASK message lines for the analysis level (C-D69 (2)); null is ``summary``."""
+    level = level if level in ANALYSIS_RULES else DEFAULT_ANALYSIS
+    return {"analysis": level, "analysis_rule": ANALYSIS_RULES[level]}
+
+
 MANAGER_RULE = ("The worker does this Task; do not do it yourself (no commands, edits or checks for it). End "
                 "your turn and wait for the worker's to_manager report.")
 CANCEL_WAIT_DETAIL = ("The experiment's host command is still running; Workbench never kills it. The Task "
@@ -214,7 +220,8 @@ class FlowTask:
     status: str = "dispatched"  # see ACTIVE_STATUSES / INACTIVE_STATUSES
     revision: int = 1
     spec: dict[str, Any] = field(default_factory=dict)  # the spec of ``revision`` (delegated)
-    summary: str = ""
+    summary: str = ""  # the first SUMMARY_MAX chars of ``message``, for status views only
+    message: str = ""  # the manager's full to_worker message (<= MESSAGE_MAX); the first TASK carries it
     since: str = ""
     scope_decision_id: str | None = None
     run_id: str | None = None
@@ -489,6 +496,8 @@ class TaskFlow:
             document["instructions"] = spec["instructions"]
         if "execution" in spec:
             document["execution"] = dict(spec["execution"])
+        if args.get("analysis") is not None:  # C-D69 (2): kept with the Task for later follow-ups
+            document["analysis"] = args["analysis"]
         document["source"] = "manager_to_worker"
         return document, errors
 
@@ -511,7 +520,7 @@ class TaskFlow:
         scope: dict[str, Any] = {"kind": task.kind, "goal": spec["goal"], "paths": list(spec["paths"]),
                                  "commit_policy": "manager_local_commits", "retry_limit": RETRY_LIMIT,
                                  **self._standing(request)}
-        for name in ("execution", "instructions"):
+        for name in ("execution", "instructions", "analysis"):
             if name in spec:
                 scope[name] = spec[name]
         with self._repository() as repository:
@@ -549,7 +558,8 @@ class TaskFlow:
                 self._end_inactive(active, "superseded_by_new_task")
             with self._repository() as repository:
                 new_id = repository.create_task(spec)
-            task = FlowTask(new_id, args["kind"], spec=spec, summary=args["message"][:SUMMARY_MAX])
+            task = FlowTask(new_id, args["kind"], spec=spec, summary=args["message"][:SUMMARY_MAX],
+                            message=args["message"])
             task.set_status("dispatched")
             self.tasks[new_id] = task
             self._record({"type": "task_created", "task_id": new_id, "request_key": request.key_dict()})
@@ -621,6 +631,8 @@ class TaskFlow:
                                    "task_id": task.task_id}
         if spec is not None:
             payload["paths"] = list(spec["paths"])
+        if task.kind == "work":
+            payload.update(_analysis_fields(request.args.get("analysis") or (task.spec or {}).get("analysis")))
         return HandoffDecision({"status": "queued", "task_id": task.task_id, "manager_rule": MANAGER_RULE},
                                message=OutboundMessage(
             task.task_id, task.run_revision, task.run_id, ActorRole.MANAGER, ActorRole.WORKER,
@@ -937,9 +949,11 @@ class TaskFlow:
             spec = task.spec or {}
             payload: dict[str, Any] = {"handoff": "to_worker", "kind": "work", "task_id": task_id,
                                        "revision": revision, "goal": spec.get("goal"),
-                                       "paths": list(spec.get("paths") or []), "message": task.summary}
+                                       "paths": list(spec.get("paths") or []),
+                                       "message": task.message or task.summary}  # older records: summary
             if "instructions" in spec:
                 payload["instructions"] = spec["instructions"]
+            payload.update(_analysis_fields(spec.get("analysis")))
             outbound = OutboundMessage(task_id, revision, run_id, ActorRole.MANAGER, ActorRole.WORKER,
                                        MessageKind.TASK, payload)
             self._task_message_state[task_id] = "queued"

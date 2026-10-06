@@ -28,12 +28,21 @@ class InstallAgentsTests(unittest.TestCase):
     def test_prepare_installs_the_repo_definitions_private_into_the_workbench_agent_dir(self):
         home = self.prepare()
         installed = home.agent_dir / "agents"
-        self.assertEqual(sorted(path.name for path in installed.iterdir()), ["analyst.md", "explorer.md"])
+        self.assertEqual(sorted(path.name for path in installed.iterdir()), ["explorer.md"])
         for source in launcher.default_agents_dir().glob("*.md"):
             target = installed / source.name
             self.assertEqual(target.read_bytes(), source.read_bytes())
             self.assertEqual(stat.S_IMODE(os.stat(target).st_mode), 0o600)
         self.assertEqual(stat.S_IMODE(os.stat(installed).st_mode), 0o700)
+
+    def test_a_retired_analyst_definition_from_an_older_home_is_removed(self):
+        # C-D69 (3)
+        home = self.prepare()
+        stale = home.agent_dir / "agents" / "analyst.md"
+        stale.write_text("---\nname: analyst\ndescription: x\n---\n")
+        home = self.prepare()
+        self.assertFalse(stale.exists())
+        self.assertEqual(sorted(path.name for path in (home.agent_dir / "agents").iterdir()), ["explorer.md"])
 
     def test_nothing_is_written_under_the_users_omp_dir(self):
         self.prepare()
@@ -66,7 +75,7 @@ class InstallAgentsTests(unittest.TestCase):
         self.assertEqual(names, ("foreign-agent",))
         manager = launcher.role_overlay("manager", project_dir=project, home=self.home, environment=env)
         worker = launcher.role_overlay("worker", project_dir=project, home=self.home, environment=env)
-        self.assertEqual(sorted(manager["task"]["disabledAgents"]), ["analyst", "explorer", "foreign-agent"])
+        self.assertEqual(sorted(manager["task"]["disabledAgents"]), ["explorer", "foreign-agent"])
         self.assertEqual(set(worker["task"]["disabledAgents"]), launcher.BUNDLED_TASK_AGENTS | {"foreign-agent"})
 
 

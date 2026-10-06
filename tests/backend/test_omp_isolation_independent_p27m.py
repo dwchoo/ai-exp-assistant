@@ -66,7 +66,8 @@ HOME_ENV_KEYS = ("PI_CONFIG_DIR", "PI_CODING_AGENT_DIR", "BUN_RUNTIME_TRANSPILER
 FAKE_AUTH_BYTES = b"p27u fake auth store - not a credential\n"
 # C-D68 (1)-(3): OMP 18.6.1's bundled task agents (manager only) and the Workbench-owned worker agents.
 BUNDLED_AGENTS = frozenset({"scout", "reviewer", "security-reviewer", "task", "sonic"})
-WORKBENCH_AGENTS = frozenset({"explorer", "analyst"})
+# C-D69 (3): the worker's Workbench subagent ``analyst`` is removed; only ``explorer`` remains.
+WORKBENCH_AGENTS = frozenset({"explorer"})
 CD68_ROLE_DISABLED = {"manager": WORKBENCH_AGENTS, "worker": BUNDLED_AGENTS}
 
 
@@ -471,7 +472,8 @@ if mode["behaviour"] == "die":
 shapes = mode.get("shapes", {})
 # C-D68 (p27-cd68-test-01): like the real OMP 18.6.1 (live-verified in live_omp_tools_independent_p27cd68.py), the
 # fake honours ``task.disabledAgents`` of every JSON ``--config`` overlay and the ``--tools`` built-in allowlist.
-# Its agent list is OMP's bundled agents plus the Workbench explorer/analyst that the Workbench home always carries.
+# Its agent list is OMP's bundled agents plus the Workbench explorer that the Workbench home always carries
+# (C-D69 (3): no analyst any more).
 _argv = sys.argv[1:]
 DISABLED, TOOLS_ALLOW = set(), None
 for _i, _a in enumerate(_argv[:-1]):
@@ -493,7 +495,7 @@ STATE = {"model": {"provider": "stubprov", "id": "stub-model-1"}, "systemPrompt"
          "dumpTools": [_agents_filter(t) for t in shapes.get("dumpTools", [
              {"name": "read", "description": "read"}, {"name": "bash", "description": "bash"},
              {"name": "eval", "description": "eval"},
-             {"name": "task", "description": "Launch\n# Available Agents\n- `scout` (RO): a\n- `reviewer`: b\n- `security-reviewer`: c\n- `task`: d\n- `sonic`: e\n- `explorer` (RO): f\n- `analyst` (RO): g\n\n# Other\n"}])
+             {"name": "task", "description": "Launch\n# Available Agents\n- `scout` (RO): a\n- `reviewer`: b\n- `security-reviewer`: c\n- `task`: d\n- `sonic`: e\n- `explorer` (RO): f\n\n# Other\n"}])
              if TOOLS_ALLOW is None or t.get("name") in TOOLS_ALLOW]}
 COMMANDS = shapes.get("commands", [{"name": "init", "source": "builtin"}, {"name": "autoresearch", "source": "extension"},
                                    {"name": "settings", "source": "builtin"}])
@@ -794,16 +796,28 @@ class CheckIsolationContractTests(unittest.TestCase):
         self.assertNotIn("task_agent:scout", result["leaks"])
 
     def test_cd68_worker_missing_a_workbench_agent_is_a_warning_and_a_bundled_one_a_leak(self):
+        # C-D69 (3): the worker's only Workbench agent is ``explorer``; with it present there is nothing missing,
+        # without it the missing explorer is the warning (and never a missing analyst).
         self.h.set_mode(shapes={"dumpTools": [{"name": "task", "description":
                                                "L\n# Available Agents\n- `explorer`: f\n\n# Other\n"}]})
         result = self.h.check(role="worker")
-        self.assertEqual((result["state"], result["leaks"]), ("warning", []), result)
-        self.assertEqual(result["warnings"], ["task_agent:missing:analyst"])
+        self.assertEqual((result["state"], result["leaks"], result.get("warnings") or []), ("ok", [], []), result)
         self.h.set_mode(shapes={"dumpTools": [{"name": "task", "description":
-                                               "L\n# Available Agents\n- `explorer`: f\n- `analyst`: g\n"
+                                               "L\n# Available Agents\n\n# Other\n"}]})
+        result = self.h.check(role="worker")
+        self.assertEqual((result["state"], result["leaks"]), ("warning", []), result)
+        self.assertEqual(result["warnings"], ["task_agent:missing:explorer"])
+        self.assertNotIn("task_agent:missing:analyst", result["warnings"], result)
+        self.h.set_mode(shapes={"dumpTools": [{"name": "task", "description":
+                                               "L\n# Available Agents\n- `explorer`: f\n"
                                                "- `scout`: a\n\n# Other\n"}]})
         leak = self.h.check(role="worker", role_config=False)
         self.assertEqual(leak["leaks"], ["task_agent:scout"])
+        # C-D69 (3): a (stale) analyst offered to the worker is no longer a Workbench agent: a leak, not allowed.
+        self.h.set_mode(shapes={"dumpTools": [{"name": "task", "description":
+                                               "L\n# Available Agents\n- `explorer`: f\n- `analyst`: g\n"
+                                               "\n# Other\n"}]})
+        self.assertEqual(self.h.check(role="worker", role_config=False)["leaks"], ["task_agent:analyst"])
         self.h.set_mode(shapes={"dumpTools": [{"name": "read", "description": "r"}, {"name": "eval", "description": "e"}]})
         self.assertIn("tool:eval", self.h.check(role="worker", role_config=False)["leaks"])
         self.assertEqual(self.h.check(role="manager", role_config=False)["leaks"], [], "manager keeps eval")

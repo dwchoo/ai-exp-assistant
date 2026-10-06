@@ -115,7 +115,7 @@ test("manager registers only to_worker and worker only to_manager, both essentia
 	const manager = await startBridge("manager");
 	try {
 		const props = manager.tools.get("to_worker")!.parameters.properties;
-		assert.deepEqual(Object.keys(props).sort(), ["cancel", "kind", "message", "run", "spec", "task_id"]);
+		assert.deepEqual(Object.keys(props).sort(), ["analysis", "cancel", "kind", "message", "run", "spec", "task_id"]);
 		assert.deepEqual(props.cancel.type, ["boolean", "null"]);
 		assert.deepEqual(Object.keys(props.spec.properties).sort(), ["execution", "goal", "instructions", "paths"]);
 		assert.deepEqual(Object.keys(props.spec.properties.execution.properties).sort(),
@@ -312,7 +312,7 @@ function objectNodes(schema: Schema, path = "$"): [string, Schema][] {
 }
 
 const OPTIONAL: Record<string, string[]> = {
-	to_worker: ["task_id", "spec", "run", "cancel"],
+	to_worker: ["task_id", "spec", "analysis", "run", "cancel"],
 	to_manager: ["task_id", "in_reply_to", "requires_code_change", "reason", "request"],
 };
 
@@ -347,6 +347,15 @@ test("both tools are strict-mode compatible: strict flag, closed objects, every 
 		assert.match(spec.properties.execution.description, /kind work/);
 		assert.match(spec.properties.paths.description, /repo-relative/i);
 		assert.match(manager.tools.get("to_worker")!.description, /end your turn/);
+		// C-D69 (2): executor role boundary and the nullable analysis level.
+		const toWorker = manager.tools.get("to_worker")!;
+		assert.deepEqual(toWorker.parameters.properties.analysis.enum, ["summary", "detailed", null]);
+		assert.match(toWorker.description, /executor: delegate a procedure/);
+		assert.match(toWorker.description, /report that fact only/);
+		assert.match(toWorker.parameters.properties.analysis.description, /kind work only/);
+		for (const args of [{ kind: "work", message: "m", analysis: "detailed" }, { kind: "work", message: "m", analysis: null }])
+			assert.deepEqual(schemaErrors(toWorker.parameters, args), [], JSON.stringify(args));
+		assert.notDeepEqual(schemaErrors(toWorker.parameters, { kind: "work", message: "m", analysis: "deep" }), []);
 	} finally { await manager.close(); }
 });
 

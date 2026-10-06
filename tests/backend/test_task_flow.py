@@ -19,7 +19,7 @@ import unittest
 from types import SimpleNamespace
 from uuid import uuid4
 
-from workbench.backend.flow import HandoffService
+from workbench.backend.flow import ANALYSIS_RULES, HandoffService
 from workbench.backend.flow_tasks import RETRY_LIMIT, ExperimentPorts, TaskFlow
 from workbench.backend.panes import HostShellPort, ShellPane
 from workbench.backend.service import Backend
@@ -318,7 +318,9 @@ class DispatchTests(FlowFixture):
         self.assertEqual((task_message.kind, task_message.target_role), (MessageKind.TASK, ActorRole.WORKER))
         self.assertEqual(task_message.payload, {"handoff": "to_worker", "kind": "work", "task_id": result["task_id"],
                                                 "revision": 1, "goal": "clean parser", "paths": ["src/parser/"],
-                                                "message": "refactor the parser module"})
+                                                "message": "refactor the parser module",
+                                                "analysis": "summary",
+                                                "analysis_rule": ANALYSIS_RULES["summary"]})
         self.assertTrue(wait_until(lambda: self.flow.task_view()["status"] == "running"))
         self.assertEqual(self.current_run(result["task_id"])["run_id"], self.flow.task_view()["run_id"])
         self.assertEqual(self.flow.worker_view(), {"state": "busy", "task_id": result["task_id"]})
@@ -327,6 +329,20 @@ class DispatchTests(FlowFixture):
         delegated = [r for r in self.ledger() if r["type"] == "delegated"]
         self.assertEqual((delegated[0]["actor"], delegated[0]["authority"]), STANDING)
         self.assertEqual(os.stat(self.root / "workflow" / "tasks-flow.jsonl").st_mode & 0o777, 0o600)
+
+    def test_the_first_task_carries_the_full_manager_message_and_the_summary_stays_short(self):
+        # C-D69 (2): the procedure goes in `message`; the worker must get all of it (<= 8192), not the summary.
+        procedure = "\n".join(f"step {index}: run `make check-{index}` and record the exit code"
+                              for index in range(1, 200))[:8192]
+        self.assertGreater(len(procedure), 1024)
+        result = self.new_work(procedure)
+        self.assertTrue(wait_until(lambda: len(self.mailbox.delivered) == 1))
+        self.assertEqual(self.mailbox.created[0].payload["message"], procedure)
+        self.assertEqual(self.flow.task_view()["summary"], procedure[:1024])
+        busy = self.new_work("another")
+        self.assertEqual(busy["task"]["summary"], procedure[:1024])
+        self.assertNotIn("message", self.flow.task_view())
+        self.assertEqual(result["status"], "dispatched")
 
     def test_experiment_to_worker_starts_the_run_at_once_and_finishing_frees_the_worker(self):
         result = self.new_experiment()

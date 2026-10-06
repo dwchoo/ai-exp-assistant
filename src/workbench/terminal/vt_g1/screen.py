@@ -185,6 +185,15 @@ _STRING_STOP = re.compile(rb"[\x1b\x18\x1a]")
 STRING_MAX = 8 << 20
 
 
+# C-D69 (1): OSC 52 clipboard writes (``ESC ] 52 ; Pc ; Pd`` ended by BEL or ST), plain or wrapped in a tmux
+# passthrough DCS (``ESC P tmux; ESC ESC ] 52 ; ... ESC \\``), are taken out of the stream and handed to a callback.
+_OSC52 = b"52;"
+_TMUX_OSC52 = b"tmux;\x1b]52;"
+_OSC_STOP = re.compile(rb"[\x07\x1b\x18\x1a]")
+# default body cap (Pc ; Pd): base64 of 1 MiB plus room for the selection parameter
+CLIPBOARD_MAX = 4 * -(-(1 << 20) // 3) + 16
+
+
 class TerminalByteStream(pyte.ByteStream):
     """pyte ByteStream that also dispatches CSI S (SU) and CSI T (SD).
 
@@ -197,26 +206,113 @@ class TerminalByteStream(pyte.ByteStream):
     other byte ends it and is parsed again as a normal sequence (a lost ST
     never hides later output, RIS still resets); after ``STRING_MAX`` bytes it
     is abandoned. Outside: ``ESC ESC`` cancels the first ESC (``ESC ESC P``
-    starts a DCS, as in a real terminal). Nothing is forwarded anywhere.
+    starts a DCS, as in a real terminal).
+
+    C-D69 (1): the body of an OSC 52 (plain, or the only content of a
+    ``tmux;`` DCS) never reaches pyte (a plain one reaches it as ``ESC ] 52 ;``
+    + BEL, which pyte ignores); when it ends with BEL or ST its ``Pc;Pd`` body
+    goes to ``clipboard`` (``None`` when longer than ``clipboard_max``).
+    CAN/SUB or ESC + another byte abort it (nothing reported). Output fed while
+    ``quiet`` is set (replay, catch-up tail) never reports, also when such an
+    OSC 52 only began or ended there. Other OSCs reach pyte as before.
     """
 
     csi = {**pyte.ByteStream.csi, "S": "scroll_up", "T": "scroll_down"}
     events = frozenset(pyte.ByteStream.events | {"scroll_up", "scroll_down"})
 
-    def __init__(self, *args: object, **kwargs: object) -> None:
+    def __init__(self, *args: object, clipboard: Callable[[bytes | None], None] | None = None,
+                 clipboard_max: int = CLIPBOARD_MAX, **kwargs: object) -> None:
         super().__init__(*args, **kwargs)
         self._in_string = False  # inside a DCS/SOS/PM/APC string
         self._string_bytes = 0  # payload bytes of the current string so far
         self._pending_esc = False  # the last read ended in ESC (outside or inside a string)
+        self.quiet = False  # set by the owner around replayed/skipped-ahead output: no clipboard reports
+        self._clipboard = clipboard
+        self._clipboard_max = clipboard_max
+        self._osc_head: bytes | None = None  # bytes after ESC ] (forwarded) while they still match ``52;``
+        self._osc52: bytearray | None = None  # body of a plain OSC 52 being collected
+        self._inner: bytearray | None = None  # un-doubled payload of a DCS that may be a tmux-wrapped OSC 52
+        self._inner_head = b""  # its first bytes, compared with ``tmux;`` ESC ] 52 ;
+        self._clip_bytes = 0  # body bytes of the current OSC 52 (also those not kept)
+        self._clip_over = False  # the current OSC 52 body is longer than clipboard_max
+        self._clip_quiet = False  # part of the current OSC 52 was fed while quiet
+        self._seq_quiet = False  # the current ESC ] / ESC P sequence began (or continued) in quiet output
+        self._pending_quiet = False  # the ESC carried over from the last read was fed while quiet
+
+    @property
+    def in_clipboard_body(self) -> bool:
+        """True while bytes fed now are held back as string or OSC 52 payload (never drawn).
+
+        p27-cd69-review-01 P2-2: the owner skips the rest of an OSC 52 body this stream did not see begin
+        (it started over inside it, e.g. after a catch-up), so that body is never drawn as text.
+        """
+        return self._osc52 is not None or self._in_string
 
     def feed(self, data: bytes) -> None:  # type: ignore[override]
+        if self.quiet:
+            self._clip_quiet = self._seq_quiet = True
         super().feed(self._drop_strings(bytes(data)))
+
+    def _clip_start(self) -> bytearray:
+        self._clip_bytes, self._clip_over, self._clip_quiet = 0, False, self._seq_quiet
+        return bytearray()
+
+    def _clip_add(self, buf: bytearray, data: bytes, slack: int = 0) -> None:
+        self._clip_bytes += len(data)
+        if self._clip_over:
+            return
+        if len(buf) + len(data) > self._clipboard_max + slack:
+            self._clip_over = True
+            buf.clear()
+        else:
+            buf += data
+
+    def _clip_report(self, body: bytes) -> None:
+        if self._clipboard is not None and not self._clip_quiet:
+            self._clipboard(None if self._clip_over else bytes(body))
+
+    def _inner_add(self, data: bytes) -> None:
+        """Payload of a DCS: kept only while it can still be ``tmux;`` + OSC 52."""
+        head = self._inner_head
+        if len(head) < len(_TMUX_OSC52):
+            take = data[:len(_TMUX_OSC52) - len(head)]
+            head += take
+            if not _TMUX_OSC52.startswith(head):
+                self._inner = None
+                return
+            self._inner_head = head
+            data = data[len(take):]
+        if data:
+            self._clip_add(self._inner, data, slack=2)  # the wrapped OSC 52's own BEL or ST
+
+    def _inner_done(self) -> None:
+        """The DCS ended with ST: report its OSC 52 when it was ``tmux;`` + a terminated OSC 52."""
+        inner, self._inner = self._inner, None
+        if inner is None or self._inner_head != _TMUX_OSC52:
+            return
+        if self._clip_over:
+            self._clip_report(b"")
+            return
+        stop = _OSC_STOP.search(inner)
+        if stop is None:
+            return  # the wrapped OSC 52 has no terminator: no copy
+        at = stop.start()
+        if inner[at] == 0x07 or inner[at:at + 2] == b"\x1b\\":
+            self._clip_over = at > self._clipboard_max
+            self._clip_report(inner[:at])
 
     def _drop_strings(self, data: bytes) -> bytes:
         out = bytearray()
-        if self._pending_esc:
+        carried = self._pending_esc  # data[0] is an ESC from the last read
+        if carried:
             self._pending_esc = False
             data = b"\x1b" + data
+        carried_quiet = carried and self._pending_quiet
+
+        def quiet_at(at: int) -> bool:
+            """The ESC at ``at`` was fed while quiet (a carried-over ESC: in the last read)."""
+            return self.quiet or (carried_quiet and at == 0)
+
         i, n = 0, len(data)
         while i < n:
             if self._in_string:
@@ -224,29 +320,78 @@ class TerminalByteStream(pyte.ByteStream):
                 stop = n if match is None else match.start()
                 self._string_bytes += stop - i
                 if self._string_bytes > STRING_MAX:  # abandoned: the rest is shown again
-                    self._in_string = False
+                    self._in_string, self._inner = False, None
                     i = max(i, stop - (self._string_bytes - STRING_MAX))
                     continue
+                if self._inner is not None:
+                    self._inner_add(data[i:stop])
                 if match is None:
                     break
                 i = stop
                 if data[i] in _STRING_ABORT:
-                    self._in_string = False
+                    self._in_string, self._inner = False, None
                     i += 1
                 elif i + 1 == n:
-                    self._pending_esc = True
+                    self._pending_esc, self._pending_quiet = True, quiet_at(i)
                     break
                 elif data[i + 1] == 0x5C:  # ESC \ (ST): the string ends
                     self._in_string = False
+                    self._inner_done()
                     i += 2
                 elif data[i + 1] == _ESC:  # tmux doubling: one payload ESC
                     self._string_bytes += 2
+                    if self._inner is not None:
+                        self._inner_add(b"\x1b")
                     i += 2
                 elif data[i + 1] in _STRING_ABORT:
-                    self._in_string = False
+                    self._in_string, self._inner = False, None
                     i += 2
                 else:  # ESC + another byte: the string ended without ST; parse it again
-                    self._in_string = False
+                    self._in_string, self._inner = False, None
+                continue
+            if self._osc_head is not None:  # ESC ] forwarded: is it ESC ] 52 ; ?
+                head = self._osc_head
+                if data[i] == _OSC52[len(head)]:
+                    head += data[i:i + 1]
+                    out += data[i:i + 1]  # pyte sees ESC ] 52 ; (and later a BEL): an OSC it ignores
+                    i += 1
+                    if len(head) == len(_OSC52):
+                        self._osc_head, self._osc52 = None, self._clip_start()
+                    else:
+                        self._osc_head = head
+                else:  # another OSC: pyte parses it as before
+                    self._osc_head = None
+                continue
+            if self._osc52 is not None:
+                match = _OSC_STOP.search(data, i)
+                stop = n if match is None else match.start()
+                self._clip_add(self._osc52, data[i:stop])
+                if self._clip_bytes > STRING_MAX:  # a lost terminator: abandoned, the rest is shown again
+                    self._osc52 = None
+                    out += b"\x07"  # ends pyte's OSC
+                    i = max(i, stop - (self._clip_bytes - STRING_MAX))
+                    continue
+                if match is None:
+                    break
+                i = stop
+                if not (data[i] == 0x1B and i + 1 == n):
+                    out += b"\x07"  # whatever ends the OSC 52 here (BEL, ST, CAN/SUB, ESC + byte) ends pyte's OSC
+                if data[i] == 0x07:  # BEL
+                    body, self._osc52 = self._osc52, None
+                    self._clip_report(body)
+                    i += 1
+                elif data[i] in _STRING_ABORT:
+                    self._osc52 = None
+                    i += 1
+                elif i + 1 == n:
+                    self._pending_esc, self._pending_quiet = True, quiet_at(i)
+                    break
+                elif data[i + 1] == 0x5C:  # ESC \ (ST)
+                    body, self._osc52 = self._osc52, None
+                    self._clip_report(body)
+                    i += 2
+                else:  # ESC + another byte: aborted (no copy); the ESC is parsed again
+                    self._osc52 = None
                 continue
             esc = data.find(b"\x1b", i)
             if esc < 0:
@@ -254,13 +399,20 @@ class TerminalByteStream(pyte.ByteStream):
                 break
             out += data[i:esc]
             if esc + 1 == n:
-                self._pending_esc = True
+                self._pending_esc, self._pending_quiet = True, quiet_at(esc)
                 break
             follower = data[esc + 1]
+            self._seq_quiet = quiet_at(esc)
             if follower == _ESC:  # the first ESC is cancelled; the second starts a sequence
                 i = esc + 1
             elif follower in _STRING_INTRODUCERS:
                 self._in_string, self._string_bytes = True, 0
+                if follower == 0x50 and self._clipboard is not None:  # DCS: maybe a tmux-wrapped OSC 52
+                    self._inner, self._inner_head = self._clip_start(), b""
+                i = esc + 2
+            elif follower == 0x5D:  # OSC: forwarded as before; only an OSC 52 body is held back
+                out += b"\x1b]"
+                self._osc_head = b""
                 i = esc + 2
             else:
                 out += data[esc:esc + 2]
@@ -268,5 +420,6 @@ class TerminalByteStream(pyte.ByteStream):
         return bytes(out)
 
 
-def make_stream(screen: TerminalScreen) -> pyte.ByteStream:
-    return TerminalByteStream(screen)
+def make_stream(screen: TerminalScreen, *, clipboard: Callable[[bytes | None], None] | None = None,
+                clipboard_max: int = CLIPBOARD_MAX) -> pyte.ByteStream:
+    return TerminalByteStream(screen, clipboard=clipboard, clipboard_max=clipboard_max)

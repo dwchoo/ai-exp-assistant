@@ -9,7 +9,7 @@ import json
 import re
 import unittest
 
-from workbench.backend import flow_tasks, launcher
+from workbench.backend import flow, flow_tasks, launcher
 
 SKILLS = launcher.default_skills_dir()
 BRIDGE = Path(launcher.default_bridge_extension()).read_text(encoding="utf-8")
@@ -184,7 +184,7 @@ class SmokeCorrectionSkillTests(unittest.TestCase):
         for name in ("to-worker", "to-manager"):
             text = body(name)
             self.assertLess(len(text.splitlines()), 70, name)
-            self.assertLess(len(text), 9000, name)
+            self.assertLess(len(text), 10000, name)  # C-D69: +procedure-delegation section
 
 
 class RoleFilterTests(unittest.TestCase):
@@ -252,7 +252,7 @@ class TerminalAndManagerRuleTests(unittest.TestCase):
         self.assertRegex(commands, r"`terminal_done`")
         self.assertNotRegex(commands, r"(?i)to wait again|wait for it again|wait for it with `command` null")
         self.assertNotRegex(text, r"(?i)run tests\)")  # no hint at another way to run commands
-        self.assertLess(len(text.splitlines()), 70)
+        self.assertLess(len(text.splitlines()), 75)
 
     def test_to_worker_skill_bridge_and_result_carry_the_manager_rule(self):
         text = body("to-worker")
@@ -263,7 +263,7 @@ class TerminalAndManagerRuleTests(unittest.TestCase):
         self.assertIn("The worker does this Task; do not do it yourself", flow_tasks.MANAGER_RULE)
         self.assertIn("to_manager report", flow_tasks.MANAGER_RULE)
         self.assertGreaterEqual(FLOW_TASKS.count('"manager_rule": MANAGER_RULE'), 3)
-        self.assertLess(len(text), 9000)
+        self.assertLess(len(text), 10000)
 
     def test_bridge_registers_terminal_for_the_worker_only(self):
         self.assertRegex(BRIDGE, r'if \(role === "worker"\) \{\s*pi\.registerTool\(\{\s*name: TERMINAL_TOOL\.name')
@@ -271,18 +271,18 @@ class TerminalAndManagerRuleTests(unittest.TestCase):
 
 
 class WorkerSubagentRuleTests(unittest.TestCase):
-    """C-D68 (p27-cd68-skill-01): the worker's only subagents are explorer and analyst; agent is always set."""
+    """C-D68 (p27-cd68-skill-01): the worker's only subagent is explorer (C-D69 (3): no analyst); agent is always set."""
 
-    def test_to_manager_names_explorer_and_analyst_and_requires_agent(self):
+    def test_to_manager_names_only_explorer_and_requires_agent(self):
         text = body("to-manager")
         sub = section(text, "Subagents: `task` tool")
-        for name in ("explorer", "analyst"):
-            self.assertIn(f"`{name}`", sub, name)
-        self.assertRegex(sub, r"(?i)always set `agent` to `explorer` or `analyst`")
+        self.assertIn("`explorer`", sub)
+        self.assertNotIn("analyst", text)
+        self.assertRegex(sub, r"(?i)always set `agent` to `explorer`")
         self.assertRegex(sub, r"(?i)without `agent` fails")
         self.assertRegex(sub, r"(?i)never send `to_manager` reports and never run terminal commands")
         self.assertIn("`terminal`", section(text, "Running commands: `terminal`"))  # existing guidance intact
-        self.assertLess(len(text.splitlines()), 70)
+        self.assertLess(len(text.splitlines()), 75)
 
     def test_agent_definitions_match_the_skill(self):
         agents = Path(launcher.default_bridge_extension()).parent.parent / "agents"
@@ -290,7 +290,7 @@ class WorkerSubagentRuleTests(unittest.TestCase):
             re.search(r"^name: (\S+)$", p.read_text(encoding="utf-8"), re.M).group(1)
             for p in agents.glob("*.md")
         )
-        self.assertEqual(names, ["analyst", "explorer"])
+        self.assertEqual(names, ["explorer"])
 
 
 class ReviewFixSkillTests(unittest.TestCase):
@@ -340,6 +340,51 @@ class SmokeTwoSkillTests(unittest.TestCase):
     def test_no_further_report_after_done(self):
         text = body("to-manager")
         self.assertRegex(text, r"(?i)after `done`, do not send another report for the same task")
+
+
+class RoleBoundaryTests(unittest.TestCase):
+    """C-D69 (2)(3): the manager delegates procedures, the worker executes and reports facts."""
+
+    def test_to_worker_teaches_procedure_delegation_with_a_good_and_bad_example(self):
+        text = body("to-worker")
+        block = section(text, "The worker is an executor: delegate a procedure")
+        for word in ("commands or steps", "fallbacks", "when to stop", "result you need back"):
+            self.assertIn(word, block, word)
+        self.assertRegex(block, r"(?i)interpreting results and the write-up are yours")
+        self.assertRegex(block, r"(?i)- Good:.*CPU/RAM/GPU/disk.*report that fact only")
+        self.assertRegex(block, r"(?i)- Bad:")
+        self.assertRegex(block, r"`analysis`[^\n]*null means `summary`[^\n]*`detailed` only when you really need")
+        self.assertNotRegex(text, r"(?i)free work the worker does with its own tools \(analysis")
+
+    def test_to_manager_makes_the_worker_an_executor_that_reports_facts(self):
+        text = body("to-manager")
+        work = section(text, "Work Tasks (no `response_contract`)")
+        self.assertRegex(work, r"(?i)you are an executor")
+        self.assertRegex(work, r"(?i)only the steps the manager gave you and the fallbacks it allowed")
+        self.assertRegex(work, r"(?i)report those facts and stop; never widen the scope")
+        self.assertRegex(work, r"(?i)`analysis: detailed`")
+        self.assertRegex(work, r"(?i)what you ran, the key output, failures/missing")
+        self.assertRegex(work, r"(?i)no length limit")
+
+    def test_to_manager_states_the_8192_character_message_limit_and_how_to_split(self):
+        # review/test P3: to_manager.message is rejected beyond 8192 characters (flow.MESSAGE_MAX, bridge.ts).
+        work = " ".join(section(body("to-manager"), "Work Tasks (no `response_contract`)").split())
+        self.assertIn(f"{flow.MESSAGE_MAX} characters", work)
+        self.assertRegex(work, r"(?i)split[^.]*`progress` reports")
+        self.assertRegex(work, r"(?i)(log|file)[^.]*path")
+
+    def test_to_worker_message_allows_a_long_procedure(self):
+        # review P2-1: the procedure goes in `message`; "Short and concrete" contradicted that.
+        fields = section(body("to-worker"), "Fields")
+        line = next(item for item in fields.splitlines() if item.startswith("- `message`"))
+        self.assertNotRegex(line, r"(?i)short and concrete")
+        self.assertRegex(line, r"(?i)procedure")
+        self.assertIn(f"{flow.MESSAGE_MAX} characters", line)
+        self.assertRegex(line, r"(?i)may be long")
+
+    def test_to_worker_schema_has_the_nullable_analysis_field(self):
+        self.assertIn("analysis", schema_properties("TO_WORKER_PARAMETERS"))
+        self.assertRegex(BRIDGE, r'analysis: \{ type: \["string", "null"\], enum: \["summary", "detailed", null\]')
 
 
 if __name__ == "__main__":
