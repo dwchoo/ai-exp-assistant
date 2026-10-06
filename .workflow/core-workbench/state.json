@@ -425,7 +425,7 @@
   "implementation_p27": {
     "run_record": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
     "approved_bundle_sha256": "91fe05dc882d8c00ab0eb28c30e2b6cabcbfacb0f0fee3f0eaeecfaff5b7d3e8",
-    "status": "C-D69 (6) implemented (p27-cd69-cmds-01, uncommitted on disk), review-01 approve with P2x2+P3x3, independent test-01 candidate_ready with P3x2; NEXT on resume: one correction unit (review P2: _task_runs memory -> light records; commands_run lost after restart -> rebuild from journal or mark lost; P3: spill request byte cap, blank commands -> null, replace commands on delivery; test P3: exact match strips only space/tab/newline; unpin the 5 new xfails), then rerun (Sonnet wb-test-rerun) + delta review (Sonnet), Sonnet real-model smoke with the hardware request, then commit",
+    "status": "C-D69 (1)-(6) integrated and verified (smoke-03: user->final answer 53.6 s); next: UR-USABILITY retry by the user (sandbox restart), CW-19, CW-16 (polish list in integration-p27-cd68.json)",
     "resumed_from": ".codex/handoffs/2026-09-29-core-workbench-p27-cw17/HANDOFF.md",
     "units": {
       "V-CW-17-p2.7": {

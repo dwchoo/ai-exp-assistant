@@ -159,5 +159,26 @@
       "OSC 52 receipt >= vs stream > at the 8 MiB boundary (1 byte, harmless)"
     ],
     "pending": "real-model smoke with the hardware request (role boundary) and a /copy check through the product UI"
+  },
+  "cd69_6": {
+    "commits": [
+      "24d994e",
+      "d52df9d"
+    ],
+    "verification": [
+      "cmds-review-01 approve (P2x2 fixed)",
+      "cmds-test-01 candidate_ready (P3x2 fixed)",
+      "cmds-fix-01",
+      "cmds-review-02 approve",
+      "cmds-test-02 candidate_ready"
+    ],
+    "smoke": "p27-cd69-smoke-03 (Sonnet): manager sent commands (1 heredoc) + analysis summary; worker ran exactly commands[0]; report without script; commands_run appended; TASK->first terminal 53.8->5.9 s, TASK->done 89.5->11.8 s, user->final 123.9->53.6 s",
+    "carried_polish": [
+      "host pane: after a follow-up user command an output line is drawn over the previous one (seen in smoke-02 and smoke-03; cause unknown, maybe the driver's pyte) -> check in UR-USABILITY / CW-16",
+      "worker sends a second done after done (rejected no_active_task, harmless)",
+      "report path reads the whole journal under the handoff lock (P3-a)",
+      "spill fallback with a >1.9 KB script path exceeds the request limit (unrealistic)",
+      "not exercised on a real model: spill, not_in_task_commands refusal, multiple commands, start-failure shell return"
+    ]
   }
 }
