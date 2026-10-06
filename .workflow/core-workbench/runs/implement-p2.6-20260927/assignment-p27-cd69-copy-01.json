@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cd69-copy-01",
+  "ticket_id": "CW-18/CW-06 C-D69 (1) OMP /copy",
+  "role": "worker_senior",
+  "unit": "V-CW-18-cd69-copy",
+  "approved_bundle_digest": "068d62647e1385fd1c5b0ad6d4e6debb1f288a99ee10feb1aecea7b4a958ba72",
+  "routing": {
+    "planned_role": "worker_senior",
+    "selected_role": "worker_senior (Opus, reused cd68-terminal2)",
+    "reason_codes": [
+      "terminal_protocol"
+    ],
+    "evidence_refs": [
+      "docs/features/core-workbench/DECISIONS.md#C-D69"
+    ]
+  },
+  "root_findings": [
+    "OMP 18.6.1 /copy (packages/coding-agent/src/utils/clipboard.ts copyToClipboard): if stdout is a TTY it writes `ESC ] 52;c;<base64> BEL` to stdout (plain, not tmux-wrapped), then tries native tools (xclip/wl-copy when DISPLAY/WAYLAND_DISPLAY, termux). Extracted strings: /tmp/claude-1000/-home-dwchoo-ai-exp-assistant/dd5e2cee-e10d-41c4-8ebb-7c00b50dd465/scratchpad/omp-strings.txt around lines 712680-712700.",
+    "The pane VT path (vt_g1/screen.py + pyte) swallows OSC 52; the product UI already writes OSC 52 for drag copy to the outer terminal (model.py, TMUX-aware)."
+  ],
+  "required_behavior": [
+    "Forward OSC 52 clipboard WRITES (selection c/p/s etc. normalised as the UI copy path does; BEL or ST terminated; also when wrapped in a tmux DCS passthrough; split across chunks) from the manager and worker OMP panes to the outer terminal through the existing drag-copy path (same TMUX wrapping). Never forward from the host shell pane. Never forward clipboard READ requests (`?`). Size cap consistent with the drag-copy path (reject or ignore larger, never truncate silently into a wrong clipboard). Invalid base64 ignored.",
+    "Must work for live output and must NOT replay old copies on reattach/catch-up/session restart (only bytes received live after attach trigger a copy, once).",
+    "Reproduce with the exact /copy bytes first (no model call), then red->green unit tests + a PTY-level test inside a private `tmux -L` server showing the outer terminal receives the (tmux-wrapped) OSC 52."
+  ],
+  "acceptance": [
+    "tests/ui, tests/terminal vt*, tests/gates/g1_vt, backend pane tests (real exit codes)"
+  ],
+  "allowed_write_paths": [
+    "src/workbench/terminal/vt_g1/screen.py",
+    "src/workbench/ui/product/**",
+    "src/workbench/backend/panes.py",
+    "src/workbench/contracts/ui_v1.py",
+    "tests/ui/test_*.py",
+    "tests/terminal/test_*.py",
+    "tests/backend/test_panes*.py",
+    "tests/contracts/test_ui_v1*.py"
+  ],
+  "prohibited_paths": [
+    "tests/**/*_independent*",
+    "docs/**",
+    ".workflow/**"
+  ],
+  "rules": "No real provider requests; never read credential contents or other processes' environ; never touch the user's tmux server (private tmux -L only) or ~/wb-urux-sandbox and its processes; temp only under /tmp; kill only PIDs you started; no commits; no graphify update.",
+  "result_format": "checks table first (real exit codes), root cause, fix, changed paths + sha256, residue. Korean, <=10 lines."
+}

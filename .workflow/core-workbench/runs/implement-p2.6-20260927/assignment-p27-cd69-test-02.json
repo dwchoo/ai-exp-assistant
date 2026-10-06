@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cd69-test-02",
+  "ticket_id": "C-D69 rerun after corrections",
+  "role": "test_designer",
+  "unit": "V-CW-18-cd69-role",
+  "approved_bundle_digest": "068d62647e1385fd1c5b0ad6d4e6debb1f288a99ee10feb1aecea7b4a958ba72",
+  "frozen_candidate": "b8ac3e7a6260ed5261741c3340911e65bcd9c20528c6dd0e802219a72ab92b4c",
+  "routing": {
+    "planned_role": "test_designer",
+    "selected_role": "test_designer (wb-test-rerun)",
+    "reason_codes": [
+      "correction_reverification"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd69-review-01.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd69-test-01.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd69-fix-01.md"
+    ]
+  },
+  "required": [
+    "Add minimal independent tests (new *_independent_p27cd69b* files) for the corrections: first TASK carries the full manager message up to 8192 (and old records fall back); 300 KB and ~1 MiB /copy delivered without catch-up and without base64 on screen (plain + tmux), over-cap refused with notice and no base64, catch-up tail inside a body never draws base64; two OSC 52 writes in one feed both forwarded in order; skills state the 8192 report limit with splitting guidance.",
+    "Run tests/backend, tests/ui, tests/terminal, tests/bridge (py+node), tests/gates/g1_vt, tests/workflow, tests/contracts on the frozen candidate with hash checks; flakes: module rerun once."
+  ],
+  "allowed_write_paths": [
+    "tests/**/*_independent_p27cd69b*"
+  ],
+  "prohibited_paths": [
+    "src/**",
+    "omp_bridge/**",
+    "docs/**",
+    ".workflow/**"
+  ],
+  "rules": "No real provider requests; never read credential contents or other processes' environ; never touch the user's tmux server (private tmux -L only) or ~/wb-urux-sandbox and its processes; temp only under /tmp; kill only PIDs you started; no commits; no graphify update.",
+  "result_format": "checks table first (counts, real exit codes), hash check, findings, verdict, changed test paths + sha256. Korean, <=10 lines."
+}

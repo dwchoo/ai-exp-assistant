@@ -1,0 +1,17 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 2111,
+  "event": {
+    "id": "running-p27-cd69-role-01",
+    "kind": "transition",
+    "data": {
+      "evidence": "host: Claude Code Agent spawn succeeded (name cd69-role, wb-worker), 2026-10-06",
+      "invocation": "p27-cd69-role-01",
+      "not_started_evidence": null,
+      "observed_effort": "unverified",
+      "observed_model": "unverified",
+      "outcome": null,
+      "state": "running"
+    }
+  }
+}

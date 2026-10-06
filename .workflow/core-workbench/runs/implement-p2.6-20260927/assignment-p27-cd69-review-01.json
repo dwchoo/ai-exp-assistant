@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cd69-review-01",
+  "ticket_id": "C-D69 review",
+  "role": "reviewer",
+  "unit": "V-CW-18-cd69-copy",
+  "approved_bundle_digest": "068d62647e1385fd1c5b0ad6d4e6debb1f288a99ee10feb1aecea7b4a958ba72",
+  "frozen_candidate": "46d7944dc77557b8c94338040ddda2a203577496c7878512494e27c7b6fc12ca",
+  "routing": {
+    "planned_role": "reviewer",
+    "selected_role": "reviewer (Opus general-purpose, fresh)",
+    "reason_codes": [
+      "security_relevant_clipboard",
+      "contract_change"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd69-copy-01.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd69-role-01.md"
+    ]
+  },
+  "scope": "`git diff HEAD -- src omp_bridge` (C-D69: vt_g1/screen.py OSC 52 extraction, ui/product/model.py + app.py forwarding, bridge.ts/flow.py/flow_tasks.py analysis field and texts, skills, launcher/omp_home analyst removal). Focus: clipboard security (no forwarding from host shell, no reads, no replay, size cap, injection of other escape sequences into the outer terminal through the forwarded payload — the outer write must be a clean OSC 52 rebuilt from validated base64), interaction with the O1 DCS filter, quiet/replay state, performance; to_worker schema strictness and backward compatibility (null), TASK message content; skill guidance quality vs C-D69 (2) (procedure delegation, executor, no scope widening, no length cap); analyst removal completeness incl. existing homes and isolation expectations.",
+  "rules": "No real provider/model requests (fake local provider allowed); never read credential contents or other processes' environ; never touch the user's tmux server (private tmux -L only) or ~/wb-urux-sandbox and its processes; temp only under /tmp; kill only PIDs you started; no commits; no graphify update. Read-only.",
+  "result_format": "verdict (approve / block), findings P1-P3 with file:line and scenario. Korean, <=12 lines."
+}

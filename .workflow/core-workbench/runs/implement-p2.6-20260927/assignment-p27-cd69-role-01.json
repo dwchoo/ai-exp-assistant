@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cd69-role-01",
+  "ticket_id": "CW-18 C-D69 (2)(3) role boundary",
+  "role": "worker",
+  "unit": "V-CW-18-cd69-role",
+  "approved_bundle_digest": "068d62647e1385fd1c5b0ad6d4e6debb1f288a99ee10feb1aecea7b4a958ba72",
+  "routing": {
+    "planned_role": "worker",
+    "selected_role": "worker (wb-worker, Sonnet)",
+    "reason_codes": [
+      "docs_like_text",
+      "bounded_schema"
+    ],
+    "evidence_refs": [
+      "docs/features/core-workbench/DECISIONS.md#C-D69"
+    ]
+  },
+  "required_behavior": [
+    "to_worker (bridge.ts schema + description, backend normalize/validation in flow.py, the TASK message the worker receives in flow_tasks.py/flow.py): add a nullable field `analysis` for kind work: \"summary\" (default when null) or \"detailed\"; show it in the worker's TASK message as an explicit line (e.g. 'Analysis: summary — report facts and a short summary; do not investigate beyond the given steps'). Keep strict schema rules (nullable optional).",
+    "Manager guidance (to_worker description + omp_bridge/skills/to-worker/SKILL.md): delegate executable procedures — commands/steps, allowed fallbacks, stop conditions, expected result; the manager decides scope, interpretation and the user-facing write-up; add a short good/bad example (hardware specs: 'collect CPU/RAM/GPU/disk with these read-only commands; if a command is missing or denied, report that fact only; no further investigation; return key values and errors'). Use analysis=detailed only when the manager really needs the worker to analyse.",
+    "Worker guidance (omp_bridge/skills/to-manager/SKILL.md, keep it short): executor role — run only the given steps and allowed fallbacks; on failure/contradiction/missing info report the facts and stop; never widen the scope or plan further investigation; report = what ran / key output / failures-missing, with enough factual detail and summary-level analysis only (no length limit); detailed analysis only when the TASK says analysis: detailed.",
+    "Remove the worker Workbench subagent `analyst` (omp_bridge/agents/analyst.md, install list, worker allowed-agent set, isolation expectations, skill text); keep `explorer`. Worker model table unchanged.",
+    "Tests red->green; list independent tests that pin analyst or the old schema (do not edit *_independent*)."
+  ],
+  "acceptance": [
+    "tests/backend (flow*, launcher*, omp_home*, skills), tests/bridge (py + node handoff_tools), live_omp_tools_independent_p27cd68 may need an independent update — report (real exit codes)"
+  ],
+  "allowed_write_paths": [
+    "omp_bridge/g3/bridge.ts",
+    "omp_bridge/skills/**",
+    "omp_bridge/agents/**",
+    "src/workbench/backend/flow.py",
+    "src/workbench/backend/flow_tasks.py",
+    "src/workbench/backend/launcher.py",
+    "src/workbench/backend/omp_home.py",
+    "tests/backend/test_flow*.py",
+    "tests/backend/test_launcher_models.py",
+    "tests/backend/test_omp_home*.py",
+    "tests/backend/test_workbench_skills.py",
+    "tests/bridge/handoff_tools.test.ts",
+    "tests/bridge/test_*.py"
+  ],
+  "do_not_touch": "vt_g1/screen.py, ui/product/** (concurrent copy unit p27-cd69-copy-01).",
+  "prohibited_paths": [
+    "tests/**/*_independent*",
+    "docs/**",
+    ".workflow/**"
+  ],
+  "rules": "No real provider requests; never read credential contents or other processes' environ; never touch the user's tmux server (private tmux -L only) or ~/wb-urux-sandbox and its processes; temp only under /tmp; kill only PIDs you started; no commits; no graphify update.",
+  "result_format": "checks table first (real exit codes), status per item, changed paths + sha256, independent tests needing updates. Korean, <=12 lines."
+}

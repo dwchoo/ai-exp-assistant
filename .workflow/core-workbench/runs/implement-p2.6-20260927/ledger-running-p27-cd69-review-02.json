@@ -1,0 +1,17 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 2131,
+  "event": {
+    "id": "running-p27-cd69-review-02",
+    "kind": "transition",
+    "data": {
+      "evidence": "host: Claude Code Agent spawn succeeded (name cd69-delta, wb-delta-reviewer), 2026-10-06",
+      "invocation": "p27-cd69-review-02",
+      "not_started_evidence": null,
+      "observed_effort": "unverified",
+      "observed_model": "unverified",
+      "outcome": null,
+      "state": "running"
+    }
+  }
+}

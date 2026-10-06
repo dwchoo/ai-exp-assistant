@@ -139,5 +139,25 @@
       "notifications are not forwarded to the outer terminal",
       "C1 ST U+009C not handled (8-bit C1 not used)"
     ]
+  },
+  "cd69": {
+    "decision": "C-D69 (amendment p2.7p, bundle 068d6264...)",
+    "invocations": [
+      "p27-cd69-copy-01",
+      "p27-cd69-role-01",
+      "p27-cd69-test-01 (pass)",
+      "p27-cd69-review-01 (block P2x2)",
+      "p27-cd69-fix-01",
+      "p27-cd69-test-02 (pass)",
+      "p27-cd69-review-02 (approve)",
+      "p27-cd69-fix-02 (clip backlog cap)"
+    ],
+    "root_check": "tests/ui test_product_omp_copy* and tests/terminal test_vt_osc52* OK after fix-02",
+    "carried_polish": [
+      "proceed instruction (:529) and follow-up records (:652) still truncated to 1024 (audit only)",
+      "test_product_omp_copy* PTY flake once (8 failures first run, then OK)",
+      "OSC 52 receipt >= vs stream > at the 8 MiB boundary (1 byte, harmless)"
+    ],
+    "pending": "real-model smoke with the hardware request (role boundary) and a /copy check through the product UI"
   }
 }

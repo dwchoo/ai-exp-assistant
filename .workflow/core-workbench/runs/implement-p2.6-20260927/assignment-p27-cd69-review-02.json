@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cd69-review-02",
+  "ticket_id": "C-D69 delta review",
+  "role": "reviewer",
+  "unit": "V-CW-18-cd69-copy",
+  "approved_bundle_digest": "068d62647e1385fd1c5b0ad6d4e6debb1f288a99ee10feb1aecea7b4a958ba72",
+  "frozen_candidate": "b8ac3e7a6260ed5261741c3340911e65bcd9c20528c6dd0e802219a72ab92b4c",
+  "routing": {
+    "planned_role": "reviewer",
+    "selected_role": "reviewer (wb-delta-reviewer, fresh)",
+    "reason_codes": [
+      "delta_after_full_review"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd69-review-01.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd69-test-01.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd69-fix-01.md"
+    ]
+  },
+  "scope": "Corrections only (fix-01): flow_tasks.py message field + first TASK; vt_g1/screen.py + ui/product/model.py OSC 52 body accounting vs catch-up, in_clipboard_body skipping, cap/notice, _out append; skills text. Check each review-01 finding is fixed; regressions: catch-up still protects the UI from runaway output that is NOT an OSC 52 body (an attacker/program printing a never-terminated `ESC]52;c;` + endless data must not disable catch-up forever or grow memory unbounded), memory bounds for bodies, persisted-record compatibility for `message`, notice wording.",
+  "rules": "No real provider requests; never read credential contents or other processes' environ; never touch the user's tmux server (private tmux -L only) or ~/wb-urux-sandbox and its processes; temp only under /tmp; kill only PIDs you started; no commits; no graphify update. Read-only.",
+  "result_format": "verdict (approve / block), per-finding status, new findings P1-P3 with file:line and scenario. Korean, <=10 lines."
+}

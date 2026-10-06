@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cd69-fix-01",
+  "ticket_id": "C-D69 review block corrections",
+  "role": "worker_senior",
+  "unit": "V-CW-18-cd69-role",
+  "approved_bundle_digest": "068d62647e1385fd1c5b0ad6d4e6debb1f288a99ee10feb1aecea7b4a958ba72",
+  "routing": {
+    "planned_role": "worker_senior",
+    "selected_role": "worker_senior (Opus general-purpose)",
+    "reason_codes": [
+      "contract_correctness",
+      "terminal_protocol"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd69-review-01.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd69-test-01.md"
+    ]
+  },
+  "required_behavior": [
+    "review P2-1: the first TASK the worker receives must carry the manager's full `message` (<=8192 chars) — keep the 1024-char summary only for UI/status; adjust the to-worker SKILL wording ('Short and concrete') so long procedures are fine.",
+    "review P2-2: a large /copy (OSC 52 body bigger than the catch-up threshold, e.g. 300 KB text) must not trigger catch-up that drops it and draws base64: exclude an in-progress OSC 52 body from catch-up accounting (or otherwise guarantee delivery up to the 1 MiB cap); beyond the cap: no clipboard write, a clear 'copy too large' notice, and never base64 on screen (also when a catch-up tail starts inside an OSC 52 body).",
+    "review/test P3: to-manager SKILL states the 8192-char report limit and to split longer factual output into progress reports or point to a log/file path; no other length rule.",
+    "test P3 model.py:1337: queue all OSC 52 writes from one feed in order (append, not overwrite).",
+    "Red->green tests for each; existing *_independent_p27cd69* tests must stay green (do not edit them)."
+  ],
+  "acceptance": [
+    "tests/backend flow*/task_flow/skills, tests/bridge node handoff_tools, tests/ui, tests/terminal vt*, the p27cd69 independent tests (real exit codes)"
+  ],
+  "allowed_write_paths": [
+    "src/workbench/backend/flow.py",
+    "src/workbench/backend/flow_tasks.py",
+    "omp_bridge/g3/bridge.ts",
+    "omp_bridge/skills/**",
+    "src/workbench/terminal/vt_g1/screen.py",
+    "src/workbench/ui/product/**",
+    "tests/backend/test_flow*.py",
+    "tests/backend/test_task_flow.py",
+    "tests/backend/test_workbench_skills.py",
+    "tests/bridge/handoff_tools.test.ts",
+    "tests/ui/test_product_omp_copy.py",
+    "tests/terminal/test_vt_osc52.py"
+  ],
+  "prohibited_paths": [
+    "tests/**/*_independent*",
+    "docs/**",
+    ".workflow/**"
+  ],
+  "rules": "No real provider requests; never read credential contents or other processes' environ; never touch the user's tmux server (private tmux -L only) or ~/wb-urux-sandbox and its processes; temp only under /tmp; kill only PIDs you started; no commits; no graphify update.",
+  "result_format": "checks table first (real exit codes), status per item, changed paths + sha256, residue. Korean, <=10 lines."
+}

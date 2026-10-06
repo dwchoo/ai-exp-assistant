@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cd69-fix-02",
+  "ticket_id": "C-D69 review-02 P3 clip_bytes bound",
+  "role": "worker_senior",
+  "unit": "V-CW-18-cd69-copy",
+  "approved_bundle_digest": "068d62647e1385fd1c5b0ad6d4e6debb1f288a99ee10feb1aecea7b4a958ba72",
+  "routing": {
+    "planned_role": "worker_senior",
+    "selected_role": "worker_senior (Opus, reused cd69-fix)",
+    "reason_codes": [
+      "resource_bound"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd69-review-02.md"
+    ]
+  },
+  "required_behavior": [
+    "Bound the OSC 52 body backlog excluded from catch-up (model.py count/clip_bytes): above a cap (e.g. 2 x STRING_MAX) excess body bytes are no longer excluded (they count toward catch-up, or are dropped with a 'copy skipped' notice) so repeated `ESC]52;c;`+8 MiB+BEL cannot accumulate unbounded memory; normal 300 KB / 1 MiB copies unchanged.",
+    "Red->green test; keep all *_independent_p27cd69* and *_p27cd69b* tests green without editing them; run tests/ui test_product_omp_copy*, tests/terminal test_vt_osc52*, tests/ui test_product_model* (real exit codes)."
+  ],
+  "allowed_write_paths": [
+    "src/workbench/ui/product/model.py",
+    "src/workbench/terminal/vt_g1/screen.py",
+    "tests/ui/test_product_omp_copy.py"
+  ],
+  "prohibited_paths": [
+    "tests/**/*_independent*",
+    "docs/**",
+    ".workflow/**"
+  ],
+  "rules": "No real provider requests; never touch the user's tmux server or ~/wb-urux-sandbox and its processes; temp only under /tmp; kill only PIDs you started; no commits; no graphify update.",
+  "result_format": "checks table, changed paths + sha256. Korean, <=6 lines."
+}

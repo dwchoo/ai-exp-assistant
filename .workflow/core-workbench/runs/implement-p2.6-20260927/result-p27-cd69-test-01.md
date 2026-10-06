@@ -1,0 +1,6 @@
+# p27-cd69-test-01 (test_designer, Opus) — 2026-10-06 — PASS (no P1/P2)
+
+First run, no flakes: backend 789 OK (skip 30, xfail 1); ui 795; terminal 193 (skip 2); g1_vt 85; workflow 56; contracts 52; bridge py 52 (skip 1) / node 31; live_omp_tools_independent_p27cd68 13 OK. Frozen 46d7944d at start; after edits 2d6ff239, audit: 9 changed files all tests/**/*_independent* (0 outside scope).
+P3 model.py:1337 `_out` overwritten, not appended: two OSC 52 writes in one feed -> only the last forwarded (final clipboard same; clipboard history tools miss the first).
+P3 to-manager SKILL.md:19 "no length limit" vs to_manager message 8192-char limit (flow.py:98, bridge.ts:207) -> long factual reports rejected.
+Updated (C-D69 (3) comments): live_omp_tools_independent_p27cd68 c175b5f39202, test_manager_rule_independent_p27cd68 623b1a024c92, test_models_independent_p27cd68 423add191f6c, test_omp_home_independent_p27u 3e8ad9b054cb, test_omp_isolation_independent_p27m 8893a56d54b2. New: test_role_boundary_independent_p27cd69.py f56c42176d2d, bridge_analysis_independent_p27cd69.test.ts cd5aea861824, test_vt_osc52_independent_p27cd69.py a2129eb2b9d9, test_product_omp_copy_independent_p27cd69.py 0a88b474ba37 (incl. real curses UI PTY path).
