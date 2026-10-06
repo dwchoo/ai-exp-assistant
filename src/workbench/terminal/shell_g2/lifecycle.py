@@ -28,6 +28,9 @@ if not __package__:  # Fixed helper invocation by absolute path.
 from .prototype import ShellChoice, ShellProcess, UnsafeShellState
 
 
+RUN_REQUEST_MAX = 4096  # one ``RUN:<base64 JSON>\n`` control line: at most the pipe's atomic write (PIPE_BUF)
+
+
 @dataclass
 class ManagedLifecycle:
     parent_pid: int
@@ -254,11 +257,11 @@ class ManagedLifecycleProbe(ShellProcess):
             payload = encode_run(normalize_run(self.choice.executable, script, request_id,
                                                start_timeout=start_timeout,
                                                return_timeout=return_timeout))
-            self.lifecycle.begin(request_id)
             request = f"RUN:{payload}\n".encode()
-            if len(request) > 4096:
-                self.lifecycle.fail_unknown("request_too_large")
+            if len(request) > RUN_REQUEST_MAX:
+                # C-D69 (5): refused before the lifecycle begins: nothing was written, the shell stays returnable
                 raise ValueError("bounded request exceeds pipe atomic write")
+            self.lifecycle.begin(request_id)
             try:
                 if os.write(self._request_fd, request) != len(request):
                     raise OSError("partial managed request")

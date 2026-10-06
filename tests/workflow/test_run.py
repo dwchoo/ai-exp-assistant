@@ -377,6 +377,84 @@ class WorkflowRuntimeTests(unittest.TestCase):
         self.assertEqual(typed, [], "nothing was typed")
         self.assertIsNone(self.repository.get_current_run(task_id))
 
+    def test_the_parent_cwd_file_is_read_only_when_pwd_finished_writing_it(self):
+        # p27-cd69-stuck-03: `pwd -P > file` creates the file before pwd writes it; reading it as soon as it
+        # existed saw "" and held the run ("parent shell cwd could not be verified"), a flake under load.
+        import shlex
+
+        class SlowPwdShell:
+            choice = ShellChoice("bash", "/usr/bin/bash")
+
+            def __init__(self, parts):
+                self.typed, self.pending, self.polls = [], None, 0
+                self.parts = parts
+
+            def send_user(self, data):
+                self.typed.append(data)
+                if data == b"wb-handoff\n":
+                    raise RuntimeError("reached wb-handoff")
+                words = shlex.split(data.decode())
+                if words[:1] == ["cd"] and "pwd" in words:
+                    target, path = Path(words[1]), Path(words[-1])
+                    path.write_text("")  # the redirection opened (and truncated) the file
+                    self.pending = (path, str(target.resolve()) + "\n")
+
+            def poll(self, timeout=0):
+                self.polls += 1
+                if self.pending is not None:
+                    path, text = self.pending
+                    step = self.polls  # pwd writes its line in pieces, a few polls later
+                    path.write_text(text[:max(0, min(len(text), (step - 3) * self.parts))])
+                return {"parent_mode": "manual_prompt"}
+
+            def display_bytes(self):
+                return b""
+
+            def detach(self):
+                pass
+
+        for parts in (1000, 4):
+            with self.subTest(parts=parts):
+                task_id = self.names_task("printf 'PASS\\n'; printf PASS > outcome.txt")
+                host = SlowPwdShell(parts)
+                with self.assertRaisesRegex(RuntimeError, "reached wb-handoff"):
+                    self.workflow.start(task_id, 1, worktree_path=self.root / f"slow-pwd-{parts}",
+                                        artifacts_root=self.artifacts, automation=AUTOMATION, shell=host)
+                self.assertEqual(host.typed[-1], b"wb-handoff\n", "the cwd was verified once pwd finished")
+
+    def test_a_parent_cwd_that_really_differs_or_never_completes_still_holds(self):
+        import shlex
+
+        class WrongPwdShell:
+            choice = ShellChoice("bash", "/usr/bin/bash")
+
+            def __init__(self, text):
+                self.typed, self.text = [], text
+
+            def send_user(self, data):
+                self.typed.append(data)
+                words = shlex.split(data.decode())
+                if words[:1] == ["cd"] and "pwd" in words:
+                    Path(words[-1]).write_text(self.text)
+
+            def poll(self, timeout=0):
+                return {"parent_mode": "manual_prompt"}
+
+            def display_bytes(self):
+                return b""
+
+            def detach(self):
+                pass
+
+        for name, text in (("elsewhere", "/tmp\n"), ("unterminated", "/tmp")):
+            with self.subTest(case=name):
+                task_id = self.names_task("printf 'PASS\\n'; printf PASS > outcome.txt")
+                host = WrongPwdShell(text)
+                with self.assertRaisesRegex(WorkflowHeld, "parent shell cwd could not be verified"):
+                    self.workflow.start(task_id, 1, worktree_path=self.root / f"wrong-pwd-{name}",
+                                        artifacts_root=self.artifacts, automation=AUTOMATION, shell=host)
+                self.assertNotIn(b"wb-handoff\n", host.typed)
+
     def test_preparation_failure_preserves_source_and_existing_target(self):
         task_id = self.approved_task("printf 'PASS\\n'; printf PASS > outcome.txt")
         target = self.root / "existing-target"

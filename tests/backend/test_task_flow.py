@@ -17,8 +17,10 @@ import threading
 import time
 import unittest
 from types import SimpleNamespace
+from unittest import mock
 from uuid import uuid4
 
+from workbench.backend import flow as flow_module
 from workbench.backend.flow import ANALYSIS_RULES, HandoffService
 from workbench.backend.flow_tasks import RETRY_LIMIT, ExperimentPorts, TaskFlow
 from workbench.backend.panes import HostShellPort, ShellPane
@@ -343,6 +345,21 @@ class DispatchTests(FlowFixture):
         self.assertEqual(busy["task"]["summary"], procedure[:1024])
         self.assertNotIn("message", self.flow.task_view())
         self.assertEqual(result["status"], "dispatched")
+
+    def test_an_experiment_command_too_long_for_the_host_shell_is_rejected_at_task_creation(self):
+        # C-D69 (5)(b): the same early size check as terminal; nothing is created or typed
+        for command in ("echo " + "x" * 3500, ["/bin/sh", "-c", "echo " + "y" * 3500], "echo " + "한" * 600):
+            with self.subTest(kind=type(command).__name__, size=len(str(command))):
+                result = self.new_experiment(execution=execution(command=command))
+                self.assertEqual((result["status"], result["reason"]), ("rejected", "invalid_arguments"), result)
+                errors = [e for e in result["errors"] if e.startswith("spec.execution.command")]
+                self.assertTrue(errors, result)
+                self.assertIn("script file", errors[0])
+                self.assertIn("4096", errors[0])
+        self.assertIsNone(self.flow.active_task())
+        self.assertEqual(self.mailbox.created, [])
+        self.assertEqual(self.new_experiment(execution=execution(command="echo " + "z" * 1500))["status"],
+                         "dispatched")
 
     def test_experiment_to_worker_starts_the_run_at_once_and_finishing_frees_the_worker(self):
         result = self.new_experiment()
@@ -869,6 +886,171 @@ class RealHostShellTests(unittest.TestCase):
             flow.close()
             service.close()
 
+
+    def test_any_start_failure_after_the_handoff_gives_the_host_shell_back_and_the_next_run_works(self):
+        # C-D69 (5)(a): p27-cd69-smoke-01 left the shell in control_wait (manager) after a refused request
+        with TaskRepository(self.db):
+            pass
+        service = HandoffService(self.root / "workflow" / "handoffs.jsonl", mailbox=FakeMailbox())
+        ports = ExperimentPorts(host_shell=lambda: HostShellPort(self.pane, lambda: self.pane),
+                                make_workflow=self.make_workflow, automation=lambda: AUTOMATION,
+                                environment_names=lambda: {"PATH"}, worktrees_root=self.root / "worktrees",
+                                artifacts_root=self.root / "runs")
+        flow = TaskFlow(self.root / "workflow" / "tasks-flow.jsonl", repository_factory=lambda: TaskRepository(self.db),
+                        handoffs=service, omp_idle=lambda role: True, experiment=ports, poll_interval=0.05,
+                        collect_slice=0.2)
+        service.configure(policy=flow)
+        service.start()
+        flow.start()
+
+        def spec(command):
+            return {"goal": "fixture run", "paths": ["outcome.txt"], "execution": {
+                "source": str(self.source), "commit": self.commit, "command": command,
+                "criteria": {"log_contains": "PASS", "result_file": "outcome.txt", "result_contains": "PASS"},
+                "environment": ["PATH"], "shell": "bash"}}
+
+        def user_owns_the_shell():
+            self.assertTrue(wait_until(lambda: self.pane.state["input_owner"] == "user"
+                                       and self.pane.state["parent_mode"] == "manual_prompt", 10), self.pane.state)
+            self.assertTrue(wait_until(lambda: self.pane.automation_hold is None, 5))
+            marker = f"user-{uuid4().hex[:6]}"
+            self.assertIsNone(self.pane.admit(f"echo {marker}\r".encode()))
+            self.assertTrue(wait_until(lambda: bytes(self.ui).count(marker.encode()) >= 2, 5), "the user types again")
+
+        def failed_start(call_id, command):
+            result = service.handle(ActorRole.MANAGER, request("to_worker", {
+                "kind": "experiment", "message": "run the fixture", "spec": spec(command)}, call_id))
+            self.assertEqual(result["status"], "dispatched", result)
+            self.assertTrue(wait_until(lambda: flow.task_view()["status"] == "finished", 30), flow.task_view())
+            self.assertEqual(flow.task_view()["last_result"]["outcome"], "start_failed", flow.task_view())
+            user_owns_the_shell()
+
+        try:
+            self.assertTrue(wait_until(lambda: self.pane.state["parent_mode"] == "manual_prompt"))
+            # 1. the shell refuses the request after wb-handoff and the manager claim (sizing check bypassed)
+            with mock.patch.object(flow_module, "experiment_request_bytes", lambda command: 0):
+                failed_start("m-1", "printf PASS > outcome.txt; echo " + "x" * 5000)
+            # 2. the claim itself fails: the parent waits in control_wait, still owned by the user
+            with mock.patch.object(HostShellPort, "claim_manager", side_effect=RuntimeError("forced claim failure")):
+                failed_start("m-2", "printf PASS > outcome.txt")
+            # 3. the next run uses the same shell normally
+            result = service.handle(ActorRole.MANAGER, request("to_worker", {
+                "kind": "experiment", "message": "run the fixture", "spec": spec(
+                    "printf 'PASS from host\\n'; printf PASS > outcome.txt")}, "m-3"))
+            self.assertEqual(result["status"], "dispatched", result)
+            self.assertTrue(wait_until(lambda: flow.task_view()["status"] == "finished"
+                                       and (flow.task_view()["last_result"] or {}).get("judgment") == "success", 30),
+                            flow.task_view())
+            user_owns_the_shell()
+        finally:
+            flow.close()
+            service.close()
+
+    def experiment_flow(self):
+        with TaskRepository(self.db):
+            pass
+        service = HandoffService(self.root / "workflow" / "handoffs.jsonl", mailbox=FakeMailbox())
+        ports = ExperimentPorts(host_shell=lambda: HostShellPort(self.pane, lambda: self.pane),
+                                make_workflow=self.make_workflow, automation=lambda: AUTOMATION,
+                                environment_names=lambda: {"PATH"}, worktrees_root=self.root / "worktrees",
+                                artifacts_root=self.root / "runs")
+        flow = TaskFlow(self.root / "workflow" / "tasks-flow.jsonl", repository_factory=lambda: TaskRepository(self.db),
+                        handoffs=service, omp_idle=lambda role: True, experiment=ports, poll_interval=0.05,
+                        collect_slice=0.2)
+        service.configure(policy=flow)
+        service.start()
+        flow.start()
+        self.addCleanup(service.close)
+        self.addCleanup(flow.close)
+        self.assertTrue(wait_until(lambda: self.pane.state["parent_mode"] == "manual_prompt"))
+        return service, flow
+
+    def experiment_spec(self, command):
+        return {"goal": "fixture run", "paths": ["outcome.txt"], "execution": {
+            "source": str(self.source), "commit": self.commit, "command": command,
+            "criteria": {"log_contains": "PASS", "result_file": "outcome.txt", "result_contains": "PASS"},
+            "environment": ["PATH"], "shell": "bash"}}
+
+    def test_a_late_control_wait_after_the_experiment_claim_failed_still_returns_the_shell(self):
+        # p27-cd69-stuck-test-01 P3-1: the shell processes wb-handoff only after the 3 s wait (stopped shell)
+        import signal
+        service, flow = self.experiment_flow()
+        original = HostShellPort.send_user
+        resumed = []
+
+        def slow_handoff(port, data):
+            original(port, data)
+            if data == b"wb-handoff\n":
+                os.kill(self.pane.pid, signal.SIGSTOP)  # the test's own shell child
+                timer = threading.Timer(3.6, lambda: (resume(), resumed.append(1)))
+                timer.start()
+                self.addCleanup(timer.cancel)
+
+        pid = self.pane.pid
+
+        def resume():
+            try:
+                os.kill(pid, signal.SIGCONT)
+            except ProcessLookupError:
+                pass
+        self.addCleanup(resume)
+        with mock.patch.object(HostShellPort, "send_user", slow_handoff):
+            result = service.handle(ActorRole.MANAGER, request("to_worker", {
+                "kind": "experiment", "message": "run", "spec": self.experiment_spec("printf PASS > outcome.txt")},
+                "m-late"))
+            self.assertEqual(result["status"], "dispatched", result)
+            self.assertTrue(wait_until(lambda: flow.task_view()["status"] == "finished", 30), flow.task_view())
+        self.assertEqual(flow.task_view()["last_result"]["outcome"], "start_failed", flow.task_view())
+        self.assertEqual(resumed, [1])
+        self.assertTrue(wait_until(lambda: self.pane.state["input_owner"] == "user"
+                                   and self.pane.state["parent_mode"] == "manual_prompt", 10), self.pane.state)
+        self.assertTrue(wait_until(lambda: self.pane.automation_hold is None, 5))
+        self.assertIsNone(self.pane.admit(b"echo after-late\r"))
+        self.assertTrue(wait_until(lambda: bytes(self.ui).count(b"after-late") >= 2, 5))
+
+    def test_the_experiment_size_check_uses_the_real_host_shell_path(self):
+        # p27-cd69-stuck-review-01 P3-1: a host shell path longer than the generic estimate (e.g. a Nix store path)
+        service, flow = self.experiment_flow()
+        long_shell = ("/nix/store/" + "a" * 32 + "-bash-interactive-5.2p37/bin/").ljust(106, "x") + "/bash"
+        prefix = "printf 'PASS\\n'; printf PASS > outcome.txt; : "
+        n = 1
+        while flow_module.experiment_request_bytes(prefix + "b" * (n + 1)) <= 4096:
+            n += 1
+        command = prefix + "b" * n  # the largest the generic check passes
+        self.assertEqual(flow_module.validate_arguments("to_worker", {
+            "kind": "experiment", "message": "m", "spec": self.experiment_spec(command)}), [])
+        self.assertIsNotNone(flow_module.experiment_command_error(command, long_shell))
+        self.assertIsNone(flow_module.experiment_command_error(command, "/usr/bin/bash"))
+        self.assertIsNone(flow_module.experiment_command_error(["/bin/sh", "-c", command], long_shell),
+                          "an argv list does not carry the shell path")
+        before = len(self.ui)
+        with mock.patch.object(self.pane, "choice", ShellChoice("bash", long_shell)):
+            # 1. at Task creation, with the current host shell's path
+            created = service.handle(ActorRole.MANAGER, request("to_worker", {
+                "kind": "experiment", "message": "run", "spec": self.experiment_spec(command)}, "m-long"))
+            self.assertEqual((created["status"], created["reason"]), ("rejected", "invalid_arguments"), created)
+            self.assertTrue(any(e.startswith("spec.execution.command") and "script file" in e
+                                for e in created["errors"]), created)
+            self.assertIsNone(flow.active_task())
+            # 2. the shell changed after creation: the start check refuses it before anything is typed
+            with mock.patch.object(TaskFlow, "_host_shell_size_error", lambda self, args: None):
+                created = service.handle(ActorRole.MANAGER, request("to_worker", {
+                    "kind": "experiment", "message": "run", "spec": self.experiment_spec(command)}, "m-start"))
+            self.assertEqual(created["status"], "dispatched", created)
+            self.assertTrue(wait_until(lambda: flow.task_view()["status"] == "finished", 20), flow.task_view())
+        self.assertEqual((flow.task_view()["last_result"]["outcome"], flow.task_view()["last_result"]["error"]),
+                         ("start_failed", "command_too_long"), flow.task_view())
+        time.sleep(0.3)
+        self.assertNotIn(b"wb-handoff", bytes(self.ui)[before:], "nothing was typed")
+        self.assertNotIn(b"cd ", bytes(self.ui)[before:], "nothing was typed")
+        self.assertEqual((self.pane.state["input_owner"], self.pane.state["parent_mode"]), ("user", "manual_prompt"))
+        # 3. with the real (short) path the same command runs
+        result = service.handle(ActorRole.MANAGER, request("to_worker", {
+            "kind": "experiment", "message": "run", "spec": self.experiment_spec(command)}, "m-short"))
+        self.assertEqual(result["status"], "dispatched", result)
+        self.assertTrue(wait_until(lambda: flow.task_view()["status"] == "finished"
+                                   and (flow.task_view()["last_result"] or {}).get("judgment") == "success", 30),
+                        flow.task_view())
 
 if __name__ == "__main__":
     unittest.main()

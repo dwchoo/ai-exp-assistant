@@ -97,6 +97,7 @@ from workbench.backend.flow import (
     HandoffService, environment_value_findings, rejected,
 )
 from workbench.contracts.v1 import ActorRole
+from workbench.terminal.shell_g2.lifecycle import RUN_REQUEST_MAX, encode_run, normalize_run
 
 TERMINAL_TOOL = "terminal"
 ABANDON_TOOL = "terminal_wait_abandoned"  # the bridge: a terminal call stopped waiting (abort or its timeout)
@@ -107,6 +108,7 @@ TAIL_BYTES = 8192
 TAIL_LINES = 200
 LOG_MAX = 64 * 1024 * 1024  # the per-run raw log limit of the operating contract
 PREPARE_WAIT = 3.0  # the control wait, as in an experiment start
+RETURN_WAIT = 5.0  # after a failed start whose wb-handoff Workbench typed: how long a late control wait is awaited
 HOLD_REASON = "Workbench is running the worker's terminal command"
 TERMINAL_DIRECTORY = "terminal"  # under DataLayout.workflow
 CHECK_INTERVAL = 60  # C-D68 (8): 1 minute
@@ -136,6 +138,19 @@ BUSY_DETAIL = ("Nothing was run. The host terminal runs a command only when it i
                "no job, no typed line, no experiment run). Do not work around it; try again later or tell the "
                "manager with to_manager.")
 ABORTED_DETAIL = "The call was aborted before the command started: nothing was run."
+TOO_LONG_DETAIL = ("Nothing was typed into the host terminal: this command is too long to hand to the host shell "
+                   "(it needs {need} bytes as a request; the limit is {limit}, about {room} plain ASCII characters; "
+                   "non-ASCII characters, newlines and quotes take more). Write the script to a file with the "
+                   "`write` tool (for example a temporary file under /tmp) and run `bash <file>`, or split it into "
+                   "several short commands.")
+START_FAILED_DETAIL = "The command was not started; the host terminal is the user's again."
+START_FAILED_UNCONFIRMED = ("The command was not started, and Workbench could not confirm that the host terminal is "
+                            "back at the user's prompt (input owner {owner}, mode {mode}). Do not retry: report "
+                            "blocked to the manager with to_manager. The user can take the host terminal back "
+                            "(prefix t, then c); if that does not work, force-kill it (prefix k) and press Enter for "
+                            "a new shell.")
+_UNKNOWN_SHELL = "/usr/bin/bash"  # sizing only, when the port does not name its shell
+_SIZING_ID = str(uuid4())  # a request id has this length
 PAUSED_DETAIL = ("Nothing was run: the user paused Workbench automation. A command already running continues. "
                  "Wait for the user's resume.")
 
@@ -183,9 +198,29 @@ def validate_terminal_arguments(args: object) -> list[str]:
     errors = [f"{name}: unknown field; only command" for name in sorted(set(args) - _KEYS)]
     command = args.get("command")
     if command is not None and (not isinstance(command, str) or len(command) > COMMAND_MAX or "\x00" in command):
-        errors.append(f"command: a shell command string (at most {COMMAND_MAX} characters, no NUL), or null to "
-                      "wait for the running command")
+        errors.append(f"command: a shell command string (at most {COMMAND_MAX} characters, no NUL; the host shell "
+                      f"takes one request of at most {RUN_REQUEST_MAX} bytes, about 2,800 plain ASCII characters, "
+                      "so write a longer script to a file and run bash <file>), or null for the current state")
     return errors
+
+
+def command_request_bytes(executable: str, command: str) -> int:
+    """C-D69 (5)(b): the size of the control line ``dispatch_managed`` would write for this command
+    (``RUN:`` + base64 of the request JSON with the display wrapper); at most ``RUN_REQUEST_MAX``."""
+    argv = [executable, "-c", ECHO_SCRIPT, executable, command]
+    return len(f"RUN:{encode_run(normalize_run(executable, argv, _SIZING_ID))}\n".encode())
+
+
+def command_room(executable: str) -> int:
+    """The longest plain ASCII command (letters, no quotes or newlines) that fits one request."""
+    low, high = 0, RUN_REQUEST_MAX
+    while low < high:
+        middle = (low + high + 1) // 2
+        if command_request_bytes(executable, "a" * middle) <= RUN_REQUEST_MAX:
+            low = middle
+        else:
+            high = middle - 1
+    return low
 
 
 def output_tail(data: bytes) -> tuple[str, bool]:
@@ -223,6 +258,7 @@ class _Command:
     log_bytes: int = 0
     log_truncated: bool = False
     log_error: str | None = None
+    handoff_typed: bool = False  # Workbench typed wb-handoff for this command (C-D69 (5)(a))
     echo: bytes = b""  # the command line the child prints first, still to be skipped (as the PTY shows it)
     # C-D68 (8) notices; ``since`` is guarded by ``lock``, the rest by the service lock.
     lock: threading.Lock = field(default_factory=threading.Lock)
@@ -786,6 +822,14 @@ class TerminalService:
                 port = None
             if port is None:
                 return self._refuse(key_dict, "host_terminal_busy", "host terminal is not running", BUSY_DETAIL)
+            executable = getattr(getattr(port, "choice", None), "executable", None)
+            executable = executable if isinstance(executable, str) and executable else _UNKNOWN_SHELL
+            need = command_request_bytes(executable, text)
+            if need > RUN_REQUEST_MAX:  # C-D69 (5)(b): refused before anything is held or typed
+                return self._refuse(key_dict, "command_too_long", "command_too_long",
+                                    TOO_LONG_DETAIL.format(need=need, limit=RUN_REQUEST_MAX,
+                                                           room=command_room(executable)),
+                                    request_bytes=need, limit_bytes=RUN_REQUEST_MAX)
             try:
                 reason = port.busy() or port.hold(HOLD_REASON)
             except Exception as exc:
@@ -802,24 +846,32 @@ class TerminalService:
             try:
                 self._dispatch(port, command, key)
             except _CallAbandoned:
+                # the hold stays until the shell is back: the user cannot type a handoff of their own meanwhile
+                requested = self._give_back(port, after_failure=True)
+                returned = self._returned_state(port, retake=command.handoff_typed and not requested)
                 port.release_hold(HOLD_REASON)
-                self._give_back(port, after_failure=True)
                 try:
                     command.log_path.unlink()  # nothing ran: no empty log is left (review-02 P3 (2))
                 except OSError:
                     pass
                 self._journal({"type": "terminal_aborted", "key": key_dict, "stage": "before_submit",
-                               "command_id": command.command_id})
+                               "command_id": command.command_id, "returned_to_user": _is_returned(returned)})
                 return {"status": "aborted", "reason": "call_abandoned", "command_id": command.command_id,
                         "detail": ABORTED_DETAIL}
             except Exception as exc:
                 error = f"{type(exc).__name__}: {exc}"[:300]
+                requested = self._give_back(port, after_failure=True)
+                # C-D69 (5)(a): the result says what the shell really is now (never a claimed return); a control
+                # wait that comes late (wb-handoff typed, claim failed) is still given back, under the hold
+                returned = self._returned_state(port, retake=command.handoff_typed and not requested)
                 port.release_hold(HOLD_REASON)
-                self._give_back(port, after_failure=True)
                 self._journal({"type": "terminal_start_failed", "command_id": command.command_id,
-                               "key": key_dict, "reason": error, "cwd": command.cwd or None})
+                               "key": key_dict, "reason": error, "cwd": command.cwd or None,
+                               "returned_to_user": _is_returned(returned), "host_terminal": returned})
+                detail = (START_FAILED_DETAIL if _is_returned(returned) else START_FAILED_UNCONFIRMED.format(
+                    owner=returned["input_owner"] or "unknown", mode=returned["parent_mode"] or "unknown"))
                 return {"status": "start_failed", "reason": error, "command_id": command.command_id,
-                        "detail": "The command was not started; the host terminal is the user's again."}
+                        "detail": detail, "host_terminal": returned}
             port.release_hold(HOLD_REASON)
             with self._lock:
                 self._current = command
@@ -864,6 +916,7 @@ class TerminalService:
         command.cwd = where
         if self._abandoned_now(key):
             raise _CallAbandoned
+        command.handoff_typed = True
         port.send_user(b"wb-handoff\n")
         deadline = time.monotonic() + PREPARE_WAIT
         while time.monotonic() < deadline and port.poll(0.02)["parent_mode"] != "control_wait":
@@ -950,8 +1003,10 @@ class TerminalService:
             if self._stop.is_set():
                 return {"status": "unknown", "reason": "backend stopping"}
 
-    def _give_back(self, port: Any, *, after_failure: bool = False) -> None:
-        """Return the shell to the user (``TaskFlow._give_back``); its directory was never changed."""
+    def _give_back(self, port: Any, *, after_failure: bool = False) -> bool:
+        """Return the shell to the user (``TaskFlow._give_back``); its directory was never changed.
+
+        True when the takeover was requested now."""
         try:
             state = port.snapshot()
             life = state.get("lifecycle") or {}
@@ -961,8 +1016,40 @@ class TerminalService:
                          and state.get("parent_mode") == "control_wait")  # wb-handoff typed, never claimed
             if (state.get("input_owner") == "manager" and (life.get("request_id") is None or returned)) or idle_wait:
                 port.request_takeover()
+                return True
         except Exception:
             pass
+        return False
+
+
+    @staticmethod
+    def _returned_state(port: Any, *, retake: bool = False) -> dict[str, Any]:
+        """``{input_owner, parent_mode}`` once the shell is back at the user's prompt, else the last state seen
+        within ``PREPARE_WAIT`` (``RETURN_WAIT`` with ``retake``); ``None`` values when it cannot be read.
+
+        ``retake`` (Workbench typed wb-handoff, its input still held): a control wait that shows up late with no
+        request is given back once more (p27-cd69-stuck review/test P3). A user's own handoff never gets here.
+        """
+        deadline = time.monotonic() + (RETURN_WAIT if retake else PREPARE_WAIT)
+        seen: dict[str, Any] = {"input_owner": None, "parent_mode": None}
+        retaken = False
+        while True:
+            try:
+                state = port.poll(0.02)
+                seen = {"input_owner": state.get("input_owner"), "parent_mode": state.get("parent_mode")}
+                life = state.get("lifecycle")
+                if (retake and not retaken and seen["parent_mode"] == "control_wait"
+                        and isinstance(life, Mapping) and life.get("request_id") is None):
+                    retaken = True
+                    port.request_takeover()
+            except Exception:
+                return seen
+            if _is_returned(seen) or time.monotonic() >= deadline:
+                return seen
+
+
+def _is_returned(state: Mapping[str, Any]) -> bool:
+    return state.get("input_owner") == "user" and state.get("parent_mode") == "manual_prompt"
 
 
 def _busy_reason(owner: str) -> str:

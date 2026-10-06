@@ -511,6 +511,16 @@ class WorkflowRun:
         _release_shell(self.shell, self.owns_shell)
 
 
+def _complete_line(path: Path) -> str | None:
+    """The first line of ``path`` once it is complete (ends with a newline), else None (missing or partial)."""
+    try:
+        text = path.read_text()
+    except (OSError, UnicodeDecodeError):
+        return None
+    line, newline, _ = text.partition("\n")
+    return line if newline and line else None
+
+
 def _release_shell(shell: Any, owned: bool) -> None:
     """Close a shell the workflow created; only detach from an injected one."""
     if owned:
@@ -705,10 +715,14 @@ class TaskWorkflow:
             pwd_file = record_dir / "parent-cwd.txt"
             shell.send_user((f"cd {shlex.quote(str(worktree.path))} && pwd -P > {shlex.quote(str(pwd_file))}\n").encode())
             deadline = time.monotonic() + 3
-            while not pwd_file.exists() and time.monotonic() < deadline:
+            # p27-cd69-stuck-03: the redirection creates the file before pwd writes it; only a complete
+            # (newline-terminated) line is compared, within the same deadline
+            reported = _complete_line(pwd_file)
+            while reported is None and time.monotonic() < deadline:
                 shell.poll(0.02)
                 shell.display_bytes()  # Preparation output is not experiment evidence.
-            if not pwd_file.exists() or Path(pwd_file.read_text().strip()).resolve() != worktree.path:
+                reported = _complete_line(pwd_file)
+            if reported is None or Path(reported).resolve() != worktree.path:
                 raise WorkflowHeld("parent shell cwd could not be verified; no experiment sent")
             shell.send_user(b"wb-handoff\n")
             deadline = time.monotonic() + 3

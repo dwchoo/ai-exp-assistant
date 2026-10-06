@@ -78,6 +78,7 @@ from uuid import UUID, uuid4
 
 from workbench.contracts.v1 import ActorRole, MessageKind
 from workbench.ipc.bridge_g3.mailbox import BridgeDisconnected, BridgePeer, MailboxError, MailboxStatus
+from workbench.terminal.shell_g2.lifecycle import RUN_REQUEST_MAX, encode_run, normalize_run
 
 HANDOFF_JOURNAL_NAME = "handoffs.jsonl"  # under DataLayout.workflow
 # p27-cd68-fix-03 (smoke-01 M2): "not yet processed" was read as "send it again".
@@ -382,6 +383,39 @@ def _normalize_request(request: dict[str, Any]) -> dict[str, Any] | None:
     return {**request, "paths": paths}
 
 
+_SIZING_SHELL = "/" + "s" * 63  # the host shell's path is not known at Task creation: sized generously
+_SIZING_ID = str(uuid4())
+
+
+def experiment_request_bytes(command: str | list[str]) -> int:
+    """The control line an experiment start writes for ``command`` (``PersistentShell.submit`` +
+    ``dispatch_managed``: ``RUN:`` + base64 of the request JSON); the host shell takes ``RUN_REQUEST_MAX``."""
+    argv = [_SIZING_SHELL, "-c", command] if isinstance(command, str) else list(command)
+    return len(f"RUN:{encode_run(normalize_run(_SIZING_SHELL, argv, _SIZING_ID))}\n".encode())
+
+
+def _shell_path_extra(command: str | list[str], executable: str | None) -> int:
+    """Upper bound of the extra request bytes when the real shell path is longer than ``_SIZING_SHELL``.
+
+    Shell text runs as ``[<shell>, -c, text]`` and the request also names the shell as ``selected``: the path
+    is in the JSON twice; an argv list does not carry it.
+    """
+    if executable is None or not isinstance(command, str):
+        return 0
+    grown = 2 * (len(json.dumps(executable)) - len(json.dumps(_SIZING_SHELL)))
+    return 0 if grown <= 0 else -(-grown * 4 // 3) + 4  # base64 of the longer JSON, with its padding
+
+
+def experiment_command_error(command: str | list[str], executable: str | None = None) -> str | None:
+    """Why ``command`` cannot be handed to the host shell (``executable``: its path when known), or None."""
+    need = experiment_request_bytes(command) + _shell_path_extra(command, executable)
+    if need <= RUN_REQUEST_MAX:
+        return None
+    return (f"spec.execution.command: too long for the host shell (it needs {need} bytes as one request; the "
+            f"limit is {RUN_REQUEST_MAX}, about 2,800 plain ASCII characters); put the commands in a script file "
+            "in the source repository and run it, e.g. bash scripts/run.sh")
+
+
 def _check_execution(execution: object, errors: list[str]) -> None:
     if not isinstance(execution, dict) or set(execution) != _EXECUTION_KEYS:
         errors.append(f"spec.execution: must be an object with exactly {EXECUTION_SHAPE}")
@@ -393,6 +427,10 @@ def _check_execution(execution: object, errors: list[str]) -> None:
     if not (_text(command) or isinstance(command, list) and 0 < len(command) <= LIST_MAX
             and all(_text(item) for item in command)):
         errors.append("spec.execution.command: must be shell text or a non-empty argv list of strings")
+    else:
+        error = experiment_command_error(command)  # C-D69 (5)(b): refused at Task creation, nothing typed
+        if error is not None:
+            errors.append(error)
     criteria = execution["criteria"]
     if (not isinstance(criteria, dict) or set(criteria) != _CRITERIA_KEYS
             or not all(_text(criteria[name], SHORT_MAX) for name in _CRITERIA_KEYS)):

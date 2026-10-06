@@ -90,8 +90,9 @@ from uuid import uuid4
 
 from workbench.backend.flow import (
     ANALYSIS_RULES, DEFAULT_ANALYSIS, ActiveTask, HandoffDecision, HandoffJournal, HandoffRequest, OutboundMessage, accepts_keyword, held, rejected,
+    experiment_command_error,
 )
-from workbench.backend.flow_terminal import HostGate
+from workbench.backend.flow_terminal import RETURN_WAIT, HostGate
 from workbench.contracts.v1 import ActorRole, MessageKind
 from workbench.ipc.bridge_g3.mailbox import MailboxStatus
 from workbench.workflow.run import WorkerJudgmentUnavailable, WorkflowHeld, classify_worker_request
@@ -465,15 +466,42 @@ class TaskFlow:
 
     # -- the HandoffPolicy -----------------------------------------------------------
     def decide(self, request: HandoffRequest, _active: ActiveTask | None) -> HandoffDecision:
+        # the host shell is asked before the flow lock (its port takes the pane lock)
+        size_error = self._host_shell_size_error(request.args) if request.tool == "to_worker" else None
         with self._lock:
             if request.tool == "to_worker":
-                decision = self._to_worker(request)
+                decision = (HandoffDecision(rejected("invalid_arguments", errors=[size_error]))
+                            if size_error is not None else self._to_worker(request))
                 notices = self._take_notices()
                 if notices:
                     decision = HandoffDecision({**decision.result, "notices": notices}, decision.message,
                                                decision.approval, decision.listener)
                 return decision
             return self._to_manager(request)
+
+    def _host_shell_size_error(self, args: Mapping[str, Any]) -> str | None:
+        """C-D69 (5)(b) (stuck-review-01 P3-1): an experiment command checked with the current host shell's path
+        at Task creation, so creation never passes what the start refuses on this shell."""
+        spec = args.get("spec") if args.get("kind") == "experiment" else None
+        execution = spec.get("execution") if isinstance(spec, Mapping) else None
+        if not isinstance(execution, Mapping) or self._experiment is None or args.get("cancel") is True:
+            return None
+        return experiment_command_error(execution.get("command"), self._host_shell_path())
+
+    def _host_shell_path(self) -> str | None:
+        port = None
+        try:
+            port = self._experiment.host_shell()
+            executable = getattr(getattr(port, "choice", None), "executable", None)
+            return executable if isinstance(executable, str) and executable else None
+        except Exception:
+            return None
+        finally:
+            if port is not None:
+                try:
+                    port.detach()
+                except Exception:
+                    pass
 
     def _take_notices(self) -> list[dict[str, Any]]:
         if not self.notices:
@@ -1097,19 +1125,34 @@ class TaskFlow:
                 self._following = task.task_id
                 self._save_task(task)
             refused: list[str] = []
+            typing: list[bool] = []  # the workflow may type into the host shell from here (C-D69 (5)(a))
             options: dict[str, Any] = {}
             if late_hold:
-                options["before_shell_input"] = self._typing_hold(task, port, ports, refused)
+                hold = self._typing_hold(task, port, ports, refused)
+
+                def before_shell_input() -> None:
+                    hold()
+                    typing.append(True)
+                options["before_shell_input"] = before_shell_input
             else:
                 self._remember_home_cwd(port, ports)
+                typing.append(True)
             slot = ports.worktrees_root / f"{task.task_id}-r{revision}-{uuid4().hex[:8]}"
             try:
+                executable = getattr(getattr(port, "choice", None), "executable", None)
+                too_long = experiment_command_error((task.spec or {}).get("execution", {}).get("command") or "",
+                                                    executable if isinstance(executable, str) else None)
+                if too_long is not None:  # C-D69 (5)(b): this shell's real path, before anything is typed
+                    refused.append("command_too_long")
+                    raise WorkflowHeld(too_long)
                 run = workflow.start(task.task_id, revision, worktree_path=slot,
                                      artifacts_root=ports.artifacts_root, automation=ports.automation(), shell=port,
                                      **options)
             except Exception as exc:
+                if typing:  # a wb-handoff the workflow typed may reach the control wait late (input still held)
+                    self._await_settled(port)
                 port.release_hold()
-                self._give_back(port, ports)
+                self._give_back(port, ports, after_failure=bool(typing))
                 # F2: a rejected worker response keeps the bridge's machine reason, not just "ValueError".
                 error = (refused[0] if refused else exc.reason if isinstance(exc, WorkerResponseRejected)
                          else type(exc).__name__)
@@ -1199,7 +1242,25 @@ class TaskFlow:
             self._record({"type": record_type, "task_id": task_id, "run_id": run_id,
                           "state": queued.get("status"), "reason": queued.get("reason")})
 
-    def _give_back(self, port: Any, ports: ExperimentPorts | None = None) -> None:
+    @staticmethod
+    def _await_settled(port: Any) -> None:
+        """Until the shell shows the user's prompt or a control wait with no request (bounded by RETURN_WAIT).
+
+        A wb-handoff typed by the start (stuck-test-01 P3-1) may be processed after the claim gave up; its
+        control wait is then given back by ``_give_back``. Nothing else can type meanwhile: input is held.
+        """
+        deadline = time.monotonic() + RETURN_WAIT
+        while time.monotonic() < deadline:
+            try:
+                state = port.poll(0.02)
+            except Exception:
+                return
+            life = state.get("lifecycle") or {}
+            if state.get("parent_mode") == "manual_prompt" or (
+                    state.get("parent_mode") == "control_wait" and life.get("request_id") is None):
+                return
+
+    def _give_back(self, port: Any, ports: ExperimentPorts | None = None, *, after_failure: bool = False) -> None:
         """Return the host shell to the user when the manager holds it with nothing in flight.
 
         CW-18 F2: then the user's directory from before the run is restored. User
@@ -1212,7 +1273,10 @@ class TaskFlow:
             life = state.get("lifecycle") or {}
             returned = (not life.get("unknown") and life.get("lifetime") == "ended"
                         and life.get("input_returned") and life.get("control_returned"))
-            if state.get("input_owner") == "manager" and (life.get("request_id") is None or returned):
+            # C-D69 (5)(a): also a start that failed after its wb-handoff but before the manager claim (idle wait)
+            idle_wait = (after_failure and life.get("request_id") is None
+                         and state.get("parent_mode") == "control_wait")
+            if (state.get("input_owner") == "manager" and (life.get("request_id") is None or returned)) or idle_wait:
                 if self._home_cwd is not None and ports is not None:
                     try:
                         held = port.hold_return(RETURN_REASON) is True

@@ -382,6 +382,28 @@ class RoleBoundaryTests(unittest.TestCase):
         self.assertIn(f"{flow.MESSAGE_MAX} characters", line)
         self.assertRegex(line, r"(?i)may be long")
 
+    def test_worker_runs_short_commands_or_a_script_file(self):
+        # C-D69 (5)(b)(c): a 5,058-char inline script hit the host shell request limit (p27-cd69-smoke-01)
+        block = " ".join(section(body("to-manager"), "Running commands: `terminal`").split())
+        self.assertRegex(block, r"(?i)several short `terminal` commands")
+        self.assertRegex(block, r"(?i)write it to a file with `write`[^.]*`bash <file>`")
+        self.assertRegex(block, r"(?i)never put a long multi-line script inline")
+        stated = int(re.search(r"about ([\d,]+) plain ASCII characters", block).group(1).replace(",", ""))
+        from workbench.backend import flow_terminal
+        for shell in ("/usr/bin/bash", "/bin/sh"):  # never more than the host shell takes (stuck-review-01 P3-3)
+            self.assertLessEqual(stated, flow_terminal.command_room(shell))
+        self.assertRegex(block, r"`command_too_long`: nothing ran")
+        self.assertRegex(block, r"(?i)`start_failed`: nothing ran[^.]*detail says whether the host terminal is the "
+                                r"user's again")
+
+    def test_manager_keeps_procedures_concise(self):
+        block = " ".join(section(body("to-worker"), "The worker is an executor: delegate a procedure").split())
+        self.assertRegex(block, r"(?i)as concise as the task needs")
+        self.assertRegex(block, r"(?i)no multi-section essays")
+        joined = re.sub(r'"\s*\+\s*"', "", BRIDGE)  # the description is split over source lines
+        self.assertIn("as concise as the task needs: key commands, allowed fallbacks, when to stop, "
+                      "the values to return", joined)
+
     def test_to_worker_schema_has_the_nullable_analysis_field(self):
         self.assertIn("analysis", schema_properties("TO_WORKER_PARAMETERS"))
         self.assertRegex(BRIDGE, r'analysis: \{ type: \["string", "null"\], enum: \["summary", "detailed", null\]')

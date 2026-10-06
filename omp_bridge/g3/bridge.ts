@@ -226,7 +226,8 @@ const TO_WORKER_PARAMETERS = {
 			description: "experiment: run a command and judge criteria; work: the worker does the work itself." },
 		message: { ...TEXT, description: "The instruction or summary for the worker (no secret values). For kind work "
 			+ "give an executable procedure (commands or steps, allowed fallbacks, when to stop, the result you need "
-			+ "back), not an open question." },
+			+ "back), not an open question; keep it as concise as the task needs: key commands, allowed fallbacks, "
+			+ "when to stop, the values to return (no multi-section essays)." },
 		spec: {
 			type: ["object", "null"], additionalProperties: false, required: ["goal", "paths"],
 			description: `The Task: goal and the paths the worker may change (required for a new Task); ${NOT_USED} `
@@ -366,7 +367,9 @@ const TERMINAL_PARAMETERS = {
 			description: "One shell command line (bash -c / sh -c), run in the current directory of the host terminal "
 				+ "(where the user last cd'd; a cd inside the command does not change it); null returns the current state at once (never waits): "
 				+ "the last command's result, or that it is still running with its new output. No environment "
-				+ "variable values (use $NAME)." },
+				+ "variable values (use $NAME). Keep it short: the host shell takes about 2,800 plain ASCII characters "
+				+ "(non-ASCII, newlines and quotes take more); a longer one gets command_too_long and nothing runs. "
+				+ "For a long script, write it to a file with the write tool and run bash <file>." },
 	},
 };
 const TERMINAL_TOOL = {

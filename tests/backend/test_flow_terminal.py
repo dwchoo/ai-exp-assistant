@@ -28,6 +28,9 @@ import unittest
 from types import SimpleNamespace
 from uuid import uuid4
 
+from unittest import mock
+
+from workbench.backend import flow_terminal
 from workbench.backend.flow import HandoffService
 from workbench.backend.flow_terminal import (
     TAIL_BYTES, TAIL_LINES, WAIT_SECONDS, HostGate, TerminalService, output_tail,
@@ -151,6 +154,69 @@ class RefusalTests(ServiceFixture):
             self.assertEqual((result["status"], result["reason"]), ("rejected", "invalid_arguments"), args)
             self.assertTrue(any(error.startswith(field) for error in result["errors"]), result)
         self.assert_nothing_typed()
+
+    def test_an_oversize_command_is_refused_before_anything_is_typed(self):
+        # C-D69 (5)(b): the real encoded RUN line (base64 JSON incl. the display wrapper) is checked first
+        for command in ("echo " + "x" * 5000, "echo " + "한" * 700, "printf '%s\\n' " + "'a\"b' " * 600):
+            with self.subTest(size=len(command)):
+                result = self.run_tool({"command": command})
+                self.assertEqual((result["status"], result["reason"]), ("command_too_long", "command_too_long"),
+                                 result)
+                self.assertGreater(result["request_bytes"], result["limit_bytes"])
+                self.assertEqual(result["limit_bytes"], 4096)
+                self.assertIn("`write`", result["detail"])
+                self.assertIn("bash <file>", result["detail"])
+                self.assertIn("Nothing was typed", result["detail"])
+                self.assert_nothing_typed()
+        self.assertLess(len("echo " + "한" * 700), 1000, "non-ASCII counts by its encoded size, not characters")
+        refused = [r for r in journal(self.root) if r["type"] == "terminal_refused"]
+        self.assertEqual({r["status"] for r in refused}, {"command_too_long"})
+
+    def test_the_size_check_matches_the_dispatch_encoding(self):
+        executable = "/usr/bin/bash"
+        room = flow_terminal.command_room(executable)
+        self.assertGreater(room, 2500)
+        self.assertLessEqual(flow_terminal.command_request_bytes(executable, "a" * room), 4096)
+        self.assertGreater(flow_terminal.command_request_bytes(executable, "a" * (room + 1)), 4096)
+
+    def test_a_start_failure_whose_return_is_not_confirmed_never_claims_the_terminal_is_the_users(self):
+        class StuckPort(FakeHostPort):
+            choice = SimpleNamespace(kind="bash", executable="/usr/bin/bash")
+
+            def cwd(self):
+                return "/tmp"
+
+            def poll(self, timeout=0):
+                return {"parent_mode": "control_wait", "input_owner": "manager"}
+
+            def claim_manager(self):
+                pass
+
+            def display_bytes(self):
+                return b""
+
+            def snapshot(self):
+                return {"parent_pid": 1, "generation": 1, "owner_epoch": 1, "input_owner": "manager",
+                        "parent_mode": "control_wait",
+                        "lifecycle": {"request_id": "r", "unknown": ["request_write_failure"]}}
+
+            def submit(self, *args, **kwargs):
+                raise OSError("partial managed request")
+
+            def request_takeover(self):
+                raise AssertionError("an unknown lifecycle is never taken over")
+
+        self.port = StuckPort()
+        with mock.patch.object(flow_terminal, "PREPARE_WAIT", 0.2), \
+                mock.patch.object(flow_terminal, "RETURN_WAIT", 0.3, create=True):
+            result = self.run_tool({"command": "true"})
+        self.assertEqual(result["status"], "start_failed", result)
+        self.assertNotIn("user's again", result["detail"])
+        self.assertIn("could not confirm", result["detail"])
+        self.assertIn("prefix t", result["detail"])
+        self.assertEqual(result["host_terminal"], {"input_owner": "manager", "parent_mode": "control_wait"})
+        failed = next(r for r in journal(self.root) if r["type"] == "terminal_start_failed")
+        self.assertIs(failed["returned_to_user"], False)
 
     def test_the_wait_is_fixed_at_120_seconds(self):
         # C-D68 (9) user decision 2026-10-05: "120초 고정"; the worker sets no wait.
@@ -342,6 +408,45 @@ class RealHostShellTerminalTests(ServiceFixture):
         self.assertTrue(wait_until(lambda: b"history | tail -3" in bytes(self.ui)[len(shown.encode()):], 5))
         time.sleep(0.3)
         self.assertNotIn(b"args=", bytes(self.ui)[len(shown.encode()):], "nothing went into the parent's history")
+
+    def test_an_oversize_command_is_refused_and_the_shell_stays_the_users(self):
+        # p27-cd69-smoke-01 P1: a 5,058-char command used to strand the shell in control_wait (manager)
+        before = len(self.ui)
+        result = self.run_tool({"command": "echo " + "y" * 5053, "wait": 10})
+        self.assertEqual(result["status"], "command_too_long", result)
+        time.sleep(0.3)
+        self.assertNotIn(b"wb-handoff", bytes(self.ui)[before:], "nothing was typed")
+        self.assert_user_owns_the_shell_again()
+        after = self.run_tool({"command": "echo next-ok", "wait": 30})
+        self.assertEqual((after["status"], after["exit_code"]), ("exited", 0), after)
+        self.assertIn("next-ok", after["output_tail"])
+        self.assert_user_owns_the_shell_again()
+
+    def test_a_start_failure_after_the_handoff_gives_the_shell_back_to_the_user(self):
+        # C-D69 (5)(a): the request is refused by the shell after wb-handoff and the manager claim
+        with mock.patch.object(flow_terminal, "command_request_bytes", lambda executable, command: 0):
+            result = self.run_tool({"command": "echo " + "z" * 5053, "wait": 10})
+        self.assertEqual(result["status"], "start_failed", result)
+        self.assertIn("pipe atomic write", result["reason"])
+        self.assertIn("the host terminal is the user's again", result["detail"])
+        self.assertEqual(result["host_terminal"], {"input_owner": "user", "parent_mode": "manual_prompt"})
+        self.assert_user_owns_the_shell_again()
+        after = self.run_tool({"command": "echo after-failure", "wait": 30})
+        self.assertEqual((after["status"], after["exit_code"]), ("exited", 0), after)
+        self.assert_user_owns_the_shell_again()
+        failed = next(r for r in journal(self.root) if r["type"] == "terminal_start_failed")
+        self.assertIs(failed["returned_to_user"], True)
+
+    def test_a_late_control_wait_after_a_failed_claim_still_returns_the_shell(self):
+        # p27-cd69-stuck-review-01 P3-2: wb-handoff typed, the claim came before the control wait (slow shell)
+        with mock.patch.object(flow_terminal, "PREPARE_WAIT", 0.0):
+            result = self.run_tool({"command": "echo never-runs", "wait": 10})
+        self.assertEqual(result["status"], "start_failed", result)
+        self.assertIn("user's again", result["detail"])
+        self.assertEqual(result["host_terminal"], {"input_owner": "user", "parent_mode": "manual_prompt"})
+        self.assert_user_owns_the_shell_again()
+        after = self.run_tool({"command": "echo after-late-wait", "wait": 30})
+        self.assertEqual((after["status"], after["exit_code"]), ("exited", 0), after)
 
     def test_typing_user_refuses_without_typing(self):
         self.user_types(b"echo half-typed")

@@ -417,6 +417,10 @@ test("worker registers terminal: strict, essential, one nullable command (no wai
 		assert.match(parameters.properties.command.description, /current directory of the host terminal/);
 		assert.match(parameters.properties.command.description, /null returns the current state at once \(never waits\)/);
 		assert.doesNotMatch(parameters.properties.command.description, /project directory/);
+		// C-D69 (5)(b): the real limit is the host shell request; a long script goes to a file.
+		assert.match(parameters.properties.command.description, /about 2,800 plain ASCII characters/);
+		assert.match(parameters.properties.command.description, /command_too_long and nothing runs/);
+		assert.match(parameters.properties.command.description, /write it to a file with the write tool and run bash <file>/);
 		assert.match(tool.description, /current directory \(where the user last cd'd\)/);
 		assert.doesNotMatch(tool.description, /project directory/);
 		for (const needle of [/Workbench host terminal \(visible to the user\)/, /exit code/, /every shell command/,
