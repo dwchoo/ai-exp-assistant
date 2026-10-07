@@ -19,7 +19,9 @@
     "p27-cd70-smoke-02",
     "p27-cd70-fix-03",
     "p27-cd70-review-03",
-    "p27-cd70-smoke-03"
+    "p27-cd70-smoke-03",
+    "p27-cd70-ui-01",
+    "p27-cd70-smoke-04"
   ],
   "root_adjudications": [
     ".workflow/core-workbench/runs/implement-p2.6-20260927/assignment-p27-cd70-02.json",
@@ -51,7 +53,9 @@
     "smoke-01 O1: a manager told to restart mid-command re-ran the command to create a window (scenario artifact; non-idempotent commands risk)",
     "smoke-01 O3 / user observation: host prompt sometimes not redrawn after a follow-up command (not reproduced in smoke-02)",
     "smoke-03: manager answered twice around recovery (an English one-liner after the report, then Korean after manager_recovery)",
-    "first Task delivery recorded unknown/BridgeTimeout although delivered (recurring; see BridgeTimeout record noise)"
+    "first Task delivery recorded unknown/BridgeTimeout although delivered (recurring; see BridgeTimeout record noise)",
+    "smoke-04 O1: host pane output overprints / prompt pushed below after a follow-up command in a full pane (3rd reproduction in PTY capture)",
+    "smoke-04 O2: worker (luna) wrote turn-end text and one to_manager message in Mongolian; manager understood; consider a language line in the worker skill"
   ],
   "files_sha256": {
     "omp_bridge/g3/bridge.ts": "835158403d182f3835967b5495319c73d356fe2479a443387fe64c9f0e4da0e8",
@@ -100,7 +104,8 @@
     "fix-03": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd70-fix-03.md (D1 fixed: unbound queue for done/blocked reports to next manager session; all suites green)",
     "review-03": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd70-review-03.md (pass; 2 P3)",
     "pending": "none required; not exercised live: S1 2nd check + worker_stalled, watchdog quiet while a report waits for the manager (offline tests cover both)",
-    "smoke-03": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd70-smoke-03.md (S3 re-smoke after fix-03: D1 fixed; worker report queued while manager gone, delivered once to the new session, reports_resent 1, manager answered without cancel/re-run; 11/15 requests; OMP 18.7.0 isolation ok)"
+    "smoke-03": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd70-smoke-03.md (S3 re-smoke after fix-03: D1 fixed; worker report queued while manager gone, delivered once to the new session, reports_resent 1, manager answered without cancel/re-run; 11/15 requests; OMP 18.7.0 isolation ok)",
+    "smoke-04": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd70-smoke-04.md (normal-flow regression on e6a73a1: R1 delegated, 13.9/23.1/63.6 s; R2 150 s command: running at 120 s, terminal_done once, no status_check; 16/20 requests)"
   },
   "files_sha256_fix03": {
     "omp_bridge/skills/to-manager/SKILL.md": "bbeba20792ce460c4ff0bfaf2d1020c1e267d02440cf979e06f4e5b6ecafcd45",

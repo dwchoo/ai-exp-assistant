@@ -1,0 +1,755 @@
+{
+ "invocation": "p27-cd70-smoke-04",
+ "omp": "omp/18.7.0",
+ "requests": {
+  "R1": {
+   "manager": 4,
+   "worker": 4
+  },
+  "R2": {
+   "manager": 4,
+   "worker": 4
+  },
+  "total": 16,
+  "cap": 20,
+  "pause_at": 18,
+  "errors": 0,
+  "aborted": 0
+ },
+ "clock_note": "key_events times are UTC from session/journal records; driver_events use t seconds since driver start and KST wall (UTC+9)",
+ "key_events": [
+  {
+   "scenario": "R1",
+   "utc": "09:07:53.327",
+   "event": "user input into manager pane"
+  },
+  {
+   "scenario": "R1",
+   "utc": "09:07:56.687",
+   "event": "manager request1: read skill://to-worker (3.4 s)"
+  },
+  {
+   "scenario": "R1",
+   "utc": "09:08:17.342",
+   "event": "manager to_worker(kind=work, commands=[1 script, 1665 chars]) (24.0 s after input)"
+  },
+  {
+   "scenario": "R1",
+   "utc": "09:08:17.469",
+   "event": "TASK delivered to worker (0.13 s)"
+  },
+  {
+   "scenario": "R1",
+   "utc": "09:08:20.886",
+   "event": "worker request1: read skill://to-manager (3.4 s)"
+  },
+  {
+   "scenario": "R1",
+   "utc": "09:08:31.366",
+   "event": "worker terminal(command == manager command, exact) -> TASK->first terminal 13.9 s"
+  },
+  {
+   "scenario": "R1",
+   "utc": "09:08:31.561",
+   "event": "terminal_ended exit 0, 0.152 s; terminal_notice outcome=not_needed"
+  },
+  {
+   "scenario": "R1",
+   "utc": "09:08:40.521",
+   "event": "worker to_manager kind=done (TASK->done 23.1 s) ; handoff queued"
+  },
+  {
+   "scenario": "R1",
+   "utc": "09:08:40.563",
+   "event": "report delivered to manager with commands_run appendix (0.04 s)"
+  },
+  {
+   "scenario": "R1",
+   "utc": "09:08:56.923",
+   "event": "manager final answer to user -> input->final 63.6 s"
+  },
+  {
+   "scenario": "R2",
+   "utc": "09:09:43.089",
+   "event": "user input into manager pane"
+  },
+  {
+   "scenario": "R2",
+   "utc": "09:09:46.479",
+   "event": "manager request1: read skill://to-worker"
+  },
+  {
+   "scenario": "R2",
+   "utc": "09:09:52.757",
+   "event": "manager to_worker(commands=['sleep 150; echo cd70-long-done']) (9.7 s after input)"
+  },
+  {
+   "scenario": "R2",
+   "utc": "09:09:52.879",
+   "event": "TASK delivered to worker"
+  },
+  {
+   "scenario": "R2",
+   "utc": "09:09:59.495",
+   "event": "worker terminal(command exact) -> TASK->first terminal 6.6 s; terminal_started 09:09:59.534"
+  },
+  {
+   "scenario": "R2",
+   "utc": "09:11:59.496",
+   "event": "terminal tool result status=running after fixed wait (elapsed 119.962 s)"
+  },
+  {
+   "scenario": "R2",
+   "utc": "09:12:01.435",
+   "event": "worker ends its turn (1.9 s later); no other worker/manager request during 09:12:01-09:12:29"
+  },
+  {
+   "scenario": "R2",
+   "utc": "09:12:29.649",
+   "event": "terminal_ended exit 0 duration 150.115 s"
+  },
+  {
+   "scenario": "R2",
+   "utc": "09:12:29.688",
+   "event": "terminal_done notice delivered to worker (outcome sent, target worker; notice_id 1bc0d403...)"
+  },
+  {
+   "scenario": "R2",
+   "utc": "09:12:35.917",
+   "event": "worker to_manager kind=done (once), 6.2 s after notice"
+  },
+  {
+   "scenario": "R2",
+   "utc": "09:12:35.961",
+   "event": "report delivered to manager (commands_run: duration 150.115, exit 0)"
+  },
+  {
+   "scenario": "R2",
+   "utc": "09:12:39.463",
+   "event": "manager final answer -> input->final 176.4 s"
+  }
+ ],
+ "driver_events": [
+  {
+   "t": 0.0,
+   "wall": "18:07:13",
+   "event": "setup",
+   "root": "<root>",
+   "head": "b07752d"
+  },
+  {
+   "t": 0.1,
+   "wall": "18:07:13",
+   "event": "omp_version",
+   "out": "omp/18.7.0"
+  },
+  {
+   "t": 1.7,
+   "wall": "18:07:14",
+   "event": "start",
+   "exit": 0,
+   "stdout": "starting backend: shell bash (/usr/bin/bash), omp/18.7.0\nwaiting for the OMP isolation check ...\nbackend pid 3700723 phase ready\ndata dir /tmp/wb-cd70-smoke4-_wdvzaj4/data\n  host_shell: pid 3700783 alive=True owner=user\n  manager_omp: pid 3700784 alive=True owner=user\n  worker_omp: pid 3700785 alive=True owner=user\n  shell: bash /usr/bin/bash mode=manual_prompt\nomp isolation: ok (omp/18.7.0 evidence bridge_g3=18.2.10, isolation=18.6.1)\n",
+   "stderr": ""
+  },
+  {
+   "t": 31.9,
+   "wall": "18:07:45",
+   "event": "screen",
+   "lines": [
+    "focus: MANAGER OMP | host 입 력  owner: user | shell mode: manual_prompt | worker: 대 기  | 자 동 화 : idle                                                                      ",
+    "backend: ready | bridge manager=ok worker=ok | 마 지 막  확 인  18:07:44 (0s 전 ) | Ctrl-] ? 도 움 말                                                                              ",
+    "lq MANAGER OMP *FOCUS* alive qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqklq WORKER OMP alive qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqk"
+   ]
+  },
+  {
+   "t": 32.3,
+   "wall": "18:07:45",
+   "event": "status_lines",
+   "lines": [
+    "focus: MANAGER OMP | host 입 력 owner: user | shell mode: manual_prompt | worker: 대 기 | 자 동 화 : idle",
+    "backend: ready | bridge manager=ok worker=ok | 마 지 막 확 인 18:07:45 (0s 전 ) | Ctrl-] ? 도 움 말",
+    "lq MANAGER OMP *FOCUS* alive qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqklq WORKER OMP alive qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqk"
+   ]
+  },
+  {
+   "t": 32.4,
+   "wall": "18:07:45",
+   "event": "R1_begin"
+  },
+  {
+   "t": 40.3,
+   "wall": "18:07:53",
+   "event": "R1_typed"
+  },
+  {
+   "t": 44.0,
+   "wall": "18:07:57",
+   "event": "requests",
+   "total": 1,
+   "per": {
+    "Z_01a1159d-ed8b-73d3-b87d-e33357db2916.jsonl": [
+     1,
+     0
+    ]
+   }
+  },
+  {
+   "t": 64.5,
+   "wall": "18:08:17",
+   "event": "requests",
+   "total": 2,
+   "per": {
+    "Z_01a1159d-ed8b-73d3-b87d-e33357db2916.jsonl": [
+     2,
+     0
+    ]
+   }
+  },
+  {
+   "t": 64.5,
+   "wall": "18:08:17",
+   "event": "status_lines",
+   "lines": [
+    "focus: MANAGER OMP | host 입 력 owner: user | shell mode: manual_prompt | worker: 작 업 중 | 자 동 화 : idle",
+    "작 업 : 작 업 \"Run the supplied read-only hardware ins…\" [실 행 중 ] | backend: ready | bridge manager=ok worker=ok | 마 지 막 확 인 18:08:17 (0s 전 ) | Ctrl-] ? 도 움 말",
+    "lq MANAGER OMP *FOCUS* alive qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqklq WORKER OMP alive qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqk"
+   ]
+  },
+  {
+   "t": 64.9,
+   "wall": "18:08:18",
+   "event": "status_lines",
+   "lines": [
+    "focus: MANAGER OMP | host 입 력 owner: user | shell mode: manual_prompt | worker: 작 업 중 | 자 동 화 : active",
+    "작 업 : 작 업 \"Run the supplied read-only hardware ins…\" [실 행 중 ] | backend: ready | bridge manager=ok worker=ok | 마 지 막 확 인 18:08:17 (0s 전 ) | Ctrl-] ? 도 움 말",
+    "lq MANAGER OMP *FOCUS* alive qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqklq WORKER OMP alive qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqk"
+   ]
+  },
+  {
+   "t": 68.2,
+   "wall": "18:08:21",
+   "event": "requests",
+   "total": 3,
+   "per": {
+    "Z_01a1159d-ed8f-74da-8304-72c724ef7b33.jsonl": [
+     1,
+     0
+    ],
+    "Z_01a1159d-ed8b-73d3-b87d-e33357db2916.jsonl": [
+     2,
+     0
+    ]
+   }
+  },
+  {
+   "t": 68.6,
+   "wall": "18:08:21",
+   "event": "requests",
+   "total": 4,
+   "per": {
+    "Z_01a1159d-ed8f-74da-8304-72c724ef7b33.jsonl": [
+     1,
+     0
+    ],
+    "Z_01a1159d-ed8b-73d3-b87d-e33357db2916.jsonl": [
+     3,
+     0
+    ]
+   }
+  },
+  {
+   "t": 78.3,
+   "wall": "18:08:31",
+   "event": "requests",
+   "total": 5,
+   "per": {
+    "Z_01a1159d-ed8f-74da-8304-72c724ef7b33.jsonl": [
+     2,
+     0
+    ],
+    "Z_01a1159d-ed8b-73d3-b87d-e33357db2916.jsonl": [
+     3,
+     0
+    ]
+   }
+  },
+  {
+   "t": 87.6,
+   "wall": "18:08:40",
+   "event": "requests",
+   "total": 6,
+   "per": {
+    "Z_01a1159d-ed8f-74da-8304-72c724ef7b33.jsonl": [
+     3,
+     0
+    ],
+    "Z_01a1159d-ed8b-73d3-b87d-e33357db2916.jsonl": [
+     3,
+     0
+    ]
+   }
+  },
+  {
+   "t": 87.6,
+   "wall": "18:08:40",
+   "event": "status_lines",
+   "lines": [
+    "focus: MANAGER OMP | host 입 력 owner: user | shell mode: manual_prompt | worker: 대 기 | 자 동 화 : idle",
+    "작 업 : 작 업 \"Run the supplied read-only hardware ins…\" [종 료 (완 료 )] | backend: ready | bridge manager=ok worker=ok | 마 지 막 확 인 18:08:40 (0s 전 ) | Ctrl-] ? 도 움 말",
+    "lq MANAGER OMP *FOCUS* alive qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqklq WORKER OMP alive qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqk"
+   ]
+  },
+  {
+   "t": 89.7,
+   "wall": "18:08:42",
+   "event": "requests",
+   "total": 7,
+   "per": {
+    "Z_01a1159d-ed8f-74da-8304-72c724ef7b33.jsonl": [
+     4,
+     0
+    ],
+    "Z_01a1159d-ed8b-73d3-b87d-e33357db2916.jsonl": [
+     3,
+     0
+    ]
+   }
+  },
+  {
+   "t": 103.9,
+   "wall": "18:08:56",
+   "event": "requests",
+   "total": 8,
+   "per": {
+    "Z_01a1159d-ed8f-74da-8304-72c724ef7b33.jsonl": [
+     4,
+     0
+    ],
+    "Z_01a1159d-ed8b-73d3-b87d-e33357db2916.jsonl": [
+     4,
+     0
+    ]
+   }
+  },
+  {
+   "t": 129.2,
+   "wall": "18:09:22",
+   "event": "R1_end",
+   "result": "closed",
+   "since_input": 96.8,
+   "counts": {
+    "manager": [
+     4,
+     0,
+     {
+      "read": 1,
+      "to_worker": 1
+     }
+    ],
+    "worker": [
+     4,
+     0,
+     {
+      "read": 1,
+      "terminal": 1,
+      "to_manager": 1
+     }
+    ]
+   }
+  },
+  {
+   "t": 136.6,
+   "wall": "18:09:29",
+   "event": "R1_followup",
+   "found": true
+  },
+  {
+   "t": 139.6,
+   "wall": "18:09:32",
+   "event": "status_lines",
+   "lines": [
+    "focus: HOST SHELL | host 입 력 owner: user | shell mode: manual_prompt | worker: 대 기 | 자 동 화 : idle",
+    "작 업 : 작 업 \"Run the supplied read-only hardware ins…\" [종 료 (완 료 )] | backend: ready | bridge manager=ok worker=ok | 마 지 막 확 인 18:09:31 (0s 전 ) | Ctrl-] ? 도 움 말",
+    "lq MANAGER OMP alive qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqklq WORKER OMP alive qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqk"
+   ]
+  },
+  {
+   "t": 139.6,
+   "wall": "18:09:32",
+   "event": "R1_followup_screen_tail",
+   "tail": [
+    "x===== VIRTUALIZATION =====                                                                                                                                              x",
+    "xnone                                                                                                                                                                    x",
+    "xdetect-virt exit status: 1                                                                                                                                              x",
+    "x                                                                                                                                                                        x",
+    "xCD70_R1_FOLLOWUP_42 completed.                                                                                                                                          x",
+    "x$ echo CD70_R1_FOLLOWUP_$((6*7))                                                                                                                                        x",
+    "mqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqj",
+    "원 본  키 는  focus pane으 로  그 대 로  전 달 됩 니 다  · Ctrl-] Space 메 뉴  · Ctrl-] q/Ctrl-q = detach · 휠 /Shift+PgUp 스 크 롤  · 드 래 그 : 복 사  · Shift+드 래 그 : 터 미 널  선 택"
+   ]
+  },
+  {
+   "t": 139.6,
+   "wall": "18:09:32",
+   "event": "R2_begin",
+   "tot": 8
+  },
+  {
+   "t": 150.1,
+   "wall": "18:09:43",
+   "event": "R2_typed"
+  },
+  {
+   "t": 150.5,
+   "wall": "18:09:43",
+   "event": "status_lines",
+   "lines": [
+    "focus: MANAGER OMP | host 입 력 owner: user | shell mode: manual_prompt | worker: 대 기 | 자 동 화 : idle",
+    "작 업 : 작 업 \"Run the supplied read-only hardware ins…\" [종 료 (완 료 )] | backend: ready | bridge manager=ok worker=ok | 마 지 막 확 인 18:09:43 (0s 전 ) | Ctrl-] ? 도 움 말",
+    "lq MANAGER OMP *FOCUS* alive qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqklq WORKER OMP alive qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqk"
+   ]
+  },
+  {
+   "t": 153.8,
+   "wall": "18:09:46",
+   "event": "requests",
+   "total": 9,
+   "per": {
+    "Z_01a1159d-ed8f-74da-8304-72c724ef7b33.jsonl": [
+     4,
+     0
+    ],
+    "Z_01a1159d-ed8b-73d3-b87d-e33357db2916.jsonl": [
+     5,
+     0
+    ]
+   }
+  },
+  {
+   "t": 159.9,
+   "wall": "18:09:52",
+   "event": "requests",
+   "total": 10,
+   "per": {
+    "Z_01a1159d-ed8f-74da-8304-72c724ef7b33.jsonl": [
+     4,
+     0
+    ],
+    "Z_01a1159d-ed8b-73d3-b87d-e33357db2916.jsonl": [
+     6,
+     0
+    ]
+   }
+  },
+  {
+   "t": 159.9,
+   "wall": "18:09:52",
+   "event": "status_lines",
+   "lines": [
+    "focus: MANAGER OMP | host 입 력 owner: user | shell mode: manual_prompt | worker: 작 업 중 | 자 동 화 : idle",
+    "작 업 : 작 업 \"터 미 널 에 서 제 공 된 명 령 을 그 대 로 한 번 …\" [시 작 중 ] | backend: ready | bridge manager=ok worker=ok | 마 지 막 확 인 18:09:52 (0s 전 ) | Ctrl-] ? 도 움 말",
+    "lq MANAGER OMP *FOCUS* alive qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqklq WORKER OMP alive qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqk"
+   ]
+  },
+  {
+   "t": 160.3,
+   "wall": "18:09:53",
+   "event": "status_lines",
+   "lines": [
+    "focus: MANAGER OMP | host 입 력 owner: user | shell mode: manual_prompt | worker: 작 업 중 | 자 동 화 : active",
+    "작 업 : 작 업 \"터 미 널 에 서 제 공 된 명 령 을 그 대 로 한 번 …\" [실 행 중 ] | backend: ready | bridge manager=ok worker=ok | 마 지 막 확 인 18:09:53 (0s 전 ) | Ctrl-] ? 도 움 말",
+    "lq MANAGER OMP *FOCUS* alive qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqklq WORKER OMP alive qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqk"
+   ]
+  },
+  {
+   "t": 163.6,
+   "wall": "18:09:56",
+   "event": "requests",
+   "total": 11,
+   "per": {
+    "Z_01a1159d-ed8f-74da-8304-72c724ef7b33.jsonl": [
+     4,
+     0
+    ],
+    "Z_01a1159d-ed8b-73d3-b87d-e33357db2916.jsonl": [
+     7,
+     0
+    ]
+   }
+  },
+  {
+   "t": 166.5,
+   "wall": "18:09:59",
+   "event": "requests",
+   "total": 12,
+   "per": {
+    "Z_01a1159d-ed8f-74da-8304-72c724ef7b33.jsonl": [
+     5,
+     0
+    ],
+    "Z_01a1159d-ed8b-73d3-b87d-e33357db2916.jsonl": [
+     7,
+     0
+    ]
+   }
+  },
+  {
+   "t": 166.5,
+   "wall": "18:09:59",
+   "event": "R2_terminal_running",
+   "since_input": 26.9
+  },
+  {
+   "t": 166.9,
+   "wall": "18:10:00",
+   "event": "status_lines",
+   "lines": [
+    "focus: MANAGER OMP | host 입 력 owner: worker | shell mode: control_wait | worker: 작 업 중 | 자 동 화 : active",
+    "작 업 : 작 업 \"터 미 널 에 서 제 공 된 명 령 을 그 대 로 한 번 …\" [실 행 중 ] | backend: ready | bridge manager=ok worker=ok | 마 지 막 확 인 18:09:59 (0s 전 ) | Ctrl-] ? 도 움 말",
+    "lq MANAGER OMP *FOCUS* alive qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqklq WORKER OMP alive qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqk"
+   ]
+  },
+  {
+   "t": 288.7,
+   "wall": "18:12:01",
+   "event": "requests",
+   "total": 13,
+   "per": {
+    "Z_01a1159d-ed8f-74da-8304-72c724ef7b33.jsonl": [
+     6,
+     0
+    ],
+    "Z_01a1159d-ed8b-73d3-b87d-e33357db2916.jsonl": [
+     7,
+     0
+    ]
+   }
+  },
+  {
+   "t": 317.0,
+   "wall": "18:12:30",
+   "event": "status_lines",
+   "lines": [
+    "focus: MANAGER OMP | host 입 력 owner: user | shell mode: manual_prompt | worker: 작 업 중 | 자 동 화 : active",
+    "작 업 : 작 업 \"터 미 널 에 서 제 공 된 명 령 을 그 대 로 한 번 …\" [실 행 중 ] | backend: ready | bridge manager=ok worker=ok | 마 지 막 확 인 18:12:30 (0s 전 ) | Ctrl-] ? 도 움 말",
+    "lq MANAGER OMP *FOCUS* alive qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqklq WORKER OMP alive qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqk"
+   ]
+  },
+  {
+   "t": 323.2,
+   "wall": "18:12:36",
+   "event": "requests",
+   "total": 14,
+   "per": {
+    "Z_01a1159d-ed8f-74da-8304-72c724ef7b33.jsonl": [
+     7,
+     0
+    ],
+    "Z_01a1159d-ed8b-73d3-b87d-e33357db2916.jsonl": [
+     7,
+     0
+    ]
+   }
+  },
+  {
+   "t": 323.2,
+   "wall": "18:12:36",
+   "event": "status_lines",
+   "lines": [
+    "focus: MANAGER OMP | host 입 력 owner: user | shell mode: manual_prompt | worker: 대 기 | 자 동 화 : idle",
+    "작 업 : 작 업 \"터 미 널 에 서 제 공 된 명 령 을 그 대 로 한 번 …\" [종 료 (완 료 )] | backend: ready | bridge manager=ok worker=ok | 마 지 막 확 인 18:12:36 (0s 전 ) | Ctrl-] ? 도 움 말",
+    "lq MANAGER OMP *FOCUS* alive qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqklq WORKER OMP alive qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqk"
+   ]
+  },
+  {
+   "t": 324.9,
+   "wall": "18:12:37",
+   "event": "requests",
+   "total": 15,
+   "per": {
+    "Z_01a1159d-ed8f-74da-8304-72c724ef7b33.jsonl": [
+     8,
+     0
+    ],
+    "Z_01a1159d-ed8b-73d3-b87d-e33357db2916.jsonl": [
+     7,
+     0
+    ]
+   }
+  },
+  {
+   "t": 326.6,
+   "wall": "18:12:39",
+   "event": "requests",
+   "total": 16,
+   "per": {
+    "Z_01a1159d-ed8f-74da-8304-72c724ef7b33.jsonl": [
+     8,
+     0
+    ],
+    "Z_01a1159d-ed8b-73d3-b87d-e33357db2916.jsonl": [
+     8,
+     0
+    ]
+   }
+  },
+  {
+   "t": 351.6,
+   "wall": "18:13:04",
+   "event": "R2_end",
+   "result": "closed",
+   "since_input": 212.0,
+   "counts": {
+    "manager": [
+     8,
+     0,
+     {
+      "read": 2,
+      "to_worker": 2
+     }
+    ],
+    "worker": [
+     8,
+     0,
+     {
+      "read": 1,
+      "terminal": 2,
+      "to_manager": 2
+     }
+    ]
+   }
+  },
+  {
+   "t": 359.0,
+   "wall": "18:13:12",
+   "event": "R2_followup",
+   "found": true
+  },
+  {
+   "t": 362.1,
+   "wall": "18:13:15",
+   "event": "status_lines",
+   "lines": [
+    "focus: HOST SHELL | host 입 력 owner: user | shell mode: manual_prompt | worker: 대 기 | 자 동 화 : idle",
+    "작 업 : 작 업 \"터 미 널 에 서 제 공 된 명 령 을 그 대 로 한 번 …\" [종 료 (완 료 )] | backend: ready | bridge manager=ok worker=ok | 마 지 막 확 인 18:13:15 (0s 전 ) | Ctrl-] ? 도 움 말",
+    "lq MANAGER OMP alive qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqklq WORKER OMP alive qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqk"
+   ]
+  },
+  {
+   "t": 362.1,
+   "wall": "18:13:15",
+   "event": "R2_followup_screen_tail",
+   "tail": [
+    "x                                                                                                                                                                        x",
+    "xCD70_R1_FOLLOWUP_42 completed.                                                                                                                                          x",
+    "x$ wb-handoff                                                                                                                                                            x",
+    "x[worker] $ sleep 150; echo cd70-long-done                                                                                                                               x",
+    "xCD70_R2_FOLLOWUP_42                                                                                                                                                     x",
+    "x$ echo CD70_R2_FOLLOWUP_$((6*7))                                                                                                                                        x",
+    "mqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqj",
+    "원 본  키 는  focus pane으 로  그 대 로  전 달 됩 니 다  · Ctrl-] Space 메 뉴  · Ctrl-] q/Ctrl-q = detach · 휠 /Shift+PgUp 스 크 롤  · 드 래 그 : 복 사  · Shift+드 래 그 : 터 미 널  선 택"
+   ]
+  },
+  {
+   "t": 362.1,
+   "wall": "18:13:15",
+   "event": "final_counts",
+   "tot": 16,
+   "roles": {
+    "manager": [
+     8,
+     0,
+     {
+      "read": 2,
+      "to_worker": 2
+     }
+    ],
+    "worker": [
+     8,
+     0,
+     {
+      "read": 1,
+      "terminal": 2,
+      "to_manager": 2
+     }
+    ]
+   },
+   "flags": {
+    "_n_task_created": 2,
+    "_n_delegated": 2,
+    "_n_task": 12,
+    "_n_kw_stall": 7,
+    "_n_run_started": 2,
+    "_n_task_worker_session": 2,
+    "_n_request": 4,
+    "_n_result": 4,
+    "_n_outbox": 16,
+    "_n_entry_baseline_recorded": 2,
+    "_n_terminal_request": 2,
+    "_n_terminal_started": 2,
+    "_n_terminal_ended": 2,
+    "_n_terminal_notice": 3,
+    "_n_terminal_result": 2,
+    "_n_run_ended": 2,
+    "_n_task_closed": 2
+   }
+  },
+  {
+   "t": 363.0,
+   "wall": "18:13:16",
+   "event": "shutdown",
+   "exit": 0,
+   "stdout": "no active work reported\n{\"shutdown\": {\"panes\": [{\"exit_status\": -1, \"pane\": \"host_shell\", \"survivors\": []}, {\"exit_status\": 143, \"pane\": \"manager_omp\", \"survivors\": []}, {\"exit_status\": 143, \"pane\": \"worker_omp\", \"survivors\": []}], \"processes\": {\"host_shell\": \"dead\", \"manager_omp\": \"dead\", \"supervisor\": \"dead\", \"worker_omp\": \"dead\"}, \"verified\": true}}\n",
+   "stderr": ""
+  },
+  {
+   "t": 363.0,
+   "wall": "18:13:16",
+   "event": "post_shutdown_count",
+   "total": 16,
+   "per": {
+    "Z_01a1159d-ed8f-74da-8304-72c724ef7b33.jsonl": [
+     8,
+     0,
+     {
+      "read": 1,
+      "terminal": 2,
+      "to_manager": 2
+     }
+    ],
+    "Z_01a1159d-ed8b-73d3-b87d-e33357db2916.jsonl": [
+     8,
+     0,
+     {
+      "read": 2,
+      "to_worker": 2
+     }
+    ]
+   }
+  },
+  {
+   "t": 365.9,
+   "wall": "18:13:18",
+   "event": "residue_processes",
+   "left": []
+  },
+  {
+   "t": 365.9,
+   "wall": "18:13:19",
+   "event": "git_status",
+   "out": ""
+  },
+  {
+   "t": 365.9,
+   "wall": "18:13:19",
+   "event": "final_total",
+   "tot": 16
+  },
+  {
+   "t": 366.5,
+   "wall": "18:13:19",
+   "event": "root_removed",
+   "removed": true
+  }
+ ]
+}

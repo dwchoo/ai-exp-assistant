@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cd70-smoke-04",
+  "ticket_id": "CW-18 C-D70 regression smoke of the normal flow before the user's UR retry",
+  "role": "test_designer",
+  "unit": "V-CW-18-smoke",
+  "approved_bundle_digest": "25936cde805e6f2163ad6fc487be61f10d3c5e5e8da57e9ca30d2e0274fa820a",
+  "candidate_commit": "e6a73a1",
+  "routing": {
+    "planned_role": "test_designer",
+    "selected_role": "test_designer (general-purpose, Sonnet high; user 2026-10-06 routing: established smokes on Sonnet)",
+    "reason_codes": [
+      "live_real_model"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/assignment-p27-cd68-smoke-01.json",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/assignment-p27-cd69-smoke-03.json",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd69-smoke-03.md",
+      "docs/features/core-workbench/DECISIONS.md#C-D70"
+    ]
+  },
+  "user_authorization": "User 2026-10-07 '좋아' to Root's proposal: UI polish then a real-model regression smoke of the normal flow (~20 requests, 20 min).",
+  "setup": "Exactly as p27-cd68-smoke-01 / p27-cd69-smoke-03 (new /tmp data dir and tiny git project, `python -m workbench start --data-dir <tmp> --no-attach` from the project dir, ui_v1 client; attach the real product UI in a PTY at least once for status-line text screenshots). Record `omp --version` and the start isolation-check result for both roles (ok/leaks/warnings) — this is the OMP 18.7.0 isolation evidence.",
+  "scenario": [
+    "R1 (same text as p27-cd69-smoke-03, for comparison): type exactly '현재 하드웨어의 스팩을 확인하는 스크립트를 터미널에서 실행해서 결과를 정리해서 나에게 줘' into the manager pane. Record whether the manager delegates (to_worker with commands) or runs it itself; if delegated: TASK->first terminal, TASK->done, user input->final answer (compare 5.9 s / 11.8 s / 53.6 s), exact-command enforcement, report shape; any watchdog status_check (expected none in a normal flow).",
+    "R2 long command: type 'worker에게 터미널에서 `sleep 150; echo cd70-long-done` 를 실행하게 하고 결과를 알려줘'. Expected: worker terminal returns running after the fixed 120 s wait and the worker ends its turn; NO status_check while the command runs; terminal_done notice to the worker when it finishes (~150 s); worker reports done once; manager answers. Record timings and every notice. Also capture the status line text via the real product UI in a PTY at least once while the command runs.",
+    "After: host shell usable (follow-up command works); note prompt redraw/overprint."
+  ],
+  "limits": [
+    "Hard cap 20 provider requests total across both roles, wall clock 20 min; fail-closed counter as in smoke-02/03; pause at 18. If the cap would cut a scenario, stop, shut down (verified) and report. Run R1 then R2.",
+    "Never touch ~/wb-urux-sandbox or the user's running Workbench/OMP processes; kill only PIDs you started; never read credential contents or other processes' environ (agent.db symlink: metadata only); never print tokens; no commits; no graphify update; remove temp dirs afterwards (keep short logs/timeline under the run dir without secrets)."
+  ],
+  "result_format": "Write .workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd70-smoke-04.md (+ -timeline.json), Korean: per scenario timeline/notices/tool calls/timings vs prior, request counts, what worked / not, defects with evidence. Reply in Korean <=8 lines.",
+  "prior": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd69-smoke-03.md",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd69-smoke-03-timeline.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd70-smoke-03.md"
+  ]
+}
