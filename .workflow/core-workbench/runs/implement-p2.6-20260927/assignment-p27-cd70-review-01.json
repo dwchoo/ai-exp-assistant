@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "unit": "V-CW-18-cd70",
+  "approved_bundle_digest": "25936cde805e6f2163ad6fc487be61f10d3c5e5e8da57e9ca30d2e0274fa820a",
+  "candidate_snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-cd70-candidate.json",
+  "candidate": "90300b95b0b31f5959ab781a812bff7925fccd817521009bd1baa3637a159c89",
+  "inputs": [
+    "docs/features/core-workbench/DECISIONS.md#C-D70",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/assignment-p27-cd70-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/assignment-p27-cd70-02.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd70-01.md",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd70-02.md"
+  ],
+  "rules": "No real provider requests; never read credential contents or other processes' environ; never touch the user's tmux server, ~/wb-urux-sandbox or its processes; temp only under /tmp; kill only PIDs you started; no pkill; no commits; no graphify update.",
+  "invocation": "p27-cd70-review-01",
+  "ticket_id": "C-D70 frozen-candidate review",
+  "role": "reviewer",
+  "routing": {
+    "planned_role": "reviewer",
+    "selected_role": "reviewer (Opus high, fresh)",
+    "reason_codes": [
+      "process_lifetime",
+      "concurrency",
+      "contract_change"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd70-01.md"
+    ]
+  },
+  "required_behavior": [
+    "Read-only review of the diff vs base snapshot (git diff HEAD plus untracked files listed in the results) against C-D70 and existing invariants (CW-08 delivery contract/roleAllows, no replay of unknown deliveries, pause semantics, C-D62 restart rules for users, C-D69 (6) enforcement, kill only own processes, no blocking of the backend loop, 10 s tool budget, thread safety/locks, notice dedupe, generation/session binding). Look for races (restart during delivery, watchdog vs report arriving, restart_worker vs user restart vs shutdown), leaks (threads/timers), and model-facing text quality (notices and skill must be concise and unambiguous for the manager/worker models).",
+    "OMP is now 18.7.0 locally (evidence was 18.6.1): check whether bridge.ts APIs used (ctx.agent, setActiveTools, sendUserMessage, getEditorText, isIdle, hasPendingMessages, skill frontmatter) still exist in the installed OMP package (read package files only, no credential paths)."
+  ],
+  "acceptance": [
+    "Verdict pass/block; findings P1-P3 with file:line and concrete failure scenario"
+  ],
+  "allowed_write_paths": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd70-review-01.md"
+  ],
+  "prohibited_paths": [
+    "everything else"
+  ],
+  "result_format": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd70-review-01.md. Korean reply <=12 lines."
+}

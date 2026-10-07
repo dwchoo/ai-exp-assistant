@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cd70-01",
+  "ticket_id": "C-D70 Workbench watchdog, manager restart_worker, OMP new-session recovery",
+  "role": "worker_senior",
+  "unit": "V-CW-18-cd70",
+  "approved_bundle_digest": "25936cde805e6f2163ad6fc487be61f10d3c5e5e8da57e9ca30d2e0274fa820a",
+  "base_snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-cd70-base.json",
+  "routing": {
+    "planned_role": "worker_senior",
+    "selected_role": "worker_senior (Opus high)",
+    "reason_codes": ["process_lifetime", "concurrency", "contract_change"],
+    "evidence_refs": ["docs/features/core-workbench/DECISIONS.md#C-D70", "docs/features/core-workbench/tickets/CW-18.md"]
+  },
+  "required_behavior": [
+    "(1) Watchdog in the backend (one thread or the existing tick loop; no busy polling of OMP more than about every 5 s): while a worker Task is open (flow worker_view not idle/finished), the worker OMP is idle (bridge probe: idle, no pending, no approvalPending, inFlightToolCount 0), no terminal command the worker started is running (flow_terminal state), no outbox entry to/from the worker is pending/delivering, and automation is not paused, for 60 s continuously -> send the worker a `status_check` Workbench notice (existing notice path; Task id, how long idle, last terminal command id/state/exit; text: if finished report done, if blocked report blocked, if listed commands remain run them, else end the turn). At most 2 consecutive checks per Task; any worker terminal call or to_manager resets the count. After the 2nd check plus another 60 s idle with no report/terminal call -> one `worker_stalled` notice to the manager (Task id, idle time, checks sent, last terminal state, hint: follow-up to_worker, cancel, or restart_worker). Never more than one stalled notice per Task until the worker acts again. Notices only go in when the target is message-safe (existing isMessageSafe); a deferred notice is retried, never duplicated. Timings are constants overridable for tests.",
+    "(2) Manager notices: the bridge currently accepts Workbench notices only for role worker; extend to manager with its own allowed notice types (worker_stalled, report_delivery_unknown, worker_restarted, manager_recovery). A worker report to the manager that stays deferred more than 30 s because the manager editor is non-empty -> expose it in the backend state/ui_v1 so the product UI status line shows a short Korean line (e.g. 'worker 보고 대기 중: manager 입력창을 비우면 전달됩니다'); cleared when delivered. A worker report whose delivery ended unknown -> one `report_delivery_unknown` notice to the manager (Task id, message id; no report content).",
+    "(3) Manager-only bridge tool `restart_worker` {reason: string, required, non-blank, bounded length}: backend terminates only the worker OMP process it started (polite terminate, grace e.g. 3 s, then SIGKILL of that process/its own session members as the existing pane close does; never pattern kills), then respawns through the existing restart path (service._respawn: same OMP home, overlay, model table, isolation re-check, generation+1). Allowed any time (no user approval), serialised with the existing restart lock; refuse with a clear status when a restart is already in progress or the backend is shutting down. The host terminal command the worker started keeps running (do not touch the shell). The open Task is not cancelled. Record reason, requester=manager and time in the restart history/record and show it in the UI restart notice. The worker cannot call it; the user-facing restart rules of C-D62 for exited panes are unchanged. Tool result tells the manager the new worker session/generation and the open Task state, and that the new worker has no memory: send a follow-up to_worker on the same task_id to continue, or cancel.",
+    "(4) Worker new session (any cause: user pane restart, restart_worker, crash + restart): when the worker registers with a new session while a Task is open -> one `worker_restarted` notice to the manager (Task id, cause if known, terminal state). Messages queued for the old worker session are dropped as today (target_session_changed). A follow-up to_worker on the open Task delivered to a worker session that has not yet received this Task -> Workbench sends the full TASK (as the first TASK: full message, analysis level, commands with the run-as-given rule) plus a 'commands already run' section from the journal (command, exit, duration, log path), then the follow-up text. Command enforcement (C-D69 (6)) keeps working for the new session.",
+    "(5) Manager new session: when the manager registers with a new session (restart), Workbench automatically sends a `manager_recovery` notice (open Task summary, worker state, terminal state, counts of re-sent and unknown reports). Worker reports to the manager that were dropped as target_session_changed (never submitted) are re-queued to the new manager session (re-send is allowed only because they were never submitted); reports whose delivery ended unknown are only listed (no content re-send).",
+    "(6) Manager read-only bridge tool `workbench_status` (no arguments or optional task_id): returns open Task (id, state, message, analysis, commands, commands_run so far with exit/duration/log path), worker state (idle/busy, session id/generation, restart history with reasons), terminal state (running command id/owner/started, or idle), reports to the manager that are pending/deferred(reason)/unknown with their content (bounded). Must answer within the existing 10 s tool budget without waiting on mailboxes.",
+    "(7) Manager agent-only recovery skill under omp_bridge/skills (e.g. `workbench-recovery`, English, concise; installed for the manager role only via the existing role skill allowlist): when a Workbench notice (worker_stalled, report_delivery_unknown, worker_restarted, manager_recovery) arrives -> call workbench_status -> decide: follow-up to_worker on the same task_id (continue/clarify), cancel, or restart_worker (with reason) for a worker that is stuck mid-turn or not responding; never re-run the worker's commands itself; tell the user briefly what happened. Mention in the to-worker skill and the manager tool descriptions where needed. Investigate whether OMP 18.6.1 skill frontmatter can hide a skill from the user's slash menu while keeping it model-visible; use it if available, otherwise report.",
+    "Tests red->green for each item: watchdog timing/limits/reset/paused/terminal-running/outbox-pending; manager notices; editor-wait indicator; unknown notice; restart_worker with a real child process (fake OMP command) proving only that process is killed, the shell is untouched, generation+1, reason recorded, refused while restarting; worker new-session notice + full TASK re-delivery + commands-run section + enforcement; manager new-session recovery + re-queue of dropped reports only; workbench_status shape and timing; bridge node tests for the new tools/notice types and role restrictions; skill install/allowlist test."
+  ],
+  "acceptance": [
+    "tests/backend, tests/bridge (py+node), tests/terminal, tests/workflow, tests/gates/g2_shell, tests/contracts, tests/ui pass (real exit codes); list independent tests needing updates (do not edit them)"
+  ],
+  "allowed_write_paths": [
+    "src/workbench/backend/flow*.py",
+    "src/workbench/backend/service.py",
+    "src/workbench/backend/ui_server.py",
+    "src/workbench/backend/launcher.py",
+    "src/workbench/backend/omp_home.py",
+    "src/workbench/backend/panes.py",
+    "src/workbench/contracts/ui_v1.py",
+    "src/workbench/ui/product/**",
+    "src/workbench/ipc/bridge_g3/mailbox.py",
+    "omp_bridge/g3/bridge.ts",
+    "omp_bridge/skills/**",
+    "tests/backend/test_*.py (not *_independent*)",
+    "tests/bridge/** (not *_independent*)",
+    "tests/ui/test_product_model*.py (not *_independent*)",
+    "tests/terminal/test_*.py (not *_independent*)"
+  ],
+  "prohibited_paths": ["tests/**/*_independent*", "docs/**", ".workflow/**"],
+  "rules": "No real provider requests; never read credential contents or other processes' environ; never touch the user's tmux server, ~/wb-urux-sandbox or its processes; temp only under /tmp; kill only PIDs you started; no pkill/pattern kills; no commits; no graphify update.",
+  "result_format": "Write .workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd70-01.md: checks table first (real exit codes), status per item, design choices made (with file:line), changed paths + sha256, independent tests needing updates, open questions. Reply in Korean <=15 lines."
+}

@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cd70-review-02",
+  "ticket_id": "C-D70 delta review of fix-01",
+  "role": "reviewer",
+  "unit": "V-CW-18-cd70",
+  "approved_bundle_digest": "25936cde805e6f2163ad6fc487be61f10d3c5e5e8da57e9ca30d2e0274fa820a",
+  "candidate": "5c9f375d101a66bdece9e4898c3a6a75bc05b448d831ce42f9815fbe7bc96b05",
+  "candidate_snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-cd70-fix01.json",
+  "prior_candidate": "90300b95b0b31f5959ab781a812bff7925fccd817521009bd1baa3637a159c89",
+  "routing": {
+    "planned_role": "reviewer",
+    "selected_role": "reviewer (Opus, reused cd70-review)",
+    "reason_codes": [
+      "review_block_delta"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd70-review-01.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd70-fix-01.md"
+    ]
+  },
+  "required_behavior": [
+    "Verify each of review-01 findings P2-1, P3-1..P3-4 and test-01 P3-1/O1/O3 is closed per assignment-p27-cd70-fix-01.json root_adjudication, and the fix introduces no new defect (races, locks, notice dedupe, model-facing wording). Read-only; you may run tests under /tmp."
+  ],
+  "acceptance": [
+    "Verdict pass/block, findings with file:line"
+  ],
+  "allowed_write_paths": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd70-review-02.md"
+  ],
+  "rules": "No real provider requests; never read credential contents or other processes' environ; never touch the user's tmux server, ~/wb-urux-sandbox or its processes; temp only under /tmp; kill only PIDs you started; no pkill; no commits; no graphify update.",
+  "result_format": "Korean reply <=8 lines."
+}

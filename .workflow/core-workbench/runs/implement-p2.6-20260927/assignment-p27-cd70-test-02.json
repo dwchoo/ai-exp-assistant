@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cd70-test-02",
+  "ticket_id": "Fix pre-existing test-side races in cd69 independent tests and the sh signal-mask probe",
+  "role": "test_designer",
+  "unit": "V-CW-18-cd70",
+  "approved_bundle_digest": "25936cde805e6f2163ad6fc487be61f10d3c5e5e8da57e9ca30d2e0274fa820a",
+  "candidate": "5c9f375d101a66bdece9e4898c3a6a75bc05b448d831ce42f9815fbe7bc96b05",
+  "routing": {
+    "planned_role": "test_designer",
+    "selected_role": "test_designer (Opus, reused cd70-test)",
+    "reason_codes": [
+      "regression_flake"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd70-fix-01.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd70-test-01.md"
+    ]
+  },
+  "required_behavior": [
+    "tests/backend/test_role_boundary_independent_p27cd69.py and test_task_message_independent_p27cd69b.py fail deterministically now on both the candidate and a HEAD copy: after a cancel the test clears mailbox.created while the cancel notice to the worker is still created asynchronously, so the next subtest sees a QUESTION first. Make the tests wait for the cancel's message (or select the TASK by kind) without weakening what they assert; keep each test's intent.",
+    "tests/terminal test_review_fixes_independent_p27c sh signal-mask probe: SigBlk sampled during a fork window; make it robust (e.g. sample several times and require SigIgn always correct and SigBlk clean in at least one sample) without weakening the disposition checks.",
+    "Run the edited tests 5x in isolation and once under parallel load; then full tests/backend and tests/terminal with real exit codes."
+  ],
+  "allowed_write_paths": [
+    "the three named test files",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd70-test-02.md"
+  ],
+  "prohibited_paths": [
+    "src/**",
+    "omp_bridge/**",
+    "docs/**"
+  ],
+  "rules": "No real provider requests; never read credential contents or other processes' environ; never touch the user's tmux server, ~/wb-urux-sandbox or its processes; temp only under /tmp; kill only PIDs you started; no pkill; no commits; no graphify update.",
+  "result_format": "Korean reply <=8 lines."
+}

@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cd70-fix-01",
+  "ticket_id": "C-D70 corrections from review-01 and test-01",
+  "role": "worker_senior",
+  "unit": "V-CW-18-cd70",
+  "approved_bundle_digest": "25936cde805e6f2163ad6fc487be61f10d3c5e5e8da57e9ca30d2e0274fa820a",
+  "routing": {"planned_role": "worker_senior", "selected_role": "worker_senior (Opus, reused cd70-impl)", "reason_codes": ["review_block", "concurrency"], "evidence_refs": [".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd70-review-01.md", ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd70-test-01.md"]},
+  "root_adjudication": [
+    "Review P2-1: one cue, one re-send. The restart_worker tool result must not tell the manager to send a follow-up now; it says the new worker is starting and to send exactly one follow-up to_worker on the task_id after the `worker_restarted` notice (or cancel). The `worker_restarted` notice is the single cue for every cause (user restart, restart_worker, crash). Defence in depth: `_needs_resend` also treats a queued/delivering (not yet submitted) re-send for the current worker session as already pending, so a second follow-up is delivered as a plain follow-up (no second full TASK). `commands_already_run` is built from the journal when the message is created for delivery (lane), not at decide time.",
+    "Review P3-1: a first TASK whose delivery ended unknown still counts as delivered to that worker session for watchdog purposes (the worker may have it); RESEND_NOTE text must be neutral and true for both causes (e.g. 'The Task is re-sent in full because the current worker session may not have it').",
+    "Review P3-2: a re-send held/rejected at queue time must not leave the resend state stuck at queued; the next follow-up retries the full re-send.",
+    "Review P3-3: covered by P2-1 wording (send only after worker_restarted, which is sent only once the new worker session has registered).",
+    "Review P3-4 + test O3: restart_worker racing shutdown must answer a truthful refusal (backend_shutdown), never 'restarting'; close the check-then-append window under the same lock as _abort_restart_jobs.",
+    "Test P3-1: manager_recovery `reports_resent` must count the reports re-queued for the new session regardless of whether the lane already delivered them before the notice is built (count at re-queue time). The independent test test_recovery_e2e_independent_p27cd70 must pass unchanged.",
+    "Test O1: when manager_recovery is sent, drop pending report_delivery_unknown notices addressed to the old manager session for reports it already lists (no double mention).",
+    "Test O2: keep as is (API-accepted reports are in the manager's session; no notice)."
+  ],
+  "acceptance": ["red->green tests for each item (your own test files, not *_independent*); all suites with real exit codes: tests/backend, tests/bridge (py+node), tests/terminal, tests/workflow, tests/gates/g2_shell, tests/contracts, tests/ui. Independent tests must pass unchanged; if one encodes behavior you had to change per this adjudication, list it, do not edit it."],
+  "allowed_write_paths": "same as assignment-p27-cd70-01.json",
+  "result_format": "result-p27-cd70-fix-01.md; Korean reply <=10 lines."
+}

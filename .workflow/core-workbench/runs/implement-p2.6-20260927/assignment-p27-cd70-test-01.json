@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "unit": "V-CW-18-cd70",
+  "approved_bundle_digest": "25936cde805e6f2163ad6fc487be61f10d3c5e5e8da57e9ca30d2e0274fa820a",
+  "candidate_snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-cd70-candidate.json",
+  "candidate": "90300b95b0b31f5959ab781a812bff7925fccd817521009bd1baa3637a159c89",
+  "inputs": [
+    "docs/features/core-workbench/DECISIONS.md#C-D70",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/assignment-p27-cd70-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/assignment-p27-cd70-02.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd70-01.md",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd70-02.md"
+  ],
+  "rules": "No real provider requests; never read credential contents or other processes' environ; never touch the user's tmux server, ~/wb-urux-sandbox or its processes; temp only under /tmp; kill only PIDs you started; no pkill; no commits; no graphify update.",
+  "invocation": "p27-cd70-test-01",
+  "ticket_id": "C-D70 independent verification",
+  "role": "test_designer",
+  "routing": {
+    "planned_role": "test_designer",
+    "selected_role": "test_designer (Opus high; first adversarial verification of new behavior)",
+    "reason_codes": [
+      "process_lifetime",
+      "concurrency"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd70-01.md"
+    ]
+  },
+  "required_behavior": [
+    "Write new independent tests tests/**/test_*_independent_p27cd70*.py (and tests/bridge/*_independent_p27cd70*.test.ts if needed) from the decision text, not from the implementation's tests: watchdog conditions (each blocking condition: worker busy, pending, approval, in-flight tool, worker terminal command running, outbox pending, paused) and timing/limits/reset (worker terminal call, to_manager, submitted manager follow-up), one stalled notice; manager editor-wait indicator >30 s and clearing; unknown-delivery notice once without content; restart_worker kills only the worker OMP process tree it started (real child process), shell and running host command untouched, Task kept, reason/requester recorded, worker cannot call it, refusal while restarting/shutting down, concurrent with user restart; worker new session -> one worker_restarted notice, follow-up re-delivers full TASK + commands already run, enforcement on new session; old-session terminal_done routed to manager before re-delivery, worker after, not duplicated; manager new session -> manager_recovery, re-queue only never-submitted reports, unknown ones listed only; workbench_status shape/bounded size/answers fast without waiting on mailboxes; skill installed for manager only.",
+    "Update the 8 existing independent tests listed in result-p27-cd70-01.md to the new manager tool/skill set only where the change is the decided behavior (explain each).",
+    "Re-run the flaky terminal test test_review_fixes_independent_p27c sh signal-mask check 5x isolated and under load; report whether it is pre-existing (check against base snapshot code if needed)."
+  ],
+  "acceptance": [
+    "All suites: tests/backend, tests/bridge (py+node), tests/terminal, tests/workflow, tests/gates/g2_shell, tests/contracts, tests/ui with real exit codes"
+  ],
+  "allowed_write_paths": [
+    "tests/**/*_independent_p27cd70*",
+    "the 8 listed independent tests (minimal edits)",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd70-test-01.md"
+  ],
+  "prohibited_paths": [
+    "src/**",
+    "omp_bridge/**",
+    "docs/**",
+    "other .workflow files"
+  ],
+  "result_format": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd70-test-01.md: checks table first, findings with severity P1-P3 and repro, edited independent tests with reasons. Korean reply <=12 lines."
+}

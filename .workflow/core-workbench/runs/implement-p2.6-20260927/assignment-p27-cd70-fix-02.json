@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cd70-fix-02",
+  "ticket_id": "C-D70 review-02 P3-T and P3-W",
+  "role": "worker_senior",
+  "unit": "V-CW-18-cd70",
+  "approved_bundle_digest": "25936cde805e6f2163ad6fc487be61f10d3c5e5e8da57e9ca30d2e0274fa820a",
+  "routing": {"planned_role": "worker_senior", "selected_role": "worker_senior (Opus, reused cd70-impl)", "reason_codes": ["review_delta"], "evidence_refs": [".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd70-review-02.md"]},
+  "required_behavior": [
+    "P3-T: tests/backend/test_cd70_task_resend.py:166-171 races the original TASK's late delivered event; make the test wait for the TASK's terminal outbox event before changing the resend state (no sleeps as the fix; keep the assertion).",
+    "P3-W: RESTART_DETAIL (restart_worker result) must be true in both cases: with an open Task -> wait for the worker_restarted notice then send exactly one follow-up (or cancel); without an open Task -> no notice will come, nothing to resend. Test both."
+  ],
+  "acceptance": ["tests/backend test_*cd70* 5x isolated green; then tests/backend and tests/bridge (py+node) with real exit codes. Note a test agent is concurrently editing tests/backend/test_role_boundary_independent_p27cd69.py, test_task_message_independent_p27cd69b.py and tests/terminal/test_review_fixes_independent_p27c.py; do not touch them and ignore their failures."],
+  "allowed_write_paths": "same as assignment-p27-cd70-01.json",
+  "result_format": "result-p27-cd70-fix-02.md; Korean reply <=6 lines."
+}

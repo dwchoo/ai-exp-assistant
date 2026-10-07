@@ -1,0 +1,24 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 2237,
+  "event": {
+    "id": "reserve-p27-cd70-review-02",
+    "kind": "reserve",
+    "data": {
+      "buckets": [
+        "total",
+        "role:reviewer",
+        "unit:V-CW-18-cd70"
+      ],
+      "effort": "high",
+      "incident": "",
+      "invocation": "p27-cd70-review-02",
+      "model": "claude-opus-5-5",
+      "purpose": "C-D70 delta review",
+      "role": "reviewer",
+      "unit": "V-CW-18-cd70",
+      "workspace": "/home/dwchoo/ai-exp-assistant",
+      "writer": false
+    }
+  }
+}

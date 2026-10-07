@@ -1,0 +1,24 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 2225,
+  "event": {
+    "id": "reserve-p27-cd70-test-01",
+    "kind": "reserve",
+    "data": {
+      "buckets": [
+        "total",
+        "role:test_designer",
+        "unit:V-CW-18-cd70"
+      ],
+      "effort": "high",
+      "incident": "",
+      "invocation": "p27-cd70-test-01",
+      "model": "claude-opus-5-5",
+      "purpose": "C-D70 test-01",
+      "role": "test_designer",
+      "unit": "V-CW-18-cd70",
+      "workspace": "/home/dwchoo/ai-exp-assistant",
+      "writer": true
+    }
+  }
+}
