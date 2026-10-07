@@ -91,10 +91,7 @@ class TerminalScreen(pyte.HistoryScreen):
             self._restore(primary)
         control["primary"] = None
         control["using_alternate"] = False
-        super().resize(
-            lines=control["lines"],
-            columns=control["columns"],
-        )
+        self._resize_screen(control["lines"], control["columns"])
 
     def set_mode(self, *modes: int, **kwargs: object) -> None:
         if kwargs.get("private"):
@@ -171,6 +168,29 @@ class TerminalScreen(pyte.HistoryScreen):
             control["lines"] = lines
         if columns:
             control["columns"] = columns
+        self._resize_screen(lines, columns)
+
+    def _resize_screen(self, lines: int | None, columns: int | None) -> None:
+        """p27-overprint-01: pyte 0.8.2 drops rows from the top on a height shrink but leaves the cursor on its
+        old row, i.e. below the screen once the pane was full (the next typed line was drawn on an invisible row
+        and the output after it over the visible prompt line). Shrink like xterm instead: rows below the cursor
+        go first (tmux keeps those that hold text), then top rows scroll into the history (primary screen only)
+        and the cursor moves up with its line. Growing and column changes stay pyte's."""
+        lines = lines or self.lines
+        if lines < self.lines:
+            drop = max(0, self.cursor.y + 1 - lines)
+            if drop:
+                if not self._terminal_control["using_alternate"]:
+                    for y in range(drop):
+                        self.history.top.append(self.buffer[y])
+                for y in range(lines):
+                    self.buffer[y] = self.buffer[y + drop]
+                self.cursor.y -= drop
+            for y in range(lines, self.lines):
+                self.buffer.pop(y, None)
+            self.lines = lines  # pyte's own resize then has no rows left to drop from the top
+            self.dirty.update(range(lines))
+            self.set_margins()
         super().resize(lines=lines, columns=columns)
 
 

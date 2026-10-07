@@ -1676,7 +1676,12 @@ class ProductModel:
             r, c = sizes[pane]
             if force or sizes[pane] != self.sizes[pane]:
                 self._sel = None  # cell positions change with the size
+                # p27-overprint-01: a height shrink may scroll rows into the history; a scrolled view keeps its offset
+                offset = self.scroll_offset(pane) if pane in self._views else None
                 self.panes[pane].screen.resize(lines=r, columns=c)
+                view = self._views.get(pane)
+                if offset is not None and view is not None and view.queue is self._history(pane):
+                    view.anchor = view.queue.pushed - offset
                 if send:
                     self._unsent.add(pane)
         self.sizes = sizes
