@@ -1,0 +1,24 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 2271,
+  "event": {
+    "id": "limit-cd70ui-unit-V-CW-18-cd70-ui",
+    "kind": "limit",
+    "data": {
+      "authority": "C-D70 (approved PLAN p2.7s, bundle 25936cde...), C-D55 budget delegation, workflow-contract section 8; user 2026-10-07 '좋아' to pre-UR polish + regression smoke",
+      "bucket": "unit:V-CW-18-cd70-ui",
+      "decision_owner": "Root",
+      "expected_previous": null,
+      "origin": "operating",
+      "reason": "New unit: C-D70 pre-UR UI polish (worker, delta review, reserve)",
+      "remaining_work_estimate": 4,
+      "scope_basis": {
+        "evidence_refs": [
+          "new unit (C-D70 polish)"
+        ],
+        "status": "known-empty"
+      },
+      "value": 4
+    }
+  }
+}
