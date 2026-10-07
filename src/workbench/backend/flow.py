@@ -36,7 +36,12 @@ through ``record``. Its contract:
   C-D70 (5): a worker->manager message that was never submitted and whose
   target manager OMP is now a new session is not dropped but addressed to the
   new session (``requeued``, at most ``REQUEUE_LIMIT`` times; a message to the
-  worker is still dropped as ``target_session_changed``). A deferral records
+  worker is still dropped as ``target_session_changed``). p27-cd70-fix-03: a
+  worker done/blocked report (``wait_for_target``) made while no manager OMP is
+  connected is queued unbound (no target session; ``waiting_for``) and created
+  for the next manager session that registers; ``requeue_for_new_session``
+  counts it once. Every other handoff to an absent OMP is
+  ``held:target_not_connected``. A deferral records
   why the target was not ready (``blockers``; C-D70 (2): ``editor_not_empty``).
   A listener sees ``delivering`` (the lane took the message), ``deferred`` (back
   to pending, nothing submitted) and ``submitted`` (CW-18 R1: the target OMP
@@ -90,6 +95,11 @@ REQUEUE_LIMIT = 5  # C-D70 (5): new manager sessions a never-submitted worker re
 # p27-cd68-fix-03 (smoke-01 M2): "not yet processed" was read as "send it again".
 QUEUED_DETAIL = ("Accepted by Workbench; it is delivered to the other OMP once, in order. Do not send it again; "
                  "a reply, if any, arrives as a new message.")
+# p27-cd70-fix-03 (smoke-02 D1): a worker report queued while no manager OMP is connected.
+WAITING_FOR_MANAGER = "manager_session"
+QUEUED_WAITING_DETAIL = (
+    "Accepted by Workbench. The manager OMP is not connected right now; Workbench keeps this report and delivers it "
+    "once to the next manager session. Do not send it again; end your turn.")
 TOOL_ROLES: dict[str, ActorRole] = {"to_worker": ActorRole.MANAGER, "to_manager": ActorRole.WORKER}
 TO_WORKER_KINDS = ("experiment", "work")
 # C-D69 (2): how much analysis the manager wants back from the worker for a work Task; null means "summary".
@@ -192,6 +202,9 @@ class HandoffDecision:
     keep_across_pause: bool = False
     # p27-cd70-fix-01: told (with the result) when ``message`` was not queued (held at queue time: nothing sent)
     on_not_queued: Callable[[Mapping[str, Any]], None] | None = None
+    # p27-cd70-fix-03: a worker->manager ``message`` that waits for the next manager session instead of
+    # ``held:target_not_connected`` when no manager OMP is connected (a done/blocked report)
+    wait_for_target: bool = False
 
 
 @runtime_checkable
@@ -767,6 +780,8 @@ class HandoffService:
         # and in-flight ones already counted whose re-queue is still to come
         self._requeued_uncounted: set[str] = set()
         self._requeue_expected: set[str] = set()
+        # p27-cd70-fix-03: reports queued while no manager OMP was connected, not yet counted by a manager_recovery
+        self._unbound_uncounted: set[str] = set()
 
     # -- wiring for U2/U3 -------------------------------------------------------
     def configure(self, *, policy: HandoffPolicy | None = None,
@@ -895,6 +910,8 @@ class HandoffService:
         with self._outbox_cv:
             counted = set(self._requeued_uncounted)
             self._requeued_uncounted.clear()
+            if current is not None:
+                counted |= self._unbound_for(current)
             for entry in self._outbox:
                 if entry.outbound.target_role is not role or entry.state not in ("pending", "delivering"):
                     continue
@@ -916,6 +933,23 @@ class HandoffService:
         for entry in moved:
             self._log_outbox(entry, "requeued")
         return len(counted)
+
+    def _unbound_for(self, current: tuple[str, int]) -> set[str]:
+        """Under the outbox lock: the reports queued while no manager was connected that go to the ``current``
+        session (p27-cd70-fix-03): not created yet, or created for it and not ended unknown (those are listed as
+        unknown instead). Each is counted by one manager_recovery only."""
+        found: set[str] = set()
+        for entry in self._outbox:
+            if entry.handoff_id not in self._unbound_uncounted:
+                continue
+            self._unbound_uncounted.discard(entry.handoff_id)
+            if entry.withdrawn or entry.state in ("withdrawn", "rejected", "held_paused", "unknown"):
+                continue
+            message = entry.message
+            if message is None or (message.session_id, message.session_generation) == current:
+                found.add(entry.handoff_id)
+        self._unbound_uncounted.clear()  # entries no longer in the outbox
+        return found
 
     def _count_lane_requeue(self, entry: _OutboxEntry) -> None:
         """Under the outbox lock: a re-queue the lane did on its own is counted by the next manager_recovery."""
@@ -1013,7 +1047,8 @@ class HandoffService:
             except (OSError, TypeError, ValueError):
                 pass  # kept in memory; the request record is already durable
         if decision.message is not None:
-            queued = self._queue(request.key, decision.message, decision.listener, decision.keep_across_pause)
+            queued = self._queue(request.key, decision.message, decision.listener, decision.keep_across_pause,
+                                 wait_for_target=decision.wait_for_target)
             result.update(queued)
             if queued.get("status") != "queued" and decision.on_not_queued is not None:
                 try:
@@ -1023,26 +1058,42 @@ class HandoffService:
         return result
 
     def _queue(self, key: RequestKey, outbound: OutboundMessage,
-               listener: OutboxListener | None = None, keep_across_pause: bool = False) -> dict[str, Any]:
+               listener: OutboxListener | None = None, keep_across_pause: bool = False, *,
+               wait_for_target: bool = False) -> dict[str, Any]:
         if self._mailbox is None and self._mailbox_factory is None:
             return held("mailbox_unavailable")
         target: tuple[str, int] | None = None
+        unbound = False
         if self._peer_lookup is not None:
             try:
                 peer = self._peer_lookup(outbound.target_role)
             except Exception:
                 peer = None
             if peer is None:
-                return held("target_not_connected")
-            target = (peer.session_id, peer.generation)
+                # p27-cd70-fix-03 (C-D70 (4)/(5)): a worker report waits for the next manager session (bound to
+                # none: the lane creates it for whichever session registers); any other handoff is held.
+                if not (wait_for_target and outbound.sender_role is ActorRole.WORKER
+                        and outbound.target_role is ActorRole.MANAGER):
+                    return held("target_not_connected")
+                unbound = True
+            else:
+                target = (peer.session_id, peer.generation)
         entry = _OutboxEntry(key, str(uuid4()), outbound, target, listener=listener,
                              keep_across_pause=keep_across_pause)
-        self._journal.append({"type": "outbox", "key": _key_dict(key), "handoff_id": entry.handoff_id,
-                              "target_role": outbound.target_role.value, "kind": outbound.kind.value,
-                              "state": "pending", "attempts": 0})
+        record = {"type": "outbox", "key": _key_dict(key), "handoff_id": entry.handoff_id,
+                  "target_role": outbound.target_role.value, "kind": outbound.kind.value,
+                  "state": "pending", "attempts": 0}
+        if unbound:
+            record["waiting_for"] = WAITING_FOR_MANAGER
+        self._journal.append(record)
         with self._outbox_cv:
             self._outbox.append(entry)
+            if unbound:
+                self._unbound_uncounted.add(entry.handoff_id)
             self._outbox_cv.notify_all()
+        if unbound:
+            return {"status": "queued", "handoff_id": entry.handoff_id, "waiting_for": WAITING_FOR_MANAGER,
+                    "detail": QUEUED_WAITING_DETAIL}
         return {"status": "queued", "handoff_id": entry.handoff_id, "detail": QUEUED_DETAIL}
 
     # -- outbox thread ------------------------------------------------------------
@@ -1260,7 +1311,7 @@ class HandoffService:
 
 
 __all__ = [
-    "REQUEUE_LIMIT", "ANALYSIS_LEVELS", "ANALYSIS_RULES", "DEFAULT_ANALYSIS", "HANDOFF_JOURNAL_NAME", "ActiveTask", "HandoffDecision", "HandoffJournal", "HandoffPolicy", "HandoffRequest", "HandoffService",
+    "REQUEUE_LIMIT", "QUEUED_WAITING_DETAIL", "WAITING_FOR_MANAGER", "ANALYSIS_LEVELS", "ANALYSIS_RULES", "DEFAULT_ANALYSIS", "HANDOFF_JOURNAL_NAME", "ActiveTask", "HandoffDecision", "HandoffJournal", "HandoffPolicy", "HandoffRequest", "HandoffService",
     "OutboundMessage", "OutboxListener", "PlaceholderPolicy", "TOOL_ROLES", "accepts_keyword",
     "environment_value_findings", "held", "rejected",
     "sensitive_environment_values", "validate_arguments",

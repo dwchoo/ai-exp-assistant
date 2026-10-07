@@ -85,9 +85,10 @@ UNKNOWN_HINT = (
     "it is not re-sent). Call workbench_status to read it, then continue as the workbench-recovery skill says.")
 RECOVERY_HINT = (
     "Workbench notice: your OMP session is new. Use the workbench-recovery skill: call workbench_status for the open "
-    "Task, the worker, the terminal and the reports. Reports that never reached your old session arrive again as "
-    "messages; reports whose delivery is unknown are only listed (read them with workbench_status). Tell the user "
-    "briefly what happened.")
+    "Task, the worker, the terminal and the reports. Reports that never reached your old session, or that the worker "
+    "sent while your OMP was down, arrive as messages (reports_resent); wait for them before you cancel the Task. "
+    "Reports whose delivery is unknown are only listed (read them with workbench_status). Tell the user briefly "
+    "what happened.")
 RESTART_DETAIL = (
     "The worker OMP was restarted as a new session; it has no memory. The open Task was not cancelled and a host "
     "terminal command the worker started keeps running. Do not send a follow-up now: end your turn. Workbench sends "

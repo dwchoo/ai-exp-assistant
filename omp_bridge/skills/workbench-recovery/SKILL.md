@@ -12,7 +12,7 @@ Workbench watches the worker for you; never poll it yourself. It tells you with 
 - `worker_restarted`: the worker OMP is a new session (user restart, your `restart_worker`, or a crash). It has no memory of the Task; the Task is still open. This notice is the one cue to continue: one follow-up on the same `task_id` (Workbench re-sends the full Task), or cancel.
 - `report_delivery_unknown`: a worker report may not have reached you; it is not re-sent. Its text is in `workbench_status`.
 - `worker_terminal_done` (information): a terminal command the previous worker session started has ended (`command_id`, exit, `log_path`); the new worker has not got the Task yet. It is in `commands_run` and in the Task re-sent with your follow-up; never run it again yourself.
-- `manager_recovery`: your own OMP session is new. Reports that never reached your old session arrive again as messages; reports with an unknown delivery are only listed.
+- `manager_recovery`: your own OMP session is new. Reports that never reached your old session, or that the worker sent while your OMP was down, arrive as messages (`reports_resent` counts them; wait for them before you cancel the Task); reports with an unknown delivery are only listed.
 
 ## Procedure
 1. Call `workbench_status` (no arguments, or the notice's `task_id`). It is read-only and answers at once: the Task (message, `commands`, `commands_run` with exit code, duration and `log_path`), the worker (idle/busy, session, restarts with reasons), the host terminal (running command or idle) and reports to you that are pending, deferred or of unknown delivery, with their text.

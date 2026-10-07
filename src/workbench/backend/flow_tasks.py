@@ -1087,7 +1087,8 @@ class TaskFlow:
             self._save_task(task)
         return HandoffDecision({"status": "queued", "task_id": task.task_id}, message=OutboundMessage(
             task.task_id, task.run_revision, task.run_id, ActorRole.WORKER, ActorRole.MANAGER, kind, payload,
-            in_reply_to_message_id=reply_to), listener=listener, keep_across_pause=report)
+            in_reply_to_message_id=reply_to), listener=listener, keep_across_pause=report,
+            wait_for_target=report)  # p27-cd70-fix-03: waits for the next manager session if none is connected
 
     def _report_listener(self, task_id: str, run_id: str, kind: str, tool_call_id: str) -> Callable:
         """The done/blocked report's outbox events (R1): accepted -> the worker is free; lost -> the Task closes."""

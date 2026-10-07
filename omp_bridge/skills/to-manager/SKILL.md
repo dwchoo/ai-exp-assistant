@@ -53,8 +53,9 @@ Your only subagent is `explorer` (read-only fast exploration); use it only for w
 - Subagents never send `to_manager` reports and never run terminal commands: Workbench refuses `to_manager` and `terminal` from a subagent (`subagent_not_allowed`). You report to the manager and run commands yourself.
 
 ## Results
-The `to_manager` result comes back at once. `status` is `queued` when Workbench accepted the message: it is delivered once, so never send the same report again. Otherwise:
+The `to_manager` result comes back at once. `status` is `queued` when Workbench accepted the message: it is delivered once, so never send the same report again. A `done`/`blocked` report `queued` with `waiting_for: manager_session` means the manager OMP is not connected right now: Workbench keeps it and delivers it to the next manager session; do not send it again, end your turn. Otherwise:
 - `rejected:task_not_delivered`: a report without `task_id` cannot belong to the active Task, because its TASK has not reached you yet. Do not retry in a loop; end the turn and wait for it, then report with `task_id` set.
 - `rejected:no_active_task` / `rejected:unknown_task`: there is no active Task, or `task_id` is not it. Do not resend unchanged; check the Task the manager gave you.
 - `rejected:in_reply_to_required`: an `answer` needs `in_reply_to`. `rejected:no_task_message`: there is no Task message to attach the report to; set `in_reply_to` or wait for the TASK.
 - `held:no_active_run` (also `held:paused`): nothing was sent; the Task has no run yet or the user paused. Wait, then retry once.
+- `held:target_not_connected` (a `progress`, `report` or `answer` while the manager OMP is not connected): nothing was sent. Do not retry in a loop; send it again later only if it still matters.
