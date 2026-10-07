@@ -36,6 +36,7 @@ from workbench.terminal.shell_g2.prototype import ShellChoice
 from workbench.terminal.shell_persistent.adapter import PersistentShell
 
 SHELLS = (ShellChoice("bash", "/usr/bin/bash"), ShellChoice("sh", "/usr/bin/dash"))
+STATUS_SAMPLES = 3  # p27-cd70-test-02
 PIPE_XFSZ = (1 << (signal.SIGPIPE - 1)) | (1 << (signal.SIGXFSZ - 1))
 
 
@@ -289,7 +290,11 @@ class DefaultPipeXfszTests(Case):
     @staticmethod
     def probe(d: Path, tag: str) -> str:
         """Status of this process, `yes | head -1` writer status + duration, and an XFSZ write."""
-        return (f"cat /proc/$$/status > {q(d / (tag + '.status'))}; "
+        # p27-cd70-test-02: the status is read by the shell itself (builtin read, no fork) three times. A `cat`
+        # sample raced the shell's own fork, during which bash/dash block every signal for a moment (SigBlk).
+        sample = "".join(f"{{ while IFS= read -r l; do printf '%s\\n' \"$l\"; done < /proc/$$/status; }} "
+                         f"> {q(d / f'{tag}.status.{n}')}; " for n in range(STATUS_SAMPLES))
+        return (sample +
                 f"s=$(date +%s%N); (yes; echo $? > {q(d / (tag + '.pipe'))}) | head -1 > /dev/null; "
                 f"e=$(date +%s%N); echo $(( (e - s) / 1000000 )) > {q(d / (tag + '.ms'))}; "
                 f"(ulimit -f 1; head -c 65536 /dev/zero > {q(d / (tag + '.big'))}; "
@@ -299,10 +304,13 @@ class DefaultPipeXfszTests(Case):
         self.until(shell, lambda _: all(p.exists() and p.stat().st_size > 0 for p in paths), seconds, what)
 
     def check(self, d: Path, tag: str) -> None:
-        text = (d / (tag + ".status")).read_text()
-        values = masks(text)
-        self.assertEqual(values["SigIgn"] & PIPE_XFSZ, 0, f"{tag} ignores SIGPIPE/SIGXFSZ: {values}")
-        self.assertEqual(values["SigBlk"] & PIPE_XFSZ, 0, f"{tag} blocks SIGPIPE/SIGXFSZ: {values}")
+        samples = [masks((d / f"{tag}.status.{n}").read_text()) for n in range(STATUS_SAMPLES)]
+        for values in samples:  # the disposition never changes: every sample must be clean
+            self.assertEqual(set(values), {"SigIgn", "SigBlk"}, f"{tag}: incomplete status sample {values}")
+            self.assertEqual(values["SigIgn"] & PIPE_XFSZ, 0, f"{tag} ignores SIGPIPE/SIGXFSZ: {values}")
+        # a block is transient by nature; the process must have them unblocked in at least one sample
+        self.assertTrue(any(values["SigBlk"] & PIPE_XFSZ == 0 for values in samples),
+                        f"{tag} blocks SIGPIPE/SIGXFSZ in every sample: {samples}")
         if (d / (tag + ".pipe")).exists():
             self.assertEqual((d / (tag + ".pipe")).read_text().strip(), "141", f"{tag}: yes not killed by SIGPIPE")
             self.assertLess(int((d / (tag + ".ms")).read_text()), 5000, f"{tag}: yes | head -1 slow")

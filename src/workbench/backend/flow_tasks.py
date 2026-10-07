@@ -70,6 +70,13 @@ and the owner of the single active Task:
   command holds it). Every
   accepted ``to_worker`` result (``dispatched``, ``queued``) carries
   ``manager_rule``: the worker does the Task, the manager waits for its report.
+- New worker session (C-D70 (4)): each work Task remembers the worker OMP
+  session that accepted its TASK (``worker_session``). A follow-up
+  ``to_worker`` on that Task while the worker is another session that never got
+  it carries the full TASK again (message, goal, paths, analysis level, the
+  commands with the run-as-given rule), the commands already run from the
+  terminal journal (command, exit, duration, log path) and then the follow-up
+  text; nothing else is resent. The Task's command list keeps being enforced.
 - Persistence: ``workflow/tasks-flow.jsonl`` (0600, fsync per record) keeps the
   Task state and every decision with its ids. After a backend restart nothing
   is started or resent: an unstarted Task is closed, a Task with a current run
@@ -79,7 +86,7 @@ and the owner of the single active Task:
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass, field, fields
+from dataclasses import asdict, dataclass, field, fields, replace
 import os
 from pathlib import Path
 import threading
@@ -137,6 +144,12 @@ COMMANDS_RULE = ("Run these commands exactly as given with the terminal tool, on
                  "do not paste commands or scripts back.")
 COMMANDS_RUN_NOTE = ("Recorded by Workbench from the terminal journal: the commands the worker ran for this Task "
                      "(command shortened for display, exit code or signal, duration, full output in log_path).")
+# C-D70 (4): what a new worker session reads first in a re-sent Task.
+RESEND_NOTE = ("The Task is re-sent in full because the current worker session may not have it. Below is the full Task "
+               "as first sent, then commands_already_run (the commands already run for this Task, from the "
+               "Workbench terminal journal), then the manager's follow_up. Do not run a command listed in "
+               "commands_already_run again unless the follow-up asks for it; continue as the follow-up says and "
+               "report with to_manager.")
 
 
 def _commands_fields(commands: list[str] | None) -> dict[str, Any]:
@@ -286,6 +299,7 @@ class FlowTask:
     closed_reason: str | None = None
     last_result: dict[str, Any] | None = None
     cancel_requested: dict[str, Any] | None = None
+    worker_session: list[Any] | None = None  # C-D70 (4): [session_id, generation] of the worker that got the TASK
 
     def set_status(self, status: str) -> None:
         if status != self.status or not self.since:
@@ -337,8 +351,11 @@ class TaskFlow:
                  experiment: ExperimentPorts | None = None, lifecycle: Any | None = None,
                  poll_interval: float = 0.5, collect_slice: float = 1.0,
                  project_dir: str | Path | None = None, analysis_idle_limit: float = ANALYSIS_IDLE_LIMIT,
-                 host_gate: HostGate | None = None):
+                 host_gate: HostGate | None = None,
+                 worker_session: Callable[[], tuple[str, int] | None] = lambda: None):
         self._repository_factory = repository_factory
+        # C-D70 (4): the worker OMP's current bridge session (session_id, generation), None when not connected.
+        self._worker_session = worker_session
         # C-D68: one Workbench owner of the host shell (an experiment run or the worker's terminal command).
         self._host_gate = host_gate or HostGate()
         self._analysis_idle_limit = analysis_idle_limit
@@ -359,10 +376,15 @@ class TaskFlow:
         self._home_cwd: str | None = None
         # C-D69 (6): the terminal service's record of the commands run for a Task (set by the backend)
         self.terminal_runs: Callable[[str], list[dict[str, Any]]] | None = None
+        # C-D70 (Q2, p27-cd70-02): told when a manager follow-up of a Task was submitted to the worker (the watchdog
+        # starts its status checks and the worker_stalled notice over: a new instruction is a new chance)
+        self.follow_up_submitted: Callable[[str], None] | None = None
         # R1/R2 (in memory): Tasks whose report the lane/runner is submitting right now, and each free-work
         # Task's TASK message state (queued | delivering | sent | not_sent).
         self._report_inflight: set[str] = set()
         self._task_message_state: dict[str, str] = {}
+        # p27-cd70-fix-01: a full re-send queued or being delivered, per Task: the worker session it goes to
+        self._resend_pending: dict[str, list[Any]] = {}
         self._ledger = HandoffJournal(ledger_path)
         self.tasks: dict[str, FlowTask] = {}
         self.notices: list[dict[str, Any]] = []
@@ -520,6 +542,43 @@ class TaskFlow:
             task = self.active() or (list(self.tasks.values())[-1] if self.tasks else None)
             return None if task is None else task.view()
 
+    def watch_view(self) -> dict[str, Any] | None:
+        """C-D70 (1): the open (busy) Task as the watchdog sees it, else None."""
+        with self._lock:
+            task = self.active()
+            if task is None or not task.busy():
+                return None
+            return {"task_id": task.task_id, "kind": task.kind, "status": task.status, "run_id": task.run_id,
+                    "held_reason": task.held_reason, "summary": task.summary,
+                    "message_state": self._task_message_state.get(task.task_id),
+                    "worker_session": None if task.worker_session is None else list(task.worker_session)}
+
+    def task_session(self, task_id: str) -> list[Any] | None:
+        """The worker session ``[session_id, generation]`` that has this Task's TASK (C-D70 (4)), or None."""
+        with self._lock:
+            task = self.tasks.get(task_id)
+            return None if task is None or task.worker_session is None else list(task.worker_session)
+
+    def status_view(self, task_id: str | None = None) -> dict[str, Any] | None:
+        """C-D70 (6): a Task for the manager's ``workbench_status`` (the current, else the last one), with its full
+        message, analysis level and commands; None when there is no such Task."""
+        with self._lock:
+            if task_id is None:
+                task = self.active() or (list(self.tasks.values())[-1] if self.tasks else None)
+            else:
+                task = self.tasks.get(task_id)
+            if task is None:
+                return None
+            spec = task.spec or {}
+            view = task.view()
+            view.update({"message": task.message or task.summary, "goal": spec.get("goal"),
+                         "paths": list(spec.get("paths") or []), "analysis": spec.get("analysis") or (
+                             DEFAULT_ANALYSIS if task.kind == "work" else None),
+                         "commands": None if task.commands is None else list(task.commands),
+                         "task_message_id": task.task_message_id,
+                         "worker_session": None if task.worker_session is None else list(task.worker_session)})
+            return view
+
     def worker_view(self) -> dict[str, Any]:
         """ui_v1 ``worker``: busy while a Task occupies it (C-D66)."""
         with self._lock:
@@ -537,8 +596,7 @@ class TaskFlow:
                             if size_error is not None else self._to_worker(request))
                 notices = self._take_notices()
                 if notices:
-                    decision = HandoffDecision({**decision.result, "notices": notices}, decision.message,
-                                               decision.approval, decision.listener)
+                    decision = replace(decision, result={**decision.result, "notices": notices})
                 return decision
             return self._to_manager(request)
 
@@ -719,7 +777,129 @@ class TaskFlow:
             self._save_task(task)
         return self._question(task, request, spec)
 
+    def _current_worker_session(self) -> list[Any] | None:
+        try:
+            current = self._worker_session()
+        except Exception:
+            return None
+        return None if current is None else [current[0], current[1]]
+
+    def _needs_resend(self, task: FlowTask) -> list[Any] | None:
+        """C-D70 (4): the worker session to re-send the full Task to, or None (it has the Task, or it is unknown
+        or the TASK itself is still on its way to it)."""
+        if task.kind != "work":
+            return None
+        current = self._current_worker_session()
+        if current is None or task.worker_session == current:
+            return None
+        if self._task_message_state.get(task.task_id) in ("queued", "delivering"):
+            return None  # its TASK still goes to this session
+        if self._resend_pending.get(task.task_id) == current:
+            return None  # a full re-send to this session is on its way: a further follow-up is a plain one
+        return current
+
+    def _resend(self, task: FlowTask, request: HandoffRequest, spec: dict[str, Any] | None,
+                session: list[Any]) -> HandoffDecision:
+        """C-D70 (4): the full TASK, the commands already run and the follow-up, to a new worker session."""
+        commands = list(request.args["commands"]) if request.args.get("commands") else task.commands
+        analysis = request.args.get("analysis") or (task.spec or {}).get("analysis")
+        payload = self._task_payload(task, task.run_revision or task.revision, commands=commands, analysis=analysis)
+        if spec is not None:
+            payload["paths"] = list(spec["paths"])
+        payload.update({"resent_task": True, "resent_reason": "worker_session_may_not_have_it",
+                        "resend_note": RESEND_NOTE, "follow_up": request.args["message"]})
+        first = task.task_message_id is None  # the TASK never reached any worker: this message is the TASK
+        self._record({"type": "task_resent", "task_id": task.task_id, "run_id": task.run_id,
+                      "worker_session": list(session), "as_task_message": first})
+        previous_state = self._task_message_state.get(task.task_id)
+        if first:
+            self._task_message_state[task.task_id] = "queued"
+        self._resend_pending[task.task_id] = list(session)
+        task_id = task.task_id
+
+        def not_queued(result: Mapping[str, Any]) -> None:  # held at queue time: the next follow-up retries it
+            with self._lock:
+                if self._resend_pending.get(task_id) == list(session):
+                    del self._resend_pending[task_id]
+                if first and self._task_message_state.get(task_id) == "queued":
+                    if previous_state is None:
+                        self._task_message_state.pop(task_id, None)
+                    else:
+                        self._task_message_state[task_id] = previous_state
+                self._record({"type": "task_resend_not_queued", "task_id": task_id,
+                              "reason": result.get("reason")})
+
+        return HandoffDecision({"status": "queued", "task_id": task.task_id, "manager_rule": MANAGER_RULE,
+                                "resent_task": True,
+                                "detail": "the worker is a new session: Workbench re-sends the full Task, the "
+                                          "commands already run and this follow-up"},
+                               message=OutboundMessage(task.task_id, task.run_revision, task.run_id, ActorRole.MANAGER,
+                                                       ActorRole.WORKER,
+                                                       MessageKind.TASK if first else MessageKind.QUESTION, payload,
+                                                       prepare=self._commands_run_section(task.task_id)),
+                               listener=self._follow_up_listener(task.task_id, self._resend_listener(
+                                   task.task_id, task.run_id,
+                                   list(commands) if request.args.get("commands") else None, first, list(session))),
+                               on_not_queued=not_queued)
+
+    def _commands_run_section(self, task_id: str) -> Callable[[dict[str, Any]], dict[str, Any]]:
+        """p27-cd70-fix-01: ``commands_already_run`` read from the terminal journal when the outbox lane creates the
+        re-sent message (so it lists what ran up to the delivery, not up to the manager's call)."""
+        def prepare(payload: dict[str, Any]) -> dict[str, Any]:
+            runs: Any = None
+            if self.terminal_runs is not None:
+                try:
+                    runs = self.terminal_runs(task_id)
+                except Exception:
+                    runs = None
+            payload["commands_already_run"] = [] if runs is None else list(runs)
+            payload["commands_already_run_note"] = (" ".join([COMMANDS_RUN_NOTE, *(
+                note for note in getattr(runs, "notes", ()) if isinstance(note, str))]) if runs is not None
+                else "The terminal journal could not be read; it does not show that nothing ran.")
+            return payload
+        return prepare
+
+    def _resend_listener(self, task_id: str, run_id: str | None, commands: list[str] | None,
+                         first: bool, session: list[Any] | None = None) -> Callable:
+        replace_commands = None if commands is None else self._commands_listener(task_id, run_id, commands)
+        state_listener = self._task_message_listener(task_id, run_id) if first and run_id is not None else None
+
+        def listener(event: str, snapshot: Mapping[str, Any]) -> None:
+            if event in ("submitted", "delivered", "unknown", "rejected", "held_paused", "withdrawn"):
+                with self._lock:  # the re-send is no longer on its way (worker_session says who has it)
+                    if self._resend_pending.get(task_id) == session:
+                        del self._resend_pending[task_id]
+            if event == "unknown" and state_listener is None:
+                self._took_task(task_id, run_id, snapshot)  # the worker may have it (review P3-1)
+            if state_listener is not None:
+                state_listener(event, snapshot)  # the TASK message of the run (its id, running, worker_session)
+            elif event in ("submitted", "delivered"):
+                self._took_task(task_id, run_id, snapshot)
+            if replace_commands is not None:
+                replace_commands(event, snapshot)
+        return listener
+
+    def _took_task(self, task_id: str, run_id: str | None, snapshot: Mapping[str, Any]) -> None:
+        """A worker OMP session accepted this Task's TASK (or its re-send): it has the Task now."""
+        session, generation = snapshot.get("session_id"), snapshot.get("session_generation")
+        if not isinstance(session, str) or type(generation) is not int:
+            return
+        with self._lock:
+            task = self.tasks.get(task_id)
+            if task is None or task.run_id != run_id or task.status == "closed":
+                return
+            self._task_message_state[task_id] = "sent"
+            if task.worker_session != [session, generation]:
+                task.worker_session = [session, generation]
+                self._record({"type": "task_worker_session", "task_id": task_id, "session_id": session,
+                              "generation": generation})
+                self._save_task(task)
+            self._wake.notify_all()
+
     def _question(self, task: FlowTask, request: HandoffRequest, spec: dict[str, Any] | None) -> HandoffDecision:
+        session = self._needs_resend(task)
+        if session is not None:
+            return self._resend(task, request, spec, session)
         payload: dict[str, Any] = {"handoff": "to_worker", "kind": task.kind, "message": request.args["message"],
                                    "task_id": task.task_id}
         listener = None
@@ -734,7 +914,25 @@ class TaskFlow:
         return HandoffDecision({"status": "queued", "task_id": task.task_id, "manager_rule": MANAGER_RULE},
                                message=OutboundMessage(
             task.task_id, task.run_revision, task.run_id, ActorRole.MANAGER, ActorRole.WORKER,
-            MessageKind.QUESTION, payload), listener=listener)
+            MessageKind.QUESTION, payload), listener=self._follow_up_listener(task.task_id, listener))
+
+    def _follow_up_listener(self, task_id: str, inner: Callable | None) -> Callable:
+        """A manager follow-up's outbox events: ``inner`` (if any) first, then ``follow_up_submitted`` once the
+        worker's OMP accepted it (p27-cd70-02 Q2)."""
+        told = [False]
+
+        def listener(event: str, snapshot: Mapping[str, Any]) -> None:
+            if inner is not None:
+                inner(event, snapshot)
+            if event in ("submitted", "delivered") and not told[0]:
+                told[0] = True
+                hook = self.follow_up_submitted
+                if hook is not None:
+                    try:
+                        hook(task_id)
+                    except Exception:
+                        pass  # the watchdog never changes the flow
+        return listener
 
     def _commands_listener(self, task_id: str, run_id: str | None, commands: list[str]) -> Callable:
         """The follow-up's new commands take effect when the worker's OMP accepted the message (a failed or
@@ -1068,15 +1266,7 @@ class TaskFlow:
             task.set_status("starting")
             self._save_task(task)
             self._record({"type": "run_started", "task_id": task_id, "run_id": run_id, "revision": revision})
-            spec = task.spec or {}
-            payload: dict[str, Any] = {"handoff": "to_worker", "kind": "work", "task_id": task_id,
-                                       "revision": revision, "goal": spec.get("goal"),
-                                       "paths": list(spec.get("paths") or []),
-                                       "message": task.message or task.summary}  # older records: summary
-            if "instructions" in spec:
-                payload["instructions"] = spec["instructions"]
-            payload.update(_analysis_fields(spec.get("analysis")))
-            payload.update(_commands_fields(task.commands))
+            payload = self._task_payload(task, revision)
             outbound = OutboundMessage(task_id, revision, run_id, ActorRole.MANAGER, ActorRole.WORKER,
                                        MessageKind.TASK, payload)
             self._task_message_state[task_id] = "queued"
@@ -1087,6 +1277,21 @@ class TaskFlow:
             with self._lock:
                 self._task_message_state[task_id] = "not_sent"
             self._set_held(task_id, f"instruction_{queued.get('reason', 'not_queued')}")
+
+    @staticmethod
+    def _task_payload(task: FlowTask, revision: int, *, commands: list[str] | None = None,
+                      analysis: Any = None) -> dict[str, Any]:
+        """The first TASK message of a work Task (also re-sent to a new worker session, C-D70 (4))."""
+        spec = task.spec or {}
+        payload: dict[str, Any] = {"handoff": "to_worker", "kind": "work", "task_id": task.task_id,
+                                   "revision": revision, "goal": spec.get("goal"),
+                                   "paths": list(spec.get("paths") or []),
+                                   "message": task.message or task.summary}  # older records: summary
+        if "instructions" in spec:
+            payload["instructions"] = spec["instructions"]
+        payload.update(_analysis_fields(analysis or spec.get("analysis")))
+        payload.update(_commands_fields(task.commands if commands is None else commands))
+        return payload
 
     _TASK_MESSAGE_STATES = {"delivering": "delivering", "deferred": "queued", "submitted": "sent",
                             "delivered": "sent", "unknown": "sent", "rejected": "not_sent",
@@ -1108,9 +1313,23 @@ class TaskFlow:
                     return
                 if event == "created":
                     task.task_message_id = snapshot.get("message_id")
+                    if task.held_reason is not None and task.held_reason.startswith("instruction_"):
+                        task.held_reason = None  # C-D70 (4): a re-sent TASK after a lost one
                     task.set_status("running")
                 elif event in ("rejected", "held_paused") or event == "unknown" and not submitted[0]:
                     task.held_reason = f"instruction_{event}"
+                    session, generation = snapshot.get("session_id"), snapshot.get("session_generation")
+                    if event == "unknown" and isinstance(session, str) and type(generation) is int:
+                        # review P3-1: the worker session may have it (watchdog, no false re-send)
+                        task.worker_session = [session, generation]
+                elif event in ("submitted", "delivered"):
+                    session, generation = snapshot.get("session_id"), snapshot.get("session_generation")
+                    if not isinstance(session, str) or type(generation) is not int \
+                            or task.worker_session == [session, generation]:
+                        return
+                    task.worker_session = [session, generation]  # C-D70 (4): this worker session has the Task
+                    self._record({"type": "task_worker_session", "task_id": task_id, "session_id": session,
+                                  "generation": generation})
                 else:
                     return
                 self._save_task(task)

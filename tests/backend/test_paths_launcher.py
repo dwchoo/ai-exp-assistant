@@ -299,9 +299,11 @@ class IsolationLaunchTests(unittest.TestCase):
         self.assertEqual(launcher.workbench_skill_names(skills, ("order-worker", "shared-*")),
                          ("order-worker", "shared-x"))
         self.assertEqual(launcher.workbench_skill_names(self.root / "none"), ())
-        # CW-18: the repository ships exactly the two role skills; each role's allow-list is its own one.
-        self.assertEqual(launcher.workbench_skill_names(launcher.default_skills_dir()), ("to-manager", "to-worker"))
-        self.assertEqual(launcher.role_skill_allowlist("manager"), ("to-worker",))
+        # CW-18: the repository ships the two role skills and (C-D70 (7)) the manager's recovery skill; each role's
+        # allow-list is its own.
+        self.assertEqual(launcher.workbench_skill_names(launcher.default_skills_dir()),
+                         ("to-manager", "to-worker", "workbench-recovery"))
+        self.assertEqual(launcher.role_skill_allowlist("manager"), ("to-worker", "workbench-recovery"))
         self.assertEqual(launcher.role_skill_allowlist("worker"), ("to-manager",))
 
     def test_user_disabled_providers_read_via_omp_config_get(self):

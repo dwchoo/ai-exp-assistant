@@ -64,7 +64,12 @@ through ``HandoffService.handle`` (which answers at once): this call may wait.
   notice (command, cwd, status, exit code or signal, output tail, log path,
   duration): busy -> retried until delivered, paused -> held until the resume,
   ``unknown``/``rejected`` -> never resent; never twice. The notice of an
-  earlier command survives a new command. ``tick`` (the notifier thread, or a
+  earlier command survives a new command. C-D70 (p27-cd70-02 Q3): a command a
+  previous worker OMP session started goes, while its Task has not been
+  re-delivered to the current worker session, to the manager instead
+  (``worker_terminal_done``: command id, status, exit code or signal, log
+  path; no output) through ``notify_manager``; ``done_target`` decides per
+  attempt. ``tick`` (the notifier thread, or a
   test with a fake ``clock``) does all of it.
 - Experiment runs and terminal commands exclude each other through one
   ``HostGate`` (the experiment's whole run vs. the command from its idle check
@@ -134,6 +139,10 @@ CHECK_INSTRUCTION = ("Workbench check (automatic, every 60 s while your terminal
                      "follows when the command exits.")
 DONE_INSTRUCTION = ("Workbench notice: your terminal command ended. Read the result (the full output is in "
                     "log_path) and continue your work.")
+MANAGER_DONE_INSTRUCTION = ("Workbench notice (information): a terminal command the previous worker OMP session started "
+                            "has ended; the current worker session has not received the Task yet. It is listed in "
+                            "workbench_status (commands_run) and in the Task re-sent with your next follow-up. Do not "
+                            "run it again yourself.")
 BUSY_DETAIL = ("Nothing was run. The host terminal runs a command only when it is free (the user's idle prompt, "
                "no job, no typed line, no experiment run). Do not work around it; try again later or tell the "
                "manager with to_manager.")
@@ -424,6 +433,8 @@ class TerminalService:
                  task_commands: Callable[[], list[str] | None] = lambda: None,
                  poll_interval: float = 0.03,
                  notify: Callable[[Mapping[str, Any]], str] | None = None,
+                 notify_manager: Callable[[Mapping[str, Any]], str] | None = None,
+                 done_target: Callable[[Mapping[str, Any]], str] | None = None,
                  clock: Callable[[], float] = time.monotonic, check_interval: float = CHECK_INTERVAL,
                  notice_retry: float = NOTICE_RETRY, tick_interval: float = NOTIFIER_TICK,
                  wait_seconds: float = WAIT_SECONDS):
@@ -451,6 +462,8 @@ class TerminalService:
         self._threads: list[threading.Thread] = []
         # C-D68 (8): checks and the completion notice (module docstring).
         self._notify = notify
+        self._notify_manager = notify_manager  # p27-cd70-02 Q3
+        self._done_target = done_target
         self._wait_seconds = wait_seconds
         self._clock = clock
         self._check_interval = check_interval
@@ -494,6 +507,23 @@ class TerminalService:
         if command.result is not None:
             view["status"] = command.result.get("status")
         return view
+
+    def watch_state(self) -> dict[str, Any]:
+        """C-D70 (1)/(6): whether a worker command runs or its completion notice is still to be sent, and the
+        latest command (id, short command, state, exit code or signal, start, log path)."""
+        with self._lock:
+            command = self._current
+            running = self._starting or (command is not None and not command.done.is_set())
+            pending = any(item.notice in ("pending", "sending") for item in self._noticing)
+            last = None
+            if command is not None:
+                result = command.result or {}
+                last = {"command_id": command.command_id, "command": shown_command(command.command),
+                        "state": "running" if not command.done.is_set() else result.get("status") or "unknown",
+                        "exit_code": result.get("exit_code"), "signal": result.get("signal"),
+                        "started_at": command.started_at, "duration_seconds": result.get("duration_seconds"),
+                        "log_path": str(command.log_path), "task_id": command.task_id, "owner": "worker"}
+        return {"running": running, "notice_pending": pending, "operated_by": self.host_operator(), "last": last}
 
     # -- requests ---------------------------------------------------------------------
     def handle(self, role: ActorRole | str, request: Mapping[str, Any]) -> dict[str, Any]:
@@ -777,9 +807,9 @@ class TerminalService:
             if current is not None and not current.done.is_set():
                 self._check_step(current, now, paused)
 
-    def _send(self, notice: Mapping[str, Any]) -> str:
+    def _send(self, notice: Mapping[str, Any], notify: Callable[[Mapping[str, Any]], str] | None = None) -> str:
         try:
-            outcome = self._notify(notice)  # type: ignore[misc]
+            outcome = (notify or self._notify)(notice)  # type: ignore[misc]
         except Exception:
             return "unknown"  # it may have reached the worker: never resent
         return outcome if outcome in ("delivered", "deferred", "not_connected", "paused", "unknown",
@@ -844,13 +874,22 @@ class TerminalService:
                 return
             command.notice = "sending"
         result = command.result or {}
-        notice = {"notice_id": command.notice_id, "type": "terminal_done", "command_id": command.command_id,
-                  "command": command.command, "cwd": command.cwd, "task_id": command.task_id,
-                  "status": result.get("status"), "exit_code": result.get("exit_code"),
-                  "signal": result.get("signal"), "reason": result.get("reason"), **command.tail(),
-                  "log_path": str(command.log_path), "duration_seconds": result.get("duration_seconds"),
-                  "instruction": DONE_INSTRUCTION}
-        outcome = self._send(notice)
+        target = self._target(command)
+        if target == "manager":  # p27-cd70-02 Q3: the worker session that started it is gone
+            notice = {"notice_id": command.notice_id, "type": "worker_terminal_done", "command_id": command.command_id,
+                      "command": shown_command(command.command), "task_id": command.task_id,
+                      "status": result.get("status"), "exit_code": result.get("exit_code"),
+                      "signal": result.get("signal"), "log_path": str(command.log_path),
+                      "duration_seconds": result.get("duration_seconds"), "instruction": MANAGER_DONE_INSTRUCTION}
+            outcome = self._send(notice, self._notify_manager)
+        else:
+            notice = {"notice_id": command.notice_id, "type": "terminal_done", "command_id": command.command_id,
+                      "command": command.command, "cwd": command.cwd, "task_id": command.task_id,
+                      "status": result.get("status"), "exit_code": result.get("exit_code"),
+                      "signal": result.get("signal"), "reason": result.get("reason"), **command.tail(),
+                      "log_path": str(command.log_path), "duration_seconds": result.get("duration_seconds"),
+                      "instruction": DONE_INSTRUCTION}
+            outcome = self._send(notice)
         with self._lock:
             if outcome in ("deferred", "not_connected", "paused"):
                 command.notice = "pending"
@@ -863,7 +902,19 @@ class TerminalService:
                 self._refresh_notice(command)  # a call may have got the result meanwhile
                 return
             command.notice = {"delivered": "sent"}.get(outcome, outcome)
-            self._notice_record(command, "terminal_notice", command.notice, notice_id=command.notice_id)
+            self._notice_record(command, "terminal_notice", command.notice, notice_id=command.notice_id,
+                                target=target)
+
+    def _target(self, command: _Command) -> str:
+        """``worker`` (as before) or ``manager`` for a command of a previous worker session (p27-cd70-02 Q3)."""
+        if self._done_target is None or self._notify_manager is None:
+            return "worker"
+        try:
+            target = self._done_target({"session_id": command.key.get("session_id"),
+                                        "generation": command.key.get("generation"), "task_id": command.task_id})
+        except Exception:
+            return "worker"
+        return "manager" if target == "manager" else "worker"
 
     # -- starting a command -------------------------------------------------------------
     def _start(self, text: str, key_dict: dict[str, Any], task: str | None,

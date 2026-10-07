@@ -79,6 +79,21 @@ class AnalysisValidationTests(unittest.TestCase):
         self.assertTrue([e for e in errors(follow) if e.startswith("analysis")])
 
 
+def cancel_settled(test, task_id):
+    """Cancel the Task and wait until its cancel notice to the worker exists (p27-cd70-test-02).
+
+    The cancel notice (a QUESTION with ``cancel: true``) is created asynchronously by the outbox; clearing
+    ``mailbox.created`` before it appears lets the next subtest see it as its first message. The TASK is first
+    waited for until it counts as sent, so the cancel always has a notice to wait for."""
+    test.assertTrue(wait_until(lambda: test.flow._task_message_state.get(task_id) == "sent", 10),
+                    "the TASK was never sent before the cancel")
+    test.to_worker({"kind": "work", "message": "cancel", "task_id": task_id, "cancel": True})
+    test.assertTrue(wait_until(lambda: test.flow.active_task() is None, 10))
+    test.assertTrue(wait_until(lambda: any(m.kind is MessageKind.QUESTION and m.task_id == task_id
+                                           and m.payload.get("cancel") is True for m in test.mailbox.created), 10),
+                    "the cancel notice to the worker was never created")
+
+
 class AnalysisTaskMessageTests(FlowFixture):
     def dispatch(self, **extra):
         result = self.to_worker({**WORK, **extra})
@@ -99,8 +114,7 @@ class AnalysisTaskMessageTests(FlowFixture):
                 rule = payload.get("analysis_rule", "")
                 self.assertRegex(rule, re.compile(r"fact", re.I), "summary means facts plus a short summary")
                 self.assertNotRegex(rule, LENGTH_CAP, "C-D69 (4): no length cap")
-                self.to_worker({"kind": "work", "message": "cancel", "task_id": result["task_id"], "cancel": True})
-                self.assertTrue(wait_until(lambda: self.flow.active_task() is None, 10))
+                cancel_settled(self, result["task_id"])
 
     def test_detailed_is_explicit_and_shown(self):
         _, payload = self.dispatch(analysis="detailed")

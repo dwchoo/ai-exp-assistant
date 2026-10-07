@@ -411,6 +411,17 @@ class OmpPane(_OwnedSession, Pane):
                 "queued_input_bytes": len(self._pending), "input_capacity": INPUT_QUEUE_BYTES,
                 "restart": None if self.restart is None else dict(self.restart)}
 
+    def terminate(self) -> bool:
+        """C-D70 (3): ask this OMP to end: SIGTERM to its own process group, only while its unreaped child is
+        proven ours (never a pattern or another process). True when the signal was sent; ``close`` KILLs later."""
+        if self._leader_exited() or not self._leader_proven():
+            return False
+        try:
+            os.killpg(self.pid, signal.SIGTERM)
+        except OSError:
+            return False
+        return True
+
     def close(self, grace: float = 3.0) -> dict[str, Any]:
         """TERM the proven OMP group, then KILL every proven member left in its session.
 

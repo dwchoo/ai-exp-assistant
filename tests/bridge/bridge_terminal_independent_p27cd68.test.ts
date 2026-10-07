@@ -97,7 +97,8 @@ test("C-D68 (1)/(3): terminal exists only for the worker; the manager keeps to_w
 	} finally { await worker.close(); }
 	const manager = await startBridge("manager");
 	try {
-		assert.deepEqual([...manager.tools.keys()], ["to_worker"]);
+		// C-D70 (3)/(5): the manager also has restart_worker and workbench_status, never terminal (p27-cd70-test-01 edit).
+		assert.deepEqual([...manager.tools.keys()].sort(), ["restart_worker", "to_worker", "workbench_status"]);
 		const description = manager.tools.get("to_worker")!.description as string;
 		// C-D68 (3): work handed over with to_worker is not done by the manager; it waits for the worker's report.
 		assert.match(description, /do not do it yourself/i);

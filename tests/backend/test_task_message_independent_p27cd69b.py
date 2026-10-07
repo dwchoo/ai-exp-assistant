@@ -37,6 +37,21 @@ def procedure(size: int, mark: str = "p") -> str:
     return out[:size]
 
 
+def cancel_settled(test, task_id):
+    """Cancel the Task and wait until its cancel notice to the worker exists (p27-cd70-test-02).
+
+    The cancel notice (a QUESTION with ``cancel: true``) is created asynchronously by the outbox; clearing
+    ``mailbox.created`` before it appears lets the next subtest see it as its first message. The TASK is first
+    waited for until it counts as sent, so the cancel always has a notice to wait for."""
+    test.assertTrue(wait_until(lambda: test.flow._task_message_state.get(task_id) == "sent", 10),
+                    "the TASK was never sent before the cancel")
+    test.to_worker({"kind": "work", "message": "cancel", "task_id": task_id, "cancel": True})
+    test.assertTrue(wait_until(lambda: test.flow.active_task() is None, 10))
+    test.assertTrue(wait_until(lambda: any(m.kind is MessageKind.QUESTION and m.task_id == task_id
+                                           and m.payload.get("cancel") is True for m in test.mailbox.created), 10),
+                    "the cancel notice to the worker was never created")
+
+
 class FirstTaskCarriesTheWholeMessageTests(FlowFixture):
     def dispatch(self, message, **extra):
         result = self.to_worker({"kind": "work", "message": message, "spec": dict(SPEC), **extra})
@@ -60,8 +75,7 @@ class FirstTaskCarriesTheWholeMessageTests(FlowFixture):
                 view = self.flow.task_view()
                 self.assertEqual(view["summary"], text[:1024], "status keeps the short summary only")
                 self.assertLessEqual(len(view["summary"]), 1024)
-                self.to_worker({"kind": "work", "message": "cancel", "task_id": result["task_id"], "cancel": True})
-                self.assertTrue(wait_until(lambda: self.flow.active_task() is None, 10))
+                cancel_settled(self, result["task_id"])
 
     def test_the_tail_of_a_long_procedure_is_not_lost_and_the_json_payload_shows_it(self):
         text = procedure(LIMIT - 40) + "\nSTOP CONDITION: LAST-LINE-SENTINEL"
@@ -133,8 +147,7 @@ class OldRecordFallbackTests(FlowFixture):
                 self.assertEqual(payload["message"], text[:1024])
                 self.assertTrue(payload["message"])
                 self.assertEqual(payload["task_id"], result["task_id"])
-                self.to_worker({"kind": "work", "message": "cancel", "task_id": result["task_id"], "cancel": True})
-                self.assertTrue(wait_until(lambda: self.flow.active_task() is None, 10))
+                cancel_settled(self, result["task_id"])
 
     def test_a_new_task_held_for_a_while_then_sent_still_carries_the_full_message(self):
         text = procedure(LIMIT)

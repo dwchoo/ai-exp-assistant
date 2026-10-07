@@ -106,7 +106,8 @@ class SkillAllowlistTests(unittest.TestCase):
             self.assertEqual(launcher.role_skill_allowlist(role), (), role)
 
     def test_known_roles_unchanged(self):
-        self.assertEqual(launcher.role_skill_allowlist("manager"), ("to-worker",))
+        # C-D70 (7): the manager also has its agent-only recovery skill.
+        self.assertEqual(launcher.role_skill_allowlist("manager"), ("to-worker", "workbench-recovery"))
         self.assertEqual(launcher.role_skill_allowlist("worker"), ("to-manager",))
 
 

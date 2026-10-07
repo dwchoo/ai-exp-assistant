@@ -141,6 +141,8 @@ class NullableArgumentsTests(SmokeFlowFixture):
                 "run": False, "cancel": False}
         result = self.to_worker(args)
         self.assertEqual(result["status"], "queued", result)
+        # the lane creates the message after the call returns (p27-cd70-fix-02: no read before it exists)
+        self.assertTrue(wait_until(lambda: any(m.kind is MessageKind.QUESTION for m in self.mailbox.created)))
         question = [m for m in self.mailbox.created if m.kind is MessageKind.QUESTION][-1]
         self.assertNotIn("paths", question.payload)
 

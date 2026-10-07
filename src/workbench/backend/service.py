@@ -6,14 +6,17 @@ connections come and go; only a confirmed shutdown request or a signal stops
 it. It never starts a Task run or replays a request. The only processes it
 starts again, when an attached UI asks for it, are an exited manager/worker OMP,
 as a new session with its start-up command (C-D62), and an exited host shell, as
-a new persistent shell started like the first one (C-D63). A live pane and the
-backend itself are never restarted. The only pane it force-kills on request is
-the host shell with the members of its own session (C-D63).
+a new persistent shell started like the first one (C-D63). The backend itself is
+never restarted. The only live pane it ends on request is the worker OMP, when
+the manager calls ``restart_worker`` (C-D70 (3): only the worker OMP process it
+started and its own session members, then a new worker session through the same
+restart path); the host shell is force-killed with the members of its own
+session only on the user's request (C-D63).
 """
 
 from __future__ import annotations
 
-from dataclasses import asdict
+from dataclasses import asdict, dataclass, field
 import os
 from pathlib import Path
 import signal
@@ -26,7 +29,13 @@ from uuid import uuid4
 
 from workbench.app.lifecycle import LifecycleJournal
 from workbench.backend.automation import AutomationController
-from workbench.backend.flow import HANDOFF_JOURNAL_NAME, HandoffService, sensitive_environment_values
+from workbench.backend.flow import (
+    HANDOFF_JOURNAL_NAME, HandoffService, environment_value_findings, rejected, sensitive_environment_values,
+)
+from workbench.backend.flow_recovery import (
+    RESTART_WORKER_TOOL, restart_detail, RESTARTS_SHOWN, STATUS_REPORTS_MAX, STATUS_TOOL, WatchPorts, Watchdog,
+    bounded, validate_restart_arguments, validate_status_arguments,
+)
 from workbench.backend.flow_tasks import FLOW_LEDGER_NAME, ExperimentPorts, TaskFlow
 from workbench.backend.flow_terminal import (
     ABANDON_TOOL, TERMINAL_DIRECTORY, TERMINAL_TOOL, HostGate, TerminalService,
@@ -63,6 +72,25 @@ OMP_ROLES = (("manager", PaneId.MANAGER_OMP), ("worker", PaneId.WORKER_OMP))
 ISOLATION_JOIN_TIMEOUT = 15.0
 RESTART_HISTORY = 20
 NOTICE_LOCK_WAIT = 0.2  # C-D68 (8): a delivery to the worker in progress defers a terminal notice
+# C-D70 (3): restart_worker asks the worker OMP to end, waits this long, then KILLs its own session members.
+RESTART_GRACE = 3.0
+RESTART_JOB_BUDGET = 8.0  # the tool waits this long (from the request) for the restart itself ...
+RESTART_TOOL_BUDGET = 9.0  # ... and until here for the new worker's bridge registration (the bridge waits 10 s)
+WATCH_EVENTS = ("agent_start", "agent_end", "tool_execution_start")  # a worker turn the watchdog did not probe
+
+
+@dataclass(eq=False)
+class _RestartJob:
+    """One manager restart_worker request, carried out on the backend loop (it owns the pane table)."""
+
+    reason: str
+    requester: str
+    at: float
+    phase: str = "new"  # new | terminating
+    deadline: float = 0.0
+    terminated: bool = False
+    result: dict[str, Any] | None = None
+    done: threading.Event = field(default_factory=threading.Event)
 
 
 def _log(message: str) -> None:
@@ -136,6 +164,15 @@ class Backend:
         self._shell_cwd: str | None = None
         self._shell_lock = threading.Lock()
         self.kills: list[dict[str, Any]] = []
+        # C-D70: the watchdog, the manager's restart_worker jobs and the manager tools' results by call key.
+        self.watchdog: Watchdog | None = None
+        self._restart_jobs: list[_RestartJob] = []
+        self._jobs_lock = threading.Lock()
+        self._jobs_closed = False  # set under _jobs_lock when the backend aborts the jobs at shutdown
+        self._recovery_lock = threading.Lock()
+        self._recovery_results: dict[tuple, dict[str, Any]] = {}
+        self._recovery_inflight: set[tuple] = set()
+        self._causes_reported: set[int] = set()
 
     # -- lifecycle -------------------------------------------------------
     def run(self) -> int:
@@ -217,7 +254,8 @@ class Backend:
                 automation=self._automation_port, environment_names=lambda: set(self._shell_env or {}),
                 worktrees_root=ensure_private_dir(layout.workflow / "worktrees"),
                 artifacts_root=ensure_private_dir(layout.workflow / "runs")),
-            project_dir=self.project_dir, lifecycle=self.automation_loop, host_gate=host_gate)
+            project_dir=self.project_dir, lifecycle=self.automation_loop, host_gate=host_gate,
+            worker_session=self._worker_session_key)  # C-D70 (4): a new worker session gets the full Task again
         self.handoffs.configure(policy=self.flow, active_task=self.flow.active_task)
         self.terminal = TerminalService(
             handoffs=self.handoffs, host_shell=self._host_shell_port, gate=host_gate,
@@ -225,8 +263,14 @@ class Backend:
             paused=self._automation_paused, activity=self.flow.experiment_host_activity,
             sensitive_values=self._sensitive_values, active_task=self.flow.active_task,
             task_commands=self.flow.active_commands,  # C-D69 (6): a Task's commands are the only ones run
-            notify=self._worker_notice)  # C-D68 (8): checks and the completion notice
+            notify=self._worker_notice,  # C-D68 (8): checks and the completion notice
+            # p27-cd70-02 Q3: the completion of a previous worker session's command goes to the manager until the
+            # open Task reached the current worker session
+            notify_manager=lambda notice: self._notice(ActorRole.MANAGER, notice), done_target=self._done_target)
         self.flow.terminal_runs = self.terminal.runs_for_task  # C-D69 (6)(d): the done report's commands run
+        self.watchdog = self._make_watchdog()  # C-D70: status checks, stalled/restart/recovery notices
+        # p27-cd70-02 Q2: a manager follow-up the worker accepted re-arms the status checks and worker_stalled
+        self.flow.follow_up_submitted = lambda task_id: self.watchdog.worker_acted("manager_follow_up")
         self.automation = self.automation_loop.status()
         # The role is the peer's authenticated hello role, never a frame field.
         self.bridge.set_tool_handler(self._tool_request, undelivered=self._tool_result_undelivered,
@@ -261,6 +305,7 @@ class Backend:
         self.flow.start()
         self.automation_loop.start()
         self.terminal.start()
+        self.watchdog.start()
         # Started after every pane fork so no fork happens while it runs.
         self._isolation_thread = threading.Thread(target=self._run_isolation_check, args=(checks,),
                                                   name="omp-isolation-check", daemon=True)
@@ -352,6 +397,7 @@ class Backend:
         for pane in list(self.panes.values()):
             for chunk in pane.pump():
                 self.ui.broadcast(chunk)
+        self._run_restart_jobs()  # C-D70 (3): the manager's restart_worker, on this loop (it owns the panes)
         self._check_ready()
         if self._isolation_dirty:
             self._isolation_dirty = False
@@ -418,6 +464,9 @@ class Backend:
 
     def _close(self) -> dict[str, Any]:
         self._isolation_cancel.set()
+        if self.watchdog is not None:
+            self.watchdog.close()  # no notice is sent after this; nothing is replayed
+        self._abort_restart_jobs("the backend is shutting down; the worker was not restarted")
         if self.automation_loop is not None:
             self.automation_loop.close()  # the tick and pause/resume threads end first; nothing is replayed
         if self.flow is not None:
@@ -515,6 +564,7 @@ class Backend:
                 "task": self.flow.task_view() if self.flow else None,
                 "worker": self.flow.worker_view() if self.flow else {"state": "idle", "task_id": None},
                 "omp_isolation": self.omp_isolation,
+                "recovery": self._recovery_view(),
                 "boot": dict(self.boot), "shutdown": {"pending": self._shutdown_token is not None},
                 "ui": dict(self.ui.stats) if self.ui else {}}
 
@@ -666,12 +716,15 @@ class Backend:
             if rechecking:
                 raise Held(Reason.RESTART_IN_PROGRESS,
                            f"{pane_id.value} was just restarted and its isolation re-check is still running")
-            return self._respawn(pane_id, pane, launch)
+            return self._respawn(pane_id, pane, launch,
+                                 cause={"cause": "user_restart", "requester": "user", "reason": None})
         finally:
             self._restart_lock.release()
 
-    def _respawn(self, pane_id: PaneId, old: OmpPane, launch: dict[str, Any]) -> dict[str, Any]:
+    def _respawn(self, pane_id: PaneId, old: OmpPane, launch: dict[str, Any], *,
+                 cause: dict[str, Any] | None = None, close_grace: float = 3.0) -> dict[str, Any]:
         role = launch["role"]
+        cause = dict(cause or {"cause": "user_restart", "requester": "user", "reason": None})
         previous = {"process": ref_dict(old.ref), "session_id": old.session_id, "generation": old.generation,
                     "exit_status": old.returncode}
         count = (old.restart or {}).get("count", 0)
@@ -683,23 +736,26 @@ class Backend:
             write_role_overlay(self.layout.root, role, launch["overlay"])
             # The exited OMP is reaped: release its PTY and any members left in its own session.
             # A member that cannot be signalled (EPERM) is reported, never a restart failure.
-            previous["survivors"] = old.close()["survivors"]
+            # C-D70 (3): a live worker OMP asked to end by restart_worker is KILLed here with its session.
+            previous["survivors"] = old.close(grace=close_grace)["survivors"]
+            previous["exit_status"] = old.returncode
             new = OmpPane(pane_id, role, launch["command"], launch["env"], cwd=self.project_dir,
                           size=old.size, generation=old.generation + 1)
         except Exception as exc:  # the pane stays exited with the reason; the backend keeps running
             detail = f"could not start a new {role} OMP: {exc}"
             old.restart = {"state": "failed", "count": count, "at": time.time(), "error": detail,
-                           "previous": previous}
+                           "previous": previous, **cause}
             _log(f"restart of {pane_id.value} failed: {exc!r}")
             self._write_record()
             raise Held(Reason.RESTART_FAILED, detail) from exc
         entry = {"pane": pane_id.value, "at": time.time(), "previous": previous,
-                 "process": ref_dict(new.ref), "session_id": new.session_id, "generation": new.generation}
+                 "process": ref_dict(new.ref), "session_id": new.session_id, "generation": new.generation, **cause}
         new.restart = {"state": "restarted", "count": count + 1, "at": entry["at"], "error": None,
-                       "previous": previous}
+                       "previous": previous, **cause}
         self.panes[pane_id] = new
         self.restarts = (self.restarts + [entry])[-RESTART_HISTORY:]
-        _log(f"restarted {pane_id.value}: pid {new.pid} (was {previous['process']}, exit {old.returncode})")
+        _log(f"restarted {pane_id.value}: pid {new.pid} (was {previous['process']}, exit {old.returncode}, "
+             f"requested by {cause.get('requester')})")
         # Ready again only after the new OMP registers with its own pid (see _check_degraded).
         self.phase = "degraded"
         self._check_degraded()
@@ -817,7 +873,15 @@ class Backend:
         return TaskMailbox(repository, self.bridge), repository.close
 
     def _tool_request(self, peer: Any, request: dict[str, Any]) -> dict[str, Any]:
-        """Bridge tool requests: the worker's ``terminal`` (C-D68) waits for its command; the rest is handoffs."""
+        """Bridge tool requests: the worker's ``terminal`` (C-D68) waits for its command; the manager's
+        ``restart_worker`` and ``workbench_status`` (C-D70) are answered here; the rest is handoffs."""
+        tool = request.get("tool")
+        watchdog = getattr(self, "watchdog", None)  # a backend built without __init__ (tests) has none
+        if watchdog is not None and getattr(peer.role, "value", peer.role) == "worker" \
+                and tool in (TERMINAL_TOOL, "to_manager"):
+            watchdog.worker_acted(str(tool))  # C-D70 (1): the worker acted; its status checks start over
+        if tool in (RESTART_WORKER_TOOL, STATUS_TOOL):
+            return self._recovery_tool(peer, request)
         if request.get("tool") in (TERMINAL_TOOL, ABANDON_TOOL):
             terminal = self.terminal
             if terminal is None:
@@ -844,7 +908,11 @@ class Backend:
             terminal.undelivered(peer.role, request)
 
     def _worker_notice(self, notice: Any) -> str:
-        """C-D68 (8): one Workbench notice to the worker OMP (the bridge ``notice`` frame).
+        """C-D68 (8): one Workbench notice to the worker OMP; see ``_notice``."""
+        return self._notice(ActorRole.WORKER, notice)
+
+    def _notice(self, role: Any, notice: Any) -> str:
+        """C-D68 (8), C-D70: one Workbench notice to the ``role`` OMP (the bridge ``notice`` frame).
 
         It holds the worker's delivery lock, which every mailbox delivery (a
         handoff, a workflow stage, an experiment's periodic review) holds until
@@ -854,15 +922,16 @@ class Backend:
         sent), ``unknown`` (it may have been sent: never resent) or ``rejected``.
         """
         bridge = self.bridge
+        role = role if isinstance(role, ActorRole) else ActorRole(role)
         try:
-            peer = bridge.peer(ActorRole.WORKER, 0)
+            peer = bridge.peer(role, 0)
         except (BridgeDisconnected, MailboxError):
             return "not_connected"
-        lock = bridge.delivery_lock(ActorRole.WORKER)
+        lock = bridge.delivery_lock(role)
         if not lock.acquire(timeout=NOTICE_LOCK_WAIT):
-            return "deferred"  # a delivery to the worker is in progress: its turn
+            return "deferred"  # a delivery to this OMP is in progress: its turn
         try:
-            ack = bridge.request(ActorRole.WORKER, {"kind": "notice", "notice": dict(notice)}, timeout=5.0,
+            ack = bridge.request(role, {"kind": "notice", "notice": dict(notice)}, timeout=5.0,
                                  expected_peer=(peer.session_id, peer.generation))
         except Exception:
             return "unknown"
@@ -876,6 +945,289 @@ class Backend:
         if status == "unknown_no_replay":
             return "unknown"
         return "rejected"
+
+    # -- C-D70: the watchdog, restart_worker and workbench_status ----------------------------
+    def _worker_session_key(self) -> tuple[str, int] | None:
+        peer = self._bridge_peer(ActorRole.WORKER)
+        return None if peer is None else (peer.session_id, peer.generation)
+
+    def _done_target(self, started: dict[str, Any]) -> str:
+        """``manager`` for a command a previous worker session started whose Task has not been re-delivered to the
+        current worker session (p27-cd70-02 Q3), else ``worker``."""
+        current = self._worker_session_key()
+        session = (started.get("session_id"), started.get("generation"))
+        if current is None or session == tuple(current):
+            return "worker"
+        task_id = started.get("task_id")
+        if task_id is not None and self.flow is not None and self.flow.task_session(task_id) == list(current):
+            return "worker"  # re-delivered: the current worker has the Task
+        return "manager"
+
+    def _probe(self, role: Any) -> dict[str, Any] | None:
+        try:
+            return self.bridge.probe(role, timeout=1.0) if self.bridge is not None else None
+        except (MailboxError, OSError, TimeoutError):
+            return None
+
+    def _worker_turns(self, cursor: int) -> tuple[int, int]:
+        if self.bridge is None:
+            return cursor, 0
+        return self.bridge.events_since(ActorRole.WORKER, WATCH_EVENTS, cursor)
+
+    def _make_watchdog(self) -> Watchdog:
+        handoffs, flow, terminal = self.handoffs, self.flow, self.terminal
+        return Watchdog(WatchPorts(
+            task=flow.watch_view, task_summary=flow.task_view, worker_state=flow.worker_view,
+            peer=self._bridge_peer, probe=self._probe, turns=self._worker_turns,
+            terminal=terminal.watch_state, outbox_busy=handoffs.lane_busy, reports=handoffs.report_entries,
+            requeue=lambda: handoffs.requeue_for_new_session(ActorRole.MANAGER), paused=self._automation_paused,
+            notify=self._notice, restart_cause=self._restart_cause, journal=handoffs.record))
+
+    def _recovery_view(self) -> dict[str, Any] | None:
+        """ui_v1 ``recovery`` (C-D70, additive)."""
+        watchdog = self.watchdog
+        if watchdog is None:
+            return None
+        try:
+            return watchdog.view()
+        except Exception:
+            return None
+
+    def _restart_cause(self, peer: Any) -> dict[str, Any]:
+        """Why the worker OMP with this bridge peer is a new session (for the worker_restarted notice)."""
+        pid = getattr(peer, "pid", None)
+        if pid not in self._causes_reported:
+            for entry in reversed(self.restarts):
+                if entry.get("pane") == PaneId.WORKER_OMP.value and (entry.get("process") or {}).get("pid") == pid:
+                    self._causes_reported.add(pid)
+                    return {"cause": entry.get("cause") or "user_restart", "requester": entry.get("requester"),
+                            "reason": entry.get("reason"), "at": entry.get("at")}
+        pane = self.panes.get(PaneId.WORKER_OMP)
+        if isinstance(pane, OmpPane) and pane.pid == pid:
+            return {"cause": "omp_new_session", "requester": None, "reason": None}  # same process, new session
+        return {"cause": "unknown", "requester": None, "reason": None}
+
+    def _recovery_tool(self, peer: Any, request: dict[str, Any]) -> dict[str, Any]:
+        """``restart_worker`` / ``workbench_status`` (C-D70 (3)/(6)): manager only, once per tool call key."""
+        parsed = HandoffService._parse(peer.role, request)
+        if isinstance(parsed, dict):
+            self._journal({"type": "recovery_invalid", "reason": parsed["reason"]})
+            return parsed
+        key, key_dict = parsed.key, parsed.key_dict()
+        if parsed.role is not ActorRole.MANAGER:
+            self._journal({"type": "recovery_request", "key": key_dict, "tool": parsed.tool,
+                           "redacted": "tool_not_allowed_for_role"})
+            return rejected("tool_not_allowed_for_role")
+        with self._recovery_lock:
+            if key in self._recovery_results:
+                return dict(self._recovery_results[key])
+            if key in self._recovery_inflight:
+                return {"status": "outcome_unknown", "reason": "duplicate_in_flight"}
+            self._recovery_inflight.add(key)
+        started = time.monotonic()
+        try:
+            if parsed.tool == RESTART_WORKER_TOOL:
+                result = self._restart_worker(parsed, key_dict, started)
+            else:
+                result = self._workbench_status(parsed, key_dict)
+        except Exception as exc:  # a restart may have started: its outcome is not known here
+            result = {"status": "outcome_unknown", "reason": f"backend_error:{type(exc).__name__}"}
+        with self._recovery_lock:
+            self._recovery_inflight.discard(key)
+            self._recovery_results[key] = result
+            while len(self._recovery_results) > 256:
+                del self._recovery_results[next(iter(self._recovery_results))]
+        if parsed.tool == RESTART_WORKER_TOOL:
+            self._journal({"type": "restart_worker_result", "key": key_dict,
+                           "result": {k: v for k, v in result.items() if k != "detail"}})
+        return dict(result)
+
+    def _journal(self, record: dict[str, Any]) -> None:
+        try:
+            if self.handoffs is not None:
+                self.handoffs.record(record)
+        except (OSError, TypeError, ValueError):
+            pass
+
+    def _restart_worker(self, parsed: Any, key_dict: dict[str, Any], started: float) -> dict[str, Any]:
+        args = parsed.args
+        errors = validate_restart_arguments(args)
+        if errors:
+            self._journal({"type": "restart_worker_request", "key": key_dict, "redacted": "invalid_arguments",
+                           "errors": errors})
+            return rejected("invalid_arguments", errors=errors)
+        reason = args["reason"].strip()
+        try:
+            findings = environment_value_findings({"reason": reason}, self._sensitive_values())
+        except Exception:
+            findings = ["reason:environment_check_unavailable"]
+        if findings:
+            self._journal({"type": "restart_worker_request", "key": key_dict, "redacted": "environment_value",
+                           "fields": findings})
+            return rejected("environment_value", fields=findings,
+                            detail="Never put environment variable values in the reason.")
+        self._journal({"type": "restart_worker_request", "key": key_dict, "reason": reason})
+        if self._shutting_down():
+            return {"status": "refused", "reason": "backend_shutdown",
+                    "detail": "The backend is shutting down; the worker is not restarted."}
+        if not isinstance(self.panes.get(PaneId.WORKER_OMP), OmpPane) or PaneId.WORKER_OMP not in self._launch:
+            return {"status": "refused", "reason": "pane_unavailable", "detail": "There is no worker OMP pane."}
+        if not self._restart_lock.acquire(blocking=False):
+            return {"status": "refused", "reason": "restart_in_progress",
+                    "detail": "Another OMP restart is in progress; wait for it (do not retry in a loop)."}
+        with self._isolation_lock:
+            rechecking = "worker" in self._isolation_rechecking
+        if rechecking:
+            self._restart_lock.release()
+            return {"status": "refused", "reason": "restart_in_progress",
+                    "detail": "The worker was just restarted and its isolation re-check still runs; wait for it."}
+        job = _RestartJob(reason, "manager", time.time())
+        with self._jobs_lock:  # the same lock as _abort_restart_jobs: no job is queued after the shutdown abort
+            closing = self._jobs_closed or self._shutting_down()
+            if not closing:
+                self._restart_jobs.append(job)  # the backend loop owns the lock from here and releases it
+        if closing:
+            self._restart_lock.release()
+            return {"status": "refused", "reason": "backend_shutdown",
+                    "detail": "The backend is shutting down; the worker is not restarted."}
+        if not job.done.wait(max(0.0, started + RESTART_JOB_BUDGET - time.monotonic())):
+            if self._shutting_down():  # review P3-4: never "restarting" while the backend stops
+                return {"status": "refused", "reason": "backend_shutdown",
+                        "detail": "The backend is shutting down; no new worker session is started."}
+            return {"status": "restarting", "reason": reason,
+                    "detail": restart_detail(self._worker_task_open(), ready=False)}
+        result = dict(job.result or {"status": "outcome_unknown", "reason": "no_result"})
+        if result.get("status") != "restarted":
+            return result
+        pid = (result.get("process") or {}).get("pid")
+        peer = None
+        while time.monotonic() < started + RESTART_TOOL_BUDGET:
+            peer = self._bridge_peer(ActorRole.WORKER)
+            if peer is not None and peer.pid == pid:
+                break
+            peer = None
+            time.sleep(0.05)
+        flow_task = self.flow.task_view() if self.flow is not None else None
+        task = None if flow_task is None else {name: flow_task.get(name) for name in (
+            "task_id", "kind", "status", "active", "held_reason", "closed_reason", "summary")}
+        terminal = self.terminal.watch_state() if self.terminal is not None else None
+        return {"status": "restarted", "reason": reason,
+                "worker": {"pane_generation": result.get("generation"), "pid": pid, "registered": peer is not None,
+                           "session_id": None if peer is None else peer.session_id,
+                           "generation": None if peer is None else peer.generation},
+                "previous": result.get("previous"), "survivors": result.get("survivors"), "task": task,
+                "terminal": terminal, "detail": restart_detail(self._worker_task_open(), ready=peer is not None)}
+
+    def _worker_task_open(self) -> bool:
+        """A Task the worker_restarted notice is sent for (the watchdog's rule: busy, or blocked and open)."""
+        flow = self.flow
+        if flow is None:
+            return False
+        if flow.watch_view() is not None:
+            return True
+        view = flow.task_view()
+        return isinstance(view, dict) and view.get("status") == "blocked"
+
+    def _run_restart_jobs(self) -> None:
+        """The backend loop's part of restart_worker: ask the worker OMP to end, wait ``RESTART_GRACE`` without
+        blocking the loop, then close it (KILL of its own session members) and respawn it (C-D62 path)."""
+        while True:
+            with self._jobs_lock:
+                if not self._restart_jobs:
+                    return
+                job = self._restart_jobs[0]
+            if not self._advance_restart(job):
+                return
+            with self._jobs_lock:
+                self._restart_jobs.remove(job)
+
+    def _advance_restart(self, job: _RestartJob) -> bool:
+        """One step of a job; True once it finished (result set, restart lock released)."""
+        pane, launch = self.panes.get(PaneId.WORKER_OMP), self._launch.get(PaneId.WORKER_OMP)
+        try:
+            if self._shutting_down():
+                raise Held(Reason.BACKEND_SHUTDOWN, "the backend is shutting down; the worker was not restarted")
+            if not isinstance(pane, OmpPane) or launch is None:
+                raise Held(Reason.PANE_UNAVAILABLE, "worker_omp has no OMP pane in this backend")
+            if job.phase == "new":
+                job.phase, job.deadline = "terminating", time.monotonic() + RESTART_GRACE
+                job.terminated = pane.poll() is None and pane.terminate()
+                _log(f"restart_worker requested by the manager: worker OMP pid {pane.pid} "
+                     f"{'asked to end' if job.terminated else 'not signalled (already exited or not provable)'}")
+            if pane.poll() is None and job.terminated and time.monotonic() < job.deadline:
+                return False  # still ending politely; the loop goes on meanwhile
+            result = self._respawn(PaneId.WORKER_OMP, pane, launch, close_grace=0.0, cause={
+                "cause": "restart_worker", "requester": "manager", "reason": job.reason, "requested_at": job.at})
+            job.result = {"status": "restarted", **result, "previous": (self.panes[PaneId.WORKER_OMP].restart or {})
+                          .get("previous")}
+        except Held as exc:
+            job.result = {"status": "failed" if exc.reason is Reason.RESTART_FAILED else "refused",
+                          "reason": exc.reason.value, "detail": exc.detail}
+        except Exception as exc:  # never into the backend loop
+            job.result = {"status": "failed", "reason": Reason.RESTART_FAILED.value,
+                          "detail": f"{type(exc).__name__}: {exc}"[:300]}
+        self._restart_lock.release()
+        job.done.set()
+        return True
+
+    def _abort_restart_jobs(self, detail: str) -> None:
+        with self._jobs_lock:
+            self._jobs_closed = True  # restart_worker queues nothing from now on
+            jobs, self._restart_jobs = list(self._restart_jobs), []
+        for job in jobs:
+            job.result = {"status": "refused", "reason": Reason.BACKEND_SHUTDOWN.value, "detail": detail}
+            self._restart_lock.release()
+            job.done.set()
+
+    def _workbench_status(self, parsed: Any, key_dict: dict[str, Any]) -> dict[str, Any]:
+        """C-D70 (6): read-only; never waits on a mailbox (one bridge probe of at most 1 s)."""
+        task_id, errors = validate_status_arguments(parsed.args)
+        if errors:
+            return rejected("invalid_arguments", errors=errors)
+        flow, terminal, handoffs = self.flow, self.terminal, self.handoffs
+        task = flow.status_view(task_id) if flow is not None else None
+        if task_id is not None and task is None:
+            return rejected("unknown_task", detail="task_id: no such Task; null means the current one")
+        self._journal({"type": "workbench_status", "key": key_dict, "task_id": None if task is None
+                       else task.get("task_id")})
+        if task is not None and terminal is not None:
+            try:
+                runs = terminal.runs_for_task(task["task_id"])
+                task["commands_run"] = list(runs)
+                task["commands_run_notes"] = list(getattr(runs, "notes", ()))
+            except Exception:
+                task["commands_run"], task["commands_run_notes"] = None, ["the terminal journal could not be read"]
+        peer = self._bridge_peer(ActorRole.WORKER)
+        probe = self._probe(ActorRole.WORKER) if peer is not None else None
+        pane = self.panes.get(PaneId.WORKER_OMP)
+        restarts = [{name: entry.get(name) for name in ("at", "cause", "requester", "reason", "generation")}
+                    | {"pid": (entry.get("process") or {}).get("pid")}
+                    for entry in self.restarts if entry.get("pane") == PaneId.WORKER_OMP.value][-RESTARTS_SHOWN:]
+        worker = {**(flow.worker_view() if flow is not None else {}),
+                  "omp": None if probe is None else ("idle" if probe.get("idle") is True and probe.get("pending")
+                                                     is False and probe.get("inFlightToolCount") == 0 else "busy"),
+                  "connected": peer is not None, "session_id": None if peer is None else peer.session_id,
+                  "generation": None if peer is None else peer.generation,
+                  "pane_generation": getattr(pane, "generation", None), "pid": getattr(pane, "pid", None),
+                  # read only: poll() would reap the child off the backend loop
+                  "alive": isinstance(pane, OmpPane) and pane.returncode is None, "restarts": restarts}
+        reports = []
+        for entry in (handoffs.report_entries() if handoffs is not None else []):
+            if entry.get("state") not in ("pending", "delivering", "unknown") or entry.get("submitted"):
+                continue
+            text, cut = bounded(entry.get("text"))
+            state = entry["state"]
+            if state == "pending" and entry.get("status") == "deferred":
+                state = "deferred"
+            reports.append({"task_id": entry.get("task_id"), "message_id": entry.get("message_id"),
+                            "kind": entry.get("report_kind"), "origin": entry.get("origin"), "state": state,
+                            "reason": entry.get("reason"), "blockers": entry.get("blockers"),
+                            "requeued": entry.get("requeued"), "text": text, "text_truncated": cut})
+        watchdog = self.watchdog
+        return {"status": "ok", "task": task, "worker": worker,
+                "terminal": terminal.watch_state() if terminal is not None else None,
+                "reports": reports[-STATUS_REPORTS_MAX:], "reports_omitted": max(0, len(reports) - STATUS_REPORTS_MAX),
+                "watchdog": None if watchdog is None else watchdog.view().get("watch")}
 
     def _bridge_peer(self, role: Any) -> Any:
         try:

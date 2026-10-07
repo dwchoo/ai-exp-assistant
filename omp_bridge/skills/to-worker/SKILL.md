@@ -35,7 +35,7 @@ Send every field; set each one you do not use to null (not a placeholder value).
 - `cancel: true` (with `task_id`): cancel the Task; the worker is told and becomes free. Otherwise null.
 
 ## Waiting for the worker: end your turn
-After a `to_worker` call, and any time you are waiting for the worker, END YOUR TURN (finish your reply). The worker's `to_manager` report arrives as a new message once you are idle; while your turn runs it cannot reach you. Never use the `wait` tool for worker results, and do not poll (no history reads, file checks or follow-ups just to see if it is done).
+After a `to_worker` call, and any time you are waiting for the worker, END YOUR TURN (finish your reply). The worker's `to_manager` report arrives as a new message once you are idle; while your turn runs it cannot reach you. Never use the `wait` tool for worker results, and do not poll (no history reads, file checks or follow-ups just to see if it is done). Workbench watches the worker for you; a Workbench notice (`worker_stalled`, `worker_restarted`, `report_delivery_unknown`, `manager_recovery`) means: follow the `workbench-recovery` skill (`workbench_status`, then a follow-up on the same `task_id`, cancel, or `restart_worker`).
 
 ## Results
 The result returns at once. The worker's outcome arrives later as a `to_manager` report; it is not in the tool result. Statuses and what to do:

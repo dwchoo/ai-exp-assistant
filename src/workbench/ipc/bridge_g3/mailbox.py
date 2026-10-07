@@ -586,6 +586,16 @@ class G3BridgeServer:
         with self._condition:
             return self._event_sequence
 
+    def events_since(self, role: ActorRole | str, names: tuple[str, ...], after_sequence: int) -> tuple[int, int]:
+        """(current cursor, how many retained events of ``role`` named ``names`` came after ``after_sequence``);
+        never waits (C-D70 (1): the watchdog sees a turn it did not probe)."""
+        target = _role(role).value
+        wanted = frozenset(names)
+        with self._condition:
+            count = sum(1 for event in self._events if event.get("bridgeSequence", 0) > after_sequence
+                        and event.get("role") == target and event.get("name") in wanted)
+            return self._event_sequence, count
+
     def wait_event(
         self,
         role: ActorRole | str,
@@ -689,6 +699,26 @@ def _delivery_lock(bridge: Any, role: ActorRole) -> Lock:
         return getter(role)
     with _FALLBACK_DELIVERY_GUARD:
         return _FALLBACK_DELIVERY_LOCKS.setdefault((id(bridge), role), Lock())
+
+
+def state_blockers(state: Mapping[str, Any]) -> list[str]:
+    """Why an OMP state snapshot is not safe for a delivery (short machine names, never editor text)."""
+    blockers = []
+    if state.get("idle") is not True:
+        blockers.append("busy")
+    if state.get("pending") is not False:
+        blockers.append("pending_messages")
+    if state.get("approvalPending") is not False:
+        blockers.append("approval_pending")
+    if state.get("editorKnown") is not True:
+        blockers.append("editor_unknown")
+    elif state.get("editorEmpty") is not True:
+        blockers.append("editor_not_empty")
+    if type(state.get("inFlightToolCount")) is not int or state.get("inFlightToolCount") != 0:
+        blockers.append("tool_running")
+    if state.get("paused") is not False:
+        blockers.append("paused")
+    return blockers
 
 
 class TaskMailbox:
@@ -856,6 +886,8 @@ class TaskMailbox:
         if not self._ready_state(message, state):
             return self._receipt(message, None, MailboxStatus.DEFERRED, {
                 "reason": "current_omp_state_not_safe",
+                # C-D70 (2): which conditions held it (e.g. the manager's composer is not empty)
+                "blockers": state_blockers(state),
                 "api_called": False,
                 "omp_processed": False,
             })
@@ -1128,4 +1160,5 @@ __all__ = [
     "MailboxMessage",
     "MailboxStatus",
     "TaskMailbox",
+    "state_blockers",
 ]

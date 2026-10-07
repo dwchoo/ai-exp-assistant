@@ -301,7 +301,7 @@ const TO_MANAGER_PARAMETERS = {
 		},
 	},
 };
-type BridgeTool = "to_worker" | "to_manager" | "terminal";
+type BridgeTool = "to_worker" | "to_manager" | "terminal" | "restart_worker" | "workbench_status";
 const HANDOFF_TOOLS: Record<Role, { name: "to_worker" | "to_manager"; label: string; description: string; parameters: Frame }> = {
 	manager: {
 		name: "to_worker", label: "To worker", parameters: TO_WORKER_PARAMETERS,
@@ -318,7 +318,9 @@ const HANDOFF_TOOLS: Record<Role, { name: "to_worker" | "to_manager"; label: str
 			+ "delegated this, no approval step). With the current task_id it is a follow-up message for the "
 			+ "worker (status queued), run: true re-runs an experiment, cancel: true cancels the Task. Set every "
 			+ "field you do not use to null. The result returns at once; then end your turn: the worker's to_manager "
-			+ "report arrives as a new message (never wait or poll for it).",
+			+ "report arrives as a new message (never wait or poll for it). A Workbench notice (worker_stalled, "
+			+ "worker_restarted, report_delivery_unknown, manager_recovery) means: follow the workbench-recovery skill "
+			+ "(workbench_status, then a follow-up on the same task_id, cancel, or restart_worker).",
 	},
 	worker: {
 		name: "to_manager", label: "To manager", parameters: TO_MANAGER_PARAMETERS,
@@ -340,7 +342,12 @@ const TERMINAL_ABORT_DETAIL = "Waiting stopped. A command that already started k
 // C-D68 (8): the backend learns that a terminal call stopped waiting (abort or this bridge's own timeout), so the
 // completion notice is still sent; Workbench notices reach the worker as their own frame (no Task message).
 const TERMINAL_ABANDON_TOOL = "terminal_wait_abandoned";
-const NOTICE_TYPES = new Set(["terminal_check", "terminal_done"]);
+// C-D70: the worker also gets the watchdog's status_check; the manager gets its own recovery notices.
+const NOTICE_TYPES: Record<Role, Set<unknown>> = {
+	worker: new Set(["terminal_check", "terminal_done", "status_check"]),
+	manager: new Set(["worker_stalled", "report_delivery_unknown", "worker_restarted", "manager_recovery",
+		"worker_terminal_done"]),
+};
 // p27-cd68-fix-01 P2-2, measured on OMP 18.6.1 (fake provider, /tmp/cd68fix-probe): each subagent session runs its
 // own instance of this extension (factory and session_start again, same process) and its ExtensionContext has
 // agent = {kind: "sub", depth: 1, parentId, name}; the main session has {kind: "main", depth: 0}. A subagent
@@ -350,7 +357,7 @@ const NOTICE_TYPES = new Set(["terminal_check", "terminal_done"]);
 // subagent (pi, pi.runtime, pi.extension and the flags are the same as in the main session, pi has no agent), so
 // the tools are registered; at the subagent's session_start they are removed from that session's active tools
 // (pi.setActiveTools), which drops them from the subagent's provider request. The refusal stays as defence.
-const BRIDGE_TOOL_NAMES = new Set(["to_worker", "to_manager", "terminal"]);
+const BRIDGE_TOOL_NAMES = new Set(["to_worker", "to_manager", "terminal", "restart_worker", "workbench_status"]);
 const SUBAGENT_DETAIL = "Bridge tools are for the worker itself, not its subagents: only the worker itself reports "
 	+ "to the manager and runs commands. Return your findings to the worker instead.";
 
@@ -394,6 +401,45 @@ const TERMINAL_TOOL = {
 		+ "progress reports about it unless the user or the manager asks or a check shows a problem. Workbench "
 		+ "sends you a check every 60 s while it runs and a completion notice when it exits.",
 };
+
+// C-D70 (3)/(6): the manager's recovery tools. restart_worker ends only the worker OMP process Workbench started
+// and starts a new worker session (same OMP home, role config and model table); a host terminal command keeps
+// running and the open Task is not cancelled. workbench_status is read-only and answers at once.
+const RESTART_REASON_MAX = 500;
+const RESTART_WORKER_TOOL = {
+	name: "restart_worker" as const, label: "Restart worker", parameters: {
+		type: "object",
+		additionalProperties: false,
+		required: ["reason"],
+		properties: {
+			reason: { type: "string", minLength: 1, maxLength: RESTART_REASON_MAX,
+				description: "Why the worker is restarted (required, recorded and shown to the user), e.g. \"no answer "
+					+ "after 2 status checks\"." },
+		},
+	},
+	description: "Force-restart the Workbench worker OMP (the worker's own process only; a host terminal command it "
+		+ "started keeps running and the open Task is not cancelled). Use it only when the worker is stuck mid-turn or "
+		+ "does not respond (see the workbench-recovery skill); never for a normal wait. The new worker has no memory. "
+		+ "After the call end your turn; when the worker_restarted notice arrives, send exactly one follow-up to_worker "
+		+ "on the same task_id (Workbench re-sends the full Task and the commands already run) or cancel the Task. "
+		+ "Refused while another restart is in progress.",
+};
+const WORKBENCH_STATUS_TOOL = {
+	name: "workbench_status" as const, label: "Workbench status", parameters: {
+		type: "object",
+		additionalProperties: false,
+		required: [],
+		properties: {
+			task_id: { ...OPTIONAL_UUID, description: `A Task id; null means the current (else the last) Task. ${NOT_USED}` },
+		},
+	},
+	description: "Read-only Workbench state for recovery: the open Task (message, analysis, commands, commands run so "
+		+ "far with exit code, duration and log path), the worker (idle/busy, session, restart history with reasons), "
+		+ "the host terminal (running command or idle) and worker reports to you that are pending, deferred or of "
+		+ "unknown delivery, with their text. Use it when a Workbench notice arrives (workbench-recovery skill). It "
+		+ "answers at once and changes nothing.",
+};
+const MANAGER_TOOLS = [RESTART_WORKER_TOOL, WORKBENCH_STATUS_TOOL];
 
 // How long this bridge waits for the backend's terminal result (C-D68 (9): fixed; the call's arguments do not
 // change it).
@@ -694,15 +740,16 @@ export default function workbenchG3Extension(pi: any): void {
 			}
 			return;
 		}
-		// C-D68 (8): a Workbench notice for the worker (terminal check / completion), not a Task message. Like a
-		// delivery it goes only into an idle, unpaused worker with an empty composer, once per notice_id.
+		// C-D68 (8): a Workbench notice (worker: terminal check / completion / C-D70 status check; manager: C-D70
+		// recovery notices), not a Task message. Like a delivery it goes only into an idle, unpaused OMP with an empty
+		// composer, once per notice_id; each role takes only its own notice types.
 		if (frame.kind === "notice" && typeof frame.requestId === "string") {
 			const notice = frame.notice;
 			const fields = typeof notice === "object" && notice !== null && !Array.isArray(notice)
 				? notice as Frame : undefined;
 			const noticeId = fields?.notice_id;
-			if (role !== "worker" || fields === undefined || typeof noticeId !== "string" || !UUID_PATTERN.test(noticeId)
-				|| !NOTICE_TYPES.has(fields.type)) {
+			if (fields === undefined || typeof noticeId !== "string" || !UUID_PATTERN.test(noticeId)
+				|| !NOTICE_TYPES[role].has(fields.type)) {
 				ack(frame.requestId, "rejected", { reason: "invalid Workbench notice" });
 				return;
 			}
@@ -935,6 +982,22 @@ export default function workbenchG3Extension(pi: any): void {
 				return { content: [{ type: "text", text: JSON.stringify(result) }], details: result };
 			},
 		});
+		if (role === "manager") {
+			for (const own of MANAGER_TOOLS) {
+				pi.registerTool({
+					name: own.name,
+					label: own.label,
+					description: own.description,
+					parameters: own.parameters,
+					strict: true,
+					loadMode: "essential",
+					async execute(toolCallId: string, params: unknown, signal?: AbortSignal, _onUpdate?: unknown, ctx?: unknown) {
+						const result = await requestHandoff(own.name, toolCallId, params, signal, TOOL_RESULT_TIMEOUT_MS, ctx);
+						return { content: [{ type: "text", text: JSON.stringify(result) }], details: result };
+					},
+				});
+			}
+		}
 		if (role === "worker") {
 			pi.registerTool({
 				name: TERMINAL_TOOL.name,

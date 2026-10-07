@@ -105,6 +105,22 @@ removed before any release; a client sending ``approval_decide`` gets
 - ``worker``: ``{state, task_id}``; ``state`` is one of :data:`WORKER_STATES`
   (``busy`` while a Task is active, then ``task_id`` names it).
 
+Recovery (C-D70; additive)
+--------------------------
+- ``recovery``: null (no watchdog) or ``{report_wait, watch}``. ``report_wait``
+  is null or ``{count, reason, since}`` while worker reports to the manager
+  have waited at least 30 s because the manager OMP's composer is not empty
+  (``reason`` ``manager_editor_not_empty``; ``since`` is the wall-clock time
+  the wait began); it is null again once they were delivered. ``watch`` is null
+  or ``{task_id, checks_sent, max_checks, stalled_notified, idle_since}`` for
+  the open work Task the Workbench watchdog checks.
+- A manager/worker pane's ``restart`` (and the snapshot record of restarts)
+  also carries ``cause`` (``user_restart`` from ``restart_pane``,
+  ``restart_worker`` from the manager's tool), ``requester`` (``user`` or
+  ``manager``) and ``reason`` (the manager's text for ``restart_worker``, else
+  null). A ``restart_worker`` restarts a live worker OMP; ``restart_pane``
+  still restarts only an exited pane.
+
 ``pause`` (attached client, no fields) holds new automatic work. ``resume``
 (attached client, ``reconciled`` boolean) resumes only with ``reconciled:
 true``; ``false`` is refused with ``resume_not_reconciled``. Both answer with

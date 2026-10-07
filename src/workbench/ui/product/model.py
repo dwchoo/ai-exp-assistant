@@ -107,6 +107,11 @@ PAUSE_MENU_ROW = ("자동화 일시정지 / 재개 (확인 후 실행)", "p", "C
 SUMMARY_MAX_COLS = 40  # the Task summary in the status line is shortened to at most this display width
 SUMMARY_MIN_COLS = 8
 WORKER_TEXT = {"idle": "대기", "busy": "작업 중"}
+# C-D70 (2): a worker report waits because the manager's composer is not empty.
+REPORT_WAIT_TEXT = "worker 보고 대기 중: manager 입력창을 비우면 전달됩니다"
+# C-D70 (3): how long the status line shows a worker restart the manager asked for.
+MANAGER_RESTART_SHOWN_SECONDS = 120
+REASON_MAX_COLS = 40
 TASK_KIND_TEXT = {"experiment": "실험", "work": "작업"}
 # "finished" with a run that failed to start is shown as 시작 실패 (smoke-02 E4; see task_text)
 TASK_STATUS_TEXT = {"dispatched": "전달됨", "starting": "시작 중", "running": "실행 중", "waiting_report": "보고 대기",
@@ -1938,7 +1943,7 @@ class ProductModel:
                  f"shell mode: {mode}" + (f" | worker: {worker}" if worker else "") + f" | 자동화: {automation}")
         line2 = (f"backend: {self.state.get('phase', 'unknown')} | bridge manager={peer('manager')} "
                  f"worker={peer('worker')} | 마지막 확인 {seen} | Ctrl-] ? 도움말")
-        extra = " | ".join(part for part in (self.task_text(), self.automation_text()) if part)
+        extra = " | ".join(part for part in (self.recovery_text(), self.task_text(), self.automation_text()) if part)
         if extra:
             line2 = f"{extra} | {line2}"
         warning = self.isolation_warning()
@@ -1987,6 +1992,26 @@ class ProductModel:
             summary = _clip(summary, max(SUMMARY_MIN_COLS, min(SUMMARY_MAX_COLS, self.cols // 3)))
             head += f' "{summary}"'
         return head + tail
+
+    def recovery_text(self) -> str:
+        """C-D70: a worker report waiting on the manager's composer, and a worker restart the manager asked for."""
+        parts = []
+        recovery = self.state.get("recovery")
+        wait = recovery.get("report_wait") if isinstance(recovery, dict) else None
+        if isinstance(wait, dict):
+            count = wait.get("count")
+            more = f" ({count}건)" if isinstance(count, int) and not isinstance(count, bool) and count > 1 else ""
+            parts.append(REPORT_WAIT_TEXT + more)
+        info = self.state.get("panes", {}).get(PaneId.WORKER_OMP.value)
+        restart = info.get("restart") if isinstance(info, dict) else None
+        if isinstance(restart, dict) and restart.get("requester") == "manager" and restart.get("state") == "restarted":
+            at = restart.get("at")
+            recent = isinstance(at, (int, float)) and not isinstance(at, bool) \
+                and self.clock() - at <= MANAGER_RESTART_SHOWN_SECONDS
+            if recent:
+                reason = _clip(_plain(restart.get("reason")), REASON_MAX_COLS)
+                parts.append(f"worker 재시작됨 (manager 요청{': ' + reason if reason else ''})")
+        return " · ".join(parts)
 
     def automation_text(self) -> str:
         """Review timer / held reason / interruption / refused resume of the snapshot ``automation``."""

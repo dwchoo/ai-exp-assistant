@@ -44,9 +44,9 @@ class SkillFileTests(unittest.TestCase):
             self.assertTrue(fields["description"].strip())
             self.assertLessEqual(len(body(name).splitlines()), 90, "about one page")
 
-    def test_only_these_two_skill_directories_exist(self):
+    def test_only_these_skill_directories_exist(self):
         dirs = sorted(entry.name for entry in SKILLS.iterdir() if entry.is_dir())
-        self.assertEqual(dirs, ["to-manager", "to-worker"])
+        self.assertEqual(dirs, ["to-manager", "to-worker", "workbench-recovery"])  # C-D70 (7)
 
     def test_to_worker_documents_every_tool_field(self):
         text = body("to-worker")
@@ -189,15 +189,15 @@ class SmokeCorrectionSkillTests(unittest.TestCase):
 
 class RoleFilterTests(unittest.TestCase):
     def test_role_patterns(self):
-        self.assertEqual(launcher.ROLE_SKILL_PATTERNS["manager"], ("to-worker",))
+        self.assertEqual(launcher.ROLE_SKILL_PATTERNS["manager"], ("to-worker", "workbench-recovery"))
         self.assertEqual(launcher.ROLE_SKILL_PATTERNS["worker"], ("to-manager",))
 
     def test_allowlists_follow_the_filter(self):
-        self.assertEqual(launcher.role_skill_allowlist("manager"), ("to-worker",))
+        self.assertEqual(launcher.role_skill_allowlist("manager"), ("to-worker", "workbench-recovery"))
         self.assertEqual(launcher.role_skill_allowlist("worker"), ("to-manager",))
 
     def test_overlay_carries_the_role_filter_and_the_skills_dir(self):
-        for role, expected in (("manager", ["to-worker"]), ("worker", ["to-manager"])):
+        for role, expected in (("manager", ["to-worker", "workbench-recovery"]), ("worker", ["to-manager"])):
             overlay = launcher.role_overlay(role, project_dir=SKILLS, home=SKILLS)
             self.assertEqual(overlay["skills"], {"customDirectories": [str(SKILLS)],
                                                   "includeSkills": expected, "ignoredSkills": []})
@@ -426,6 +426,50 @@ class RoleBoundaryTests(unittest.TestCase):
     def test_to_worker_schema_has_the_nullable_analysis_field(self):
         self.assertIn("analysis", schema_properties("TO_WORKER_PARAMETERS"))
         self.assertRegex(BRIDGE, r'analysis: \{ type: \["string", "null"\], enum: \["summary", "detailed", null\]')
+
+
+class RecoverySkillTests(unittest.TestCase):
+    """C-D70 (7): the manager's agent-only recovery skill, installed for the manager only."""
+
+    def test_frontmatter_and_size(self):
+        fields = frontmatter("workbench-recovery")
+        self.assertEqual(fields["name"], "workbench-recovery")
+        self.assertIn("Agent-only", fields["description"])
+        text = body("workbench-recovery")
+        self.assertLess(len(text.splitlines()), 40)
+        self.assertLess(len(text), 4000)
+
+    def test_procedure_names_every_notice_and_tool(self):
+        text = body("workbench-recovery")
+        for name in ("worker_stalled", "worker_restarted", "report_delivery_unknown", "manager_recovery",
+                     "workbench_status", "restart_worker", "to_worker", "task_id", "cancel", "restart_in_progress"):
+            self.assertIn(name, text)
+        self.assertRegex(text, r"(?i)never run the worker's commands yourself")
+        self.assertRegex(text, r"(?i)tell the user briefly")
+        procedure = section(text, "Procedure")
+        self.assertLess(procedure.index("workbench_status"), procedure.index("restart_worker"),
+                        "status first, then the decision")
+
+    def test_notice_and_tool_names_match_the_bridge_and_the_backend(self):
+        from workbench.backend import flow_recovery
+        for name in flow_recovery.MANAGER_NOTICE_TYPES:
+            self.assertIn(f'"{name}"', BRIDGE)
+            self.assertIn(name, body("workbench-recovery"))
+        for name in flow_recovery.MANAGER_TOOLS:
+            self.assertIn(f'name: "{name}"', BRIDGE)
+        self.assertIn("workbench-recovery", body("to-worker"))
+        self.assertIn("workbench_status", body("to-worker"))
+
+    def test_installed_for_the_manager_only(self):
+        self.assertIn("workbench-recovery", launcher.role_skill_allowlist("manager"))
+        self.assertNotIn("workbench-recovery", launcher.role_skill_allowlist("worker"))
+        worker = launcher.role_overlay("worker", project_dir=SKILLS, home=SKILLS)
+        self.assertNotIn("workbench-recovery", worker["skills"]["includeSkills"])
+        observed = IsolationExpectationTests.observed("to-worker", "workbench-recovery")
+        self.assertEqual(launcher.isolation_leaks(observed, allowed_skills=launcher.role_skill_allowlist("manager")), [])
+        self.assertEqual(launcher.isolation_leaks(IsolationExpectationTests.observed("workbench-recovery"),
+                                                  allowed_skills=launcher.role_skill_allowlist("worker")),
+                         ["skill:workbench-recovery"])
 
 
 if __name__ == "__main__":

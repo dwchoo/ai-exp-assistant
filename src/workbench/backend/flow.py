@@ -33,6 +33,11 @@ through ``record``. Its contract:
   holds the mailbox lock until the target's turn ends, and the calling OMP's
   tool must answer within 10 s. Only a ``DEFERRED`` delivery (or a target not
   connected before any submission) is tried again; unknown or rejected never is.
+  C-D70 (5): a worker->manager message that was never submitted and whose
+  target manager OMP is now a new session is not dropped but addressed to the
+  new session (``requeued``, at most ``REQUEUE_LIMIT`` times; a message to the
+  worker is still dropped as ``target_session_changed``). A deferral records
+  why the target was not ready (``blockers``; C-D70 (2): ``editor_not_empty``).
   A listener sees ``delivering`` (the lane took the message), ``deferred`` (back
   to pending, nothing submitted) and ``submitted`` (CW-18 R1: the target OMP
   accepted it into its session; ``TaskMailbox.deliver(on_submitted=...)``),
@@ -81,6 +86,7 @@ from workbench.ipc.bridge_g3.mailbox import BridgeDisconnected, BridgePeer, Mail
 from workbench.terminal.shell_g2.lifecycle import RUN_REQUEST_MAX, encode_run, normalize_run
 
 HANDOFF_JOURNAL_NAME = "handoffs.jsonl"  # under DataLayout.workflow
+REQUEUE_LIMIT = 5  # C-D70 (5): new manager sessions a never-submitted worker report follows
 # p27-cd68-fix-03 (smoke-01 M2): "not yet processed" was read as "send it again".
 QUEUED_DETAIL = ("Accepted by Workbench; it is delivered to the other OMP once, in order. Do not send it again; "
                  "a reply, if any, arrives as a new message.")
@@ -163,6 +169,9 @@ class OutboundMessage:
     kind: MessageKind
     payload: Mapping[str, Any]
     in_reply_to_message_id: str | None = None
+    # p27-cd70-fix-01: completes the payload when the lane creates the message for delivery (each creation,
+    # also after a re-queue), e.g. the commands already run at that moment; a failure creates nothing.
+    prepare: Callable[[dict[str, Any]], dict[str, Any]] | None = None
 
 
 OutboxListener = Callable[[str, Mapping[str, Any]], None]
@@ -181,6 +190,8 @@ class HandoffDecision:
     approval: Mapping[str, Any] | None = None
     listener: OutboxListener | None = None
     keep_across_pause: bool = False
+    # p27-cd70-fix-01: told (with the result) when ``message`` was not queued (held at queue time: nothing sent)
+    on_not_queued: Callable[[Mapping[str, Any]], None] | None = None
 
 
 @runtime_checkable
@@ -689,14 +700,22 @@ class _OutboxEntry:
     submitted: bool = False  # the target OMP accepted it into its session (R1)
     withdrawn: bool = False  # its Task was cancelled/superseded before it was submitted (R2)
     paused_logged: bool = False
+    blockers: tuple[str, ...] = ()  # C-D70 (2): why the last deferral happened (target OMP state)
+    editor_since: float | None = None  # monotonic: deferred since then because the target's composer is not empty
+    requeued: int = 0  # C-D70 (5): times addressed again to a new target session (never submitted)
 
     def snapshot(self) -> dict[str, Any]:
         return {"key": _key_dict(self.key), "handoff_id": self.handoff_id,
                 "message_id": getattr(self.message, "message_id", None),
                 "target_role": self.outbound.target_role.value, "state": self.state,
-                "attempts": self.attempts, "status": self.status, "reason": self.reason}
+                "attempts": self.attempts, "status": self.status, "reason": self.reason,
+                # C-D70 (4): the target session the message was created for (None before it exists)
+                "session_id": getattr(self.message, "session_id", None),
+                "session_generation": getattr(self.message, "session_generation", None)}
 
 
+# TaskMailbox reasons for "the target OMP is another session now; nothing was submitted" (C-D70 (5)).
+_SESSION_CHANGED = frozenset({"target_session_changed", "BridgeBoundMismatch"})
 _TERMINAL_STATES = {MailboxStatus.API_RETURNED: "delivered", MailboxStatus.OMP_PROCESSED: "delivered",
                     MailboxStatus.UNKNOWN: "unknown", MailboxStatus.REJECTED: "rejected"}
 
@@ -744,6 +763,10 @@ class HandoffService:
         self._outbox_cv = threading.Condition()
         self._stop = False
         self._threads: dict[ActorRole, threading.Thread] = {}
+        # p27-cd70-fix-01: worker->manager messages the lane re-queued that no manager_recovery has counted yet,
+        # and in-flight ones already counted whose re-queue is still to come
+        self._requeued_uncounted: set[str] = set()
+        self._requeue_expected: set[str] = set()
 
     # -- wiring for U2/U3 -------------------------------------------------------
     def configure(self, *, policy: HandoffPolicy | None = None,
@@ -828,6 +851,78 @@ class HandoffService:
     def outbox_snapshot(self) -> list[dict[str, Any]]:
         with self._outbox_cv:
             return [entry.snapshot() for entry in self._outbox]
+
+    # -- C-D70 views and the new-session requeue -----------------------------------------
+    def lane_busy(self, role: ActorRole) -> bool:
+        """A message to or from ``role`` is pending or being delivered (the watchdog waits for it)."""
+        with self._outbox_cv:
+            return any(entry.state in ("pending", "delivering")
+                       and role in (entry.outbound.target_role, entry.outbound.sender_role) for entry in self._outbox)
+
+    def report_entries(self) -> list[dict[str, Any]]:
+        """Worker->manager messages (``origin`` ``worker``: a ``to_manager`` call; ``backend``: a Workbench
+        notice), oldest first, with their text for the manager's ``workbench_status``."""
+        with self._outbox_cv:
+            entries = [entry for entry in self._outbox if entry.outbound.sender_role is ActorRole.WORKER
+                       and entry.outbound.target_role is ActorRole.MANAGER]
+            return [{**entry.snapshot(), "origin": "worker" if entry.key[0] == ActorRole.WORKER.value else "backend",
+                     "task_id": entry.outbound.task_id, "kind": entry.outbound.kind.value,
+                     "report_kind": entry.outbound.payload.get("kind") or entry.outbound.payload.get("notice"),
+                     "text": entry.outbound.payload.get("message"), "submitted": entry.submitted,
+                     "blockers": list(entry.blockers), "editor_since": entry.editor_since,
+                     "requeued": entry.requeued} for entry in entries]
+
+    def _requeue_eligible(self, entry: _OutboxEntry) -> bool:
+        """Under the outbox lock: a worker->manager message never submitted may follow a new manager session."""
+        return (entry.outbound.sender_role is ActorRole.WORKER and entry.outbound.target_role is ActorRole.MANAGER
+                and not entry.submitted and not entry.withdrawn and entry.requeued < REQUEUE_LIMIT)
+
+    def requeue_for_new_session(self, role: ActorRole) -> int:
+        """C-D70 (5): the ``role`` OMP is a new session; its pending (never submitted) worker messages are
+        addressed to it. Returns how many never-submitted messages go to the new session because of the session
+        change: those moved now, those the lane re-queued already (counted once, p27-cd70-fix-01) and those in
+        flight to the old session (the lane re-queues them next)."""
+        if role is not ActorRole.MANAGER:
+            return 0
+        current = None
+        if self._peer_lookup is not None:
+            try:
+                peer = self._peer_lookup(role)
+            except Exception:
+                peer = None
+            current = None if peer is None else (peer.session_id, peer.generation)
+        moved: list[_OutboxEntry] = []
+        with self._outbox_cv:
+            counted = set(self._requeued_uncounted)
+            self._requeued_uncounted.clear()
+            for entry in self._outbox:
+                if entry.outbound.target_role is not role or entry.state not in ("pending", "delivering"):
+                    continue
+                if not self._requeue_eligible(entry):
+                    continue
+                bound = (entry.target if entry.message is None
+                         else (entry.message.session_id, entry.message.session_generation))
+                if current is None or bound is None or bound == current:
+                    continue
+                counted.add(entry.handoff_id)
+                if entry.state == "pending":
+                    entry.message, entry.target = None, None  # created again for the new session
+                    entry.requeued += 1
+                    entry.due = 0.0
+                    moved.append(entry)
+                else:
+                    self._requeue_expected.add(entry.handoff_id)  # the lane re-queues it: counted here already
+            self._outbox_cv.notify_all()
+        for entry in moved:
+            self._log_outbox(entry, "requeued")
+        return len(counted)
+
+    def _count_lane_requeue(self, entry: _OutboxEntry) -> None:
+        """Under the outbox lock: a re-queue the lane did on its own is counted by the next manager_recovery."""
+        if entry.handoff_id in self._requeue_expected:
+            self._requeue_expected.discard(entry.handoff_id)
+        else:
+            self._requeued_uncounted.add(entry.handoff_id)
 
     def _is_paused(self) -> bool:
         try:
@@ -918,7 +1013,13 @@ class HandoffService:
             except (OSError, TypeError, ValueError):
                 pass  # kept in memory; the request record is already durable
         if decision.message is not None:
-            result.update(self._queue(request.key, decision.message, decision.listener, decision.keep_across_pause))
+            queued = self._queue(request.key, decision.message, decision.listener, decision.keep_across_pause)
+            result.update(queued)
+            if queued.get("status") != "queued" and decision.on_not_queued is not None:
+                try:
+                    decision.on_not_queued(dict(queued))
+                except Exception:
+                    pass  # the policy's bookkeeping never changes the result
         return result
 
     def _queue(self, key: RequestKey, outbound: OutboundMessage,
@@ -993,10 +1094,17 @@ class HandoffService:
         if entry.message is not None:
             return None
         outbound = entry.outbound
+        payload = dict(outbound.payload)
+        if outbound.prepare is not None:
+            try:
+                payload = dict(outbound.prepare(payload))
+            except Exception as exc:  # nothing was created
+                entry.reason = f"prepare_failed:{type(exc).__name__}"
+                return "rejected"
         try:
             message = mailbox.create_message(
                 outbound.task_id, outbound.revision, outbound.run_id, outbound.sender_role, outbound.target_role,
-                outbound.kind, dict(outbound.payload), in_reply_to_message_id=outbound.in_reply_to_message_id)
+                outbound.kind, payload, in_reply_to_message_id=outbound.in_reply_to_message_id)
         except BridgeDisconnected:
             return "deferred"  # the target reconnects; nothing was created
         except (MailboxError, LookupError, ValueError, TypeError) as exc:
@@ -1007,9 +1115,17 @@ class HandoffService:
             return "unknown"
         entry.message = message
         if entry.target is not None and (message.session_id, message.session_generation) != entry.target:
-            # The target OMP is a new session: the handoff was for the one it was queued for.
-            entry.reason = "target_session_changed"
-            return "rejected"
+            with self._outbox_cv:
+                follow = self._requeue_eligible(entry)
+                if follow:
+                    entry.requeued += 1
+                    entry.target = (message.session_id, message.session_generation)
+                    self._count_lane_requeue(entry)
+            if not follow:
+                # The target OMP is a new session: the handoff was for the one it was queued for.
+                entry.reason = "target_session_changed"
+                return "rejected"
+            self._log_outbox(entry, "requeued")  # C-D70 (5): never submitted, so the new manager session gets it
         self._log_outbox(entry, "created")
         self._notify(entry, "created")
         return None
@@ -1046,13 +1162,16 @@ class HandoffService:
             else:
                 receipt = mailbox.deliver(entry.message, timeout=self._deliver_timeout)
             status, reason = receipt.status, (receipt.details or {}).get("reason")
+            blockers = (receipt.details or {}).get("blockers")
         except BridgeDisconnected:
-            status, reason = MailboxStatus.DEFERRED, "target_not_connected"  # before any submission
+            status, reason, blockers = MailboxStatus.DEFERRED, "target_not_connected", None  # before any submission
         except Exception as exc:
-            status, reason = MailboxStatus.UNKNOWN, type(exc).__name__
+            status, reason, blockers = MailboxStatus.UNKNOWN, type(exc).__name__, None
         if status is MailboxStatus.DEFERRED and not entry.submitted:
-            self._defer(entry, status, reason)
+            self._defer(entry, status, reason, blockers)
             return
+        if status is MailboxStatus.REJECTED and reason in _SESSION_CHANGED and self._requeue(entry):
+            return  # C-D70 (5): created for the old manager session, never submitted: created again
         state = _TERMINAL_STATES.get(status, "unknown")
         if state == "delivered" and not entry.submitted:
             self._submitted(entry)  # a mailbox without the ack hook: its receipt is the submission
@@ -1077,13 +1196,31 @@ class HandoffService:
             self._log_outbox(entry, "kept_paused")
         self._notify(entry, "deferred")
 
-    def _defer(self, entry: _OutboxEntry, status: MailboxStatus, reason: Any) -> None:
+    def _requeue(self, entry: _OutboxEntry) -> bool:
+        with self._outbox_cv:
+            if not self._requeue_eligible(entry):
+                return False
+            entry.requeued += 1
+            entry.message, entry.target = None, None
+            entry.state, entry.due = "pending", 0.0
+            self._count_lane_requeue(entry)
+            self._outbox_cv.notify_all()
+        self._log_outbox(entry, "requeued")
+        self._notify(entry, "deferred")  # back to pending, nothing was submitted
+        return True
+
+    def _defer(self, entry: _OutboxEntry, status: MailboxStatus, reason: Any, blockers: Any = None) -> None:
         if self._withdrawn(entry):
             self._finish(entry, "withdrawn", None, "task_withdrawn")
             return
         with self._outbox_cv:
             entry.attempts += 1
             entry.status, entry.reason = status.value, reason if isinstance(reason, str) else None
+            entry.blockers = tuple(str(item) for item in blockers) if isinstance(blockers, (list, tuple)) else ()
+            if "editor_not_empty" in entry.blockers:
+                entry.editor_since = entry.editor_since if entry.editor_since is not None else time.monotonic()
+            else:
+                entry.editor_since = None
             delay = min(self._retry_interval * (2 ** min(entry.attempts - 1, 6)), max(self._retry_interval, 2.0))
             entry.due = time.monotonic() + delay
             entry.state = "pending"
@@ -1123,7 +1260,7 @@ class HandoffService:
 
 
 __all__ = [
-    "ANALYSIS_LEVELS", "ANALYSIS_RULES", "DEFAULT_ANALYSIS", "HANDOFF_JOURNAL_NAME", "ActiveTask", "HandoffDecision", "HandoffJournal", "HandoffPolicy", "HandoffRequest", "HandoffService",
+    "REQUEUE_LIMIT", "ANALYSIS_LEVELS", "ANALYSIS_RULES", "DEFAULT_ANALYSIS", "HANDOFF_JOURNAL_NAME", "ActiveTask", "HandoffDecision", "HandoffJournal", "HandoffPolicy", "HandoffRequest", "HandoffService",
     "OutboundMessage", "OutboxListener", "PlaceholderPolicy", "TOOL_ROLES", "accepts_keyword",
     "environment_value_findings", "held", "rejected",
     "sensitive_environment_values", "validate_arguments",

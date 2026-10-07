@@ -94,7 +94,9 @@ test("manager registers only to_worker and worker only to_manager, both essentia
 		const bridge = await startBridge(role);
 		try {
 			// C-D68: the worker also has `terminal`, its only command execution path.
-			assert.deepEqual([...bridge.tools.keys()], role === "worker" ? [own, "terminal"] : [own], `${role} tools`);
+			// C-D70: the manager also has its recovery tools restart_worker and workbench_status.
+			assert.deepEqual([...bridge.tools.keys()], role === "worker" ? [own, "terminal"]
+				: [own, "restart_worker", "workbench_status"], `${role} tools`);
 			assert.equal(bridge.tools.has(other), false);
 			const tool = bridge.tools.get(own)!;
 			assert.equal(tool.loadMode, "essential", "schema must reach the provider without xd:// discovery");
@@ -598,4 +600,100 @@ test("a subagent session never connects to the bridge and its bridge tools refus
 		main.reply({ kind: "tool_result", requestId: request.requestId, toolCallId: "call-main", result: { status: "queued" } });
 		assert.equal(textOf(await pending).status, "queued");
 	} finally { await main.close(); }
+});
+
+// C-D70 (3)/(6): the manager's recovery tools; the worker never has them.
+test("manager recovery tools: schemas, one tool_request each, worker and subagents never get them", async () => {
+	const manager = await startBridge("manager");
+	try {
+		const restart = manager.tools.get("restart_worker")!;
+		const status = manager.tools.get("workbench_status")!;
+		for (const tool of [restart, status]) {
+			assert.equal(tool.loadMode, "essential");
+			assert.equal(tool.strict, true);
+			assert.equal(tool.parameters.additionalProperties, false);
+		}
+		assert.deepEqual(restart.parameters.required, ["reason"]);
+		assert.deepEqual(Object.keys(restart.parameters.properties), ["reason"]);
+		assert.equal(restart.parameters.properties.reason.type, "string");
+		assert.equal(restart.parameters.properties.reason.minLength, 1);
+		assert.equal(restart.parameters.properties.reason.maxLength, 500);
+		assert.match(restart.description, /host terminal command it started keeps running/);
+		assert.match(restart.description, /no memory/);
+		assert.deepEqual(status.parameters.required, []);
+		assert.deepEqual(Object.keys(status.parameters.properties), ["task_id"]);
+		assert.deepEqual(status.parameters.properties.task_id.type, ["string", "null"]);
+		assert.match(status.description, /Read-only/);
+		assert.match(manager.tools.get("to_worker")!.description, /workbench-recovery skill/);
+		for (const [name, args] of [["restart_worker", { reason: "stuck after 2 checks" }], ["workbench_status", { task_id: null }]] as const) {
+			const pending = manager.tools.get(name)!.execute(`call-${name}`, args, new AbortController().signal, () => {}, {});
+			const request = await manager.waitFor(frame => frame.kind === "tool_request");
+			assert.equal(request.tool, name);
+			assert.equal(request.toolCallId, `call-${name}`);
+			assert.deepEqual(request.args, args);
+			manager.reply({ kind: "tool_result", requestId: request.requestId, toolCallId: request.toolCallId,
+				result: { status: name === "restart_worker" ? "restarted" : "ok" } });
+			assert.equal(textOf(await pending).status, name === "restart_worker" ? "restarted" : "ok");
+		}
+	} finally { await manager.close(); }
+	const worker = await startBridge("worker");
+	try {
+		assert.equal(worker.tools.has("restart_worker"), false);
+		assert.equal(worker.tools.has("workbench_status"), false);
+	} finally { await worker.close(); }
+	const sub = await startBridge("manager", SUBAGENT);
+	try {
+		await delay(50);
+		assert.deepEqual(sub.activeToolSets, [["read", "grep", "yield"]], "a manager subagent is not offered them");
+		const refused = textOf(await sub.tools.get("restart_worker")!.execute("call-sub", { reason: "x" },
+			new AbortController().signal, () => {}, { agent: SUBAGENT }));
+		assert.deepEqual([refused.status, refused.reason], ["rejected", "subagent_not_allowed"]);
+		await delay(30);
+		assert.equal(sub.frames.filter(frame => frame.kind === "tool_request").length, 0);
+	} finally { await sub.close(); }
+});
+
+// C-D70 (1)/(2): each role takes only its own Workbench notice types (manager: recovery notices; worker: checks).
+test("Workbench notice types are per role: manager recovery notices, worker status_check", async () => {
+	const manager = await startBridge("manager");
+	try {
+		let index = 0;
+		for (const type of ["worker_stalled", "report_delivery_unknown", "worker_restarted", "manager_recovery",
+			"worker_terminal_done"]) {
+			const requestId = `m-${index += 1}`;
+			manager.reply({ kind: "notice", requestId, notice: { notice_id: randomUUID(), type, task_id: randomUUID() } });
+			const ack = await manager.waitFor(frame => frame.kind === "api_ack" && frame.requestId === requestId);
+			assert.equal(ack.status, "api_accepted", type);
+		}
+		assert.deepEqual(manager.userMessages.map(text => JSON.parse(text).workbench_notice),
+			["worker_stalled", "report_delivery_unknown", "worker_restarted", "manager_recovery", "worker_terminal_done"]);
+		for (const type of ["terminal_check", "terminal_done", "status_check", "other"]) {
+			manager.reply({ kind: "notice", requestId: "mx", notice: { notice_id: randomUUID(), type } });
+			const ack = await manager.waitFor(frame => frame.kind === "api_ack" && frame.requestId === "mx");
+			assert.equal(ack.status, "rejected", type);
+		}
+		manager.omp.idle = false;
+		manager.reply({ kind: "notice", requestId: "busy", notice: { notice_id: randomUUID(), type: "worker_stalled" } });
+		const busy = await manager.waitFor(frame => frame.kind === "api_ack" && frame.requestId === "busy");
+		assert.equal(busy.status, "deferred", "a busy manager gets nothing");
+		assert.equal(manager.userMessages.length, 5);
+	} finally { await manager.close(); }
+	const worker = await startBridge("worker");
+	try {
+		const notice = { notice_id: randomUUID(), type: "status_check", task_id: randomUUID(), idle_seconds: 61 };
+		worker.reply({ kind: "notice", requestId: "w1", notice });
+		let ack = await worker.waitFor(frame => frame.kind === "api_ack" && frame.requestId === "w1");
+		assert.equal(ack.status, "api_accepted");
+		worker.reply({ kind: "notice", requestId: "w2", notice });
+		ack = await worker.waitFor(frame => frame.kind === "api_ack" && frame.requestId === "w2");
+		assert.equal(ack.status, "duplicate_api_accepted", "a retried notice_id is never shown twice");
+		for (const type of ["worker_stalled", "report_delivery_unknown", "worker_restarted", "manager_recovery",
+			"worker_terminal_done"]) {
+			worker.reply({ kind: "notice", requestId: "wx", notice: { notice_id: randomUUID(), type } });
+			ack = await worker.waitFor(frame => frame.kind === "api_ack" && frame.requestId === "wx");
+			assert.equal(ack.status, "rejected", type);
+		}
+		assert.equal(worker.userMessages.length, 1);
+		assert.equal(JSON.parse(worker.userMessages[0]).workbench_notice, "status_check");
+	} finally { await worker.close(); }
 });

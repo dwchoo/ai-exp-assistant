@@ -130,9 +130,11 @@ ISOLATION_PROVIDER_IDS = (
     "vscode", "windsurf", "agent-plugins", "builtin-defaults",
 )
 # Role skill filter (skills.includeSkills globs) applied to omp_bridge/skills
-# (C-D65 (3), CW-18 U6): the manager loads only to-worker, the worker only
-# to-manager. These are the Workbench skills the isolation check expects.
-ROLE_SKILL_PATTERNS: dict[str, tuple[str, ...]] = {"manager": ("to-worker",), "worker": ("to-manager",)}
+# (C-D65 (3), CW-18 U6): the manager loads only to-worker and (C-D70 (7)) its
+# agent-only recovery skill workbench-recovery, the worker only to-manager.
+# These are the Workbench skills the isolation check expects.
+ROLE_SKILL_PATTERNS: dict[str, tuple[str, ...]] = {"manager": ("to-worker", "workbench-recovery"),
+                                                   "worker": ("to-manager",)}
 OMP_ROLE_NAMES = ("manager", "worker")
 # What an isolated OMP 18.4.4 still shows: bundled task agents and bundled
 # non-builtin-sourced commands. Anything else is reported as a leak.
