@@ -1,0 +1,832 @@
+{
+ "invocation": "p27-cd70-smoke-02",
+ "omp": "omp/18.7.0",
+ "note": "times KST (driver wall); journal/session times UTC=KST-9. Second launch only (runs 0,1 aborted, see md). No secrets; <root>=/tmp/wb-cd70-smoke2-*",
+ "events": [
+  {
+   "t": 0.0,
+   "wall": "16:35:31",
+   "event": "setup",
+   "root": "<root>",
+   "head": "53d76c3"
+  },
+  {
+   "t": 0.1,
+   "wall": "16:35:31",
+   "event": "omp_version",
+   "out": "omp/18.7.0"
+  },
+  {
+   "t": 32.4,
+   "wall": "16:36:03",
+   "event": "S3_begin"
+  },
+  {
+   "t": 42.3,
+   "wall": "16:36:13",
+   "event": "S3_typed"
+  },
+  {
+   "t": 45.5,
+   "wall": "16:36:17",
+   "event": "requests",
+   "total": 1,
+   "per": {
+    "Z_01a11549-fb25-77d0-a14d-41b51acd7bfa.jsonl": [
+     1,
+     0
+    ]
+   }
+  },
+  {
+   "t": 50.8,
+   "wall": "16:36:22",
+   "event": "requests",
+   "total": 2,
+   "per": {
+    "Z_01a11549-fb25-77d0-a14d-41b51acd7bfa.jsonl": [
+     2,
+     0
+    ]
+   }
+  },
+  {
+   "t": 54.0,
+   "wall": "16:36:25",
+   "event": "requests",
+   "total": 3,
+   "per": {
+    "Z_01a11549-fb25-77d0-a14d-41b51acd7bfa.jsonl": [
+     3,
+     0
+    ]
+   }
+  },
+  {
+   "t": 56.9,
+   "wall": "16:36:28",
+   "event": "requests",
+   "total": 4,
+   "per": {
+    "Z_01a11549-fb25-77d0-a14d-41b51acd7bfa.jsonl": [
+     3,
+     0
+    ],
+    "Z_01a11549-fb1f-70f6-b631-0682aa4c5e2b.jsonl": [
+     1,
+     0
+    ]
+   }
+  },
+  {
+   "t": 60.9,
+   "wall": "16:36:32",
+   "event": "requests",
+   "total": 5,
+   "per": {
+    "Z_01a11549-fb25-77d0-a14d-41b51acd7bfa.jsonl": [
+     3,
+     0
+    ],
+    "Z_01a11549-fb1f-70f6-b631-0682aa4c5e2b.jsonl": [
+     2,
+     0
+    ]
+   }
+  },
+  {
+   "t": 60.9,
+   "wall": "16:36:32",
+   "event": "journal",
+   "o": {
+    "type": "terminal_started",
+    "task_id": "45d66509-54b2-4867-94a7-59975857258a",
+    "command_id": "10dd24a8-e253-4de2-81ee-9190324f2f3c"
+   }
+  },
+  {
+   "t": 60.9,
+   "wall": "16:36:32",
+   "event": "S3_terminal_running",
+   "since_input": 28.5
+  },
+  {
+   "t": 66.3,
+   "wall": "16:36:37",
+   "event": "S3_exit_typed"
+  },
+  {
+   "t": 66.7,
+   "wall": "16:36:38",
+   "event": "S3_manager_exit_seen",
+   "seen": true,
+   "since_exit": 1.8
+  },
+  {
+   "t": 91.0,
+   "wall": "16:37:02",
+   "event": "journal",
+   "o": {
+    "type": "terminal_ended",
+    "command_id": "10dd24a8-e253-4de2-81ee-9190324f2f3c",
+    "exit_code": 0
+   }
+  },
+  {
+   "t": 91.0,
+   "wall": "16:37:02",
+   "event": "journal",
+   "o": {
+    "type": "terminal_notice",
+    "outcome": "not_needed",
+    "command_id": "10dd24a8-e253-4de2-81ee-9190324f2f3c"
+   }
+  },
+  {
+   "t": 95.1,
+   "wall": "16:37:06",
+   "event": "requests",
+   "total": 6,
+   "per": {
+    "Z_01a11549-fb25-77d0-a14d-41b51acd7bfa.jsonl": [
+     3,
+     0
+    ],
+    "Z_01a11549-fb1f-70f6-b631-0682aa4c5e2b.jsonl": [
+     3,
+     0
+    ]
+   }
+  },
+  {
+   "t": 95.1,
+   "wall": "16:37:06",
+   "event": "S3_worker_done",
+   "seen": true,
+   "t_since_input": 62.7
+  },
+  {
+   "t": 101.1,
+   "wall": "16:37:12",
+   "event": "S3_manager_screen",
+   "head": [
+    "focus: MANAGER OMP | host 입 력  owner: user | shell mode: manual_prompt | worker: 작 업  중  | 자 동 화 : active                                                                 ",
+    "작 업 : 작 업  \"터 미 널 에 서  지 정 된  명 령 을  그 대 로  한  번  …\" [실 행  중  · done_report_pending] | backend: degraded | bridge manager=down worker=ok | 마 지 막  확 인  16:37:12 (0s 전 ) | ",
+    "lq MANAGER OMP *FOCUS* exited(0) 종 료 됨  (Enter: 다 시  시 작 ) qqqqqqqqqqqqqqqqqqqqqqqqqklq WORKER OMP alive qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqk"
+   ]
+  },
+  {
+   "t": 101.7,
+   "wall": "16:37:13",
+   "event": "S3_enter_restart_sent"
+  },
+  {
+   "t": 102.6,
+   "wall": "16:37:14",
+   "event": "journal",
+   "o": {
+    "type": "workbench_notice",
+    "notice_type": "manager_recovery",
+    "outcome": "queued",
+    "task_id": "45d66509-54b2-4867-94a7-59975857258a"
+   }
+  },
+  {
+   "t": 102.6,
+   "wall": "16:37:14",
+   "event": "journal",
+   "o": {
+    "type": "workbench_notice",
+    "notice_type": "manager_recovery",
+    "outcome": "sent",
+    "task_id": "45d66509-54b2-4867-94a7-59975857258a"
+   }
+  },
+  {
+   "t": 105.4,
+   "wall": "16:37:16",
+   "event": "requests",
+   "total": 7,
+   "per": {
+    "Z_01a11549-fb25-77d0-a14d-41b51acd7bfa.jsonl": [
+     3,
+     0
+    ],
+    "Z_01a11549-fb1f-70f6-b631-0682aa4c5e2b.jsonl": [
+     4,
+     0
+    ]
+   }
+  },
+  {
+   "t": 106.2,
+   "wall": "16:37:17",
+   "event": "requests",
+   "total": 8,
+   "per": {
+    "Z_01a1154b-85bb-7267-a078-b5e6641e1ef1.jsonl": [
+     1,
+     0
+    ],
+    "Z_01a11549-fb25-77d0-a14d-41b51acd7bfa.jsonl": [
+     3,
+     0
+    ],
+    "Z_01a11549-fb1f-70f6-b631-0682aa4c5e2b.jsonl": [
+     4,
+     0
+    ]
+   }
+  },
+  {
+   "t": 106.2,
+   "wall": "16:37:17",
+   "event": "S3_new_session",
+   "restart_to_session": 5.1
+  },
+  {
+   "t": 109.9,
+   "wall": "16:37:21",
+   "event": "requests",
+   "total": 9,
+   "per": {
+    "Z_01a1154b-85bb-7267-a078-b5e6641e1ef1.jsonl": [
+     2,
+     0
+    ],
+    "Z_01a11549-fb25-77d0-a14d-41b51acd7bfa.jsonl": [
+     3,
+     0
+    ],
+    "Z_01a11549-fb1f-70f6-b631-0682aa4c5e2b.jsonl": [
+     4,
+     0
+    ]
+   }
+  },
+  {
+   "t": 114.0,
+   "wall": "16:37:25",
+   "event": "requests",
+   "total": 10,
+   "per": {
+    "Z_01a1154b-85bb-7267-a078-b5e6641e1ef1.jsonl": [
+     3,
+     0
+    ],
+    "Z_01a11549-fb25-77d0-a14d-41b51acd7bfa.jsonl": [
+     3,
+     0
+    ],
+    "Z_01a11549-fb1f-70f6-b631-0682aa4c5e2b.jsonl": [
+     4,
+     0
+    ]
+   }
+  },
+  {
+   "t": 118.0,
+   "wall": "16:37:29",
+   "event": "requests",
+   "total": 11,
+   "per": {
+    "Z_01a1154b-85bb-7267-a078-b5e6641e1ef1.jsonl": [
+     4,
+     0
+    ],
+    "Z_01a11549-fb25-77d0-a14d-41b51acd7bfa.jsonl": [
+     3,
+     0
+    ],
+    "Z_01a11549-fb1f-70f6-b631-0682aa4c5e2b.jsonl": [
+     4,
+     0
+    ]
+   }
+  },
+  {
+   "t": 122.1,
+   "wall": "16:37:33",
+   "event": "requests",
+   "total": 12,
+   "per": {
+    "Z_01a1154b-85bb-7267-a078-b5e6641e1ef1.jsonl": [
+     5,
+     0
+    ],
+    "Z_01a11549-fb25-77d0-a14d-41b51acd7bfa.jsonl": [
+     3,
+     0
+    ],
+    "Z_01a11549-fb1f-70f6-b631-0682aa4c5e2b.jsonl": [
+     4,
+     0
+    ]
+   }
+  },
+  {
+   "t": 127.4,
+   "wall": "16:37:38",
+   "event": "requests",
+   "total": 13,
+   "per": {
+    "Z_01a1154b-85bb-7267-a078-b5e6641e1ef1.jsonl": [
+     6,
+     0
+    ],
+    "Z_01a11549-fb25-77d0-a14d-41b51acd7bfa.jsonl": [
+     3,
+     0
+    ],
+    "Z_01a11549-fb1f-70f6-b631-0682aa4c5e2b.jsonl": [
+     4,
+     0
+    ]
+   }
+  },
+  {
+   "t": 131.5,
+   "wall": "16:37:43",
+   "event": "requests",
+   "total": 14,
+   "per": {
+    "Z_01a1154b-85bb-7267-a078-b5e6641e1ef1.jsonl": [
+     6,
+     0
+    ],
+    "Z_01a11549-fb25-77d0-a14d-41b51acd7bfa.jsonl": [
+     3,
+     0
+    ],
+    "Z_01a11549-fb1f-70f6-b631-0682aa4c5e2b.jsonl": [
+     5,
+     0
+    ]
+   }
+  },
+  {
+   "t": 135.2,
+   "wall": "16:37:46",
+   "event": "requests",
+   "total": 15,
+   "per": {
+    "Z_01a1154b-85bb-7267-a078-b5e6641e1ef1.jsonl": [
+     6,
+     0
+    ],
+    "Z_01a11549-fb25-77d0-a14d-41b51acd7bfa.jsonl": [
+     3,
+     0
+    ],
+    "Z_01a11549-fb1f-70f6-b631-0682aa4c5e2b.jsonl": [
+     6,
+     0
+    ]
+   }
+  },
+  {
+   "t": 160.6,
+   "wall": "16:38:12",
+   "event": "S3_end",
+   "counts": {
+    "manager": [
+     9,
+     0,
+     {
+      "read": 4,
+      "workbench_status": 1,
+      "to_worker": 2
+     }
+    ],
+    "worker": [
+     6,
+     0,
+     {
+      "read": 1,
+      "terminal": 1,
+      "to_manager": 2
+     }
+    ]
+   }
+  },
+  {
+   "t": 168.0,
+   "wall": "16:38:19",
+   "event": "S3_followup",
+   "found": true
+  },
+  {
+   "t": 171.0,
+   "wall": "16:38:22",
+   "event": "S1_begin"
+  },
+  {
+   "t": 181.1,
+   "wall": "16:38:32",
+   "event": "S1_typed"
+  },
+  {
+   "t": 185.6,
+   "wall": "16:38:37",
+   "event": "requests",
+   "total": 16,
+   "per": {
+    "Z_01a1154b-85bb-7267-a078-b5e6641e1ef1.jsonl": [
+     7,
+     0
+    ],
+    "Z_01a11549-fb25-77d0-a14d-41b51acd7bfa.jsonl": [
+     3,
+     0
+    ],
+    "Z_01a11549-fb1f-70f6-b631-0682aa4c5e2b.jsonl": [
+     6,
+     0
+    ]
+   }
+  },
+  {
+   "t": 186.9,
+   "wall": "16:38:38",
+   "event": "S1_worker_busy",
+   "since_input": 15.9
+  },
+  {
+   "t": 187.5,
+   "wall": "16:38:39",
+   "event": "requests",
+   "total": 17,
+   "per": {
+    "Z_01a1154b-85bb-7267-a078-b5e6641e1ef1.jsonl": [
+     7,
+     0
+    ],
+    "Z_01a11549-fb25-77d0-a14d-41b51acd7bfa.jsonl": [
+     3,
+     0
+    ],
+    "Z_01a11549-fb1f-70f6-b631-0682aa4c5e2b.jsonl": [
+     7,
+     1
+    ]
+   }
+  },
+  {
+   "t": 187.7,
+   "wall": "16:38:39",
+   "event": "S1_escape_sent",
+   "n": 1
+  },
+  {
+   "t": 188.5,
+   "wall": "16:38:39",
+   "event": "requests",
+   "total": 18,
+   "per": {
+    "Z_01a1154b-85bb-7267-a078-b5e6641e1ef1.jsonl": [
+     8,
+     0
+    ],
+    "Z_01a11549-fb25-77d0-a14d-41b51acd7bfa.jsonl": [
+     3,
+     0
+    ],
+    "Z_01a11549-fb1f-70f6-b631-0682aa4c5e2b.jsonl": [
+     7,
+     1
+    ]
+   }
+  },
+  {
+   "t": 191.1,
+   "wall": "16:38:42",
+   "event": "S1_after_escape_3s",
+   "terminal_started": false,
+   "worker": {
+    "state": "busy",
+    "task_id": "ecfbb8e1-0772-41f5-ad4e-332171b922ed"
+   },
+   "worker_calls": [
+    7,
+    1,
+    {
+     "read": 1,
+     "terminal": 1,
+     "to_manager": 2
+    }
+   ]
+  },
+  {
+   "t": 192.1,
+   "wall": "16:38:43",
+   "event": "S1_escape_sent",
+   "n": 2
+  },
+  {
+   "t": 248.6,
+   "wall": "16:39:40",
+   "event": "journal",
+   "o": {
+    "type": "workbench_notice",
+    "notice_type": "status_check",
+    "outcome": "sent",
+    "task_id": "ecfbb8e1-0772-41f5-ad4e-332171b922ed"
+   }
+  },
+  {
+   "t": 252.6,
+   "wall": "16:39:44",
+   "event": "requests",
+   "total": 19,
+   "per": {
+    "Z_01a1154b-85bb-7267-a078-b5e6641e1ef1.jsonl": [
+     8,
+     0
+    ],
+    "Z_01a11549-fb25-77d0-a14d-41b51acd7bfa.jsonl": [
+     3,
+     0
+    ],
+    "Z_01a11549-fb1f-70f6-b631-0682aa4c5e2b.jsonl": [
+     8,
+     1
+    ]
+   }
+  },
+  {
+   "t": 252.7,
+   "wall": "16:39:44",
+   "event": "journal",
+   "o": {
+    "type": "watchdog_reset",
+    "task_id": "ecfbb8e1-0772-41f5-ad4e-332171b922ed",
+    "checks": 1,
+    "stalled": false,
+    "tool": "terminal"
+   }
+  },
+  {
+   "t": 252.7,
+   "wall": "16:39:44",
+   "event": "journal",
+   "o": {
+    "type": "terminal_started",
+    "task_id": "ecfbb8e1-0772-41f5-ad4e-332171b922ed",
+    "command_id": "7ce8a838-1322-4e62-a8a2-ca5b80c25a41"
+   }
+  },
+  {
+   "t": 272.7,
+   "wall": "16:40:04",
+   "event": "journal",
+   "o": {
+    "type": "terminal_ended",
+    "command_id": "7ce8a838-1322-4e62-a8a2-ca5b80c25a41",
+    "exit_code": 0
+   }
+  },
+  {
+   "t": 272.7,
+   "wall": "16:40:04",
+   "event": "journal",
+   "o": {
+    "type": "terminal_notice",
+    "outcome": "not_needed",
+    "command_id": "7ce8a838-1322-4e62-a8a2-ca5b80c25a41"
+   }
+  },
+  {
+   "t": 274.4,
+   "wall": "16:40:05",
+   "event": "requests",
+   "total": 20,
+   "per": {
+    "Z_01a1154b-85bb-7267-a078-b5e6641e1ef1.jsonl": [
+     8,
+     0
+    ],
+    "Z_01a11549-fb25-77d0-a14d-41b51acd7bfa.jsonl": [
+     3,
+     0
+    ],
+    "Z_01a11549-fb1f-70f6-b631-0682aa4c5e2b.jsonl": [
+     9,
+     1
+    ]
+   }
+  },
+  {
+   "t": 275.6,
+   "wall": "16:40:07",
+   "event": "requests",
+   "total": 21,
+   "per": {
+    "Z_01a1154b-85bb-7267-a078-b5e6641e1ef1.jsonl": [
+     8,
+     0
+    ],
+    "Z_01a11549-fb25-77d0-a14d-41b51acd7bfa.jsonl": [
+     3,
+     0
+    ],
+    "Z_01a11549-fb1f-70f6-b631-0682aa4c5e2b.jsonl": [
+     10,
+     1
+    ]
+   }
+  },
+  {
+   "t": 277.3,
+   "wall": "16:40:08",
+   "event": "requests",
+   "total": 22,
+   "per": {
+    "Z_01a1154b-85bb-7267-a078-b5e6641e1ef1.jsonl": [
+     9,
+     0
+    ],
+    "Z_01a11549-fb25-77d0-a14d-41b51acd7bfa.jsonl": [
+     3,
+     0
+    ],
+    "Z_01a11549-fb1f-70f6-b631-0682aa4c5e2b.jsonl": [
+     10,
+     1
+    ]
+   }
+  },
+  {
+   "t": 302.3,
+   "wall": "16:40:33",
+   "event": "S1_end",
+   "result": "closed",
+   "counts": {
+    "manager": [
+     12,
+     0,
+     {
+      "read": 4,
+      "workbench_status": 1,
+      "to_worker": 3
+     }
+    ],
+    "worker": [
+     10,
+     1,
+     {
+      "read": 1,
+      "terminal": 2,
+      "to_manager": 3
+     }
+    ]
+   }
+  },
+  {
+   "t": 309.7,
+   "wall": "16:40:41",
+   "event": "S1_followup",
+   "found": true
+  },
+  {
+   "t": 312.8,
+   "wall": "16:40:44",
+   "event": "final_counts",
+   "tot": 22,
+   "roles": {
+    "manager": [
+     12,
+     0,
+     {
+      "read": 4,
+      "workbench_status": 1,
+      "to_worker": 3
+     }
+    ],
+    "worker": [
+     10,
+     1,
+     {
+      "read": 1,
+      "terminal": 2,
+      "to_manager": 3
+     }
+    ]
+   },
+   "flags": {
+    "_n_task_created": 2,
+    "_n_delegated": 2,
+    "_n_task": 12,
+    "_n_run_started": 2,
+    "_n_task_worker_session": 2,
+    "_n_request": 6,
+    "_n_result": 6,
+    "_n_outbox": 16,
+    "_n_entry_baseline_recorded": 2,
+    "_n_terminal_request": 2,
+    "_n_terminal_started": 2,
+    "_n_terminal_ended": 2,
+    "_n_terminal_notice": 2,
+    "_n_terminal_result": 2,
+    "_n_workbench_notice": 3,
+    "_n_kw_manager_recovery": 2,
+    "_n_kw_recover": 2,
+    "_n_workbench_status": 1,
+    "_n_cancel_requested": 1,
+    "_n_task_closed": 2,
+    "_n_notice": 1,
+    "_n_notices_delivered": 1,
+    "_n_kw_status_check": 1,
+    "_n_watchdog_reset": 1,
+    "_n_kw_stall": 1,
+    "_n_kw_watchdog": 1,
+    "_n_run_ended": 1
+   }
+  },
+  {
+   "t": 313.7,
+   "wall": "16:40:45",
+   "event": "shutdown",
+   "exit": 0,
+   "stdout": "status\": -1, \"pane\": \"host_shell\", \"survivors\": []}, {\"exit_status\": 143, \"pane\": \"manager_omp\", \"survivors\": []}, {\"exit_status\": 143, \"pane\": \"worker_omp\", \"survivors\": []}], \"processes\": {\"host_shell\": \"dead\", \"manager_omp\": \"dead\", \"supervisor\": \"dead\", \"worker_omp\": \"dead\"}, \"verified\": true}}\n",
+   "stderr": ""
+  },
+  {
+   "t": 313.7,
+   "wall": "16:40:45",
+   "event": "post_shutdown_count",
+   "total": 22,
+   "per": {
+    "Z_01a1154b-85bb-7267-a078-b5e6641e1ef1.jsonl": [
+     9,
+     0,
+     {
+      "read": 3,
+      "workbench_status": 1,
+      "to_worker": 2
+     }
+    ],
+    "Z_01a11549-fb25-77d0-a14d-41b51acd7bfa.jsonl": [
+     3,
+     0,
+     {
+      "read": 1,
+      "to_worker": 1
+     }
+    ],
+    "Z_01a11549-fb1f-70f6-b631-0682aa4c5e2b.jsonl": [
+     10,
+     1,
+     {
+      "read": 1,
+      "terminal": 2,
+      "to_manager": 3
+     }
+    ]
+   }
+  },
+  {
+   "t": 316.6,
+   "wall": "16:40:48",
+   "event": "residue_processes",
+   "left": []
+  },
+  {
+   "t": 317.1,
+   "wall": "16:40:48",
+   "event": "root_removed",
+   "removed": true
+  }
+ ],
+ "sessions": {
+  "worker(1 session, both scenarios)": {
+   "assistant_messages": 10,
+   "aborted": 1,
+   "tool_calls": {
+    "read": 1,
+    "terminal": 2,
+    "to_manager": 3
+   }
+  },
+  "manager#1 (exited in S3)": {
+   "assistant_messages": 3,
+   "tool_calls": {
+    "read": 1,
+    "to_worker": 1
+   }
+  },
+  "manager#2 (restarted, S3 recovery + S1)": {
+   "assistant_messages": 9,
+   "tool_calls": {
+    "read": 3,
+    "workbench_status": 1,
+    "to_worker": 2
+   }
+  }
+ },
+ "requests_total_this_launch": 22,
+ "requests_prior_aborted_launches": {
+  "launch0": "1 recorded (+<=1 in flight)",
+  "launch1": 2
+ },
+ "requests_total_all": "<=26 (cap 30, pause 28)"
+}

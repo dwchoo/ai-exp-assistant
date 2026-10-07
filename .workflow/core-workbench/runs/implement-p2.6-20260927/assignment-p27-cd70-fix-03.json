@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cd70-fix-03",
+  "ticket_id": "C-D70 smoke-02 D1: worker report while the manager OMP is gone",
+  "role": "worker_senior",
+  "unit": "V-CW-18-cd70",
+  "approved_bundle_digest": "25936cde805e6f2163ad6fc487be61f10d3c5e5e8da57e9ca30d2e0274fa820a",
+  "candidate_commit": "bc131d5",
+  "routing": {"planned_role": "worker_senior", "selected_role": "worker_senior (Opus high, fresh)", "reason_codes": ["real_model_defect", "delivery_contract"], "evidence_refs": [".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd70-smoke-02.md", ".workflow/core-workbench/runs/implement-p2.6-20260927/integration-p27-cd70.json"]},
+  "root_adjudication": [
+    "D1 is a defect against C-D70 (4)/(5) ('worker reports that could not be delivered to the previous manager session are re-sent to the new manager session'). A worker's to_manager report (done/blocked, i.e. the entries already queued with keep_across_pause) made while no manager peer is connected must be queued, not held: the outbox entry is bound to no session (target None) and is delivered to the next manager session that registers (never replayed if it was submitted or ended unknown). The worker's tool result says it is queued and will be delivered when the manager is back (truthful), so the worker ends its turn and the Task state advances as for a normal queued report.",
+    "manager_recovery counts such reports in reports_resent (or a clearly named field) and workbench_status lists them with content while pending. Order: the recovery notice first if both are due at registration is not required; just no duplicate and a correct count.",
+    "Other handoffs (to_worker from the manager, worker questions/progress that are not done/blocked reports) keep today's held target_not_connected behaviour. Pause semantics unchanged (keep_across_pause). Watchdog must not nag the worker while its report waits for the manager.",
+    "Also confirm the path where the manager OMP exits while the report is already queued for the old session (target_session_changed -> re-queued by C-D70 (5)) still works."
+  ],
+  "acceptance": ["red->green tests (own files, not *_independent*), including an end-to-end style test with a fake manager peer disconnected then a new session registering; all suites tests/backend, tests/bridge (py+node), tests/terminal, tests/workflow, tests/gates/g2_shell, tests/contracts, tests/ui with real exit codes (run as `PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/<suite> -t tests/<suite> -p 'test_*.py'`, node `node --test tests/bridge/*.test.ts`). List independent tests needing updates; do not edit them."],
+  "allowed_write_paths": "same as assignment-p27-cd70-01.json",
+  "prohibited_paths": ["tests/**/*_independent*", "docs/**", ".workflow/** except result-p27-cd70-fix-03.md"],
+  "rules": "No real provider requests; never read credential contents or other processes' environ; never touch the user's tmux server, ~/wb-urux-sandbox or its processes; temp only under /tmp; kill only PIDs you started; no pkill; no commits; no graphify update.",
+  "result_format": "result-p27-cd70-fix-03.md: checks table first, design with file:line, changed paths + sha256. Korean reply <=8 lines."
+}

@@ -1,0 +1,23 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 2261,
+  "event": {
+    "id": "limit-cd70b-unit-V-CW-18-cd70",
+    "kind": "limit",
+    "data": {
+      "authority": "C-D70 (approved PLAN p2.7s, planning-p2.7-20260929/approval-amendment-s.json, bundle 25936cde...), C-D55 budget delegation, workflow-contract section 8; result-p27-cd70-smoke-02 D1",
+      "bucket": "unit:V-CW-18-cd70",
+      "decision_owner": "Root",
+      "expected_previous": {
+        "authority": "C-D70 (approved PLAN p2.7s, planning-p2.7-20260929/approval-amendment-s.json, bundle 25936cde...), C-D55 budget delegation, workflow-contract section 8",
+        "reason": "New unit: C-D70 Workbench watchdog, manager restart_worker, OMP new-session recovery, manager recovery skill and status tool",
+        "value": 9
+      },
+      "origin": "operating",
+      "reason": "smoke-02 D1 fix delta review + one reserve",
+      "remaining_work_estimate": 2,
+      "scope_basis": null,
+      "value": 11
+    }
+  }
+}

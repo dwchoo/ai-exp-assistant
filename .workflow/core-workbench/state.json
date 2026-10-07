@@ -425,7 +425,7 @@
   "implementation_p27": {
     "run_record": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
     "approved_bundle_sha256": "91fe05dc882d8c00ab0eb28c30e2b6cabcbfacb0f0fee3f0eaeecfaff5b7d3e8",
-    "status": "C-D70 (watchdog, restart_worker, OMP new-session recovery, manager recovery skill/status tool) integrated and verified offline (all suites green); next: real-model smoke of C-D70 on user approval, UR-USABILITY retry by the user, CW-19, CW-16 (polish lists in integration-p27-cd68.json, integration-p27-cd70.json)",
+    "status": "C-D70 integrated; real-model smokes: S2 pass, S3 recovery notice pass + D1 fixed (fix-03, review-03 pass), S1 first check pass; next: optional S3 re-smoke on user approval, UR-USABILITY retry by the user, CW-19, CW-16 (polish lists in integration-p27-cd68.json, integration-p27-cd70.json)",
     "resumed_from": ".codex/handoffs/2026-09-29-core-workbench-p27-cw17/HANDOFF.md",
     "units": {
       "V-CW-17-p2.7": {
@@ -490,7 +490,7 @@
       "V-CW-18-cd70": {
         "status": "integrated",
         "record": ".workflow/core-workbench/runs/implement-p2.6-20260927/integration-p27-cd70.json",
-        "candidate": "803970426b22fc0493853b8e0b557c703ccd729e4a0d1f8be2217d3ee58b5c49"
+        "candidate": "f33113b1c7e77d3a37e5e47633febfea8c939dd3896540ece4956b1dc4a696a5"
       }
     },
     "user_review_checkpoints": {

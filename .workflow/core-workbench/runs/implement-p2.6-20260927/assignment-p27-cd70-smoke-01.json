@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cd70-smoke-01",
+  "ticket_id": "CW-18 C-D70 real-model smoke (watchdog, restart_worker, manager recovery) on OMP 18.7.0",
+  "role": "test_designer",
+  "unit": "V-CW-18-smoke",
+  "approved_bundle_digest": "25936cde805e6f2163ad6fc487be61f10d3c5e5e8da57e9ca30d2e0274fa820a",
+  "candidate_commit": "b7e0012",
+  "routing": {
+    "planned_role": "test_designer",
+    "selected_role": "test_designer (general-purpose, Sonnet high; user 2026-10-06 routing: established smokes on Sonnet)",
+    "reason_codes": [
+      "live_real_model"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/assignment-p27-cd68-smoke-01.json",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/assignment-p27-cd69-smoke-03.json",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd69-smoke-03.md",
+      "docs/features/core-workbench/DECISIONS.md#C-D70"
+    ]
+  },
+  "user_authorization": "User 2026-10-07 '진행해.' after Root proposed: C-D70 real-model smoke, cap 30 requests / 20 min, Sonnet agent, isolation re-check on OMP 18.7.0.",
+  "setup": "Exactly as p27-cd68-smoke-01 / p27-cd69-smoke-03 (new /tmp data dir and tiny git project, `python -m workbench start --data-dir <tmp> --no-attach` from the project dir, ui_v1 client; attach the real product UI in a PTY at least once for status-line text screenshots). Record `omp --version` and the start isolation-check result for both roles (ok/leaks/warnings) — this is the OMP 18.7.0 isolation evidence.",
+  "scenario": [
+    "S1 watchdog: type into the manager pane: '터미널에서 `sleep 20; echo cd70-s1-done` 를 실행하고 결과를 알려줘'. As soon as the worker's terminal command is running, the worker turn ends (by design, 120 s wait not reached — fine). Once the command has finished and the worker has gone idle WITHOUT reporting is unlikely; to force the stalled path deterministically: right after the worker receives the TASK, press Escape in the worker pane via the UI client to abort its turn before it calls terminal (retry once if missed). Then wait: record whether Workbench sends status_check after ~60 s idle, what the worker does (expected: runs the listed command / reports), and if it stays idle, the 2nd check and the manager's worker_stalled notice and the manager's reaction. Record timings.",
+    "S2 restart_worker: type into the manager pane: '터미널에서 `sleep 45; echo cd70-s2-done` 를 실행하게 하고, 명령이 실행 중이면 restart_worker로 worker를 재시작한 다음 이어서 마무리해줘'. Record: restart_worker call (reason), that the host command kept running (pane text / journal), worker_restarted notice, exactly one follow-up to_worker, the new worker's TASK (full Task + commands already run), whether the new worker re-runs the command (it should not if done/running) and the final report to the user. Count full-Task re-sends (expected 1).",
+    "S3 manager recovery: type into the manager pane: '터미널에서 `sleep 30; echo cd70-s3-done` 를 실행하고 결과를 알려줘'. When the worker's command is running, exit the manager OMP (e.g. /exit or Ctrl-D twice in the manager pane via the UI client) so the worker's done report cannot be delivered; wait until the worker reports done (deferred); then restart the exited manager pane through the existing UI restart (C-D62). Record: manager_recovery notice, the re-sent report delivered to the new manager session, workbench_status call if any, and what the manager tells the user.",
+    "After each scenario: host shell usable (follow-up command works). Note any host pane line overprint after follow-up commands (user's open observation)."
+  ],
+  "limits": [
+    "Hard cap 30 provider requests total across both roles (count assistant messages in the temp home session jsonl, poll >=1/s, pause automation at the cap); wall clock 20 min. If the cap would cut a scenario, finish the current step, pause, shut down (verified) and report which scenarios ran. Priority order S2, S3, S1 if budget looks short.",
+    "Never touch ~/wb-urux-sandbox or the user's running Workbench/OMP processes; kill only PIDs you started; never read credential contents or other processes' environ (agent.db symlink: metadata only); never print tokens; no commits; no graphify update; remove temp dirs afterwards (keep short logs/timeline under the run dir without secrets)."
+  ],
+  "result_format": "Write .workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd70-smoke-01.md (+ -timeline.json), Korean: OMP version + isolation result per role, per scenario timeline/notices/tool calls/timings, request counts, what worked / not, defects with evidence. Reply in Korean <=12 lines."
+}

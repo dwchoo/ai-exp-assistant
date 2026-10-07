@@ -14,7 +14,11 @@
     "p27-cd70-fix-01",
     "p27-cd70-review-02",
     "p27-cd70-test-02",
-    "p27-cd70-fix-02"
+    "p27-cd70-fix-02",
+    "p27-cd70-smoke-01",
+    "p27-cd70-smoke-02",
+    "p27-cd70-fix-03",
+    "p27-cd70-review-03"
   ],
   "root_adjudications": [
     ".workflow/core-workbench/runs/implement-p2.6-20260927/assignment-p27-cd70-02.json",
@@ -39,7 +43,12 @@
   },
   "carried_polish": [
     "skill visibility: OMP 18.7.0 has no menu-only hide key; workbench-recovery stays visible in the manager slash menu",
-    "O2: API-accepted reports with unknown processing get no notice (by adjudication)"
+    "O2: API-accepted reports with unknown processing get no notice (by adjudication)",
+    "review-03 P3-1: reports_resent count skew if the manager session changes twice in a narrow window (no loss/duplicate)",
+    "review-03 P3-2: report waiting for an absent manager has no user-visible indicator or limit; Task stays done_report_pending",
+    "smoke-02: manager without explicit 'worker에게' may run commands with its own bash (by C-D68 design)",
+    "smoke-01 O1: a manager told to restart mid-command re-ran the command to create a window (scenario artifact; non-idempotent commands risk)",
+    "smoke-01 O3 / user observation: host prompt sometimes not redrawn after a follow-up command (not reproduced in smoke-02)"
   ],
   "files_sha256": {
     "omp_bridge/g3/bridge.ts": "835158403d182f3835967b5495319c73d356fe2479a443387fe64c9f0e4da0e8",
@@ -80,5 +89,21 @@
     "tests/bridge/test_cw18_schema_independent_p27w.py": "447ca7fe50e577a86bbe8ec9a8f2a04366f62ea9ccadfa865512d84bdc37345c",
     "tests/terminal/test_review_fixes_independent_p27c.py": "23d5bd8e3e93ea3362487877072072f8b856804b34a9dee24e505f62007dffef",
     "tests/ui/test_product_model_cd70.py": "dc9a76fedb58f8ddcd26eb6ec91b00f9d389d67e775c99add0fc8bc2df130bf1"
+  },
+  "candidate_after_fix03": "f33113b1c7e77d3a37e5e47633febfea8c939dd3896540ece4956b1dc4a696a5",
+  "real_model": {
+    "smoke-01": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd70-smoke-01.md (S2 restart_worker pass; 34/30 requests: counter thread died during OMP restart; OMP 18.7.0 isolation ok both roles)",
+    "smoke-02": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd70-smoke-02.md (S3 manager_recovery auto-injected, D1 found: report while manager gone was held and lost; S1 status_check at 61 s, worker reacted; 2nd check/worker_stalled not reached; 26/30 requests)",
+    "fix-03": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd70-fix-03.md (D1 fixed: unbound queue for done/blocked reports to next manager session; all suites green)",
+    "review-03": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd70-review-03.md (pass; 2 P3)",
+    "pending": "real-model re-smoke of S3 after fix-03 (needs user approval)"
+  },
+  "files_sha256_fix03": {
+    "omp_bridge/skills/to-manager/SKILL.md": "bbeba20792ce460c4ff0bfaf2d1020c1e267d02440cf979e06f4e5b6ecafcd45",
+    "omp_bridge/skills/workbench-recovery/SKILL.md": "e108ef791f16217b58970b5dc716c948dc3dae9dcb34117760afafbba128153e",
+    "src/workbench/backend/flow.py": "faa67de2e792ee9d0daacc79bbd0dc1f36c3ce6146debbacc1dab2ba51c3a72d",
+    "src/workbench/backend/flow_recovery.py": "35c8707889d8e08462aa77d7e62caa2dc4ed8174e393beac23d02a48835922f8",
+    "src/workbench/backend/flow_tasks.py": "9b756864f05ecd5fcb145202c542008a64eb4ca4882f63249ab2ce05533f2bf8",
+    "tests/backend/test_cd70_fix03.py": "b7fdd8c05928087ad9332888c5068df7b68be1955e23a437cc9610cb6860c369"
   }
 }

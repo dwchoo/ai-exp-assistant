@@ -1,0 +1,617 @@
+{
+ "invocation": "p27-cd70-smoke-01",
+ "note": "<root>=/tmp/wb-cd70-smoke; times UTC (KST=+9). Only S2 ran; cap exceeded (34/30) because scratch observer thread died at 15:58:40 KST (TypeError on session_id None during restart).",
+ "omp": "omp/18.7.0",
+ "sessions": [
+  {
+   "file": "7Z_01a11525-3b99-7636-9e19-8d1c61702b67.jsonl",
+   "role": "worker",
+   "assistant_messages": 6,
+   "tool_calls": {
+    "read": 1,
+    "terminal": 2,
+    "to_manager": 2
+   },
+   "events": [
+    [
+     "06:57:06.149",
+     "injected",
+     "task",
+     1920
+    ],
+    [
+     "06:57:09.351",
+     "call",
+     "read",
+     70
+    ],
+    [
+     "06:57:15.740",
+     "call",
+     "terminal",
+     75
+    ],
+    [
+     "06:58:04.716",
+     "call",
+     "to_manager",
+     483
+    ],
+    [
+     "06:58:11.510",
+     "call",
+     "to_manager",
+     198
+    ],
+    [
+     "06:58:16.569",
+     "text",
+     0
+    ],
+    [
+     "06:58:27.273",
+     "injected",
+     "task",
+     1719
+    ],
+    [
+     "06:58:31.039",
+     "call",
+     "terminal",
+     75
+    ]
+   ]
+  },
+  {
+   "file": "9Z_01a11525-3bb9-753a-8231-7ee562380fc7.jsonl",
+   "role": "manager",
+   "assistant_messages": 23,
+   "tool_calls": {
+    "read": 2,
+    "todo": 7,
+    "to_worker": 3,
+    "workbench_status": 2,
+    "restart_worker": 1
+   },
+   "events": [
+    [
+     "06:56:41.999",
+     "user_text",
+     99
+    ],
+    [
+     "06:56:45.328",
+     "call",
+     "read",
+     69
+    ],
+    [
+     "06:56:47.648",
+     "call",
+     "read",
+     76
+    ],
+    [
+     "06:56:58.697",
+     "call",
+     "todo",
+     407
+    ],
+    [
+     "06:57:06.025",
+     "call",
+     "to_worker",
+     954
+    ],
+    [
+     "06:57:08.740",
+     "text",
+     74
+    ],
+    [
+     "06:57:12.375",
+     "text",
+     46
+    ],
+    [
+     "06:58:04.760",
+     "injected",
+     "report",
+     1229
+    ],
+    [
+     "06:58:27.161",
+     "text",
+     111
+    ],
+    [
+     "06:58:27.161",
+     "call",
+     "to_worker",
+     751
+    ],
+    [
+     "06:58:31.366",
+     "text",
+     65
+    ],
+    [
+     "06:58:35.110",
+     "call",
+     "workbench_status",
+     91
+    ],
+    [
+     "06:58:39.270",
+     "call",
+     "todo",
+     211
+    ],
+    [
+     "06:58:43.597",
+     "call",
+     "restart_worker",
+     368
+    ],
+    [
+     "06:58:47.416",
+     "text",
+     94
+    ],
+    [
+     "06:58:52.868",
+     "call",
+     "todo",
+     187
+    ],
+    [
+     "06:58:56.245",
+     "call",
+     "todo",
+     329
+    ],
+    [
+     "06:58:58.690",
+     "text",
+     72
+    ],
+    [
+     "06:58:59.697",
+     "injected",
+     "worker_restarted",
+     1331
+    ],
+    [
+     "06:59:04.249",
+     "call",
+     "workbench_status",
+     88
+    ],
+    [
+     "06:59:07.627",
+     "call",
+     "todo",
+     207
+    ],
+    [
+     "06:59:13.195",
+     "call",
+     "to_worker",
+     572
+    ],
+    [
+     "06:59:17.044",
+     "text",
+     84
+    ],
+    [
+     "06:59:21.490",
+     "call",
+     "todo",
+     368
+    ],
+    [
+     "06:59:25.300",
+     "text",
+     47
+    ],
+    [
+     "06:59:28.017",
+     "injected",
+     "report",
+     1236
+    ],
+    [
+     "06:59:31.554",
+     "call",
+     "todo",
+     204
+    ],
+    [
+     "06:59:36.239",
+     "text",
+     224
+    ]
+   ]
+  },
+  {
+   "file": "7Z_01a11528-490b-7277-ada7-d31560975d7b.jsonl",
+   "role": "worker",
+   "assistant_messages": 5,
+   "tool_calls": {
+    "terminal": 1,
+    "read": 1,
+    "to_manager": 1
+   },
+   "events": [
+    [
+     "06:59:13.238",
+     "injected",
+     "question",
+     3033
+    ],
+    [
+     "06:59:15.959",
+     "call",
+     "terminal",
+     52
+    ],
+    [
+     "06:59:19.350",
+     "text",
+     44
+    ],
+    [
+     "06:59:20.600",
+     "injected",
+     "terminal_done",
+     642
+    ],
+    [
+     "06:59:23.822",
+     "call",
+     "read",
+     69
+    ],
+    [
+     "06:59:27.982",
+     "call",
+     "to_manager",
+     490
+    ],
+    [
+     "06:59:34.643",
+     "text",
+     116
+    ]
+   ]
+  }
+ ],
+ "totals": {
+  "requests": 34,
+  "manager": 23,
+  "worker": 11
+ },
+ "handoff_journal": [
+  {
+   "at": "06:57:06.026",
+   "type": "request",
+   "kind": "to_worker",
+   "state": null,
+   "reason": null
+  },
+  {
+   "at": "06:57:06.038",
+   "type": "result",
+   "kind": null,
+   "state": null,
+   "reason": null
+  },
+  {
+   "at": "06:57:06.043",
+   "type": "outbox",
+   "kind": "task",
+   "state": "pending",
+   "reason": null
+  },
+  {
+   "at": "06:57:15.741",
+   "type": "terminal_request",
+   "kind": null,
+   "state": null,
+   "reason": null
+  },
+  {
+   "at": "06:57:15.784",
+   "type": "terminal_started",
+   "kind": null,
+   "state": null,
+   "reason": null
+  },
+  {
+   "at": "06:57:26.118",
+   "type": "outbox",
+   "kind": null,
+   "state": "unknown",
+   "reason": "BridgeTimeout"
+  },
+  {
+   "at": "06:58:00.888",
+   "type": "terminal_ended",
+   "kind": null,
+   "state": null,
+   "reason": null
+  },
+  {
+   "at": "06:58:00Z",
+   "type": "terminal_notice",
+   "kind": null,
+   "state": "not_needed",
+   "reason": null
+  },
+  {
+   "at": "06:58:00.889",
+   "type": "terminal_result",
+   "kind": null,
+   "state": null,
+   "reason": null
+  },
+  {
+   "at": "06:58:04.717",
+   "type": "request",
+   "kind": "to_manager",
+   "state": null,
+   "reason": null
+  },
+  {
+   "at": "06:58:04.718",
+   "type": "outbox",
+   "kind": "report",
+   "state": "pending",
+   "reason": null
+  },
+  {
+   "at": "06:58:04.718",
+   "type": "result",
+   "kind": null,
+   "state": null,
+   "reason": null
+  },
+  {
+   "at": "06:58:24.737",
+   "type": "outbox",
+   "kind": null,
+   "state": "unknown",
+   "reason": "BridgeTimeout"
+  },
+  {
+   "at": "06:58:27.162",
+   "type": "request",
+   "kind": "to_worker",
+   "state": null,
+   "reason": null
+  },
+  {
+   "at": "06:58:27.172",
+   "type": "result",
+   "kind": null,
+   "state": null,
+   "reason": null
+  },
+  {
+   "at": "06:58:27.177",
+   "type": "outbox",
+   "kind": "task",
+   "state": "pending",
+   "reason": null
+  },
+  {
+   "at": "06:58:31.039",
+   "type": "terminal_request",
+   "kind": null,
+   "state": null,
+   "reason": null
+  },
+  {
+   "at": "06:58:31.078",
+   "type": "terminal_started",
+   "kind": null,
+   "state": null,
+   "reason": null
+  },
+  {
+   "at": "06:58:35.111",
+   "type": "workbench_status",
+   "kind": null,
+   "state": null,
+   "reason": null
+  },
+  {
+   "at": "06:58:43.598",
+   "type": "restart_worker_request",
+   "kind": null,
+   "state": null,
+   "reason": "사용자 요청: sleep 45; echo cd70-s2-done 명령이 터미널에서 실행 중임을 확인했으므로 worker만 재시작하고 기존 명령은 계속 실행하도록 유지."
+  },
+  {
+   "at": "06:58:43.619",
+   "type": "terminal_peer_gone",
+   "kind": null,
+   "state": null,
+   "reason": null
+  },
+  {
+   "at": "06:58:43.620",
+   "type": "terminal_wait_abandoned",
+   "kind": null,
+   "state": null,
+   "reason": null
+  },
+  {
+   "at": "06:58:44.709",
+   "type": "restart_worker_result",
+   "kind": null,
+   "state": null,
+   "reason": null
+  },
+  {
+   "at": "06:58:45.642",
+   "type": "workbench_notice",
+   "kind": "worker_restarted",
+   "state": "queued",
+   "reason": null
+  },
+  {
+   "at": "06:58:45.647",
+   "type": "workbench_notice",
+   "kind": "worker_restarted",
+   "state": "deferred",
+   "reason": null
+  },
+  {
+   "at": "06:58:47.250",
+   "type": "outbox",
+   "kind": null,
+   "state": "unknown",
+   "reason": "BridgeTimeout"
+  },
+  {
+   "at": "06:58:59.664",
+   "type": "workbench_notice",
+   "kind": "worker_restarted",
+   "state": "sent",
+   "reason": null
+  },
+  {
+   "at": "06:59:04.250",
+   "type": "workbench_status",
+   "kind": null,
+   "state": null,
+   "reason": null
+  },
+  {
+   "at": "06:59:13.196",
+   "type": "request",
+   "kind": "to_worker",
+   "state": null,
+   "reason": null
+  },
+  {
+   "at": "06:59:13.197",
+   "type": "outbox",
+   "kind": "question",
+   "state": "pending",
+   "reason": null
+  },
+  {
+   "at": "06:59:13.198",
+   "type": "result",
+   "kind": null,
+   "state": null,
+   "reason": null
+  },
+  {
+   "at": "06:59:15.962",
+   "type": "terminal_request",
+   "kind": null,
+   "state": null,
+   "reason": null
+  },
+  {
+   "at": "06:59:15.963",
+   "type": "terminal_fetch",
+   "kind": null,
+   "state": null,
+   "reason": null
+  },
+  {
+   "at": "06:59:15.963",
+   "type": "terminal_result",
+   "kind": null,
+   "state": null,
+   "reason": null
+  },
+  {
+   "at": "06:59:16.168",
+   "type": "terminal_ended",
+   "kind": null,
+   "state": null,
+   "reason": null
+  },
+  {
+   "at": "06:59:16Z",
+   "type": "terminal_notice",
+   "kind": null,
+   "state": "pending",
+   "reason": null
+  },
+  {
+   "at": "06:59:16.170",
+   "type": "terminal_result",
+   "kind": null,
+   "state": null,
+   "reason": null
+  },
+  {
+   "at": "06:59:16.170",
+   "type": "terminal_result_undelivered",
+   "kind": null,
+   "state": null,
+   "reason": null
+  },
+  {
+   "at": "06:59:16Z",
+   "type": "terminal_notice",
+   "kind": null,
+   "state": "deferred",
+   "reason": "deferred"
+  },
+  {
+   "at": "06:59:19.359",
+   "type": "outbox",
+   "kind": null,
+   "state": "delivered",
+   "reason": null
+  },
+  {
+   "at": "06:59:20Z",
+   "type": "terminal_notice",
+   "kind": null,
+   "state": "sent",
+   "reason": null
+  },
+  {
+   "at": "06:59:27.983",
+   "type": "request",
+   "kind": "to_manager",
+   "state": null,
+   "reason": null
+  },
+  {
+   "at": "06:59:27.985",
+   "type": "outbox",
+   "kind": "report",
+   "state": "pending",
+   "reason": null
+  },
+  {
+   "at": "06:59:27.985",
+   "type": "result",
+   "kind": null,
+   "state": null,
+   "reason": null
+  },
+  {
+   "at": "06:59:36.243",
+   "type": "outbox",
+   "kind": null,
+   "state": "delivered",
+   "reason": null
+  }
+ ],
+ "status_lines": [
+  "15:57:16 focus: MANAGER OMP | host 입력 owner: worker | shell mode: control_wait | worker: 작업 중 | 자동화: active / 작업 \"Run the exact command once in the host …\" [실행 중]",
+  "15:58:44 … | worker 재시작됨 (manager 요청: 사용자 요청: sleep 45; echo cd70-s2-don…) | 작업: \"Run the given command exactly once now.…\" [실행 중] | backend: ready | bridge manager=ok worker=ok",
+  "15:59:28 focus: MANAGER OMP | host 입력 owner: user | shell mode: manual_prompt | worker: 대기 | 자동화: idle | worker 재시작됨 (…) | 작업 … [종료(완료)]"
+ ]
+}
