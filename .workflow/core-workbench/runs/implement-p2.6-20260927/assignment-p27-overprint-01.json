@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-overprint-01",
+  "ticket_id": "Host pane overprint / prompt pushed off-screen after a follow-up command in a full pane",
+  "role": "worker_senior",
+  "unit": "V-CW-18-host-overprint",
+  "candidate_commit": "dab5761",
+  "routing": {
+    "planned_role": "worker_senior",
+    "selected_role": "worker_senior (Opus high; terminal emulation / rendering diagnosis)",
+    "reason_codes": [
+      "vt_rendering",
+      "unknown_cause"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd70-smoke-04.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd70-smoke-01.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd69-smoke-03.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd70-smoke-02.md"
+    ]
+  },
+  "user_decision": "User 2026-10-07: confirmed this is a real problem to fix (user also saw output lines overlapping in the host terminal earlier).",
+  "observations": [
+    "Reproduced 3x (cd69-smoke-03 O1, cd70-smoke-01 O3, cd70-smoke-04 O1) only after a long output filled the host pane (hardware inspection), then the user types a follow-up `echo X_$((6*7))` command: the follow-up output overwrites the previous last output line (e.g. 'X_42 completed.' over 'Hardware inspection completed.'), appears ABOVE the echoed input line, and the next prompt is pushed below the visible pane. Not reproduced when the pane was not full (cd70-smoke-02/03). Frames at 2 s and 5 s identical. Captures were via the real product UI in a PTY with a pyte outer-terminal emulation, so an emulator artefact is not excluded.",
+    "Relevant code: src/workbench/terminal/vt_g1/screen.py (pane VT model: pyte, DCS filter, OSC 52), src/workbench/ui/product/app.py / view.py / layout.py (frame composition to the outer terminal, diff rendering, stream reset, _align), the worker display wrapper '[worker] $ cmd' typed by flow_terminal (C-D68), shell_persistent adapter."
+  ],
+  "required_behavior": [
+    "1. Reproduce deterministically without real models: drive the host pane (real PersistentShell/bash under the product UI or the pane model directly) with output that fills the pane (e.g. seq 1 200, or a multi-line script output through the worker terminal display path) then a follow-up command; check both (a) the pane's internal VT screen and (b) the frames the product UI writes to the outer terminal, using two independent outer emulators (pyte and a private tmux server on its own -L/-S socket under /tmp, or another real emulator available locally) to rule out an emulator artefact. Also test the worker-run path (managed command display wrapper) vs user-typed commands, and pane sizes/resizes.",
+    "2. Find the root cause (file:line) and fix it with the smallest change; keep existing behaviours (OSC 52, DCS filter, scroll/direct-scroll, resize, IME/jamo, colors).",
+    "3. Tests red->green reproducing the exact symptom (internal screen and rendered frame), plus suites tests/ui, tests/terminal, tests/gates/g2_shell, tests/backend with real exit codes (`PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/<suite> -t tests/<suite> -p 'test_*.py'`).",
+    "If it turns out to be only an emulator artefact (not reproducible in a real emulator nor the internal screen), stop and report with evidence instead of changing code."
+  ],
+  "allowed_write_paths": [
+    "src/workbench/terminal/vt_g1/**",
+    "src/workbench/ui/product/**",
+    "src/workbench/backend/flow_terminal.py",
+    "src/workbench/backend/panes.py",
+    "src/workbench/terminal/shell_persistent/**",
+    "tests/ui/test_*.py (not *_independent*)",
+    "tests/terminal/test_*.py (not *_independent*)",
+    "tests/backend/test_*.py (not *_independent*)",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-overprint-01.md"
+  ],
+  "prohibited_paths": [
+    "tests/**/*_independent*",
+    "docs/**",
+    "other .workflow files",
+    "omp_bridge/**"
+  ],
+  "rules": "No real provider requests (no OMP model turns; fake OMP or none is fine). Never read credential contents or other processes' environ; never touch the user's tmux server (default socket) or other claude-swarm sockets, ~/wb-urux-sandbox or its processes; a private tmux server only on your own socket under /tmp, killed afterwards; temp only under /tmp; kill only PIDs you started; no pkill; no commits; no graphify update.",
+  "result_format": "result-p27-overprint-01.md: repro (both emulators + internal screen), root cause file:line, fix, checks table. Korean reply <=8 lines."
+}

@@ -1,0 +1,24 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 2280,
+  "event": {
+    "id": "limit-overprint-unit",
+    "kind": "limit",
+    "data": {
+      "authority": "C-D55 budget delegation, workflow-contract section 8; user 2026-10-07 '1번은 문제가 맞는데' (host pane overprint is a defect to fix before UR)",
+      "bucket": "unit:V-CW-18-host-overprint",
+      "decision_owner": "Root",
+      "expected_previous": null,
+      "origin": "operating",
+      "reason": "New unit: host pane overprint/prompt-off-screen after a follow-up command in a full pane (investigate, fix, review, reserve)",
+      "remaining_work_estimate": 5,
+      "scope_basis": {
+        "evidence_refs": [
+          "new unit (smoke O1 x3)"
+        ],
+        "status": "known-empty"
+      },
+      "value": 5
+    }
+  }
+}

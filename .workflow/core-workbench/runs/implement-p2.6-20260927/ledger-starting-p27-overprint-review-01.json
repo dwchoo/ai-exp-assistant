@@ -1,0 +1,17 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 2286,
+  "event": {
+    "id": "starting-p27-overprint-review-01",
+    "kind": "transition",
+    "data": {
+      "evidence": ".workflow/core-workbench/runs/implement-p2.6-20260927/assignment-p27-overprint-review-01.json",
+      "invocation": "p27-overprint-review-01",
+      "not_started_evidence": null,
+      "observed_effort": "unverified",
+      "observed_model": "unverified",
+      "outcome": null,
+      "state": "starting"
+    }
+  }
+}

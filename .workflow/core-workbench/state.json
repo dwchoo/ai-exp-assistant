@@ -425,7 +425,7 @@
   "implementation_p27": {
     "run_record": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
     "approved_bundle_sha256": "91fe05dc882d8c00ab0eb28c30e2b6cabcbfacb0f0fee3f0eaeecfaff5b7d3e8",
-    "status": "C-D70 integrated and verified with real-model smokes (S2 restart_worker, S3 manager recovery incl. D1 fix re-smoke, S1 first status_check); next: UR-USABILITY retry by the user, CW-19, CW-16 (polish lists in integration-p27-cd68.json, integration-p27-cd70.json)",
+    "status": "C-D70 integrated and verified (real-model smokes incl. normal-flow regression); host pane shrink overprint fixed (smoke overprint was an emulator artefact); next: UR-USABILITY retry by the user, CW-19, CW-16 (polish lists in integration-p27-cd68/cd70/overprint.json)",
     "resumed_from": ".codex/handoffs/2026-09-29-core-workbench-p27-cw17/HANDOFF.md",
     "units": {
       "V-CW-17-p2.7": {
@@ -491,6 +491,10 @@
         "status": "integrated",
         "record": ".workflow/core-workbench/runs/implement-p2.6-20260927/integration-p27-cd70.json",
         "candidate": "f33113b1c7e77d3a37e5e47633febfea8c939dd3896540ece4956b1dc4a696a5"
+      },
+      "V-CW-18-host-overprint": {
+        "status": "integrated",
+        "record": ".workflow/core-workbench/runs/implement-p2.6-20260927/integration-p27-overprint.json"
       }
     },
     "user_review_checkpoints": {

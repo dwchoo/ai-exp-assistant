@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-overprint-review-01",
+  "ticket_id": "Host pane shrink overprint fix review",
+  "role": "reviewer",
+  "unit": "V-CW-18-host-overprint",
+  "base_commit": "dab5761",
+  "routing": {
+    "planned_role": "reviewer",
+    "selected_role": "reviewer (wb-delta-reviewer, Sonnet high; small bounded VT change)",
+    "reason_codes": [
+      "review_delta"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-overprint-01.md"
+    ]
+  },
+  "required_behavior": [
+    "Review `git diff dab5761 -- src` (vt_g1/screen.py _resize_screen used by resize and _leave_alternate; ui/product/model.py _relayout scroll-offset preservation) and the new tests tests/terminal/test_vt_resize_shrink.py, tests/ui/test_product_host_overprint.py against result-p27-overprint-01.md. Check: shrink semantics match tmux (rows below cursor first, then top rows into history, cursor moved), history ordering/limits, alternate screen (no history), margins reset, grow/column changes unchanged, interplay with existing history/scroll view, direct-scroll, OSC 52 / DCS filter untouched; the model.py offset change is correct for scrolled and live views; no regressions in resize of OMP panes. Run the two new test files and tests/ui/test_product_model*.py scroll tests."
+  ],
+  "acceptance": [
+    "Verdict pass/block, findings P1-P3 with file:line"
+  ],
+  "allowed_write_paths": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-overprint-review-01.md"
+  ],
+  "rules": "Read-only. No real provider requests; never read credential contents; temp only under /tmp; no commits; no graphify update.",
+  "result_format": "Korean reply <=6 lines."
+}

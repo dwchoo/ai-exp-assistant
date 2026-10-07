@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "integration": "V-CW-18-host-overprint",
+  "date": "2026-10-07",
+  "user_decision": "User 2026-10-07 '1번은 문제가 맞는데 2번은 간헐적인거니까 그냥 넘기자.'",
+  "invocations": [
+    "p27-overprint-01",
+    "p27-overprint-review-01"
+  ],
+  "finding": {
+    "smoke_symptom": "cd69-smoke-03 O1 / cd70-smoke-01 O3 / cd70-smoke-04 O1 were an outer-emulator artefact: the smoke driver's plain pyte 0.8.2 ignores CSI S (SU) that ncurses sends when a full pane scrolls; real tmux and SU/REP pyte render the same bytes correctly",
+    "product_defect": "pane height shrink (window shrink, divider move, unzoom) left the cursor below the screen in the pane VT model (pyte Screen.resize), so typed input went to an invisible row and the next output overwrote the prompt line; reproduced in the internal screen, SU/REP pyte and real tmux; fixed in vt_g1/screen.py _resize_screen (xterm-style shrink), model.py keeps a scrolled view's offset"
+  },
+  "verification": {
+    "agent_full_run": "ui 826, terminal 216, g2_shell 142, backend 1076 OK exit 0 (two unrelated intermittent failures passed on rerun: bash Ctrl-C timing, backend process lookup)",
+    "review": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-overprint-review-01.md (pass; 3 P3)",
+    "root": "comment wording fixed per review P3-1; new tests rerun OK"
+  },
+  "carried_polish": [
+    "review P3-2: DECSC-saved cursor y not shifted on shrink (ESC 8 after a shrink may land off by the dropped rows)",
+    "review P3-1: rows below the cursor are dropped even if they hold text (xterm-like; tmux keeps them)",
+    "smoke drivers must use tests/ui/support.rep_screen_classes() (SU/SD/REP) as the outer emulator; tests/backend/live_cw18_independent_p27w.py still uses plain pyte",
+    "grow: pyte appends blank rows instead of pulling history back (tmux does)"
+  ],
+  "files_sha256": {
+    "src/workbench/terminal/vt_g1/screen.py": "483ffccd00fba9d572a29a7e80cd8a2b1e20ca881b38a88ec6c6fefaa2cd0a59",
+    "src/workbench/ui/product/model.py": "55ab267fce8d1061e65eb2eb1c6f8f28a8a568f2247d57de0b75bd94e04d819a",
+    "tests/terminal/test_vt_resize_shrink.py": "d8c65598fe125be56a4b758739f373fd605e57300318e2698f16318dac7e11e4",
+    "tests/ui/test_product_host_overprint.py": "4d4f5013ceafaf42dd91f6f898510752a81e93d091bb20c6b919418d4403d105"
+  }
+}
