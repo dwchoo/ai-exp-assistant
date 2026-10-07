@@ -1,0 +1,123 @@
+{
+ "invocation": "p27-cd70-smoke-03",
+ "omp_version": "omp/18.7.0",
+ "date": "2026-10-07",
+ "kst_input": "17:24:18",
+ "requests": {
+  "manager_session_1": 3,
+  "worker": 4,
+  "manager_session_2": 4,
+  "total": 11,
+  "errors": 0,
+  "aborted": 0,
+  "cap": 15,
+  "pause_at": 13
+ },
+ "events": [
+  {
+   "kst": "17:23:35",
+   "t": 0,
+   "e": "driver start; omp --version omp/18.7.0"
+  },
+  {
+   "kst": "17:23:37",
+   "t": 1.8,
+   "e": "workbench start exit 0; omp isolation: ok (omp/18.7.0 evidence bridge_g3=18.2.10, isolation=18.6.1); manager/worker state ok, leaks [], warnings []"
+  },
+  {
+   "kst": "17:24:18",
+   "t": 42.3,
+   "e": "S3 prompt typed into manager pane"
+  },
+  {
+   "kst": "17:24:21",
+   "t": 46.0,
+   "e": "manager read skill://to-worker"
+  },
+  {
+   "kst": "17:24:27.0",
+   "t": 51.6,
+   "e": "manager to_worker(work, commands[1]) -> dispatched; Task 793ec2d7 created/run started; worker TASK delivered 17:24:27.16"
+  },
+  {
+   "kst": "17:24:30",
+   "t": 54.8,
+   "e": "manager text turn end ('완료 보고가 도착하면 알려드리겠습니다'); worker read skill://to-manager"
+  },
+  {
+   "kst": "17:24:31.9",
+   "t": 56.4,
+   "e": "worker terminal sleep 30; echo cd70-s3-done started (S3_terminal_running 24.1 s after input)"
+  },
+  {
+   "kst": "17:24:37",
+   "t": 61.9,
+   "e": "'/exit' typed into manager pane; pane exited(0) 1.8 s later; statusline backend: degraded, bridge manager=down worker=ok"
+  },
+  {
+   "kst": "17:24:47.1",
+   "t": 71.6,
+   "e": "journal outbox of the first TASK delivery: unknown/BridgeTimeout (20 s; worker already processing; known cd69 O3)"
+  },
+  {
+   "kst": "17:25:02.0",
+   "t": 86.5,
+   "e": "terminal exited 0, 30.09 s; terminal_notice not_needed"
+  },
+  {
+   "kst": "17:25:03.74",
+   "t": 88.2,
+   "e": "worker to_manager(done) -> result {status:queued, waiting_for:manager_session, handoff_id 490fbd2f} (no held); journal outbox pending(waiting_for manager_session) then deferred(target_not_connected); statusline task '실행 중 · done_report_pending'"
+  },
+  {
+   "kst": "17:25:04.8",
+   "t": 89.4,
+   "e": "worker text turn end (no re-send)"
+  },
+  {
+   "kst": "17:25:10",
+   "t": 94.8,
+   "e": "Enter on exited manager pane (product UI restart) sent"
+  },
+  {
+   "kst": "17:25:11.25-11.29",
+   "t": 95.6,
+   "e": "new manager session 01a11577 registered; backlog report created+submitted (outbox attempts 5) and injected as user message kind=report with commands_run appendix; Task closed done; statusline '종료(완료)', backend: ready"
+  },
+  {
+   "kst": "17:25:12.1",
+   "t": 96.4,
+   "e": "manager_recovery notice queued -> deferred (manager turn in progress)"
+  },
+  {
+   "kst": "17:25:16.63",
+   "t": 101.3,
+   "e": "report outbox delivered(omp_processed); manager answered the report; notice sent 17:25:16.64 (reports_resent 1, reports_unknown 0)"
+  },
+  {
+   "kst": "17:25:19.6",
+   "t": 104.2,
+   "e": "manager read skill://workbench-recovery"
+  },
+  {
+   "kst": "17:25:22.8",
+   "t": 107.4,
+   "e": "manager workbench_status(task_id): task closed/done, commands_run exit 0 30.09 s, reports [], watchdog null"
+  },
+  {
+   "kst": "17:25:25.98",
+   "t": 110.7,
+   "e": "manager final answer (Korean): 복구 확인, 재실행 없음, stdout cd70-s3-done, 종료 코드 0"
+  },
+  {
+   "kst": "17:25:59",
+   "t": 143.4,
+   "e": "host follow-up echo CD70_S3_FOLLOWUP_$((6*7)) -> CD70_S3_FOLLOWUP_42, prompt '$ ' restored, no overprint"
+  },
+  {
+   "kst": "17:26:02",
+   "t": 147.2,
+   "e": "shutdown exit 0 verified true, residue 0, temp dir removed"
+  }
+ ]
+}

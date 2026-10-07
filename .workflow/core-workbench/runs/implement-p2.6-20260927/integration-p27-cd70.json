@@ -18,7 +18,8 @@
     "p27-cd70-smoke-01",
     "p27-cd70-smoke-02",
     "p27-cd70-fix-03",
-    "p27-cd70-review-03"
+    "p27-cd70-review-03",
+    "p27-cd70-smoke-03"
   ],
   "root_adjudications": [
     ".workflow/core-workbench/runs/implement-p2.6-20260927/assignment-p27-cd70-02.json",
@@ -48,7 +49,9 @@
     "review-03 P3-2: report waiting for an absent manager has no user-visible indicator or limit; Task stays done_report_pending",
     "smoke-02: manager without explicit 'worker에게' may run commands with its own bash (by C-D68 design)",
     "smoke-01 O1: a manager told to restart mid-command re-ran the command to create a window (scenario artifact; non-idempotent commands risk)",
-    "smoke-01 O3 / user observation: host prompt sometimes not redrawn after a follow-up command (not reproduced in smoke-02)"
+    "smoke-01 O3 / user observation: host prompt sometimes not redrawn after a follow-up command (not reproduced in smoke-02)",
+    "smoke-03: manager answered twice around recovery (an English one-liner after the report, then Korean after manager_recovery)",
+    "first Task delivery recorded unknown/BridgeTimeout although delivered (recurring; see BridgeTimeout record noise)"
   ],
   "files_sha256": {
     "omp_bridge/g3/bridge.ts": "835158403d182f3835967b5495319c73d356fe2479a443387fe64c9f0e4da0e8",
@@ -96,7 +99,8 @@
     "smoke-02": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd70-smoke-02.md (S3 manager_recovery auto-injected, D1 found: report while manager gone was held and lost; S1 status_check at 61 s, worker reacted; 2nd check/worker_stalled not reached; 26/30 requests)",
     "fix-03": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd70-fix-03.md (D1 fixed: unbound queue for done/blocked reports to next manager session; all suites green)",
     "review-03": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd70-review-03.md (pass; 2 P3)",
-    "pending": "real-model re-smoke of S3 after fix-03 (needs user approval)"
+    "pending": "none required; not exercised live: S1 2nd check + worker_stalled, watchdog quiet while a report waits for the manager (offline tests cover both)",
+    "smoke-03": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd70-smoke-03.md (S3 re-smoke after fix-03: D1 fixed; worker report queued while manager gone, delivered once to the new session, reports_resent 1, manager answered without cancel/re-run; 11/15 requests; OMP 18.7.0 isolation ok)"
   },
   "files_sha256_fix03": {
     "omp_bridge/skills/to-manager/SKILL.md": "bbeba20792ce460c4ff0bfaf2d1020c1e267d02440cf979e06f4e5b6ecafcd45",

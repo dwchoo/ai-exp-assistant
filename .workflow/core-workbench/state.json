@@ -425,7 +425,7 @@
   "implementation_p27": {
     "run_record": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
     "approved_bundle_sha256": "91fe05dc882d8c00ab0eb28c30e2b6cabcbfacb0f0fee3f0eaeecfaff5b7d3e8",
-    "status": "C-D70 integrated; real-model smokes: S2 pass, S3 recovery notice pass + D1 fixed (fix-03, review-03 pass), S1 first check pass; next: optional S3 re-smoke on user approval, UR-USABILITY retry by the user, CW-19, CW-16 (polish lists in integration-p27-cd68.json, integration-p27-cd70.json)",
+    "status": "C-D70 integrated and verified with real-model smokes (S2 restart_worker, S3 manager recovery incl. D1 fix re-smoke, S1 first status_check); next: UR-USABILITY retry by the user, CW-19, CW-16 (polish lists in integration-p27-cd68.json, integration-p27-cd70.json)",
     "resumed_from": ".codex/handoffs/2026-09-29-core-workbench-p27-cw17/HANDOFF.md",
     "units": {
       "V-CW-17-p2.7": {

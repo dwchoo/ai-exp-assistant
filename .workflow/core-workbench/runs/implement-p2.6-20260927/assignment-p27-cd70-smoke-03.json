@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cd70-smoke-03",
+  "ticket_id": "CW-18 C-D70 real-model re-smoke of S3 after fix-03 (D1)",
+  "role": "test_designer",
+  "unit": "V-CW-18-smoke",
+  "approved_bundle_digest": "25936cde805e6f2163ad6fc487be61f10d3c5e5e8da57e9ca30d2e0274fa820a",
+  "candidate_commit": "1dcc538",
+  "routing": {
+    "planned_role": "test_designer",
+    "selected_role": "test_designer (general-purpose, Sonnet high; user 2026-10-06 routing: established smokes on Sonnet)",
+    "reason_codes": [
+      "live_real_model"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/assignment-p27-cd68-smoke-01.json",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/assignment-p27-cd69-smoke-03.json",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd69-smoke-03.md",
+      "docs/features/core-workbench/DECISIONS.md#C-D70"
+    ]
+  },
+  "user_authorization": "User 2026-10-07 'S3 재시험 진행해' after Root proposed ~12-15 requests.",
+  "setup": "Exactly as p27-cd68-smoke-01 / p27-cd69-smoke-03 (new /tmp data dir and tiny git project, `python -m workbench start --data-dir <tmp> --no-attach` from the project dir, ui_v1 client; attach the real product UI in a PTY at least once for status-line text screenshots). Record `omp --version` and the start isolation-check result for both roles (ok/leaks/warnings) — this is the OMP 18.7.0 isolation evidence.",
+  "scenario": [
+    "S3: type into the manager pane: 'worker에게 터미널에서 `sleep 30; echo cd70-s3-done` 를 실행하게 하고 결과를 알려줘'. When the worker's command is running, exit the manager OMP (/exit as in smoke-02). Wait until the worker reports done while the manager is gone: record the worker's to_manager result (expected status queued, waiting_for manager_session, no held). Then restart the exited manager pane via the product UI (as smoke-02). Record: manager_recovery notice (reports_resent expected 1), the worker report delivered to the new manager session exactly once (kind report, with the cd70-s3-done result / commands_run appendix), workbench_status if called, the manager's answer to the user (expected: the result, no cancel before the report, no re-run). Timings.",
+    "After: host shell usable (follow-up command works); note prompt redraw/overprint."
+  ],
+  "limits": [
+    "Hard cap 15 provider requests total across both roles, wall clock 15 min; fail-closed counter as in smoke-02 (re-resolve session files across the manager restart; pause automation if the counter errors or stalls >2 s); pause at 13. If the cap would cut the scenario, stop, shut down (verified) and report.",
+    "Never touch ~/wb-urux-sandbox or the user's running Workbench/OMP processes; kill only PIDs you started; never read credential contents or other processes' environ (agent.db symlink: metadata only); never print tokens; no commits; no graphify update; remove temp dirs afterwards (keep short logs/timeline under the run dir without secrets)."
+  ],
+  "result_format": "Write .workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd70-smoke-03.md (+ -timeline.json), Korean: timeline, notices/tool calls, request counts, D1 verdict (fixed / not), other defects with evidence. Reply in Korean <=8 lines.",
+  "prior": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd70-smoke-02.md",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd70-fix-03.md"
+  ]
+}
