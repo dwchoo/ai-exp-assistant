@@ -321,7 +321,8 @@ class P27FixTests(unittest.TestCase):
                 model.on_result(ui_v1.result(rid, False, reason=ui_v1.Reason.HANDOFF_HELD, detail="jobs",
                                              shell={"held_reasons": reasons}))
                 footer = model.footer()
-                self.assertIn("manual_jobs" if "manual_jobs" in reasons else reasons[0], footer)
+                # p27-cd70-ui-01: job reasons are shown in plain Korean (not as raw codes); the raw-code cases keep theirs
+                self.assertIn("사용자 job" if "manual_jobs" in reasons else "상태를 확인할 수 없음", footer)
                 for needle in ("인수", "wb-handoff"):
                     self.assertIn(needle, footer)
                 # the full recovery order (C-D58): take over, clear jobs, wb-handoff, give back, take over again

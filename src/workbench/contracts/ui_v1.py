@@ -111,7 +111,11 @@ Recovery (C-D70; additive)
   is null or ``{count, reason, since}`` while worker reports to the manager
   have waited at least 30 s because the manager OMP's composer is not empty
   (``reason`` ``manager_editor_not_empty``; ``since`` is the wall-clock time
-  the wait began); it is null again once they were delivered. ``watch`` is null
+  the wait began), or, at once, while a report is queued with no manager OMP
+  connected (``reason`` ``manager_session_not_connected``; it goes to the next
+  manager session; with both kinds waiting this reason is reported). A client
+  that does not know a ``reason`` treats it as the editor wait. It is null
+  again once the reports were delivered. ``watch`` is null
   or ``{task_id, checks_sent, max_checks, stalled_notified, idle_since}`` for
   the open work Task the Workbench watchdog checks.
 - A manager/worker pane's ``restart`` (and the snapshot record of restarts)

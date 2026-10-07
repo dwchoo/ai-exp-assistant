@@ -109,6 +109,10 @@ SUMMARY_MIN_COLS = 8
 WORKER_TEXT = {"idle": "대기", "busy": "작업 중"}
 # C-D70 (2): a worker report waits because the manager's composer is not empty.
 REPORT_WAIT_TEXT = "worker 보고 대기 중: manager 입력창을 비우면 전달됩니다"
+# C-D70 fix-03: a worker report queued while no manager OMP session is connected (delivered to the next session)
+REPORT_WAIT_NO_MANAGER_TEXT = "worker 보고 대기 중: manager OMP가 꺼져 있음 (다시 시작하면 전달)"
+REPORT_WAIT_REASON_TEXT = {"manager_editor_not_empty": REPORT_WAIT_TEXT,
+                           "manager_session_not_connected": REPORT_WAIT_NO_MANAGER_TEXT}
 # C-D70 (3): how long the status line shows a worker restart the manager asked for.
 MANAGER_RESTART_SHOWN_SECONDS = 120
 REASON_MAX_COLS = 40
@@ -121,6 +125,13 @@ TASK_HELD_TEXT = {"host_terminal_busy": "host terminal 사용 중",
                   "host_terminal_busy:worker_terminal_command": "worker 명령 실행 중 (끝나면 시작)"}
 # host-shell held reasons that mean user jobs (or a state left unknown by them) keep the handoff / automation held
 JOB_HELD_REASONS = ("manual_jobs", "unknown_or_manual_residue")
+# held reasons in a refusal notice, in plain Korean (unknown codes are shown as they are)
+HELD_REASON_TEXT = {**TASK_HELD_TEXT,
+                    "host_terminal_busy:worker_terminal_command": "worker 명령 실행 중",
+                    "manual_jobs": "host shell에 사용자 job이 남아 있음",
+                    "unknown_or_manual_residue": "host shell 상태를 확인할 수 없음",
+                    "paused": "자동화 일시정지 중",
+                    "target_not_connected": "상대 OMP가 연결되지 않음"}
 JOB_HELD_HINT = ("해제: prefix t,c로 인수 → jobs 종료(fg/kill) → host shell에서 wb-handoff 다시 실행 → "
                  "prefix h로 manager에 반환 → prefix t,c로 다시 인수(빈 prompt)")
 JOB_HELD_TASK_NOTE = "jobs 정리: prefix t,c 인수 → wb-handoff → prefix h → prefix t,c 재인수"
@@ -797,7 +808,7 @@ class ProductModel:
         text = f"{what} 거부{target}: {header.get('reason')}: {header.get('detail') or ''}".rstrip(": ")
         held = self._held_reasons(header)
         if held:
-            text += f" (held: {', '.join(held)})"
+            text += f" (보류: {', '.join(HELD_REASON_TEXT.get(r) or r for r in held)})"
             if any(r in JOB_HELD_REASONS for r in held):
                 text += f" · {JOB_HELD_HINT}"
         self.notice = text
@@ -2001,7 +2012,9 @@ class ProductModel:
         if isinstance(wait, dict):
             count = wait.get("count")
             more = f" ({count}건)" if isinstance(count, int) and not isinstance(count, bool) and count > 1 else ""
-            parts.append(REPORT_WAIT_TEXT + more)
+            reason = wait.get("reason")
+            text = REPORT_WAIT_REASON_TEXT.get(reason) if isinstance(reason, str) else None
+            parts.append((text or REPORT_WAIT_TEXT) + more)
         info = self.state.get("panes", {}).get(PaneId.WORKER_OMP.value)
         restart = info.get("restart") if isinstance(info, dict) else None
         if isinstance(restart, dict) and restart.get("requester") == "manager" and restart.get("state") == "restarted":

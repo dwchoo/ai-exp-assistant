@@ -29,7 +29,10 @@ reads in-memory state, except one bridge ``probe`` of the worker at most every
   before any acceptance -> one ``report_delivery_unknown`` notice to the
   manager (Task id, message id, report kind; never the content). A report
   deferred longer than ``EDITOR_WAIT`` (30 s) because the manager's composer
-  is not empty is shown in the UI status line (``report_wait``).
+  is not empty is shown in the UI status line (``report_wait``), and so is a
+  report queued while no manager OMP is connected (``waiting_for:
+  manager_session``; reason ``manager_session_not_connected``, shown at once,
+  cleared when it is delivered).
 - Notices are sent once each: a deferred, paused or not connected attempt is
   retried with the same ``notice_id`` (the bridge refuses a second copy); a
   delivered, unknown or rejected one is never sent again. Every outcome is
@@ -265,15 +268,22 @@ class Watchdog:
     def report_wait(self) -> dict[str, Any] | None:
         """Worker reports deferred at least ``editor_wait`` because the manager's composer is not empty."""
         now, wall = self._clock(), self._wall()
-        waiting = []
+        waiting, no_manager = [], False
         for entry in self._reports():
+            if entry.get("state") not in ("pending", "delivering") or entry.get("submitted"):
+                continue
             since = entry.get("editor_since")
-            if (entry.get("state") in ("pending", "delivering") and not entry.get("submitted")
-                    and isinstance(since, (int, float)) and now - since >= self.editor_wait):
+            queued = entry.get("waiting_since")
+            if entry.get("waiting_for") == "manager_session" and isinstance(queued, (int, float)):
+                # p27-cd70-ui-01: queued while no manager OMP is connected; shown at once (the OMP is gone)
+                waiting.append(queued)
+                no_manager = True
+            elif isinstance(since, (int, float)) and now - since >= self.editor_wait:
                 waiting.append(since)
         if not waiting:
             return None
-        return {"count": len(waiting), "reason": "manager_editor_not_empty", "since": _wall(now, min(waiting), wall)}
+        reason = "manager_session_not_connected" if no_manager else "manager_editor_not_empty"
+        return {"count": len(waiting), "reason": reason, "since": _wall(now, min(waiting), wall)}
 
     # -- the tick ---------------------------------------------------------------------------
     def tick(self) -> None:

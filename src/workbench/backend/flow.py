@@ -716,6 +716,7 @@ class _OutboxEntry:
     blockers: tuple[str, ...] = ()  # C-D70 (2): why the last deferral happened (target OMP state)
     editor_since: float | None = None  # monotonic: deferred since then because the target's composer is not empty
     requeued: int = 0  # C-D70 (5): times addressed again to a new target session (never submitted)
+    queued_at: float = field(default_factory=time.monotonic)  # monotonic: when it was queued (ui_v1 report_wait since)
 
     def snapshot(self) -> dict[str, Any]:
         return {"key": _key_dict(self.key), "handoff_id": self.handoff_id,
@@ -885,7 +886,17 @@ class HandoffService:
                      "report_kind": entry.outbound.payload.get("kind") or entry.outbound.payload.get("notice"),
                      "text": entry.outbound.payload.get("message"), "submitted": entry.submitted,
                      "blockers": list(entry.blockers), "editor_since": entry.editor_since,
-                     "requeued": entry.requeued} for entry in entries]
+                     "requeued": entry.requeued,
+                     # p27-cd70-ui-01: waiting for a manager OMP session to register (no message created yet)
+                     "waiting_for": WAITING_FOR_MANAGER if self._waits_for_manager(entry) else None,
+                     "waiting_since": entry.queued_at if self._waits_for_manager(entry) else None}
+                    for entry in entries]
+
+    @staticmethod
+    def _waits_for_manager(entry: _OutboxEntry) -> bool:
+        """Under the outbox lock: never created for a session and the last attempt found no manager connected."""
+        return (entry.state == "pending" and entry.message is None and entry.target is None
+                and not entry.submitted and not entry.withdrawn and entry.reason == "target_not_connected")
 
     def _requeue_eligible(self, entry: _OutboxEntry) -> bool:
         """Under the outbox lock: a worker->manager message never submitted may follow a new manager session."""
