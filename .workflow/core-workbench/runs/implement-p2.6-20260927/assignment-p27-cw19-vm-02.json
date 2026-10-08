@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw19-vm-02",
+  "ticket_id": "CW-19 L-CW19-REBOOT re-run on the corrected candidate",
+  "role": "test_designer",
+  "unit": "V-CW-19",
+  "candidate": "03d6350f53eddcf30be77ca1b6a90179cc2eee43a57e3d5208ff0e80ca393891",
+  "routing": {
+    "planned_role": "test_designer",
+    "selected_role": "test_designer (general-purpose Sonnet high; established VM procedure re-run)",
+    "reason_codes": [
+      "reboot_runtime_rerun"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw19-vm-01.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw19-vm-01-log.json"
+    ]
+  },
+  "required_behavior": [
+    "Repeat the procedure of result-p27-cw19-vm-01.md (same driver/steps; see -log.json) on the current working tree: rsync to the guest, manifest match, two guest reboots, held-before-confirm matrix (70 s, zero notices/deliveries), confirm-boot rc semantics, dispatch after confirm. Additionally check the fixes: VM F1 (no backend_restarted for a Task cancelled before confirm; content built at send time) and F2 (confirmation wait text visible first on the status line at 160 columns). Shut the VM down at the end; keep its disk files."
+  ],
+  "allowed_write_paths": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw19-vm-02.md",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw19-vm-02-log.json"
+  ],
+  "rules": "No model requests (do not type prompts into OMP); only reboot the guest VM, never the host. Never read credential stores/contents or other processes' environ; never print tokens; never edit ~/.omp, ~/.agents, ~/.claude, ~/.codex or user configs; never touch the user's tmux (default socket), other claude-swarm sockets, ~/wb-urux-sandbox or processes you did not start; kill only PIDs you started; no pkill; temp only under /tmp; no commits; no graphify update.",
+  "result_format": "Korean reply <=8 lines."
+}

@@ -1,0 +1,109 @@
+{
+  "schema_version": 1,
+  "integration": "V-CW-19 (+ V-polish-final tests)",
+  "date": "2026-10-08",
+  "decision": "C-D71",
+  "approved_bundle_digest": "cd3e3c9d143ef4d00f806288bccba15ecbc5d76bf7d8c6f1547672cbd31e812c",
+  "candidate": "93fb44815693d8e78c104192371ce3f77c95785585f979c94fa88f320cfe9394",
+  "snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-cw19-final.json",
+  "invocations": [
+    "p27-cw19-design-01",
+    "p27-cw19-01",
+    "p27-cw19-test-01",
+    "p27-cw19-vm-01",
+    "p27-cw19-review-01",
+    "p27-cw19-fix-01",
+    "p27-cw19-review-02",
+    "p27-cw19-vm-02",
+    "p27-cw19-fix-02",
+    "p27-flaky-01"
+  ],
+  "gate_items": {
+    "L-CW19-RESTART": {
+      "status": "passed",
+      "evidence": [
+        ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw19-test-01.md",
+        ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw19-test-01-restart.json"
+      ],
+      "note": "56/56 on candidate f7091db...; corrections after it covered by unit/fake-OMP tests and the review-02 pass items; CW-16 X2 re-runs it on C16"
+    },
+    "L-CW19-REBOOT": {
+      "status": "passed",
+      "evidence": [
+        ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw19-vm-02.md",
+        ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw19-vm-02-log.json"
+      ],
+      "candidate": "03d6350f... (fix-01); fix-02 changed only automation pause-store retry, queued wording and survivor re-pin (not the reboot path); CW-16 X5 re-runs on C16"
+    }
+  },
+  "reviews": {
+    "review-01": "block (2 P2, 5 P3) -> fix-01",
+    "review-02": "block (1 P2, 2 P3) -> fix-02",
+    "fix-02": "Root-reviewed (3 targeted changes, own tests red->green)"
+  },
+  "root_full_run": {
+    "summary": ".workflow/core-workbench/runs/implement-p2.6-20260927/cw19-final-suite-logs/summary.txt",
+    "notes": [
+      "gates/g3_omp 1 error + integration 3 failures: OMP 18.2.10 pins vs installed 18.8.0 (C-D72 (2): handled in CW-16)",
+      "ui 1 failure test_product_mux_independent_p27n drag test: passes 3/3 alone (intermittent; attribute in CW-16 B4)",
+      "policy/harness exit 5 = no top-level tests (sub-suites run elsewhere)"
+    ]
+  },
+  "carried": [
+    "project 512 MiB raw log cap has no rotation: later run logs are not stored once full",
+    "worker terminal no tool result for ~45 s while an unaccepted Task is open or right after cancel (vm-01/02 with fake OMP; investigate in CW-16 F-scenarios)",
+    "hold-lift ordering: a message queued within 0.5 s after a hold lifts can overtake held ones (pre-existing _defer backoff)",
+    "to-worker skill at 10994/11000 chars"
+  ],
+  "files_sha256": {
+    "omp_bridge/g3/bridge.ts": "96542352e564c39a8c1da7428581ed6c7a7094d944a46953a43067a8eb88c175",
+    "omp_bridge/skills/to-manager/SKILL.md": "1a58b068c9e69ab344466cbc7b52303f24167655c8dc7fa14f61aac836b19037",
+    "omp_bridge/skills/to-worker/SKILL.md": "429ed8ae4ee8aadcec99845ff2ee78a2e0848f0e9e41244a8c624a334396cc87",
+    "omp_bridge/skills/workbench-recovery/SKILL.md": "0c90c0cce7bf02ae72f979e93add822fc05da5f002f485dc7b54bc416ed7a012",
+    "src/workbench/app/recovery.py": "a72a6f79cd706cda13f23f563f44f0abdeb74831a49a32180becb58721bb148a",
+    "src/workbench/backend/automation.py": "d5d4985de3d5b42b0f6c4ab97a25550ed87f1e13a64826f775be174589c7cb74",
+    "src/workbench/backend/boot.py": "780bb525569a1643db89e776791c22e420aae311b08873ef22c667b8d644460d",
+    "src/workbench/backend/cli.py": "fcf06c43bf0458acaabca2ff67c941c009293107beb4db5b535fd96f4f3073e1",
+    "src/workbench/backend/flow.py": "b9232e8772978f232e06b070b6a4124583af94cfbb90a80b59d66d0efd1b26d3",
+    "src/workbench/backend/flow_recovery.py": "7a8dd4290b8e4d7b04939ca46e023a6037d09e648d39c26a6001c88a29e87824",
+    "src/workbench/backend/flow_tasks.py": "834aa8659bfe19ea59eb588cadbeff1b109965865094e6758069f9485d3c3499",
+    "src/workbench/backend/flow_terminal.py": "695f4d26704896c167805c3d4f7e931683477af8db41f1e37e59bf89019ef87c",
+    "src/workbench/backend/service.py": "a519df985cbc1fe0cc5d1b3d7986ae66e9421da0ebb19339ca5facfe3a2a951a",
+    "src/workbench/contracts/ui_v1.py": "0b4f2acb0ef6ce523787298baf387662fef6859496e71d0cd2a1c02aa818d4ab",
+    "src/workbench/ipc/bridge_g3/mailbox.py": "2b05c71949b47331789bd9560674284c6e94f6e4c89b6d2f76176cceb7ca3162",
+    "src/workbench/policy/recovery_manager/port_sqlite.py": "91f8b866a43e89db0635e25aefe84e8264d1d2cd6d3a4b71c3b21da85065eb1c",
+    "src/workbench/ui/product/model.py": "f2025baf76720e738130f72002c2d44ac22912e3849d18edf430350f180f0b63",
+    "src/workbench/workflow/run.py": "4a61aecf049341b5563117ae5d3e61143c9479ef3c48083ac83d62ce9a59f3b3",
+    "tests/backend/live_cw18_independent_p27w.py": "ce9fd32fca23e95a837ec5a51ce1c97188cbaca99fa6c1d1a118378229fc36b7",
+    "tests/backend/test_cd70_restart_worker.py": "4b6bd77e19c67047fc9a907be7604381c68b1f7ee096f540ed069b1a7ec82983",
+    "tests/backend/test_recovery_e2e_independent_p27cd70.py": "f02878d5be9073af0613f47992d0b94d0dd7c18eaf27fafd836d466023761736",
+    "tests/backend/test_terminal_independent_p27cd68.py": "55494dbd2c65090cfa6e95775a64465ab0abb4ed55e04208e974c2e659af4d03",
+    "tests/bridge/bridge_cw19_independent_p27cw19.test.ts": "2cd5088dcb57533e129b950b6e411f70e68beeac2403f023a57382e103062ddc",
+    "tests/bridge/bridge_recovery_independent_p27cd70.test.ts": "a480feb4abbd93d77315d168ff299f5eec93bcbb16e3110427e411429808296b",
+    "tests/bridge/bridge_terminal_independent_p27cd68.test.ts": "a430842fb5cf8adf6558dbec3df825b9c340fe6fa778c7983ced2c96cafcb2e6",
+    "tests/bridge/cw19_bridge.test.ts": "683356c9c2fba5943fb45f633a2f88df2fead034f1b459a4b5b8300a3bd93c54",
+    "tests/bridge/handoff_tools.test.ts": "d6f5e9bd1e869adaa83d88d2483f08ea2b3fbeb3eae10fb97834be83e878b1ff",
+    "tests/bridge/test_cw18_schema_independent_p27w.py": "74326094c4171d9ea4e6efc559299bb9b68e9bd6f4d8bd7938495e2451b057ed",
+    "tests/recovery_boot/fake_omp.py": "ebede5237cab4f76016592a7b9ce2da58098f8a1a9267265813d1b8c17203d3d",
+    "tests/recovery_boot/live_restart_independent_p27cw19.py": "a8c477dd49e4bf2e14e8c8bae0cc79e01b2d5a8277f0b4646254b4392614764a",
+    "tests/recovery_boot/support.py": "f40fb64144a5e182cca50629827b473fbc3e43ba76505668811157ee322d9199",
+    "tests/recovery_boot/test_backend_restart.py": "0a888a843e76d8e2ef55e3e1ca327405cecef030a94ba561ce6f306314874536",
+    "tests/recovery_boot/test_boot_reconcile.py": "7253f3490557bc83a92480a87c46ff58731f9d4fa0986ece777833f446fb632a",
+    "tests/recovery_boot/test_cli_independent_p27cw19.py": "a35d8caffda1211e6510c3b9c4a93f2d67ca7fd424548a010a8e34683018084e",
+    "tests/recovery_boot/test_cw19_fix01.py": "50286f7cad687e7451bbcdc6f01ba15c7595e2a1ef1f9ab76303f91836033d4a",
+    "tests/recovery_boot/test_cw19_fix02.py": "086fed54e603317797a5f530bb88f2999f1a28e945059c2091889ca200b1b8fc",
+    "tests/recovery_boot/test_faults_holds.py": "c7a8766fcb4d3485c3631b57bda0e178006310272cd02ed1d1288d0aded3ad1a",
+    "tests/recovery_boot/test_faults_independent_p27cw19.py": "3ab6099f608368a5eefe3b4e07b89e6799f9e32274304360e295ea483582d751",
+    "tests/recovery_boot/test_live_restart_entrypoint.py": "8e84cc2aef019f8142f51d78008bbedad83e3154d4e7860a97e7ff51a2e1c791",
+    "tests/recovery_boot/test_reconcile_independent_p27cw19.py": "29ad0415c2795cea66be04021dfc84b57e005d4cdcc1b36575464ca3f8c1549f",
+    "tests/recovery_boot/test_recovery_port.py": "9d14a7064d0c1ff460d7c1dc6993f66a6dabc3e189209214157d1908f7ce03fc",
+    "tests/recovery_boot/test_survivor_stop.py": "852d4e9261a1f3f0abd81bdd8d930ad0a0b7e4e12e4706e96e4aefe9fbb8cfd8",
+    "tests/recovery_boot/test_survivors_holds_independent_p27cw19.py": "90c4e5831a3f5765bbbb31b4743b6bffdd06b95b18d35bdf5f6065e3ef03d4d9",
+    "tests/terminal/test_manual_input_boundary_independent.py": "9eb27e7010cba6787ef8fa242f686683bdbc962c9bbcbbc3c6bde3a65e745313",
+    "tests/terminal/test_manual_input_target.py": "d46eadcf4017c95cc3bcb138c83be640cc250ca0699ddd9694e817d6e868de4d",
+    "tests/ui/test_product_model_cw19.py": "c3de13636ea8339346e65bdc619f846285c88554d869452eb47baf312f73611e",
+    "tests/ui/test_product_model_independent_p27cw19.py": "3ababad3745f2f0cfbbabe43103c44b64ab2f32931e28d1122e1d05bd7ce5730",
+    "tests/workflow/test_cw19_fix01_workflow.py": "8798461a03a6cca625a21cd975de1da16dc45eea8e11d5440235353ca92a0608",
+    "tests/workflow/test_workflow_unbounded_independent_p27b.py": "7baaa9d2e726ffe9c1ec85ad5e6fb22ebadb3ce6fc015f3f7d3dc3c65cd039aa"
+  }
+}

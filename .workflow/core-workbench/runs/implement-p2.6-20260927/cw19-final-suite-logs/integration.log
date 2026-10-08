@@ -1,0 +1,32 @@
+..FFF...
+======================================================================
+FAIL: test_plain_tmux_and_herdr_outer_matrix (test_cw16_runtime_matrix.Cw16RuntimeMatrixTests.test_plain_tmux_and_herdr_outer_matrix) (outer='plain')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/dwchoo/ai-exp-assistant/tests/integration/test_cw16_runtime_matrix.py", line 254, in test_plain_tmux_and_herdr_outer_matrix
+    self.assertEqual(completed.returncode, 0, completed.stdout + completed.stderr)
+AssertionError: 1 != 0 : {"mode": "plain", "omp_version": "omp/18.8.0", "result": "unknown", "stale_herdr_context_removed": ["HERDR_BIN_PATH", "HERDR_ENV", "HERDR_PANE_ID", "HERDR_SOCKET_PATH", "HERDR_STARTUP_CWD", "HERDR_TAB_ID", "HERDR_WORKSPACE_ID"]}
+
+
+======================================================================
+FAIL: test_plain_tmux_and_herdr_outer_matrix (test_cw16_runtime_matrix.Cw16RuntimeMatrixTests.test_plain_tmux_and_herdr_outer_matrix) (outer='tmux')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/dwchoo/ai-exp-assistant/tests/integration/test_cw16_runtime_matrix.py", line 254, in test_plain_tmux_and_herdr_outer_matrix
+    self.assertEqual(completed.returncode, 0, completed.stdout + completed.stderr)
+AssertionError: 1 != 0 : {"result": "inconclusive_version", "versions": {"omp": "omp/18.8.0", "tmux": "tmux 3.4"}}
+
+
+======================================================================
+FAIL: test_plain_tmux_and_herdr_outer_matrix (test_cw16_runtime_matrix.Cw16RuntimeMatrixTests.test_plain_tmux_and_herdr_outer_matrix) (outer='herdr')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/dwchoo/ai-exp-assistant/tests/integration/test_cw16_runtime_matrix.py", line 254, in test_plain_tmux_and_herdr_outer_matrix
+    self.assertEqual(completed.returncode, 0, completed.stdout + completed.stderr)
+AssertionError: 1 != 0 : {"mode": "herdr", "omp_version": "omp/18.8.0", "result": "unknown", "stale_herdr_context_removed": ["HERDR_BIN_PATH", "HERDR_ENV", "HERDR_PANE_ID", "HERDR_SOCKET_PATH", "HERDR_STARTUP_CWD", "HERDR_TAB_ID", "HERDR_WORKSPACE_ID"]}
+
+
+----------------------------------------------------------------------
+Ran 6 tests in 5.941s
+
+FAILED (failures=3)

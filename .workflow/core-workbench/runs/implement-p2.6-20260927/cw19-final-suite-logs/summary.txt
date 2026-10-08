@@ -1,0 +1,22 @@
+backend exit=0 Ran 1095 tests in 655.614s OK (skipped=30, expected failures=1) 
+bridge exit=0 Ran 52 tests in 52.721s OK (skipped=1) 
+contracts exit=0 Ran 52 tests in 0.261s OK 
+gates/g1_vt exit=0 Ran 85 tests in 1.521s OK 
+gates/g2_shell exit=0 Ran 142 tests in 114.450s OK (skipped=6) 
+gates/g3_omp exit=1 Ran 114 tests in 26.200s FAILED (errors=1) 
+gates/g4_evidence exit=0 Ran 10 tests in 0.058s OK 
+gates/g4_lifetime exit=0 Ran 8 tests in 0.140s OK 
+gates/harness exit=5 Ran 0 tests in 0.000s 
+integration exit=1 Ran 6 tests in 5.941s FAILED (failures=3) 
+lifecycle exit=0 Ran 38 tests in 3.940s OK 
+observation exit=0 Ran 95 tests in 0.701s OK 
+policy exit=5 Ran 0 tests in 0.000s 
+recovery_boot exit=0 Ran 163 tests in 34.366s OK 
+storage exit=0 Ran 33 tests in 0.287s OK 
+tasks exit=0 Ran 22 tests in 1.810s OK 
+terminal exit=0 Ran 221 tests in 559.723s OK (skipped=2) 
+ui exit=1 Ran 836 tests in 215.616s FAILED (failures=1) 
+workflow exit=0 Ran 62 tests in 139.879s OK 
+node exit=0 # pass 48 # fail 0 
+
+[exited with code 0]

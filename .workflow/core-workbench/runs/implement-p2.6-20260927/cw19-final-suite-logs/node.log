@@ -1,0 +1,298 @@
+TAP version 13
+# Subtest: to_worker has a nullable, optional analysis level of exactly summary/detailed
+ok 1 - to_worker has a nullable, optional analysis level of exactly summary/detailed
+  ---
+  duration_ms: 17.897012
+  type: 'test'
+  ...
+# Subtest: the analysis level reaches the backend unchanged (detailed, summary and null)
+ok 2 - the analysis level reaches the backend unchanged (detailed, summary and null)
+  ---
+  duration_ms: 25.294162
+  type: 'test'
+  ...
+# Subtest: the tool texts state the executor boundary and never offer an analyst
+ok 3 - the tool texts state the executor boundary and never offer an analyst
+  ---
+  duration_ms: 14.599722
+  type: 'test'
+  ...
+# Subtest: to_worker.commands is an optional nullable list bounded like the backend
+ok 4 - to_worker.commands is an optional nullable list bounded like the backend
+  ---
+  duration_ms: 32.02924
+  type: 'test'
+  ...
+# Subtest: commands reach the backend exactly as written (multi-line, unicode, quotes, spacing, null)
+ok 5 - commands reach the backend exactly as written (multi-line, unicode, quotes, spacing, null)
+  ---
+  duration_ms: 27.903609
+  type: 'test'
+  ...
+# Subtest: the worker's terminal text names the Task refusal and the script file, not command_too_long
+ok 6 - the worker's terminal text names the Task refusal and the script file, not command_too_long
+  ---
+  duration_ms: 15.903586
+  type: 'test'
+  ...
+# Subtest: C-D71 (4): model outcome classes
+ok 7 - C-D71 (4): model outcome classes
+  ---
+  duration_ms: 2.346913
+  type: 'test'
+  ...
+# Subtest: C-D71 (1): stop_survivor for the manager only, strict arguments
+ok 8 - C-D71 (1): stop_survivor for the manager only, strict arguments
+  ---
+  duration_ms: 1.328816
+  type: 'test'
+  ...
+# Subtest: to_worker and to_manager accept a message of exactly 8192 characters and no more
+ok 9 - to_worker and to_manager accept a message of exactly 8192 characters and no more
+  ---
+  duration_ms: 40.486166
+  type: 'test'
+  ...
+# Subtest: a long procedure in to_worker reaches the backend whole
+ok 10 - a long procedure in to_worker reaches the backend whole
+  ---
+  duration_ms: 31.694804
+  type: 'test'
+  ...
+# Subtest: C-D70 (3)/(5): restart_worker and workbench_status exist for the manager only
+ok 11 - C-D70 (3)/(5): restart_worker and workbench_status exist for the manager only
+  ---
+  duration_ms: 30.247035
+  type: 'test'
+  ...
+# Subtest: C-D70 (3): restart_worker goes to the backend as a manager tool_request with the reason and returns its result
+ok 12 - C-D70 (3): restart_worker goes to the backend as a manager tool_request with the reason and returns its result
+  ---
+  duration_ms: 15.779209
+  type: 'test'
+  ...
+# Subtest: C-D70 (2): each role takes only its own Workbench notice types; a manager notice is injected once
+ok 13 - C-D70 (2): each role takes only its own Workbench notice types; a manager notice is injected once
+  ---
+  duration_ms: 104.782185
+  type: 'test'
+  ...
+# Subtest: C-D70 (2): a manager notice never disturbs the user's composer or a busy manager; it is deferred, not lost
+ok 14 - C-D70 (2): a manager notice never disturbs the user's composer or a busy manager; it is deferred, not lost
+  ---
+  duration_ms: 26.03285
+  type: 'test'
+  ...
+# Subtest: C-D68 (1)/(3): terminal exists only for the worker; the manager keeps to_worker with the manager rule
+ok 15 - C-D68 (1)/(3): terminal exists only for the worker; the manager keeps to_worker with the manager rule
+  ---
+  duration_ms: 45.432292
+  type: 'test'
+  ...
+# Subtest: C-D68 (9): the wait is fixed at 120 s; no timeout_seconds in the schema or description
+ok 16 - C-D68 (9): the wait is fixed at 120 s; no timeout_seconds in the schema or description
+  ---
+  duration_ms: 9.637657
+  type: 'test'
+  ...
+# Subtest: C-D68 (10): a command-less terminal call is answered at once, so the bridge waits only briefly for it
+ok 17 - C-D68 (10): a command-less terminal call is answered at once, so the bridge waits only briefly for it
+  ---
+  duration_ms: 16.960743
+  type: 'test'
+  ...
+# Subtest: C-D68 (8): a terminal call answered by the backend is not abandoned; an abort after the answer sends nothing
+ok 18 - C-D68 (8): a terminal call answered by the backend is not abandoned; an abort after the answer sends nothing
+  ---
+  duration_ms: 66.941924
+  type: 'test'
+  ...
+# Subtest: C-D68 (8): two aborted terminal calls each name their own call in the abandon signal
+ok 19 - C-D68 (8): two aborted terminal calls each name their own call in the abandon signal
+  ---
+  duration_ms: 29.360662
+  type: 'test'
+  ...
+# Subtest: C-D68 (8): a notice held while paused is accepted after the resume, once; a busy worker defers it
+ok 20 - C-D68 (8): a notice held while paused is accepted after the resume, once; a busy worker defers it
+  ---
+  duration_ms: 50.942187
+  type: 'test'
+  ...
+# Subtest: stop_survivor is a manager-only tool with survivor_id and reason
+ok 21 - stop_survivor is a manager-only tool with survivor_id and reason
+  ---
+  duration_ms: 3.010678
+  type: 'test'
+  ...
+# Subtest: the manager takes the backend_restarted notice
+ok 22 - the manager takes the backend_restarted notice
+  ---
+  duration_ms: 0.303076
+  type: 'test'
+  ...
+# Subtest: model outcome classes carry no text
+ok 23 - model outcome classes carry no text
+  ---
+  duration_ms: 0.391018
+  type: 'test'
+  ...
+# Subtest: manager registers only to_worker and worker only to_manager, both essential with JSON-schema parameters
+ok 24 - manager registers only to_worker and worker only to_manager, both essential with JSON-schema parameters
+  ---
+  duration_ms: 33.504037
+  type: 'test'
+  ...
+# Subtest: execute sends one tool_request frame and returns the matching tool_result immediately
+ok 25 - execute sends one tool_request frame and returns the matching tool_result immediately
+  ---
+  duration_ms: 44.597456
+  type: 'test'
+  ...
+# Subtest: OMP's injected intent field is not forwarded as a tool argument
+ok 26 - OMP's injected intent field is not forwarded as a tool argument
+  ---
+  duration_ms: 13.959668
+  type: 'test'
+  ...
+# Subtest: timeout returns outcome_unknown after 10 s and never resends
+ok 27 - timeout returns outcome_unknown after 10 s and never resends
+  ---
+  duration_ms: 10109.078564
+  type: 'test'
+  ...
+# Subtest: disconnect while waiting returns outcome_unknown and the request is not resent after reconnect
+ok 28 - disconnect while waiting returns outcome_unknown and the request is not resent after reconnect
+  ---
+  duration_ms: 222.501496
+  type: 'test'
+  ...
+# Subtest: abort while waiting returns outcome_unknown; not connected returns not_sent without a frame
+ok 29 - abort while waiting returns outcome_unknown; not connected returns not_sent without a frame
+  ---
+  duration_ms: 65.953952
+  type: 'test'
+  ...
+# Subtest: to_manager during a staged worker delivery is rejected without a frame and the stage reply stays rejected
+ok 30 - to_manager during a staged worker delivery is rejected without a frame and the stage reply stays rejected
+  ---
+  duration_ms: 51.636084
+  type: 'test'
+  ...
+# Subtest: both tools are strict-mode compatible: strict flag, closed objects, every optional field nullable
+ok 31 - both tools are strict-mode compatible: strict flag, closed objects, every optional field nullable
+  ---
+  duration_ms: 22.029577
+  type: 'test'
+  ...
+# Subtest: strict-mode placeholders (nulls, blanks, false flags) pass the registered schema and reach the backend unchanged
+ok 32 - strict-mode placeholders (nulls, blanks, false flags) pass the registered schema and reach the backend unchanged
+  ---
+  duration_ms: 19.682912
+  type: 'test'
+  ...
+# Subtest: to_worker has a nullable commands list of exact command strings
+ok 33 - to_worker has a nullable commands list of exact command strings
+  ---
+  duration_ms: 8.398267
+  type: 'test'
+  ...
+# Subtest: worker registers terminal: strict, essential, one nullable command (no wait input); manager has none
+ok 34 - worker registers terminal: strict, essential, one nullable command (no wait input); manager has none
+  ---
+  duration_ms: 14.223513
+  type: 'test'
+  ...
+# Subtest: terminal waits a fixed 120 s plus a start slack (C-D68 (9))
+ok 35 - terminal waits a fixed 120 s plus a start slack (C-D68 (9))
+  ---
+  duration_ms: 0.426268
+  type: 'test'
+  ...
+# Subtest: terminal sends one tool_request and outlives the 10 s handoff timeout
+ok 36 - terminal sends one tool_request and outlives the 10 s handoff timeout
+  ---
+  duration_ms: 10424.028916
+  type: 'test'
+  ...
+# Subtest: aborting a terminal call stops only the wait: the result says the command keeps running
+ok 37 - aborting a terminal call stops only the wait: the result says the command keeps running
+  ---
+  duration_ms: 48.278601
+  type: 'test'
+  ...
+# Subtest: worker takes a Workbench notice only when idle and unpaused, once per notice_id
+ok 38 - worker takes a Workbench notice only when idle and unpaused, once per notice_id
+  ---
+  duration_ms: 63.235487
+  type: 'test'
+  ...
+# Subtest: a subagent session never connects to the bridge and its bridge tools refuse
+ok 39 - a subagent session never connects to the bridge and its bridge tools refuse
+  ---
+  duration_ms: 146.018493
+  type: 'test'
+  ...
+# Subtest: manager recovery tools: schemas, one tool_request each, worker and subagents never get them
+ok 40 - manager recovery tools: schemas, one tool_request each, worker and subagents never get them
+  ---
+  duration_ms: 105.742625
+  type: 'test'
+  ...
+# Subtest: Workbench notice types are per role: manager recovery notices, worker status_check
+ok 41 - Workbench notice types are per role: manager recovery notices, worker status_check
+  ---
+  duration_ms: 102.991555
+  type: 'test'
+  ...
+# Subtest: fixtures are the captured OMP 18.4.5 shapes and contain no credentials
+ok 42 - fixtures are the captured OMP 18.4.5 shapes and contain no credentials
+  ---
+  duration_ms: 2.880636
+  type: 'test'
+  ...
+# Subtest: a worker execute delivery is processed with its response in every captured payload shape
+ok 43 - a worker execute delivery is processed with its response in every captured payload shape
+  ---
+  duration_ms: 58.537873
+  type: 'test'
+  ...
+# Subtest: a manager report delivery is processed in every captured payload shape
+ok 44 - a manager report delivery is processed in every captured payload shape
+  ---
+  duration_ms: 55.308581
+  type: 'test'
+  ...
+# Subtest: Responses identity stays exact: history, other attempts, other roles and item kinds never match
+ok 45 - Responses identity stays exact: history, other attempts, other roles and item kinds never match
+  ---
+  duration_ms: 187.471698
+  type: 'test'
+  ...
+# Subtest: without the response hook only a clean assistant message for the matched request is response evidence
+ok 46 - without the response hook only a clean assistant message for the matched request is response evidence
+  ---
+  duration_ms: 87.901141
+  type: 'test'
+  ...
+# Subtest: worker response: thinking items are ignored, the marker text alone is judged (C-D67, F2 reasons)
+ok 47 - worker response: thinking items are ignored, the marker text alone is judged (C-D67, F2 reasons)
+  ---
+  duration_ms: 258.800603
+  type: 'test'
+  ...
+# Subtest: worker response: identity mismatch, a second message and provider errors keep their own reason
+ok 48 - worker response: identity mismatch, a second message and provider errors keep their own reason
+  ---
+  duration_ms: 69.07348
+  type: 'test'
+  ...
+1..48
+# tests 48
+# suites 0
+# pass 48
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 21894.508675

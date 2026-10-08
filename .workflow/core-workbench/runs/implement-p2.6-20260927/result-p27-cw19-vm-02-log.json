@@ -1,0 +1,2899 @@
+{
+ "schema_version": 1,
+ "invocation": "p27-cw19-vm-02",
+ "item": "L-CW19-REBOOT",
+ "candidate": "03d6350f53eddcf30be77ca1b6a90179cc2eee43a57e3d5208ff0e80ca393891",
+ "vm": {
+  "name": "wb-reboot",
+  "dir": "~/.local/share/wb-vm/wb-reboot",
+  "qemu_pid": 728713,
+  "started": "2026-10-08T13:24:4x+09:00",
+  "stopped_by": "stop.sh (rc 0, guest poweroff)",
+  "base_image_sha256_prefix": "6a81c37564db9b1e (= SHA256SUMS noble-server-cloudimg-amd64.img)",
+  "disk_files_kept": true
+ },
+ "manifest": {
+  "scope": "src/**, omp_bridge/**, tests/recovery_boot/** (no __pycache__)",
+  "host": {
+   "count": 88,
+   "aggregate": "a4aebd9c3c69d5e5ee440d1b0632b460628df2959adcf89bc277b78348eebcad"
+  },
+  "guest": {
+   "count": 88,
+   "aggregate": "a4aebd9c3c69d5e5ee440d1b0632b460628df2959adcf89bc277b78348eebcad"
+  },
+  "equal": true,
+  "candidate_snapshot_match": "all 88 host files equal p27-snapshot-cw19-fix01.json sha256",
+  "host_after_run_aggregate": "a4aebd9c3c69d5e5ee440d1b0632b460628df2959adcf89bc277b78348eebcad (unchanged)",
+  "files": {
+   "src/workbench/__init__.py": "80218cee4cdaf244d98d749c4baf8214df7ff96ce74b460d0df99ef4251d278c",
+   "src/workbench/__main__.py": "1f64317eb45cd190898598a81a48045884b8324e5f16c5a16c7f16e7c907ad51",
+   "src/workbench/app/__init__.py": "61d58c78f87cf032242a76e59d8291dfdfcafc406d5d1fb68a559ec5de13e8e8",
+   "src/workbench/app/lifecycle.py": "6d8b158ae1579875705c35acce9a4252f8998f2526691d2be04a14b59e9d6e7f",
+   "src/workbench/app/production.py": "e07d39f89622a411d5567a269b5b59737b429aff79ec8228d93fabfa9338e788",
+   "src/workbench/app/recovery.py": "ca3d63eafc0cf27f31df1771a764888d2f592003a8225888d520f565963edaff",
+   "src/workbench/backend/__init__.py": "10e55518cc044993d472b5a4f14bc70a136ffc9c7902ada2f7a4a95244ff074a",
+   "src/workbench/backend/automation.py": "7a9e1e6af673eb8c4bb82f95e9085738e1a872ef39e4ab9170bd1efe9a48ff9a",
+   "src/workbench/backend/boot.py": "780bb525569a1643db89e776791c22e420aae311b08873ef22c667b8d644460d",
+   "src/workbench/backend/cli.py": "fcf06c43bf0458acaabca2ff67c941c009293107beb4db5b535fd96f4f3073e1",
+   "src/workbench/backend/client.py": "63494a3a4006d2be7a868ff38576d9e93fcb2a5174c23ba42203ac1dff28e8d3",
+   "src/workbench/backend/flow.py": "04f8aae79515f50002f65483163ad9c3f377b1cf771fb5d26a3a8730a2a22640",
+   "src/workbench/backend/flow_recovery.py": "7a8dd4290b8e4d7b04939ca46e023a6037d09e648d39c26a6001c88a29e87824",
+   "src/workbench/backend/flow_tasks.py": "834aa8659bfe19ea59eb588cadbeff1b109965865094e6758069f9485d3c3499",
+   "src/workbench/backend/flow_terminal.py": "695f4d26704896c167805c3d4f7e931683477af8db41f1e37e59bf89019ef87c",
+   "src/workbench/backend/launcher.py": "146486cf513916749236c9de0419ef3179a4f57b7762f870a3c9c6ff6bd8cbf1",
+   "src/workbench/backend/omp_home.py": "d0ee02a87e041aa578c9793a6cfa84f8d493e28a27efb727fca56898bcbb0395",
+   "src/workbench/backend/panes.py": "5e5f95da82bbcad9dea5ca8b6399e1304417186df356b59bd3a87339286442f4",
+   "src/workbench/backend/paths.py": "a5f4bf91225b35d46fe601bb49e6a6a6cce21e1e5fa9c3a9db8599c0e217c680",
+   "src/workbench/backend/service.py": "a519df985cbc1fe0cc5d1b3d7986ae66e9421da0ebb19339ca5facfe3a2a951a",
+   "src/workbench/backend/ui_server.py": "f7db6b18b86f6846a3f9022ce236013382d58db4f7069b4fc75bf0304da6223c",
+   "src/workbench/contracts/__init__.py": "9c4103c852dd774550dee07b59248f57340592060c130df00a27b3f3a2d50a73",
+   "src/workbench/contracts/ports_v2.py": "e2cbb14975e56b22f55f9a3f5ca50676939c88009134f3de436c7f80c2235bbf",
+   "src/workbench/contracts/ui_v1.py": "0b4f2acb0ef6ce523787298baf387662fef6859496e71d0cd2a1c02aa818d4ab",
+   "src/workbench/contracts/v1.py": "a8c5b9b12d408e9d22edc5b320634ec5b06b6ab70d15d7bc109cebf042796910",
+   "src/workbench/ipc/bridge_g3/mailbox.py": "2b05c71949b47331789bd9560674284c6e94f6e4c89b6d2f76176cceb7ca3162",
+   "src/workbench/ipc/bridge_g3/protocol.py": "2c8fc96efb86dc0be2c79f6f1f5f711fba27d3bfa0359e23d8d0d97cec9e0678",
+   "src/workbench/observation/worker_review.py": "5a369ed083d5741104da66baa1539810d1cafad6cb62b3a7b966978cf9a90faa",
+   "src/workbench/observation/workflow_binding.py": "cbd5b965fd40bb564cc9d846ba2b5781bc94f1d0ba5602f98622863db3f8b4aa",
+   "src/workbench/policy/pause_automation/__init__.py": "85c29285d26edc18262548dc8b6ba977549318df3115f95a177e5b57774fe151",
+   "src/workbench/policy/pause_automation/controller.py": "693a1afb366053655314a6abd7a97a0b167ec5abaf093f8d249f5c09fdbfb765",
+   "src/workbench/policy/pause_automation/journal.py": "7532f5bf61a7b5fe1b57d7afbbded91fe55c8da3dbe53e359e0f6b5fc2fb1764",
+   "src/workbench/policy/recovery_manager/__init__.py": "daa02b785bf3405f7a08784cdec40d734257fe4f1719360c27142ed11d8cc91e",
+   "src/workbench/policy/recovery_manager/policy.py": "0dad5e088409b5d99b6032b115277eb30a2fc18f99771db728b7bd1302b77b1f",
+   "src/workbench/policy/recovery_manager/port_sqlite.py": "91f8b866a43e89db0635e25aefe84e8264d1d2cd6d3a4b71c3b21da85065eb1c",
+   "src/workbench/runtime/g4.py": "5b9cc2a48a672dc6da0f799f6204689e275ded5cc6af425064dc59df56dbc440",
+   "src/workbench/runtime/process_evidence.py": "0e550489ac9c6894099b17fcc3e3b2737800f760303702ae12846b0547b0737b",
+   "src/workbench/storage/log_raw/__init__.py": "2c336e18a75ffc5dea247054094766f9e0aea9512c0ebbe5169012ba1531feb6",
+   "src/workbench/storage/log_raw/admission.py": "4ce23cbaa06c4a0b0d79f5e1081b16fb72cd381aeffc104c15985bdc2dd57345",
+   "src/workbench/storage/log_raw/store.py": "949c8cbb02fa2713ee82c60a92596edc0f7d43bf4667f64ecc95c882f37f9018",
+   "src/workbench/storage/metadata_sqlite/__init__.py": "65a21f328a22d3d8f7a75d6f4ff9d21c83ca8b58bedbf43cf18ffc8ccb94ae49",
+   "src/workbench/storage/metadata_sqlite/schema.py": "831091fc1099c9687b9302bf6357d947c28fbbc500b72c3d1cab4cbb33a01971",
+   "src/workbench/tasks/__init__.py": "b8e95dd173b9b57e8b59a35e300233ca95938e83ea648f8c8db166cf1d669209",
+   "src/workbench/tasks/repository.py": "b69e908bf799690ec7500ea0fe2c9614633e18be7156493f915e5970deea660e",
+   "src/workbench/terminal/shell_g2/control_probe.py": "4f8a4ddd6f33b6d09f9c8c5eeec756f0cb37a060180d7cf77fccd7fd064c9c7f",
+   "src/workbench/terminal/shell_g2/lifecycle.py": "f544dbe44806ee2111b286736599856a5d87204272a89759d2571ba01756a185",
+   "src/workbench/terminal/shell_g2/prototype.py": "08c96e8a2d66865fd66346afa64ccb67768db4adeefd4117b4b5c98166416abc",
+   "src/workbench/terminal/shell_persistent/adapter.py": "1fedd22c25106ecb7b02252806431251dcbd70d4d2ed7c69ef82af306a155956",
+   "src/workbench/terminal/vt_g1/screen.py": "6cefb5d485274ea461b4e70ac3c7dd38373263c282d64af7e84727998b25b060",
+   "src/workbench/terminal/vt_g1/session.py": "992234ac5f4aae4651a986259f5e94ee5840fd0e18a510e5be84426887232416",
+   "src/workbench/ui/product/__init__.py": "8b250db57bcf1590be1ba6959cf059139155475f18d84ee4577e84e7ad1d536b",
+   "src/workbench/ui/product/app.py": "cc0dfa2367e5eeaebc6a5f593abb10d5af9a753cc09e0723ce67ecb6faf396ac",
+   "src/workbench/ui/product/input.py": "d3cefd7e06c5fbeb44fd1b77db22c7a38da21b80a9189a828315defb745a06b5",
+   "src/workbench/ui/product/layout.py": "f7be43692d595ca172c3fca666be3d4f89272615dd3dd8ea0017ca95a685b0e3",
+   "src/workbench/ui/product/model.py": "f2025baf76720e738130f72002c2d44ac22912e3849d18edf430350f180f0b63",
+   "src/workbench/ui/product/view.py": "d86cf9ad3c96c3017c8b4bb93fd0fac797a4892a5ebcc7da69ee0d3378b3fa5b",
+   "src/workbench/ui/status_workbench/__init__.py": "07a2f07e64e8dddd31e5869d23bdedea0178c932b4edf186ae658538054dc573",
+   "src/workbench/ui/status_workbench/projection.py": "49e8f430dcd06fb636442710fc4bd069d6c5bfd5c4e414c22d701c726f7ab44f",
+   "src/workbench/ui/terminal_g1/app.py": "c00e8592898a1d6c65dc7ddf8c7d083af5792fdb79906865db222f5247d0d678",
+   "src/workbench/ui/terminal_g1/input_router.py": "f42bac8d80c6d1d359cfc3e9c190b347e90e7b483db0fe31096439ac938a2fe9",
+   "src/workbench/workflow/__init__.py": "35dd5bc7aa638920ace1f6ecb75aa4e0ab80e3031b65afe81f2dcfcd6ff3242a",
+   "src/workbench/workflow/run.py": "4a61aecf049341b5563117ae5d3e61143c9479ef3c48083ac83d62ce9a59f3b3",
+   "src/workbench/workflow/worker_port.py": "a4cc1204e2c99643b0077e707094c626c07ccc99b27da91f2455db05fd29cae9",
+   "src/workbench/workflow/worktree.py": "35c723d50aa59016c4d108dd5ebe65110dfeb21f6a7aa50d0869d32a67e9a4b3",
+   "omp_bridge/omp-isolation.yml": "31b004a887a24cb98eb35ccfde7b2f3449c7e9e33326cff3f1d8bd8255c3df9c",
+   "omp_bridge/omp-models.yml": "8519c287defc7cd6c6169027dc4017963371a5df5a94365d43724bdac1a4489e",
+   "omp_bridge/agents/explorer.md": "a226d3d2007fbced80bbe071a7e8f4f9587ee8d9fe96b05000059e5d8366d671",
+   "omp_bridge/contract/ports_v2.ts": "30a5a782daefd3fdd90a240c9de7744a0715850b9c7ca4e912a6193e31dfffd9",
+   "omp_bridge/contract/v1.ts": "7f31a6d0b54c1467eccfa7c54d19ce8ce61e3ec40b9ddf2f70b953ad420d2a3f",
+   "omp_bridge/g3/bridge.ts": "96542352e564c39a8c1da7428581ed6c7a7094d944a46953a43067a8eb88c175",
+   "omp_bridge/skills/README.md": "704c2d266be465f70b09b995a2d62dd3e4e3c2a9d57eeb70ea577702ac8cb529",
+   "omp_bridge/skills/to-manager/SKILL.md": "bbeba20792ce460c4ff0bfaf2d1020c1e267d02440cf979e06f4e5b6ecafcd45",
+   "omp_bridge/skills/to-worker/SKILL.md": "429ed8ae4ee8aadcec99845ff2ee78a2e0848f0e9e41244a8c624a334396cc87",
+   "omp_bridge/skills/workbench-recovery/SKILL.md": "0c90c0cce7bf02ae72f979e93add822fc05da5f002f485dc7b54bc416ed7a012",
+   "tests/recovery_boot/fake_omp.py": "ebede5237cab4f76016592a7b9ce2da58098f8a1a9267265813d1b8c17203d3d",
+   "tests/recovery_boot/live_restart_independent_p27cw19.py": "a8c477dd49e4bf2e14e8c8bae0cc79e01b2d5a8277f0b4646254b4392614764a",
+   "tests/recovery_boot/support.py": "f40fb64144a5e182cca50629827b473fbc3e43ba76505668811157ee322d9199",
+   "tests/recovery_boot/test_backend_restart.py": "0a888a843e76d8e2ef55e3e1ca327405cecef030a94ba561ce6f306314874536",
+   "tests/recovery_boot/test_boot_reconcile.py": "7253f3490557bc83a92480a87c46ff58731f9d4fa0986ece777833f446fb632a",
+   "tests/recovery_boot/test_cli_independent_p27cw19.py": "a35d8caffda1211e6510c3b9c4a93f2d67ca7fd424548a010a8e34683018084e",
+   "tests/recovery_boot/test_cw19_fix01.py": "50286f7cad687e7451bbcdc6f01ba15c7595e2a1ef1f9ab76303f91836033d4a",
+   "tests/recovery_boot/test_faults_holds.py": "c7a8766fcb4d3485c3631b57bda0e178006310272cd02ed1d1288d0aded3ad1a",
+   "tests/recovery_boot/test_faults_independent_p27cw19.py": "3ab6099f608368a5eefe3b4e07b89e6799f9e32274304360e295ea483582d751",
+   "tests/recovery_boot/test_live_restart_entrypoint.py": "8e84cc2aef019f8142f51d78008bbedad83e3154d4e7860a97e7ff51a2e1c791",
+   "tests/recovery_boot/test_reconcile_independent_p27cw19.py": "29ad0415c2795cea66be04021dfc84b57e005d4cdcc1b36575464ca3f8c1549f",
+   "tests/recovery_boot/test_recovery_port.py": "9d14a7064d0c1ff460d7c1dc6993f66a6dabc3e189209214157d1908f7ce03fc",
+   "tests/recovery_boot/test_survivor_stop.py": "852d4e9261a1f3f0abd81bdd8d930ad0a0b7e4e12e4706e96e4aefe9fbb8cfd8",
+   "tests/recovery_boot/test_survivors_holds_independent_p27cw19.py": "90c4e5831a3f5765bbbb31b4743b6bffdd06b95b18d35bdf5f6065e3ef03d4d9"
+  }
+ },
+ "boot_ids": {
+  "pre_cycle1": "2cb5a178-a3f9-442e-a5ff-da36260d4fd2",
+  "cycle1_after": "ee166795-ebef-47e0-8078-d3d8815bb7a4",
+  "cycle2_before": "ee166795-ebef-47e0-8078-d3d8815bb7a4",
+  "cycle2_after": "29b6d314-c603-4efa-a6d3-16ae69f7d521"
+ },
+ "reboots": [
+  {
+   "cmd": "ssh.sh 'sync; sudo reboot'",
+   "at": "2026-10-08T13:25:15+09:00",
+   "ssh_back": "13:25:24+09:00"
+  },
+  {
+   "cmd": "ssh.sh 'sync; sudo reboot'",
+   "at": "2026-10-08T13:28:52+09:00",
+   "ssh_back": "13:29:03+09:00"
+  }
+ ],
+ "fix_checks": {
+  "F1": {
+   "cycle1_cancelled_before_confirm": {
+    "startup_notice_state_after_cancel": "dropped_task_closed",
+    "backend_restarted_notices_total": 0,
+    "notices_file": "absent (no manager notice at all)"
+   },
+   "cycle2_open_task_not_cancelled": {
+    "notice_state_before_confirm": "queued",
+    "held_window_65s_notices": 0,
+    "after_confirm_delivered": 1,
+    "delivered_task_status": "running",
+    "delivered_held_reason": "backend_restarted",
+    "note": "task.status in content is the status at send time; task was still open"
+   }
+  },
+  "F2": {
+   "cols160_status_line2_starts_with": "재부팅 확인 대기: python -m workbench confirm-boot (그 전에는 자동 동작 보류) | 경고 OMP 격리 failed …",
+   "cols400": "확인 대기 first, then isolation warning, then restart summary",
+   "after_confirm_has_boot_wait": false
+  }
+ },
+ "driver": {
+  "guest_path": "~/cw19-driver-02.py",
+  "sha256": "3de6e82e2955d7c1ee394b9650ff11c693f69fc317365148152b4179d1280ebe",
+  "base": "vm-01 driver-final.py (sha256 3154e010…f27c0) with ROOT=~/cw19-reboot-02; post2 changed to leave the Task open before confirm (F1 positive case), cancel after the notice; extra same-boot script /tmp/cw19-extra.py (host copy /tmp/cw19-vm-02/extra.py)",
+  "host_copy": "/tmp/cw19-vm-02/driver.py"
+ },
+ "guest_events": [
+  {
+   "t": "2026-10-08T04:25:01+0000",
+   "phase": "pre",
+   "step": "boot_before",
+   "boot_id": "2cb5a178-a3f9-442e-a5ff-da36260d4fd2"
+  },
+  {
+   "t": "2026-10-08T04:25:02+0000",
+   "phase": "pre",
+   "step": "cli",
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "start",
+    "--no-attach",
+    "--omp",
+    "/home/dwchoo/cw19-reboot-02/a/omp"
+   ],
+   "rc": 0,
+   "stdout": "starting backend: shell bash (/usr/bin/bash), omp/18.2.10\nwaiting for the OMP isolation check ...\nbackend pid 1380 phase ready\ndata dir /home/dwchoo/cw19-reboot-02/a/home/wbdata\n  host_shell: pid 1384 alive=True owner=user\n  manager_omp: pid 1386 alive=True owner=user\n  worker_omp: pid 1387 alive=True owner=user\n  shell: bash /usr/bin/bash mode=manual_prompt\nomp isolation: failed (omp/18.2.10 evidence isolation=18.6.1)\nWARNING: OMP isolation check failed: manager: omp exited (closed stdout) before answering 'get_state'; worker: omp exited (closed stdout) before answering 'get_state'\n  note: OMP 18.2.10 has not extracted its native addon into /home/dwchoo/cw19-reboot-02/a/home/.omp/natives/18.2.10 yet: the first Workbench OMP extracts it there (the same files your own omp 18.2.10 extracts; OMP has no setting to move this directory).\n",
+   "stderr": ""
+  },
+  {
+   "t": "2026-10-08T04:25:02+0000",
+   "phase": "pre",
+   "step": "ready",
+   "summary": {
+    "phase": "ready",
+    "boot": {
+     "boot_id": "2cb5a178-a3f9-442e-a5ff-da36260d4fd2",
+     "confirmation_required": false,
+     "confirmed": null,
+     "confirmed_boot_id": null,
+     "persisted": true,
+     "reason": null,
+     "recorded_boot_id": "2cb5a178-a3f9-442e-a5ff-da36260d4fd2"
+    },
+    "holds": [],
+    "faults": {
+     "metadata": null,
+     "model": null,
+     "raw_log": null,
+     "record_error": null
+    },
+    "automation": {
+     "detail": "no active run",
+     "interruption": {
+      "confirmed_at": null,
+      "error": null,
+      "manager_ack": null,
+      "pause_id": null,
+      "requested_at": null,
+      "state": "none",
+      "unknown_tool_call_ids": [],
+      "worker_ack": null
+     },
+     "paused": false,
+     "persistence_error": null,
+     "resume": null,
+     "retry_limit": 3,
+     "review": {
+      "applies": false,
+      "coalesced_count": 0,
+      "exit": null,
+      "interval_seconds": 60,
+      "last_review_at": null,
+      "next_due_in_seconds": null,
+      "pending": false,
+      "reason": null,
+      "review_count": 0,
+      "status": null
+     },
+     "run": null,
+     "source": "backend",
+     "state": "idle",
+     "tick": null,
+     "transition": null
+    },
+    "startup": {
+     "at": 1791433501.8725038,
+     "classification": "fresh",
+     "notes": [],
+     "notice": null,
+     "outbox_lost": [],
+     "outbox_lost_count": 0,
+     "previous": null,
+     "probed": false,
+     "processes": [],
+     "run": null,
+     "survivor_stops": [],
+     "survivors": []
+    },
+    "task": {
+     "task_id": null,
+     "kind": null,
+     "status": null,
+     "run_id": null,
+     "held_reason": null
+    },
+    "sessions": {
+     "manager": "5010552c-6381-4f7c-855b-fafecc0591d5",
+     "worker": "26781b14-5cf0-446d-bb4c-9d9f0e0ea4bd"
+    }
+   }
+  },
+  {
+   "t": "2026-10-08T04:25:02+0000",
+   "phase": "pre",
+   "step": "tool",
+   "pane": "manager_omp",
+   "tool": "to_worker",
+   "args": {
+    "kind": "work",
+    "message": "cw19 reboot work",
+    "spec": {
+     "goal": "cw19 reboot",
+     "paths": [
+      "notes/"
+     ]
+    }
+   },
+   "result": {
+    "status": "dispatched",
+    "task_id": "91372c30-3838-4493-af59-315fd80871da",
+    "kind": "work",
+    "revision": 1,
+    "detail": "dispatched to the worker under the user's standing delegation (C-D66); it reports back with to_manager",
+    "manager_rule": "The worker does this Task; do not do it yourself (no commands, edits or checks for it). End your turn and wait for the worker's to_manager report."
+   }
+  },
+  {
+   "t": "2026-10-08T04:25:03+0000",
+   "phase": "pre",
+   "step": "pre_state",
+   "state": {
+    "boot_id": "2cb5a178-a3f9-442e-a5ff-da36260d4fd2",
+    "commit": "01f99c5275d45b9bb2624271d1edc05985f95ef6",
+    "task_id": "91372c30-3838-4493-af59-315fd80871da",
+    "runs": 1,
+    "summary": {
+     "phase": "ready",
+     "boot": {
+      "boot_id": "2cb5a178-a3f9-442e-a5ff-da36260d4fd2",
+      "confirmation_required": false,
+      "confirmed": null,
+      "confirmed_boot_id": null,
+      "persisted": true,
+      "reason": null,
+      "recorded_boot_id": "2cb5a178-a3f9-442e-a5ff-da36260d4fd2"
+     },
+     "holds": [],
+     "faults": {
+      "metadata": null,
+      "model": null,
+      "raw_log": null,
+      "record_error": null
+     },
+     "automation": {
+      "detail": "free-work run: no host run to review; pause/resume apply",
+      "interruption": {
+       "confirmed_at": null,
+       "error": null,
+       "manager_ack": null,
+       "pause_id": null,
+       "requested_at": null,
+       "state": "none",
+       "unknown_tool_call_ids": [],
+       "worker_ack": null
+      },
+      "paused": false,
+      "persistence_error": null,
+      "resume": null,
+      "retry_limit": 3,
+      "review": {
+       "applies": false,
+       "coalesced_count": 0,
+       "exit": null,
+       "interval_seconds": 60,
+       "last_review_at": null,
+       "next_due_in_seconds": null,
+       "pending": false,
+       "reason": null,
+       "review_count": 0,
+       "status": null
+      },
+      "run": {
+       "bound": true,
+       "error": null,
+       "kind": "work",
+       "revision": 1,
+       "run_id": "7a7d6c14-7243-40fc-905d-e3bb3ba64a32",
+       "task_id": "91372c30-3838-4493-af59-315fd80871da"
+      },
+      "source": "backend",
+      "state": "active",
+      "tick": null,
+      "transition": null
+     },
+     "startup": {
+      "at": 1791433501.8725038,
+      "classification": "fresh",
+      "notes": [],
+      "notice": null,
+      "outbox_lost": [],
+      "outbox_lost_count": 0,
+      "previous": null,
+      "probed": false,
+      "processes": [],
+      "run": null,
+      "survivor_stops": [],
+      "survivors": []
+     },
+     "task": {
+      "task_id": "91372c30-3838-4493-af59-315fd80871da",
+      "kind": "work",
+      "status": "running",
+      "run_id": "7a7d6c14-7243-40fc-905d-e3bb3ba64a32",
+      "held_reason": null
+     },
+     "sessions": {
+      "manager": "5010552c-6381-4f7c-855b-fafecc0591d5",
+      "worker": "26781b14-5cf0-446d-bb4c-9d9f0e0ea4bd"
+     }
+    },
+    "manager_session": "5010552c-6381-4f7c-855b-fafecc0591d5",
+    "worker_session": "26781b14-5cf0-446d-bb4c-9d9f0e0ea4bd",
+    "boot_json": {
+     "confirmed_boot_id": null,
+     "history": [
+      {
+       "at": 1791433501.8685744,
+       "boot_id": "2cb5a178-a3f9-442e-a5ff-da36260d4fd2",
+       "event": "start",
+       "pending": false,
+       "reason": null
+      }
+     ],
+     "pending": false,
+     "pending_boot_id": null,
+     "reason": null,
+     "recorded_boot_id": "2cb5a178-a3f9-442e-a5ff-da36260d4fd2",
+     "version": 1
+    },
+    "backend_json_processes": {
+     "backend": {
+      "pid": 1380,
+      "start_ticks": 1746
+     },
+     "host_shell": {
+      "pid": 1384,
+      "start_ticks": 1789
+     },
+     "manager_omp": {
+      "pid": 1386,
+      "start_ticks": 1791
+     },
+     "worker_omp": {
+      "pid": 1387,
+      "start_ticks": 1791
+     }
+    },
+    "backend_json_boot_id": "2cb5a178-a3f9-442e-a5ff-da36260d4fd2",
+    "lifecycle_json": {
+     "record": {
+      "admission_closed": false,
+      "approval_hash": "7d5867ddeca95d6b38e8e6ea80340f7f43fcf4390c320ab9c0038e486d275b41",
+      "boot_confirmed_marker": null,
+      "boot_marker": "2cb5a178-a3f9-442e-a5ff-da36260d4fd2",
+      "command": {
+       "delivery": "none",
+       "owner_epoch": null,
+       "request_id": null,
+       "session_id": null
+      },
+      "control": {
+       "input_owner": "user",
+       "mode": "manual_prompt",
+       "owner_epoch": 2,
+       "takeover_confirmed": false,
+       "takeover_requested": false
+      },
+      "generation": 1,
+      "last_failed_check_at": null,
+      "last_successful_check_at": null,
+      "manager": {
+       "generation": 1,
+       "process": {
+        "owner_epoch": 1,
+        "pid": 1386,
+        "role": "manager",
+        "start_ticks": 1791
+       },
+       "role": "manager",
+       "session_id": "5010552c-6381-4f7c-855b-fafecc0591d5"
+      },
+      "model_hold": false,
+      "revision": 1,
+      "run_id": "7a7d6c14-7243-40fc-905d-e3bb3ba64a32",
+      "run_targets": [],
+      "shell": {
+       "owner_epoch": 2,
+       "pid": 1384,
+       "role": "shell",
+       "start_ticks": 1789
+      },
+      "shutdown_confirmed": false,
+      "task_id": "91372c30-3838-4493-af59-315fd80871da",
+      "worker": {
+       "generation": 1,
+       "process": {
+        "owner_epoch": 1,
+        "pid": 1387,
+        "role": "worker",
+        "start_ticks": 1791
+       },
+       "role": "worker",
+       "session_id": "26781b14-5cf0-446d-bb4c-9d9f0e0ea4bd"
+      }
+     },
+     "version": 1
+    },
+    "notices_count": 0,
+    "frames_count": 1,
+    "ours": {
+     "1380": [
+      1746,
+      "/home/dwchoo/wb-venv/bin/python -c import sys; sys.path.insert(0, '/home/dwchoo/ai-exp-assistant/src'); from workbench.backend.cli import main; raise SystemExit"
+     ],
+     "1384": [
+      1789,
+      "/usr/bin/bash --noprofile --rcfile /tmp/cw03-g2-vhexq1oe/shell-init -i "
+     ],
+     "1386": [
+      1791,
+      "/home/dwchoo/wb-venv/bin/python /home/dwchoo/cw19-reboot-02/a/omp --config /home/dwchoo/ai-exp-assistant/omp_bridge/omp-isolation.yml --config /home/dwchoo/cw19"
+     ],
+     "1387": [
+      1791,
+      "/home/dwchoo/wb-venv/bin/python /home/dwchoo/cw19-reboot-02/a/omp --config /home/dwchoo/ai-exp-assistant/omp_bridge/omp-isolation.yml --config /home/dwchoo/cw19"
+     ],
+     "1400": [
+      1825,
+      "sleep 3000 "
+     ]
+    }
+   }
+  },
+  {
+   "t": "2026-10-08T04:25:03+0000",
+   "phase": "pre",
+   "step": "cli",
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "status"
+   ],
+   "rc": 0,
+   "stdout": "backend pid 1380 phase ready\ndata dir /home/dwchoo/cw19-reboot-02/a/home/wbdata\n  host_shell: pid 1384 alive=True owner=user\n  manager_omp: pid 1386 alive=True owner=user\n  worker_omp: pid 1387 alive=True owner=user\n  shell: bash /usr/bin/bash mode=manual_prompt\nomp isolation: failed (omp/18.2.10 evidence isolation=18.6.1)\nWARNING: OMP isolation check failed: manager: omp exited (closed stdout) before answering 'get_state'; worker: omp exited (closed stdout) before answering 'get_state'\n  note: OMP 18.2.10 has not extracted its native addon into /home/dwchoo/cw19-reboot-02/a/home/.omp/natives/18.2.10 yet: the first Workbench OMP extracts it there (the same files your own omp 18.2.10 extracts; OMP has no setting to move this directory).\n",
+   "stderr": ""
+  },
+  {
+   "t": "2026-10-08T04:25:11+0000",
+   "phase": "probe",
+   "step": "probe_start",
+   "rc": 0,
+   "stdout": "starting backend: shell bash (/usr/bin/bash), omp/18.2.10\nwaiting for the OMP isolation check ...\nbackend pid 1518 phase ready\ndata dir /home/dwchoo/cw19-reboot-02/probe/home/wbdata\n  host_shell: pid 1522 alive=True owner=user\n  manager_omp: pid 1524 alive=True owner=user\n  worker_omp: pid 1525 alive=True owner=user\n  shell: bash /usr/bin/bash mode=manual_prompt\nomp isolation: failed (omp/18.2.10 evidence isolation=18.6.1)\nWARNING: OMP isolation check failed: manager: omp exited (closed stdout) before answering 'get_state'; worker: omp exited (closed stdout) before answering 'get_state'\n  note: OMP 18.2.10 has not extracted its native addon into /home/dwchoo/cw19-reboot-02/probe/home/.omp/natives/18.2.10 yet: the first Workbench OMP extracts it there (the same files your own omp 18.2.10 extracts; OMP has no setting to move this directory).\n",
+   "stderr": ""
+  },
+  {
+   "t": "2026-10-08T04:25:11+0000",
+   "phase": "probe",
+   "step": "probe_status",
+   "summary": {
+    "phase": "ready",
+    "reason": null,
+    "bridge": {
+     "event_cursor": {},
+     "manager": {
+      "generation": 1,
+      "session_id": "01a119c2-0958-73cd-aa83-c02285706daf"
+     },
+     "worker": {
+      "generation": 1,
+      "session_id": "01a119c2-094e-76c7-b648-4da2f19c9b27"
+     }
+    }
+   }
+  },
+  {
+   "t": "2026-10-08T04:25:11+0000",
+   "phase": "probe",
+   "step": "probe_shutdown",
+   "rc": 0,
+   "stdout": "no active work reported\n{\"shutdown\": {\"left_running\": [], \"lifecycle\": null, \"panes\": [{\"exit_status\": -1, \"pane\": \"host_shell\", \"survivors\": []}, {\"exit_status\": 143, \"pane\": \"manager_omp\", \"survivors\": []}, {\"exit_status\": 143, \"pane\": \"worker_omp\", \"survivors\": []}], \"previous_survivors\": [], \"problems\": [], \"processes\": {\"host_shell\": \"dead\", \"manager_omp\": \"dead\", \"worker_omp\": \"dead\"}, \"user_confirmed\": true, \"verified\": true}}\n",
+   "stderr": ""
+  },
+  {
+   "t": "2026-10-08T04:25:12+0000",
+   "phase": "probe",
+   "step": "probe_leftover",
+   "left": {}
+  },
+  {
+   "t": "2026-10-08T04:25:31+0000",
+   "phase": "post",
+   "step": "boot_after",
+   "boot_id_before": "2cb5a178-a3f9-442e-a5ff-da36260d4fd2",
+   "boot_id_after": "ee166795-ebef-47e0-8078-d3d8815bb7a4",
+   "changed": true
+  },
+  {
+   "t": "2026-10-08T04:25:31+0000",
+   "phase": "post",
+   "step": "ours_before_start",
+   "ours": {}
+  },
+  {
+   "t": "2026-10-08T04:25:31+0000",
+   "phase": "post",
+   "step": "records_on_disk",
+   "runs": 1,
+   "boot_json": {
+    "confirmed_boot_id": null,
+    "history": [
+     {
+      "at": 1791433501.8685744,
+      "boot_id": "2cb5a178-a3f9-442e-a5ff-da36260d4fd2",
+      "event": "start",
+      "pending": false,
+      "reason": null
+     }
+    ],
+    "pending": false,
+    "pending_boot_id": null,
+    "reason": null,
+    "recorded_boot_id": "2cb5a178-a3f9-442e-a5ff-da36260d4fd2",
+    "version": 1
+   },
+   "backend_boot_id": "2cb5a178-a3f9-442e-a5ff-da36260d4fd2",
+   "files": [
+    "backend.json",
+    "backend.lock",
+    "backend.log",
+    "boot.json",
+    "lifecycle.json",
+    "lifecycle.json.lock",
+    "omp-isolation-manager.yml",
+    "omp-isolation-worker.yml",
+    "omp-root",
+    "raw-logs",
+    "startup.json",
+    "tasks.sqlite3",
+    "workflow"
+   ]
+  },
+  {
+   "t": "2026-10-08T04:25:32+0000",
+   "phase": "post",
+   "step": "cli",
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "start",
+    "--no-attach",
+    "--omp",
+    "/home/dwchoo/cw19-reboot-02/a/omp"
+   ],
+   "rc": 0,
+   "stdout": "starting backend: shell bash (/usr/bin/bash), omp/18.2.10\nbackend pid 1100 phase ready\ndata dir /home/dwchoo/cw19-reboot-02/a/home/wbdata\n  host_shell: pid 1104 alive=True owner=user\n  manager_omp: pid 1106 alive=True owner=user\n  worker_omp: pid 1107 alive=True owner=user\n  shell: bash /usr/bin/bash mode=manual_prompt\nomp isolation: failed (omp/18.2.10 evidence isolation=18.6.1)\nWARNING: OMP isolation check failed: manager: omp exited (closed stdout) before answering 'get_state'; worker: omp exited (closed stdout) before answering 'get_state'\n  note: OMP 18.2.10 has not extracted its native addon into /home/dwchoo/cw19-reboot-02/a/home/.omp/natives/18.2.10 yet: the first Workbench OMP extracts it there (the same files your own omp 18.2.10 extracts; OMP has no setting to move this directory).\n",
+   "stderr": ""
+  },
+  {
+   "t": "2026-10-08T04:25:32+0000",
+   "phase": "post",
+   "step": "ready_after_reboot",
+   "summary": {
+    "phase": "ready",
+    "boot": {
+     "boot_id": "ee166795-ebef-47e0-8078-d3d8815bb7a4",
+     "confirmation_required": true,
+     "confirmed": false,
+     "confirmed_boot_id": null,
+     "persisted": true,
+     "reason": "reboot",
+     "recorded_boot_id": "2cb5a178-a3f9-442e-a5ff-da36260d4fd2"
+    },
+    "holds": [
+     {
+      "detail": "reboot",
+      "reason": "boot_confirmation_required",
+      "since": 1791433532.0007782
+     }
+    ],
+    "faults": {
+     "metadata": null,
+     "model": null,
+     "raw_log": null,
+     "record_error": null
+    },
+    "automation": {
+     "detail": "no active run",
+     "interruption": {
+      "confirmed_at": null,
+      "error": null,
+      "manager_ack": null,
+      "pause_id": null,
+      "requested_at": null,
+      "state": "none",
+      "unknown_tool_call_ids": [],
+      "worker_ack": null
+     },
+     "paused": false,
+     "persistence_error": null,
+     "resume": null,
+     "retry_limit": 3,
+     "review": {
+      "applies": false,
+      "coalesced_count": 0,
+      "exit": null,
+      "interval_seconds": 60,
+      "last_review_at": null,
+      "next_due_in_seconds": null,
+      "pending": false,
+      "reason": null,
+      "review_count": 0,
+      "status": null
+     },
+     "run": null,
+     "source": "backend",
+     "state": "idle",
+     "tick": null,
+     "transition": null
+    },
+    "startup": {
+     "at": 1791433531.9989579,
+     "classification": "reboot",
+     "notes": [],
+     "notice": {
+      "notice_id": "d25b6854-6786-4779-ba30-aae6ae4296f6",
+      "state": "queued",
+      "task_id": "91372c30-3838-4493-af59-315fd80871da"
+     },
+     "outbox_lost": [
+      {
+       "handoff_id": "ad6e53d0-a74d-4926-83a9-e5ad2a2a0060",
+       "kind": "task",
+       "message_id": "4f1ef21b-1cbe-4808-af25-78ab09aeb27c",
+       "state": "queued_not_sent",
+       "target_role": "worker"
+      }
+     ],
+     "outbox_lost_count": 1,
+     "previous": {
+      "boot_id": "2cb5a178-a3f9-442e-a5ff-da36260d4fd2",
+      "phase": "stopped",
+      "pid": 1380,
+      "shutdown_verified": true
+     },
+     "probed": false,
+     "processes": [
+      {
+       "name": "backend",
+       "pid": 1380,
+       "start_ticks": 1746,
+       "state": "ended_by_reboot"
+      },
+      {
+       "name": "manager_omp",
+       "pid": 1386,
+       "start_ticks": 1791,
+       "state": "ended_by_reboot"
+      },
+      {
+       "name": "worker_omp",
+       "pid": 1387,
+       "start_ticks": 1791,
+       "state": "ended_by_reboot"
+      },
+      {
+       "name": "host_shell",
+       "pid": 1384,
+       "start_ticks": 1789,
+       "state": "ended_by_reboot"
+      }
+     ],
+     "run": {
+      "boot_marker": "2cb5a178-a3f9-442e-a5ff-da36260d4fd2",
+      "revision": 1,
+      "run_id": "7a7d6c14-7243-40fc-905d-e3bb3ba64a32",
+      "state": "interrupted_by_reboot",
+      "target": null,
+      "target_state": "unrecorded",
+      "task_id": "91372c30-3838-4493-af59-315fd80871da"
+     },
+     "survivor_stops": [],
+     "survivors": []
+    },
+    "task": {
+     "task_id": "91372c30-3838-4493-af59-315fd80871da",
+     "kind": "work",
+     "status": "running",
+     "run_id": "7a7d6c14-7243-40fc-905d-e3bb3ba64a32",
+     "held_reason": "backend_restarted"
+    },
+    "sessions": {
+     "manager": "62ef4ab3-c4ca-4bf6-9a18-8a7336c07345",
+     "worker": "2ea9ad89-99b2-456d-9e19-b7c56623104b"
+    }
+   }
+  },
+  {
+   "t": "2026-10-08T04:25:32+0000",
+   "phase": "post",
+   "step": "cli",
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "status"
+   ],
+   "rc": 0,
+   "stdout": "backend pid 1100 phase ready\ndata dir /home/dwchoo/cw19-reboot-02/a/home/wbdata\n  host_shell: pid 1104 alive=True owner=user\n  manager_omp: pid 1106 alive=True owner=user\n  worker_omp: pid 1107 alive=True owner=user\n  shell: bash /usr/bin/bash mode=manual_prompt\nomp isolation: failed (omp/18.2.10 evidence isolation=18.6.1)\nWARNING: OMP isolation check failed: manager: omp exited (closed stdout) before answering 'get_state'; worker: omp exited (closed stdout) before answering 'get_state'\n  note: OMP 18.2.10 has not extracted its native addon into /home/dwchoo/cw19-reboot-02/a/home/.omp/natives/18.2.10 yet: the first Workbench OMP extracts it there (the same files your own omp 18.2.10 extracts; OMP has no setting to move this directory).\n부팅 확인 대기 (reboot): 'python -m workbench confirm-boot' 로 환경을 확인하기 전까지 Workbench 자동 동작은 보류됩니다\nbackend 재시작 대조: reboot | 이전 run 7a7d6c14-7243-40fc-905d-e3bb3ba64a32 상태 interrupted_by_reboot (재실행·재전송 없음) | 보내지 못한 메시지 1건 (재전송 없음)\n자동 동작 보류: boot_confirmation_required\n",
+   "stderr": ""
+  },
+  {
+   "t": "2026-10-08T04:25:38+0000",
+   "phase": "post",
+   "step": "ui_screen_before_confirm",
+   "has_boot_wait": true,
+   "screen": "focus: MANAGER OMP | host 입력 owner: user | shell mode: manual_prompt | worker: 작업 중 | 자동화: idle\n재부팅 확인 대기: python -m workbench confirm-boot (그 전에는 자동 동작 보류) | 경고 OMP 격리 failed: OMP isolation check failed: manager: omp exited (closed st\nlq MANAGER OMP *FOCUS* alive qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqklq WORKER OMP alive qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqk\nxfake omp manager                                                              xxfake omp worker                                                               x\nx                                                                              xx                                                                              x\nx                                                                              xx                                                                              x\nx                                                                              xx                                                                              x\nx                                                                              xx                                                                              x\nx                                                                              xx                                                                              x\nx                                                                              xx                                                                              x\nx                                                                              xx                                                                              x\nx                                                                              xx                                                                              x\nx                                                                              xx                                                                              x\nx                                                                              xx                                                                              x\nx                                                                              xx                                                                              x\nx                                                                              xx                                                                              x\nx                                                                              xx                                                                              x\nx                                                                              xx                                                                              x\nx                                                                              xx                                                                              x\nx                                                                              xx                                                                              x\nmqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqjmqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqj\nlq HOST SHELL alive owner=user qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqk\nx$                                                                                                                                                             x\nx                                                                                                                                                              x\nx                                                                                                                                                              x\nx                                                                                                                                                              x\nx                                                                                                                                                              x\nx                                                                                                                                                              x\nx                                                                                                                                                              x\nx                                                                                                                                                              x\nx                                                                                                                                                              x\nx                                                                                                                                                              x\nx                                                                                                                                                              x\nx                                                                                                                                                              x\nx                                                                                                                                                              x\nx                                                                                                                                                              x\nx                                                                                                                                                              x\nx                                                                                                                                                              x\nmqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqj\n원본 키는 focus pane으로 그대로 전달됩니다 · Ctrl-] Space 메뉴 · Ctrl-] q/Ctrl-q = detach · 휠/Shift+PgUp 스크롤 · 드래그: 복사 · Shift+드래그: 터미널 선택"
+  },
+  {
+   "t": "2026-10-08T04:25:38+0000",
+   "phase": "post",
+   "step": "tool",
+   "pane": "manager_omp",
+   "tool": "to_worker",
+   "args": {
+    "kind": "work",
+    "message": "follow-up after reboot",
+    "task_id": "91372c30-3838-4493-af59-315fd80871da"
+   },
+   "result": {
+    "status": "held",
+    "reason": "boot_confirmation_required"
+   }
+  },
+  {
+   "t": "2026-10-08T04:25:38+0000",
+   "phase": "post",
+   "step": "tool",
+   "pane": "worker_omp",
+   "tool": "terminal",
+   "args": {
+    "command": "echo cw19-worker-terminal"
+   },
+   "result": {
+    "status": "held",
+    "reason": "boot_confirmation_required",
+    "detail": "Nothing was run: Workbench holds automatic work now (reason in this result: boot confirmation, metadata storage or a model error). A command already running continues. End your turn; do not retry in a loop."
+   }
+  },
+  {
+   "t": "2026-10-08T04:25:38+0000",
+   "phase": "post",
+   "step": "tool",
+   "pane": "manager_omp",
+   "tool": "to_worker",
+   "args": {
+    "kind": "work",
+    "message": "cancel after reboot",
+    "task_id": "91372c30-3838-4493-af59-315fd80871da",
+    "cancel": true
+   },
+   "result": {
+    "status": "cancelled",
+    "task_id": "91372c30-3838-4493-af59-315fd80871da",
+    "worker_notified": true,
+    "notices": [
+     {
+      "notice_id": "cd963a21-31a7-4a4a-9904-49d30673f761",
+      "at": "2026-10-08T04:25:38Z",
+      "kind": "task_cancelled",
+      "task_id": "91372c30-3838-4493-af59-315fd80871da",
+      "run_id": "7a7d6c14-7243-40fc-905d-e3bb3ba64a32"
+     }
+    ]
+   }
+  },
+  {
+   "t": "2026-10-08T04:25:39+0000",
+   "phase": "post",
+   "step": "after_cancel",
+   "summary": {
+    "phase": "ready",
+    "boot": {
+     "boot_id": "ee166795-ebef-47e0-8078-d3d8815bb7a4",
+     "confirmation_required": true,
+     "confirmed": false,
+     "confirmed_boot_id": null,
+     "persisted": true,
+     "reason": "reboot",
+     "recorded_boot_id": "2cb5a178-a3f9-442e-a5ff-da36260d4fd2"
+    },
+    "holds": [
+     {
+      "detail": "reboot",
+      "reason": "boot_confirmation_required",
+      "since": 1791433532.0007782
+     }
+    ],
+    "faults": {
+     "metadata": null,
+     "model": null,
+     "raw_log": null,
+     "record_error": null
+    },
+    "automation": {
+     "detail": "no active run",
+     "interruption": {
+      "confirmed_at": null,
+      "error": null,
+      "manager_ack": null,
+      "pause_id": null,
+      "requested_at": null,
+      "state": "none",
+      "unknown_tool_call_ids": [],
+      "worker_ack": null
+     },
+     "paused": false,
+     "persistence_error": null,
+     "resume": null,
+     "retry_limit": 3,
+     "review": {
+      "applies": false,
+      "coalesced_count": 0,
+      "exit": null,
+      "interval_seconds": 60,
+      "last_review_at": null,
+      "next_due_in_seconds": null,
+      "pending": false,
+      "reason": null,
+      "review_count": 0,
+      "status": null
+     },
+     "run": null,
+     "source": "backend",
+     "state": "idle",
+     "tick": {
+      "at": "2026-10-08T04:25:39+00:00",
+      "outcome": "idle",
+      "problems": []
+     },
+     "transition": null
+    },
+    "startup": {
+     "at": 1791433531.9989579,
+     "classification": "reboot",
+     "notes": [],
+     "notice": {
+      "notice_id": "d25b6854-6786-4779-ba30-aae6ae4296f6",
+      "state": "dropped_task_closed",
+      "task_id": "91372c30-3838-4493-af59-315fd80871da"
+     },
+     "outbox_lost": [
+      {
+       "handoff_id": "ad6e53d0-a74d-4926-83a9-e5ad2a2a0060",
+       "kind": "task",
+       "message_id": "4f1ef21b-1cbe-4808-af25-78ab09aeb27c",
+       "state": "queued_not_sent",
+       "target_role": "worker"
+      }
+     ],
+     "outbox_lost_count": 1,
+     "previous": {
+      "boot_id": "2cb5a178-a3f9-442e-a5ff-da36260d4fd2",
+      "phase": "stopped",
+      "pid": 1380,
+      "shutdown_verified": true
+     },
+     "probed": false,
+     "processes": [
+      {
+       "name": "backend",
+       "pid": 1380,
+       "start_ticks": 1746,
+       "state": "ended_by_reboot"
+      },
+      {
+       "name": "manager_omp",
+       "pid": 1386,
+       "start_ticks": 1791,
+       "state": "ended_by_reboot"
+      },
+      {
+       "name": "worker_omp",
+       "pid": 1387,
+       "start_ticks": 1791,
+       "state": "ended_by_reboot"
+      },
+      {
+       "name": "host_shell",
+       "pid": 1384,
+       "start_ticks": 1789,
+       "state": "ended_by_reboot"
+      }
+     ],
+     "run": {
+      "boot_marker": "2cb5a178-a3f9-442e-a5ff-da36260d4fd2",
+      "revision": 1,
+      "run_id": "7a7d6c14-7243-40fc-905d-e3bb3ba64a32",
+      "state": "interrupted_by_reboot",
+      "target": null,
+      "target_state": "unrecorded",
+      "task_id": "91372c30-3838-4493-af59-315fd80871da"
+     },
+     "survivor_stops": [],
+     "survivors": []
+    },
+    "task": {
+     "task_id": "91372c30-3838-4493-af59-315fd80871da",
+     "kind": "work",
+     "status": "closed",
+     "run_id": null,
+     "held_reason": null
+    },
+    "sessions": {
+     "manager": "62ef4ab3-c4ca-4bf6-9a18-8a7336c07345",
+     "worker": "2ea9ad89-99b2-456d-9e19-b7c56623104b"
+    }
+   }
+  },
+  {
+   "t": "2026-10-08T04:25:39+0000",
+   "phase": "post",
+   "step": "tool",
+   "pane": "manager_omp",
+   "tool": "to_worker",
+   "args": {
+    "kind": "experiment",
+    "message": "new experiment before confirm",
+    "spec": {
+     "goal": "cw19 reboot exp",
+     "paths": [
+      "outcome.txt"
+     ],
+     "execution": {
+      "source": "/home/dwchoo/cw19-reboot-02/a/project",
+      "commit": "01f99c5275d45b9bb2624271d1edc05985f95ef6",
+      "command": "printf 'CW19 PASS\\n'; printf PASS > outcome.txt",
+      "criteria": {
+       "log_contains": "PASS",
+       "result_file": "outcome.txt",
+       "result_contains": "PASS"
+      },
+      "environment": [
+       "PATH"
+      ],
+      "shell": "bash"
+     }
+    }
+   },
+   "result": {
+    "status": "held",
+    "reason": "boot_confirmation_required"
+   }
+  },
+  {
+   "t": "2026-10-08T04:25:40+0000",
+   "phase": "post",
+   "step": "user_actions",
+   "pause": {
+    "v": 1,
+    "type": "result",
+    "id": "ce3f3e6a8a674ce9",
+    "ok": true,
+    "automation": {
+     "state": "paused",
+     "source": "backend",
+     "detail": "paused by the user; collection continues, new automatic work is held",
+     "paused": true,
+     "transition": null,
+     "run": null,
+     "tick": {
+      "outcome": "idle",
+      "problems": [],
+      "at": "2026-10-08T04:25:39+00:00"
+     },
+     "review": {
+      "applies": false,
+      "interval_seconds": 60,
+      "status": null,
+      "reason": null,
+      "review_count": 0,
+      "last_review_at": null,
+      "next_due_in_seconds": null,
+      "pending": false,
+      "coalesced_count": 0,
+      "exit": null
+     },
+     "interruption": {
+      "state": "not_needed",
+      "pause_id": null,
+      "requested_at": null,
+      "confirmed_at": null,
+      "manager_ack": null,
+      "worker_ack": null,
+      "unknown_tool_call_ids": [],
+      "error": null
+     },
+     "resume": null,
+     "retry_limit": 3,
+     "persistence_error": null
+    }
+   },
+   "resume": {
+    "v": 1,
+    "type": "result",
+    "id": "6d6ce1f55b4b471e",
+    "ok": true,
+    "automation": {
+     "state": "resuming",
+     "source": "backend",
+     "detail": "resuming: reconciling files, tools, processes, Task and approval",
+     "paused": true,
+     "transition": "resuming",
+     "run": null,
+     "tick": {
+      "outcome": "idle",
+      "problems": [],
+      "at": "2026-10-08T04:25:40+00:00"
+     },
+     "review": {
+      "applies": false,
+      "interval_seconds": 60,
+      "status": null,
+      "reason": null,
+      "review_count": 0,
+      "last_review_at": null,
+      "next_due_in_seconds": null,
+      "pending": false,
+      "coalesced_count": 0,
+      "exit": null
+     },
+     "interruption": {
+      "state": "not_needed",
+      "pause_id": null,
+      "requested_at": null,
+      "confirmed_at": null,
+      "manager_ack": null,
+      "worker_ack": null,
+      "unknown_tool_call_ids": [],
+      "error": null
+     },
+     "resume": null,
+     "retry_limit": 3,
+     "persistence_error": null
+    }
+   }
+  },
+  {
+   "t": "2026-10-08T04:26:52+0000",
+   "phase": "post",
+   "step": "held_window",
+   "runs_before": 1,
+   "runs_now": 1,
+   "notices_since_start": [],
+   "deliveries_since_start": [],
+   "user_input_file": "CW19_USER_INPUT\n",
+   "summary": {
+    "phase": "ready",
+    "boot": {
+     "boot_id": "ee166795-ebef-47e0-8078-d3d8815bb7a4",
+     "confirmation_required": true,
+     "confirmed": false,
+     "confirmed_boot_id": null,
+     "persisted": true,
+     "reason": "reboot",
+     "recorded_boot_id": "2cb5a178-a3f9-442e-a5ff-da36260d4fd2"
+    },
+    "holds": [
+     {
+      "detail": "reboot",
+      "reason": "boot_confirmation_required",
+      "since": 1791433532.0007782
+     }
+    ],
+    "faults": {
+     "metadata": null,
+     "model": null,
+     "raw_log": null,
+     "record_error": null
+    },
+    "automation": {
+     "detail": "no active run",
+     "interruption": {
+      "confirmed_at": null,
+      "error": null,
+      "manager_ack": null,
+      "pause_id": null,
+      "requested_at": null,
+      "state": "none",
+      "unknown_tool_call_ids": [],
+      "worker_ack": null
+     },
+     "paused": false,
+     "persistence_error": null,
+     "resume": {
+      "at": "2026-10-08T04:25:40+00:00",
+      "outcome": "resumed",
+      "reason": null
+     },
+     "retry_limit": 3,
+     "review": {
+      "applies": false,
+      "coalesced_count": 0,
+      "exit": null,
+      "interval_seconds": 60,
+      "last_review_at": null,
+      "next_due_in_seconds": null,
+      "pending": false,
+      "reason": null,
+      "review_count": 0,
+      "status": null
+     },
+     "run": null,
+     "source": "backend",
+     "state": "idle",
+     "tick": {
+      "at": "2026-10-08T04:26:52+00:00",
+      "outcome": "idle",
+      "problems": []
+     },
+     "transition": null
+    },
+    "startup": {
+     "at": 1791433531.9989579,
+     "classification": "reboot",
+     "notes": [],
+     "notice": {
+      "notice_id": "d25b6854-6786-4779-ba30-aae6ae4296f6",
+      "state": "dropped_task_closed",
+      "task_id": "91372c30-3838-4493-af59-315fd80871da"
+     },
+     "outbox_lost": [
+      {
+       "handoff_id": "ad6e53d0-a74d-4926-83a9-e5ad2a2a0060",
+       "kind": "task",
+       "message_id": "4f1ef21b-1cbe-4808-af25-78ab09aeb27c",
+       "state": "queued_not_sent",
+       "target_role": "worker"
+      }
+     ],
+     "outbox_lost_count": 1,
+     "previous": {
+      "boot_id": "2cb5a178-a3f9-442e-a5ff-da36260d4fd2",
+      "phase": "stopped",
+      "pid": 1380,
+      "shutdown_verified": true
+     },
+     "probed": false,
+     "processes": [
+      {
+       "name": "backend",
+       "pid": 1380,
+       "start_ticks": 1746,
+       "state": "ended_by_reboot"
+      },
+      {
+       "name": "manager_omp",
+       "pid": 1386,
+       "start_ticks": 1791,
+       "state": "ended_by_reboot"
+      },
+      {
+       "name": "worker_omp",
+       "pid": 1387,
+       "start_ticks": 1791,
+       "state": "ended_by_reboot"
+      },
+      {
+       "name": "host_shell",
+       "pid": 1384,
+       "start_ticks": 1789,
+       "state": "ended_by_reboot"
+      }
+     ],
+     "run": {
+      "boot_marker": "2cb5a178-a3f9-442e-a5ff-da36260d4fd2",
+      "revision": 1,
+      "run_id": "7a7d6c14-7243-40fc-905d-e3bb3ba64a32",
+      "state": "interrupted_by_reboot",
+      "target": null,
+      "target_state": "unrecorded",
+      "task_id": "91372c30-3838-4493-af59-315fd80871da"
+     },
+     "survivor_stops": [],
+     "survivors": []
+    },
+    "task": {
+     "task_id": "91372c30-3838-4493-af59-315fd80871da",
+     "kind": "work",
+     "status": "closed",
+     "run_id": null,
+     "held_reason": null
+    },
+    "sessions": {
+     "manager": "62ef4ab3-c4ca-4bf6-9a18-8a7336c07345",
+     "worker": "2ea9ad89-99b2-456d-9e19-b7c56623104b"
+    }
+   }
+  },
+  {
+   "t": "2026-10-08T04:26:52+0000",
+   "phase": "post",
+   "step": "cli",
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "confirm-boot"
+   ],
+   "rc": 1,
+   "stdout": "== 부팅 확인: 환경·실행 조건 ==\nboot marker: 기록 2cb5a178-a3f9-442e-a5ff-da36260d4fd2 -> 현재 ee166795-ebef-47e0-8078-d3d8815bb7a4 (사유 reboot)\ndata dir: /home/dwchoo/cw19-reboot-02/a/home/wbdata\nproject dir: /home/dwchoo/cw19-reboot-02/a/project\nhost shell: bash /usr/bin/bash (mode manual_prompt)\nOMP: omp/18.2.10 | 격리 확인: failed (OMP isolation check failed: manager: omp exited (closed stdout) before answering 'get_state'; worker: omp exited (closed stdout) before answering 'get_state')\n자동화: idle\nTask: work 91372c30-3838-4493-af59-315fd80871da 상태 closed \"cw19 reboot work\"\nbackend 재시작 대조: reboot | 이전 run 7a7d6c14-7243-40fc-905d-e3bb3ba64a32 상태 interrupted_by_reboot (재실행·재전송 없음) | 보내지 못한 메시지 1건 (재전송 없음)\n자동 동작 보류: boot_confirmation_required\n확인하면 Workbench 자동 동작(worker 지시 전달, worker terminal, 감시·복구 알림, 60초 점검, 새 실험)이 다시 허용됩니다. 재부팅 전 실험은 다시 실행되지 않습니다.\n",
+   "stderr": "refusing to confirm the boot without confirmation (use --yes)\n"
+  },
+  {
+   "t": "2026-10-08T04:26:52+0000",
+   "phase": "post",
+   "step": "cli",
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "confirm-boot",
+    "--json"
+   ],
+   "rc": 1,
+   "stdout": "== 부팅 확인: 환경·실행 조건 ==\nboot marker: 기록 2cb5a178-a3f9-442e-a5ff-da36260d4fd2 -> 현재 ee166795-ebef-47e0-8078-d3d8815bb7a4 (사유 reboot)\ndata dir: /home/dwchoo/cw19-reboot-02/a/home/wbdata\nproject dir: /home/dwchoo/cw19-reboot-02/a/project\nhost shell: bash /usr/bin/bash (mode manual_prompt)\nOMP: omp/18.2.10 | 격리 확인: failed (OMP isolation check failed: manager: omp exited (closed stdout) before answering 'get_state'; worker: omp exited (closed stdout) before answering 'get_state')\n자동화: idle\nTask: work 91372c30-3838-4493-af59-315fd80871da 상태 closed \"cw19 reboot work\"\nbackend 재시작 대조: reboot | 이전 run 7a7d6c14-7243-40fc-905d-e3bb3ba64a32 상태 interrupted_by_reboot (재실행·재전송 없음) | 보내지 못한 메시지 1건 (재전송 없음)\n자동 동작 보류: boot_confirmation_required\n확인하면 Workbench 자동 동작(worker 지시 전달, worker terminal, 감시·복구 알림, 60초 점검, 새 실험)이 다시 허용됩니다. 재부팅 전 실험은 다시 실행되지 않습니다.\n",
+   "stderr": "refusing to confirm the boot without confirmation (use --yes)\n"
+  },
+  {
+   "t": "2026-10-08T04:26:53+0000",
+   "phase": "post",
+   "step": "cli",
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "confirm-boot",
+    "--yes"
+   ],
+   "rc": 0,
+   "stdout": "== 부팅 확인: 환경·실행 조건 ==\nboot marker: 기록 2cb5a178-a3f9-442e-a5ff-da36260d4fd2 -> 현재 ee166795-ebef-47e0-8078-d3d8815bb7a4 (사유 reboot)\ndata dir: /home/dwchoo/cw19-reboot-02/a/home/wbdata\nproject dir: /home/dwchoo/cw19-reboot-02/a/project\nhost shell: bash /usr/bin/bash (mode manual_prompt)\nOMP: omp/18.2.10 | 격리 확인: failed (OMP isolation check failed: manager: omp exited (closed stdout) before answering 'get_state'; worker: omp exited (closed stdout) before answering 'get_state')\n자동화: idle\nTask: work 91372c30-3838-4493-af59-315fd80871da 상태 closed \"cw19 reboot work\"\nbackend 재시작 대조: reboot | 이전 run 7a7d6c14-7243-40fc-905d-e3bb3ba64a32 상태 interrupted_by_reboot (재실행·재전송 없음) | 보내지 못한 메시지 1건 (재전송 없음)\n자동 동작 보류: boot_confirmation_required\n확인하면 Workbench 자동 동작(worker 지시 전달, worker terminal, 감시·복구 알림, 60초 점검, 새 실험)이 다시 허용됩니다. 재부팅 전 실험은 다시 실행되지 않습니다.\n부팅 확인됨 (ee166795-ebef-47e0-8078-d3d8815bb7a4): Workbench 자동 동작이 다시 허용됩니다\n",
+   "stderr": ""
+  },
+  {
+   "t": "2026-10-08T04:26:53+0000",
+   "phase": "post",
+   "step": "after_confirm",
+   "summary": {
+    "phase": "ready",
+    "boot": {
+     "boot_id": "ee166795-ebef-47e0-8078-d3d8815bb7a4",
+     "confirmation_required": false,
+     "confirmed": true,
+     "confirmed_boot_id": "ee166795-ebef-47e0-8078-d3d8815bb7a4",
+     "persisted": true,
+     "reason": null,
+     "recorded_boot_id": "ee166795-ebef-47e0-8078-d3d8815bb7a4"
+    },
+    "holds": [],
+    "faults": {
+     "metadata": null,
+     "model": null,
+     "raw_log": null,
+     "record_error": null
+    },
+    "automation": {
+     "detail": "no active run",
+     "interruption": {
+      "confirmed_at": null,
+      "error": null,
+      "manager_ack": null,
+      "pause_id": null,
+      "requested_at": null,
+      "state": "none",
+      "unknown_tool_call_ids": [],
+      "worker_ack": null
+     },
+     "paused": false,
+     "persistence_error": null,
+     "resume": {
+      "at": "2026-10-08T04:25:40+00:00",
+      "outcome": "resumed",
+      "reason": null
+     },
+     "retry_limit": 3,
+     "review": {
+      "applies": false,
+      "coalesced_count": 0,
+      "exit": null,
+      "interval_seconds": 60,
+      "last_review_at": null,
+      "next_due_in_seconds": null,
+      "pending": false,
+      "reason": null,
+      "review_count": 0,
+      "status": null
+     },
+     "run": null,
+     "source": "backend",
+     "state": "idle",
+     "tick": {
+      "at": "2026-10-08T04:26:52+00:00",
+      "outcome": "idle",
+      "problems": []
+     },
+     "transition": null
+    },
+    "startup": {
+     "at": 1791433531.9989579,
+     "classification": "reboot",
+     "notes": [],
+     "notice": {
+      "notice_id": "d25b6854-6786-4779-ba30-aae6ae4296f6",
+      "state": "dropped_task_closed",
+      "task_id": "91372c30-3838-4493-af59-315fd80871da"
+     },
+     "outbox_lost": [
+      {
+       "handoff_id": "ad6e53d0-a74d-4926-83a9-e5ad2a2a0060",
+       "kind": "task",
+       "message_id": "4f1ef21b-1cbe-4808-af25-78ab09aeb27c",
+       "state": "queued_not_sent",
+       "target_role": "worker"
+      }
+     ],
+     "outbox_lost_count": 1,
+     "previous": {
+      "boot_id": "2cb5a178-a3f9-442e-a5ff-da36260d4fd2",
+      "phase": "stopped",
+      "pid": 1380,
+      "shutdown_verified": true
+     },
+     "probed": false,
+     "processes": [
+      {
+       "name": "backend",
+       "pid": 1380,
+       "start_ticks": 1746,
+       "state": "ended_by_reboot"
+      },
+      {
+       "name": "manager_omp",
+       "pid": 1386,
+       "start_ticks": 1791,
+       "state": "ended_by_reboot"
+      },
+      {
+       "name": "worker_omp",
+       "pid": 1387,
+       "start_ticks": 1791,
+       "state": "ended_by_reboot"
+      },
+      {
+       "name": "host_shell",
+       "pid": 1384,
+       "start_ticks": 1789,
+       "state": "ended_by_reboot"
+      }
+     ],
+     "run": {
+      "boot_marker": "2cb5a178-a3f9-442e-a5ff-da36260d4fd2",
+      "revision": 1,
+      "run_id": "7a7d6c14-7243-40fc-905d-e3bb3ba64a32",
+      "state": "interrupted_by_reboot",
+      "target": null,
+      "target_state": "unrecorded",
+      "task_id": "91372c30-3838-4493-af59-315fd80871da"
+     },
+     "survivor_stops": [],
+     "survivors": []
+    },
+    "task": {
+     "task_id": "91372c30-3838-4493-af59-315fd80871da",
+     "kind": "work",
+     "status": "closed",
+     "run_id": null,
+     "held_reason": null
+    },
+    "sessions": {
+     "manager": "62ef4ab3-c4ca-4bf6-9a18-8a7336c07345",
+     "worker": "2ea9ad89-99b2-456d-9e19-b7c56623104b"
+    }
+   }
+  },
+  {
+   "t": "2026-10-08T04:27:07+0000",
+   "phase": "post",
+   "step": "ui_screen_after_confirm",
+   "has_boot_wait": false,
+   "screen": "focus: MANAGER OMP | host 입력 owner: user | shell mode: manual_prompt | worker: 대기 | 자동화: idle\n경고 OMP 격리 failed: OMP isolation check failed: manager: omp exited (closed stdout) before answering 'get_state'; worker: omp exited (closed stdout) before an\nlq MANAGER OMP *FOCUS* alive qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqklq WORKER OMP alive qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqk\nxfake omp manager                                                              xxfake omp worker                                                               x\nxtool to_worker {\"kind\": \"work\", \"message\": \"follow-up after reboot\", \"task_id\"xxtool terminal {\"command\": \"echo cw19-worker-terminal\"}                        x\nx: \"91372c30-3838-4493-af59-315fd80871da\"}                                     xxtool sent terminal                                                            x\nxtool sent to_worker                                                           xx                                                                              x\nxtool to_worker {\"kind\": \"work\", \"message\": \"cancel after reboot\", \"task_id\": \"xx                                                                              x\nx91372c30-3838-4493-af59-315fd80871da\", \"cancel\": true}                        xx                                                                              x\nxtool sent to_worker                                                           xx                                                                              x\nxtool to_worker {\"kind\": \"experiment\", \"message\": \"new experiment before confirxx                                                                              x\nxm\", \"spec\": {\"goal\": \"cw19 reboot exp\", \"paths\": [\"outcome.txt\"], \"execution\":xx                                                                              x\nx {\"source\": \"/home/dwchoo/cw19-reboot-02/a/project\", \"commit\": \"01f99c5275d45bxx                                                                              x\nx9bb2624271d1edc05985f95ef6\", \"command\": \"printf 'CW19 PASS\\\\n'; printf PASS > xx                                                                              x\nxoutcome.txt\", \"criteria\": {\"log_contains\": \"PASS\", \"result_file\": \"outcome.txtxx                                                                              x\nx\", \"result_contains\": \"PASS\"}, \"environment\": [\"PATH\"], \"shell\": \"bash\"}}}    xx                                                                              x\nxtool sent to_worker                                                           xx                                                                              x\nx                                                                              xx                                                                              x\nx                                                                              xx                                                                              x\nx                                                                              xx                                                                              x\nmqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqjmqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqj\nlq HOST SHELL alive owner=user qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqk\nx$ echo CW19_USER_INPUT > /home/dwchoo/cw19-reboot-02/user_input.txt                                                                                           x\nx$                                                                                                                                                             x\nx                                                                                                                                                              x\nx                                                                                                                                                              x\nx                                                                                                                                                              x\nx                                                                                                                                                              x\nx                                                                                                                                                              x\nx                                                                                                                                                              x\nx                                                                                                                                                              x\nx                                                                                                                                                              x\nx                                                                                                                                                              x\nx                                                                                                                                                              x\nx                                                                                                                                                              x\nx                                                                                                                                                              x\nx                                                                                                                                                              x\nx                                                                                                                                                              x\nmqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqj\n원본 키는 focus pane으로 그대로 전달됩니다 · Ctrl-] Space 메뉴 · Ctrl-] q/Ctrl-q = detach · 휠/Shift+PgUp 스크롤 · 드래그: 복사 · Shift+드래그: 터미널 선택"
+  },
+  {
+   "t": "2026-10-08T04:27:07+0000",
+   "phase": "post",
+   "step": "tool",
+   "pane": "manager_omp",
+   "tool": "to_worker",
+   "args": {
+    "kind": "experiment",
+    "message": "new experiment after confirm",
+    "spec": {
+     "goal": "cw19 reboot exp",
+     "paths": [
+      "outcome.txt"
+     ],
+     "execution": {
+      "source": "/home/dwchoo/cw19-reboot-02/a/project",
+      "commit": "01f99c5275d45b9bb2624271d1edc05985f95ef6",
+      "command": "printf 'CW19 PASS\\n'; printf PASS > outcome.txt",
+      "criteria": {
+       "log_contains": "PASS",
+       "result_file": "outcome.txt",
+       "result_contains": "PASS"
+      },
+      "environment": [
+       "PATH"
+      ],
+      "shell": "bash"
+     }
+    }
+   },
+   "result": {
+    "status": "dispatched",
+    "task_id": "c703bb6e-14ce-4f39-a40f-118e9d1e30f5",
+    "kind": "experiment",
+    "revision": 1,
+    "detail": "dispatched to the worker under the user's standing delegation (C-D66); it reports back with to_manager",
+    "manager_rule": "The worker does this Task; do not do it yourself (no commands, edits or checks for it). End your turn and wait for the worker's to_manager report."
+   }
+  },
+  {
+   "t": "2026-10-08T04:27:32+0000",
+   "phase": "post",
+   "step": "tool_no_result",
+   "pane": "worker_omp",
+   "tool": "terminal",
+   "args": {
+    "command": "echo cw19-worker-terminal-after"
+   },
+   "input_ok": {
+    "v": 1,
+    "type": "result",
+    "id": "eadc1dd0aef44ccf",
+    "ok": true,
+    "pane": "worker_omp",
+    "accepted_bytes": 61
+   }
+  },
+  {
+   "t": "2026-10-08T04:27:47+0000",
+   "phase": "post",
+   "step": "after_confirm_effects",
+   "runs_before": 1,
+   "runs_now": 2,
+   "notices": [],
+   "deliveries": [],
+   "summary": {
+    "phase": "ready",
+    "boot": {
+     "boot_id": "ee166795-ebef-47e0-8078-d3d8815bb7a4",
+     "confirmation_required": false,
+     "confirmed": true,
+     "confirmed_boot_id": "ee166795-ebef-47e0-8078-d3d8815bb7a4",
+     "persisted": true,
+     "reason": null,
+     "recorded_boot_id": "ee166795-ebef-47e0-8078-d3d8815bb7a4"
+    },
+    "holds": [],
+    "faults": {
+     "metadata": null,
+     "model": null,
+     "raw_log": null,
+     "record_error": null
+    },
+    "automation": {
+     "detail": "no active run",
+     "interruption": {
+      "confirmed_at": null,
+      "error": null,
+      "manager_ack": null,
+      "pause_id": null,
+      "requested_at": null,
+      "state": "none",
+      "unknown_tool_call_ids": [],
+      "worker_ack": null
+     },
+     "paused": false,
+     "persistence_error": null,
+     "resume": {
+      "at": "2026-10-08T04:25:40+00:00",
+      "outcome": "resumed",
+      "reason": null
+     },
+     "retry_limit": 3,
+     "review": {
+      "applies": false,
+      "coalesced_count": 0,
+      "exit": null,
+      "interval_seconds": 60,
+      "last_review_at": null,
+      "next_due_in_seconds": null,
+      "pending": false,
+      "reason": null,
+      "review_count": 0,
+      "status": null
+     },
+     "run": null,
+     "source": "backend",
+     "state": "idle",
+     "tick": {
+      "at": "2026-10-08T04:27:47+00:00",
+      "outcome": "idle",
+      "problems": []
+     },
+     "transition": null
+    },
+    "startup": {
+     "at": 1791433531.9989579,
+     "classification": "reboot",
+     "notes": [],
+     "notice": {
+      "notice_id": "d25b6854-6786-4779-ba30-aae6ae4296f6",
+      "state": "dropped_task_closed",
+      "task_id": "91372c30-3838-4493-af59-315fd80871da"
+     },
+     "outbox_lost": [
+      {
+       "handoff_id": "ad6e53d0-a74d-4926-83a9-e5ad2a2a0060",
+       "kind": "task",
+       "message_id": "4f1ef21b-1cbe-4808-af25-78ab09aeb27c",
+       "state": "queued_not_sent",
+       "target_role": "worker"
+      }
+     ],
+     "outbox_lost_count": 1,
+     "previous": {
+      "boot_id": "2cb5a178-a3f9-442e-a5ff-da36260d4fd2",
+      "phase": "stopped",
+      "pid": 1380,
+      "shutdown_verified": true
+     },
+     "probed": false,
+     "processes": [
+      {
+       "name": "backend",
+       "pid": 1380,
+       "start_ticks": 1746,
+       "state": "ended_by_reboot"
+      },
+      {
+       "name": "manager_omp",
+       "pid": 1386,
+       "start_ticks": 1791,
+       "state": "ended_by_reboot"
+      },
+      {
+       "name": "worker_omp",
+       "pid": 1387,
+       "start_ticks": 1791,
+       "state": "ended_by_reboot"
+      },
+      {
+       "name": "host_shell",
+       "pid": 1384,
+       "start_ticks": 1789,
+       "state": "ended_by_reboot"
+      }
+     ],
+     "run": {
+      "boot_marker": "2cb5a178-a3f9-442e-a5ff-da36260d4fd2",
+      "revision": 1,
+      "run_id": "7a7d6c14-7243-40fc-905d-e3bb3ba64a32",
+      "state": "interrupted_by_reboot",
+      "target": null,
+      "target_state": "unrecorded",
+      "task_id": "91372c30-3838-4493-af59-315fd80871da"
+     },
+     "survivor_stops": [],
+     "survivors": []
+    },
+    "task": {
+     "task_id": "c703bb6e-14ce-4f39-a40f-118e9d1e30f5",
+     "kind": "experiment",
+     "status": "finished",
+     "run_id": null,
+     "held_reason": "start_failed:WorkflowHeld"
+    },
+    "sessions": {
+     "manager": "62ef4ab3-c4ca-4bf6-9a18-8a7336c07345",
+     "worker": "2ea9ad89-99b2-456d-9e19-b7c56623104b"
+    }
+   }
+  },
+  {
+   "t": "2026-10-08T04:27:47+0000",
+   "phase": "post",
+   "step": "cli",
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "confirm-boot",
+    "--yes"
+   ],
+   "rc": 1,
+   "stdout": "",
+   "stderr": "부팅 확인이 필요하지 않습니다 (대기 중인 확인 없음)\n"
+  },
+  {
+   "t": "2026-10-08T04:27:47+0000",
+   "phase": "post",
+   "step": "cli",
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "status"
+   ],
+   "rc": 0,
+   "stdout": "backend pid 1100 phase ready\ndata dir /home/dwchoo/cw19-reboot-02/a/home/wbdata\n  host_shell: pid 1104 alive=True owner=user\n  manager_omp: pid 1106 alive=True owner=user\n  worker_omp: pid 1107 alive=True owner=user\n  shell: bash /usr/bin/bash mode=manual_prompt\nomp isolation: failed (omp/18.2.10 evidence isolation=18.6.1)\nWARNING: OMP isolation check failed: manager: omp exited (closed stdout) before answering 'get_state'; worker: omp exited (closed stdout) before answering 'get_state'\n  note: OMP 18.2.10 has not extracted its native addon into /home/dwchoo/cw19-reboot-02/a/home/.omp/natives/18.2.10 yet: the first Workbench OMP extracts it there (the same files your own omp 18.2.10 extracts; OMP has no setting to move this directory).\nbackend 재시작 대조: reboot | 이전 run 7a7d6c14-7243-40fc-905d-e3bb3ba64a32 상태 interrupted_by_reboot (재실행·재전송 없음) | 보내지 못한 메시지 1건 (재전송 없음)\n",
+   "stderr": ""
+  },
+  {
+   "t": "2026-10-08T04:27:49+0000",
+   "phase": "post",
+   "step": "cli",
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "shutdown",
+    "--yes",
+    "--json"
+   ],
+   "rc": 0,
+   "stdout": "active work:\n  - {\"idle\": null, \"kind\": \"omp_turn\", \"role\": \"manager\"}\n  - {\"idle\": null, \"kind\": \"omp_turn\", \"role\": \"worker\"}\n{\"shutdown\": {\"left_running\": [], \"lifecycle\": null, \"panes\": [{\"exit_status\": -1, \"pane\": \"host_shell\", \"survivors\": []}, {\"exit_status\": -15, \"pane\": \"manager_omp\", \"survivors\": []}, {\"exit_status\": -15, \"pane\": \"worker_omp\", \"survivors\": []}], \"previous_survivors\": [], \"problems\": [], \"processes\": {\"host_shell\": \"dead\", \"manager_omp\": \"dead\", \"worker_omp\": \"dead\"}, \"user_confirmed\": true, \"verified\": true}}\n",
+   "stderr": ""
+  },
+  {
+   "t": "2026-10-08T04:27:51+0000",
+   "phase": "post",
+   "step": "leftover",
+   "ours": {}
+  },
+  {
+   "t": "2026-10-08T04:27:59+0000",
+   "phase": "pre2",
+   "step": "boot_before",
+   "boot_id": "ee166795-ebef-47e0-8078-d3d8815bb7a4"
+  },
+  {
+   "t": "2026-10-08T04:28:00+0000",
+   "phase": "pre2",
+   "step": "cli",
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "start",
+    "--no-attach",
+    "--omp",
+    "/home/dwchoo/cw19-reboot-02/b/omp"
+   ],
+   "rc": 0,
+   "stdout": "starting backend: shell bash (/usr/bin/bash), omp/18.2.10\nbackend pid 1269 phase ready\ndata dir /home/dwchoo/cw19-reboot-02/b/home/wbdata\n  host_shell: pid 1273 alive=True owner=user\n  manager_omp: pid 1275 alive=True owner=user\n  worker_omp: pid 1276 alive=True owner=user\n  shell: bash /usr/bin/bash mode=manual_prompt\nomp isolation: failed (omp/18.2.10 evidence isolation=18.6.1)\nWARNING: OMP isolation check failed: manager: omp exited (closed stdout) before answering 'get_state'; worker: omp exited (closed stdout) before answering 'get_state'\n  note: OMP 18.2.10 has not extracted its native addon into /home/dwchoo/cw19-reboot-02/b/home/.omp/natives/18.2.10 yet: the first Workbench OMP extracts it there (the same files your own omp 18.2.10 extracts; OMP has no setting to move this directory).\n",
+   "stderr": ""
+  },
+  {
+   "t": "2026-10-08T04:28:00+0000",
+   "phase": "pre2",
+   "step": "terminal_baseline_no_task",
+   "input_ok": true,
+   "results": [
+    {
+     "status": "exited",
+     "exit_code": 0,
+     "command_id": "31bb8611-de1e-40db-aa55-d53b960d97e1",
+     "command": "echo cw19-baseline-1",
+     "cwd": "/home/dwchoo/cw19-reboot-02/b/project",
+     "log_path": "/home/dwchoo/cw19-reboot-02/b/home/wbdata/workflow/terminal/31bb8611-de1e-40db-aa55-d53b960d97e1.log",
+     "duration_seconds": 0.092,
+     "output_tail": "cw19-baseline-1\n",
+     "output_tail_truncated": false
+    }
+   ]
+  },
+  {
+   "t": "2026-10-08T04:28:00+0000",
+   "phase": "pre2",
+   "step": "tool",
+   "pane": "manager_omp",
+   "tool": "to_worker",
+   "args": {
+    "kind": "work",
+    "message": "cw19 reboot work 2",
+    "spec": {
+     "goal": "cw19 reboot 2",
+     "paths": [
+      "notes/"
+     ]
+    }
+   },
+   "result": {
+    "status": "dispatched",
+    "task_id": "61373417-795b-488e-b884-e793f731c34e",
+    "kind": "work",
+    "revision": 1,
+    "detail": "dispatched to the worker under the user's standing delegation (C-D66); it reports back with to_manager",
+    "manager_rule": "The worker does this Task; do not do it yourself (no commands, edits or checks for it). End your turn and wait for the worker's to_manager report."
+   }
+  },
+  {
+   "t": "2026-10-08T04:28:46+0000",
+   "phase": "pre2",
+   "step": "terminal_baseline_with_task",
+   "input_ok": true,
+   "results": null
+  },
+  {
+   "t": "2026-10-08T04:28:46+0000",
+   "phase": "pre2",
+   "step": "pre2_summary",
+   "summary": {
+    "phase": "ready",
+    "boot": {
+     "boot_id": "ee166795-ebef-47e0-8078-d3d8815bb7a4",
+     "confirmation_required": false,
+     "confirmed": null,
+     "confirmed_boot_id": null,
+     "persisted": true,
+     "reason": null,
+     "recorded_boot_id": "ee166795-ebef-47e0-8078-d3d8815bb7a4"
+    },
+    "holds": [],
+    "faults": {
+     "metadata": null,
+     "model": null,
+     "raw_log": null,
+     "record_error": null
+    },
+    "automation": {
+     "detail": "free-work run: no host run to review; pause/resume apply",
+     "interruption": {
+      "confirmed_at": null,
+      "error": null,
+      "manager_ack": null,
+      "pause_id": null,
+      "requested_at": null,
+      "state": "none",
+      "unknown_tool_call_ids": [],
+      "worker_ack": null
+     },
+     "paused": false,
+     "persistence_error": null,
+     "resume": null,
+     "retry_limit": 3,
+     "review": {
+      "applies": false,
+      "coalesced_count": 0,
+      "exit": null,
+      "interval_seconds": 60,
+      "last_review_at": null,
+      "next_due_in_seconds": null,
+      "pending": false,
+      "reason": null,
+      "review_count": 0,
+      "status": null
+     },
+     "run": {
+      "bound": true,
+      "error": null,
+      "kind": "work",
+      "revision": 1,
+      "run_id": "b9f9db9f-004b-481e-b455-c7595278af31",
+      "task_id": "61373417-795b-488e-b884-e793f731c34e"
+     },
+     "source": "backend",
+     "state": "active",
+     "tick": {
+      "at": "2026-10-08T04:28:45+00:00",
+      "outcome": "held",
+      "problems": [
+       "control_or_owner_unknown_or_drifted",
+       "run_not_ready",
+       "user_owner_or_control_hold"
+      ]
+     },
+     "transition": null
+    },
+    "startup": {
+     "at": 1791433680.1568282,
+     "classification": "fresh",
+     "notes": [],
+     "notice": null,
+     "outbox_lost": [],
+     "outbox_lost_count": 0,
+     "previous": null,
+     "probed": false,
+     "processes": [],
+     "run": null,
+     "survivor_stops": [],
+     "survivors": []
+    },
+    "task": {
+     "task_id": "61373417-795b-488e-b884-e793f731c34e",
+     "kind": "work",
+     "status": "running",
+     "run_id": "b9f9db9f-004b-481e-b455-c7595278af31",
+     "held_reason": null
+    },
+    "sessions": {
+     "manager": "8c131c70-6be7-4bc7-a04a-a51d0debd1d7",
+     "worker": "a39d24e2-28f5-477d-94bf-e9255bef3bd5"
+    }
+   }
+  },
+  {
+   "t": "2026-10-08T04:28:52+0000",
+   "phase": "pre2",
+   "step": "ui_screen_pre2",
+   "screen": "focus: MANAGER OMP | host 입력 owner: user | shell mode: manual_prompt | worker: 작업 중 | 자동화: active\n경고 OMP 격리 failed: OMP isolation check failed: manager: omp exited (closed stdout) before answering 'get_state'; worker: omp exited (closed stdout) before an\nlq MANAGER OMP *FOCUS* alive qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqklq WORKER OMP alive qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqk\nxfake omp manager                                                              xxfake omp worker                                                               x\nxtool to_worker {\"kind\": \"work\", \"message\": \"cw19 reboot work 2\", \"spec\": {\"goaxxtool terminal {\"command\": \"echo cw19-baseline-1\"}                             x\nxl\": \"cw19 reboot 2\", \"paths\": [\"notes/\"]}}                                    xxtool sent terminal                                                            x\nxtool sent to_worker                                                           xxtool terminal {\"command\": \"echo cw19-baseline-2\"}                             x\nx                                                                              xxtool sent terminal                                                            x\nx                                                                              xxException in thread Thread-1 (serve):                                         x\nx                                                                              xxTraceback (most recent call last):                                            x\nx                                                                              xx  File \"/usr/lib/python3.12/threading.py\", line 1073, in _bootstrap_inner     x\nx                                                                              xx    self.run()                                                                x\nx                                                                              xx  File \"/usr/lib/python3.12/threading.py\", line 1010, in run                  x\nx                                                                              xx    self._target(*self._args, **self._kwargs)                                 x\nx                                                                              xx  File \"/home/dwchoo/cw19-reboot-02/b/omp\", line 70, in serve                 x\nx                                                                              xx    \"kind\": \"deliver\", \"task_id\": envelope.get(\"task_id\"),                    x\nx                                                                              xx                                  ^^^^^^^^^^^^                                x\nx                                                                              xxAttributeError: 'str' object has no attribute 'get'                           x\nx                                                                              xx                                                                              x\nx                                                                              xx                                                                              x\nmqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqjmqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqj\nlq HOST SHELL alive owner=user qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqk\nx$ wb-handoff                                                                                                                                                  x\nx[worker] $ echo cw19-baseline-1                                                                                                                               x\nxcw19-baseline-1                                                                                                                                               x\nx$ wb-handoff                                                                                                                                                  x\nx[worker] $ echo cw19-baseline-2                                                                                                                               x\nxcw19-baseline-2                                                                                                                                               x\nx$                                                                                                                                                             x\nx                                                                                                                                                              x\nx                                                                                                                                                              x\nx                                                                                                                                                              x\nx                                                                                                                                                              x\nx                                                                                                                                                              x\nx                                                                                                                                                              x\nx                                                                                                                                                              x\nx                                                                                                                                                              x\nx                                                                                                                                                              x\nmqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqj\n원본 키는 focus pane으로 그대로 전달됩니다 · Ctrl-] Space 메뉴 · Ctrl-] q/Ctrl-q = detach · 휠/Shift+PgUp 스크롤 · 드래그: 복사 · Shift+드래그: 터미널 선택"
+  },
+  {
+   "t": "2026-10-08T04:29:11+0000",
+   "phase": "post2",
+   "step": "boot_after",
+   "boot_id_before": "ee166795-ebef-47e0-8078-d3d8815bb7a4",
+   "boot_id_after": "29b6d314-c603-4efa-a6d3-16ae69f7d521",
+   "changed": true
+  },
+  {
+   "t": "2026-10-08T04:29:11+0000",
+   "phase": "post2",
+   "step": "ours_before_start",
+   "ours": {}
+  },
+  {
+   "t": "2026-10-08T04:29:11+0000",
+   "phase": "post2",
+   "step": "cli",
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "start",
+    "--no-attach",
+    "--omp",
+    "/home/dwchoo/cw19-reboot-02/b/omp"
+   ],
+   "rc": 0,
+   "stdout": "starting backend: shell bash (/usr/bin/bash), omp/18.2.10\nbackend pid 1106 phase ready\ndata dir /home/dwchoo/cw19-reboot-02/b/home/wbdata\n  host_shell: pid 1110 alive=True owner=user\n  manager_omp: pid 1112 alive=True owner=user\n  worker_omp: pid 1113 alive=True owner=user\n  shell: bash /usr/bin/bash mode=manual_prompt\nomp isolation: failed (omp/18.2.10 evidence isolation=18.6.1)\nWARNING: OMP isolation check failed: manager: omp exited (closed stdout) before answering 'get_state'; worker: omp exited (closed stdout) before answering 'get_state'\n  note: OMP 18.2.10 has not extracted its native addon into /home/dwchoo/cw19-reboot-02/b/home/.omp/natives/18.2.10 yet: the first Workbench OMP extracts it there (the same files your own omp 18.2.10 extracts; OMP has no setting to move this directory).\n",
+   "stderr": ""
+  },
+  {
+   "t": "2026-10-08T04:29:11+0000",
+   "phase": "post2",
+   "step": "ready_after_reboot",
+   "summary": {
+    "phase": "ready",
+    "boot": {
+     "boot_id": "29b6d314-c603-4efa-a6d3-16ae69f7d521",
+     "confirmation_required": true,
+     "confirmed": false,
+     "confirmed_boot_id": null,
+     "persisted": true,
+     "reason": "reboot",
+     "recorded_boot_id": "ee166795-ebef-47e0-8078-d3d8815bb7a4"
+    },
+    "holds": [
+     {
+      "detail": "reboot",
+      "reason": "boot_confirmation_required",
+      "since": 1791433751.636029
+     }
+    ],
+    "faults": {
+     "metadata": null,
+     "model": null,
+     "raw_log": null,
+     "record_error": null
+    },
+    "automation": {
+     "detail": "no active run",
+     "interruption": {
+      "confirmed_at": null,
+      "error": null,
+      "manager_ack": null,
+      "pause_id": null,
+      "requested_at": null,
+      "state": "none",
+      "unknown_tool_call_ids": [],
+      "worker_ack": null
+     },
+     "paused": false,
+     "persistence_error": null,
+     "resume": null,
+     "retry_limit": 3,
+     "review": {
+      "applies": false,
+      "coalesced_count": 0,
+      "exit": null,
+      "interval_seconds": 60,
+      "last_review_at": null,
+      "next_due_in_seconds": null,
+      "pending": false,
+      "reason": null,
+      "review_count": 0,
+      "status": null
+     },
+     "run": null,
+     "source": "backend",
+     "state": "idle",
+     "tick": null,
+     "transition": null
+    },
+    "startup": {
+     "at": 1791433751.6342485,
+     "classification": "reboot",
+     "notes": [],
+     "notice": {
+      "notice_id": "3ac04543-6c35-4547-a9cc-0359dbdeb6ea",
+      "state": "queued",
+      "task_id": "61373417-795b-488e-b884-e793f731c34e"
+     },
+     "outbox_lost": [
+      {
+       "handoff_id": "100e7af6-23d1-49cd-9502-1fbc76ec5217",
+       "kind": "task",
+       "message_id": "af908588-6e45-4cc0-ba11-d17c7778faee",
+       "state": "queued_not_sent",
+       "target_role": "worker"
+      }
+     ],
+     "outbox_lost_count": 1,
+     "previous": {
+      "boot_id": "ee166795-ebef-47e0-8078-d3d8815bb7a4",
+      "phase": "stopped",
+      "pid": 1269,
+      "shutdown_verified": true
+     },
+     "probed": false,
+     "processes": [
+      {
+       "name": "backend",
+       "pid": 1269,
+       "start_ticks": 16230,
+       "state": "ended_by_reboot"
+      },
+      {
+       "name": "manager_omp",
+       "pid": 1275,
+       "start_ticks": 16270,
+       "state": "ended_by_reboot"
+      },
+      {
+       "name": "worker_omp",
+       "pid": 1276,
+       "start_ticks": 16270,
+       "state": "ended_by_reboot"
+      },
+      {
+       "name": "host_shell",
+       "pid": 1273,
+       "start_ticks": 16269,
+       "state": "ended_by_reboot"
+      },
+      {
+       "name": "supervisor",
+       "pid": 1353,
+       "start_ticks": 16341,
+       "state": "ended_by_reboot"
+      }
+     ],
+     "run": {
+      "boot_marker": "ee166795-ebef-47e0-8078-d3d8815bb7a4",
+      "revision": 1,
+      "run_id": "b9f9db9f-004b-481e-b455-c7595278af31",
+      "state": "interrupted_by_reboot",
+      "target": null,
+      "target_state": "unrecorded",
+      "task_id": "61373417-795b-488e-b884-e793f731c34e"
+     },
+     "survivor_stops": [],
+     "survivors": []
+    },
+    "task": {
+     "task_id": "61373417-795b-488e-b884-e793f731c34e",
+     "kind": "work",
+     "status": "running",
+     "run_id": "b9f9db9f-004b-481e-b455-c7595278af31",
+     "held_reason": "backend_restarted"
+    },
+    "sessions": {
+     "manager": "e5aa09b0-b5bc-4587-bde7-cd62f8a87a1c",
+     "worker": "9d6b1ee4-2112-4df2-9cb0-10e3e9fcb1c3"
+    }
+   }
+  },
+  {
+   "t": "2026-10-08T04:29:18+0000",
+   "phase": "post2",
+   "step": "ui_screen_before_confirm_160",
+   "has_boot_wait": true,
+   "status_lines": [
+    "focus: MANAGER OMP | host 입력 owner: user | shell mode: manual_prompt | worker: 작업 중 | 자동화: idle",
+    "재부팅 확인 대기: python -m workbench confirm-boot (그 전에는 자동 동작 보류) | 경고 OMP 격리 failed: OMP isolation check failed: manager: omp exited (closed st",
+    "lq MANAGER OMP *FOCUS* alive qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqklq WORKER OMP alive qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqk"
+   ],
+   "bottom": [
+    "mqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqj",
+    "원본 키는 focus pane으로 그대로 전달됩니다 · Ctrl-] Space 메뉴 · Ctrl-] q/Ctrl-q = detach · 휠/Shift+PgUp 스크롤 · 드래그: 복사 · Shift+드래그: 터미널 선택"
+   ]
+  },
+  {
+   "t": "2026-10-08T04:29:24+0000",
+   "phase": "post2",
+   "step": "ui_screen_before_confirm_400",
+   "has_boot_wait": true,
+   "status_lines": [
+    "focus: MANAGER OMP | host 입력 owner: user | shell mode: manual_prompt | worker: 작업 중 | 자동화: idle",
+    "재부팅 확인 대기: python -m workbench confirm-boot (그 전에는 자동 동작 보류) | 경고 OMP 격리 failed: OMP isolation check failed: manager: omp exited (closed stdout) before answering 'get_state'; worker: omp exited (closed stdout) before answering 'get_state' | 재부팅 뒤 시작 · 이전 run 중단됨(결과 불명) · 보내지 못한 메시지 1건 | 작업: 작업 \"cw19 reboot work 2\" [실행 중 · backend_restarted] | bac",
+    "lq MANAGER OMP *FOCUS* alive qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqklq WORKER OMP alive qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqk"
+   ],
+   "bottom": [
+    "mqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqj",
+    "원본 키는 focus pane으로 그대로 전달됩니다 · Ctrl-] Space 메뉴 · Ctrl-] q/Ctrl-q = detach · 휠/Shift+PgUp 스크롤 · 드래그: 복사 · Shift+드래그: 터미널 선택"
+   ]
+  },
+  {
+   "t": "2026-10-08T04:29:24+0000",
+   "phase": "post2",
+   "step": "terminal_before_confirm_open_task",
+   "input_ok": true,
+   "results": [
+    {
+     "status": "held",
+     "reason": "boot_confirmation_required",
+     "detail": "Nothing was run: Workbench holds automatic work now (reason in this result: boot confirmation, metadata storage or a model error). A command already running continues. End your turn; do not retry in a loop."
+    }
+   ]
+  },
+  {
+   "t": "2026-10-08T04:30:29+0000",
+   "phase": "post2",
+   "step": "held_window2",
+   "notices": [],
+   "deliveries": [],
+   "summary": {
+    "phase": "ready",
+    "boot": {
+     "boot_id": "29b6d314-c603-4efa-a6d3-16ae69f7d521",
+     "confirmation_required": true,
+     "confirmed": false,
+     "confirmed_boot_id": null,
+     "persisted": true,
+     "reason": "reboot",
+     "recorded_boot_id": "ee166795-ebef-47e0-8078-d3d8815bb7a4"
+    },
+    "holds": [
+     {
+      "detail": "reboot",
+      "reason": "boot_confirmation_required",
+      "since": 1791433751.636029
+     }
+    ],
+    "faults": {
+     "metadata": null,
+     "model": null,
+     "raw_log": null,
+     "record_error": null
+    },
+    "automation": {
+     "detail": "no active run",
+     "interruption": {
+      "confirmed_at": null,
+      "error": null,
+      "manager_ack": null,
+      "pause_id": null,
+      "requested_at": null,
+      "state": "none",
+      "unknown_tool_call_ids": [],
+      "worker_ack": null
+     },
+     "paused": false,
+     "persistence_error": null,
+     "resume": null,
+     "retry_limit": 3,
+     "review": {
+      "applies": false,
+      "coalesced_count": 0,
+      "exit": null,
+      "interval_seconds": 60,
+      "last_review_at": null,
+      "next_due_in_seconds": null,
+      "pending": false,
+      "reason": null,
+      "review_count": 0,
+      "status": null
+     },
+     "run": null,
+     "source": "backend",
+     "state": "idle",
+     "tick": {
+      "at": "2026-10-08T04:30:29+00:00",
+      "outcome": "idle",
+      "problems": []
+     },
+     "transition": null
+    },
+    "startup": {
+     "at": 1791433751.6342485,
+     "classification": "reboot",
+     "notes": [],
+     "notice": {
+      "notice_id": "3ac04543-6c35-4547-a9cc-0359dbdeb6ea",
+      "state": "queued",
+      "task_id": "61373417-795b-488e-b884-e793f731c34e"
+     },
+     "outbox_lost": [
+      {
+       "handoff_id": "100e7af6-23d1-49cd-9502-1fbc76ec5217",
+       "kind": "task",
+       "message_id": "af908588-6e45-4cc0-ba11-d17c7778faee",
+       "state": "queued_not_sent",
+       "target_role": "worker"
+      }
+     ],
+     "outbox_lost_count": 1,
+     "previous": {
+      "boot_id": "ee166795-ebef-47e0-8078-d3d8815bb7a4",
+      "phase": "stopped",
+      "pid": 1269,
+      "shutdown_verified": true
+     },
+     "probed": false,
+     "processes": [
+      {
+       "name": "backend",
+       "pid": 1269,
+       "start_ticks": 16230,
+       "state": "ended_by_reboot"
+      },
+      {
+       "name": "manager_omp",
+       "pid": 1275,
+       "start_ticks": 16270,
+       "state": "ended_by_reboot"
+      },
+      {
+       "name": "worker_omp",
+       "pid": 1276,
+       "start_ticks": 16270,
+       "state": "ended_by_reboot"
+      },
+      {
+       "name": "host_shell",
+       "pid": 1273,
+       "start_ticks": 16269,
+       "state": "ended_by_reboot"
+      },
+      {
+       "name": "supervisor",
+       "pid": 1353,
+       "start_ticks": 16341,
+       "state": "ended_by_reboot"
+      }
+     ],
+     "run": {
+      "boot_marker": "ee166795-ebef-47e0-8078-d3d8815bb7a4",
+      "revision": 1,
+      "run_id": "b9f9db9f-004b-481e-b455-c7595278af31",
+      "state": "interrupted_by_reboot",
+      "target": null,
+      "target_state": "unrecorded",
+      "task_id": "61373417-795b-488e-b884-e793f731c34e"
+     },
+     "survivor_stops": [],
+     "survivors": []
+    },
+    "task": {
+     "task_id": "61373417-795b-488e-b884-e793f731c34e",
+     "kind": "work",
+     "status": "running",
+     "run_id": "b9f9db9f-004b-481e-b455-c7595278af31",
+     "held_reason": "backend_restarted"
+    },
+    "sessions": {
+     "manager": "e5aa09b0-b5bc-4587-bde7-cd62f8a87a1c",
+     "worker": "9d6b1ee4-2112-4df2-9cb0-10e3e9fcb1c3"
+    }
+   }
+  },
+  {
+   "t": "2026-10-08T04:30:30+0000",
+   "phase": "post2",
+   "step": "cli",
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "confirm-boot",
+    "--yes"
+   ],
+   "rc": 0,
+   "stdout": "== 부팅 확인: 환경·실행 조건 ==\nboot marker: 기록 ee166795-ebef-47e0-8078-d3d8815bb7a4 -> 현재 29b6d314-c603-4efa-a6d3-16ae69f7d521 (사유 reboot)\ndata dir: /home/dwchoo/cw19-reboot-02/b/home/wbdata\nproject dir: /home/dwchoo/cw19-reboot-02/b/project\nhost shell: bash /usr/bin/bash (mode manual_prompt)\nOMP: omp/18.2.10 | 격리 확인: failed (OMP isolation check failed: manager: omp exited (closed stdout) before answering 'get_state'; worker: omp exited (closed stdout) before answering 'get_state')\n자동화: idle\nTask: work 61373417-795b-488e-b884-e793f731c34e 상태 running (보류 사유 backend_restarted) \"cw19 reboot work 2\"\nbackend 재시작 대조: reboot | 이전 run b9f9db9f-004b-481e-b455-c7595278af31 상태 interrupted_by_reboot (재실행·재전송 없음) | 보내지 못한 메시지 1건 (재전송 없음)\n자동 동작 보류: boot_confirmation_required\n확인하면 Workbench 자동 동작(worker 지시 전달, worker terminal, 감시·복구 알림, 60초 점검, 새 실험)이 다시 허용됩니다. 재부팅 전 실험은 다시 실행되지 않습니다.\n부팅 확인됨 (29b6d314-c603-4efa-a6d3-16ae69f7d521): Workbench 자동 동작이 다시 허용됩니다\n",
+   "stderr": ""
+  },
+  {
+   "t": "2026-10-08T04:30:30+0000",
+   "phase": "post2",
+   "step": "after_confirm",
+   "summary": {
+    "phase": "ready",
+    "boot": {
+     "boot_id": "29b6d314-c603-4efa-a6d3-16ae69f7d521",
+     "confirmation_required": false,
+     "confirmed": true,
+     "confirmed_boot_id": "29b6d314-c603-4efa-a6d3-16ae69f7d521",
+     "persisted": true,
+     "reason": null,
+     "recorded_boot_id": "29b6d314-c603-4efa-a6d3-16ae69f7d521"
+    },
+    "holds": [],
+    "faults": {
+     "metadata": null,
+     "model": null,
+     "raw_log": null,
+     "record_error": null
+    },
+    "automation": {
+     "detail": "no active run",
+     "interruption": {
+      "confirmed_at": null,
+      "error": null,
+      "manager_ack": null,
+      "pause_id": null,
+      "requested_at": null,
+      "state": "none",
+      "unknown_tool_call_ids": [],
+      "worker_ack": null
+     },
+     "paused": false,
+     "persistence_error": null,
+     "resume": null,
+     "retry_limit": 3,
+     "review": {
+      "applies": false,
+      "coalesced_count": 0,
+      "exit": null,
+      "interval_seconds": 60,
+      "last_review_at": null,
+      "next_due_in_seconds": null,
+      "pending": false,
+      "reason": null,
+      "review_count": 0,
+      "status": null
+     },
+     "run": null,
+     "source": "backend",
+     "state": "idle",
+     "tick": {
+      "at": "2026-10-08T04:30:29+00:00",
+      "outcome": "idle",
+      "problems": []
+     },
+     "transition": null
+    },
+    "startup": {
+     "at": 1791433751.6342485,
+     "classification": "reboot",
+     "notes": [],
+     "notice": {
+      "notice_id": "3ac04543-6c35-4547-a9cc-0359dbdeb6ea",
+      "state": "queued",
+      "task_id": "61373417-795b-488e-b884-e793f731c34e"
+     },
+     "outbox_lost": [
+      {
+       "handoff_id": "100e7af6-23d1-49cd-9502-1fbc76ec5217",
+       "kind": "task",
+       "message_id": "af908588-6e45-4cc0-ba11-d17c7778faee",
+       "state": "queued_not_sent",
+       "target_role": "worker"
+      }
+     ],
+     "outbox_lost_count": 1,
+     "previous": {
+      "boot_id": "ee166795-ebef-47e0-8078-d3d8815bb7a4",
+      "phase": "stopped",
+      "pid": 1269,
+      "shutdown_verified": true
+     },
+     "probed": false,
+     "processes": [
+      {
+       "name": "backend",
+       "pid": 1269,
+       "start_ticks": 16230,
+       "state": "ended_by_reboot"
+      },
+      {
+       "name": "manager_omp",
+       "pid": 1275,
+       "start_ticks": 16270,
+       "state": "ended_by_reboot"
+      },
+      {
+       "name": "worker_omp",
+       "pid": 1276,
+       "start_ticks": 16270,
+       "state": "ended_by_reboot"
+      },
+      {
+       "name": "host_shell",
+       "pid": 1273,
+       "start_ticks": 16269,
+       "state": "ended_by_reboot"
+      },
+      {
+       "name": "supervisor",
+       "pid": 1353,
+       "start_ticks": 16341,
+       "state": "ended_by_reboot"
+      }
+     ],
+     "run": {
+      "boot_marker": "ee166795-ebef-47e0-8078-d3d8815bb7a4",
+      "revision": 1,
+      "run_id": "b9f9db9f-004b-481e-b455-c7595278af31",
+      "state": "interrupted_by_reboot",
+      "target": null,
+      "target_state": "unrecorded",
+      "task_id": "61373417-795b-488e-b884-e793f731c34e"
+     },
+     "survivor_stops": [],
+     "survivors": []
+    },
+    "task": {
+     "task_id": "61373417-795b-488e-b884-e793f731c34e",
+     "kind": "work",
+     "status": "running",
+     "run_id": "b9f9db9f-004b-481e-b455-c7595278af31",
+     "held_reason": "backend_restarted"
+    },
+    "sessions": {
+     "manager": "e5aa09b0-b5bc-4587-bde7-cd62f8a87a1c",
+     "worker": "9d6b1ee4-2112-4df2-9cb0-10e3e9fcb1c3"
+    }
+   }
+  },
+  {
+   "t": "2026-10-08T04:31:48+0000",
+   "phase": "post2",
+   "step": "notice_open_task_after_confirm",
+   "notices": [
+    {
+     "role": "manager",
+     "session": "e5aa09b0-b5bc-4587-bde7-cd62f8a87a1c",
+     "notice": {
+      "task_id": "61373417-795b-488e-b884-e793f731c34e",
+      "task": {
+       "task_id": "61373417-795b-488e-b884-e793f731c34e",
+       "kind": "work",
+       "status": "running",
+       "summary": "cw19 reboot work 2",
+       "held_reason": "backend_restarted",
+       "run_id": "b9f9db9f-004b-481e-b455-c7595278af31"
+      },
+      "classification": "reboot",
+      "run": {
+       "task_id": "61373417-795b-488e-b884-e793f731c34e",
+       "revision": 1,
+       "run_id": "b9f9db9f-004b-481e-b455-c7595278af31",
+       "state": "interrupted_by_reboot",
+       "boot_marker": "ee166795-ebef-47e0-8078-d3d8815bb7a4",
+       "target": null,
+       "target_state": "unrecorded"
+      },
+      "survivors": [],
+      "outbox_not_sent": 1,
+      "instruction": "Workbench notice: the Workbench backend restarted (this OMP session is new and has no memory). The open Task was not cancelled and nothing was re-sent or re-run; a run that was going on has an unknown outcome. survivors lists processes the previous backend left running (Workbench never ends them by itself). Use the workbench-recovery skill: call workbench_status, then decide per survivor (stop_survivor with a reason, or leave it) and continue the Task (one follow-up to_worker on its task_id, run: true to re-run an experiment, or cancel). Tell the user briefly what happened.",
+      "notice_id": "3ac04543-6c35-4547-a9cc-0359dbdeb6ea",
+      "type": "backend_restarted"
+     }
+    }
+   ],
+   "deliveries": [],
+   "summary": {
+    "phase": "ready",
+    "boot": {
+     "boot_id": "29b6d314-c603-4efa-a6d3-16ae69f7d521",
+     "confirmation_required": false,
+     "confirmed": true,
+     "confirmed_boot_id": "29b6d314-c603-4efa-a6d3-16ae69f7d521",
+     "persisted": true,
+     "reason": null,
+     "recorded_boot_id": "29b6d314-c603-4efa-a6d3-16ae69f7d521"
+    },
+    "holds": [],
+    "faults": {
+     "metadata": null,
+     "model": null,
+     "raw_log": null,
+     "record_error": null
+    },
+    "automation": {
+     "detail": "no active run",
+     "interruption": {
+      "confirmed_at": null,
+      "error": null,
+      "manager_ack": null,
+      "pause_id": null,
+      "requested_at": null,
+      "state": "none",
+      "unknown_tool_call_ids": [],
+      "worker_ack": null
+     },
+     "paused": false,
+     "persistence_error": null,
+     "resume": null,
+     "retry_limit": 3,
+     "review": {
+      "applies": false,
+      "coalesced_count": 0,
+      "exit": null,
+      "interval_seconds": 60,
+      "last_review_at": null,
+      "next_due_in_seconds": null,
+      "pending": false,
+      "reason": null,
+      "review_count": 0,
+      "status": null
+     },
+     "run": null,
+     "source": "backend",
+     "state": "idle",
+     "tick": {
+      "at": "2026-10-08T04:31:47+00:00",
+      "outcome": "idle",
+      "problems": []
+     },
+     "transition": null
+    },
+    "startup": {
+     "at": 1791433751.6342485,
+     "classification": "reboot",
+     "notes": [],
+     "notice": {
+      "notice_id": "3ac04543-6c35-4547-a9cc-0359dbdeb6ea",
+      "state": "queued",
+      "task_id": "61373417-795b-488e-b884-e793f731c34e"
+     },
+     "outbox_lost": [
+      {
+       "handoff_id": "100e7af6-23d1-49cd-9502-1fbc76ec5217",
+       "kind": "task",
+       "message_id": "af908588-6e45-4cc0-ba11-d17c7778faee",
+       "state": "queued_not_sent",
+       "target_role": "worker"
+      }
+     ],
+     "outbox_lost_count": 1,
+     "previous": {
+      "boot_id": "ee166795-ebef-47e0-8078-d3d8815bb7a4",
+      "phase": "stopped",
+      "pid": 1269,
+      "shutdown_verified": true
+     },
+     "probed": false,
+     "processes": [
+      {
+       "name": "backend",
+       "pid": 1269,
+       "start_ticks": 16230,
+       "state": "ended_by_reboot"
+      },
+      {
+       "name": "manager_omp",
+       "pid": 1275,
+       "start_ticks": 16270,
+       "state": "ended_by_reboot"
+      },
+      {
+       "name": "worker_omp",
+       "pid": 1276,
+       "start_ticks": 16270,
+       "state": "ended_by_reboot"
+      },
+      {
+       "name": "host_shell",
+       "pid": 1273,
+       "start_ticks": 16269,
+       "state": "ended_by_reboot"
+      },
+      {
+       "name": "supervisor",
+       "pid": 1353,
+       "start_ticks": 16341,
+       "state": "ended_by_reboot"
+      }
+     ],
+     "run": {
+      "boot_marker": "ee166795-ebef-47e0-8078-d3d8815bb7a4",
+      "revision": 1,
+      "run_id": "b9f9db9f-004b-481e-b455-c7595278af31",
+      "state": "interrupted_by_reboot",
+      "target": null,
+      "target_state": "unrecorded",
+      "task_id": "61373417-795b-488e-b884-e793f731c34e"
+     },
+     "survivor_stops": [],
+     "survivors": []
+    },
+    "task": {
+     "task_id": "61373417-795b-488e-b884-e793f731c34e",
+     "kind": "work",
+     "status": "running",
+     "run_id": "b9f9db9f-004b-481e-b455-c7595278af31",
+     "held_reason": "backend_restarted"
+    },
+    "sessions": {
+     "manager": "e5aa09b0-b5bc-4587-bde7-cd62f8a87a1c",
+     "worker": "9d6b1ee4-2112-4df2-9cb0-10e3e9fcb1c3"
+    }
+   }
+  },
+  {
+   "t": "2026-10-08T04:31:48+0000",
+   "phase": "post2",
+   "step": "tool",
+   "pane": "manager_omp",
+   "tool": "to_worker",
+   "args": {
+    "kind": "work",
+    "message": "cancel after confirm 2",
+    "task_id": "61373417-795b-488e-b884-e793f731c34e",
+    "cancel": true
+   },
+   "result": {
+    "status": "cancelled",
+    "task_id": "61373417-795b-488e-b884-e793f731c34e",
+    "worker_notified": true,
+    "notices": [
+     {
+      "notice_id": "6f76b973-7bf0-4614-a036-ac945330226e",
+      "at": "2026-10-08T04:31:48Z",
+      "kind": "task_cancelled",
+      "task_id": "61373417-795b-488e-b884-e793f731c34e",
+      "run_id": "b9f9db9f-004b-481e-b455-c7595278af31"
+     }
+    ]
+   }
+  },
+  {
+   "t": "2026-10-08T04:32:35+0000",
+   "phase": "post2",
+   "step": "terminal_after_confirm_task_cancelled",
+   "input_ok": true,
+   "results": null
+  },
+  {
+   "t": "2026-10-08T04:32:41+0000",
+   "phase": "post2",
+   "step": "ui_screen_after_confirm_400",
+   "has_boot_wait": false,
+   "status_lines": [
+    "focus: MANAGER OMP | host 입력 owner: user | shell mode: manual_prompt | worker: 대기 | 자동화: idle",
+    "경고 OMP 격리 failed: OMP isolation check failed: manager: omp exited (closed stdout) before answering 'get_state'; worker: omp exited (closed stdout) before answering 'get_state' | 재부팅 뒤 시작 · 이전 run 중단됨(결과 불명) · 보내지 못한 메시지 1건 | 작업: 작업 \"cw19 reboot work 2\" [종료(취소됨) · 취소 요청됨] | backend: ready | bridge manager=ok worker=ok | 마지막 확인 04:32:40 (0s 전) | Ctrl-]",
+    "lq MANAGER OMP *FOCUS* alive qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqklq WORKER OMP alive qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqk"
+   ],
+   "host_shell": [
+    "x$ wb-handoff                                                                                                                                                                                                                                                                                                                                                                                                  x",
+    "x[worker] $ echo cw19-after-confirm-2                                                                                                                                                                                                                                                                                                                                                                          x",
+    "xcw19-after-confirm-2                                                                                                                                                                                                                                                                                                                                                                                          x",
+    "x$                                                                                                                                                                                                                                                                                                                                                                                                             x",
+    "x                                                                                                                                                                                                                                                                                                                                                                                                              x",
+    "x                                                                                                                                                                                                                                                                                                                                                                                                              x",
+    "x                                                                                                                                                                                                                                                                                                                                                                                                              x",
+    "x                                                                                                                                                                                                                                                                                                                                                                                                              x"
+   ]
+  },
+  {
+   "t": "2026-10-08T04:32:41+0000",
+   "phase": "post2",
+   "step": "cli",
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "status"
+   ],
+   "rc": 0,
+   "stdout": "backend pid 1106 phase ready\ndata dir /home/dwchoo/cw19-reboot-02/b/home/wbdata\n  host_shell: pid 1110 alive=True owner=user\n  manager_omp: pid 1112 alive=True owner=user\n  worker_omp: pid 1113 alive=True owner=user\n  shell: bash /usr/bin/bash mode=manual_prompt\nomp isolation: failed (omp/18.2.10 evidence isolation=18.6.1)\nWARNING: OMP isolation check failed: manager: omp exited (closed stdout) before answering 'get_state'; worker: omp exited (closed stdout) before answering 'get_state'\n  note: OMP 18.2.10 has not extracted its native addon into /home/dwchoo/cw19-reboot-02/b/home/.omp/natives/18.2.10 yet: the first Workbench OMP extracts it there (the same files your own omp 18.2.10 extracts; OMP has no setting to move this directory).\nbackend 재시작 대조: reboot | 이전 run b9f9db9f-004b-481e-b455-c7595278af31 상태 interrupted_by_reboot (재실행·재전송 없음) | 보내지 못한 메시지 1건 (재전송 없음)\n",
+   "stderr": ""
+  },
+  {
+   "t": "2026-10-08T04:32:42+0000",
+   "phase": "post2",
+   "step": "cli",
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "shutdown",
+    "--yes",
+    "--json"
+   ],
+   "rc": 0,
+   "stdout": "active work:\n  - {\"idle\": null, \"kind\": \"omp_turn\", \"role\": \"worker\"}\n{\"shutdown\": {\"left_running\": [], \"lifecycle\": null, \"panes\": [{\"exit_status\": -1, \"pane\": \"host_shell\", \"survivors\": []}, {\"exit_status\": -15, \"pane\": \"manager_omp\", \"survivors\": []}, {\"exit_status\": -15, \"pane\": \"worker_omp\", \"survivors\": []}], \"previous_survivors\": [], \"problems\": [], \"processes\": {\"host_shell\": \"dead\", \"manager_omp\": \"dead\", \"supervisor\": \"dead\", \"worker_omp\": \"dead\"}, \"user_confirmed\": true, \"verified\": true}}\n",
+   "stderr": ""
+  },
+  {
+   "t": "2026-10-08T04:32:44+0000",
+   "phase": "post2",
+   "step": "leftover",
+   "ours": {}
+  },
+  {
+   "t": "2026-10-08T04:33:01+0000",
+   "phase": "post2_extra",
+   "step": "boot_now",
+   "boot_id": "29b6d314-c603-4efa-a6d3-16ae69f7d521"
+  },
+  {
+   "t": "2026-10-08T04:33:02+0000",
+   "phase": "post2_extra",
+   "step": "cli",
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "start",
+    "--no-attach",
+    "--omp",
+    "/home/dwchoo/cw19-reboot-02/b/omp"
+   ],
+   "rc": 0,
+   "stdout": "starting backend: shell bash (/usr/bin/bash), omp/18.2.10\nbackend pid 1434 phase ready\ndata dir /home/dwchoo/cw19-reboot-02/b/home/wbdata\n  host_shell: pid 1438 alive=True owner=user\n  manager_omp: pid 1440 alive=True owner=user\n  worker_omp: pid 1441 alive=True owner=user\n  shell: bash /usr/bin/bash mode=manual_prompt\nomp isolation: failed (omp/18.2.10 evidence isolation=18.6.1)\nWARNING: OMP isolation check failed: manager: omp exited (closed stdout) before answering 'get_state'; worker: omp exited (closed stdout) before answering 'get_state'\n  note: OMP 18.2.10 has not extracted its native addon into /home/dwchoo/cw19-reboot-02/b/home/.omp/natives/18.2.10 yet: the first Workbench OMP extracts it there (the same files your own omp 18.2.10 extracts; OMP has no setting to move this directory).\n",
+   "stderr": ""
+  },
+  {
+   "t": "2026-10-08T04:33:02+0000",
+   "phase": "post2_extra",
+   "step": "ready_same_boot",
+   "summary": {
+    "phase": "ready",
+    "boot": {
+     "boot_id": "29b6d314-c603-4efa-a6d3-16ae69f7d521",
+     "confirmation_required": false,
+     "confirmed": null,
+     "confirmed_boot_id": "29b6d314-c603-4efa-a6d3-16ae69f7d521",
+     "persisted": true,
+     "reason": null,
+     "recorded_boot_id": "29b6d314-c603-4efa-a6d3-16ae69f7d521"
+    },
+    "holds": [],
+    "faults": {
+     "metadata": null,
+     "model": null,
+     "raw_log": null,
+     "record_error": null
+    },
+    "automation": {
+     "detail": "no active run",
+     "interruption": {
+      "confirmed_at": null,
+      "error": null,
+      "manager_ack": null,
+      "pause_id": null,
+      "requested_at": null,
+      "state": "none",
+      "unknown_tool_call_ids": [],
+      "worker_ack": null
+     },
+     "paused": false,
+     "persistence_error": null,
+     "resume": null,
+     "retry_limit": 3,
+     "review": {
+      "applies": false,
+      "coalesced_count": 0,
+      "exit": null,
+      "interval_seconds": 60,
+      "last_review_at": null,
+      "next_due_in_seconds": null,
+      "pending": false,
+      "reason": null,
+      "review_count": 0,
+      "status": null
+     },
+     "run": null,
+     "source": "backend",
+     "state": "idle",
+     "tick": null,
+     "transition": null
+    },
+    "startup": {
+     "at": 1791433982.2109933,
+     "classification": "same_boot_clean_stop",
+     "notes": [],
+     "notice": null,
+     "outbox_lost": [
+      {
+       "handoff_id": "d571c292-ae31-4cf5-92eb-d55b2772cc44",
+       "kind": "question",
+       "message_id": "739c6df0-2af3-4e65-8c11-934eb9a36ce6",
+       "state": "queued_not_sent",
+       "target_role": "worker"
+      }
+     ],
+     "outbox_lost_count": 1,
+     "previous": {
+      "boot_id": "29b6d314-c603-4efa-a6d3-16ae69f7d521",
+      "phase": "stopped",
+      "pid": 1106,
+      "shutdown_verified": true
+     },
+     "probed": true,
+     "processes": [
+      {
+       "name": "backend",
+       "pid": 1106,
+       "start_ticks": 1719,
+       "state": "ended"
+      },
+      {
+       "name": "manager_omp",
+       "pid": 1112,
+       "start_ticks": 1752,
+       "state": "ended"
+      },
+      {
+       "name": "worker_omp",
+       "pid": 1113,
+       "start_ticks": 1753,
+       "state": "ended"
+      },
+      {
+       "name": "host_shell",
+       "pid": 1110,
+       "start_ticks": 1752,
+       "state": "ended"
+      },
+      {
+       "name": "supervisor",
+       "pid": 1184,
+       "start_ticks": 17624,
+       "state": "ended"
+      }
+     ],
+     "run": {
+      "boot_marker": "ee166795-ebef-47e0-8078-d3d8815bb7a4",
+      "revision": 1,
+      "run_id": "b9f9db9f-004b-481e-b455-c7595278af31",
+      "state": "closed",
+      "target": null,
+      "target_state": "unrecorded",
+      "task_id": "61373417-795b-488e-b884-e793f731c34e"
+     },
+     "survivor_stops": [],
+     "survivors": []
+    },
+    "task": {
+     "task_id": "61373417-795b-488e-b884-e793f731c34e",
+     "kind": "work",
+     "status": "closed",
+     "run_id": null,
+     "held_reason": null
+    },
+    "sessions": {
+     "manager": "79e47caf-e9a3-4acc-b337-67266fdbc442",
+     "worker": "cf33845f-e586-4dc8-9df1-65afa7ffdc3b"
+    }
+   }
+  },
+  {
+   "t": "2026-10-08T04:33:02+0000",
+   "phase": "post2_extra",
+   "step": "terminal_after_confirm_task_closed_same_boot",
+   "input_ok": true,
+   "results": [
+    {
+     "status": "exited",
+     "exit_code": 0,
+     "command_id": "ee9a3955-68ef-453f-a77a-32e8789f1818",
+     "command": "echo cw19-after-confirm-closed",
+     "cwd": "/home/dwchoo/cw19-reboot-02/b/project",
+     "log_path": "/home/dwchoo/cw19-reboot-02/b/home/wbdata/workflow/terminal/ee9a3955-68ef-453f-a77a-32e8789f1818.log",
+     "duration_seconds": 0.093,
+     "output_tail": "cw19-after-confirm-closed\n",
+     "output_tail_truncated": false
+    }
+   ]
+  },
+  {
+   "t": "2026-10-08T04:33:03+0000",
+   "phase": "post2_extra",
+   "step": "cli",
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "shutdown",
+    "--yes",
+    "--json"
+   ],
+   "rc": 0,
+   "stdout": "no active work reported\n{\"shutdown\": {\"left_running\": [], \"lifecycle\": null, \"panes\": [{\"exit_status\": -1, \"pane\": \"host_shell\", \"survivors\": []}, {\"exit_status\": -15, \"pane\": \"manager_omp\", \"survivors\": []}, {\"exit_status\": -15, \"pane\": \"worker_omp\", \"survivors\": []}], \"previous_survivors\": [], \"problems\": [], \"processes\": {\"host_shell\": \"dead\", \"manager_omp\": \"dead\", \"supervisor\": \"dead\", \"worker_omp\": \"dead\"}, \"user_confirmed\": true, \"verified\": true}}\n",
+   "stderr": ""
+  },
+  {
+   "t": "2026-10-08T04:33:05+0000",
+   "phase": "post2_extra",
+   "step": "leftover",
+   "ours": {}
+  }
+ ]
+}

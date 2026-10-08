@@ -1,0 +1,17 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 2323,
+  "event": {
+    "id": "running-p27-cw19-vm-01",
+    "kind": "transition",
+    "data": {
+      "evidence": "host: Claude Code Agent spawn succeeded (name cw19-vm, general-purpose opus), 2026-10-08",
+      "invocation": "p27-cw19-vm-01",
+      "not_started_evidence": null,
+      "observed_effort": "unverified",
+      "observed_model": "unverified",
+      "outcome": null,
+      "state": "running"
+    }
+  }
+}

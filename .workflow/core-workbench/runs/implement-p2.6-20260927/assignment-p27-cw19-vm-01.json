@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "unit": "V-CW-19",
+  "approved_bundle_digest": "cd3e3c9d143ef4d00f806288bccba15ecbc5d76bf7d8c6f1547672cbd31e812c",
+  "candidate": "f7091db80a1548124439497a7f59751876b508f0faa11cde623839267090d74e",
+  "candidate_snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-cw19-candidate.json",
+  "base_commit": "a12e668",
+  "inputs": [
+    "docs/features/core-workbench/tickets/CW-19.md",
+    "docs/features/core-workbench/DECISIONS.md#C-D71",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw19-design-01.md",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/assignment-p27-cw19-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw19-01.md"
+  ],
+  "root_adjudication": "Root accepts the 8 'Decisions taken where design/C-D71 left room' in result-p27-cw19-01.md as the intended behaviour.",
+  "invocation": "p27-cw19-vm-01",
+  "ticket_id": "CW-19 L-CW19-REBOOT in the isolated VM",
+  "role": "test_designer",
+  "routing": {
+    "planned_role": "test_designer",
+    "selected_role": "test_designer (Opus high; first VM reboot run)",
+    "reason_codes": [
+      "reboot_runtime"
+    ],
+    "evidence_refs": [
+      "docs/features/core-workbench/DECISIONS.md#C-D56"
+    ]
+  },
+  "vm": {
+    "dir": "~/.local/share/wb-vm/wb-reboot",
+    "scripts": [
+      "start.sh",
+      "stop.sh",
+      "ssh.sh (127.0.0.1:2222, user dwchoo, key id_ed25519)"
+    ],
+    "guest": "Ubuntu 24.04, bash 5.2.21, dash, python 3.12.3 venv ~/wb-venv (pyte 0.8.2, wcwidth 0.8.4), OMP 18.2.10 ~/.local/bin/omp; repo copy ~/ai-exp-assistant via rsync (exclude .workflow, graphify-out)",
+    "user_authorization": "user authorized copying host OMP credentials into the VM on 2026-09-29; do NOT copy or read credentials now unless strictly needed — this run should need no model requests"
+  },
+  "required_behavior": [
+    "Start the VM, rsync the current working tree (the frozen candidate; exclude .workflow, graphify-out, .git if large) to the guest repo, record a manifest (sha256 of src/** and omp_bridge/** on host vs guest must match).",
+    "In the guest: start the product entrypoint (temp data dir under the guest home, no prompts typed => no provider requests; if the guest OMP 18.2.10 cannot start the Workbench extension, record it and use the documented fake OMP path the implementer's tests use), create a durable record of a running run / open Task if possible without models (e.g. a host command via the CLI or a direct flow fixture script), record boot_id.",
+    "Reboot the guest for real (sudo reboot inside the guest or a guest-initiated reboot; never the host). After it comes back: start the entrypoint again; verify boot_id changed, records restored, the UI/status shows the confirmation wait, every automatic action is held before confirm-boot (try to_worker dispatch / new experiment via the available CLI or fixtures and observe held), `confirm-boot` CLI shows environment/execution conditions, and after confirming automatic actions are allowed. Record commands, outputs (no secrets), boot_ids before/after, exit codes.",
+    "Shut the VM down at the end (stop.sh); leave the VM files as they were (do not delete the overlay)."
+  ],
+  "allowed_write_paths": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw19-vm-01.md",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw19-vm-01-log.json"
+  ],
+  "prohibited_paths": [
+    "repo files on the host (read-only)",
+    "docs/**"
+  ],
+  "rules": "Never read credential stores/contents or other processes' environ; never print tokens; never edit ~/.omp, ~/.agents, ~/.claude, ~/.codex or user configs; never touch the user's tmux (default socket), other claude-swarm sockets, ~/wb-urux-sandbox or processes you did not start; kill only PIDs you started; no pkill; temp only under /tmp; no commits; no graphify update. Only reboot the guest VM, never the host.",
+  "result_format": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw19-vm-01.md: VM manifest, timeline, boot_ids, observations per check, pass/fail/pending. Korean reply <=10 lines."
+}

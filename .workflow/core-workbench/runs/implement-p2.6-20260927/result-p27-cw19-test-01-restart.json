@@ -1,0 +1,1173 @@
+{
+ "root": "/tmp/wb-cw19-live-2ch7tg7v",
+ "omp": "/home/dwchoo/.local/bin/omp",
+ "commands": [
+  {
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "start",
+    "--data-dir",
+    "$ROOT/home/wbdata",
+    "--omp",
+    "/home/dwchoo/.local/bin/omp",
+    "--omp-arg=--model",
+    "--omp-arg=wbcw19/scripted",
+    "--no-attach"
+   ],
+   "exit": 0,
+   "at": 1791426038.2387345,
+   "seconds": 3.83,
+   "stdout": "starting backend: shell bash (/usr/bin/bash), omp/18.8.0\nwaiting for the OMP isolation check ...\nbackend pid 525617 phase ready\ndata dir $ROOT/home/wbdata\n  host_shell: pid 525666 alive=True owner=user\n  manager_omp: pid 525669 alive=True owner=user\n  worker_omp: pid 525670 alive=True owner=user\n  shell: bash /usr/bin/bash mode=manual_prompt\nomp isolation: ok (omp/18.8.0 evidence bridge_g3=18.2.10, isolation=18.6.1)\n  note: OMP 18.8.0 has not extracted its native addon into $ROOT/home/.omp/natives/18.8.0 yet: the first Workbench OMP extracts it there (the same files your own omp 18.8.0 extracts; OMP has no setting to move this directory).\n",
+   "stderr": ""
+  },
+  {
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "start",
+    "--data-dir",
+    "$ROOT/home/wbdata",
+    "--omp",
+    "/home/dwchoo/.local/bin/omp",
+    "--omp-arg=--model",
+    "--omp-arg=wbcw19/scripted",
+    "--no-attach"
+   ],
+   "exit": 0,
+   "at": 1791426087.228971,
+   "seconds": 2.53,
+   "stdout": "starting backend: shell bash (/usr/bin/bash), omp/18.8.0\nwaiting for the OMP isolation check ...\nbackend pid 529290 phase ready\ndata dir $ROOT/home/wbdata\n  host_shell: pid 529294 alive=True owner=user\n  manager_omp: pid 529297 alive=True owner=user\n  worker_omp: pid 529298 alive=True owner=user\n  shell: bash /usr/bin/bash mode=manual_prompt\nomp isolation: ok (omp/18.8.0 evidence bridge_g3=18.2.10, isolation=18.6.1)\n",
+   "stderr": ""
+  },
+  {
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "status",
+    "--data-dir",
+    "$ROOT/home/wbdata"
+   ],
+   "exit": 0,
+   "at": 1791426089.825334,
+   "seconds": 0.06,
+   "stdout": "backend pid 529290 phase ready\ndata dir $ROOT/home/wbdata\n  host_shell: pid 529294 alive=True owner=user\n  manager_omp: pid 529297 alive=True owner=user\n  worker_omp: pid 529298 alive=True owner=user\n  shell: bash /usr/bin/bash mode=manual_prompt\nomp isolation: ok (omp/18.8.0 evidence bridge_g3=18.2.10, isolation=18.6.1)\nbackend 재시작 대조: same_boot_crash\n  이전 backend가 남긴 process s1: session_member pid 526495 sh — 표시만 (its session leader (host_shell) is gone, so the session is not provably the old pane's)\n  이전 backend가 남긴 process s2: session_member pid 528905 sh — 표시만 (its session leader (host_shell) is gone, so the session is not provably the old pane's)\n",
+   "stderr": ""
+  },
+  {
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "status",
+    "--data-dir",
+    "$ROOT/home/wbdata"
+   ],
+   "exit": 0,
+   "at": 1791426093.5535913,
+   "seconds": 0.06,
+   "stdout": "backend pid 529290 phase degraded (pane_exited:host_shell)\ndata dir $ROOT/home/wbdata\n  host_shell: pid 529294 alive=False owner=user\n  manager_omp: pid 529297 alive=True owner=user\n  worker_omp: pid 529298 alive=True owner=user\n  shell: bash /usr/bin/bash mode=manual_foreground\nomp isolation: ok (omp/18.8.0 evidence bridge_g3=18.2.10, isolation=18.6.1)\nbackend 재시작 대조: same_boot_crash\n  이전 backend가 남긴 process s1: session_member pid 526495 sh — 표시만 (its session leader (host_shell) is gone, so the session is not provably the old pane's)\n  이전 backend가 남긴 process s2: session_member pid 528905 sh — 표시만 (its session leader (host_shell) is gone, so the session is not provably the old pane's)\n자동 동작 보류: metadata_unavailable\nmetadata 저장 장애: backend_record: PermissionError — 실행·관측은 계속, 새 자동 작업 보류\n",
+   "stderr": ""
+  },
+  {
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "shutdown",
+    "--data-dir",
+    "$ROOT/home/wbdata"
+   ],
+   "exit": 1,
+   "at": 1791426098.4426181,
+   "seconds": 0.06,
+   "stdout": "active work:\n  - {\"comm\": \"sh\", \"kind\": \"previous_survivor\", \"name\": \"session_member\", \"note\": \"left running by the previous backend; not ended by this shutdown\", \"pid\": 526495, \"stoppable\": false, \"survivor_id\": \"s1\"}\n  - {\"comm\": \"sh\", \"kind\": \"previous_survivor\", \"name\": \"session_member\", \"note\": \"left running by the previous backend; not ended by this shutdown\", \"pid\": 528905, \"stoppable\": false, \"survivor_id\": \"s2\"}\n",
+   "stderr": "refusing to shut down without confirmation (use --yes)\n"
+  },
+  {
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "shutdown",
+    "--data-dir",
+    "$ROOT/home/wbdata",
+    "--yes"
+   ],
+   "exit": 1,
+   "at": 1791426098.558024,
+   "seconds": 0.31,
+   "stdout": "active work:\n  - {\"comm\": \"sh\", \"kind\": \"previous_survivor\", \"name\": \"session_member\", \"note\": \"left running by the previous backend; not ended by this shutdown\", \"pid\": 526495, \"stoppable\": false, \"survivor_id\": \"s1\"}\n  - {\"comm\": \"sh\", \"kind\": \"previous_survivor\", \"name\": \"session_member\", \"note\": \"left running by the previous backend; not ended by this shutdown\", \"pid\": 528905, \"stoppable\": false, \"survivor_id\": \"s2\"}\nshutdown result: {\"left_running\": [], \"lifecycle\": null, \"panes\": [{\"exit_status\": 0, \"pane\": \"host_shell\", \"survivors\": []}, {\"exit_status\": 143, \"pane\": \"manager_omp\", \"survivors\": []}, {\"exit_status\": 143, \"pane\": \"worker_omp\", \"survivors\": []}], \"previous_survivors\": [{\"comm\": \"sh\", \"name\": \"session_member\", \"pid\": 526495, \"survivor_id\": \"s1\"}, {\"comm\": \"sh\", \"name\": \"session_member\", \"pid\": 528905, \"survivor_id\": \"s2\"}], \"problems\": [\"previous_backend_survivors_alive\"], \"processes\": {\"host_shell\": \"dead\", \"manager_omp\": \"dead\", \"worker_omp\": \"dead\"}, \"user_confirmed\": true, \"verified\": false}\n",
+   "stderr": "종료 확인 실패: 일부 process의 종료를 확인하지 못했습니다 (previous_backend_survivors_alive)\n"
+  },
+  {
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "start",
+    "--data-dir",
+    "$ROOT/home/wbdata",
+    "--omp",
+    "/home/dwchoo/.local/bin/omp",
+    "--omp-arg=--model",
+    "--omp-arg=wbcw19/scripted",
+    "--no-attach"
+   ],
+   "exit": 0,
+   "at": 1791426098.9299839,
+   "seconds": 2.63,
+   "stdout": "starting backend: shell bash (/usr/bin/bash), omp/18.8.0\nwaiting for the OMP isolation check ...\nbackend pid 529762 phase ready\ndata dir $ROOT/home/wbdata\n  host_shell: pid 529768 alive=True owner=user\n  manager_omp: pid 529772 alive=True owner=user\n  worker_omp: pid 529774 alive=True owner=user\n  shell: bash /usr/bin/bash mode=manual_prompt\nomp isolation: ok (omp/18.8.0 evidence bridge_g3=18.2.10, isolation=18.6.1)\n",
+   "stderr": ""
+  },
+  {
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "shutdown",
+    "--data-dir",
+    "$ROOT/home/wbdata",
+    "--yes"
+   ],
+   "exit": 0,
+   "at": 1791426103.1231897,
+   "seconds": 0.39,
+   "stdout": "no active work reported\nshutdown result: {\"left_running\": [], \"lifecycle\": null, \"panes\": [{\"exit_status\": -1, \"pane\": \"host_shell\", \"survivors\": []}, {\"exit_status\": 143, \"pane\": \"manager_omp\", \"survivors\": []}, {\"exit_status\": 143, \"pane\": \"worker_omp\", \"survivors\": []}], \"previous_survivors\": [], \"problems\": [], \"processes\": {\"host_shell\": \"dead\", \"manager_omp\": \"dead\", \"worker_omp\": \"dead\"}, \"user_confirmed\": true, \"verified\": true}\n",
+   "stderr": ""
+  },
+  {
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "start",
+    "--data-dir",
+    "$ROOT/home/wbdata",
+    "--omp",
+    "/home/dwchoo/.local/bin/omp",
+    "--omp-arg=--model",
+    "--omp-arg=wbcw19/scripted",
+    "--no-attach"
+   ],
+   "exit": 0,
+   "at": 1791426103.568984,
+   "seconds": 2.7,
+   "stdout": "starting backend: shell bash (/usr/bin/bash), omp/18.8.0\nwaiting for the OMP isolation check ...\nbackend pid 530108 phase ready\ndata dir $ROOT/home/wbdata\n  host_shell: pid 530115 alive=True owner=user\n  manager_omp: pid 530119 alive=True owner=user\n  worker_omp: pid 530120 alive=True owner=user\n  shell: bash /usr/bin/bash mode=manual_prompt\nomp isolation: ok (omp/18.8.0 evidence bridge_g3=18.2.10, isolation=18.6.1)\n",
+   "stderr": ""
+  },
+  {
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "status",
+    "--data-dir",
+    "$ROOT/home/wbdata"
+   ],
+   "exit": 0,
+   "at": 1791426106.3329985,
+   "seconds": 0.06,
+   "stdout": "backend pid 530108 phase ready\ndata dir $ROOT/home/wbdata\n  host_shell: pid 530115 alive=True owner=user\n  manager_omp: pid 530119 alive=True owner=user\n  worker_omp: pid 530120 alive=True owner=user\n  shell: bash /usr/bin/bash mode=manual_prompt\nomp isolation: ok (omp/18.8.0 evidence bridge_g3=18.2.10, isolation=18.6.1)\n부팅 확인 대기 (reboot): 'python -m workbench confirm-boot' 로 환경을 확인하기 전까지 Workbench 자동 동작은 보류됩니다\nbackend 재시작 대조: reboot\n자동 동작 보류: boot_confirmation_required\n",
+   "stderr": ""
+  },
+  {
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "confirm-boot",
+    "--data-dir",
+    "$ROOT/home/wbdata"
+   ],
+   "exit": 1,
+   "at": 1791426109.920233,
+   "seconds": 0.06,
+   "stdout": "== 부팅 확인: 환경·실행 조건 ==\nboot marker: 기록 00000000-0000-4000-8000-00000000c019 -> 현재 30e0b94c-32c5-4014-8441-0ebcc6537118 (사유 reboot)\ndata dir: $ROOT/home/wbdata\nproject dir: $ROOT/project\nhost shell: bash /usr/bin/bash (mode manual_prompt)\nOMP: omp/18.8.0 | 격리 확인: ok\n자동화: idle\nbackend 재시작 대조: reboot\n자동 동작 보류: boot_confirmation_required\n확인하면 Workbench 자동 동작(worker 지시 전달, worker terminal, 감시·복구 알림, 60초 점검, 새 실험)이 다시 허용됩니다. 재부팅 전 실험은 다시 실행되지 않습니다.\n",
+   "stderr": "refusing to confirm the boot without confirmation (use --yes)\n"
+  },
+  {
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "confirm-boot",
+    "--data-dir",
+    "$ROOT/home/wbdata",
+    "--yes"
+   ],
+   "exit": 0,
+   "at": 1791426109.9770687,
+   "seconds": 0.06,
+   "stdout": "== 부팅 확인: 환경·실행 조건 ==\nboot marker: 기록 00000000-0000-4000-8000-00000000c019 -> 현재 30e0b94c-32c5-4014-8441-0ebcc6537118 (사유 reboot)\ndata dir: $ROOT/home/wbdata\nproject dir: $ROOT/project\nhost shell: bash /usr/bin/bash (mode manual_prompt)\nOMP: omp/18.8.0 | 격리 확인: ok\n자동화: idle\nbackend 재시작 대조: reboot\n자동 동작 보류: boot_confirmation_required\n확인하면 Workbench 자동 동작(worker 지시 전달, worker terminal, 감시·복구 알림, 60초 점검, 새 실험)이 다시 허용됩니다. 재부팅 전 실험은 다시 실행되지 않습니다.\n부팅 확인됨 (30e0b94c-32c5-4014-8441-0ebcc6537118): Workbench 자동 동작이 다시 허용됩니다\n",
+   "stderr": ""
+  },
+  {
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "confirm-boot",
+    "--data-dir",
+    "$ROOT/home/wbdata",
+    "--yes"
+   ],
+   "exit": 1,
+   "at": 1791426110.0967538,
+   "seconds": 0.06,
+   "stdout": "",
+   "stderr": "부팅 확인이 필요하지 않습니다 (대기 중인 확인 없음)\n"
+  },
+  {
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "shutdown",
+    "--data-dir",
+    "$ROOT/home/wbdata",
+    "--yes"
+   ],
+   "exit": 0,
+   "at": 1791426110.1527674,
+   "seconds": 0.4,
+   "stdout": "no active work reported\nshutdown result: {\"left_running\": [], \"lifecycle\": null, \"panes\": [{\"exit_status\": -1, \"pane\": \"host_shell\", \"survivors\": []}, {\"exit_status\": 143, \"pane\": \"manager_omp\", \"survivors\": []}, {\"exit_status\": 143, \"pane\": \"worker_omp\", \"survivors\": []}], \"previous_survivors\": [], \"problems\": [], \"processes\": {\"host_shell\": \"dead\", \"manager_omp\": \"dead\", \"worker_omp\": \"dead\"}, \"user_confirmed\": true, \"verified\": true}\n",
+   "stderr": ""
+  }
+ ],
+ "checks": [
+  {
+   "check": "A: start exit 0",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "A: boot record says the current boot",
+   "ok": true,
+   "detail": null
+  },
+  {
+   "check": "A: fresh classification",
+   "ok": true,
+   "detail": {
+    "at": 1791426038.488906,
+    "classification": "fresh",
+    "notes": [],
+    "notice": null,
+    "outbox_lost": [],
+    "outbox_lost_count": 0,
+    "previous": null,
+    "probed": false,
+    "processes": [],
+    "run": null,
+    "survivor_stops": [],
+    "survivors": []
+   }
+  },
+  {
+   "check": "A: foreground run prints in the host pane",
+   "ok": true,
+   "detail": null
+  },
+  {
+   "check": "A: automation paused by the user",
+   "ok": true,
+   "detail": null
+  },
+  {
+   "check": "B: SIGKILL sent to the exact backend",
+   "ok": true,
+   "detail": null
+  },
+  {
+   "check": "B: backend gone",
+   "ok": true,
+   "detail": null
+  },
+  {
+   "check": "C: start exit 0",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "C: classification same_boot_crash",
+   "ok": true,
+   "detail": "same_boot_crash"
+  },
+  {
+   "check": "C: previous backend pid named",
+   "ok": true,
+   "detail": null
+  },
+  {
+   "check": "C: boot not pending (same boot)",
+   "ok": true,
+   "detail": {
+    "boot_id": "30e0b94c-32c5-4014-8441-0ebcc6537118",
+    "confirmation_required": false,
+    "confirmed": null,
+    "confirmed_boot_id": null,
+    "persisted": true,
+    "reason": null,
+    "recorded_boot_id": "30e0b94c-32c5-4014-8441-0ebcc6537118"
+   }
+  },
+  {
+   "check": "C: probed on the same boot",
+   "ok": true,
+   "detail": null
+  },
+  {
+   "check": "C: reconcile state of previous backend = ended",
+   "ok": true,
+   "detail": "ended"
+  },
+  {
+   "check": "C: reconcile state of previous host_shell = ended",
+   "ok": true,
+   "detail": "ended"
+  },
+  {
+   "check": "C: reconcile state of previous manager_omp = ended",
+   "ok": true,
+   "detail": "ended"
+  },
+  {
+   "check": "C: reconcile state of previous worker_omp = ended",
+   "ok": true,
+   "detail": "ended"
+  },
+  {
+   "check": "C: surviving nohup job listed",
+   "ok": true,
+   "detail": [
+    526495,
+    528905,
+    529279,
+    529289
+   ]
+  },
+  {
+   "check": "C: every survivor shown alive is really alive with its recorded start ticks",
+   "ok": true,
+   "detail": {
+    "526495": "alive",
+    "528905": "alive",
+    "529279": "ended",
+    "529289": "ended"
+   }
+  },
+  {
+   "check": "C: surviving foreground run listed",
+   "ok": true,
+   "detail": [
+    526495,
+    528905,
+    529279,
+    529289
+   ]
+  },
+  {
+   "check": "C: nothing was signalled by the restart (survivors still alive)",
+   "ok": true,
+   "detail": null
+  },
+  {
+   "check": "C: the pause is kept across the crash",
+   "ok": true,
+   "detail": "paused"
+  },
+  {
+   "check": "C: no backend_restarted notice without an open Task",
+   "ok": true,
+   "detail": null
+  },
+  {
+   "check": "C: no outbox message listed as lost",
+   "ok": true,
+   "detail": null
+  },
+  {
+   "check": "C: no outbox/delivery record after the restart (no replay)",
+   "ok": true,
+   "detail": [
+    "backend_start"
+   ]
+  },
+  {
+   "check": "C: new OMP processes (not the survivors) are the bridge peers",
+   "ok": true,
+   "detail": {
+    "new": {
+     "manager_omp": 529297,
+     "worker_omp": 529298
+    },
+    "bridge": {
+     "event_cursor": 0,
+     "manager": {
+      "connected": true,
+      "generation": 1,
+      "pid": 529297,
+      "pid_matches_pane": true,
+      "session_id": "01a11950-cd4e-71f5-bf05-062176a33401"
+     },
+     "worker": {
+      "connected": true,
+      "generation": 1,
+      "pid": 529298,
+      "pid_matches_pane": true,
+      "session_id": "01a11950-cd49-7042-a35c-edd9001a496d"
+     }
+    }
+   }
+  },
+  {
+   "check": "C: status shows the reconcile and the survivors",
+   "ok": true,
+   "detail": "backend pid 529290 phase ready\ndata dir /tmp/wb-cw19-live-2ch7tg7v/home/wbdata\n  host_shell: pid 529294 alive=True owner=user\n  manager_omp: pid 529297 alive=True owner=user\n  worker_omp: pid 529298 alive=True owner=user\n  shell: bash /usr/bin/bash mode=manual_prompt\nomp isolation: ok (omp/18.8.0 evidence bridge_g3=18.2.10, isolation=18.6.1)\nbackend 재시작 대조: same_boot_crash\n  이전 backend가 남긴 process s1: session_member pid 526495 sh — 표시만 (its session leader (host_shell) is gone, so the session is not provably the old pane's)\n  이전 backend가 남긴 process s2: session_member pid 528905 sh — 표시만 (its session leader (host_shell) is gone, so the session is not provably the old pane's)\n"
+  },
+  {
+   "check": "D: metadata fault held and shown",
+   "ok": true,
+   "detail": {
+    "metadata": {
+     "since": 1791426093.3955123,
+     "sources": {
+      "backend_record": "backend_record: PermissionError"
+     },
+     "state": "failed"
+    },
+    "model": null,
+    "raw_log": null,
+    "record_error": "PermissionError: Permission denied"
+   }
+  },
+  {
+   "check": "D: backend keeps running (degraded, not stopped)",
+   "ok": true,
+   "detail": "degraded"
+  },
+  {
+   "check": "D: both OMP sessions still connected and observed",
+   "ok": true,
+   "detail": {
+    "event_cursor": 0,
+    "manager": {
+     "connected": true,
+     "generation": 1,
+     "pid": 529297,
+     "pid_matches_pane": true,
+     "session_id": "01a11950-cd4e-71f5-bf05-062176a33401"
+    },
+    "worker": {
+     "connected": true,
+     "generation": 1,
+     "pid": 529298,
+     "pid_matches_pane": true,
+     "session_id": "01a11950-cd49-7042-a35c-edd9001a496d"
+    }
+   }
+  },
+  {
+   "check": "D: status prints the metadata fault",
+   "ok": true,
+   "detail": " phase degraded (pane_exited:host_shell)\ndata dir /tmp/wb-cw19-live-2ch7tg7v/home/wbdata\n  host_shell: pid 529294 alive=False owner=user\n  manager_omp: pid 529297 alive=True owner=user\n  worker_omp: pid 529298 alive=True owner=user\n  shell: bash /usr/bin/bash mode=manual_foreground\nomp isolation: ok (omp/18.8.0 evidence bridge_g3=18.2.10, isolation=18.6.1)\nbackend 재시작 대조: same_boot_crash\n  이전 backend가 남긴 process s1: session_member pid 526495 sh — 표시만 (its session leader (host_shell) is gone, so the session is not provably the old pane's)\n  이전 backend가 남긴 process s2: session_member pid 528905 sh — 표시만 (its session leader (host_shell) is gone, so the session is not provably the old pane's)\n자동 동작 보류: metadata_unavailable\nmetadata 저장 장애: backend_record: PermissionError — 실행·관측은 계속, 새 자동 작업 보류\n"
+  },
+  {
+   "check": "D: admission reopens after a durable write",
+   "ok": true,
+   "detail": null
+  },
+  {
+   "check": "E: shutdown without --yes (no tty) refused, exit 1",
+   "ok": true,
+   "detail": 1
+  },
+  {
+   "check": "E: active work listed incl. previous survivors",
+   "ok": true,
+   "detail": "active work:\n  - {\"comm\": \"sh\", \"kind\": \"previous_survivor\", \"name\": \"session_member\", \"note\": \"left running by the previous backend; not ended by this shutdown\", \"pid\": 526495, \"stoppable\": false, \"survivor_id\": \"s1\"}\n  - {\"comm\": \"sh\", \"kind\": \"previous_survivor\", \"name\": \"session_member\", \"note\": \"left running by the previous backend; not ended by this shutdown\", \"pid\": 528905, \"stoppable\": false, \"survivor_id\": \"s2\"}\n"
+  },
+  {
+   "check": "E: backend still running after the refusal",
+   "ok": true,
+   "detail": null
+  },
+  {
+   "check": "E: shutdown with live survivors is not verified, exit 1",
+   "ok": true,
+   "detail": {
+    "exit": 1,
+    "result": {
+     "left_running": [],
+     "lifecycle": null,
+     "panes": [
+      {
+       "exit_status": 0,
+       "pane": "host_shell",
+       "survivors": []
+      },
+      {
+       "exit_status": 143,
+       "pane": "manager_omp",
+       "survivors": []
+      },
+      {
+       "exit_status": 143,
+       "pane": "worker_omp",
+       "survivors": []
+      }
+     ],
+     "previous_survivors": [
+      {
+       "comm": "sh",
+       "name": "session_member",
+       "pid": 526495,
+       "survivor_id": "s1"
+      },
+      {
+       "comm": "sh",
+       "name": "session_member",
+       "pid": 528905,
+       "survivor_id": "s2"
+      }
+     ],
+     "problems": [
+      "previous_backend_survivors_alive"
+     ],
+     "processes": {
+      "host_shell": "dead",
+      "manager_omp": "dead",
+      "worker_omp": "dead"
+     },
+     "user_confirmed": true,
+     "verified": false
+    }
+   }
+  },
+  {
+   "check": "E: '종료 확인 실패' shown",
+   "ok": true,
+   "detail": "종료 확인 실패: 일부 process의 종료를 확인하지 못했습니다 (previous_backend_survivors_alive)\n"
+  },
+  {
+   "check": "F: start exit 0",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "F: classification after the unverified stop",
+   "ok": true,
+   "detail": "same_boot_unverified_stop"
+  },
+  {
+   "check": "F: survivors proven again on the next start",
+   "ok": true,
+   "detail": [
+    526495,
+    528905
+   ]
+  },
+  {
+   "check": "F: shutdown with nothing left is verified, exit 0",
+   "ok": true,
+   "detail": {
+    "exit": 0,
+    "result": {
+     "left_running": [],
+     "lifecycle": null,
+     "panes": [
+      {
+       "exit_status": -1,
+       "pane": "host_shell",
+       "survivors": []
+      },
+      {
+       "exit_status": 143,
+       "pane": "manager_omp",
+       "survivors": []
+      },
+      {
+       "exit_status": 143,
+       "pane": "worker_omp",
+       "survivors": []
+      }
+     ],
+     "previous_survivors": [],
+     "problems": [],
+     "processes": {
+      "host_shell": "dead",
+      "manager_omp": "dead",
+      "worker_omp": "dead"
+     },
+     "user_confirmed": true,
+     "verified": true
+    },
+    "stderr": ""
+   }
+  },
+  {
+   "check": "G: start exit 0",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "G: reboot classified, confirmation required",
+   "ok": true,
+   "detail": {
+    "boot_id": "30e0b94c-32c5-4014-8441-0ebcc6537118",
+    "confirmation_required": true,
+    "confirmed": false,
+    "confirmed_boot_id": "00000000-0000-4000-8000-00000000c019",
+    "persisted": true,
+    "reason": "reboot",
+    "recorded_boot_id": "00000000-0000-4000-8000-00000000c019"
+   }
+  },
+  {
+   "check": "G: old-boot refs not probed",
+   "ok": true,
+   "detail": [
+    {
+     "name": "backend",
+     "pid": 529762,
+     "start_ticks": 297116939,
+     "state": "ended_by_reboot"
+    },
+    {
+     "name": "manager_omp",
+     "pid": 529772,
+     "start_ticks": 297116957,
+     "state": "ended_by_reboot"
+    },
+    {
+     "name": "worker_omp",
+     "pid": 529774,
+     "start_ticks": 297116958,
+     "state": "ended_by_reboot"
+    },
+    {
+     "name": "host_shell",
+     "pid": 529768,
+     "start_ticks": 297116957,
+     "state": "ended_by_reboot"
+    }
+   ]
+  },
+  {
+   "check": "G: admission held",
+   "ok": true,
+   "detail": [
+    {
+     "detail": "reboot",
+     "reason": "boot_confirmation_required",
+     "since": 1791426103.8196268
+    }
+   ]
+  },
+  {
+   "check": "G: status shows the confirmation wait",
+   "ok": true,
+   "detail": "backend pid 530108 phase ready\ndata dir /tmp/wb-cw19-live-2ch7tg7v/home/wbdata\n  host_shell: pid 530115 alive=True owner=user\n  manager_omp: pid 530119 alive=True owner=user\n  worker_omp: pid 530120 alive=True owner=user\n  shell: bash /usr/bin/bash mode=manual_prompt\nomp isolation: ok (omp/18.8.0 evidence bridge_g3=18.2.10, isolation=18.6.1)\n부팅 확인 대기 (reboot): 'python -m workbench confirm-boot' 로 환경을 확인하기 전까지 Workbench 자동 동작은 보류됩니다\nbackend 재시작 대조: reboot\n자동 동작 보류: boot_confirmation_required\n"
+  },
+  {
+   "check": "G: user resume allowed while the boot is unconfirmed",
+   "ok": true,
+   "detail": null
+  },
+  {
+   "check": "G: boot hold still on after the resume",
+   "ok": true,
+   "detail": null
+  },
+  {
+   "check": "G: confirm-boot without --yes/tty refused, exit 1",
+   "ok": true,
+   "detail": "refusing to confirm the boot without confirmation (use --yes)\n"
+  },
+  {
+   "check": "G: confirm-boot shows both boot ids and the data dir",
+   "ok": true,
+   "detail": "== 부팅 확인: 환경·실행 조건 ==\nboot marker: 기록 00000000-0000-4000-8000-00000000c019 -> 현재 30e0b94c-32c5-4014-8441-0ebcc6537118 (사유 reboot)\ndata dir: /tmp/wb-cw19-live-2ch7tg7v/home/wbdata\nproject dir: /tmp/wb-cw19-live-2ch7tg7v/project\nhost shell: bash /usr/bin/bash (mode manual_prompt)\nOMP: omp/18.8.0 | 격리 확인: ok\n자동화: idle\nbackend 재시작 대조: reboot\n자동 동작 보류: boot_confirmation_required\n확인하면 Workbench 자동 동작(worker 지시 전달, worker terminal, 감시·복구 알림, 60초 점검, 새 실험)이 다시 허용됩니다. 재부팅 전 실험은 다시 실행되지 않습니다.\n"
+  },
+  {
+   "check": "G: confirm-boot --yes exit 0",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "G: hold lifted after confirm-boot",
+   "ok": true,
+   "detail": []
+  },
+  {
+   "check": "G: a second confirm-boot has nothing pending, exit 1",
+   "ok": true,
+   "detail": "부팅 확인이 필요하지 않습니다 (대기 중인 확인 없음)\n"
+  },
+  {
+   "check": "G: confirmation durable in boot.json",
+   "ok": true,
+   "detail": false
+  },
+  {
+   "check": "G: final shutdown verified, exit 0",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "no request reached the local model endpoint",
+   "ok": true,
+   "detail": []
+  },
+  {
+   "check": "zero assistant messages in the OMP session files",
+   "ok": true,
+   "detail": {
+    "files": 0
+   }
+  }
+ ],
+ "observations": {
+  "A_backend": {
+   "pid": 525617,
+   "start_ticks": 297110867,
+   "boot_id": "30e0b94c-32c5-4014-8441-0ebcc6537118"
+  },
+  "A_refs": {
+   "backend": [
+    525617,
+    297110867
+   ],
+   "host_shell": [
+    525666,
+    297110886
+   ],
+   "manager_omp": [
+    525669,
+    297110887
+   ],
+   "worker_omp": [
+    525670,
+    297110888
+   ]
+  },
+  "A_user_processes": {
+   "nohup": [
+    526495,
+    297113124
+   ],
+   "setsid": [
+    527662,
+    297114205
+   ],
+   "foreground": [
+    528905,
+    297115166
+   ]
+  },
+  "B_alive_after_sigkill": {
+   "backend": false,
+   "host_shell": false,
+   "manager_omp": false,
+   "worker_omp": false,
+   "nohup_job": true,
+   "setsid_job": true,
+   "foreground_run": true
+  },
+  "C_backend": {
+   "pid": 529290,
+   "start_ticks": 297115768,
+   "boot_id": "30e0b94c-32c5-4014-8441-0ebcc6537118"
+  },
+  "C_startup": {
+   "at": 1791426087.5280304,
+   "classification": "same_boot_crash",
+   "notes": [],
+   "notice": null,
+   "outbox_lost": [],
+   "outbox_lost_count": 0,
+   "previous": {
+    "boot_id": "30e0b94c-32c5-4014-8441-0ebcc6537118",
+    "phase": "ready",
+    "pid": 525617,
+    "shutdown_verified": null
+   },
+   "probed": true,
+   "processes": [
+    {
+     "name": "backend",
+     "pid": 525617,
+     "start_ticks": 297110867,
+     "state": "ended"
+    },
+    {
+     "name": "manager_omp",
+     "pid": 525669,
+     "start_ticks": 297110887,
+     "state": "ended"
+    },
+    {
+     "name": "worker_omp",
+     "pid": 525670,
+     "start_ticks": 297110888,
+     "state": "ended"
+    },
+    {
+     "name": "host_shell",
+     "pid": 525666,
+     "start_ticks": 297110886,
+     "state": "ended"
+    }
+   ],
+   "run": null,
+   "survivor_stops": [],
+   "survivors": [
+    {
+     "boot_id": "30e0b94c-32c5-4014-8441-0ebcc6537118",
+     "comm": "sh",
+     "identity": "unverified",
+     "name": "session_member",
+     "pid": 526495,
+     "session": 525666,
+     "start_ticks": 297113124,
+     "state": "alive",
+     "stop": null,
+     "stoppable": false,
+     "survivor_id": "s1",
+     "why_not": "its session leader (host_shell) is gone, so the session is not provably the old pane's"
+    },
+    {
+     "boot_id": "30e0b94c-32c5-4014-8441-0ebcc6537118",
+     "comm": "sh",
+     "identity": "unverified",
+     "name": "session_member",
+     "pid": 528905,
+     "session": 525666,
+     "start_ticks": 297115166,
+     "state": "alive",
+     "stop": null,
+     "stoppable": false,
+     "survivor_id": "s2",
+     "why_not": "its session leader (host_shell) is gone, so the session is not provably the old pane's"
+    },
+    {
+     "boot_id": "30e0b94c-32c5-4014-8441-0ebcc6537118",
+     "comm": "sleep",
+     "identity": "unverified",
+     "name": "session_member",
+     "pid": 529279,
+     "session": 525666,
+     "start_ticks": 297115735,
+     "state": "ended",
+     "stop": null,
+     "stoppable": false,
+     "survivor_id": "s3",
+     "why_not": "its session leader (host_shell) is gone, so the session is not provably the old pane's"
+    },
+    {
+     "boot_id": "30e0b94c-32c5-4014-8441-0ebcc6537118",
+     "comm": "sleep",
+     "identity": "unverified",
+     "name": "session_member",
+     "pid": 529289,
+     "session": 525666,
+     "start_ticks": 297115768,
+     "state": "ended",
+     "stop": null,
+     "stoppable": false,
+     "survivor_id": "s4",
+     "why_not": "its session leader (host_shell) is gone, so the session is not provably the old pane's"
+    }
+   ]
+  },
+  "C_setsid_job_listed": false,
+  "C_survivor_summary": [
+   {
+    "survivor_id": "s1",
+    "name": "session_member",
+    "pid": 526495,
+    "comm": "sh",
+    "state": "alive",
+    "identity": "unverified",
+    "stoppable": false,
+    "why_not": "its session leader (host_shell) is gone, so the session is not provably the old pane's"
+   },
+   {
+    "survivor_id": "s2",
+    "name": "session_member",
+    "pid": 528905,
+    "comm": "sh",
+    "state": "alive",
+    "identity": "unverified",
+    "stoppable": false,
+    "why_not": "its session leader (host_shell) is gone, so the session is not provably the old pane's"
+   },
+   {
+    "survivor_id": "s3",
+    "name": "session_member",
+    "pid": 529279,
+    "comm": "sleep",
+    "state": "ended",
+    "identity": "unverified",
+    "stoppable": false,
+    "why_not": "its session leader (host_shell) is gone, so the session is not provably the old pane's"
+   },
+   {
+    "survivor_id": "s4",
+    "name": "session_member",
+    "pid": 529289,
+    "comm": "sleep",
+    "state": "ended",
+    "identity": "unverified",
+    "stoppable": false,
+    "why_not": "its session leader (host_shell) is gone, so the session is not provably the old pane's"
+   }
+  ],
+  "C_bridge_auth_log_lines": [],
+  "D_holds": [
+   {
+    "detail": "backend_record: PermissionError",
+    "reason": "metadata_unavailable",
+    "since": 1791426093.3955123
+   }
+  ],
+  "D_faults": {
+   "metadata": {
+    "since": 1791426093.3955123,
+    "sources": {
+     "backend_record": "backend_record: PermissionError"
+    },
+    "state": "failed"
+   },
+   "model": null,
+   "raw_log": null,
+   "record_error": "PermissionError: Permission denied"
+  },
+  "D_phase": [
+   "degraded",
+   "pane_exited:host_shell"
+  ],
+  "E_shutdown_unverified": {
+   "left_running": [],
+   "lifecycle": null,
+   "panes": [
+    {
+     "exit_status": 0,
+     "pane": "host_shell",
+     "survivors": []
+    },
+    {
+     "exit_status": 143,
+     "pane": "manager_omp",
+     "survivors": []
+    },
+    {
+     "exit_status": 143,
+     "pane": "worker_omp",
+     "survivors": []
+    }
+   ],
+   "previous_survivors": [
+    {
+     "comm": "sh",
+     "name": "session_member",
+     "pid": 526495,
+     "survivor_id": "s1"
+    },
+    {
+     "comm": "sh",
+     "name": "session_member",
+     "pid": 528905,
+     "survivor_id": "s2"
+    }
+   ],
+   "problems": [
+    "previous_backend_survivors_alive"
+   ],
+   "processes": {
+    "host_shell": "dead",
+    "manager_omp": "dead",
+    "worker_omp": "dead"
+   },
+   "user_confirmed": true,
+   "verified": false
+  },
+  "F_backend": {
+   "pid": 529762,
+   "start_ticks": 297116939,
+   "boot_id": "30e0b94c-32c5-4014-8441-0ebcc6537118"
+  },
+  "F_startup": {
+   "at": 1791426099.26115,
+   "classification": "same_boot_unverified_stop",
+   "notes": [],
+   "notice": null,
+   "outbox_lost": [],
+   "outbox_lost_count": 0,
+   "previous": {
+    "boot_id": "30e0b94c-32c5-4014-8441-0ebcc6537118",
+    "phase": "stopped",
+    "pid": 529290,
+    "shutdown_verified": false
+   },
+   "probed": true,
+   "processes": [
+    {
+     "name": "backend",
+     "pid": 529290,
+     "start_ticks": 297115768,
+     "state": "ended"
+    },
+    {
+     "name": "manager_omp",
+     "pid": 529297,
+     "start_ticks": 297115784,
+     "state": "ended"
+    },
+    {
+     "name": "worker_omp",
+     "pid": 529298,
+     "start_ticks": 297115784,
+     "state": "ended"
+    },
+    {
+     "name": "host_shell",
+     "pid": 529294,
+     "start_ticks": 297115783,
+     "state": "ended"
+    },
+    {
+     "name": "session_member",
+     "pid": 526495,
+     "start_ticks": 297113124,
+     "state": "alive"
+    },
+    {
+     "name": "session_member",
+     "pid": 528905,
+     "start_ticks": 297115166,
+     "state": "alive"
+    }
+   ],
+   "run": null,
+   "survivor_stops": [],
+   "survivors": [
+    {
+     "boot_id": "30e0b94c-32c5-4014-8441-0ebcc6537118",
+     "comm": "sh",
+     "identity": "unverified",
+     "name": "session_member",
+     "pid": 526495,
+     "session": 525666,
+     "start_ticks": 297113124,
+     "state": "alive",
+     "stop": null,
+     "stoppable": false,
+     "survivor_id": "s1",
+     "why_not": "its session leader (host_shell) is gone, so the session is not provably the old pane's"
+    },
+    {
+     "boot_id": "30e0b94c-32c5-4014-8441-0ebcc6537118",
+     "comm": "sh",
+     "identity": "unverified",
+     "name": "session_member",
+     "pid": 528905,
+     "session": 525666,
+     "start_ticks": 297115166,
+     "state": "alive",
+     "stop": null,
+     "stoppable": false,
+     "survivor_id": "s2",
+     "why_not": "its session leader (host_shell) is gone, so the session is not provably the old pane's"
+    }
+   ]
+  },
+  "F_shutdown": {
+   "left_running": [],
+   "lifecycle": null,
+   "panes": [
+    {
+     "exit_status": -1,
+     "pane": "host_shell",
+     "survivors": []
+    },
+    {
+     "exit_status": 143,
+     "pane": "manager_omp",
+     "survivors": []
+    },
+    {
+     "exit_status": 143,
+     "pane": "worker_omp",
+     "survivors": []
+    }
+   ],
+   "previous_survivors": [],
+   "problems": [],
+   "processes": {
+    "host_shell": "dead",
+    "manager_omp": "dead",
+    "worker_omp": "dead"
+   },
+   "user_confirmed": true,
+   "verified": true
+  },
+  "G_backend": {
+   "pid": 530108,
+   "start_ticks": 297117400,
+   "boot_id": "30e0b94c-32c5-4014-8441-0ebcc6537118"
+  },
+  "G_boot": {
+   "boot_id": "30e0b94c-32c5-4014-8441-0ebcc6537118",
+   "confirmation_required": true,
+   "confirmed": false,
+   "confirmed_boot_id": "00000000-0000-4000-8000-00000000c019",
+   "persisted": true,
+   "reason": "reboot",
+   "recorded_boot_id": "00000000-0000-4000-8000-00000000c019"
+  },
+  "G_startup_processes": [
+   {
+    "name": "backend",
+    "pid": 529762,
+    "start_ticks": 297116939,
+    "state": "ended_by_reboot"
+   },
+   {
+    "name": "manager_omp",
+    "pid": 529772,
+    "start_ticks": 297116957,
+    "state": "ended_by_reboot"
+   },
+   {
+    "name": "worker_omp",
+    "pid": 529774,
+    "start_ticks": 297116958,
+    "state": "ended_by_reboot"
+   },
+   {
+    "name": "host_shell",
+    "pid": 529768,
+    "start_ticks": 297116957,
+    "state": "ended_by_reboot"
+   }
+  ],
+  "G_resume": {
+   "at": "2026-10-08T02:21:49+00:00",
+   "outcome": "resumed",
+   "reason": null
+  }
+ },
+ "boot_id": "30e0b94c-32c5-4014-8441-0ebcc6537118",
+ "omp_version": "omp/18.8.0",
+ "provider_requests": [],
+ "omp_session_files": 0,
+ "omp_assistant_messages": 0,
+ "residue_processes_killed": [],
+ "residue_root": false,
+ "error": null
+}

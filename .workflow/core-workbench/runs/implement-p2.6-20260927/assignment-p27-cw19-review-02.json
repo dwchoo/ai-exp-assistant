@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw19-review-02",
+  "ticket_id": "CW-19 delta review of fix-01",
+  "role": "reviewer",
+  "unit": "V-CW-19",
+  "candidate": "03d6350f53eddcf30be77ca1b6a90179cc2eee43a57e3d5208ff0e80ca393891",
+  "prior_candidate": "f7091db80a1548124439497a7f59751876b508f0faa11cde623839267090d74e",
+  "routing": {
+    "planned_role": "reviewer",
+    "selected_role": "reviewer (Opus high, fresh; delta after a block with concurrency fixes)",
+    "reason_codes": [
+      "review_block_delta",
+      "concurrency"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw19-review-01.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/assignment-p27-cw19-fix-01.json",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw19-fix-01.md"
+    ]
+  },
+  "required_behavior": [
+    "Verify each Root adjudication in assignment-p27-cw19-fix-01.json is closed (review-01 P2-1, P2-2, P3s; vm F1, F2; test P3-1, P3-2) and no new defect: races at hold lift (P2-2), outbox ordering/no replay/no duplicate on hold lift (P2-1), survivor re-observation and retry identity checks, streaming journal read memory bound, pause save retry. Also judge: messages dropped on pause keep the worker's 'queued ... delivered once' wording — is it truthful? (pause drop is the existing C-D65 rule; the wording must not promise delivery). The to-worker skill is at 10994/11000 chars."
+  ],
+  "acceptance": [
+    "Verdict pass/block, findings with file:line"
+  ],
+  "allowed_write_paths": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw19-review-02.md"
+  ],
+  "rules": "Read-only. No real provider requests. Never read credential stores/contents or other processes' environ; never print tokens; never edit ~/.omp, ~/.agents, ~/.claude, ~/.codex or user configs; never touch the user's tmux (default socket), other claude-swarm sockets, ~/wb-urux-sandbox or processes you did not start; kill only PIDs you started; no pkill; temp only under /tmp; no commits; no graphify update.",
+  "result_format": "Korean reply <=8 lines."
+}

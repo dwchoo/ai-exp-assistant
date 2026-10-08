@@ -1,0 +1,137 @@
+2026-10-08T14:09:23 backend[799947] startup reconcile: fresh (boot ok); survivors []; run None; outbox not sent 0
+2026-10-08T14:09:23 backend[799947] starting in /tmp/cw19-be-bb8dd1ll/d (session 779287, shell /usr/bin/bash)
+2026-10-08T14:09:23 backend[799947] omp home: OMP Workbench shares only your OMP login and found no usable OMP auth store at /tmp/cw19-be-bb8dd1ll/h/.omp/agent/agent.db (missing). Run 'omp' once outside Workbench and sign in with /login, then start Workbench again. No OMP login yet but a provider API key? With no auth store at that path, a provider API key environment variable from 'omp --help' (for example ANTHROPIC_API_KEY or OPENAI_API_KEY) lets Workbench start without the shared login; the key is passed to the Workbench OMPs as before. Workbench never creates this file and never reads its contents.
+2026-10-08T14:09:23 backend[799947] omp home: OMP 18.6.1 has not extracted its native addon into /tmp/cw19-be-bb8dd1ll/h/.omp/natives/18.6.1 yet: the first Workbench OMP extracts it there (the same files your own omp 18.6.1 extracts; OMP has no setting to move this directory).
+2026-10-08T14:09:23 backend[799947] omp home /tmp/cw19-be-bb8dd1ll/d/omp-root (agent.db not linked)
+/usr/lib/python3.12/pty.py:95: DeprecationWarning: This process (pid=799947) is multi-threaded, use of forkpty() may lead to deadlocks in the child.
+  pid, fd = os.forkpty()
+2026-10-08T14:09:23 backend[799947] omp isolation check ok
+2026-10-08T14:09:23 backend[799947] ready: both OMP bridges connected
+2026-10-08T14:09:23 backend[799947] model error in the worker OMP (error); its automatic work is held, experiments and observation continue
+2026-10-08T14:09:24 backend[799947] model of worker answered without error; its automatic work is admitted again
+.2026-10-08T14:09:24 backend[799947] startup reconcile: fresh (boot ok); survivors []; run None; outbox not sent 0
+2026-10-08T14:09:24 backend[799947] starting in /tmp/cw19-be-qtg33fta/d (session 779287, shell /usr/bin/bash)
+2026-10-08T14:09:24 backend[799947] omp home: OMP Workbench shares only your OMP login and found no usable OMP auth store at /tmp/cw19-be-qtg33fta/h/.omp/agent/agent.db (missing). Run 'omp' once outside Workbench and sign in with /login, then start Workbench again. No OMP login yet but a provider API key? With no auth store at that path, a provider API key environment variable from 'omp --help' (for example ANTHROPIC_API_KEY or OPENAI_API_KEY) lets Workbench start without the shared login; the key is passed to the Workbench OMPs as before. Workbench never creates this file and never reads its contents.
+2026-10-08T14:09:24 backend[799947] omp home: OMP 18.6.1 has not extracted its native addon into /tmp/cw19-be-qtg33fta/h/.omp/natives/18.6.1 yet: the first Workbench OMP extracts it there (the same files your own omp 18.6.1 extracts; OMP has no setting to move this directory).
+2026-10-08T14:09:24 backend[799947] omp home /tmp/cw19-be-qtg33fta/d/omp-root (agent.db not linked)
+2026-10-08T14:09:24 backend[799947] omp isolation check ok
+2026-10-08T14:09:24 backend[799947] ready: both OMP bridges connected
+2026-10-08T14:09:24 backend[799947] metadata write failed (task_metadata: OperationalError); new automatic work is held, running work and logs continue
+.2026-10-08T14:09:24 backend[799947] startup reconcile: fresh (boot ok); survivors []; run None; outbox not sent 0
+2026-10-08T14:09:24 backend[799947] starting in /tmp/cw19-be-3vk1m7pa/d (session 779287, shell /usr/bin/bash)
+2026-10-08T14:09:24 backend[799947] omp home: OMP Workbench shares only your OMP login and found no usable OMP auth store at /tmp/cw19-be-3vk1m7pa/h/.omp/agent/agent.db (missing). Run 'omp' once outside Workbench and sign in with /login, then start Workbench again. No OMP login yet but a provider API key? With no auth store at that path, a provider API key environment variable from 'omp --help' (for example ANTHROPIC_API_KEY or OPENAI_API_KEY) lets Workbench start without the shared login; the key is passed to the Workbench OMPs as before. Workbench never creates this file and never reads its contents.
+2026-10-08T14:09:24 backend[799947] omp home: OMP 18.6.1 has not extracted its native addon into /tmp/cw19-be-3vk1m7pa/h/.omp/natives/18.6.1 yet: the first Workbench OMP extracts it there (the same files your own omp 18.6.1 extracts; OMP has no setting to move this directory).
+2026-10-08T14:09:24 backend[799947] omp home /tmp/cw19-be-3vk1m7pa/d/omp-root (agent.db not linked)
+2026-10-08T14:09:24 backend[799947] omp isolation check ok
+2026-10-08T14:09:24 backend[799947] ready: both OMP bridges connected
+2026-10-08T14:09:24 backend[799947] metadata write failed (backend_record: OSError); new automatic work is held, running work and logs continue
+2026-10-08T14:09:25 backend[799947] metadata writes work again; automatic work admitted again
+.2026-10-08T14:09:25 backend[799947] startup reconcile: reboot (boot confirmation required: reboot); survivors []; run None; outbox not sent 0
+2026-10-08T14:09:25 backend[799947] starting in /tmp/cw19-be-ifs3kuv6/d (session 779287, shell /usr/bin/bash)
+2026-10-08T14:09:25 backend[799947] omp home: OMP Workbench shares only your OMP login and found no usable OMP auth store at /tmp/cw19-be-ifs3kuv6/h/.omp/agent/agent.db (missing). Run 'omp' once outside Workbench and sign in with /login, then start Workbench again. No OMP login yet but a provider API key? With no auth store at that path, a provider API key environment variable from 'omp --help' (for example ANTHROPIC_API_KEY or OPENAI_API_KEY) lets Workbench start without the shared login; the key is passed to the Workbench OMPs as before. Workbench never creates this file and never reads its contents.
+2026-10-08T14:09:25 backend[799947] omp home: OMP 18.6.1 has not extracted its native addon into /tmp/cw19-be-ifs3kuv6/h/.omp/natives/18.6.1 yet: the first Workbench OMP extracts it there (the same files your own omp 18.6.1 extracts; OMP has no setting to move this directory).
+2026-10-08T14:09:25 backend[799947] omp home /tmp/cw19-be-ifs3kuv6/d/omp-root (agent.db not linked)
+2026-10-08T14:09:25 backend[799947] omp isolation check ok
+2026-10-08T14:09:25 backend[799947] ready: both OMP bridges connected
+2026-10-08T14:09:25 backend[799947] startup reconcile: same_boot_clean_stop (boot confirmation required: reboot); survivors [('backend', 799947)]; run None; outbox not sent 0
+2026-10-08T14:09:25 backend[799947] starting in /tmp/cw19-be-ifs3kuv6/d (session 779287, shell /usr/bin/bash)
+2026-10-08T14:09:25 backend[799947] omp home: OMP Workbench shares only your OMP login and found no usable OMP auth store at /tmp/cw19-be-ifs3kuv6/h/.omp/agent/agent.db (missing). Run 'omp' once outside Workbench and sign in with /login, then start Workbench again. No OMP login yet but a provider API key? With no auth store at that path, a provider API key environment variable from 'omp --help' (for example ANTHROPIC_API_KEY or OPENAI_API_KEY) lets Workbench start without the shared login; the key is passed to the Workbench OMPs as before. Workbench never creates this file and never reads its contents.
+2026-10-08T14:09:25 backend[799947] omp home: OMP 18.6.1 has not extracted its native addon into /tmp/cw19-be-ifs3kuv6/h/.omp/natives/18.6.1 yet: the first Workbench OMP extracts it there (the same files your own omp 18.6.1 extracts; OMP has no setting to move this directory).
+2026-10-08T14:09:25 backend[799947] omp home /tmp/cw19-be-ifs3kuv6/d/omp-root (agent.db not linked)
+2026-10-08T14:09:25 backend[799947] omp isolation check ok
+2026-10-08T14:09:25 backend[799947] ready: both OMP bridges connected
+.2026-10-08T14:09:26 backend[799947] startup reconcile: reboot (boot confirmation required: reboot); survivors []; run None; outbox not sent 0
+2026-10-08T14:09:26 backend[799947] starting in /tmp/cw19-be-e_ky5v6r/d (session 779287, shell /usr/bin/bash)
+2026-10-08T14:09:26 backend[799947] omp home: OMP Workbench shares only your OMP login and found no usable OMP auth store at /tmp/cw19-be-e_ky5v6r/h/.omp/agent/agent.db (missing). Run 'omp' once outside Workbench and sign in with /login, then start Workbench again. No OMP login yet but a provider API key? With no auth store at that path, a provider API key environment variable from 'omp --help' (for example ANTHROPIC_API_KEY or OPENAI_API_KEY) lets Workbench start without the shared login; the key is passed to the Workbench OMPs as before. Workbench never creates this file and never reads its contents.
+2026-10-08T14:09:26 backend[799947] omp home: OMP 18.6.1 has not extracted its native addon into /tmp/cw19-be-e_ky5v6r/h/.omp/natives/18.6.1 yet: the first Workbench OMP extracts it there (the same files your own omp 18.6.1 extracts; OMP has no setting to move this directory).
+2026-10-08T14:09:26 backend[799947] omp home /tmp/cw19-be-e_ky5v6r/d/omp-root (agent.db not linked)
+2026-10-08T14:09:26 backend[799947] backend_restarted notice queued for the manager (Task 05c5c1af-5857-4910-bb99-16db7ccf46f3)
+2026-10-08T14:09:26 backend[799947] omp isolation check ok
+2026-10-08T14:09:26 backend[799947] ready: both OMP bridges connected
+2026-10-08T14:09:27 backend[799947] automation: pause requested by the user
+2026-10-08T14:09:27 backend[799947] automation: resume requested by the user
+2026-10-08T14:09:27 backend[799947] automation: resume resumed
+2026-10-08T14:09:27 backend[799947] boot bbbbbbbb-2222-4222-8222-bbbbbbbbbbbb confirmed by the user; Workbench automatic work is admitted again
+.2026-10-08T14:09:28 backend[799947] startup reconcile: same_boot_crash (boot ok); survivors []; run None; outbox not sent 0
+2026-10-08T14:09:28 backend[799947] starting in /tmp/cw19-be-9azfagdx/d (session 779287, shell /usr/bin/bash)
+2026-10-08T14:09:28 backend[799947] omp home: OMP Workbench shares only your OMP login and found no usable OMP auth store at /tmp/cw19-be-9azfagdx/h/.omp/agent/agent.db (missing). Run 'omp' once outside Workbench and sign in with /login, then start Workbench again. No OMP login yet but a provider API key? With no auth store at that path, a provider API key environment variable from 'omp --help' (for example ANTHROPIC_API_KEY or OPENAI_API_KEY) lets Workbench start without the shared login; the key is passed to the Workbench OMPs as before. Workbench never creates this file and never reads its contents.
+2026-10-08T14:09:28 backend[799947] omp home: OMP 18.6.1 has not extracted its native addon into /tmp/cw19-be-9azfagdx/h/.omp/natives/18.6.1 yet: the first Workbench OMP extracts it there (the same files your own omp 18.6.1 extracts; OMP has no setting to move this directory).
+2026-10-08T14:09:28 backend[799947] omp home /tmp/cw19-be-9azfagdx/d/omp-root (agent.db not linked)
+2026-10-08T14:09:28 backend[799947] omp isolation check ok
+2026-10-08T14:09:28 backend[799947] ready: both OMP bridges connected
+.2026-10-08T14:09:30 backend[799947] startup reconcile: same_boot_crash (boot ok); survivors [('host_shell', 800138)]; run None; outbox not sent 0
+2026-10-08T14:09:30 backend[799947] starting in /tmp/cw19-be-zdbr0wq2/d (session 779287, shell /usr/bin/bash)
+2026-10-08T14:09:30 backend[799947] omp home: OMP Workbench shares only your OMP login and found no usable OMP auth store at /tmp/cw19-be-zdbr0wq2/h/.omp/agent/agent.db (missing). Run 'omp' once outside Workbench and sign in with /login, then start Workbench again. No OMP login yet but a provider API key? With no auth store at that path, a provider API key environment variable from 'omp --help' (for example ANTHROPIC_API_KEY or OPENAI_API_KEY) lets Workbench start without the shared login; the key is passed to the Workbench OMPs as before. Workbench never creates this file and never reads its contents.
+2026-10-08T14:09:30 backend[799947] omp home: OMP 18.6.1 has not extracted its native addon into /tmp/cw19-be-zdbr0wq2/h/.omp/natives/18.6.1 yet: the first Workbench OMP extracts it there (the same files your own omp 18.6.1 extracts; OMP has no setting to move this directory).
+2026-10-08T14:09:30 backend[799947] omp home /tmp/cw19-be-zdbr0wq2/d/omp-root (agent.db not linked)
+2026-10-08T14:09:30 backend[799947] backend_restarted notice queued for the manager (Task ec4c3a69-993e-4d76-9465-700ed2c5ad6a)
+2026-10-08T14:09:30 backend[799947] omp isolation check ok
+2026-10-08T14:09:30 backend[799947] ready: both OMP bridges connected
+2026-10-08T14:09:33 backend[799947] automation: resume requested by the user
+2026-10-08T14:09:33 backend[799947] automation: resume resumed
+2026-10-08T14:09:36 backend[799947] stop_survivor s1 (host_shell pid 800138) requested by the manager: stopped (ended)
+.2026-10-08T14:09:36 backend[799947] startup reconcile: same_boot_crash (boot ok); survivors [('worker_omp', 800225)]; run None; outbox not sent 0
+2026-10-08T14:09:36 backend[799947] starting in /tmp/cw19-be-ulhqtqzd/d (session 779287, shell /usr/bin/bash)
+2026-10-08T14:09:36 backend[799947] omp home: OMP Workbench shares only your OMP login and found no usable OMP auth store at /tmp/cw19-be-ulhqtqzd/h/.omp/agent/agent.db (missing). Run 'omp' once outside Workbench and sign in with /login, then start Workbench again. No OMP login yet but a provider API key? With no auth store at that path, a provider API key environment variable from 'omp --help' (for example ANTHROPIC_API_KEY or OPENAI_API_KEY) lets Workbench start without the shared login; the key is passed to the Workbench OMPs as before. Workbench never creates this file and never reads its contents.
+2026-10-08T14:09:36 backend[799947] omp home: OMP 18.6.1 has not extracted its native addon into /tmp/cw19-be-ulhqtqzd/h/.omp/natives/18.6.1 yet: the first Workbench OMP extracts it there (the same files your own omp 18.6.1 extracts; OMP has no setting to move this directory).
+2026-10-08T14:09:36 backend[799947] omp home /tmp/cw19-be-ulhqtqzd/d/omp-root (agent.db not linked)
+2026-10-08T14:09:36 backend[799947] omp isolation check ok
+2026-10-08T14:09:36 backend[799947] ready: both OMP bridges connected
+.2026-10-08T14:09:36 backend[799947] startup reconcile failed (RuntimeError: boom); automatic work held until confirm-boot
+2026-10-08T14:09:36 backend[799947] metadata write failed (boot_record: OSError); new automatic work is held, running work and logs continue
+2026-10-08T14:09:36 backend[799947] startup reconcile: boot_unknown (boot confirmation required: reconcile_failed); survivors []; run None; outbox not sent 0
+2026-10-08T14:09:36 backend[799947] boot aaaaaaaa-1111-4111-8111-aaaaaaaaaaaa confirmed by the user; Workbench automatic work is admitted again
+2026-10-08T14:09:36 backend[799947] metadata writes work again; automatic work admitted again
+.2026-10-08T14:09:36 backend[799947] startup reconcile: same_boot_crash (boot ok); survivors []; run None; outbox not sent 0
+2026-10-08T14:09:36 backend[799947] stopped: {'verified': True}
+...............................2026-10-08T14:09:37 backend[799947] startup reconcile: fresh (boot ok); survivors []; run None; outbox not sent 0
+2026-10-08T14:09:37 backend[799947] starting in /tmp/cw19-be-gjd6owdv/d (session 779287, shell /usr/bin/bash)
+2026-10-08T14:09:37 backend[799947] omp home: OMP Workbench shares only your OMP login and found no usable OMP auth store at /tmp/cw19-be-gjd6owdv/h/.omp/agent/agent.db (missing). Run 'omp' once outside Workbench and sign in with /login, then start Workbench again. No OMP login yet but a provider API key? With no auth store at that path, a provider API key environment variable from 'omp --help' (for example ANTHROPIC_API_KEY or OPENAI_API_KEY) lets Workbench start without the shared login; the key is passed to the Workbench OMPs as before. Workbench never creates this file and never reads its contents.
+2026-10-08T14:09:37 backend[799947] omp home: OMP 18.6.1 has not extracted its native addon into /tmp/cw19-be-gjd6owdv/h/.omp/natives/18.6.1 yet: the first Workbench OMP extracts it there (the same files your own omp 18.6.1 extracts; OMP has no setting to move this directory).
+2026-10-08T14:09:37 backend[799947] omp home /tmp/cw19-be-gjd6owdv/d/omp-root (agent.db not linked)
+2026-10-08T14:09:37 backend[799947] omp isolation check ok
+2026-10-08T14:09:37 backend[799947] ready: both OMP bridges connected
+2026-10-08T14:09:37 backend[799947] model error in the worker OMP (error); its automatic work is held, experiments and observation continue
+2026-10-08T14:09:37 backend[799947] model of worker answered without error; its automatic work is admitted again
+.2026-10-08T14:09:37 backend[799947] model error in the worker OMP (error); its automatic work is held, experiments and observation continue
+2026-10-08T14:09:37 backend[799947] model of worker answered without error; its automatic work is admitted again
+..2026-10-08T14:09:37 backend[799947] metadata write failed (automation_pause: OSError); new automatic work is held, running work and logs continue
+2026-10-08T14:09:37 backend[799947] metadata writes work again; automatic work admitted again
+......2026-10-08T14:09:37 backend[799947] backend_restarted notice queued for the manager (Task t1)
+2026-10-08T14:09:37 backend[799947] backend_restarted notice dropped: Task t1 is no longer open
+2026-10-08T14:09:37 backend[799947] backend_restarted notice dropped: Task t1 is no longer open
+..................................2026-10-08T14:09:40 backend[799947] metadata write failed (task_metadata: OSError); new automatic work is held, running work and logs continue
+2026-10-08T14:09:40 backend[799947] metadata write failed (flow_ledger: OSError); new automatic work is held, running work and logs continue
+2026-10-08T14:09:40 backend[799947] metadata writes work again; automatic work admitted again
+.2026-10-08T14:09:40 backend[799947] metadata write failed (backend_record: PermissionError); new automatic work is held, running work and logs continue
+2026-10-08T14:09:40 backend[799947] metadata writes work again; automatic work admitted again
+.2026-10-08T14:09:40 backend[799947] model error in the worker OMP (error); its automatic work is held, experiments and observation continue
+..2026-10-08T14:09:40 backend[799947] model error in the worker OMP (error); its automatic work is held, experiments and observation continue
+2026-10-08T14:09:40 backend[799947] model of worker answered without error; its automatic work is admitted again
+.2026-10-08T14:09:40 backend[799947] model error in the manager OMP (error); its automatic work is held, experiments and observation continue
+2026-10-08T14:09:40 backend[799947] model of manager answered without error; its automatic work is admitted again
+2026-10-08T14:09:40 backend[799947] model error in the manager OMP (error_message); its automatic work is held, experiments and observation continue
+.................................2026-10-08T14:09:54 backend[799947] startup reconcile failed (RuntimeError: boom); automatic work held until confirm-boot
+2026-10-08T14:09:54 backend[799947] metadata write failed (boot_record: OSError); new automatic work is held, running work and logs continue
+2026-10-08T14:09:54 backend[799947] startup reconcile: boot_unknown (boot confirmation required: reconcile_failed); survivors []; run None; outbox not sent 0
+.2026-10-08T14:09:54 backend[799947] startup reconcile: same_boot_crash (boot ok); survivors []; run None; outbox not sent 0
+2026-10-08T14:09:54 backend[799947] backend failure:
+Traceback (most recent call last):
+  File "/home/dwchoo/ai-exp-assistant/src/workbench/backend/service.py", line 227, in run
+    self._open()
+  File "/home/dwchoo/ai-exp-assistant/tests/recovery_boot/test_reconcile_independent_p27cw19.py", line 589, in open_
+    raise RuntimeError("stop here")
+RuntimeError: stop here
+
+2026-10-08T14:09:54 backend[799947] stopped: {'verified': True}
+..............2026-10-08T14:09:56 backend[799947] startup reconcile: boot_unknown (boot confirmation required: reboot); survivors []; run None; outbox not sent 0
+2026-10-08T14:09:56 backend[799947] boot bbbbbbbb-0000-4000-8000-0000000c0019 confirmed by the user; Workbench automatic work is admitted again
+........2026-10-08T14:09:56 backend[799947] backend_restarted notice queued for the manager (Task 4318b599-098d-4a0c-ada6-5368f79aa2e9)
+2026-10-08T14:09:56 backend[799947] backend_restarted notice queued for the manager (Task 4318b599-098d-4a0c-ada6-5368f79aa2e9)
+2026-10-08T14:09:56 backend[799947] backend_restarted notice queued for the manager (Task 4318b599-098d-4a0c-ada6-5368f79aa2e9)
+......2026-10-08T14:09:56 backend[799947] stop_survivor s1 (host_shell pid 800655) requested by the manager: stopped (ended)
+.............
+----------------------------------------------------------------------
+Ran 163 tests in 34.366s
+
+OK

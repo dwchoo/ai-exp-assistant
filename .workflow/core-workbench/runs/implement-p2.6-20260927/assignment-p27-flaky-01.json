@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-flaky-01",
+  "ticket_id": "Carried polish (tests): intermittent tests and smoke driver emulator",
+  "role": "test_designer",
+  "unit": "V-polish-final",
+  "base_commit": "a12e668",
+  "routing": {
+    "planned_role": "test_designer",
+    "selected_role": "test_designer (Opus high; race diagnosis in tests)",
+    "reason_codes": [
+      "regression_flake"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/integration-p27-cd68.json",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/integration-p27-overprint.json",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-overprint-01.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd70-fix-01.md"
+    ]
+  },
+  "user_authorization": "User 2026-10-08 '전부 진행해서 테스트까지 해서 완료하고 보고해'",
+  "required_behavior": [
+    "Make these intermittent tests deterministic without weakening what they assert (diagnose each: test-side race vs product defect; if product defect, do NOT fix src — report with a failing repro): (a) p27cd68 idle-matrix foreground test, (b) manual_input_boundary / manual_input_target PTY waits, (c) workflow cwd-verify WorkflowHeld, (d) the p27b test that takes ~90 s / times out, (e) terminal bash consecutive Ctrl-C timing test (failed 2x in full runs, passes alone), (f) backend process-lookup race seen once in a full backend run (find it in result-p27-overprint-01.md), (g) cd70 e2e independent test /proc re-read IndexError (result-p27-cd70-fix-01.md). Locate each by name in tests/.",
+    "Smoke driver: tests/backend/live_cw18_independent_p27w.py Ui uses plain pyte Screen/ByteStream (ignores CSI S) — switch its outer emulator to tests/ui/support.rep_screen_classes() (REP + SU/SD) so later smokes do not report false overprints; keep its API.",
+    "Verify: each fixed test 10x isolated and 3x inside its full suite under parallel load; then full suites with real exit codes (`PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/<suite> -t tests/<suite> -p 'test_*.py'`). Note: a CW-19 implementer is concurrently changing src/ and adding tests; if a suite failure is in files they touch (see git status), attribute it and do not chase it."
+  ],
+  "allowed_write_paths": [
+    "tests/** (the flaky tests named above and the smoke driver only; minimal edits)",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-flaky-01.md"
+  ],
+  "prohibited_paths": [
+    "src/**",
+    "omp_bridge/**",
+    "docs/**",
+    "other .workflow files"
+  ],
+  "rules": "No real provider requests; never read credential contents or other processes' environ; never touch the user's tmux (default socket), other claude-swarm sockets, ~/wb-urux-sandbox or processes you did not start; kill only PIDs you started; no pkill; temp only under /tmp; no commits; no graphify update.",
+  "result_format": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-flaky-01.md: per test cause + fix + repeat results; product defects found. Korean reply <=8 lines."
+}

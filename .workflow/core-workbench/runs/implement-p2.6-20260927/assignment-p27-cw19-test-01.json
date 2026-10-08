@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "unit": "V-CW-19",
+  "approved_bundle_digest": "cd3e3c9d143ef4d00f806288bccba15ecbc5d76bf7d8c6f1547672cbd31e812c",
+  "candidate": "f7091db80a1548124439497a7f59751876b508f0faa11cde623839267090d74e",
+  "candidate_snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-cw19-candidate.json",
+  "base_commit": "a12e668",
+  "inputs": [
+    "docs/features/core-workbench/tickets/CW-19.md",
+    "docs/features/core-workbench/DECISIONS.md#C-D71",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw19-design-01.md",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/assignment-p27-cw19-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw19-01.md"
+  ],
+  "root_adjudication": "Root accepts the 8 'Decisions taken where design/C-D71 left room' in result-p27-cw19-01.md as the intended behaviour.",
+  "invocation": "p27-cw19-test-01",
+  "ticket_id": "CW-19 independent verification + L-CW19-RESTART on host",
+  "role": "test_designer",
+  "routing": {
+    "planned_role": "test_designer",
+    "selected_role": "test_designer (Opus high; first adversarial verification)",
+    "reason_codes": [
+      "process_lifetime",
+      "recovery_contract"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw19-01.md"
+    ]
+  },
+  "required_behavior": [
+    "Write independent tests tests/**/test_*_independent_p27cw19*.py from the ticket + C-D71 (not from the implementer's tests): restart reconcile (boot_id compared before pid checks, pid reuse), survivors list + stop_survivor identity re-check/refusals, backend_restarted notice once and its suppression rules, durable pause across SIGKILL, boot change hold matrix (each held vs allowed action) and confirm-boot CLI, full shutdown listing/confirmation/verified flag (C-AC-22), model error hold/lift per role, metadata failure fail-soft and admission hold, raw log 64/512 MiB caps with execution continuing, no replay of submitted/unknown deliveries, lost never-submitted outbox listing.",
+    "Update the 3 independent tests named in result-p27-cw19-01.md for stop_survivor (decided behaviour only).",
+    "L-CW19-RESTART (runtime, host, no model requests): start the product entrypoint with a temp data dir and the real OMP binary (no prompts typed => no provider requests; verify zero assistant messages in the temp OMP session files), have a running host command / experiment-like run, SIGKILL the backend PID, restart via the entrypoint, and observe: reconcile record, survivors shown (host shell / nohup job survive per implementer), no replay, pause kept, metadata fault (make the data dir record unwritable briefly) holds new automatic work but keeps observation, raw-log cap, full shutdown with confirmation and the unverified case exit 1. Record commands, exit codes, pids, boot_id.",
+    "Run all suites with real exit codes (`PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/<suite> -t tests/<suite> -p 'test_*.py'` for each tests/<suite> dir incl. recovery_boot, lifecycle, policy, storage, tasks, observation; node `node --test tests/bridge/*.test.ts`). A flaky-test fixer may be editing other test files concurrently; attribute."
+  ],
+  "allowed_write_paths": [
+    "tests/**/*_independent_p27cw19*",
+    "the 3 named independent tests (minimal)",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw19-test-01.md",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw19-test-01-restart.json"
+  ],
+  "prohibited_paths": [
+    "src/**",
+    "omp_bridge/**",
+    "docs/**",
+    "other .workflow files"
+  ],
+  "rules": "No real provider requests. Never read credential stores/contents or other processes' environ; never print tokens; never edit ~/.omp, ~/.agents, ~/.claude, ~/.codex or user configs; never touch the user's tmux (default socket), other claude-swarm sockets, ~/wb-urux-sandbox or processes you did not start; kill only PIDs you started; no pkill; temp only under /tmp; no commits; no graphify update.",
+  "result_format": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw19-test-01.md (+ -restart.json): checks table, findings P1-P3 with repro, L-CW19-RESTART observations. Korean reply <=12 lines."
+}

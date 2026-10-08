@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "unit": "V-CW-19",
+  "approved_bundle_digest": "cd3e3c9d143ef4d00f806288bccba15ecbc5d76bf7d8c6f1547672cbd31e812c",
+  "candidate": "f7091db80a1548124439497a7f59751876b508f0faa11cde623839267090d74e",
+  "candidate_snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-cw19-candidate.json",
+  "base_commit": "a12e668",
+  "inputs": [
+    "docs/features/core-workbench/tickets/CW-19.md",
+    "docs/features/core-workbench/DECISIONS.md#C-D71",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw19-design-01.md",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/assignment-p27-cw19-01.json",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw19-01.md"
+  ],
+  "root_adjudication": "Root accepts the 8 'Decisions taken where design/C-D71 left room' in result-p27-cw19-01.md as the intended behaviour.",
+  "invocation": "p27-cw19-review-01",
+  "ticket_id": "CW-19 frozen-candidate review",
+  "role": "reviewer",
+  "routing": {
+    "planned_role": "reviewer",
+    "selected_role": "reviewer (Opus high, fresh)",
+    "reason_codes": [
+      "process_lifetime",
+      "recovery_contract",
+      "concurrency"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw19-01.md"
+    ]
+  },
+  "required_behavior": [
+    "Read-only review of `git diff a12e668 -- src omp_bridge tests` + untracked new files against CW-19 ticket, C-D71 and existing invariants: kill only exact verified identities (stop_survivor, shutdown), boot_id before pid, no replay, pause durability, admission hold coverage (nothing automatic slips through before confirm-boot; user actions not blocked), C-AC-22 truthful shutdown, fail-soft metadata, raw log caps, model hold lifecycle, thread safety/locks, startup ordering (reconcile before panes/UI socket/record overwrite), SQLite RecoveryPort durability (0600, transactions), model-facing text quality. Note concurrently: an independent test_designer adds tests and a flaky-test fixer edits other tests; ignore test churn."
+  ],
+  "allowed_write_paths": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw19-review-01.md"
+  ],
+  "rules": "Read-only. No real provider requests. Never read credential stores/contents or other processes' environ; never print tokens; never edit ~/.omp, ~/.agents, ~/.claude, ~/.codex or user configs; never touch the user's tmux (default socket), other claude-swarm sockets, ~/wb-urux-sandbox or processes you did not start; kill only PIDs you started; no pkill; temp only under /tmp; no commits; no graphify update.",
+  "result_format": "Verdict pass/block; findings P1-P3 with file:line and failure scenario. Korean reply <=12 lines."
+}

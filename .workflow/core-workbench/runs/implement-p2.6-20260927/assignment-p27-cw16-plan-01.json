@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw16-plan-01",
+  "ticket_id": "CW-16 final verification plan",
+  "role": "code_explorer",
+  "unit": "V-CW-16",
+  "routing": {
+    "planned_role": "code_explorer",
+    "selected_role": "code_explorer (Opus high, read-only planning)",
+    "reason_codes": [
+      "final_gate_planning"
+    ],
+    "evidence_refs": [
+      "docs/features/core-workbench/tickets/CW-16.md"
+    ]
+  },
+  "user_authorization": "User 2026-10-08 '전부 진행해서 테스트까지 해서 완료하고 보고해' (includes real-model runs with caps)",
+  "required_behavior": [
+    "Read docs/features/core-workbench/tickets/CW-16.md, PLAN.json (CW-16, gate_items, acceptance_trace, final_checks), SPEC.md (I-FLOW, I-SHELL, I-POLICY, I-FAULT, I-COMPAT, C-AC-01..34), BRIEF acceptance, prior final gate record gate-cw16-final-result.json (p2.6) and its evidence, the G4 evidence validator (find it), and the latest integration records in .workflow/core-workbench/runs/implement-p2.6-20260927/ (integration-p27-*.json, CW-19 results incl. result-p27-cw19-vm-01.md and -test-01.md).",
+    "Produce a concrete execution plan: for each of C-AC-01..34 and each I-* item and P-C-AC-19/20: which existing evidence can be reused (with candidate/digest and why still valid after later changes) vs what must be (re)run; exact runnable procedures (product entrypoint, ui_v1 client driver tests/backend/live_cw18_independent_p27w.py Ui now with rep_screen_classes, outer environments: plain PTY terminal, an isolated tmux server on its own socket, herdr 0.9.3 (check how to drive it headless or what is not automatable), Bash 5.2 and dash as sh, zsh not installed (VM? or pending), 'no bash/sh' guidance check), real-model scenarios with request estimates and caps (OMP 18.8.0 installed now; tests/integration and gates/g3_omp pin 18.2.10 — how to handle), the VM reboot evidence reuse for I-FAULT, how to run the G4 validator on the final inputs and check it rejects missing/stale/unknown.",
+    "Group the work into 3-5 dispatchable batches (test_designer runs) with deliverables: tests/integration/** updates, docs/features/core-workbench/VERIFICATION.md and COMPATIBILITY.md (their expected structure), final gate record. Flag anything impossible locally (mark pending, never passed) and anything needing the user."
+  ],
+  "allowed_write_paths": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-plan-01.md"
+  ],
+  "rules": "Read-only. No real provider requests; never read credential stores/contents; never touch the user's tmux (default socket), other claude-swarm sockets, ~/wb-urux-sandbox, ~/.local/share/wb-vm or processes you did not start; no commits; no graphify update. A CW-19 fixer is concurrently editing src — ignore that churn.",
+  "result_format": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-plan-01.md. Korean reply <=12 lines."
+}

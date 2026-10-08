@@ -425,7 +425,7 @@
   "implementation_p27": {
     "run_record": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
     "approved_bundle_sha256": "91fe05dc882d8c00ab0eb28c30e2b6cabcbfacb0f0fee3f0eaeecfaff5b7d3e8",
-    "status": "UR-USABILITY done (user 2026-10-08); main=72e7d18 pushed; now: CW-19 (design -> implement -> test -> VM reboot -> review), then CW-16 and polish, per user 2026-10-08 '전부 진행해서 테스트까지 해서 완료하고 보고해'",
+    "status": "CW-19 integrated (L-CW19-RESTART, L-CW19-REBOOT passed; C-D71); C-D72 recorded; next: CW-16 B1 harness+compat -> B2/B3 -> freeze C16 -> B4 formal+real model -> review -> docs/gate",
     "resumed_from": ".codex/handoffs/2026-09-29-core-workbench-p27-cw17/HANDOFF.md",
     "units": {
       "V-CW-17-p2.7": {
@@ -495,6 +495,11 @@
       "V-CW-18-host-overprint": {
         "status": "integrated",
         "record": ".workflow/core-workbench/runs/implement-p2.6-20260927/integration-p27-overprint.json"
+      },
+      "V-CW-19": {
+        "status": "integrated",
+        "record": ".workflow/core-workbench/runs/implement-p2.6-20260927/integration-p27-cw19.json",
+        "candidate": "93fb44815693d8e78c104192371ce3f77c95785585f979c94fa88f320cfe9394"
       }
     },
     "user_review_checkpoints": {
@@ -513,6 +518,6 @@
       "workbench status creates the data dir as a side effect (P3, record for CW-16)"
     ],
     "environment_note": "OMP upgraded by user to 18.4.4 (was 18.2.10 during CW-02..CW-06 evidence) - compatibility re-check needed (CW-16 I-COMPAT) | 2026-10-07: local OMP is 18.7.0 (was 18.6.1); isolation evidence not yet regenerated on 18.7.0.",
-    "approved_bundle_digest": "25936cde805e6f2163ad6fc487be61f10d3c5e5e8da57e9ca30d2e0274fa820a"
+    "approved_bundle_digest": "b31396faad700dfbb5f9c95415ba34cac0ef7dabd517a4ef5c293ca8dc2c9cf2"
   }
 }

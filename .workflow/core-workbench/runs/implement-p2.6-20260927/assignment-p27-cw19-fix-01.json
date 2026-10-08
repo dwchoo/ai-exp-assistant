@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw19-fix-01",
+  "ticket_id": "CW-19 corrections from review-01, vm-01, test-01",
+  "role": "worker_senior",
+  "unit": "V-CW-19",
+  "approved_bundle_digest": "cd3e3c9d143ef4d00f806288bccba15ecbc5d76bf7d8c6f1547672cbd31e812c",
+  "routing": {
+    "planned_role": "worker_senior",
+    "selected_role": "worker_senior (Opus high, fresh; the implementer's session ended)",
+    "reason_codes": [
+      "review_block",
+      "recovery_contract",
+      "concurrency"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw19-review-01.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw19-vm-01.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw19-test-01.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw19-01.md"
+    ]
+  },
+  "root_adjudication": [
+    "Review P2-1: any worker->manager message that the worker was told is queued must be delivered once the manager hold (model/metadata/boot) lifts, never silently dropped; if it is dropped for another reason it is listed in lost_outbox/status and the worker result is truthful. Matches accepted decision 2 ('delivery waits in the outbox').",
+    "Review P2-2: the model hold of a role must lift before that role's tool calls of the same healthy turn are admitted (process model_turn_result synchronously in the bridge event path or make terminal admission consult the latest turn state); add a test where the lifting turn calls terminal.",
+    "Review P3 / test P3-1: stop_unconfirmed survivors are re-observed (refresh by exact identity) so a dead one leaves the list and a live one can be retried by the manager; shutdown verification reflects the refreshed state.",
+    "Review P3: under a manager model/metadata/boot hold, experiment run judge reports to the manager wait like other deliveries.",
+    "Review P3: TaskWorkflow.start catches RawLogStore RuntimeError and records fail_run (truthful status).",
+    "Review P3: read_jsonl must not miss recent records in journals > 64 MiB (read the tail/stream), bounded memory.",
+    "Review P3: to-worker skill lists the new held reasons briefly (boot_confirmation_required, metadata_unavailable, model_hold:<role>, shutdown_closing) and what the manager should do; reconcile_failed has its own UI/status text (not '재부팅 확인 대기').",
+    "VM F1: backend_restarted notice content is built when it is sent (current Task state), and not sent for a Task cancelled/closed meanwhile.",
+    "VM F2: the reboot-confirmation wait text gets priority on the status line (before isolation warnings) so it is visible at 160 columns.",
+    "Test P3-2: a pause save failure (automation.json) is shown as a fault in status/UI (metadata fault display) and retried; the in-memory pause stays.",
+    "The two failing independent tests from p27-cw19-test-01 must pass unchanged; all other independent tests must pass unchanged."
+  ],
+  "acceptance": [
+    "red->green tests for each item (own files); all suites with real exit codes for every tests/<suite> dir (`PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/<suite> -t tests/<suite> -p 'test_*.py'`) and node `node --test tests/bridge/*.test.ts`. Known environment failures: tests/integration (3) and tests/gates/g3_omp (1) pin OMP 18.2.10 while 18.8.0 is installed — report, do not change."
+  ],
+  "allowed_write_paths": "same as assignment-p27-cw19-01.json",
+  "prohibited_paths": [
+    "tests/**/*_independent*",
+    "docs/**",
+    "other .workflow files"
+  ],
+  "rules": "No real provider requests; never read credential stores/contents or other processes' environ; never edit ~/.omp, ~/.agents, ~/.claude, ~/.codex or user configs; never touch the user's tmux (default socket), other claude-swarm sockets, ~/wb-urux-sandbox, ~/.local/share/wb-vm or processes you did not start; kill only PIDs you started; no pkill; temp only under /tmp; no commits; no graphify update.",
+  "result_format": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw19-fix-01.md: checks table first, per item fix with file:line. Korean reply <=10 lines."
+}

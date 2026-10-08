@@ -1,0 +1,102 @@
+.....................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................F...........................................................................OBSERVATION prefix+안녕 forwarded_to_pane= b'' notice= 한글 입력 상태: Ctrl-] 뒤 자
+OBSERVATION bytes_after_menu_selection_in_same_read_forwarded= b''
+2026-10-08T14:21:47 backend[812187] starting in /tmp/rs27-hq5zss9g/d (session 779287, shell /usr/bin/bash)
+2026-10-08T14:21:47 backend[812187] omp home: OMP Workbench shares only your OMP login and found no usable OMP auth store at /tmp/rs27-hq5zss9g/h/.omp/agent/agent.db (missing). Run 'omp' once outside Workbench and sign in with /login, then start Workbench again. No OMP login yet but a provider API key? With no auth store at that path, a provider API key environment variable from 'omp --help' (for example ANTHROPIC_API_KEY or OPENAI_API_KEY) lets Workbench start without the shared login; the key is passed to the Workbench OMPs as before. Workbench never creates this file and never reads its contents.
+2026-10-08T14:21:47 backend[812187] omp home: OMP 18.4.4 has not extracted its native addon into /tmp/rs27-hq5zss9g/h/.omp/natives/18.4.4 yet: the first Workbench OMP extracts it there (the same files your own omp 18.4.4 extracts; OMP has no setting to move this directory).
+2026-10-08T14:21:47 backend[812187] omp home /tmp/rs27-hq5zss9g/d/omp-root (agent.db not linked)
+/usr/lib/python3.12/pty.py:95: DeprecationWarning: This process (pid=812187) is multi-threaded, use of forkpty() may lead to deadlocks in the child.
+  pid, fd = os.forkpty()
+2026-10-08T14:21:48 backend[812187] omp isolation check ok
+2026-10-08T14:21:48 backend[812187] ready: both OMP bridges connected
+2026-10-08T14:21:48 backend[812187] ui attached
+2026-10-08T14:21:48 backend[812187] force-killed host_shell pid 814120 (owner user, manager command None, survivors [])
+2026-10-08T14:21:48 backend[812187] restarted host_shell: pid 814144 (was {'pid': 814120, 'start_ticks': 298197832}, exit -1)
+2026-10-08T14:21:48 backend[812187] ready again: every pane alive and both OMP bridges connected
+2026-10-08T14:21:48 backend[812187] ui detached
+................................
+flood key latencies (s): [0.07, 0.053, 0.05, 0.051, 0.05] max=0.070; server flood send 2.08s
+
+sustained yes flood: UI intake 438.1 MB/s over 4.0s; Ctrl-C 0.091s
+2026-10-08T14:22:04 backend[812187] starting in /tmp/rs27-ddly_x_o/d (session 779287, shell /usr/bin/bash)
+2026-10-08T14:22:04 backend[812187] omp home: OMP Workbench shares only your OMP login and found no usable OMP auth store at /tmp/rs27-ddly_x_o/h/.omp/agent/agent.db (missing). Run 'omp' once outside Workbench and sign in with /login, then start Workbench again. No OMP login yet but a provider API key? With no auth store at that path, a provider API key environment variable from 'omp --help' (for example ANTHROPIC_API_KEY or OPENAI_API_KEY) lets Workbench start without the shared login; the key is passed to the Workbench OMPs as before. Workbench never creates this file and never reads its contents.
+2026-10-08T14:22:04 backend[812187] omp home: OMP 18.4.4 has not extracted its native addon into /tmp/rs27-ddly_x_o/h/.omp/natives/18.4.4 yet: the first Workbench OMP extracts it there (the same files your own omp 18.4.4 extracts; OMP has no setting to move this directory).
+2026-10-08T14:22:04 backend[812187] omp home /tmp/rs27-ddly_x_o/d/omp-root (agent.db not linked)
+2026-10-08T14:22:05 backend[812187] omp isolation check ok
+2026-10-08T14:22:05 backend[812187] ready: both OMP bridges connected
+2026-10-08T14:22:05 backend[812187] ui attached
+2026-10-08T14:22:05 backend[812187] omp home: OMP Workbench shares only your OMP login and found no usable OMP auth store at /tmp/rs27-ddly_x_o/h/.omp/agent/agent.db (missing). Run 'omp' once outside Workbench and sign in with /login, then start Workbench again. No OMP login yet but a provider API key? With no auth store at that path, a provider API key environment variable from 'omp --help' (for example ANTHROPIC_API_KEY or OPENAI_API_KEY) lets Workbench start without the shared login; the key is passed to the Workbench OMPs as before. Workbench never creates this file and never reads its contents.
+2026-10-08T14:22:05 backend[812187] omp home: OMP 18.4.4 has not extracted its native addon into /tmp/rs27-ddly_x_o/h/.omp/natives/18.4.4 yet: the first Workbench OMP extracts it there (the same files your own omp 18.4.4 extracts; OMP has no setting to move this directory).
+2026-10-08T14:22:05 backend[812187] restarted manager_omp: pid 814422 (was {'pid': 814407, 'start_ticks': 298199537}, exit 0, requested by user)
+2026-10-08T14:22:05 backend[812187] degraded: bridge_unconnected:manager
+2026-10-08T14:22:05 backend[812187] omp isolation re-check (manager) ok
+2026-10-08T14:22:05 backend[812187] ready again: every pane alive and both OMP bridges connected
+2026-10-08T14:22:05 backend[812187] ui detached
+....................................................................................2026-10-08T14:22:51 backend[812187] starting in /tmp/p27qu-4cnh1js3/d (session 779287, shell /usr/bin/bash)
+2026-10-08T14:22:51 backend[812187] omp home: OMP Workbench shares only your OMP login and found no usable OMP auth store at /tmp/p27qu-4cnh1js3/h/.omp/agent/agent.db (missing). Run 'omp' once outside Workbench and sign in with /login, then start Workbench again. No OMP login yet but a provider API key? With no auth store at that path, a provider API key environment variable from 'omp --help' (for example ANTHROPIC_API_KEY or OPENAI_API_KEY) lets Workbench start without the shared login; the key is passed to the Workbench OMPs as before. Workbench never creates this file and never reads its contents.
+2026-10-08T14:22:51 backend[812187] omp home: OMP 18.4.4 has not extracted its native addon into /tmp/p27qu-4cnh1js3/h/.omp/natives/18.4.4 yet: the first Workbench OMP extracts it there (the same files your own omp 18.4.4 extracts; OMP has no setting to move this directory).
+2026-10-08T14:22:51 backend[812187] omp home /tmp/p27qu-4cnh1js3/d/omp-root (agent.db not linked)
+2026-10-08T14:22:51 backend[812187] omp isolation check ok
+2026-10-08T14:22:51 backend[812187] ready: both OMP bridges connected
+2026-10-08T14:22:51 backend[812187] ui attached
+2026-10-08T14:22:52 backend[812187] omp home: OMP Workbench shares only your OMP login and found no usable OMP auth store at /tmp/p27qu-4cnh1js3/h/.omp/agent/agent.db (missing). Run 'omp' once outside Workbench and sign in with /login, then start Workbench again. No OMP login yet but a provider API key? With no auth store at that path, a provider API key environment variable from 'omp --help' (for example ANTHROPIC_API_KEY or OPENAI_API_KEY) lets Workbench start without the shared login; the key is passed to the Workbench OMPs as before. Workbench never creates this file and never reads its contents.
+2026-10-08T14:22:52 backend[812187] omp home: OMP 18.4.4 has not extracted its native addon into /tmp/p27qu-4cnh1js3/h/.omp/natives/18.4.4 yet: the first Workbench OMP extracts it there (the same files your own omp 18.4.4 extracts; OMP has no setting to move this directory).
+2026-10-08T14:22:52 backend[812187] restarted manager_omp: pid 815186 (was {'pid': 815167, 'start_ticks': 298204203}, exit 0, requested by user)
+2026-10-08T14:22:52 backend[812187] degraded: bridge_unconnected:manager
+2026-10-08T14:22:52 backend[812187] omp isolation re-check (manager) ok
+2026-10-08T14:22:52 backend[812187] ready again: every pane alive and both OMP bridges connected
+2026-10-08T14:22:52 backend[812187] ui detached
+...............................................................
+======================================================================
+FAIL: test_every_way_a_drag_can_end_keeps_the_terminal_reporting (test_product_mux_independent_p27n.OuterTerminalAfterDragsTests.test_every_way_a_drag_can_end_keeps_the_terminal_reporting)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/dwchoo/ai-exp-assistant/tests/ui/test_product_mux_independent_p27n.py", line 212, in test_every_way_a_drag_can_end_keeps_the_terminal_reporting
+    self.drag(ui, "v", -7)
+  File "/home/dwchoo/ai-exp-assistant/tests/ui/test_product_mux_independent_p27n.py", line 150, in drag
+    self.assertTrue(settled(ui, expect), f"{axis}-drag by {delta} did not move the divider\n" + ui.screen_text())
+AssertionError: False is not true : v-drag by -7 did not move the divider
+focus: MANAGER OMP | host 입력 owner: user | shell mode: manual_prompt | 자동화: idle                                                       
+backend: ready | bridge manager=ok worker=ok | 마지막 확인 14:21:35 (0s 전) | Ctrl-] ? 도움말                                               
+lq MANAGER OMP *FOCUS* alive qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqklq WORKER OMP alive qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqk
+xline 064                                                            xxwork 064                                                            x
+xline 065                                                            xxwork 065                                                            x
+xline 066                                                            xxwork 066                                                            x
+xline 067                                                            xxwork 067                                                            x
+xline 068                                                            xxwork 068                                                            x
+xline 069                                                            xxwork 069                                                            x
+xline 070                                                            xxwork 070                                                            x
+xline 071                                                            xxwork 071                                                            x
+xline 072                                                            xxwork 072                                                            x
+xline 073                                                            xxwork 073                                                            x
+xline 074                                                            xxwork 074                                                            x
+xline 075                                                            xxwork 075                                                            x
+xline 076                                                            xxwork 076                                                            x
+xline 077                                                            xxwork 077                                                            x
+xline 078                                                            xxwork 078                                                            x
+xline 079                                                            xxwork 079                                                            x
+x                                                                    xx                                                                    x
+mqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqjmqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqj
+lq HOST SHELL alive owner=user qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqk
+xhost 065                                                                                                                                  x
+xhost 066                                                                                                                                  x
+xhost 067                                                                                                                                  x
+xhost 068                                                                                                                                  x
+xhost 069                                                                                                                                  x
+xhost 070                                                                                                                                  x
+xhost 071                                                                                                                                  x
+xhost 072                                                                                                                                  x
+xhost 073                                                                                                                                  x
+xhost 074                                                                                                                                  x
+xhost 075                                                                                                                                  x
+xhost 076                                                                                                                                  x
+xhost 077                                                                                                                                  x
+xhost 078                                                                                                                                  x
+xhost 079                                                                                                                                  x
+x                                                                                                                                          x
+mqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqj
+선택 영역이 비어 있어 복사하지 않음                                                                                                         
+
+----------------------------------------------------------------------
+Ran 836 tests in 215.616s
+
+FAILED (failures=1)

@@ -1,0 +1,13 @@
+........................................................E..........................................................
+======================================================================
+ERROR: setUpClass (test_tui_extension_fault_integration.ExtensionFaultIntegrationTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/dwchoo/ai-exp-assistant/tests/gates/g3_omp/test_tui_extension_fault_integration.py", line 25, in setUpClass
+    raise RuntimeError("Unexpected OMP version")
+RuntimeError: Unexpected OMP version
+
+----------------------------------------------------------------------
+Ran 114 tests in 26.200s
+
+FAILED (errors=1)
