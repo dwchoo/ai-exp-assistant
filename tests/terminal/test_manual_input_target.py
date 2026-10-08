@@ -20,6 +20,8 @@ from workbench.terminal.shell_g2.lifecycle import ManagedLifecycle
 from workbench.terminal.shell_g2.prototype import InputBoundary, ShellChoice, UnsafeShellState
 from workbench.terminal.shell_persistent.adapter import PersistentShell, _Transport
 
+from test_manual_input_boundary_independent import reader_settled
+
 SHELLS = (ShellChoice("bash", "/usr/bin/bash"), ShellChoice("sh", "/usr/bin/dash"))
 HANDOFF_EVENTS = ("HANDOFF:{pid}", "HOOK_OK:HANDOFF", "JOBS_BEGIN:HANDOFF", "JOBS_END:HANDOFF",
                   "CONTROL_READY:{pid}")
@@ -174,13 +176,21 @@ def until(shell, condition, seconds=5.0):
     raise AssertionError({"timeout": shell.snapshot()})
 
 
+def wait_reader(shell, seconds=5.0):
+    """Until the foreground reader waits for the next key (see reader_waiting; p27-flaky-01 (b))."""
+    return until(shell, lambda _: reader_settled(shell._transport.master_fd), seconds)
+
+
 def children(shell, name):
+    """Live (not zombie) descendants named ``name``. dash reaps a killed job only at its next prompt or
+    command, so a zombie is not a running program (p27-flaky-01 (b))."""
     found = []
     for pid in shell._transport._descendant_pids():
         try:
-            if Path(f"/proc/{pid}/comm").read_text().strip() == name:
+            if (Path(f"/proc/{pid}/comm").read_text().strip() == name
+                    and Path(f"/proc/{pid}/stat").read_text().rsplit(") ", 1)[1][:1] not in {"Z", "X"}):
                 found.append(pid)
-        except OSError:
+        except (OSError, IndexError):
             pass
     return found
 
@@ -199,6 +209,7 @@ class LiveManualInputTests(unittest.TestCase):
         shell = PersistentShell(user_environment={"PATH": "/usr/bin:/bin", "TERM": "xterm", "HOME": directory},
                                 choice=choice)
         self.addCleanup(shell.close)
+        wait_reader(shell)
         return shell
 
     def assert_automation_held(self, shell):
@@ -218,6 +229,7 @@ class LiveManualInputTests(unittest.TestCase):
                 shell.send_user(b"\x7f")
                 self.assertEqual(shell.snapshot()["phase"], "unknown")
                 self.assert_automation_held(shell)
+                wait_reader(shell)
                 shell.send_user(b"\x03")  # discard the edited line
                 until(shell, lambda s: s["phase"] != "unknown")
                 shell.send_user(b"\x1b[A\x15")
@@ -331,7 +343,8 @@ class LiveManualInputTests(unittest.TestCase):
                 self.assertIsNone(shell.manual_input_hold())
                 marker = Path(directory) / "typed"
                 shell.send_user(f"printf ok > {marker}\n".encode())
-                until(shell, lambda _: marker.exists())
+                # no READY follows here: wait for printf's output, not the file the redirection creates first
+                until(shell, lambda _: marker.exists() and marker.read_text() == "ok")
                 self.assertEqual(marker.read_text(), "ok")
                 self.assert_automation_held(shell)
 
@@ -382,10 +395,16 @@ class ShellPaneManualAdmissionTests(unittest.TestCase):
                 pane = ShellPane(choice, {"PATH": "/usr/bin:/bin", "HOME": directory, "TERM": "xterm"})
                 try:
                     out = Path(directory) / "out"
+                    wait_reader(pane.shell)
                     self.assertIsNone(pane.admit(b"echo x\x1b[D\x7f"))
                     pane.pump()
                     self.assertEqual(pane.state["phase"], "unknown")
+                    wait_reader(pane.shell)
                     self.assertIsNone(pane.admit(b"\x03"))
+                    # A line typed while the shell still handles the ^C is discarded by the shell itself
+                    # (bash and dash drop what they read before the interrupt): wait for its fresh prompt.
+                    until(pane.shell, lambda s: s["parent_mode"] == "manual_prompt" and s["phase"] != "unknown")
+                    wait_reader(pane.shell)
                     self.assertIsNone(pane.admit(f"cat > {shlex.quote(str(out))}\r".encode()))
                     until(pane.shell, lambda s: s["parent_mode"] == "manual_foreground")
                     self.assertIsNone(pane.admit(b"line\n\x04"))

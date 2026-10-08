@@ -12,6 +12,15 @@ the manager calls ``restart_worker`` (C-D70 (3): only the worker OMP process it
 started and its own session members, then a new worker session through the same
 restart path); the host shell is force-killed with the members of its own
 session only on the user's request (C-D63).
+
+CW-19: before anything else (no pane, no TaskFlow load, no UI socket, no
+record overwrite) ``StartupReconciler`` compares the previous incarnation's
+record with the boot marker and ``/proc``; a changed or unknown boot holds every
+Workbench-originated automatic action until the CLI ``confirm-boot`` (C-D71
+(3)). Processes the previous backend left running are never signalled by
+Workbench itself; the manager may end a proven one with ``stop_survivor``
+(C-D71 (1)). A same-boot (or confirmed) restart with an open Task sends the new
+manager session one ``backend_restarted`` notice (C-D71 (2)).
 """
 
 from __future__ import annotations
@@ -28,13 +37,19 @@ from typing import Any
 from uuid import uuid4
 
 from workbench.app.lifecycle import LifecycleJournal
+from workbench.app.recovery import (
+    BOOT_HOLD, METADATA_HOLD, MODEL_HOLD_PREFIX, SHUTDOWN_HOLD, AdmissionHold, PauseStore, StartupReconciler, StartupResult,
+    SurvivorRegistry, model_hold, observe,
+)
 from workbench.backend.automation import AutomationController
+from workbench.backend.boot import FRESH, BootState, BootStore, read_boot_id
 from workbench.backend.flow import (
-    HANDOFF_JOURNAL_NAME, HandoffService, environment_value_findings, rejected, sensitive_environment_values,
+    HANDOFF_JOURNAL_NAME, HandoffService, accepts_keyword, environment_value_findings, rejected, sensitive_environment_values,
 )
 from workbench.backend.flow_recovery import (
-    RESTART_WORKER_TOOL, restart_detail, RESTARTS_SHOWN, STATUS_REPORTS_MAX, STATUS_TOOL, WatchPorts, Watchdog,
-    bounded, validate_restart_arguments, validate_status_arguments,
+    BACKEND_RESTARTED_HINT, RESTART_WORKER_TOOL, restart_detail, RESTARTS_SHOWN, STATUS_REPORTS_MAX, STATUS_TOOL,
+    STOP_SURVIVOR_TOOL, WatchPorts, Watchdog, bounded, validate_restart_arguments, validate_status_arguments,
+    validate_stop_survivor_arguments,
 )
 from workbench.backend.flow_tasks import FLOW_LEDGER_NAME, ExperimentPorts, TaskFlow
 from workbench.backend.flow_terminal import (
@@ -77,6 +92,8 @@ RESTART_GRACE = 3.0
 RESTART_JOB_BUDGET = 8.0  # the tool waits this long (from the request) for the restart itself ...
 RESTART_TOOL_BUDGET = 9.0  # ... and until here for the new worker's bridge registration (the bridge waits 10 s)
 WATCH_EVENTS = ("agent_start", "agent_end", "tool_execution_start")  # a worker turn the watchdog did not probe
+METADATA_RETRY = 5.0  # CW-19: while metadata writes fail, the backend record is tried again this often
+SURVIVOR_STOPS_KEPT = 20
 
 
 @dataclass(eq=False)
@@ -93,28 +110,46 @@ class _RestartJob:
     done: threading.Event = field(default_factory=threading.Event)
 
 
+PAUSE_STORE_SOURCE = "automation_pause"  # AutomationController's metadata source for automation.json
+
+
 def _log(message: str) -> None:
     print(f"{time.strftime('%Y-%m-%dT%H:%M:%S')} backend[{os.getpid()}] {message}", flush=True)
-
-
-def read_boot_id() -> str | None:
-    try:
-        return Path("/proc/sys/kernel/random/boot_id").read_text().strip() or None
-    except OSError:
-        return None
 
 
 class Backend:
     """ui_v1 controller plus the backend-owned ports CW-06/CW-18/CW-19 consume."""
 
     def __init__(self, layout: DataLayout, plan: LaunchPlan, *, project_dir: str,
-                 environment: dict[str, str]):
+                 environment: dict[str, str], boot_source: Any = read_boot_id):
         self.layout, self.plan, self.project_dir = layout, plan, project_dir
         self.environment = dict(environment)
         self.phase, self.reason = "starting", None
         self.started_wall = time.time()
         self.ref = process_ref("backend", os.getpid())
-        self.boot = {"boot_id": read_boot_id(), "confirmation_required": False, "confirmed": None}
+        # CW-19: the boot marker source (injectable for tests), the durable boot record, the admission hold,
+        # the start-up reconcile report, the previous incarnation's survivors and the durable pause.
+        self._boot_source = boot_source
+        self.boot_store = BootStore(layout.root / "boot.json", boot_source=boot_source)
+        self.boot = {"boot_id": self.boot_store.current_boot(), "confirmation_required": False, "confirmed": None}
+        self.hold = AdmissionHold()
+        self.startup: dict[str, Any] | None = None
+        self.survivors = SurvivorRegistry([], boot_source)
+        self.survivor_stops: list[dict[str, Any]] = []
+        self.pause_store = PauseStore(layout.root / "automation.json")
+        self._restart_notice: dict[str, Any] | None = None
+        self._metadata_failures: dict[str, str] = {}
+        self._metadata_lock = threading.Lock()
+        # CW-19 U3 (C-D71 (4)): per-role model error state from the bridge's model_turn_result events
+        self._model: dict[str, dict[str, Any]] = {}
+        self._model_cursor = 0
+        # p27-cw19-fix-01 (P2-2): the hold check of a tool call reads the events received before it, so the turn
+        # that lifts a model hold is not refused its own tool calls; side effects run later on the loop.
+        self._model_lock = threading.Lock()
+        self._model_effects: list[tuple[str, bool]] = []
+        self._last_raw: dict[str, Any] | None = None
+        self._metadata_retry_at = 0.0
+        self._record_error: str | None = None
         self.automation: dict[str, Any] = {"state": "not_configured", "source": "backend",
                                            "detail": "automation flow is not bound (CW-18)"}
         self.focus = PaneId.MANAGER_OMP
@@ -188,6 +223,7 @@ class Backend:
         signal.signal(signal.SIGHUP, signal.SIG_IGN)
         status = 0
         try:
+            self._reconcile_startup()  # CW-19: before any pane, TaskFlow load, UI socket or record overwrite
             self._open()
             self._loop()
         except BaseException:
@@ -201,6 +237,111 @@ class Backend:
 
     def _on_signal(self, signum: int, _frame: object) -> None:
         self._stop_signal = signum
+
+    # -- CW-19: start-up reconcile, boot confirmation, admission hold -------------------------------
+    def _reconcile_startup(self) -> None:
+        """Compare the previous incarnation with the boot marker and /proc; never signals or resends."""
+        layout = self.layout
+        repository = None
+        if layout.tasks.exists():
+            try:
+                repository = TaskRepository(layout.tasks)
+            except Exception as exc:
+                _log(f"startup reconcile: task metadata unreadable ({type(exc).__name__})")
+
+        def current_run(task_id: str) -> str | None:
+            if repository is None:
+                raise LookupError("task metadata unavailable")
+            run = repository.get_current_run(task_id)
+            return None if run is None else run.get("run_id")
+
+        def run_target(run_id: str) -> tuple[int, int] | None:
+            if repository is None:
+                return None
+            for event in reversed(repository.get_shell_history(run_id)):
+                details = event.get("details") or {}
+                pid, ticks = details.get("child_pid"), details.get("child_start_ticks")
+                if event.get("kind") in ("accepted", "started") and type(pid) is int and type(ticks) is int:
+                    return pid, ticks
+            return None
+
+        try:
+            result = StartupReconciler(layout, self.boot_store, handoff_journal=layout.workflow / HANDOFF_JOURNAL_NAME,
+                                       lifecycle_journal=layout.lifecycle_journal, run_target=run_target,
+                                       current_run=current_run).run()
+        except Exception as exc:  # fail closed: nothing automatic starts until the user confirms the boot
+            _log(f"startup reconcile failed ({type(exc).__name__}: {exc}); automatic work held until confirm-boot")
+            current = self.boot_store.current_boot()
+            state = BootState(current, None, None, True, "reconcile_failed", False)
+            self.boot_store.state = state
+            result = StartupResult(state, {"classification": "boot_unknown", "at": time.time(), "boot": state.view(),
+                                           "previous": None, "probed": False, "processes": [], "survivors": [],
+                                           "run": None, "outbox_lost": [], "outbox_lost_count": 0,
+                                           "notes": [f"reconcile failed: {type(exc).__name__}"]})
+        finally:
+            if repository is not None:
+                repository.close()
+        self.startup = result.report
+        self.boot = result.boot.view()
+        self.survivors = SurvivorRegistry(result.survivors, self._boot_source)
+        if result.boot.pending:
+            self.hold.set(BOOT_HOLD, detail=result.boot.reason)
+        if not result.boot.persisted:
+            self._metadata_event("boot_record", OSError("boot record not written"))
+        report = result.report
+        _log(f"startup reconcile: {report['classification']} (boot {'confirmation required: ' + str(result.boot.reason) if result.boot.pending else 'ok'}); "
+             f"survivors {[(item['name'], item['pid']) for item in report['survivors']]}; "
+             f"run {(report.get('run') or {}).get('state')}; outbox not sent {report['outbox_lost_count']}")
+
+    def _hold_reason(self, role: Any = None) -> str | None:
+        """Why Workbench must not start automatic work into ``role`` now (C-D71 (3)/(4), C-AC-28)."""
+        hold = getattr(self, "hold", None)  # a backend built without __init__ (tests) has none
+        if hold is None:
+            return None
+        reason = hold.reason_for(role)
+        if reason is not None and reason.startswith(MODEL_HOLD_PREFIX):
+            # P2-2: a model_turn_result that arrived on the bridge before this request (same socket, in order)
+            # is applied now, not on the next 50 ms loop poll.
+            self._sync_model_events()
+            reason = hold.reason_for(role)
+        return reason
+
+    def _metadata_event(self, source: str, error: BaseException | None) -> None:
+        """A metadata write outcome: a failure latches the hold until a later durable write succeeds."""
+        gate = getattr(getattr(self, "automation_loop", None), "metadata", None)
+        if error is None:  # a durable write in the data dir succeeded: the latch opens (a new fault latches again)
+            with self._metadata_lock:
+                # p27-cw19-fix-01 (test P3-2): a pause/resume not yet in automation.json stays shown (and held)
+                # until that file is written; the automation loop retries it and reports its own success.
+                kept = {name: detail for name, detail in self._metadata_failures.items()
+                        if name == PAUSE_STORE_SOURCE and source != PAUSE_STORE_SOURCE}
+                self._metadata_failures.clear()
+                self._metadata_failures.update(kept)
+            if kept:
+                return
+            if gate is not None:
+                gate.record_durable_metadata_success()
+            if self.hold.clear(METADATA_HOLD):
+                _log("metadata writes work again; automatic work admitted again")
+            return
+        detail = f"{source}: {type(error).__name__}"
+        with self._metadata_lock:
+            first = source not in self._metadata_failures
+            self._metadata_failures[source] = detail
+        if gate is not None:
+            gate.record_metadata_failure(detail)
+        self.hold.set(METADATA_HOLD, detail=detail)
+        self._metadata_retry_at = time.monotonic() + METADATA_RETRY
+        if first:
+            _log(f"metadata write failed ({detail}); new automatic work is held, running work and logs continue")
+
+    def _metadata_view(self) -> dict[str, Any] | None:
+        with self._metadata_lock:
+            sources = dict(self._metadata_failures)
+        if not sources:
+            return None
+        return {"state": "failed", "sources": sources,
+                "since": next((item["since"] for item in self.hold.view() if item["reason"] == METADATA_HOLD), None)}
 
     def _prepare_omp_home(self) -> OmpHome:
         home = prepare_omp_home(self.layout.root, self.environment, skills_dir=default_skills_dir(),
@@ -235,13 +376,22 @@ class Backend:
         self.mailbox = TaskMailbox(self.repository, self.bridge)
         self.handoffs = HandoffService(layout.workflow / HANDOFF_JOURNAL_NAME,
                                        mailbox_factory=self._handoff_mailbox, paused=self._automation_paused, sensitive_values=self._sensitive_values,
-                                       peer_lookup=self._bridge_peer)
+                                       peer_lookup=self._bridge_peer, hold=self._hold_reason,
+                                       metadata=self._metadata_event)
+        try:  # CW-19 R9: the outbox records before this marker belong to the previous incarnation
+            self.handoffs.record({"type": "backend_start", "pid": os.getpid(),
+                                  "classification": (self.startup or {}).get("classification")})
+        except OSError as exc:
+            self._metadata_event("handoff_journal", exc)
         self.handoffs.start()
         # CW-18 U3: one automation controller; the paused flag is the single source for every reader.
         self.automation_loop = AutomationController(
             bridge=self.bridge, database=layout.tasks, journal=self.lifecycle_journal, raw=self.raw_logs,
             shell_pane=lambda: self.shell, project_dir=self.project_dir,
-            artifacts_root=ensure_private_dir(layout.workflow / "runs"), boot_marker=read_boot_id, log=_log)
+            artifacts_root=ensure_private_dir(layout.workflow / "runs"), boot_marker=self.boot_store.current_boot,
+            log=_log, pause_store=self.pause_store, hold=lambda: self._hold_reason("worker"),
+            model_ok=lambda: (self._model.get("worker") or {}).get("state") != "error",
+            metadata=self._metadata_event)
         self.pause_hook = self.automation_loop.request_pause
         self.resume_hook = self.automation_loop.request_resume
         # CW-18: Tasks under the standing delegation (C-D66) and their runs (experiment: product host shell).
@@ -255,12 +405,14 @@ class Backend:
                 worktrees_root=ensure_private_dir(layout.workflow / "worktrees"),
                 artifacts_root=ensure_private_dir(layout.workflow / "runs")),
             project_dir=self.project_dir, lifecycle=self.automation_loop, host_gate=host_gate,
-            worker_session=self._worker_session_key)  # C-D70 (4): a new worker session gets the full Task again
+            worker_session=self._worker_session_key,  # C-D70 (4): a new worker session gets the full Task again
+            hold=self._hold_reason, metadata=self._metadata_event)
         self.handoffs.configure(policy=self.flow, active_task=self.flow.active_task)
         self.terminal = TerminalService(
             handoffs=self.handoffs, host_shell=self._host_shell_port, gate=host_gate,
             log_root=ensure_private_dir(layout.workflow / TERMINAL_DIRECTORY), automation=self._automation_port,
-            paused=self._automation_paused, activity=self.flow.experiment_host_activity,
+            paused=self._automation_paused, hold=lambda: self._hold_reason(ActorRole.WORKER),
+            activity=self.flow.experiment_host_activity,
             sensitive_values=self._sensitive_values, active_task=self.flow.active_task,
             task_commands=self.flow.active_commands,  # C-D69 (6): a Task's commands are the only ones run
             notify=self._worker_notice,  # C-D68 (8): checks and the completion notice
@@ -271,6 +423,7 @@ class Backend:
         self.watchdog = self._make_watchdog()  # C-D70: status checks, stalled/restart/recovery notices
         # p27-cd70-02 Q2: a manager follow-up the worker accepted re-arms the status checks and worker_stalled
         self.flow.follow_up_submitted = lambda task_id: self.watchdog.worker_acted("manager_follow_up")
+        self._queue_restart_notice()  # C-D71 (2): after the reconcile and TaskFlow's restart hold
         self.automation = self.automation_loop.status()
         # The role is the peer's authenticated hello role, never a frame field.
         self.bridge.set_tool_handler(self._tool_request, undelivered=self._tool_result_undelivered,
@@ -398,6 +551,10 @@ class Backend:
             for chunk in pane.pump():
                 self.ui.broadcast(chunk)
         self._run_restart_jobs()  # C-D70 (3): the manager's restart_worker, on this loop (it owns the panes)
+        self._poll_model_events()
+        if self._metadata_failures and time.monotonic() >= self._metadata_retry_at:
+            self._metadata_retry_at = time.monotonic() + METADATA_RETRY
+            self._write_record()  # a durable write that succeeds again reopens admission
         self._check_ready()
         if self._isolation_dirty:
             self._isolation_dirty = False
@@ -463,10 +620,16 @@ class Backend:
         return exited
 
     def _close(self) -> dict[str, Any]:
+        self.hold.set(SHUTDOWN_HOLD)  # CW-19: nothing automatic starts from here
         self._isolation_cancel.set()
+        left = self._left_session_processes()  # setsid'd descendants of the host shell: shown, never signalled
         if self.watchdog is not None:
             self.watchdog.close()  # no notice is sent after this; nothing is replayed
         self._abort_restart_jobs("the backend is shutting down; the worker was not restarted")
+        lifecycle = None
+        if self.automation_loop is not None and self._shutdown_confirmed:
+            # C-AC-22 (U2): the bound run's durable at-most-once stop fence before the panes close
+            lifecycle = self.automation_loop.shutdown_bound()
         if self.automation_loop is not None:
             self.automation_loop.close()  # the tick and pause/resume threads end first; nothing is replayed
         if self.flow is not None:
@@ -495,8 +658,20 @@ class Backend:
             self.raw_logs.close()
         probe = LinuxProcessProbe()
         evidence = {name: probe.observe(ref).state for name, ref in refs.items() if name != "backend"}
+        # C-AC-22: a process left running is never reported as a verified shutdown
+        left_running = [item for item in left if observe(item["pid"], item["start_ticks"]) == "alive"]
+        previous = self.survivors.alive()
+        problems = ([f"{name}_{state}" for name, state in evidence.items() if state != "dead"]
+                    + (["left_session_processes_alive"] if left_running else [])
+                    + (["previous_backend_survivors_alive"] if previous else []))
         result = {"panes": closed, "processes": evidence,
-                  "verified": all(state == "dead" for state in evidence.values())}
+                  "verified": all(state == "dead" for state in evidence.values()) and not left_running
+                  and not previous,
+                  "left_running": left_running,
+                  "previous_survivors": [{name: item.get(name) for name in ("survivor_id", "name", "pid", "comm")}
+                                         for item in previous],
+                  "problems": problems, "user_confirmed": self._shutdown_confirmed,
+                  "lifecycle": lifecycle}
         record = self._record()
         record.update({"phase": "stopped", "shutdown": result})
         try:
@@ -529,10 +704,28 @@ class Backend:
                                   ("state", "ok", "leaks", "warnings", "warning", "version_drift", "notes")},
                 "processes": {name: asdict(ref) for name, ref in self.process_refs().items()},
                 "restarts": [dict(item) for item in self.restarts],
-                "kills": [dict(item) for item in self.kills]}
+                "kills": [dict(item) for item in self.kills],
+                # CW-19: processes of an earlier incarnation still alive (proven again by the next start)
+                "survivors": self.survivors.carried(), "survivor_stops": [dict(item) for item in self.survivor_stops],
+                "startup": None if self.startup is None else {
+                    "classification": self.startup.get("classification"), "at": self.startup.get("at")}}
 
-    def _write_record(self) -> None:
-        write_private_json(self.layout.record, self._record())
+    def _write_record(self) -> bool:
+        """Fail-soft (R3): an unwritable data dir is a metadata fault (held new work), never a backend stop."""
+        try:
+            write_private_json(self.layout.record, self._record())
+        except OSError as exc:
+            self._record_error = f"{type(exc).__name__}: {exc.strerror or exc}"[:200]
+            self._metadata_event("backend_record", exc)
+            return False
+        self._record_error = None
+        if self._metadata_failures:
+            state = self.boot_store.state
+            if "boot_record" in self._metadata_failures and state is not None \
+                    and not self.boot_store.rewrite():  # the boot state must be durable before admission opens
+                return True
+            self._metadata_event("backend_record", None)
+        return True
 
     def bridge_state(self) -> dict[str, Any]:
         state: dict[str, Any] = {"event_cursor": self.bridge.event_cursor() if self.bridge else 0}
@@ -566,7 +759,115 @@ class Backend:
                 "omp_isolation": self.omp_isolation,
                 "recovery": self._recovery_view(),
                 "boot": dict(self.boot), "shutdown": {"pending": self._shutdown_token is not None},
+                # CW-19 (additive): the start-up reconcile, the admission hold and the fault display
+                "startup": self._startup_view(), "holds": self.hold.view(), "faults": self._faults_view(),
                 "ui": dict(self.ui.stats) if self.ui else {}}
+
+    def _startup_view(self) -> dict[str, Any] | None:
+        startup = self.startup
+        if startup is None:
+            return None
+        return {"classification": startup.get("classification"), "at": startup.get("at"),
+                "previous": startup.get("previous"), "run": startup.get("run"),
+                "probed": startup.get("probed"), "processes": list(startup.get("processes") or []),
+                "outbox_lost": list(startup.get("outbox_lost") or []),
+                "outbox_lost_count": startup.get("outbox_lost_count", 0),
+                "survivors": self.survivors.views(), "survivor_stops": [dict(item) for item in self.survivor_stops],
+                "notice": None if self._restart_notice is None else dict(self._restart_notice),
+                "notes": list(startup.get("notes") or [])}
+
+    def _faults_view(self) -> dict[str, Any]:
+        """C-AC-17/24/28: what failed and what still runs (execution and observation continue)."""
+        return {"metadata": self._metadata_view(), "record_error": self._record_error,
+                "model": self._model_view(), "raw_log": self._raw_log_view()}
+
+    def _model_view(self) -> dict[str, Any] | None:
+        return {role: dict(state) for role, state in self._model.items()} or None
+
+    def _poll_model_events(self) -> None:
+        """C-D71 (4): a model error holds that role's automatic work; its next error-free answer lifts it.
+
+        Workbench sends no request to find out (no model cost); experiments, raw
+        logs and terminal observation go on meanwhile (C-AC-17).
+        """
+        self._sync_model_events()
+        with self._model_guard():
+            effects, self._model_effects = self._model_effects, []
+        for role, ok in effects:  # the run's durable record, outside any caller's lock (loop thread)
+            self._model_changed(role, ok=ok)
+
+    def _sync_model_events(self) -> None:
+        """Apply the received ``model_turn_result`` events to the per-role state and hold (any thread)."""
+        bridge = getattr(self, "bridge", None)
+        if bridge is None:
+            return
+        with self._model_guard():
+            self._apply_model_events(bridge)
+
+    def _model_guard(self) -> threading.Lock:
+        lock = getattr(self, "_model_lock", None)
+        if lock is None:  # a backend built without __init__ (tests)
+            lock = self._model_lock = threading.Lock()
+            self._model_effects = []
+        return lock
+
+    def _apply_model_events(self, bridge: Any) -> None:
+        try:
+            self._model_cursor, events = bridge.events_after(("model_turn_result",), self._model_cursor)
+        except Exception:
+            return
+        for event in events:
+            role = event.get("role")
+            if role not in ("manager", "worker"):
+                continue
+            current = self._model.get(role)
+            if event.get("ok") is True:
+                if current is not None and current.get("state") == "error":
+                    self._model[role] = {"state": "ok", "since": time.time(), "recovered": True,
+                                         "last_error": current.get("stop_reason")}
+                    self.hold.clear(model_hold(role))
+                    _log(f"model of {role} answered without error; its automatic work is admitted again")
+                    self._model_effects.append((role, True))
+            elif event.get("ok") is False:
+                if current is None or current.get("state") != "error":
+                    self._model[role] = {"state": "error", "since": time.time(),
+                                         "stop_reason": str(event.get("stopReason") or "error")[:32]}
+                    self.hold.set(model_hold(role), detail=self._model[role]["stop_reason"])
+                    _log(f"model error in the {role} OMP ({self._model[role]['stop_reason']}); its automatic work "
+                         "is held, experiments and observation continue")
+                    self._model_effects.append((role, False))
+
+    def _model_changed(self, role: str, *, ok: bool) -> None:
+        loop = self.automation_loop
+        if loop is not None and role == "worker":
+            try:
+                loop.model_changed(ok)
+            except Exception:
+                pass
+
+    def _raw_log_view(self) -> dict[str, Any] | None:
+        """C-AC-24: a capped or failing experiment raw log (shown only when something was not stored)."""
+        loop = self.automation_loop
+        status = None
+        try:
+            status = loop.raw_log_status() if loop is not None else None
+        except Exception:
+            status = None
+        if status is not None:
+            self._last_raw = status
+        status = self._last_raw
+        if not status:
+            return None
+        if status.get("storage_error"):
+            text = (f"raw log 저장 장애({status['storage_error']}): 누락 {status.get('missing_bytes') or 0} bytes — "
+                    "실행 계속")
+        elif status.get("truncated") or status.get("missing_bytes"):
+            limit = {"run": "run 64 MiB", "project": "프로젝트 512 MiB"}.get(status.get("cap_source"),
+                                                                        str(status.get("cap_source")))
+            text = f"raw log {limit} 한도 도달, 저장 중지 — 실행 계속"
+        else:
+            return None
+        return {**status, "text": text}
 
     def _pane_info(self, pane: Any, *, host: bool) -> dict[str, Any]:
         """A pane's ui_v1 info; the host shell also says who operates it (``operated_by``, smoke-01 P2)."""
@@ -661,7 +962,32 @@ class Backend:
         task = self.flow.task_view() if self.flow else None
         if task is not None and task.get("run_id") is not None:
             active.append({"kind": "task_run", "task_id": task["task_id"], "run_id": task["run_id"]})
+        # CW-19: processes the previous backend left running are listed; Workbench never ends them itself
+        for item in self.survivors.alive():
+            active.append({"kind": "previous_survivor", "survivor_id": item["survivor_id"], "name": item["name"],
+                           "pid": item["pid"], "comm": item.get("comm"), "stoppable": item["stoppable"],
+                           "note": "left running by the previous backend; not ended by this shutdown"})
+        for item in self._left_session_processes():
+            active.append({"kind": "left_session", "pid": item["pid"], "session": item.get("session"),
+                           "note": "a host-shell descendant in another session; not ended by this shutdown"})
         return active
+
+    def _left_session_processes(self) -> list[dict[str, Any]]:
+        """Descendants of the live host shell that moved to another session (setsid), with their start ticks."""
+        shell = self.shell
+        if shell is None or shell.exited():
+            return []
+        try:
+            with shell.io_lock:
+                left = shell._left_session()
+        except Exception:
+            return []
+        found = []
+        for item in left:
+            ref = process_ref("left_session", item["pid"])
+            if ref is not None:
+                found.append({**item, "start_ticks": ref.start_ticks})
+        return found
 
     def shutdown_request(self) -> dict[str, Any]:
         token = uuid4().hex
@@ -681,11 +1007,22 @@ class Backend:
         return {"shutting_down": True}
 
     def confirm_boot(self, boot_id: str) -> dict[str, Any]:
-        if not self.boot["confirmation_required"]:
+        """C-AC-23 / C-D58: the CLI ``confirm-boot``; durable first, then the hold is lifted."""
+        state = self.boot_store.state
+        if state is None or not state.pending:
             raise Held(Reason.BOOT_CONFIRMATION_NOT_REQUIRED, "no boot confirmation is pending")
-        if boot_id != self.boot["boot_id"]:
+        if state.current is None or boot_id != state.current or boot_id != self.boot_store.current_boot():
             raise Held(Reason.BOOT_ID_MISMATCH, "boot id does not match the current boot")
-        self.boot["confirmed"] = True
+        try:
+            confirmed = self.boot_store.confirm(boot_id)
+        except (OSError, ValueError) as exc:
+            self._metadata_event("boot_record", exc if isinstance(exc, OSError) else OSError(str(exc)))
+            raise Held(Reason.BOOT_CONFIRMATION_NOT_SAVED,
+                       f"the confirmation could not be stored ({exc}); automatic work stays held") from exc
+        self.boot = confirmed.view()
+        self.hold.clear(BOOT_HOLD)
+        _log(f"boot {boot_id} confirmed by the user; Workbench automatic work is admitted again")
+        self._write_record()
         return {"boot": dict(self.boot)}
 
     def _shutting_down(self) -> bool:
@@ -880,7 +1217,7 @@ class Backend:
         if watchdog is not None and getattr(peer.role, "value", peer.role) == "worker" \
                 and tool in (TERMINAL_TOOL, "to_manager"):
             watchdog.worker_acted(str(tool))  # C-D70 (1): the worker acted; its status checks start over
-        if tool in (RESTART_WORKER_TOOL, STATUS_TOOL):
+        if tool in (RESTART_WORKER_TOOL, STATUS_TOOL, STOP_SURVIVOR_TOOL):
             return self._recovery_tool(peer, request)
         if request.get("tool") in (TERMINAL_TOOL, ABANDON_TOOL):
             terminal = self.terminal
@@ -923,6 +1260,10 @@ class Backend:
         """
         bridge = self.bridge
         role = role if isinstance(role, ActorRole) else ActorRole(role)
+        # CW-19: a notice is automatic work; held like a pause (the sender tries it again, never twice).
+        if self._hold_reason(role) is not None or (getattr(self, "automation_loop", None) is not None
+                                                   and self._automation_paused()):
+            return "paused"
         try:
             peer = bridge.peer(role, 0)
         except (BridgeDisconnected, MailboxError):
@@ -1028,6 +1369,8 @@ class Backend:
         try:
             if parsed.tool == RESTART_WORKER_TOOL:
                 result = self._restart_worker(parsed, key_dict, started)
+            elif parsed.tool == STOP_SURVIVOR_TOOL:
+                result = self._stop_survivor(parsed, key_dict)
             else:
                 result = self._workbench_status(parsed, key_dict)
         except Exception as exc:  # a restart may have started: its outcome is not known here
@@ -1037,8 +1380,8 @@ class Backend:
             self._recovery_results[key] = result
             while len(self._recovery_results) > 256:
                 del self._recovery_results[next(iter(self._recovery_results))]
-        if parsed.tool == RESTART_WORKER_TOOL:
-            self._journal({"type": "restart_worker_result", "key": key_dict,
+        if parsed.tool in (RESTART_WORKER_TOOL, STOP_SURVIVOR_TOOL):
+            self._journal({"type": f"{parsed.tool}_result", "key": key_dict,
                            "result": {k: v for k, v in result.items() if k != "detail"}})
         return dict(result)
 
@@ -1117,6 +1460,42 @@ class Backend:
                            "generation": None if peer is None else peer.generation},
                 "previous": result.get("previous"), "survivors": result.get("survivors"), "task": task,
                 "terminal": terminal, "detail": restart_detail(self._worker_task_open(), ready=peer is not None)}
+
+    def _stop_survivor(self, parsed: Any, key_dict: dict[str, Any]) -> dict[str, Any]:
+        """C-D71 (1): the manager ends one proven process the previous backend left running (or leaves it)."""
+        args = parsed.args
+        errors = validate_stop_survivor_arguments(args)
+        if errors:
+            self._journal({"type": "stop_survivor_request", "key": key_dict, "redacted": "invalid_arguments",
+                           "errors": errors})
+            return rejected("invalid_arguments", errors=errors)
+        reason, survivor_id = args["reason"].strip(), args["survivor_id"].strip()
+        try:
+            findings = environment_value_findings({"reason": reason}, self._sensitive_values())
+        except Exception:
+            findings = ["reason:environment_check_unavailable"]
+        if findings:
+            self._journal({"type": "stop_survivor_request", "key": key_dict, "redacted": "environment_value",
+                           "fields": findings})
+            return rejected("environment_value", fields=findings,
+                            detail="Never put environment variable values in the reason.")
+        self._journal({"type": "stop_survivor_request", "key": key_dict, "survivor_id": survivor_id,
+                       "reason": reason})
+        if self._shutting_down():
+            return {"status": "refused", "reason": "backend_shutdown",
+                    "detail": "The backend is shutting down; nothing was signalled."}
+        result = self.survivors.stop(survivor_id, reason=reason, requester="manager")
+        survivor = result.get("survivor") or {}
+        entry = {"at": time.time(), "survivor_id": survivor_id, "name": survivor.get("name"),
+                 "pid": survivor.get("pid"), "reason": reason, "requester": "manager",
+                 "outcome": result.get("status"), "why": result.get("reason"),
+                 "remaining": list(result.get("remaining") or [])}
+        if result.get("status") != "refused" or survivor:
+            self.survivor_stops = (self.survivor_stops + [entry])[-SURVIVOR_STOPS_KEPT:]
+        _log(f"stop_survivor {survivor_id} ({survivor.get('name')} pid {survivor.get('pid')}) requested by the "
+             f"manager: {result.get('status')} ({result.get('reason')})")
+        self._write_record()
+        return dict(result)
 
     def _worker_task_open(self) -> bool:
         """A Task the worker_restarted notice is sent for (the watchdog's rule: busy, or blocked and open)."""
@@ -1213,18 +1592,30 @@ class Backend:
                   "alive": isinstance(pane, OmpPane) and pane.returncode is None, "restarts": restarts}
         reports = []
         for entry in (handoffs.report_entries() if handoffs is not None else []):
-            if entry.get("state") not in ("pending", "delivering", "unknown") or entry.get("submitted"):
+            dropped = entry.get("origin") == "worker" and entry.get("state") in ("rejected", "held_paused")
+            if (entry.get("state") not in ("pending", "delivering", "unknown") and not dropped) \
+                    or entry.get("submitted"):
                 continue
             text, cut = bounded(entry.get("text"))
             state = entry["state"]
             if state == "pending" and entry.get("status") == "deferred":
                 state = "deferred"
+            if dropped:  # p27-cw19-fix-01: a worker message that was queued but never sent is listed, not hidden
+                state = "not_sent"
             reports.append({"task_id": entry.get("task_id"), "message_id": entry.get("message_id"),
                             "kind": entry.get("report_kind"), "origin": entry.get("origin"), "state": state,
                             "reason": entry.get("reason"), "blockers": entry.get("blockers"),
                             "requeued": entry.get("requeued"), "text": text, "text_truncated": cut})
         watchdog = self.watchdog
-        return {"status": "ok", "task": task, "worker": worker,
+        startup = self.startup or {}
+        backend = {"startup": startup.get("classification"), "run": startup.get("run"),
+                   "outbox_not_sent": startup.get("outbox_lost_count", 0),
+                   "survivors": [{name: item.get(name) for name in (
+                       "survivor_id", "name", "pid", "comm", "state", "stoppable", "identity", "why_not", "stop")}
+                       for item in self.survivors.views()],
+                   "holds": self.hold.reasons(), "boot_confirmation_required": bool(self.boot.get(
+                       "confirmation_required"))}
+        return {"status": "ok", "backend": backend, "task": task, "worker": worker,
                 "terminal": terminal.watch_state() if terminal is not None else None,
                 "reports": reports[-STATUS_REPORTS_MAX:], "reports_omitted": max(0, len(reports) - STATUS_REPORTS_MAX),
                 "watchdog": None if watchdog is None else watchdog.view().get("watch")}
@@ -1277,22 +1668,69 @@ class Backend:
 
     def _automation_port(self) -> dict[str, Any]:
         return {"portVersion": 2, "kind": "AutomationState", "payload": {
-            "paused": self._automation_paused(), "cancelled": False, "metadataHealthy": True,
+            "paused": self._automation_paused(), "cancelled": False,
+            "metadataHealthy": self.hold.reason_for(None) != METADATA_HOLD and not self._metadata_failures,
             "approvalValid": True}}
 
     def _make_workflow(self, repository: TaskRepository) -> TaskWorkflow:
         """Runs on the task-flow runner thread: its own mailbox on the shared bridge."""
         return TaskWorkflow(repository, TaskMailbox(repository, self.bridge),
                             worker_port=G3WorkerResponsePort(self.bridge),
-                            automation_source=self._automation_port)
+                            automation_source=self._automation_port,
+                            raw_store=self.raw_logs)  # CW-19 (C-D71 (5)): run raw logs under the project cap
 
     def set_automation_status(self, status: dict[str, Any]) -> None:
         """CW-18 publishes AutomationState/run status here; pushed to the UI as state."""
         self.automation = dict(status)
 
     def require_boot_confirmation(self) -> None:
-        """CW-19 calls this after reconcile when the boot marker changed."""
+        """Hold automatic work until ``confirm_boot`` (the start-up reconcile does this for a changed boot)."""
         self.boot.update({"confirmation_required": True, "confirmed": False})
+        self.hold.set(BOOT_HOLD, detail="required")
+
+    def _queue_restart_notice(self) -> None:
+        """C-D71 (2): one ``backend_restarted`` notice for the new manager session when a Task is open.
+
+        It goes through the watchdog queue, which retries while the manager is
+        not connected or ``_notice`` answers ``paused`` (paused, before
+        confirm-boot, metadata or model hold) and never sends it twice.
+        """
+        startup = self.startup or {}
+        classification = startup.get("classification")
+        if classification in (None, FRESH) or self.flow is None or self.watchdog is None:
+            return
+        fields = self._restart_notice_fields(None)
+        if fields is None:
+            return
+        task_id = fields["task_id"]
+        enqueue = self.watchdog.enqueue_notice
+        if accepts_keyword(enqueue, "build"):  # VM F1: the content is made again when it is sent
+            notice_id = enqueue(ActorRole.MANAGER, "backend_restarted", fields,
+                                build=lambda: self._restart_notice_fields(task_id))
+        else:
+            notice_id = enqueue(ActorRole.MANAGER, "backend_restarted", fields)
+        self._restart_notice = {"notice_id": notice_id, "task_id": task_id, "state": "queued"}
+        _log(f"backend_restarted notice queued for the manager (Task {task_id})")
+
+    def _restart_notice_fields(self, task_id: str | None) -> dict[str, Any] | None:
+        """The ``backend_restarted`` fields from the current state (VM F1: built when it is sent); None when the
+        Task it is about is closed or another Task is open now (the notice no longer applies)."""
+        startup = self.startup or {}
+        task = self.flow.task_view() if self.flow is not None else None
+        if not isinstance(task, dict) or task.get("status") == "closed" \
+                or (task_id is not None and task.get("task_id") != task_id):
+            if task_id is not None and isinstance(self._restart_notice, dict):
+                self._restart_notice["state"] = "dropped_task_closed"
+                _log(f"backend_restarted notice dropped: Task {task_id} is no longer open")
+            return None
+        survivors = [{name: item.get(name) for name in ("survivor_id", "name", "pid", "comm", "stoppable",
+                                                         "identity", "why_not")}
+                     for item in self.survivors.views() if item.get("state") == "alive"]
+        return {"task_id": task.get("task_id"),
+                "task": {name: task.get(name) for name in ("task_id", "kind", "status", "summary", "held_reason",
+                                                           "run_id")},
+                "classification": startup.get("classification"), "run": startup.get("run"), "survivors": survivors,
+                "outbox_not_sent": startup.get("outbox_lost_count", 0), "instruction": BACKEND_RESTARTED_HINT}
 
 
 def _with_home_problems(result: dict[str, Any], problems: list[str]) -> dict[str, Any]:

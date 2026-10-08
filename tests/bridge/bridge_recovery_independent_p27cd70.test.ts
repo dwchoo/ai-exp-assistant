@@ -88,7 +88,7 @@ async function startBridge(role: "manager" | "worker") {
 test("C-D70 (3)/(5): restart_worker and workbench_status exist for the manager only", async () => {
 	const manager = await startBridge("manager");
 	try {
-		assert.deepEqual([...manager.tools.keys()].sort(), ["restart_worker", "to_worker", "workbench_status"]);
+		assert.deepEqual([...manager.tools.keys()].sort(), ["restart_worker", "stop_survivor", "to_worker", "workbench_status"]);  // C-D71 (1): stop_survivor (p27-cw19-test-01 edit)
 		const restart = manager.tools.get("restart_worker")!;
 		assert.deepEqual(restart.parameters.required, ["reason"], "reason is required");
 		assert.equal(restart.parameters.additionalProperties, false);

@@ -62,10 +62,13 @@ RESTARTS_SHOWN = 5
 
 RESTART_WORKER_TOOL = "restart_worker"
 STATUS_TOOL = "workbench_status"
-MANAGER_TOOLS = (RESTART_WORKER_TOOL, STATUS_TOOL)
+STOP_SURVIVOR_TOOL = "stop_survivor"  # C-D71 (1): end one proven process the previous backend left running
+MANAGER_TOOLS = (RESTART_WORKER_TOOL, STATUS_TOOL, STOP_SURVIVOR_TOOL)
 WORKER_NOTICE_TYPES = ("terminal_check", "terminal_done", "status_check")
 MANAGER_NOTICE_TYPES = ("worker_stalled", "report_delivery_unknown", "worker_restarted", "manager_recovery",
-                        "worker_terminal_done")  # p27-cd70-02 Q3: a previous worker session's command ended
+                        "worker_terminal_done",  # p27-cd70-02 Q3: a previous worker session's command ended
+                        "backend_restarted")  # C-D71 (2): the backend restarted with an open Task
+SURVIVOR_ID_MAX = 16
 
 STATUS_CHECK_INSTRUCTION = (
     "Workbench status check (automatic): your Task is open and you have been idle for {idle} s with no terminal "
@@ -112,6 +115,15 @@ RESTART_NO_TASK_PENDING_DETAIL = (
     "to_worker only when there is new work.")
 
 
+BACKEND_RESTARTED_HINT = (
+    "Workbench notice: the Workbench backend restarted (this OMP session is new and has no memory). The open Task "
+    "was not cancelled and nothing was re-sent or re-run; a run that was going on has an unknown outcome. "
+    "survivors lists processes the previous backend left running (Workbench never ends them by itself). Use the "
+    "workbench-recovery skill: call workbench_status, then decide per survivor (stop_survivor with a reason, or "
+    "leave it) and continue the Task (one follow-up to_worker on its task_id, run: true to re-run an experiment, "
+    "or cancel). Tell the user briefly what happened.")
+
+
 def restart_detail(open_task: bool, ready: bool) -> str:
     """The restart_worker result text: true with and without an open Task (review-02 P3-W)."""
     if open_task:
@@ -128,6 +140,20 @@ def validate_restart_arguments(args: object) -> list[str]:
     if not isinstance(reason, str) or not reason.strip() or len(reason) > REASON_MAX or "\x00" in reason:
         errors.append(f"reason: required, a non-blank string of at most {REASON_MAX} characters (why the worker "
                       "is restarted; it is recorded and shown to the user)")
+    return errors
+
+
+def validate_stop_survivor_arguments(args: object) -> list[str]:
+    """C-D71 (1): ``{survivor_id, reason}``; the errors name the field, never the value."""
+    if not isinstance(args, Mapping):
+        return ["arguments: an object {survivor_id, reason} is required"]
+    errors = [f"{name}: not a stop_survivor field" for name in args if name not in ("survivor_id", "reason")]
+    survivor = args.get("survivor_id")
+    if not isinstance(survivor, str) or not survivor.strip() or len(survivor) > SURVIVOR_ID_MAX:
+        errors.append(f"survivor_id: a survivor id from workbench_status (at most {SURVIVOR_ID_MAX} characters)")
+    reason = args.get("reason")
+    if not isinstance(reason, str) or not reason.strip() or len(reason) > REASON_MAX:
+        errors.append(f"reason: a non-empty text of at most {REASON_MAX} characters is required")
     return errors
 
 
@@ -177,6 +203,9 @@ class _Queued:
     retry_at: float = 0.0
     attempts: int = 0
     handoff_id: str | None = None  # the report a report_delivery_unknown notice is about
+    # p27-cw19-fix-01 (VM F1): the notice's fields built again right before each attempt (the current state);
+    # None from it means the notice no longer applies and it is dropped unsent
+    build: Callable[[], Mapping[str, Any] | None] | None = None
 
 
 @dataclass
@@ -320,15 +349,17 @@ class Watchdog:
         return {"running": state.get("running"), "last": None if last is None else dict(last)}
 
     def _enqueue(self, role: ActorRole, notice_type: str, fields: Mapping[str, Any], *, first: bool = False,
-                 handoff_id: str | None = None) -> None:
+                 handoff_id: str | None = None,
+                 build: Callable[[], Mapping[str, Any] | None] | None = None) -> str:
         notice = {"notice_id": str(uuid4()), "type": notice_type, **fields}
-        item = _Queued(role, notice, handoff_id=handoff_id)
+        item = _Queued(role, notice, handoff_id=handoff_id, build=build)
         if first:
             self._queue.insert(0, item)
         else:
             self._queue.append(item)
         self._record({"type": "workbench_notice", "role": role.value, "notice_id": notice["notice_id"],
                       "notice_type": notice_type, "task_id": fields.get("task_id"), "outcome": "queued"})
+        return notice["notice_id"]
 
     # sessions (C-D70 (4)/(5)) -------------------------------------------------------------
     def _sessions_step(self, now: float) -> None:
@@ -519,6 +550,18 @@ class Watchdog:
             item = self._queue[0]
             if now < item.retry_at:
                 return
+            if item.build is not None:
+                try:
+                    fields = item.build()
+                except Exception:
+                    fields = item.notice  # the state is not readable now: the content queued is kept
+                if fields is None:  # no longer applies (e.g. its Task closed meanwhile): never sent
+                    self._queue.pop(0)
+                    self._record({"type": "workbench_notice", "role": item.role.value,
+                                  "notice_id": item.notice.get("notice_id"), "notice_type": item.notice.get("type"),
+                                  "task_id": item.notice.get("task_id"), "outcome": "dropped_not_applicable"})
+                    continue
+                item.notice = {**dict(fields), "notice_id": item.notice["notice_id"], "type": item.notice["type"]}
             outcome = self._send(item.role, item.notice, retry=item.attempts > 0)
             item.attempts += 1
             if outcome in ("deferred", "paused", "not_connected"):
@@ -526,11 +569,20 @@ class Watchdog:
                 return  # notices to one OMP keep their order
             self._queue.pop(0)
 
+    def enqueue_notice(self, role: ActorRole, notice_type: str, fields: Mapping[str, Any], *,
+                       build: Callable[[], Mapping[str, Any] | None] | None = None) -> str:
+        """A backend notice sent once through this queue (C-D71 (2): ``backend_restarted``); like the others it
+        waits while the target OMP is paused, held or not connected and is never sent twice. Returns its id.
+
+        ``build`` (VM F1) makes the fields again right before each attempt; None drops the notice unsent."""
+        with self._tick_lock:
+            return self._enqueue(role, notice_type, fields, first=True, build=build)
+
     def queued(self) -> list[dict[str, Any]]:
         """The notices waiting for a deliverable OMP (tests and workbench_status)."""
         return [{"role": item.role.value, **item.notice} for item in self._queue]
 
 
-__all__ = ["EDITOR_WAIT", "IDLE_LIMIT", "MANAGER_NOTICE_TYPES", "MANAGER_TOOLS", "MAX_CHECKS", "PROBE_INTERVAL",
+__all__ = ["BACKEND_RESTARTED_HINT", "STOP_SURVIVOR_TOOL", "validate_stop_survivor_arguments", "EDITOR_WAIT", "IDLE_LIMIT", "MANAGER_NOTICE_TYPES", "MANAGER_TOOLS", "MAX_CHECKS", "PROBE_INTERVAL",
            "RESTART_DETAIL", "RESTART_NO_TASK_DETAIL", "RESTART_NO_TASK_PENDING_DETAIL", "RESTART_PENDING_DETAIL", "restart_detail", "RESTART_WORKER_TOOL", "STATUS_TOOL", "WORKER_NOTICE_TYPES", "WatchPorts", "Watchdog",
            "bounded", "validate_restart_arguments", "validate_status_arguments"]

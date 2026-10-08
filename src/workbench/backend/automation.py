@@ -33,10 +33,15 @@ file/tool/process/task/approval reconciliation. There is no host run, so the
 60 s review does not apply: the host shell stays user-owned and the lifecycle
 tick reports ``user_owner_or_control_hold``.
 
-Not connected here (reported as is): a forced stop. ``bind_production`` gets a
-``RecoveryCoordinator`` without a facts port, so its stop/force steps are never
-authorized (fail closed); the user's host shell kill (C-D63) stays the forced
-stop. The retry limit and the next-revision rule stay TaskFlow's (CW-13).
+CW-19 U2: ``bind_production`` gets ``RecoveryCoordinator(SqliteRecoveryPort)``
+(fresh Task metadata plus this controller's live run facts), the run's
+termination observation (``RunObservation`` from the bound run's collected
+record and shell lifecycle, a monotonic sequence per run), an exact-reference
+ordinary stop (pidfd + start-tick recheck; the host shell gets HUP/TERM/CONT as
+in C-D63, an OMP TERM), a bounded drain and an exact-reference force (only
+after CW-13 authorizes it). ``shutdown_bound`` runs the coordinator's
+at-most-once shutdown fence for a user-confirmed full shutdown. The retry
+limit and the next-revision rule stay TaskFlow's (CW-13, R7).
 """
 
 from __future__ import annotations
@@ -47,6 +52,7 @@ from hashlib import sha256
 import json
 import os
 from pathlib import Path
+import signal
 import subprocess
 import threading
 import time
@@ -65,7 +71,8 @@ from workbench.observation.worker_review import (
 )
 from workbench.observation.workflow_binding import WorkflowObservationBinding
 from workbench.policy.pause_automation.controller import PauseCoordinator, PausePolicyError, PauseStatus
-from workbench.policy.recovery_manager import RecoveryCoordinator
+from workbench.policy.recovery_manager import Artifact, RecoveryCoordinator, RunIdentity, RunObservation
+from workbench.policy.recovery_manager.port_sqlite import RunFacts, SqliteRecoveryPort
 from workbench.runtime.process_evidence import LinuxProcessProbe, ProcessRef
 from workbench.storage.log_raw import MetadataAdmissionGate
 from workbench.tasks.repository import TaskRepository
@@ -74,6 +81,7 @@ from workbench.workflow.run import _canonical
 
 REVIEW_INTERVAL_SECONDS = 60  # C-AC-12
 TICK_INTERVAL_SECONDS = 1.0
+PAUSE_STORE_RETRY_SECONDS = 5.0  # CW-19 R4: a pause/resume that could not be stored is retried
 REVIEW_DELIVERY_TIMEOUT = 30.0
 INTERRUPTION = {"none": "none", "not_needed": "not_needed", "requested": "requested",
                 "stop_observed": "confirmed", "request_failed": "request_failed", "unknown": "unknown"}
@@ -230,15 +238,22 @@ class _Bound:
     policy_paused: bool = False  # PauseCoordinator.pause ran for this run (resume must reconcile)
 
 
-class _NoRecoveryFacts:
-    """No CW-13 facts port in production yet: every stop/force decision fails closed."""
-
-    def read(self, _identity: object) -> None:
-        return None
-
-
-def _refuse_stop(_ref: ProcessRef) -> None:
-    raise LifecycleHeld("forced stop is not authorized by CW-13 facts; the user's host shell kill applies")
+def _signal_exact(ref: ProcessRef, signums: tuple[int, ...]) -> bool:
+    """Signal the exact process (pid + start ticks, held by a pidfd); False when it already ended."""
+    try:
+        descriptor = os.pidfd_open(ref.pid)
+    except ProcessLookupError:
+        return False
+    try:
+        if LinuxProcessProbe.start_ticks(ref.pid) != ref.start_ticks:
+            return False  # the pid is another process now: never signalled
+        for signum in signums:
+            signal.pidfd_send_signal(descriptor, signum)
+        return True
+    except (ProcessLookupError, FileNotFoundError):
+        return False
+    finally:
+        os.close(descriptor)
 
 
 class AutomationController:
@@ -250,8 +265,26 @@ class AutomationController:
                  wall: Callable[[], float] = time.time, interval_seconds: int = REVIEW_INTERVAL_SECONDS,
                  tick_interval: float = TICK_INTERVAL_SECONDS, request_timeout: float = 3.0,
                  stop_timeout: float = 2.0, review_timeout: float = REVIEW_DELIVERY_TIMEOUT,
-                 retry_limit: int = 3, log: Callable[[str], None] | None = None):
+                 retry_limit: int = 3, log: Callable[[str], None] | None = None,
+                 pause_store: Any | None = None, hold: Callable[[], str | None] = lambda: None,
+                 model_ok: Callable[[], bool] = lambda: True,
+                 metadata: Callable[[str, BaseException | None], None] | None = None):
         self.bridge = bridge
+        # CW-19 R4: the user's pause is durable (a backend crash never lifts it); ``hold`` is the backend's
+        # admission hold for the 60 s review (C-D71 (3)/(4), C-AC-28).
+        self._pause_store = pause_store
+        self._metadata = metadata
+        # a pause/resume that could not be stored: shown (``persistence_error`` + metadata fault) and retried
+        self._save_lock = threading.Lock()
+        self._pause_desired: bool | None = None
+        self._pause_store_error: str | None = None
+        self._pause_retry_at = 0.0
+        self._hold = hold
+        self._model_ok = model_ok
+        # CW-19 U2: the CW-13 port's own attempt store, the termination sequence and requested stops per run
+        self.recovery_db = Path(artifacts_root).parent / "recovery.sqlite3"
+        self._observation_sequence: dict[str, int] = {}
+        self._stop_requested: set[str] = set()
         self._request_timeout = request_timeout
         self.repository = ThreadLocalRepository(database)
         self.journal = journal
@@ -268,6 +301,12 @@ class AutomationController:
         self._log = log or (lambda _message: None)
         self._lock = threading.RLock()
         self._paused = False
+        self.restored_pause = False
+        if pause_store is not None:
+            try:
+                self._paused = self.restored_pause = pause_store.load() is True
+            except Exception:
+                self._paused = self.restored_pause = True  # unknown: fail closed, the user resumes
         self._transition: str | None = None
         self._transitions: list[str] = []
         self._transition_cv = threading.Condition(self._lock)
@@ -307,6 +346,93 @@ class AutomationController:
         return {"portVersion": 2, "kind": "AutomationState", "payload": {
             "paused": self.paused(), "cancelled": False,
             "metadataHealthy": self.metadata.automatic_runs_allowed is True, "approvalValid": True}}
+
+    def _save_pause(self, paused: bool) -> bool:
+        """Store the user's pause/resume; a failure is shown as a fault and retried (the in-memory flag stays)."""
+        if self._pause_store is None:
+            return True
+        with self._save_lock:
+            saved, was = self._store_pause_locked(paused)
+        self._pause_store_reported(paused, saved, was)
+        return saved
+
+    def _store_pause_locked(self, paused: bool) -> tuple[bool, str | None]:
+        """Write ``paused`` with ``_save_lock`` held; (saved, the previous store error)."""
+        self._pause_desired = paused
+        try:
+            saved = bool(self._pause_store.save(paused))
+        except Exception:
+            saved = False
+        was = self._pause_store_error
+        if saved:
+            self._pause_store_error = None
+        else:
+            self._pause_store_error = "pause_not_stored" if paused else "resume_not_stored"
+            self._pause_retry_at = self._clock() + PAUSE_STORE_RETRY_SECONDS
+        return saved, was
+
+    def _pause_store_reported(self, paused: bool, saved: bool, was: str | None) -> None:
+        if not saved:
+            if was is None:
+                self._log(f"automation: the {'pause' if paused else 'resume'} could not be stored durably; "
+                          "shown as a metadata fault and retried")
+            self._report_metadata(OSError(f"automation.json not stored ({'pause' if paused else 'resume'})"))
+        elif was is not None:
+            self._log("automation: the pause state is stored durably again")
+            self._report_metadata(None)
+
+    def _report_metadata(self, error: BaseException | None) -> None:
+        if self._metadata is None:
+            return
+        try:
+            self._metadata("automation_pause", error)
+        except Exception as exc:
+            self._log(f"automation: metadata report failed ({type(exc).__name__})")
+
+    def retry_pause_store(self) -> None:
+        """Retry a pause/resume that could not be stored (from the loop)."""
+        if self._pause_store is None:
+            return
+        # review-02 P3-1: read and write under one lock, so a pause/resume stored meanwhile is never overwritten
+        # by the value this retry read earlier.
+        with self._save_lock:
+            desired = self._pause_desired
+            if self._pause_store_error is None or desired is None or self._clock() < self._pause_retry_at:
+                return
+            saved, was = self._store_pause_locked(bool(desired))
+        self._pause_store_reported(bool(desired), saved, was)
+
+    def _held(self) -> str | None:
+        try:
+            reason = self._hold()
+        except Exception:
+            return "hold_unknown"
+        return reason if isinstance(reason, str) and reason else None
+
+    def raw_log_status(self) -> dict[str, Any] | None:
+        """CW-19 (C-AC-24): the bound experiment run's raw-log accounting, if any."""
+        with self._lock:
+            bound = self._bound
+        run = None if bound is None else bound.workflow_run
+        record = getattr(run, "_record", None)
+        status = record.get("raw_log_status") if isinstance(record, dict) else None
+        return None if not isinstance(status, dict) else {"run_id": bound.run_id, **status}
+
+    def model_changed(self, ok: bool) -> None:
+        """C-D71 (4): the worker model's passive state for the bound run's durable record (no probe request)."""
+        with self._lock:
+            bound = self._bound
+        coordinator = None if bound is None else bound.coordinator
+        if coordinator is None:
+            return
+        at = _iso(self._wall()) or "unknown"
+        try:
+            if ok:
+                coordinator.recheck_model(at)
+            else:
+                coordinator.model_failed(at)
+        except Exception as exc:
+            self._log(f"automation: model state not recorded ({type(exc).__name__})")
 
     # -- run binding (called by TaskFlow on its runner / outbox threads) ------------------
     def experiment_started(self, workflow_run: Any) -> None:
@@ -448,10 +574,123 @@ class AutomationController:
             journal=self.journal, bridge=self.bridge,
             mailbox=TaskMailbox(self.repository, self.bridge),  # type: ignore[arg-type]
             message=stored_message(self.repository, message_id), shell=shell,
-            pause=self.pause_policy, review=self.review, recovery=RecoveryCoordinator(_NoRecoveryFacts()),
-            raw=self.raw, metadata=self.metadata, model=SimpleNamespace(check=lambda: False),
-            termination=lambda: None, boot_marker=lambda: self._boot_marker() or "unknown",
-            authority=lambda: self._authority(run_id), normal_stop=_refuse_stop, drain=lambda _timeout: None)
+            pause=self.pause_policy, review=self.review,
+            recovery=RecoveryCoordinator(SqliteRecoveryPort(self.repository.path, self.recovery_db, self._run_facts)),
+            raw=self.raw, metadata=self.metadata, model=SimpleNamespace(check=lambda: self._model_ok() is True),
+            termination=lambda: self._observation(run_id), boot_marker=lambda: self._boot_marker() or "unknown",
+            authority=lambda: self._authority(run_id), normal_stop=lambda ref: self._normal_stop(run_id, ref),
+            drain=self._drain, force=lambda ref: self._force(run_id, ref))
+
+    # -- CW-19 U2: termination observation, CW-13 run facts and exact-reference stop callbacks ----------
+    def _observation(self, run_id: str) -> RunObservation | None:
+        """The bound run's managed-execution state now (CW-10); None when it is not the bound run."""
+        with self._lock:
+            bound = self._bound
+            if bound is None or bound.run_id != run_id or bound.active is None:
+                return None
+            sequence = self._observation_sequence.get(run_id, 0) + 1
+            self._observation_sequence[run_id] = sequence
+            stop_requested = run_id in self._stop_requested
+        identity = RunIdentity(bound.task_id, bound.revision, bound.run_id)
+        workflow_run = bound.workflow_run
+        if workflow_run is None:  # free work: the worker OMP is the execution unit
+            pid = getattr(getattr(bound.view, "shell", None), "worker_pid", None)
+            alive = None
+            if type(pid) is int:
+                try:
+                    alive = LinuxProcessProbe.start_ticks(pid) is not None
+                except OSError:
+                    alive = False
+            state = "running" if alive else "unknown"
+            return RunObservation(identity, sequence, state, None, False, state, None, False, False, stop_requested)
+        record = dict(getattr(workflow_run, "_record", {}) or {})
+        try:
+            life = (workflow_run.shell.snapshot() or {}).get("lifecycle") or {}
+        except Exception:
+            life = {}
+        shell_state = {"exited": "exited", "unknown": "unknown"}.get(record.get("shell_state"), "running")
+        lifetime = life.get("lifetime") if life.get("lifetime") in ("running", "ended") else "unknown"
+        status = record.get("exit_status")
+        return RunObservation(
+            identity, sequence, shell_state, status if type(status) is int else None,
+            shell_state == "exited" and record.get("exit_confirmed") is True, lifetime,
+            True if lifetime == "ended" else False if lifetime == "running" else None,
+            bool(life.get("input_returned")), bool(life.get("control_returned")), stop_requested)
+
+    def _run_facts(self, identity: RunIdentity) -> RunFacts:
+        """Live facts for the CW-13 port; raises for anything but the bound experiment run (fail closed)."""
+        with self._lock:
+            bound = self._bound
+        if bound is None or bound.run_id != identity.run_id or bound.workflow_run is None:
+            raise LifecycleHeld("no live facts for this run")
+        observation = self._observation(identity.run_id)
+        if observation is None:
+            raise LifecycleHeld("run observation unavailable")
+        run = bound.workflow_run
+        record = dict(getattr(run, "_record", {}) or {})
+        try:
+            owner = (self._shell_pane().state or {}).get("input_owner")
+        except Exception:
+            owner = None
+        raw_log = result = None
+        collected = record.get("raw_log_collected")
+        if isinstance(collected, dict) and collected.get("sha256"):
+            try:
+                content = run._read_raw() if hasattr(run, "_read_raw") else Path(run.raw_log).read_bytes()
+                raw_log = Artifact("raw_log", str(run.raw_log), content, collected["sha256"])
+            except (OSError, ValueError):
+                raw_log = Artifact("raw_log", str(run.raw_log), None, None, "unreadable")
+        collected = record.get("result_collected")
+        if isinstance(collected, dict) and collected.get("sha256") and collected.get("path"):
+            try:
+                result = Artifact("result_file", str(collected["path"]), Path(collected["path"]).read_bytes(),
+                                  collected["sha256"])
+            except (OSError, ValueError):
+                result = Artifact("result_file", str(collected["path"]), None, None, "unreadable")
+        judgment = record.get("worker_judgment")
+        return RunFacts(
+            observation=observation, automation_state=self._base_state(),
+            terminal_owner={"manager": "workbench", "user": "user"}.get(owner, "unknown"),
+            metadata_healthy=self.metadata.automatic_runs_allowed is True,
+            worktree_root=str(Path(run.worktree.path)), raw_log_path=str(run.raw_log), raw_log=raw_log,
+            result=result, worker_report=judgment if isinstance(judgment, dict) else None,
+            worker_report_id=(judgment or {}).get("report_id") if isinstance(judgment, dict) else None,
+            source_commit=str(getattr(run.worktree, "commit", "") or ""))
+
+    def _normal_stop(self, run_id: str, ref: ProcessRef) -> None:
+        """CW-13-authorized ordinary stop of one exact process (RecoveryStopAdapter checked the decision)."""
+        signums = ((signal.SIGHUP, signal.SIGTERM, signal.SIGCONT) if ref.role == "shell"
+                   else (signal.SIGTERM, signal.SIGCONT))
+        with self._lock:
+            self._stop_requested.add(run_id)
+        _signal_exact(ref, signums)
+        self._log(f"automation: ordinary stop sent to {ref.role} pid {ref.pid} (run {run_id})")
+
+    def _force(self, run_id: str, ref: ProcessRef) -> None:
+        """CW-13-authorized force of one exact owned target only."""
+        if not _signal_exact(ref, (signal.SIGKILL,)):
+            raise LifecycleHeld("exact force target is gone or changed")
+        self._log(f"automation: force (SIGKILL) sent to {ref.role} pid {ref.pid} (run {run_id})")
+
+    @staticmethod
+    def _drain(timeout: float) -> None:
+        time.sleep(min(max(0.0, timeout), 0.05))
+
+    def shutdown_bound(self, timeout: float = 2.0) -> dict[str, Any] | None:
+        """C-AC-22: the bound run's at-most-once shutdown fence for a user-confirmed full shutdown."""
+        with self._lock:
+            bound = self._bound
+        coordinator = None if bound is None else bound.coordinator
+        if coordinator is None:
+            return None
+        try:
+            result = coordinator.shutdown(user_confirmed=True, timeout=timeout)
+        except Exception as exc:
+            return {"run_id": bound.run_id, "confirmed": False, "complete": False,
+                    "survivors": [], "problems": [f"shutdown_error:{type(exc).__name__}"]}
+        return {"run_id": bound.run_id, "confirmed": result.confirmed, "complete": result.complete,
+                "survivors": [{"role": ref.role, "pid": ref.pid, "start_ticks": ref.start_ticks}
+                              for ref in result.survivors], "problems": list(result.problems)}
 
     def _authority(self, run_id: str) -> bool:
         with self._lock:
@@ -471,6 +710,7 @@ class AutomationController:
         try:
             while not self._stop.wait(self._tick_interval):
                 try:
+                    self.retry_pause_store()
                     self.tick()
                 except Exception as exc:  # never let the loop die silently
                     self._log(f"automation tick failed: {type(exc).__name__}: {exc}")
@@ -483,8 +723,11 @@ class AutomationController:
             with self._lock:
                 bound = self._bound
             result: dict[str, Any]
+            hold = self._held()
             if bound is None:
                 result = {"outcome": "idle", "problems": []}
+            elif hold is not None:  # CW-19: no 60 s review (automatic model work) while held
+                result = {"outcome": "held", "problems": [hold]}
             elif bound.coordinator is None:
                 result = {"outcome": "held", "problems": [bound.error or "run_not_bound"]}
             else:
@@ -563,7 +806,7 @@ class AutomationController:
     def _dispatch_review(self, request: ReviewRequest) -> dict[str, Any]:
         with self._lock:
             bound = self._bound
-        if (bound is None or bound.ended or bound.active is None or self.paused()
+        if (bound is None or bound.ended or bound.active is None or self.paused() or self._held() is not None
                 or bound.active.identity != request.run.identity):
             return {"status": "held"}
         mailbox = TaskMailbox(self.repository, self.bridge)  # type: ignore[arg-type]
@@ -597,6 +840,7 @@ class AutomationController:
                 self._paused = True  # every reader holds new automatic work from now on
                 self._last_resume = None
                 self._enqueue("pause")
+        self._save_pause(True)
         self._log("automation: pause requested by the user")
         self._publish()
         return self.status()
@@ -717,9 +961,12 @@ class AutomationController:
             with self._lock:
                 if status is not None:
                     self._pause_status = status
+        if outcome == "resumed":
+            self._save_pause(False)  # stored before the flag clears: a crash in between keeps the pause
         with self._lock:
             if outcome == "resumed":
                 self._paused = False
+                self.restored_pause = False
                 self._pause_error = None
                 if bound is not None:
                     bound.policy_paused = False
@@ -771,6 +1018,7 @@ class AutomationController:
             bound, paused, transition = self._bound, self._paused, self._transition
             tick, review, exit_event = self._last_tick, self._last_review, self._last_exit
             pause_status, pause_error, last_resume = self._pause_status, self._pause_error, self._last_resume
+        store_error = self._pause_store_error
         problems = list((tick or {}).get("problems") or [])
         if transition is not None:
             state = transition
@@ -819,9 +1067,13 @@ class AutomationController:
                   "active": ("free-work run: no host run to review; pause/resume apply"
                              if bound is not None and bound.kind == "work" else "automation active for the run"),
                   "held": "automatic work held: " + (", ".join(problems) or "reconciliation needed"),
-                  "paused": "paused by the user; collection continues, new automatic work is held",
+                  "paused": ("paused by the user (kept across the backend restart); collection continues, new "
+                             "automatic work is held" if self.restored_pause else
+                             "paused by the user; collection continues, new automatic work is held"),
                   "pausing": "pausing: holding new work and requesting the manager turn to stop",
                   "resuming": "resuming: reconciling files, tools, processes, Task and approval"}[state]
+        if store_error is not None:
+            detail += f" (the {'pause' if store_error == 'pause_not_stored' else 'resume'} is not stored durably; retried)"
         return {"state": state, "source": "backend", "detail": detail, "paused": paused,
                 "transition": transition, "run": run,
                 "tick": None if tick is None else {"outcome": tick.get("outcome"),
@@ -830,7 +1082,8 @@ class AutomationController:
                 "review": review_view, "interruption": interruption,
                 "resume": None if last_resume is None else dict(last_resume),
                 "retry_limit": self._retry_limit,
-                "persistence_error": None if pause_status is None else pause_status.persistence_error}
+                "persistence_error": (pause_status.persistence_error if pause_status is not None
+                                      and pause_status.persistence_error else store_error)}
 
 
 __all__ = ["AutomationController", "FreeWorkProcess", "PaneShell", "REVIEW_INTERVAL_SECONDS", "TICK_INTERVAL_SECONDS",

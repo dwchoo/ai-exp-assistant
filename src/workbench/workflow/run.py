@@ -41,6 +41,16 @@ class WorkerJudgmentUnavailable(WorkflowHeld):
         super().__init__(f"worker analysis unavailable ({reason}): no worker judgment, no report or replay")
 
 
+def _start_ticks(pid: Any) -> int | None:
+    if type(pid) is not int or pid < 1:
+        return None
+    try:
+        from workbench.runtime.process_evidence import LinuxProcessProbe
+        return LinuxProcessProbe.start_ticks(pid)
+    except (OSError, ValueError):
+        return None
+
+
 def _canonical(value: Mapping[str, Any]) -> bytes:
     return json.dumps(dict(value), sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode()
 
@@ -172,17 +182,57 @@ class WorkflowRun:
     _report_requires_code_change: bool = False
     _report_judgment: str | None = None
     _run_closed: bool = False
+    # CW-19 (C-D71 (5), C-AC-24): the project's RawLogStore (64 MiB per run, 512 MiB per project, cap_source,
+    # missing bytes). A full or failing store never stops the run or its collection.
+    raw_store: Any = None
+    _raw_missing: int = 0
 
     def _persist(self) -> None:
         _write_json(self.result_path, self._record)
 
+    def _raw_status(self, status: Any = None, error: str | None = None, lost: int = 0) -> None:
+        self._raw_missing += lost
+        current = dict(self._record.get("raw_log_status") or {})
+        if status is not None:
+            current = {"stored_bytes": status.stored_bytes, "observed_bytes": status.observed_bytes,
+                       "dropped_bytes": status.dropped_bytes, "truncated": status.truncated,
+                       "missing_bytes": status.missing_bytes, "cap_source": status.cap_source,
+                       "storage_error": status.storage_error}
+        if error is not None:
+            current["storage_error"] = error
+        if self._raw_missing:
+            current["missing_bytes"] = max(int(current.get("missing_bytes") or 0), self._raw_missing)
+        self._record["raw_log_status"] = current
+
+    def _read_raw(self) -> bytes:
+        """The stored raw log; a store-owned log that never got a byte does not exist yet (= empty)."""
+        try:
+            return self.raw_log.read_bytes()
+        except FileNotFoundError:
+            stored = (self._record.get("raw_log_status") or {}).get("stored_bytes")
+            if self.raw_store is not None and not stored:
+                return b""
+            raise
+
     def _drain(self) -> None:
         data = self.shell.display_bytes()
-        if data:
+        if not data:
+            return
+        if self.raw_store is not None:
+            try:
+                status = self.raw_store.append(self.run_id, data)
+            except Exception as exc:  # recorded as missing bytes; the experiment and its collection go on
+                self._raw_status(error=type(exc).__name__, lost=len(data))
+                return
+            self._raw_status(status)
+            return
+        try:
             with self.raw_log.open("ab") as stream:
                 stream.write(data)
                 stream.flush()
                 os.fsync(stream.fileno())
+        except OSError as exc:
+            self._raw_status(error=type(exc).__name__, lost=len(data))
 
     def collect(self, *, timeout: float = 5, paused: bool = False) -> dict[str, Any]:
         """Collect shell facts even while paused; never start worker analysis here."""
@@ -200,6 +250,8 @@ class WorkflowRun:
                 if observed and name not in self._observed:
                     self.repository.record_shell_event(self.run_id, kind, {
                         "parent_pid": state["parent_pid"], "child_pid": life["child_pid"],
+                        # CW-19: the exact identity a restarted backend proves before listing it as a survivor
+                        "child_start_ticks": _start_ticks(life["child_pid"]),
                         "cwd": str(self.worktree.path), "commit": self.worktree.commit,
                         "raw_log": str(self.raw_log), "result": str(self.result_path),
                     })
@@ -218,7 +270,7 @@ class WorkflowRun:
             if life["control_returned"] and life["input_returned"] and life["lifetime"] == "ended":
                 self._drain()
                 try:
-                    collected_log = self.raw_log.read_bytes()
+                    collected_log = self._read_raw()
                     self._record["raw_log_collected"] = {
                         "size": len(collected_log), "sha256": sha256(collected_log).hexdigest(),
                     }
@@ -257,7 +309,8 @@ class WorkflowRun:
 
     def judge(self, *, paused: bool = False, requires_code_change: bool = False,
               code_change_reason: str = "",
-              on_report: Callable[[str, Mapping[str, Any]], None] | None = None) -> dict[str, Any]:
+              on_report: Callable[[str, Mapping[str, Any]], None] | None = None,
+              report_hold: Callable[[], str | None] | None = None) -> dict[str, Any]:
         """Judge the collected evidence and report it to the manager (once; never replayed).
 
         ``on_report`` (CW-18 R1) is told ``sending`` just before the report is
@@ -265,6 +318,11 @@ class WorkflowRun:
         session (mailboxes with ``on_submitted``). With ``on_report`` the run is
         closed at that acceptance, not when the manager's turn ends: the report
         reached the manager, and a later unknown receipt changes nothing.
+
+        ``report_hold`` (CW-19, p27-cw19-fix-01) names a hold of the manager's
+        automatic work (boot/metadata/model): the report is then created but not
+        delivered (``deferred``: nothing submitted) and ``retry_report`` sends it
+        once the hold lifts, like a manager that was busy.
         """
         if paused:
             return {"status": "deferred_paused", "run_id": self.run_id, "raw_log": str(self.raw_log)}
@@ -297,6 +355,17 @@ class WorkflowRun:
                 self._record["report"]["status"] = "not_sent"
             self._analysis_unavailable(f"analysis_error:{type(exc).__name__}",
                                        host.get("judgment"), host.get("reasons") or [])
+        hold = None
+        if report_hold is not None:
+            try:
+                hold = report_hold()
+            except Exception:
+                hold = "hold_unknown"
+        if hold:  # nothing is submitted: the caller delivers it with retry_report after the hold
+            self._record["report"]["status"] = MailboxStatus.DEFERRED.value
+            self._record["report"]["held"] = str(hold)[:64]
+            self._persist()
+            return dict(self._record)
         if on_report is not None:
             on_report("sending", dict(self._record))
         try:
@@ -314,7 +383,7 @@ class WorkflowRun:
         criteria = self.execution["criteria"]
         evidence_errors: list[dict[str, str]] = []
         try:
-            log = self.raw_log.read_bytes()
+            log = self._read_raw()
         except OSError as exc:
             log = None
             evidence_errors.append({"source": "raw_log", "path": str(self.raw_log),
@@ -352,6 +421,14 @@ class WorkflowRun:
                                         "error": "ChangedSinceCollection"})
         result_hash = sha256(result_bytes).hexdigest() if result_bytes is not None else None
         unknowns = [f"{item['source']} {item['path']}: {item['error']}" for item in evidence_errors]
+        raw_status = self._record.get("raw_log_status") if isinstance(self._record.get("raw_log_status"), dict) \
+            else {}
+        incomplete = bool(raw_status.get("truncated") or raw_status.get("missing_bytes")
+                          or raw_status.get("dropped_bytes"))
+        if incomplete:  # CW-19 (C-AC-24): the judgment says what is missing; it never assumes the rest
+            unknowns.append(f"raw log incomplete: {raw_status.get('stored_bytes')} of "
+                            f"{raw_status.get('observed_bytes')} bytes stored (cap {raw_status.get('cap_source')}, "
+                            f"missing {raw_status.get('missing_bytes')})")
         if log is None or any(item["source"] == "raw_log" for item in evidence_errors) or not log:
             judgment, reasons = "indeterminate", ["insufficient_raw_log"]
             if log == b"":
@@ -366,6 +443,8 @@ class WorkflowRun:
         elif self.result_before is not None and self.result_before == result_hash:
             judgment, reasons = "indeterminate", ["result_provenance_unconfirmed"]
             unknowns.append("result file is unchanged from before the run")
+        elif incomplete and criteria["log_contains"].encode() not in log:
+            judgment, reasons = "indeterminate", ["raw_log_incomplete"]  # the marker may be in the lost bytes
         elif criteria["log_contains"].encode() not in log or criteria["result_contains"].encode() not in result_bytes:
             judgment, reasons = "failure", ["exit_zero_criteria_failed"]
         else:
@@ -497,6 +576,7 @@ class WorkflowRun:
         report = self._record.get("report") or {}
         if self._report_message is None or report.get("status") != MailboxStatus.DEFERRED.value:
             raise WorkflowHeld("only a deferred (never submitted) report is delivered again; no replay")
+        self._record["report"].pop("held", None)
         if on_report is not None:
             on_report("sending", dict(self._record))
         try:
@@ -534,9 +614,11 @@ def _release_shell(shell: Any, owned: bool) -> None:
 class TaskWorkflow:
     def __init__(self, repository: TaskRepository, mailbox: TaskMailbox,
                  *, worker_port: WorkerRolePort | None = None,
-                 automation_source: Callable[[], Mapping[str, Any]] | None = None):
+                 automation_source: Callable[[], Mapping[str, Any]] | None = None,
+                 raw_store: Any = None):
         self.repository = repository
         self.mailbox = mailbox
+        self.raw_store = raw_store  # CW-19: the project's RawLogStore for the run's raw log (None: a plain file)
         self.worker_port = worker_port
         self.automation_source = automation_source
         self._public_mailbox = isinstance(mailbox, TaskMailbox)
@@ -653,9 +735,13 @@ class TaskWorkflow:
         try:
             record_dir.mkdir(mode=0o700)
             raw_log, result_path = record_dir / "raw.log", record_dir / "run.json"
-            fd = os.open(raw_log, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
-            os.close(fd)
-        except OSError as exc:
+            if self.raw_store is not None:  # CW-19: the store owns <raw-logs>/<run_id>.log and its quota
+                raw_log = Path(self.raw_store.root_path) / f"{run_id}.log"
+                self.raw_store.append(run_id, b"")
+            else:
+                fd = os.open(raw_log, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+                os.close(fd)
+        except Exception as exc:  # OSError, or the raw-log store closed/inconsistent (RuntimeError): no half run
             self.repository.fail_run(run_id, {"stage": "artifact_setup", "error": type(exc).__name__})
             raise WorkflowHeld("durable artifact directory could not be prepared") from exc
         record: dict[str, Any] = {
@@ -755,7 +841,8 @@ class TaskWorkflow:
             return WorkflowRun(self.repository, self.mailbox, task_id, revision, run_id,
                                task_message.message_id, worktree, shell, execution,
                                record_dir, raw_log, result_path, before, approval_hash, record, {"sent"},
-                               automation_source, self.worker_port, owns_shell=not injected)
+                               automation_source, self.worker_port, owns_shell=not injected,
+                               raw_store=self.raw_store)
         except BaseException as exc:
             if shell is not None:
                 _release_shell(shell, not injected)

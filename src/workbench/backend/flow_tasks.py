@@ -87,6 +87,7 @@ and the owner of the single active Task:
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass, field, fields, replace
+import functools
 import os
 from pathlib import Path
 import threading
@@ -352,8 +353,14 @@ class TaskFlow:
                  poll_interval: float = 0.5, collect_slice: float = 1.0,
                  project_dir: str | Path | None = None, analysis_idle_limit: float = ANALYSIS_IDLE_LIMIT,
                  host_gate: HostGate | None = None,
-                 worker_session: Callable[[], tuple[str, int] | None] = lambda: None):
+                 worker_session: Callable[[], tuple[str, int] | None] = lambda: None,
+                 hold: Callable[[ActorRole], str | None] = lambda _role: None,
+                 metadata: Callable[[str, BaseException | None], None] = lambda _source, _error: None):
         self._repository_factory = repository_factory
+        # CW-19 (C-D71 (3)/(4), C-AC-28): the admission hold for automatic work into a role, and where a ledger
+        # write outcome is reported. Collection of a running experiment never waits on it.
+        self._hold = hold
+        self._metadata = metadata
         # C-D70 (4): the worker OMP's current bridge session (session_id, generation), None when not connected.
         self._worker_session = worker_session
         # C-D68: one Workbench owner of the host shell (an experiment run or the worker's terminal command).
@@ -468,7 +475,11 @@ class TaskFlow:
     def _record(self, record: Mapping[str, Any]) -> None:
         try:
             self._ledger.append(record)
-        except OSError:
+        except OSError as exc:
+            try:
+                self._metadata("flow_ledger", exc)
+            except Exception:
+                pass
             if not self._stop:  # after close() a late runner record is dropped, never raised
                 raise
 
@@ -1176,6 +1187,14 @@ class TaskFlow:
         except Exception:
             return True
 
+    def _held_now(self, role: ActorRole = ActorRole.WORKER) -> str | None:
+        """CW-19: why automatic work into ``role`` must not start now (an unknown hold state holds)."""
+        try:
+            reason = self._hold(role)
+        except Exception:
+            return "hold_unknown"
+        return reason if isinstance(reason, str) and reason else None
+
     def _schedule(self, task: FlowTask, revision: int, origin: str) -> None:
         task.pending_start = {"revision": revision, "origin": origin}
         task.held_reason = None
@@ -1248,6 +1267,11 @@ class TaskFlow:
     def _start_work(self, task_id: str, job: Mapping[str, Any]) -> None:
         if self._paused_now():
             self._set_held(task_id, "paused")
+            self._wait(self._poll_interval)
+            return
+        hold = self._held_now(ActorRole.WORKER)
+        if hold is not None:  # CW-19: the free-work TASK waits (never sent, so nothing is replayed)
+            self._set_held(task_id, hold)
             self._wait(self._poll_interval)
             return
         if self._omp_idle(ActorRole.WORKER) is None:
@@ -1343,6 +1367,9 @@ class TaskFlow:
     def _experiment_blocker(self, task: FlowTask, port: Any) -> str | None:
         if self._paused_now():
             return "paused"
+        hold = self._held_now(ActorRole.WORKER)
+        if hold is not None:  # CW-19: no new experiment before confirm-boot / during a metadata or model hold
+            return hold
         if port is None:
             return "host_terminal_unavailable"
         names = set((task.spec or {}).get("execution", {}).get("environment") or [])
@@ -1407,6 +1434,8 @@ class TaskFlow:
                 reason = "cancelled"
             elif self._paused_now():
                 reason = "paused"
+            elif self._held_now(ActorRole.WORKER) is not None:
+                reason = self._held_now(ActorRole.WORKER)
             else:
                 try:
                     if port.busy() is not None or port.hold(HOLD_REASON) is not None:
@@ -1712,6 +1741,12 @@ class TaskFlow:
                     self._set_held(task.task_id, "paused")
                     self._wait(self._poll_interval)
                     continue
+                hold = self._held_now(ActorRole.WORKER)
+                if hold is not None:  # CW-19: the staged analysis is automatic model work for the worker
+                    busy_since = deferred_since = None
+                    self._set_held(task.task_id, hold)
+                    self._wait(self._poll_interval)
+                    continue
                 if self._omp_idle(ActorRole.WORKER) is not True:
                     deferred_since = None
                     busy_since = time.monotonic() if busy_since is None else busy_since
@@ -1724,7 +1759,10 @@ class TaskFlow:
                 busy_since = None  # P3a: the worker is idle; a later busy observation starts a new period
                 self._set_held(task.task_id, None)
                 try:
-                    record = self._call_with_report_hook(run.judge, on_report)
+                    judge = run.judge
+                    if accepts_keyword(judge, "report_hold"):  # P3-2: the report waits out a manager hold
+                        judge = functools.partial(judge, report_hold=lambda: self._held_now(ActorRole.MANAGER))
+                    record = self._call_with_report_hook(judge, on_report)
                     break
                 except WorkerJudgmentUnavailable as exc:  # G2: rejected or unknown worker analysis
                     self._judgment_unavailable(task, run, exc.reason, exc.host_evidence or None)
@@ -1747,10 +1785,12 @@ class TaskFlow:
                     self._run_error(task, run, accepted, on_report, exc)
                     return
             while not accepted and (record.get("report") or {}).get("status") == MailboxStatus.DEFERRED.value:
-                self._set_held(task.task_id, "manager_busy")
+                manager_hold = self._held_now(ActorRole.MANAGER)
+                self._set_held(task.task_id, manager_hold or "manager_busy")
                 if not self._wait(self._poll_interval):
                     return
-                if self._paused_now() or self._omp_idle(ActorRole.MANAGER) is not True:
+                if (self._paused_now() or self._held_now(ActorRole.MANAGER) is not None
+                        or self._omp_idle(ActorRole.MANAGER) is not True):
                     continue
                 try:
                     record = self._call_with_report_hook(run.retry_report, on_report)

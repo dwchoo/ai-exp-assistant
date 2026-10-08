@@ -185,6 +185,16 @@ def find_in_session(sid: int, needle: bytes) -> list[int]:
     return found
 
 
+def first_found(found: list[int]):
+    """A wait predicate that keeps what it found. Re-reading /proc after the wait can miss the process: the
+    worker command's display wrapper execs into ``bash -c <command>`` and its cmdline reads empty during that
+    exec (p27-flaky-01 (f)/(g): IndexError on ``find_in_session(...)[0]``)."""
+    def keep(pids: list[int]) -> bool:
+        found[:] = pids
+        return bool(pids)
+    return keep
+
+
 def find_key(value, key):
     """The first value of ``key`` anywhere in a JSON-like structure."""
     if isinstance(value, dict):
@@ -374,9 +384,12 @@ class RestartWorkerProcessTests(_Fixture):
         helpers = {h["role"]: h for h in self.read("helpers.jsonl")}
         # a host command running in the host shell
         self.type_line(PaneId.HOST_SHELL, "sleep 7031 &")
-        self.wait(lambda: find_in_session(shell.pid, b"7031"), "the host shell's background command")
-        host_command = find_in_session(shell.pid, b"7031")[0]
+        found = []
+        keep = first_found(found)
+        self.wait(lambda: keep(find_in_session(shell.pid, b"7031")), "the host shell's background command")
+        host_command = found[0]
         host_ticks = start_ticks(host_command)
+        self.assertIsNotNone(host_ticks, "the host shell's background command is alive")
         self.owned.append((host_command, host_ticks))
         old_worker_session = self.session("worker")
         result = self.restart_worker()
@@ -514,9 +527,12 @@ class RecoveryFlowTests(_Fixture):
         call = self.tool("worker", "terminal", {"command": WORK_COMMAND}, wait=False)
         self.wait(lambda: self.backend.terminal.watch_state()["running"] is True, "the worker's command runs")
         shell = self.backend.shell
-        self.wait(lambda: find_in_session(shell.pid, b"2.7"), "the host command process")
-        host_command = find_in_session(shell.pid, b"2.7")[0]
+        found = []
+        keep = first_found(found)
+        self.wait(lambda: keep(find_in_session(shell.pid, b"2.7")), "the host command process")
+        host_command = found[0]
         host_ticks = start_ticks(host_command)
+        self.assertIsNotNone(host_ticks, "the host command process is alive")
         result = self.restart_worker("stuck mid-turn")
         self.assertEqual(result.get("status"), "restarted", result)
         self.assertEqual(start_ticks(host_command), host_ticks, "the host command keeps running after the restart")

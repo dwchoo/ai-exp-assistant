@@ -596,6 +596,15 @@ class G3BridgeServer:
                         and event.get("role") == target and event.get("name") in wanted)
             return self._event_sequence, count
 
+    def events_after(self, names: tuple[str, ...], after_sequence: int) -> tuple[int, list[dict[str, Any]]]:
+        """(current cursor, retained events named ``names`` of either role after ``after_sequence``); never waits
+        (CW-19: the backend reads ``model_turn_result``)."""
+        wanted = frozenset(names)
+        with self._condition:
+            return self._event_sequence, [dict(event) for event in self._events
+                                          if event.get("bridgeSequence", 0) > after_sequence
+                                          and event.get("name") in wanted]
+
     def wait_event(
         self,
         role: ActorRole | str,

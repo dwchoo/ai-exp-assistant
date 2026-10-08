@@ -48,7 +48,6 @@ import time
 import unittest
 from typing import Any
 
-import pyte
 
 REPO = Path(__file__).resolve().parents[2]
 SRC = REPO / "src"
@@ -267,8 +266,15 @@ def kill_exact(pid, start):
         os.close(fd)
 
 
+def _screen_classes():
+    """tests/ui/support.rep_screen_classes(): pyte plus REP and SU/SD. Plain pyte 0.8.2 ignores CSI S, which
+    ncurses sends when a full pane scrolls, so it showed overprinted lines the product never drew
+    (p27-overprint-01; p27-flaky-01)."""
+    return _load(REPO / "tests/ui/support.py", "p27w_ui_support").rep_screen_classes()
+
+
 class Ui:
-    """The product UI on a PTY, rendered with pyte."""
+    """The product UI on a PTY, rendered with pyte (REP and SU/SD applied, as a real terminal does)."""
 
     def __init__(self, argv, env, cwd):
         master, slave = os.openpty()
@@ -280,8 +286,9 @@ class Ui:
             os.close(slave)
         self.fd = master
         self.start = ticks(self.process.pid)
-        self.screen = pyte.Screen(COLS, ROWS)
-        self.stream = pyte.ByteStream(self.screen)
+        screen_class, stream_class = _screen_classes()
+        self.screen = screen_class(COLS, ROWS)
+        self.stream = stream_class(self.screen)
 
     def pump(self, seconds=0.2):
         deadline = time.monotonic() + seconds

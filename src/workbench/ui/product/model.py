@@ -122,7 +122,20 @@ TASK_STATUS_TEXT = {"dispatched": "전달됨", "starting": "시작 중", "runnin
                     "held": "보류", "cancelling": "취소 중", "finished": "보고 완료", "blocked": "막힘", "closed": "종료"}
 TASK_HELD_TEXT = {"host_terminal_busy": "host terminal 사용 중",
                   # p27-cd68-fix-03 (review-02 P3 (1)): the worker's own terminal command; nothing for the user to clear
-                  "host_terminal_busy:worker_terminal_command": "worker 명령 실행 중 (끝나면 시작)"}
+                  "host_terminal_busy:worker_terminal_command": "worker 명령 실행 중 (끝나면 시작)",
+                  # CW-19 (C-D71): admission holds and the restart hold of TaskFlow
+                  "boot_confirmation_required": "부팅 확인 대기",
+                  "metadata_unavailable": "metadata 저장 장애",
+                  "model_hold:worker": "worker 모델 오류 보류",
+                  "model_hold:manager": "manager 모델 오류 보류"}
+# CW-19: the status line after a restart or reboot (C-D58: the UI only shows the boot confirmation wait)
+BOOT_WAIT_TEXT = "재부팅 확인 대기: python -m workbench confirm-boot (그 전에는 자동 동작 보류)"
+BOOT_UNKNOWN_TEXT = "boot 확인 대기: python -m workbench confirm-boot (boot marker 확인 불가)"
+# p27-cw19-fix-01: the start-up reconcile itself failed (not a reboot): the same confirmation, its own reason
+BOOT_RECONCILE_FAILED_TEXT = "재시작 대조 실패 확인 대기: python -m workbench confirm-boot (그 전에는 자동 동작 보류)"
+STARTUP_TEXT = {"same_boot_crash": "backend 비정상 종료 뒤 재시작", "same_boot_unverified_stop": "종료 미확인 뒤 재시작",
+                "same_boot_clean_stop": "backend 재시작", "reboot": "재부팅 뒤 시작", "boot_unknown": "boot 불명 뒤 시작"}
+STARTUP_SHOWN_SECONDS = 600
 # host-shell held reasons that mean user jobs (or a state left unknown by them) keep the handoff / automation held
 JOB_HELD_REASONS = ("manual_jobs", "unknown_or_manual_residue")
 # held reasons in a refusal notice, in plain Korean (unknown codes are shown as they are)
@@ -1959,12 +1972,16 @@ class ProductModel:
                  f"shell mode: {mode}" + (f" | worker: {worker}" if worker else "") + f" | 자동화: {automation}")
         line2 = (f"backend: {self.state.get('phase', 'unknown')} | bridge manager={peer('manager')} "
                  f"worker={peer('worker')} | 마지막 확인 {seen} | Ctrl-] ? 도움말")
-        extra = " | ".join(part for part in (self.recovery_text(), self.task_text(), self.automation_text()) if part)
+        extra = " | ".join(part for part in (self.recovery_text(include_boot=False), self.task_text(),
+                                             self.automation_text()) if part)
         if extra:
             line2 = f"{extra} | {line2}"
         warning = self.isolation_warning()
         if warning:
             line2 = f"{warning} | {line2}"
+        boot_wait = self.boot_wait_text()
+        if boot_wait:  # VM F2: the safety wait comes first, so a narrow terminal still shows it
+            line2 = f"{boot_wait} | {line2}"
         return line1, line2
 
     # -- CW-18 U5: current Task / worker / automation (all fields optional; unknown values are shown as sent) --------
@@ -2009,9 +2026,62 @@ class ProductModel:
             head += f' "{summary}"'
         return head + tail
 
-    def recovery_text(self) -> str:
+    def boot_wait_text(self) -> str:
+        """CW-19: the boot confirmation wait (its text names why), else empty."""
+        boot = self.state.get("boot")
+        if not isinstance(boot, dict) or boot.get("confirmation_required") is not True:
+            return ""
+        reason = boot.get("reason")
+        if reason == "reconcile_failed":
+            return BOOT_RECONCILE_FAILED_TEXT
+        if reason in ("boot_marker_unknown", "boot_record_unreadable"):
+            return BOOT_UNKNOWN_TEXT
+        return BOOT_WAIT_TEXT
+
+    def backend_recovery_text(self, *, include_boot: bool = True) -> str:
+        """CW-19: boot confirmation wait, restart reconcile, previous survivors and fault holds (all optional)."""
+        parts: list[str] = []
+        boot_wait = self.boot_wait_text() if include_boot else ""
+        if boot_wait:
+            parts.append(boot_wait)
+        startup = self.state.get("startup")
+        if isinstance(startup, dict):
+            survivors = [item for item in startup.get("survivors") or () if isinstance(item, dict)
+                         and item.get("state") in ("alive", "stop_unconfirmed")]
+            at = startup.get("at")
+            recent = isinstance(at, (int, float)) and not isinstance(at, bool) \
+                and self.clock() - at <= STARTUP_SHOWN_SECONDS
+            label = STARTUP_TEXT.get(_plain(startup.get("classification")))
+            if label and (recent or survivors):
+                run = startup.get("run") if isinstance(startup.get("run"), dict) else {}
+                state = _plain(run.get("state"))
+                note = {"interrupted_by_reboot": " · 이전 run 중단됨(결과 불명)",
+                        "outcome_unknown": " · 이전 run 결과 불명(재실행 없음)"}.get(state, "")
+                lost = startup.get("outbox_lost_count")
+                if isinstance(lost, int) and not isinstance(lost, bool) and lost > 0:
+                    note += f" · 보내지 못한 메시지 {lost}건"
+                parts.append(label + note)
+            if survivors:
+                parts.append(f"이전 backend의 process {len(survivors)}개 남음 (status·manager 확인)")
+        holds = self.state.get("holds")
+        reasons = [_plain(item.get("reason")) for item in holds or () if isinstance(item, dict)]
+        for reason in reasons:
+            if reason == "metadata_unavailable":
+                parts.append("metadata 저장 장애: 새 자동 작업 보류 (실행·관측 계속)")
+            elif reason.startswith("model_hold:"):
+                parts.append(f"모델 오류({reason.split(':', 1)[1]}): 자동 작업 보류, 실험·관측 계속")
+        faults = self.state.get("faults")
+        raw = faults.get("raw_log") if isinstance(faults, dict) else None
+        if isinstance(raw, dict) and raw.get("text"):
+            parts.append(_plain(raw.get("text")))
+        return " · ".join(parts)
+
+    def recovery_text(self, *, include_boot: bool = True) -> str:
         """C-D70: a worker report waiting on the manager's composer, and a worker restart the manager asked for."""
         parts = []
+        backend = self.backend_recovery_text(include_boot=include_boot)
+        if backend:
+            parts.append(backend)
         recovery = self.state.get("recovery")
         wait = recovery.get("report_wait") if isinstance(recovery, dict) else None
         if isinstance(wait, dict):

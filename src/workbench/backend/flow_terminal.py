@@ -164,6 +164,9 @@ START_FAILED_UNCONFIRMED = ("The command was not started, and Workbench could no
                             "a new shell.")
 _UNKNOWN_SHELL = "/usr/bin/bash"  # sizing only, when the port does not name its shell
 _SIZING_ID = str(uuid4())  # a request id has this length
+HELD_DETAIL = ("Nothing was run: Workbench holds automatic work now (reason in this result: boot confirmation, "
+               "metadata storage or a model error). A command already running continues. End your turn; do not "
+               "retry in a loop.")
 PAUSED_DETAIL = ("Nothing was run: the user paused Workbench automation. A command already running continues. "
                  "Wait for the user's resume.")
 
@@ -440,6 +443,7 @@ class TerminalService:
                  log_root: str | Path,
                  automation: Callable[[], Mapping[str, Any]],
                  paused: Callable[[], bool] = lambda: False,
+                 hold: Callable[[], str | None] = lambda: None,
                  activity: Callable[[], str | None] = lambda: None,
                  sensitive_values: Callable[[], Iterable[str]] = lambda: (),
                  active_task: Callable[[], Any] = lambda: None,
@@ -457,6 +461,7 @@ class TerminalService:
         self._log_root = Path(log_root)
         self._automation = automation
         self._paused = paused
+        self._hold = hold  # CW-19 (C-D71 (3)/(4), C-AC-28): no new worker command while held
         self._activity = activity
         self._sensitive_values = sensitive_values
         self._active_task = active_task
@@ -983,6 +988,13 @@ class TerminalService:
         except Exception:
             return True  # an unknown pause state holds
 
+    def _held_now(self) -> str | None:
+        try:
+            reason = self._hold()
+        except Exception:
+            return "hold_unknown"
+        return reason if isinstance(reason, str) and reason else None
+
     def _start_unlocked(self, text: str, key_dict: dict[str, Any], task: str | None,
                         key: tuple = ()) -> _Command | dict[str, Any]:
         if self._abandoned_now(key):  # P3-4: the bridge already answered this call: nothing is typed
@@ -990,6 +1002,9 @@ class TerminalService:
             return {"status": "aborted", "reason": "call_abandoned", "detail": ABORTED_DETAIL}
         if self._paused_now():
             return self._refuse(key_dict, "paused", "paused", PAUSED_DETAIL)
+        hold = self._held_now()
+        if hold is not None:
+            return self._refuse(key_dict, "held", hold, HELD_DETAIL)
         busy = self._gate.acquire("terminal", self._activity)
         if busy is not None:
             return self._refuse(key_dict, "host_terminal_busy", _busy_reason(busy), BUSY_DETAIL)
@@ -1015,6 +1030,10 @@ class TerminalService:
             if self._paused_now():  # a pause between the first check and the hold: nothing typed
                 port.release_hold(HOLD_REASON)
                 return self._refuse(key_dict, "paused", "paused", PAUSED_DETAIL)
+            hold = self._held_now()
+            if hold is not None:
+                port.release_hold(HOLD_REASON)
+                return self._refuse(key_dict, "held", hold, HELD_DETAIL)
             command = self._new_command(text, key_dict, task, spill=spill)
             if isinstance(command, dict):
                 port.release_hold(HOLD_REASON)
@@ -1223,6 +1242,8 @@ class TerminalService:
             "approvalHash": approval, "phase": "accepted"}}
         if self._paused_now():
             raise RuntimeError("paused before the command was sent")
+        if self._held_now() is not None:
+            raise RuntimeError("held before the command was sent")
         if port.cwd() != command.cwd:  # input was held: only a moved or replaced shell gets here
             raise RuntimeError("host shell directory changed before the command was sent; no command sent")
         if self._abandoned_now(key):  # the last point before the command is typed

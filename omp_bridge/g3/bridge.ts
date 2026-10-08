@@ -301,7 +301,7 @@ const TO_MANAGER_PARAMETERS = {
 		},
 	},
 };
-type BridgeTool = "to_worker" | "to_manager" | "terminal" | "restart_worker" | "workbench_status";
+type BridgeTool = "to_worker" | "to_manager" | "terminal" | "restart_worker" | "workbench_status" | "stop_survivor";
 const HANDOFF_TOOLS: Record<Role, { name: "to_worker" | "to_manager"; label: string; description: string; parameters: Frame }> = {
 	manager: {
 		name: "to_worker", label: "To worker", parameters: TO_WORKER_PARAMETERS,
@@ -319,7 +319,8 @@ const HANDOFF_TOOLS: Record<Role, { name: "to_worker" | "to_manager"; label: str
 			+ "worker (status queued), run: true re-runs an experiment, cancel: true cancels the Task. Set every "
 			+ "field you do not use to null. The result returns at once; then end your turn: the worker's to_manager "
 			+ "report arrives as a new message (never wait or poll for it). A Workbench notice (worker_stalled, "
-			+ "worker_restarted, report_delivery_unknown, manager_recovery) means: follow the workbench-recovery skill "
+			+ "worker_restarted, report_delivery_unknown, manager_recovery, backend_restarted) means: follow the "
+			+ "workbench-recovery skill "
 			+ "(workbench_status, then a follow-up on the same task_id, cancel, or restart_worker).",
 	},
 	worker: {
@@ -346,7 +347,7 @@ const TERMINAL_ABANDON_TOOL = "terminal_wait_abandoned";
 const NOTICE_TYPES: Record<Role, Set<unknown>> = {
 	worker: new Set(["terminal_check", "terminal_done", "status_check"]),
 	manager: new Set(["worker_stalled", "report_delivery_unknown", "worker_restarted", "manager_recovery",
-		"worker_terminal_done"]),
+		"worker_terminal_done", "backend_restarted"]),
 };
 // p27-cd68-fix-01 P2-2, measured on OMP 18.6.1 (fake provider, /tmp/cd68fix-probe): each subagent session runs its
 // own instance of this extension (factory and session_start again, same process) and its ExtensionContext has
@@ -357,9 +358,21 @@ const NOTICE_TYPES: Record<Role, Set<unknown>> = {
 // subagent (pi, pi.runtime, pi.extension and the flags are the same as in the main session, pi has no agent), so
 // the tools are registered; at the subagent's session_start they are removed from that session's active tools
 // (pi.setActiveTools), which drops them from the subagent's provider request. The refusal stays as defence.
-const BRIDGE_TOOL_NAMES = new Set(["to_worker", "to_manager", "terminal", "restart_worker", "workbench_status"]);
+const BRIDGE_TOOL_NAMES = new Set(["to_worker", "to_manager", "terminal", "restart_worker", "workbench_status",
+	"stop_survivor"]);
 const SUBAGENT_DETAIL = "Bridge tools are for the worker itself, not its subagents: only the worker itself reports "
 	+ "to the manager and runs commands. Return your findings to the worker instead.";
+
+// CW-19 (C-D71 (4)): an assistant message's model outcome. error / an error message -> failed; aborted (a user or
+// pause abort) -> neither (no event); stop / length / toolUse without an error message -> ok.
+export function modelTurnOutcome(message: { stopReason?: unknown; errorMessage?: unknown }): { ok: boolean; stopReason: string } | undefined {
+	const reason = message?.stopReason;
+	const errorText = typeof message?.errorMessage === "string" && message.errorMessage.length > 0;
+	if (reason === "aborted") return undefined;
+	if (reason === "error" || errorText) return { ok: false, stopReason: reason === "error" ? "error" : "error_message" };
+	if (reason === "stop" || reason === "length" || reason === "toolUse") return { ok: true, stopReason: reason };
+	return undefined;
+}
 
 export function isSubagentContext(ctx: unknown): boolean {
 	try {
@@ -435,11 +448,32 @@ const WORKBENCH_STATUS_TOOL = {
 	},
 	description: "Read-only Workbench state for recovery: the open Task (message, analysis, commands, commands run so "
 		+ "far with exit code, duration and log path), the worker (idle/busy, session, restart history with reasons), "
-		+ "the host terminal (running command or idle) and worker reports to you that are pending, deferred or of "
-		+ "unknown delivery, with their text. Use it when a Workbench notice arrives (workbench-recovery skill). It "
-		+ "answers at once and changes nothing.",
+		+ "the host terminal (running command or idle), worker reports to you that are pending, deferred, of "
+		+ "unknown delivery or not_sent (queued but never sent; ask the worker again), with their text, and the backend (restart classification, holds, and survivors: "
+		+ "processes the previous backend left running, with survivor_id). Use it when a Workbench notice arrives "
+		+ "(workbench-recovery skill). It answers at once and changes nothing.",
 };
-const MANAGER_TOOLS = [RESTART_WORKER_TOOL, WORKBENCH_STATUS_TOOL];
+// C-D71 (1): a process the previous Workbench backend left running is never ended by Workbench itself; the manager
+// decides per survivor. Workbench proves its identity again (same boot, pid, start time, owner) before signalling.
+const STOP_SURVIVOR_TOOL = {
+	name: "stop_survivor" as const, label: "Stop survivor", parameters: {
+		type: "object",
+		additionalProperties: false,
+		required: ["survivor_id", "reason"],
+		properties: {
+			survivor_id: { type: "string", minLength: 1, maxLength: 16,
+				description: "The survivor_id from workbench_status (backend.survivors) or the backend_restarted notice." },
+			reason: { type: "string", minLength: 1, maxLength: RESTART_REASON_MAX,
+				description: "Why it is ended (required, recorded and shown to the user)." },
+		},
+	},
+	description: "End one process the previous Workbench backend left running (a survivor after a backend restart): "
+		+ "TERM, a short grace, then KILL of that exact process (and the members of its own session when it leads "
+		+ "one). Only a survivor whose identity is verified can be ended; Workbench checks it again first and refuses "
+		+ "an unknown or changed one. Leaving a survivor running is fine when it still does useful work. Recorded "
+		+ "and shown to the user.",
+};
+const MANAGER_TOOLS = [RESTART_WORKER_TOOL, WORKBENCH_STATUS_TOOL, STOP_SURVIVOR_TOOL];
 
 // How long this bridge waits for the backend's terminal result (C-D68 (9): fixed; the call's arguments do not
 // change it).
@@ -1305,6 +1339,12 @@ export default function workbenchG3Extension(pi: any): void {
 			&& (event.message.stopReason === "error" || event.message.stopReason === "aborted"
 				|| (typeof event.message.errorMessage === "string" && event.message.errorMessage.length > 0))) {
 			markDeliveryUnknown("assistant_message_ended_with_error_or_abort");
+		}
+		if (event?.message?.role === "assistant") {
+			// CW-19 (C-D71 (4)): the backend holds this role's automatic work after a model error and lifts the hold
+			// when a later assistant message ends without one. Only the outcome class is sent, never any text.
+			const outcome = modelTurnOutcome(event.message);
+			if (outcome !== undefined) sendEvent("model_turn_result", outcome);
 		}
 		if (!expectedResponseMarker || event?.message?.role !== "assistant") return;
 		const content = event.message.content;

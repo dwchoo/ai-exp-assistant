@@ -336,8 +336,8 @@ class WorkbenchStatusTests(RestartWorkerFixture):
         result, seconds = self.call(ActorRole.MANAGER, "workbench_status", {"task_id": None})
         self.assertLess(seconds, 3.0)
         self.assertEqual(result["status"], "ok")
-        self.assertEqual(set(result), {"status", "task", "worker", "terminal", "reports", "reports_omitted",
-                                       "watchdog"})
+        self.assertEqual(set(result), {"status", "backend", "task", "worker", "terminal", "reports",
+                                       "reports_omitted", "watchdog"})  # CW-19: backend (restart, survivors)
         view = result["task"]
         self.assertEqual((view["task_id"], view["status"], view["message"], view["commands"], view["analysis"]),
                          (task.task_id, "running", "collect facts", ["lscpu"], "summary"))

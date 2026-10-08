@@ -105,6 +105,33 @@ removed before any release; a client sending ``approval_decide`` gets
 - ``worker``: ``{state, task_id}``; ``state`` is one of :data:`WORKER_STATES`
   (``busy`` while a Task is active, then ``task_id`` names it).
 
+Backend restart and reboot (CW-19, C-D71; additive)
+--------------------------------------------------
+- ``boot``: ``{boot_id, recorded_boot_id, confirmed_boot_id,
+  confirmation_required, confirmed, reason, persisted}``. While
+  ``confirmation_required`` is true (``reason`` ``reboot``,
+  ``boot_marker_unknown``, ``boot_record_unreadable`` or ``reconcile_failed``)
+  Workbench starts no automatic work; ``confirm_boot`` (the CLI
+  ``confirm-boot``) needs the current ``boot_id`` and answers
+  ``boot_confirmation_not_saved`` when the confirmation could not be stored
+  (the hold stays). The product UI only shows the wait (C-D58).
+- ``startup``: null or ``{classification, at, previous, run, probed,
+  processes, outbox_lost, outbox_lost_count, survivors, survivor_stops, notice,
+  notes}``. ``classification`` is ``fresh``, ``same_boot_clean_stop``,
+  ``same_boot_unverified_stop``, ``same_boot_crash``, ``reboot`` or
+  ``boot_unknown``. ``survivors`` are processes the previous backend left
+  running: ``{survivor_id, name, pid, start_ticks, comm, stoppable, identity
+  (verified|unverified), why_not, state (alive|ended|stopped|stop_unconfirmed),
+  stop}``; Workbench never ends them by itself.
+- ``holds``: ``[{reason, since, detail}]`` with reasons
+  ``boot_confirmation_required``, ``metadata_unavailable``,
+  ``model_hold:<role>``, ``shutdown_closing``.
+- ``faults``: ``{metadata, record_error, model, raw_log}``: a metadata write
+  failure (``{state, sources, since}``), the model state per role
+  (``{state: error|ok, since, ...}``) and an experiment raw log that was not
+  fully stored (``{run_id, stored_bytes, missing_bytes, cap_source,
+  storage_error, text}``). Execution and observation continue in each case.
+
 Recovery (C-D70; additive)
 --------------------------
 - ``recovery``: null (no watchdog) or ``{report_wait, watch}``. ``report_wait``
@@ -249,6 +276,7 @@ class Reason(StrEnum):
     SHUTDOWN_TOKEN_MISMATCH = "shutdown_token_mismatch"
     BOOT_CONFIRMATION_NOT_REQUIRED = "boot_confirmation_not_required"
     BOOT_ID_MISMATCH = "boot_id_mismatch"
+    BOOT_CONFIRMATION_NOT_SAVED = "boot_confirmation_not_saved"  # CW-19: the hold stays until it is durable
     BACKEND_NOT_READY = "backend_not_ready"
     SLOW_CLIENT = "slow_client"
     BACKEND_SHUTDOWN = "backend_shutdown"

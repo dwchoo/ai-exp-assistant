@@ -1,6 +1,6 @@
 ---
 name: workbench-recovery
-description: Recover a Workbench Task after a Workbench notice (worker_stalled, worker_restarted, report_delivery_unknown, manager_recovery) - read workbench_status, then follow up, cancel or restart_worker. Agent-only; not for the user.
+description: Recover a Workbench Task after a Workbench notice (worker_stalled, worker_restarted, report_delivery_unknown, manager_recovery, backend_restarted) - read workbench_status, then follow up, cancel, restart_worker or stop_survivor. Agent-only; not for the user.
 ---
 
 # workbench-recovery (manager)
@@ -12,10 +12,11 @@ Workbench watches the worker for you; never poll it yourself. It tells you with 
 - `worker_restarted`: the worker OMP is a new session (user restart, your `restart_worker`, or a crash). It has no memory of the Task; the Task is still open. This notice is the one cue to continue: one follow-up on the same `task_id` (Workbench re-sends the full Task), or cancel.
 - `report_delivery_unknown`: a worker report may not have reached you; it is not re-sent. Its text is in `workbench_status`.
 - `worker_terminal_done` (information): a terminal command the previous worker session started has ended (`command_id`, exit, `log_path`); the new worker has not got the Task yet. It is in `commands_run` and in the Task re-sent with your follow-up; never run it again yourself.
+- `backend_restarted`: the Workbench backend restarted; you are a new session, the Task is held, nothing was re-sent or re-run. `survivors` are processes the old backend left running; decide per survivor: `stop_survivor` (`survivor_id`, `reason`) or leave it. Only verified ones can be stopped.
 - `manager_recovery`: your own OMP session is new. Reports that never reached your old session, or that the worker sent while your OMP was down, arrive as messages (`reports_resent` counts them; wait for them before you cancel the Task); reports with an unknown delivery are only listed.
 
 ## Procedure
-1. Call `workbench_status` (no arguments, or the notice's `task_id`). It is read-only and answers at once: the Task (message, `commands`, `commands_run` with exit code, duration and `log_path`), the worker (idle/busy, session, restarts with reasons), the host terminal (running command or idle) and reports to you that are pending, deferred or of unknown delivery, with their text.
+1. Call `workbench_status` (no arguments, or the notice's `task_id`). It is read-only and answers at once: the Task (message, `commands`, `commands_run` with exit code, duration and `log_path`), the worker (idle/busy, session, restarts with reasons), the host terminal (running command or idle) and reports to you that are pending, deferred, of unknown delivery or `not_sent` (queued but never sent: ask the worker again if it matters), with their text.
 2. Decide, once:
    - The work is done or the facts are enough (for example `commands_run` shows every command finished): read the report text there and answer the user. If the Task is still open, cancel it (`to_worker` with `task_id`, `cancel: true`).
    - The worker is idle but has not finished, or it is a new session: send a follow-up `to_worker` on the same `task_id` that says what to do next (continue with the remaining commands, or clarify). A new worker session gets the full Task and the commands already run from Workbench.

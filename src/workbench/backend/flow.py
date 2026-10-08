@@ -25,7 +25,9 @@ through ``record``. Its contract:
   that reaches the lane while paused is dropped (``held_paused``), except one
   queued with ``keep_across_pause`` (a free-work TASK, a worker's done/blocked
   report): it was never submitted, so it stays pending and is delivered after
-  the resume (not a replay; CW-18 R3).
+  the resume (not a replay; CW-18 R3). A CW-19 admission hold of the target
+  keeps these and also any worker ``to_manager`` call (p27-cw19-fix-01); a
+  worker message that still ends unsent is listed in ``workbench_status``.
 - Outbox: ``handle`` only records a queued handoff (bound to the target
   peer's current session); the target's outbox lane thread creates it through
   ``TaskMailbox.create_message`` and delivers it through ``TaskMailbox.deliver``
@@ -82,6 +84,7 @@ import json
 import os
 from pathlib import Path
 import re
+import sqlite3
 import stat
 import threading
 import time
@@ -98,8 +101,15 @@ REQUEUE_LIMIT = 5  # C-D70 (5): new manager sessions a never-submitted worker re
 # window (``deliver_timeout``): delivered, the turn's outcome pending (not ``unknown``; never resent either way)
 RECEIPT_WINDOW_ENDED = "receipt_window_ended"
 # p27-cd68-fix-03 (smoke-01 M2): "not yet processed" was read as "send it again".
-QUEUED_DETAIL = ("Accepted by Workbench; it is delivered to the other OMP once, in order. Do not send it again; "
+# p27-cw19-fix-02 (review-02 P2-1): never promise delivery; a pause (C-D65) or a rejection drops it unsent.
+QUEUED_DETAIL = ("Accepted by Workbench; it is sent to the other OMP at most once, in order, never re-sent. If the "
+                 "user pauses automation before it is delivered, or it is rejected, it is not sent "
+                 "(workbench_status shows not_sent); decide again after the resume. Do not send it again otherwise; "
                  "a reply, if any, arrives as a new message.")
+QUEUED_WORKER_DETAIL = ("Accepted by Workbench; it is sent to the manager OMP at most once, in order, never re-sent. "
+                        "If the user pauses automation before it is delivered, or it is rejected, it is not sent and "
+                        "the manager decides again after the resume. Do not send it again unless asked; a reply, if "
+                        "any, arrives as a new message.")
 # p27-cd70-fix-03 (smoke-02 D1): a worker report queued while no manager OMP is connected.
 WAITING_FOR_MANAGER = "manager_session"
 QUEUED_WAITING_DETAIL = (
@@ -759,8 +769,14 @@ class HandoffService:
                  paused: Callable[[], bool] | None = None,
                  sensitive_values: Callable[[], Iterable[str]] | None = None,
                  peer_lookup: Callable[[ActorRole], BridgePeer | None] | None = None,
+                 hold: Callable[[ActorRole], str | None] | None = None,
+                 metadata: Callable[[str, BaseException | None], None] | None = None,
                  deliver_timeout: float = 20.0, retry_interval: float = 0.5):
         self._mailbox = mailbox
+        # CW-19 (C-D71 (3)/(4), C-AC-28): why automatic work for a target role must not start now (or None),
+        # and where a metadata write outcome is reported.
+        self._hold = hold or (lambda _role: None)
+        self._metadata = metadata or (lambda _source, _error: None)
         self._mailbox_factory = mailbox_factory
         self._peer_lookup = peer_lookup
         self._policy: HandoffPolicy = policy or PlaceholderPolicy()
@@ -995,6 +1011,20 @@ class HandoffService:
         except Exception:
             return True  # an unknown pause state holds
 
+    def _hold_reason(self, role: ActorRole) -> str | None:
+        """CW-19: the admission hold for automatic work into ``role`` (an unknown state holds)."""
+        try:
+            reason = self._hold(role)
+        except Exception:
+            return "hold_unknown"
+        return reason if isinstance(reason, str) and reason else None
+
+    def _report_metadata(self, source: str, error: BaseException | None) -> None:
+        try:
+            self._metadata(source, error)
+        except Exception:
+            pass
+
     # -- requests ---------------------------------------------------------------
     def handle(self, role: ActorRole | str, request: Mapping[str, Any]) -> dict[str, Any]:
         """Decide one tool call from the authenticated ``role``; never raises for bad input."""
@@ -1014,7 +1044,10 @@ class HandoffService:
             try:
                 self._journal.append({"type": "request", "key": parsed.key_dict(), "request_id": parsed.request_id,
                                       "tool": parsed.tool, "args": journal_args})
-            except (OSError, TypeError, ValueError):
+            except OSError as exc:
+                self._report_metadata("handoff_journal", exc)  # C-AC-28: new automatic work is held from here
+                return rejected("journal_unavailable")  # nothing was decided or sent
+            except (TypeError, ValueError):
                 return rejected("journal_unavailable")  # nothing was decided or sent
             if result is None:
                 result = self._decide(parsed)
@@ -1061,12 +1094,23 @@ class HandoffService:
                     {"redacted": "environment_value", "fields": findings})
         if self._is_paused():
             return held("paused"), request.args
+        if request.tool == "to_worker" and not (isinstance(request.args, Mapping) and request.args.get("cancel") is True):
+            # CW-19 (C-D71 (3)/(4)): no instruction reaches the worker before confirm-boot, during a metadata
+            # fault or while the worker's model is held; a cancel is the user's/manager's decision and still goes.
+            # Reasons (to-worker skill): boot_confirmation_required, metadata_unavailable, model_hold:worker,
+            # shutdown_closing, hold_unknown.
+            reason = self._hold_reason(ActorRole.WORKER)
+            if reason is not None:
+                return held(reason), request.args
         return None, request.args
 
     def _decide(self, request: HandoffRequest) -> dict[str, Any]:
         try:
             active = self._active_task()
             decision = self._policy.decide(request, active)
+        except (sqlite3.Error, OSError) as exc:  # C-AC-28: a metadata store fault holds, it never half-dispatches
+            self._report_metadata("task_metadata", exc)
+            return held("metadata_unavailable")
         except Exception as exc:
             return held(f"policy_error:{type(exc).__name__}")
         result = dict(decision.result)
@@ -1125,7 +1169,9 @@ class HandoffService:
         if unbound:
             return {"status": "queued", "handoff_id": entry.handoff_id, "waiting_for": WAITING_FOR_MANAGER,
                     "detail": QUEUED_WAITING_DETAIL}
-        return {"status": "queued", "handoff_id": entry.handoff_id, "detail": QUEUED_DETAIL}
+        worker = outbound.sender_role is ActorRole.WORKER and outbound.target_role is ActorRole.MANAGER
+        return {"status": "queued", "handoff_id": entry.handoff_id,
+                "detail": QUEUED_WORKER_DETAIL if worker else QUEUED_DETAIL}
 
     # -- outbox thread ------------------------------------------------------------
     def _next_due(self, role: ActorRole) -> tuple[_OutboxEntry | None, float | None]:
@@ -1212,6 +1258,11 @@ class HandoffService:
         self._notify(entry, "created")
         return None
 
+    @staticmethod
+    def _worker_call_to_manager(entry: _OutboxEntry) -> bool:
+        return (entry.key[0] == ActorRole.WORKER.value and entry.outbound.sender_role is ActorRole.WORKER
+                and entry.outbound.target_role is ActorRole.MANAGER)
+
     def _withdrawn(self, entry: _OutboxEntry) -> bool:
         with self._outbox_cv:
             return entry.withdrawn
@@ -1226,6 +1277,16 @@ class HandoffService:
                 return
             # Held, not resent after resume: the sender decides again (C-D65 pause).
             self._finish(entry, "held_paused", None, "paused")
+            return
+        hold = self._hold_reason(entry.outbound.target_role)
+        if hold is not None:  # CW-19: as a pause; a kept message waits (never submitted, so no replay)
+            # p27-cw19-fix-01 (P2-1, accepted decision 2): a worker's own to_manager call was answered ``queued``
+            # without a hold check, so it waits out a CW-19 hold of the manager (boot_confirmation_required,
+            # metadata_unavailable, model_hold:manager, shutdown_closing) and is delivered once it lifts.
+            if entry.keep_across_pause or self._worker_call_to_manager(entry):
+                self._hold_paused(entry)
+                return
+            self._finish(entry, "held_paused", None, hold)
             return
         created = self._create(mailbox, entry)
         if created == "deferred":

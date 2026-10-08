@@ -20,6 +20,7 @@ Real ShellPane + HostShellPort (bash), a recording notice port, a fake clock whe
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 import shlex
 import sys
@@ -162,6 +163,16 @@ class RealShellFixture(unittest.TestCase):
         with self.ui_lock:
             return bytes(self.ui)
 
+    def foreground_program(self) -> str | None:
+        """The command name owning the host terminal's foreground group (None while the shell itself does)."""
+        try:
+            group = os.tcgetpgrp(self.pane.shell._transport.master_fd)
+            if group == self.pane.pid:
+                return None
+            return Path(f"/proc/{group}/comm").read_text().strip()
+        except OSError:
+            return None
+
     def idle(self) -> bool:
         port = HostShellPort(self.pane, lambda: self.pane)
         try:
@@ -231,7 +242,8 @@ class IdleOnlyRefusalMatrix(RealShellFixture):
     def test_a_stopped_job_refuses_without_typing(self):
         self.user_types(b"sleep 30\r")
         self.assertTrue(wait_until(lambda: not self.idle(), 8))
-        time.sleep(0.5)  # let sleep own the terminal's foreground group first
+        # ^Z only stops sleep once sleep owns the terminal's foreground group (before that bash takes it)
+        self.assertTrue(wait_until(lambda: self.foreground_program() == "sleep", 8), self.screen()[-300:])
         self.user_types(b"\x1a")  # ^Z: a stopped job at the prompt
         self.assertTrue(wait_until(lambda: b"Stopped" in self.screen(), 8), self.screen()[-300:])
         self.assertTrue(wait_until(lambda: self.pane.state["parent_mode"] == "manual_prompt", 8))
@@ -249,6 +261,10 @@ class IdleOnlyRefusalMatrix(RealShellFixture):
     def test_a_foreground_program_refuses(self):
         self.user_types(b"sleep 30\r")
         self.assertTrue(wait_until(lambda: not self.idle(), 8))
+        # "not idle" holds at once from the typed line. Wait until sleep owns the foreground group: then the
+        # refusal is for the running program, and the ^C below reaches sleep (a ^C that comes before bash hands
+        # the terminal to sleep goes to bash, and sleep runs on for 30 s: p27-flaky-01 (a)).
+        self.assertTrue(wait_until(lambda: self.foreground_program() == "sleep", 8), self.screen()[-300:])
         before = len(self.screen())
         result = self.tool({"command": "echo FG-NEVER", "wait": 5})
         self.assertEqual(result["status"], "host_terminal_busy", result)

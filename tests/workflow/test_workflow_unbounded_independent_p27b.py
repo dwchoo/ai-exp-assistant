@@ -166,29 +166,39 @@ class WorkflowUnboundedTests(unittest.TestCase):
         return found
 
     def test_default_start_runs_past_90s_and_confirms_real_exit_across_idle_collect_gap(self):
-        runs = []
+        # p27-flaky-01 (d): ages are per run, from just before its start (its experiment begins later, so it
+        # cannot end before started + 95 s). The former single clock began after all four starts and checked
+        # "running" until ~92 s, so the first run's `sleep 92` could already have ended (exited / stat None).
+        runs, started = [], {}
         for shell in ("bash", "sh"):
             for label, command, status in (
-                    ("ok", "sleep 92; printf 'PASS\\n'; printf PASS > result.txt; exit 0", 0),
-                    ("fail", "sleep 92; exit 5", 5)):
+                    ("ok", "sleep 95; printf 'PASS\\n'; printf PASS > result.txt; exit 0", 0),
+                    ("fail", "sleep 95; exit 5", 5)):
+                started[f"{shell}-{label}"] = time.monotonic()
                 runs.append((f"{shell}-{label}", self.start(command, shell, f"{shell}-{label}"), status))
-        began = time.monotonic()
-        mains = {}
-        while time.monotonic() - began < 90:
+        mains, last_running_age = {}, {}
+        while any(last_running_age.get(name, 0) < 90 for name, *_ in runs):
             for name, run, _ in runs:
+                if last_running_age.get(name, 0) >= 90:
+                    continue  # past 90 s: no further collect cycle for this run until it has ended
                 record = run.collect(timeout=0.5)  # short production collect cycles
-                elapsed = time.monotonic() - began
+                age = time.monotonic() - started[name]
+                self.assertLess(age, 94, f"{name}: no collect cycle between 90 s and its end (test too slow)")
                 self.assertEqual((record["shell_state"], record["exit_confirmed"]), ("running", False),
-                                 f"{name} after {elapsed:.0f}s: {record}")
+                                 f"{name} after {age:.0f}s: {record}")
                 life = run.shell.snapshot()["lifecycle"]
-                self.assertEqual(life["unknown"], [], f"{name} after {elapsed:.0f}s")
+                self.assertEqual(life["unknown"], [], f"{name} after {age:.0f}s")
                 if life["experiment_started"]:
-                    mains.setdefault(name, (life["child_pid"], stat(life["child_pid"])[19]))
-                    self.assertTrue(alive(*mains[name]), f"{name} experiment killed after {elapsed:.0f}s")
+                    if name not in mains:
+                        fields = stat(life["child_pid"])
+                        self.assertIsNotNone(fields, f"{name} experiment gone after {age:.0f}s")
+                        mains[name] = (life["child_pid"], fields[19])
+                    self.assertTrue(alive(*mains[name]), f"{name} experiment killed after {age:.0f}s")
                     self.track(run)
+                    last_running_age[name] = age
         self.assertEqual(set(mains), {name for name, *_ in runs})
-        # No collect cycle while the runs end (~92 s) and sit at the input barrier.
-        while time.monotonic() - began < 104:
+        # No collect cycle while the runs end (~95 s) and sit at the input barrier.
+        while time.monotonic() - max(started.values()) < 107:
             time.sleep(0.5)
         for name, run, status in runs:
             with self.subTest(run=name):

@@ -94,9 +94,10 @@ test("manager registers only to_worker and worker only to_manager, both essentia
 		const bridge = await startBridge(role);
 		try {
 			// C-D68: the worker also has `terminal`, its only command execution path.
-			// C-D70: the manager also has its recovery tools restart_worker and workbench_status.
+			// C-D70: the manager also has its recovery tools restart_worker and workbench_status;
+			// C-D71 (1): and stop_survivor for processes a previous backend left running.
 			assert.deepEqual([...bridge.tools.keys()], role === "worker" ? [own, "terminal"]
-				: [own, "restart_worker", "workbench_status"], `${role} tools`);
+				: [own, "restart_worker", "workbench_status", "stop_survivor"], `${role} tools`);
 			assert.equal(bridge.tools.has(other), false);
 			const tool = bridge.tools.get(own)!;
 			assert.equal(tool.loadMode, "essential", "schema must reach the provider without xd:// discovery");

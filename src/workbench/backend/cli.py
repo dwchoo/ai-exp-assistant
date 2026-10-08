@@ -1,10 +1,13 @@
-"""Product entrypoint: ``start``, ``attach``, ``status`` and ``shutdown``.
+"""Product entrypoint: ``start``, ``attach``, ``status``, ``confirm-boot`` and ``shutdown``.
 
 ``start`` attaches to a backend already serving the data dir; otherwise it
 checks start requirements (Bash, then sh; OMP; bridge extension; the user's
 OMP auth store and a usable Workbench OMP home, C-D64), launches a detached
-backend in its own session and attaches. Exit codes: 0 success,
-1 failure, 2 start requirement missing (no backend started), 3 not running.
+backend in its own session and attaches. ``confirm-boot`` (CW-19, C-D58)
+shows the environment and execution conditions after a changed boot and
+confirms it; until then Workbench starts no automatic work. Exit codes:
+0 success, 1 failure, 2 start requirement missing (no backend started),
+3 not running.
 """
 
 from __future__ import annotations
@@ -161,6 +164,49 @@ def _print_summary(snapshot: dict, stream=sys.stdout) -> None:
             print(f"  note: {note}", file=stream)
 
 
+def _print_recovery(snapshot: dict, stream=None) -> None:
+    """CW-19: boot confirmation, start-up reconcile, survivors, holds and faults (user-facing, Korean)."""
+    stream = stream or sys.stdout
+    boot = snapshot.get("boot") or {}
+    if boot.get("confirmation_required") and boot.get("reason") == "reconcile_failed":
+        print("재시작 대조 실패: 이전 backend의 process·Task·메시지 상태를 확인하지 못했습니다. "
+              "'python -m workbench confirm-boot' 로 환경을 확인하기 전까지 Workbench 자동 동작은 보류됩니다",
+              file=stream)
+    elif boot.get("confirmation_required"):
+        print(f"부팅 확인 대기 ({boot.get('reason') or 'reboot'}): 'python -m workbench confirm-boot' 로 환경을 확인하기 "
+              "전까지 Workbench 자동 동작은 보류됩니다", file=stream)
+    startup = snapshot.get("startup") or {}
+    classification = startup.get("classification")
+    if classification and classification != "fresh":
+        run = startup.get("run") or {}
+        line = f"backend 재시작 대조: {classification}"
+        if run.get("run_id"):
+            line += f" | 이전 run {run.get('run_id')} 상태 {run.get('state')} (재실행·재전송 없음)"
+        if startup.get("outbox_lost_count"):
+            line += f" | 보내지 못한 메시지 {startup['outbox_lost_count']}건 (재전송 없음)"
+        print(line, file=stream)
+    for item in startup.get("survivors") or ():
+        if item.get("state") not in ("alive", "stop_unconfirmed"):
+            continue
+        how = "manager가 stop_survivor로 종료 가능" if item.get("stoppable") else f"표시만 ({item.get('why_not')})"
+        print(f"  이전 backend가 남긴 process {item.get('survivor_id')}: {item.get('name')} pid {item.get('pid')} "
+              f"{item.get('comm') or ''} — {how}", file=stream)
+    holds = [item.get("reason") for item in snapshot.get("holds") or ()]
+    if holds:
+        print(f"자동 동작 보류: {', '.join(str(reason) for reason in holds)}", file=stream)
+    faults = snapshot.get("faults") or {}
+    metadata = faults.get("metadata")
+    if metadata:
+        print(f"metadata 저장 장애: {', '.join(metadata.get('sources', {}).values())} — 실행·관측은 계속, 새 자동 작업 보류",
+              file=stream)
+    for role, model in sorted((faults.get("model") or {}).items()):
+        if isinstance(model, dict) and model.get("state") == "error":
+            print(f"모델 오류({role}): 자동 작업 보류, 실험·관측 계속 (다음 정상 응답에서 해제)", file=stream)
+    raw = faults.get("raw_log")
+    if isinstance(raw, dict) and raw.get("text"):
+        print(f"raw log: {raw['text']}", file=stream)
+
+
 def _attach(layout: DataLayout, args: argparse.Namespace) -> int:
     if getattr(args, "plain", False):
         return run_attach(layout.ui_socket)
@@ -249,6 +295,81 @@ def cmd_status(args: argparse.Namespace) -> int:
         print(json.dumps({"running": True, "snapshot": snapshot}, sort_keys=True))
     else:
         _print_summary(snapshot)
+        _print_recovery(snapshot)
+    return 0
+
+
+def _worktrees(layout: DataLayout) -> list[str]:
+    try:
+        return sorted(entry.name for entry in os.scandir(layout.workflow / "worktrees"))[:20]
+    except OSError:
+        return []
+
+
+def _print_boot_conditions(layout: DataLayout, snapshot: dict, stream=None) -> None:
+    """C-AC-23: the environment and execution conditions shown before the user confirms the boot."""
+    stream = stream or sys.stdout
+    boot, backend = snapshot.get("boot") or {}, snapshot.get("backend") or {}
+    shell = ((snapshot.get("panes") or {}).get("host_shell") or {}).get("shell") or {}
+    isolation = snapshot.get("omp_isolation") or {}
+    automation = snapshot.get("automation") or {}
+    task = snapshot.get("task") or {}
+    print("== 부팅 확인: 환경·실행 조건 ==", file=stream)
+    print(f"boot marker: 기록 {boot.get('recorded_boot_id')} -> 현재 {boot.get('boot_id')} "
+          f"(사유 {boot.get('reason')})", file=stream)
+    print(f"data dir: {backend.get('data_dir')}", file=stream)
+    print(f"project dir: {backend.get('project_dir')}", file=stream)
+    print(f"host shell: {shell.get('kind')} {shell.get('executable')} (mode {shell.get('parent_mode')})", file=stream)
+    print(f"OMP: {backend.get('omp_version')} | 격리 확인: {isolation.get('state')}"
+          + (f" ({isolation.get('warning')})" if isolation.get("warning") else ""), file=stream)
+    print(f"자동화: {automation.get('state')}" + (" (일시정지 유지)" if automation.get("paused") else ""), file=stream)
+    if task:
+        print(f"Task: {task.get('kind')} {task.get('task_id')} 상태 {task.get('status')}"
+              + (f" (보류 사유 {task.get('held_reason')})" if task.get("held_reason") else "")
+              + (f' "{task.get("summary")}"' if task.get("summary") else ""), file=stream)
+    worktrees = _worktrees(layout)
+    if worktrees:
+        print(f"worktree: {', '.join(worktrees)}", file=stream)
+    _print_recovery({**snapshot, "boot": {}}, stream)
+    print("확인하면 Workbench 자동 동작(worker 지시 전달, worker terminal, 감시·복구 알림, 60초 점검, 새 실험)이 다시 "
+          "허용됩니다. 재부팅 전 실험은 다시 실행되지 않습니다.", file=stream)
+
+
+def cmd_confirm_boot(args: argparse.Namespace) -> int:
+    layout = _layout(args, create=False)
+    snapshot = _running_snapshot(layout) if os.path.lexists(layout.root) else None
+    if snapshot is None:
+        print(f"no backend is running for {layout.root}; use 'start'", file=sys.stderr)
+        return EXIT_NOT_RUNNING
+    boot = snapshot.get("boot") or {}
+    if not boot.get("confirmation_required"):
+        print("부팅 확인이 필요하지 않습니다 (대기 중인 확인 없음)", file=sys.stderr)
+        return EXIT_FAILURE
+    _print_boot_conditions(layout, snapshot)
+    boot_id = boot.get("boot_id")
+    if not isinstance(boot_id, str) or not boot_id:
+        print("현재 boot marker를 읽을 수 없어 확인할 수 없습니다; 자동 동작은 계속 보류됩니다", file=sys.stderr)
+        return EXIT_FAILURE
+    if not args.yes:
+        if not sys.stdin.isatty():
+            print("refusing to confirm the boot without confirmation (use --yes)", file=sys.stderr)
+            return EXIT_FAILURE
+        if input("이 환경으로 계속할까요? [y/N] ").strip().lower() != "y":
+            print("cancelled")
+            return EXIT_FAILURE
+    try:
+        with UiClient(layout.ui_socket, name="workbench-cli", timeout=10) as client:
+            answer = client.request(ClientType.CONFIRM_BOOT, boot_id=boot_id)
+    except (NotRunning, ClientError, OSError) as exc:
+        print(f"confirm-boot failed: {exc}", file=sys.stderr)
+        return EXIT_FAILURE
+    if not answer.get("ok"):
+        print(f"confirm-boot refused: {answer.get('reason')}: {answer.get('detail')}", file=sys.stderr)
+        return EXIT_FAILURE
+    if args.json:
+        print(json.dumps({"confirmed": True, "boot": answer.get("boot")}, sort_keys=True))
+    else:
+        print(f"부팅 확인됨 ({boot_id}): Workbench 자동 동작이 다시 허용됩니다")
     return 0
 
 
@@ -285,6 +406,9 @@ def cmd_shutdown(args: argparse.Namespace) -> int:
         print(json.dumps({"shutdown": result}, sort_keys=True))
     else:
         print(f"shutdown result: {json.dumps(result, sort_keys=True)}")
+        if not (result and result.get("verified")):  # C-AC-22: never shown as success
+            print("종료 확인 실패: 일부 process의 종료를 확인하지 못했습니다 "
+                  f"({', '.join((result or {}).get('problems') or ['result unknown'])})", file=sys.stderr)
     return 0 if result and result.get("verified") else EXIT_FAILURE
 
 
@@ -315,6 +439,10 @@ def parser() -> argparse.ArgumentParser:
     status = common(sub.add_parser("status", help="show backend status"))
     status.add_argument("--json", action="store_true")
     status.set_defaults(handler=cmd_status)
+    confirm = common(sub.add_parser("confirm-boot", help="show the conditions after a reboot and confirm the boot"))
+    confirm.add_argument("--yes", action="store_true", help="confirm without prompting")
+    confirm.add_argument("--json", action="store_true")
+    confirm.set_defaults(handler=cmd_confirm_boot)
     shutdown = common(sub.add_parser("shutdown", help="request and confirm a full backend shutdown"))
     shutdown.add_argument("--yes", action="store_true", help="confirm without prompting")
     shutdown.add_argument("--json", action="store_true")

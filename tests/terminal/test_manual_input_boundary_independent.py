@@ -28,9 +28,11 @@ from pathlib import Path
 import shlex
 import shutil
 import signal
+import struct
 import subprocess
 import sys
 import tempfile
+import termios
 import textwrap
 import time
 import unittest
@@ -85,6 +87,62 @@ def signal_exact(pid: int, start: str, signum: int) -> bool:
         return False
     finally:
         os.close(descriptor)
+
+
+# x86_64 syscall numbers of a reader blocked on terminal input: read, poll, select, pselect6, ppoll.
+TTY_READ_WAITS = {0, 7, 23, 270, 271}
+TIOCGPTPEER = 0x5441
+
+
+def reader_waiting(master_fd: int) -> bool:
+    """The terminal's foreground reader is blocked waiting for input and no typed byte is unread.
+
+    Keys whose meaning depends on the reader's tty mode or signal handlers (editing
+    keys, Ctrl-C, Ctrl-D) are only deterministic then (p27-flaky-01 (b)/(e)): a READY
+    comes from PROMPT_COMMAND/PS1 before bash's readline reads again, so DEL or ^D
+    sent at once is taken by the still canonical tty (^D arrives as a NUL), and a ^C
+    while readline is not blocked in its read can be left unhandled until the next
+    key. A REPL between two lines is the same. A user sees the prompt only after
+    readline prepared the terminal, so this is the user's view of "at the prompt".
+    """
+    try:
+        group = os.tcgetpgrp(master_fd)
+        fields = Path(f"/proc/{group}/syscall").read_text().split()
+        peer = fcntl.ioctl(master_fd, TIOCGPTPEER, os.O_RDWR | os.O_NOCTTY | os.O_CLOEXEC)
+    except OSError:
+        return False
+    try:
+        unread = struct.unpack("i", fcntl.ioctl(peer, termios.FIONREAD, b"\0\0\0\0"))[0]
+    except OSError:
+        return False
+    finally:
+        os.close(peer)
+    if len(fields) < 2 or not fields[0].isdecimal():
+        return False  # "running"
+    number = int(fields[0])
+    if number == 0 and int(fields[1], 16) != 0:
+        return False  # read(2) from some other file
+    return number in TTY_READ_WAITS and unread == 0
+
+
+def reader_settled(master_fd: int, samples: int = 3, gap: float = 0.01) -> bool:
+    """``reader_waiting`` on consecutive samples (bytes just written may still be on their way to the tty)."""
+    for index in range(samples):
+        if index:
+            time.sleep(gap)
+        if not reader_waiting(master_fd):
+            return False
+    return True
+
+
+def sigint_default(pid: int) -> bool:
+    """SIGINT is neither caught nor ignored by ``pid`` (its default action, termination, applies)."""
+    try:
+        lines = Path(f"/proc/{pid}/status").read_text().splitlines()
+    except OSError:
+        return False
+    masks = {line.split(":")[0]: int(line.split()[1], 16) for line in lines if line.startswith(("SigCgt:", "SigIgn:"))}
+    return len(masks) == 2 and not (masks["SigCgt"] | masks["SigIgn"]) & (1 << (signal.SIGINT - 1))
 
 
 def members_named(session: int, name: str) -> dict[int, str]:
@@ -145,6 +203,7 @@ class ShellCase(unittest.TestCase):
                                                   "HOME": str(directory), "LANG": "C.UTF-8"}, choice=choice)
         init_dir = Path(shell._transport._init_dir.name)
         self.addCleanup(self.close_verified, shell, shell.parent_pid, init_dir)
+        self.reader(shell)
         return shell, directory
 
     def close_verified(self, shell: PersistentShell, parent: int, init_dir: Path) -> None:
@@ -181,12 +240,17 @@ class ShellCase(unittest.TestCase):
         self.until(shell, lambda _: path.exists() and path.read_text() == expected, seconds,
                    f"{path.name}={expected!r} (now {path.read_text() if path.exists() else None!r})")
 
+    def reader(self, shell, seconds: float = 8.0) -> dict:
+        """Until the foreground reader (readline, dash, a REPL) waits for the next key (see reader_waiting)."""
+        return self.until(shell, lambda _: reader_settled(shell._transport.master_fd), seconds, "reader waiting")
+
     def prompt(self, shell, seconds: float = 8.0) -> dict:
-        return self.until(shell, lambda s: s["parent_mode"] == "manual_prompt", seconds, "manual_prompt")
+        return self.until(shell, lambda s: s["parent_mode"] == "manual_prompt"
+                          and reader_settled(shell._transport.master_fd), seconds, "manual_prompt")
 
     def clean_prompt(self, shell, seconds: float = 8.0) -> dict:
-        return self.until(shell, lambda s: s["parent_mode"] == "manual_prompt" and s["phase"] != "unknown",
-                          seconds, "clean manual_prompt")
+        return self.until(shell, lambda s: s["parent_mode"] == "manual_prompt" and s["phase"] != "unknown"
+                          and reader_settled(shell._transport.master_fd), seconds, "clean manual_prompt")
 
     # -- assertions --------------------------------------------------------
     def assert_automation_held(self, shell: PersistentShell, sentinel: Path) -> None:
@@ -256,6 +320,7 @@ class ManualInputAtPromptTests(ShellCase):
                 self.clean_prompt(shell)
                 # Ctrl-C at a pending line and at an empty prompt, and a double Ctrl-C.
                 shell.send_user(f"printf NO >> {q}".encode())
+                self.reader(shell)
                 shell.send_user(b"\x03")
                 self.clean_prompt(shell)
                 shell.send_user(b"\x03")
@@ -362,8 +427,10 @@ class ManualInputToForegroundProgramTests(ShellCase):
                 self.until(shell, lambda s: s["parent_mode"] == "manual_foreground"
                            and members_named(shell.parent_pid, "python3"), what="python3 fg")
                 self.settle(shell, 1.0)
+                self.reader(shell)
                 shell.send_user(f"garbage\x15open({str(out)!r}, 'w').write(str(40+3\x7f2))\r".encode())
                 self.wait_path(shell, out, "42")
+                self.reader(shell)
                 shell.send_user(b"\x1b[A\x1b[B")
                 shell.send_user(b"while True: pass\r\r")
                 self.settle(shell, 0.5)
@@ -378,8 +445,10 @@ class ManualInputToForegroundProgramTests(ShellCase):
                 shell.send_user(b"fg\n")  # dash keeps a stopped readline's raw tty (no ICRNL)
                 self.until(shell, lambda s: s["parent_mode"] == "manual_foreground", what="fg python3")
                 self.settle(shell, 0.5)
+                self.reader(shell)
                 shell.send_user(f"open({str(out)!r}, 'a').write('!')\r".encode())
                 self.wait_path(shell, out, "42!")
+                self.reader(shell)  # ^D before the REPL reads its next line would reach it as a NUL
                 shell.send_user(b"\x04")                 # EOF on an empty REPL line -> exit
                 self.until(shell, lambda s: not members_named(shell.parent_pid, "python3"), what="python3 exit")
                 self.clean_prompt(shell)
@@ -430,6 +499,9 @@ class ManualInputToForegroundProgramTests(ShellCase):
                 self.until(shell, lambda s: child_file.exists() and child_file.read_text()
                            and s["foreground_group"] == int(child_file.read_text()), what="child group fg")
                 child = int(child_file.read_text())
+                # The forked child still has Python's SIGINT handler until it sets SIG_DFL; a ^C before that can be
+                # lost (CPython skips a tripped signal whose handler became SIG_DFL), so wait until it is set.
+                self.until(shell, lambda _: sigint_default(child), what="child SIGINT default")
                 self.assertNotEqual(os.getpgid(child), os.getpgid(shell.parent_pid))
                 self.assertIsNone(shell.manual_input_hold())
                 shell.send_user(b"\x03")
@@ -560,6 +632,7 @@ class RejectedHandoffTests(ShellCase):
                     shell.send_user(b"wb-handoff\r")
                     state = self.until(shell, lambda s: "unsupported_hook_or_trap" in s["held_reasons"]
                                        and s["parent_mode"] == "manual_prompt", what="rejected handoff")
+                    self.reader(shell)
                     self.assertEqual(state["input_owner"], "user")
                     self.assertIsNone(shell.manual_input_hold())
                     self.assert_automation_held(shell, sentinel)
@@ -603,6 +676,7 @@ class RejectedHandoffTests(ShellCase):
                 self.assert_automation_held(shell, sentinel)
                 # Manual bytes (with editing keys) reach the observed prompt, twice,
                 # although no READY ever confirms the consumed lines.
+                self.reader(shell)
                 shell.send_user(f"printf A >> {shlex.quote(str(m))}X".encode() + erase_x(choice) + b"\r")
                 self.wait_path(shell, m, "A")
                 self.assertIsNone(shell.manual_input_hold())
@@ -641,6 +715,7 @@ class ConfirmedRunTakeoverTests(ShellCase):
         shell.release_input()
         self.until(shell, lambda s: s["lifecycle"]["control_returned"] and s["parent_mode"] == "manual_prompt",
                    what="manual prompt after run")
+        self.reader(shell)
         self.assertEqual(shell.snapshot()["lifecycle"]["unknown"], [])
         self.assert_automation_held(shell, d / "auto-sentinel")
         m = d / "post"
