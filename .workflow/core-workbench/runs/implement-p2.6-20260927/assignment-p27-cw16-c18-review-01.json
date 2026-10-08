@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw16-c18-review-01",
+  "ticket_id": "CW-16 fix-05 delta review (C18)",
+  "role": "reviewer",
+  "unit": "V-CW-16",
+  "base_commit": "81bebe6",
+  "routing": {
+    "planned_role": "reviewer",
+    "selected_role": "reviewer (wb-delta-reviewer, Sonnet high; bounded delta after the C17 full review)",
+    "reason_codes": [
+      "review_delta"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-c17-review-01.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/assignment-p27-cw16-fix-05.json",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-fix-05.md"
+    ]
+  },
+  "required_behavior": [
+    "Review `git diff 81bebe6 -- src omp_bridge tests` (uncommitted) against the four Root adjudications in assignment-p27-cw16-fix-05.json and the C17 review findings: umask fully reverted (no OMP child or tool umask change; host shell untouched), the private-mode independent-test delta matches the adjudication exactly and does not weaken the guarantee (data dir/omp-root/agent 0700, Workbench-written files private), colour names (brightbrown, pyte's 'bfightmagenta' typo mapping) and the SGR tests incl. gap COLOR, live_harness no longer pre-creates 0700 dirs, shutdown CLI closed-stdin/EOF/Ctrl-C paths (no traceback, truthful). Run the touched tests under /tmp."
+  ],
+  "acceptance": [
+    "Verdict pass/block with file:line"
+  ],
+  "allowed_write_paths": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-c18-review-01.md"
+  ],
+  "rules": "Read-only. No real provider requests; never read credential contents; temp only under /tmp; no commits; no graphify update.",
+  "result_format": "Korean reply <=6 lines."
+}

@@ -1,0 +1,610 @@
+{
+ "scenario": "fault-x2",
+ "run_id": "b4b-fault",
+ "started_at": "2026-10-08T11:30:29+00:00",
+ "repo_head": "e63572356480f2431427d349d749fbd09c2ee72f",
+ "context": {
+  "scenario_id": "X2"
+ },
+ "versions": {
+  "omp": "omp/18.8.0",
+  "omp_path": "/home/dwchoo/.local/bin/omp",
+  "tmux": "tmux 3.4",
+  "herdr": "herdr 0.9.3",
+  "bash": "GNU bash, version 5.2.21(1)-release (x86_64-pc-linux-gnu)",
+  "dash": "dash 0.5.12-6ubuntu5",
+  "sh": "/usr/bin/dash",
+  "python": "3.12.3",
+  "kernel": "7.0.0-30-generic",
+  "os": "Ubuntu 24.04.4 LTS"
+ },
+ "commands": [
+  {
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "start",
+    "--data-dir",
+    "/tmp/wbc16x2r-kc456i43/d",
+    "--omp",
+    "/home/dwchoo/.local/bin/omp",
+    "--omp-arg=--model",
+    "--omp-arg=wbcw16/scripted",
+    "--no-attach"
+   ],
+   "exit": 0,
+   "seconds": 3.75,
+   "stdout_tail": " OMP isolation check ...\nbackend pid 2052282 phase ready\ndata dir /tmp/wbc16x2r-kc456i43/d\n  host_shell: pid 2052286 alive=True owner=user\n  manager_omp: pid 2052289 alive=True owner=user\n  worker_omp: pid 2052290 alive=True owner=user\n  shell: bash /usr/bin/bash mode=manual_prompt\nomp isolation: ok (omp/18.8.0 evidence bridge_g3=18.2.10, isolation=18.6.1)\n  note: OMP 18.8.0 has not extracted its native addon into /tmp/wbc16x2r-kc456i43/h/.omp/natives/18.8.0 yet: the first Workbench OMP extracts it there (the same files your own omp 18.8.0 extracts; OMP has no setting to move this directory).\n",
+   "stderr_tail": ""
+  },
+  {
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "start",
+    "--data-dir",
+    "/tmp/wbc16x2r-kc456i43/d",
+    "--omp",
+    "/home/dwchoo/.local/bin/omp",
+    "--omp-arg=--model",
+    "--omp-arg=wbcw16/scripted",
+    "--no-attach"
+   ],
+   "exit": 0,
+   "seconds": 2.5,
+   "stdout_tail": "starting backend: shell bash (/usr/bin/bash), omp/18.8.0\nwaiting for the OMP isolation check ...\nbackend pid 2052820 phase ready\ndata dir /tmp/wbc16x2r-kc456i43/d\n  host_shell: pid 2052824 alive=True owner=user\n  manager_omp: pid 2052827 alive=True owner=user\n  worker_omp: pid 2052828 alive=True owner=user\n  shell: bash /usr/bin/bash mode=manual_prompt\n사용량: Task f5e62ffc-82a5-44ac-a642-459a92f46df2 run 1 (재시도 0/3) · 60s 점검 - · 모델 미확인\nomp isolation: ok (omp/18.8.0 evidence bridge_g3=18.2.10, isolation=18.6.1)\n",
+   "stderr_tail": ""
+  },
+  {
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "status",
+    "--data-dir",
+    "/tmp/wbc16x2r-kc456i43/d"
+   ],
+   "exit": 0,
+   "seconds": 0.06,
+   "stdout_tail": " · 모델 미확인\nomp isolation: ok (omp/18.8.0 evidence bridge_g3=18.2.10, isolation=18.6.1)\nbackend 재시작 대조: same_boot_crash | 이전 run 212573ce-3141-4e8c-b6d9-cc397ca99cce 상태 outcome_unknown (재실행·재전송 없음)\n  이전 backend가 남긴 process s1: run_target pid 2052650 bash — manager가 stop_survivor로 종료 가능\n  이전 backend가 남긴 process s2: session_member pid 2052596 python — 표시만 (its session leader (host_shell) is gone, so the session is not provably the old pane's)\n  이전 backend가 남긴 process s3: session_member pid 2052654 sleep — 표시만 (its session leader (host_shell) is gone, so the session is not provably the old pane's)\n",
+   "stderr_tail": ""
+  },
+  {
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "shutdown",
+    "--data-dir",
+    "/tmp/wbc16x2r-kc456i43/d",
+    "--json",
+    "--yes"
+   ],
+   "exit": 0,
+   "seconds": 3.23,
+   "stdout_tail": "5-44ac-a642-459a92f46df2\"}\n{\"shutdown\": {\"left_running\": [], \"lifecycle\": null, \"omp_children\": {\"alive\": [], \"observed\": [{\"ended\": \"by_itself\", \"parent\": \"manager_omp\", \"parent_pid\": 2052827, \"pid\": 2053403, \"start_ticks\": 300414042}]}, \"panes\": [{\"exit_status\": -1, \"pane\": \"host_shell\", \"survivors\": []}, {\"exit_status\": 143, \"pane\": \"manager_omp\", \"survivors\": []}, {\"exit_status\": 143, \"pane\": \"worker_omp\", \"survivors\": []}], \"previous_survivors\": [], \"problems\": [], \"processes\": {\"host_shell\": \"dead\", \"manager_omp\": \"dead\", \"worker_omp\": \"dead\"}, \"user_confirmed\": true, \"verified\": true}}\n",
+   "stderr_tail": ""
+  }
+ ],
+ "steps": {
+  "X2.running_open_task": {
+   "status": "pass",
+   "seconds": 8.1,
+   "observed": {
+    "task": {
+     "active": true,
+     "cancel_requested": false,
+     "closed_reason": null,
+     "held_reason": null,
+     "kind": "experiment",
+     "last_result": null,
+     "retry_limit": 3,
+     "revision": 1,
+     "run_id": "212573ce-3141-4e8c-b6d9-cc397ca99cce",
+     "runs_started": 1,
+     "since": "2026-10-08T11:30:34Z",
+     "status": "running",
+     "summary": "cw16 run",
+     "task_id": "f5e62ffc-82a5-44ac-a642-459a92f46df2"
+    },
+    "brokers_before_kill": {
+     "2052498": {
+      "ticks": 300410417,
+      "ppid": 2052289,
+      "session": 2052498,
+      "cwd": "$ROOT/p"
+     }
+    },
+    "outbox_records": 0
+   }
+  },
+  "X2.sigkill_backend": {
+   "status": "pass",
+   "seconds": 3.2,
+   "observed": {
+    "pid": 2052282,
+    "start_ticks": 300409981,
+    "signalled": true,
+    "gone": true,
+    "panes_alive_after_kill": {
+     "host_shell": false,
+     "manager_omp": false,
+     "worker_omp": false
+    },
+    "brokers_after_kill": {},
+    "starts_lines": 1
+   }
+  },
+  "X2.restart_reconcile": {
+   "status": "pass",
+   "seconds": 2.6,
+   "observed": {
+    "classification": "same_boot_crash",
+    "run": {
+     "boot_marker": "30e0b94c-32c5-4014-8441-0ebcc6537118",
+     "revision": 1,
+     "run_id": "212573ce-3141-4e8c-b6d9-cc397ca99cce",
+     "state": "outcome_unknown",
+     "target": {
+      "pid": 2052650,
+      "start_ticks": 300410464
+     },
+     "target_state": "alive",
+     "task_id": "f5e62ffc-82a5-44ac-a642-459a92f46df2"
+    },
+    "processes": [
+     {
+      "name": "backend",
+      "pid": 2052282,
+      "start_ticks": 300409981,
+      "state": "ended"
+     },
+     {
+      "name": "manager_omp",
+      "pid": 2052289,
+      "start_ticks": 300410001,
+      "state": "ended"
+     },
+     {
+      "name": "worker_omp",
+      "pid": 2052290,
+      "start_ticks": 300410002,
+      "state": "ended"
+     },
+     {
+      "name": "host_shell",
+      "pid": 2052286,
+      "start_ticks": 300410000,
+      "state": "ended"
+     },
+     {
+      "name": "run_target",
+      "pid": 2052650,
+      "start_ticks": 300410464,
+      "state": "alive"
+     }
+    ],
+    "survivors": [
+     {
+      "boot_id": "30e0b94c-32c5-4014-8441-0ebcc6537118",
+      "comm": "bash",
+      "identity": "verified",
+      "name": "run_target",
+      "pid": 2052650,
+      "session": 2052286,
+      "start_ticks": 300410464,
+      "state": "alive",
+      "stop": null,
+      "stoppable": true,
+      "survivor_id": "s1",
+      "why_not": null
+     },
+     {
+      "boot_id": "30e0b94c-32c5-4014-8441-0ebcc6537118",
+      "comm": "python",
+      "identity": "unverified",
+      "name": "session_member",
+      "pid": 2052596,
+      "session": 2052286,
+      "start_ticks": 300410458,
+      "state": "alive",
+      "stop": null,
+      "stoppable": false,
+      "survivor_id": "s2",
+      "why_not": "its session leader (host_shell) is gone, so the session is not provably the old pane's"
+     },
+     {
+      "boot_id": "30e0b94c-32c5-4014-8441-0ebcc6537118",
+      "comm": "sleep",
+      "identity": "unverified",
+      "name": "session_member",
+      "pid": 2052654,
+      "session": 2052286,
+      "start_ticks": 300410464,
+      "state": "alive",
+      "stop": null,
+      "stoppable": false,
+      "survivor_id": "s3",
+      "why_not": "its session leader (host_shell) is gone, so the session is not provably the old pane's"
+     },
+     {
+      "boot_id": "30e0b94c-32c5-4014-8441-0ebcc6537118",
+      "comm": "sleep",
+      "identity": "unverified",
+      "name": "session_member",
+      "pid": 2052808,
+      "session": 2052286,
+      "start_ticks": 300411066,
+      "state": "ended",
+      "stop": null,
+      "stoppable": false,
+      "survivor_id": "s4",
+      "why_not": "its session leader (host_shell) is gone, so the session is not provably the old pane's"
+     }
+    ],
+    "outbox_lost": [],
+    "notice": {
+     "notice_id": "6d402001-bc99-4142-8e7b-8ed562705cf7",
+     "state": "queued",
+     "task_id": "f5e62ffc-82a5-44ac-a642-459a92f46df2"
+    },
+    "task": {
+     "task_id": "f5e62ffc-82a5-44ac-a642-459a92f46df2",
+     "status": "held",
+     "held_reason": "backend_restarted",
+     "run_id": "212573ce-3141-4e8c-b6d9-cc397ca99cce",
+     "runs_started": 1
+    },
+    "brokers_at_reconcile": {},
+    "start_stdout_tail": "starting backend: shell bash (/usr/bin/bash), omp/18.8.0\nwaiting for the OMP isolation check ...\nbackend pid 2052820 phase ready\ndata dir /tmp/wbc16x2r-kc456i43/d\n  host_shell: pid 2052824 alive=True owner=user\n  manager_omp: pid 2052827 alive=True owner=user\n  worker_omp: pid 2052828 alive=True owner=user\n  shell: bash /usr/bin/bash mode=manual_prompt\n사용량: Task f5e62ffc-82a5-44ac-a642-459a92f46df2 run 1 (재시도 0/3) · 60s 점검 - · 모델 미확인\nomp isolation: ok (omp/18.8.0 evidence bridge_g3=18.2.10, isolation=18.6.1)\n"
+   }
+  },
+  "X2.backend_restarted_once": {
+   "status": "pass",
+   "seconds": 16.0,
+   "observed": {
+    "notices_to_manager": [
+     {
+      "at": 1791459044.001309,
+      "type": "backend_restarted",
+      "notice_id": "6d402001-bc99-4142-8e7b-8ed562705cf7",
+      "task_id": "f5e62ffc-82a5-44ac-a642-459a92f46df2",
+      "classification": "same_boot_crash",
+      "task_status": "held",
+      "survivors": [
+       "s1",
+       "s2",
+       "s3"
+      ]
+     }
+    ],
+    "journal": [
+     {
+      "at": "2026-10-08T11:30:40.940+00:00",
+      "notice_id": "6d402001-bc99-4142-8e7b-8ed562705cf7",
+      "notice_type": "backend_restarted",
+      "outcome": "queued",
+      "role": "manager",
+      "seq": 5,
+      "task_id": "f5e62ffc-82a5-44ac-a642-459a92f46df2",
+      "type": "workbench_notice"
+     },
+     {
+      "at": "2026-10-08T11:30:41.957+00:00",
+      "notice_id": "6d402001-bc99-4142-8e7b-8ed562705cf7",
+      "notice_type": "backend_restarted",
+      "outcome": "not_connected",
+      "role": "manager",
+      "seq": 6,
+      "task_id": "f5e62ffc-82a5-44ac-a642-459a92f46df2",
+      "type": "workbench_notice"
+     },
+     {
+      "at": "2026-10-08T11:30:43.960+00:00",
+      "notice_id": "6d402001-bc99-4142-8e7b-8ed562705cf7",
+      "notice_type": "backend_restarted",
+      "outcome": "sent",
+      "role": "manager",
+      "seq": 7,
+      "task_id": "f5e62ffc-82a5-44ac-a642-459a92f46df2",
+      "type": "workbench_notice"
+     }
+    ]
+   }
+  },
+  "X2.no_replay": {
+   "status": "pass",
+   "seconds": 10.1,
+   "observed": {
+    "run_start_lines": 1,
+    "runs_started": 1,
+    "old_outbox_resent": [],
+    "task_status": "held"
+   }
+  },
+  "X2.status_text": {
+   "status": "pass",
+   "seconds": 0.1,
+   "observed": {
+    "lines": [
+     "backend 재시작 대조: same_boot_crash | 이전 run 212573ce-3141-4e8c-b6d9-cc397ca99cce 상태 outcome_unknown (재실행·재전송 없음)",
+     "  이전 backend가 남긴 process s1: run_target pid 2052650 bash — manager가 stop_survivor로 종료 가능",
+     "  이전 backend가 남긴 process s2: session_member pid 2052596 python — 표시만 (its session leader (host_shell) is gone, so the session is not provably the old pane's)",
+     "  이전 backend가 남긴 process s3: session_member pid 2052654 sleep — 표시만 (its session leader (host_shell) is gone, so the session is not provably the old pane's)"
+    ]
+   }
+  },
+  "X2.stop_survivor_unverified_refused": {
+   "status": "pass",
+   "seconds": 1.6,
+   "observed": {
+    "target": {
+     "boot_id": "30e0b94c-32c5-4014-8441-0ebcc6537118",
+     "comm": "python",
+     "identity": "unverified",
+     "name": "session_member",
+     "pid": 2052596,
+     "session": 2052286,
+     "start_ticks": 300410458,
+     "state": "alive",
+     "stop": null,
+     "stoppable": false,
+     "survivor_id": "s2",
+     "why_not": "its session leader (host_shell) is gone, so the session is not provably the old pane's"
+    },
+    "result": {
+     "status": "refused",
+     "reason": "identity_unverified",
+     "detail": "This process is only shown: its identity is not proven (its session leader (host_shell) is gone, so the session is not provably the old pane's); Workbench never signals it.",
+     "survivor": {
+      "survivor_id": "s2",
+      "name": "session_member",
+      "pid": 2052596,
+      "start_ticks": 300410458,
+      "boot_id": "30e0b94c-32c5-4014-8441-0ebcc6537118",
+      "comm": "python",
+      "session": 2052286,
+      "stoppable": false,
+      "identity": "unverified",
+      "why_not": "its session leader (host_shell) is gone, so the session is not provably the old pane's",
+      "state": "alive",
+      "stop": null
+     }
+    }
+   }
+  },
+  "X2.stop_survivor_verified_stopped": {
+   "status": "pass",
+   "seconds": 1.2,
+   "observed": {
+    "target": {
+     "boot_id": "30e0b94c-32c5-4014-8441-0ebcc6537118",
+     "comm": "bash",
+     "identity": "verified",
+     "name": "run_target",
+     "pid": 2052650,
+     "session": 2052286,
+     "start_ticks": 300410464,
+     "state": "alive",
+     "stop": null,
+     "stoppable": true,
+     "survivor_id": "s1",
+     "why_not": null
+    },
+    "result": {
+     "status": "stopped",
+     "reason": "ended",
+     "signalled": [
+      2052650
+     ],
+     "remaining": [],
+     "members": [],
+     "survivor": {
+      "survivor_id": "s1",
+      "name": "run_target",
+      "pid": 2052650,
+      "start_ticks": 300410464,
+      "boot_id": "30e0b94c-32c5-4014-8441-0ebcc6537118",
+      "comm": "bash",
+      "session": 2052286,
+      "stoppable": false,
+      "identity": "verified",
+      "why_not": null,
+      "state": "stopped",
+      "stop": {
+       "reason": "cw16 X2: end a process the old backend left",
+       "requester": "manager",
+       "at": 1791459071.5646923,
+       "outcome": "stopped",
+       "signalled": [
+        2052650
+       ],
+       "remaining": []
+      }
+     }
+    }
+   }
+  },
+  "X2.shutdown": {
+   "status": "pass",
+   "seconds": 3.2,
+   "observed": {
+    "exit": 0,
+    "verified": true,
+    "problems": [],
+    "previous_survivors": [],
+    "alive_survivors": 0
+   }
+  }
+ },
+ "unknowns": [],
+ "result": "pass",
+ "roots": [
+  "/tmp/wbc16x2r-kc456i43"
+ ],
+ "cleanup": {
+  "residue_before_fallback": {},
+  "root_removed": true,
+  "residue_after_fallback": {}
+ },
+ "cleanups": [
+  {
+   "residue_before_fallback": {},
+   "root_removed": true,
+   "residue_after_fallback": {}
+  }
+ ],
+ "provider": {
+  "requests": {
+   "manager": 7,
+   "worker": 1
+  },
+  "injected": {
+   "manager": [],
+   "worker": [
+    {
+     "at": 1791459034.171503,
+     "kind": "task",
+     "message_id": "45da9863-1fa2-4f9c-ad12-44944b49d720",
+     "handoff": null,
+     "payload_kind": null,
+     "stage": "execute",
+     "contract": true
+    }
+   ],
+   "unknown": []
+  },
+  "aborted": [],
+  "errors": [],
+  "rules": [
+   {
+    "name": "tap",
+    "hits": 0
+   },
+   {
+    "name": "worker-staged",
+    "hits": 1
+   },
+   {
+    "name": "worker-review",
+    "hits": 0
+   },
+   {
+    "name": "text:x2exp",
+    "hits": 1
+   },
+   {
+    "name": "text:x2stopu",
+    "hits": 1
+   },
+   {
+    "name": "text:x2stopv",
+    "hits": 1
+   }
+  ],
+  "log_tail": [
+   {
+    "i": 1,
+    "at": 1791459034.0793078,
+    "role": "manager",
+    "last_role": "user",
+    "text_tail": "x2exp",
+    "injected_kind": null,
+    "tool_results": []
+   },
+   {
+    "i": 2,
+    "at": 1791459034.1097062,
+    "role": "manager",
+    "last_role": "tool",
+    "text_tail": "o not do it yourself (no commands, edits or checks for it). End your turn and wait for the worker's to_manager report.\"}",
+    "injected_kind": null,
+    "tool_results": [
+     "cw16-manager-1"
+    ]
+   },
+   {
+    "i": 3,
+    "at": 1791459034.171507,
+    "role": "worker",
+    "last_role": "user",
+    "text_tail": null,
+    "injected_kind": "task",
+    "tool_results": []
+   },
+   {
+    "i": 4,
+    "at": 1791459044.0012846,
+    "role": "manager",
+    "last_role": "user",
+    "text_tail": "run an experiment, or cancel). Tell the user briefly what happened.\",\"notice_id\":\"6d402001-bc99-4142-8e7b-8ed562705cf7\"}",
+    "injected_kind": null,
+    "tool_results": []
+   },
+   {
+    "i": 5,
+    "at": 1791459070.368059,
+    "role": "manager",
+    "last_role": "user",
+    "text_tail": "x2stopu",
+    "injected_kind": null,
+    "tool_results": []
+   },
+   {
+    "i": 6,
+    "at": 1791459070.3817134,
+    "role": "manager",
+    "last_role": "tool",
+    "text_tail": "\":\"its session leader (host_shell) is gone, so the session is not provably the old pane's\",\"state\":\"alive\",\"stop\":null}}",
+    "injected_kind": null,
+    "tool_results": [
+     "cw16-manager-2"
+    ]
+   },
+   {
+    "i": 7,
+    "at": 1791459071.5408301,
+    "role": "manager",
+    "last_role": "user",
+    "text_tail": "x2stopv",
+    "injected_kind": null,
+    "tool_results": []
+   },
+   {
+    "i": 8,
+    "at": 1791459071.5713193,
+    "role": "manager",
+    "last_role": "tool",
+    "text_tail": " backend left\",\"requester\":\"manager\",\"at\":1791459071.5646923,\"outcome\":\"stopped\",\"signalled\":[2052650],\"remaining\":[]}}}",
+    "injected_kind": null,
+    "tool_results": [
+     "cw16-manager-3"
+    ]
+   }
+  ]
+ },
+ "notices": {
+  "manager": [
+   {
+    "at": 1791459044.001309,
+    "type": "backend_restarted",
+    "notice_id": "6d402001-bc99-4142-8e7b-8ed562705cf7",
+    "task_id": "f5e62ffc-82a5-44ac-a642-459a92f46df2",
+    "classification": "same_boot_crash",
+    "task_status": "held",
+    "survivors": [
+     "s1",
+     "s2",
+     "s3"
+    ]
+   }
+  ],
+  "worker": [],
+  "unknown": []
+ },
+ "reviews": [],
+ "model_requests_real": 0,
+ "finished_at": "2026-10-08T11:31:15+00:00"
+}

@@ -1,0 +1,401 @@
+{
+ "scenario": "flow-F6-F7",
+ "run_id": "c18-flow-policy",
+ "started_at": "2026-10-08T16:40:19+00:00",
+ "repo_head": "c47456a4ad2caa0b7da40fa84179da00f249f9d6",
+ "context": {
+  "host_shell": "bash"
+ },
+ "versions": {
+  "omp": "omp/18.8.0",
+  "omp_path": "/home/dwchoo/.local/bin/omp",
+  "tmux": "tmux 3.4",
+  "herdr": "herdr 0.9.3",
+  "bash": "GNU bash, version 5.2.21(1)-release (x86_64-pc-linux-gnu)",
+  "dash": "dash 0.5.12-6ubuntu5",
+  "sh": "/usr/bin/dash",
+  "python": "3.12.3",
+  "kernel": "7.0.0-30-generic",
+  "os": "Ubuntu 24.04.4 LTS"
+ },
+ "commands": [
+  {
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "start",
+    "--data-dir",
+    "/tmp/wbc16flowf6f7-3_ryblqf/d",
+    "--omp",
+    "/home/dwchoo/.local/bin/omp",
+    "--omp-arg=--model",
+    "--omp-arg=wbcw16/scripted",
+    "--no-attach"
+   ],
+   "exit": 0,
+   "seconds": 3.76,
+   "stdout_tail": "tion check ...\nbackend pid 2650375 phase ready\ndata dir /tmp/wbc16flowf6f7-3_ryblqf/d\n  host_shell: pid 2650383 alive=True owner=user\n  manager_omp: pid 2650387 alive=True owner=user\n  worker_omp: pid 2650388 alive=True owner=user\n  shell: bash /usr/bin/bash mode=manual_prompt\nomp isolation: ok (omp/18.8.0 evidence bridge_g3=18.2.10, isolation=18.6.1)\n  note: OMP 18.8.0 has not extracted its native addon into /tmp/wbc16flowf6f7-3_ryblqf/h/.omp/natives/18.8.0 yet: the first Workbench OMP extracts it there (the same files your own omp 18.8.0 extracts; OMP has no setting to move this directory).\n",
+   "stderr_tail": ""
+  },
+  {
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "shutdown",
+    "--data-dir",
+    "/tmp/wbc16flowf6f7-3_ryblqf/d",
+    "--json",
+    "--yes"
+   ],
+   "exit": 0,
+   "seconds": 5.21,
+   "stdout_tail": "ks\": 302269056}, {\"pid\": 2650383, \"role\": \"shell\", \"start_ticks\": 302269054}]}, \"omp_children\": {\"alive\": [], \"observed\": [{\"ended\": \"by_itself\", \"parent\": \"manager_omp\", \"parent_pid\": 2650387, \"pid\": 2651327, \"start_ticks\": 302276086}]}, \"panes\": [{\"exit_status\": -1, \"pane\": \"host_shell\", \"survivors\": []}, {\"exit_status\": 143, \"pane\": \"manager_omp\", \"survivors\": []}, {\"exit_status\": 143, \"pane\": \"worker_omp\", \"survivors\": []}], \"previous_survivors\": [], \"problems\": [], \"processes\": {\"host_shell\": \"dead\", \"manager_omp\": \"dead\", \"worker_omp\": \"dead\"}, \"user_confirmed\": true, \"verified\": true}}\n",
+   "stderr_tail": ""
+  }
+ ],
+ "steps": {
+  "start": {
+   "status": "pass",
+   "seconds": 4.1,
+   "observed": {}
+  },
+  "F7_idle_before_instruction": {
+   "status": "pass",
+   "seconds": 66.1,
+   "observed": {
+    "seconds": 65,
+    "automation": [
+     "idle"
+    ],
+    "worker_requests": 0,
+    "manager_requests": 0,
+    "runs": 0
+   }
+  },
+  "F6a_done_requires_code_change_closes": {
+   "status": "pass",
+   "seconds": 64.9,
+   "observed": {
+    "task_id": "48e4c636-e528-416b-805a-186423f67a8b",
+    "status": "closed",
+    "closed_reason": "done",
+    "held_reason": null,
+    "report": {
+     "kind": "done",
+     "requires_code_change": true,
+     "reason": "the parser in src/ must change"
+    },
+    "quiet_seconds": 62,
+    "worker_deliveries_meanwhile": 0
+   }
+  },
+  "F6b_blocked_requires_code_change_no_auto": {
+   "status": "pass",
+   "seconds": 64.9,
+   "observed": {
+    "task_id": "55e440ce-d0f3-48d3-ac8a-f5c27bf1084b",
+    "status": "blocked",
+    "closed_reason": null,
+    "held_reason": "worker_blocked",
+    "report": {
+     "kind": "blocked",
+     "requires_code_change": true,
+     "reason": "src/ change needed before continuing"
+    },
+    "quiet_seconds": 62,
+    "worker_deliveries_meanwhile": 0
+   }
+  },
+  "F6_new_instruction_delivered_once": {
+   "status": "pass",
+   "seconds": 5.8,
+   "observed": {
+    "follow_up": "queued",
+    "delivered_to_worker": 1,
+    "task": {
+     "status": "running",
+     "held_reason": null
+    }
+   }
+  },
+  "shutdown": {
+   "status": "pass",
+   "seconds": 5.5,
+   "observed": {
+    "verified": true,
+    "residue": {}
+   }
+  }
+ },
+ "unknowns": [],
+ "result": "pass",
+ "identities": {
+  "backend": {
+   "pid": 2650375,
+   "start_ticks": 302269035
+  },
+  "backend_session": 2650374,
+  "panes": {
+   "host_shell": [
+    2650383,
+    302269054,
+    "195da496-e049-4019-a192-11bcc151f65c",
+    1
+   ],
+   "manager_omp": [
+    2650387,
+    302269056,
+    "50e922d7-9cab-4cf0-ad1a-9f63862a9d96",
+    1
+   ],
+   "worker_omp": [
+    2650388,
+    302269056,
+    "7baf1caa-ded1-4b9d-b9c8-75b5c975008b",
+    1
+   ]
+  },
+  "bridge": {
+   "manager": {
+    "session_id": "01a11c63-2533-70d0-b787-5717e97b24c4",
+    "generation": 1,
+    "pid": 2650387
+   },
+   "worker": {
+    "session_id": "01a11c63-252b-7783-96cb-1d1daa3a01ef",
+    "generation": 1,
+    "pid": 2650388
+   }
+  },
+  "shell_parent": {
+   "pid": 2650383,
+   "start_ticks": 302269054
+  },
+  "shell_generation": 1,
+  "supervisor": null
+ },
+ "omp_isolation": "ok",
+ "cleanup": {
+  "residue_before_fallback": {},
+  "root_removed": true,
+  "residue_after_fallback": {}
+ },
+ "provider": {
+  "requests": {
+   "manager": 8,
+   "worker": 5
+  },
+  "aborted": [],
+  "errors": [],
+  "rules": [
+   {
+    "name": "record",
+    "hits": 0
+   },
+   {
+    "name": "",
+    "hits": 1
+   },
+   {
+    "name": "",
+    "hits": 1
+   },
+   {
+    "name": "f6a-worker:start",
+    "hits": 1
+   },
+   {
+    "name": "f6a-worker:next",
+    "hits": 1
+   },
+   {
+    "name": "f6b-worker:start",
+    "hits": 1
+   },
+   {
+    "name": "f6b-worker:next",
+    "hits": 1
+   },
+   {
+    "name": "",
+    "hits": 1
+   }
+  ],
+  "real_model_requests": 0,
+  "log_tail": [
+   {
+    "i": 1,
+    "at": 1791477690.6672292,
+    "role": "manager",
+    "last_role": "user",
+    "text_tail": "f6-a",
+    "injected_kind": null,
+    "tool_results": []
+   },
+   {
+    "i": 2,
+    "at": 1791477690.7003186,
+    "role": "manager",
+    "last_role": "tool",
+    "text_tail": "o not do it yourself (no commands, edits or checks for it). End your turn and wait for the worker's to_manager report.\"}",
+    "injected_kind": null,
+    "tool_results": [
+     "cw16-manager-1"
+    ]
+   },
+   {
+    "i": 3,
+    "at": 1791477690.8257482,
+    "role": "worker",
+    "last_role": "user",
+    "text_tail": null,
+    "injected_kind": "task",
+    "tool_results": []
+   },
+   {
+    "i": 4,
+    "at": 1791477690.8512387,
+    "role": "worker",
+    "last_role": "tool",
+    "text_tail": " manager decides again after the resume. Do not send it again unless asked; a reply, if any, arrives as a new message.\"}",
+    "injected_kind": null,
+    "tool_results": [
+     "cw16-worker-2"
+    ]
+   },
+   {
+    "i": 5,
+    "at": 1791477690.8840663,
+    "role": "manager",
+    "last_role": "user",
+    "text_tail": null,
+    "injected_kind": "report",
+    "tool_results": []
+   },
+   {
+    "i": 6,
+    "at": 1791477755.5580244,
+    "role": "manager",
+    "last_role": "user",
+    "text_tail": "f6-b",
+    "injected_kind": null,
+    "tool_results": []
+   },
+   {
+    "i": 7,
+    "at": 1791477755.575783,
+    "role": "manager",
+    "last_role": "tool",
+    "text_tail": "o not do it yourself (no commands, edits or checks for it). End your turn and wait for the worker's to_manager report.\"}",
+    "injected_kind": null,
+    "tool_results": [
+     "cw16-manager-3"
+    ]
+   },
+   {
+    "i": 8,
+    "at": 1791477755.678114,
+    "role": "worker",
+    "last_role": "user",
+    "text_tail": null,
+    "injected_kind": "task",
+    "tool_results": []
+   },
+   {
+    "i": 9,
+    "at": 1791477755.694429,
+    "role": "worker",
+    "last_role": "tool",
+    "text_tail": " manager decides again after the resume. Do not send it again unless asked; a reply, if any, arrives as a new message.\"}",
+    "injected_kind": null,
+    "tool_results": [
+     "cw16-worker-4"
+    ]
+   },
+   {
+    "i": 10,
+    "at": 1791477755.724188,
+    "role": "manager",
+    "last_role": "user",
+    "text_tail": null,
+    "injected_kind": "report",
+    "tool_results": []
+   },
+   {
+    "i": 11,
+    "at": 1791477820.5107086,
+    "role": "manager",
+    "last_role": "user",
+    "text_tail": "f6-c",
+    "injected_kind": null,
+    "tool_results": []
+   },
+   {
+    "i": 12,
+    "at": 1791477820.5315385,
+    "role": "manager",
+    "last_role": "tool",
+    "text_tail": "s not_sent); decide again after the resume. Do not send it again otherwise; a reply, if any, arrives as a new message.\"}",
+    "injected_kind": null,
+    "tool_results": [
+     "cw16-manager-5"
+    ]
+   },
+   {
+    "i": 13,
+    "at": 1791477820.5551248,
+    "role": "worker",
+    "last_role": "user",
+    "text_tail": null,
+    "injected_kind": "question",
+    "tool_results": []
+   }
+  ]
+ },
+ "injected": {
+  "manager": [
+   {
+    "kind": "report",
+    "stage": null,
+    "payload_kind": "done",
+    "task_id": "48e4c636-e528-416b-805a-186423f67a8b",
+    "at": 1791477690.8840735
+   },
+   {
+    "kind": "report",
+    "stage": null,
+    "payload_kind": "blocked",
+    "task_id": "55e440ce-d0f3-48d3-ac8a-f5c27bf1084b",
+    "at": 1791477755.7241988
+   }
+  ],
+  "worker": [
+   {
+    "kind": "task",
+    "stage": null,
+    "payload_kind": "work",
+    "task_id": "48e4c636-e528-416b-805a-186423f67a8b",
+    "at": 1791477690.8257618
+   },
+   {
+    "kind": "task",
+    "stage": null,
+    "payload_kind": "work",
+    "task_id": "55e440ce-d0f3-48d3-ac8a-f5c27bf1084b",
+    "at": 1791477755.6781213
+   },
+   {
+    "kind": "question",
+    "stage": null,
+    "payload_kind": "work",
+    "task_id": "55e440ce-d0f3-48d3-ac8a-f5c27bf1084b",
+    "at": 1791477820.555132
+   }
+  ],
+  "unknown": []
+ },
+ "notes": [],
+ "finished_at": "2026-10-08T16:43:51+00:00"
+}

@@ -1,0 +1,17 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 2390,
+  "event": {
+    "id": "finished-p27-cw16-b4b-02",
+    "kind": "transition",
+    "data": {
+      "evidence": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-b4b-01.md#6",
+      "invocation": "p27-cw16-b4b-02",
+      "not_started_evidence": null,
+      "observed_effort": "unverified",
+      "observed_model": "opus",
+      "outcome": "complete",
+      "state": "finished"
+    }
+  }
+}

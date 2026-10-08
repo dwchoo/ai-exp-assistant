@@ -1,0 +1,23 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 2443,
+  "event": {
+    "id": "limit-cw16c18-unit-V-CW-16",
+    "kind": "limit",
+    "data": {
+      "authority": "C-D55 budget delegation, workflow-contract section 8; user 2026-10-08 '전부 진행해서 테스트까지 해서 완료하고 보고해' (C17/C18 corrections and reruns)",
+      "bucket": "unit:V-CW-16",
+      "decision_owner": "Root",
+      "expected_previous": {
+        "authority": "Approved PLAN p2.7s (bundle 25936cde...), C-D55 budget delegation, workflow-contract section 8; user 2026-10-08 '전부 진행해서 테스트까지 해서 완료하고 보고해' (CW-19, CW-16, polish)",
+        "reason": "New unit: CW-16 final integration matrix, real-model runs, review, corrections",
+        "value": 24
+      },
+      "origin": "operating",
+      "reason": "CW-16 C17/C18 cycles: emphasis observation, closing records",
+      "remaining_work_estimate": 6,
+      "scope_basis": null,
+      "value": 30
+    }
+  }
+}

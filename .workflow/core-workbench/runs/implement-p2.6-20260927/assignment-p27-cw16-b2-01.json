@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "unit": "V-CW-16",
+  "base_commit": "6a2ddb2",
+  "approved_bundle_digest": "b31396faad700dfbb5f9c95415ba34cac0ef7dabd517a4ef5c293ca8dc2c9cf2",
+  "inputs": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-plan-01.md",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-b1-01.md",
+    "docs/features/core-workbench/tickets/CW-16.md",
+    "docs/features/core-workbench/DECISIONS.md#C-D72"
+  ],
+  "user_authorization": "User 2026-10-08 '전부 진행해서 테스트까지 해서 완료하고 보고해'; C-D72",
+  "stage": "W (write + informal self-run). Formal runs happen later on the frozen candidate C16. Another batch writes concurrently in different files; informal host runtime self-runs may overlap — attribute timing flakes, do not chase them.",
+  "invocation": "p27-cw16-b2-01",
+  "ticket_id": "CW-16 B2: flow + policy + shell scenarios",
+  "role": "test_designer",
+  "routing": {
+    "planned_role": "test_designer",
+    "selected_role": "test_designer (Opus high)",
+    "reason_codes": [
+      "final_gate",
+      "flow_policy_runtime"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-plan-01.md"
+    ]
+  },
+  "required_behavior": [
+    "Implement plan §5.4 F1-F7, P1-P8, SH1-SH5 (bash and dash) as tests/integration/live_cw16_flow_policy.py and live_cw16_shell.py on the B1 harness (tests/integration/cw16_harness.py, API in result-p27-cw16-b1-01.md §2), scripted provider only (0 real model requests), connect the clock fixture suite. F5 expectations per C-D72 (3): within open Task scope -> that Task; no-Task small request -> unrestricted; beyond open Task scope -> worker does not widen, reports to manager.",
+    "Investigate within F-scenarios the observation from CW-19 VM runs: worker `terminal` gave no tool result for ~45 s while an unaccepted Task was open or right after a cancel (result-p27-cw19-vm-02.md 'environment observation'); determine product defect vs fixture artefact and report with evidence (do not fix src).",
+    "Convert remaining OMP 18.2.10-pinned live tests in tests/backend and tests/ui (they now skip on 18.8.0, see result-p27-cw16-b1-01.md) to version-record without weakening observations, only if minimal; otherwise list them.",
+    "Self-run once; write results."
+  ],
+  "allowed_write_paths": [
+    "tests/integration/** (your new files; do not edit cw16_harness.py except additive helpers announced in your result)",
+    "tests/backend/*live* and tests/ui/*live* pinned-version lines only",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-b2-01.md"
+  ],
+  "prohibited_paths": [
+    "src/**",
+    "omp_bridge/**",
+    "docs/**",
+    "other .workflow files"
+  ],
+  "rules": "No real provider requests. Never read credential stores/contents or other processes' environ; never print tokens; never edit ~/.omp, ~/.agents, ~/.claude, ~/.codex or user configs; this session runs inside the user's tmux and herdr: strip TMUX/HERDR env from children and use only isolated sockets/dirs under /tmp; never query or touch the user's default tmux/herdr servers, other claude-swarm sockets, ~/wb-urux-sandbox (and the user's running Workbench/OMP there) or processes you did not start; kill only PIDs you started (pid+start ticks); no pkill; temp only under /tmp; no commits; no graphify update.",
+  "result_format": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-b2-01.md: scenario table (pass/fail/pending + evidence path), defects with repro, 45 s terminal finding, formal run command. Korean reply <=10 lines."
+}

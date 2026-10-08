@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw16-fix-04",
+  "ticket_id": "CW-16 gap D1 color parse + D3 OMP file modes (C17)",
+  "role": "worker_senior",
+  "unit": "V-CW-16",
+  "routing": {
+    "planned_role": "worker_senior",
+    "selected_role": "worker_senior (Opus, reused cw16-fix3)",
+    "reason_codes": [
+      "gap_defects"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-gap-01.md",
+      "docs/features/core-workbench/DECISIONS.md#C-D73"
+    ]
+  },
+  "root_adjudication": [
+    "D1: src/workbench/ui/terminal_g1/app.py _color_index must test the 6-hex-digit form before isdigit (a pyte hex like '303030' or '123456' is an RGB, never a decimal index); 24-bit RGB -> nearest of the 256-color palette (cube AND grey ramp, choose the nearer), index strings 0-255 unchanged. Per C-D73 the 256-color approximation is the product behaviour; G1-COLOR is checked against the revised criterion in PLAN.json (index colors same index, RGB nearest 256, emphasis kept, no misparse). Make the gap COLOR scenario's expectations match C-D73 only if the test encodes the old exact-RGB criterion — that test lives in tests/integration/live_cw16_gap.py (W stage, Root approves editing its COLOR expectation to the C-D73 criterion; keep everything else).",
+    "D3: OMP processes launched by Workbench must not create group/other-accessible files in the Workbench data dir: start the OMP children (and the backend's own data-dir writes) with umask 077 (do not change the user's host shell umask). The agent.db symlink (C-D64) is expected: Root approves a minimal test delta in the independent test test_concurrent_starts... to skip symlinks (lstat) when asserting no group/other bits — document it.",
+    "Then run all suites (backend included now that live_harness runs in a sandbox) and the gap scenarios (tests/integration/live_cw16_gap.py, 0 model requests)."
+  ],
+  "allowed_write_paths": [
+    "src/workbench/**",
+    "tests/** (not other *_independent* files; the one named test only for the symlink delta; tests/integration/live_cw16_gap.py COLOR expectation only)",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-fix-04.md"
+  ],
+  "rules": "No real provider requests; never read credential stores/contents or other processes' environ; isolate tmux/herdr; never touch the user's default servers, other claude-swarm sockets, ~/wb-urux-sandbox, ~/.local/share/wb-vm or processes you did not start; kill only PIDs you started; no pkill; temp only under /tmp; no commits; no graphify update; do not edit docs/**.",
+  "result_format": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-fix-04.md. Korean reply <=6 lines."
+}

@@ -1,0 +1,18 @@
+test_color_sgr_fidelity_through_the_product_ui (tests.integration.live_cw16_gap.Cw16GapScenarios.test_color_sgr_fidelity_through_the_product_ui) ... 
+[cw16-b2] gap-G1-COLOR: pass -> /home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-formal-c18/reports/c18-gap/gap-G1-COLOR.json
+ok
+test_composer_nonempty_holds_worker_report_until_cleared (tests.integration.live_cw16_gap.Cw16GapScenarios.test_composer_nonempty_holds_worker_report_until_cleared) ... 
+[cw16-b2] gap-G3-COMPOSER: pass -> /home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-formal-c18/reports/c18-gap/gap-G3-COMPOSER.json
+ok
+test_scroll_host_and_omp_pane_history_in_the_product_ui (tests.integration.live_cw16_gap.Cw16GapScenarios.test_scroll_host_and_omp_pane_history_in_the_product_ui) ... 
+[cw16-b2] gap-G1-SCROLL: pass -> /home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-formal-c18/reports/c18-gap/gap-G1-SCROLL.json
+ok
+test_session_switch_in_manager_tui_reregisters_without_replay (tests.integration.live_cw16_gap.Cw16GapScenarios.test_session_switch_in_manager_tui_reregisters_without_replay) ... 
+[cw16-b2] gap-G3-SESSION: pass -> /home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-formal-c18/reports/c18-gap/gap-G3-SESSION.json
+ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 139.037s
+
+OK
+== combined rc=0

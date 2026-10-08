@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw16-emph-01",
+  "ticket_id": "CW-16 G1-COLOR emphasis runtime observation on frozen C18 (ad-hoc probe, no repo change)",
+  "role": "test_designer",
+  "unit": "V-CW-16",
+  "candidate": "a2e3daf23dc98d8c98c760d62e227d4425c0b6b8265b6b3d9a696bc7a573482b",
+  "candidate_commit": "c47456a",
+  "routing": {
+    "planned_role": "test_designer",
+    "selected_role": "test_designer (wb-test-rerun, Sonnet high; one bounded runtime observation)",
+    "reason_codes": [
+      "gap_observation"
+    ],
+    "evidence_refs": [
+      "docs/features/core-workbench/VERIFICATION.md (G1-COLOR current(부분))",
+      "docs/features/core-workbench/PLAN.json G1-COLOR (C-D73 criterion)"
+    ]
+  },
+  "required_behavior": [
+    "Without changing any repo file (C18 frozen: verify a workflow_tools snapshot before and after equals the candidate, exclude ['.workflow/core-workbench/runs/implement-p2.6-20260927/**','graphify-out/**']), write a probe under /tmp that reuses tests/integration/live_cw16_gap.py's COLOR approach / tests/integration/cw16_harness.py (product entrypoint, sandboxed fake HOME, scripted provider, real OMP 18.8.0 binary present but no model requests; strip TMUX*/HERDR_*): in the host pane print text with SGR bold (1), underline (4), reverse (7) — alone and combined with an index colour (e.g. 1;31, 4;38;5;208, 7;44) — and capture the product UI's outer frames through the SU/REP pyte outer emulator (tests/ui/support.rep_screen_classes) and, if simple, an isolated tmux capture-pane -e. Assert each emphasis attribute and colour index survives to the outer screen. Also, if feasible without model requests, the same inside an OMP pane is NOT required.",
+    "Save the probe source and its JSON report under the run dir (cw16-emph-c18/), record command, exit, snapshot before/after."
+  ],
+  "allowed_write_paths": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/cw16-emph-c18/**",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-emph-01.md"
+  ],
+  "prohibited_paths": [
+    "any repo file outside the run dir"
+  ],
+  "rules": "No real provider requests; never read credential stores/contents or other processes' environ; isolate tmux; never touch the user's default tmux/herdr, other claude-swarm sockets, ~/wb-urux-sandbox or processes you did not start; kill only PIDs you started; no pkill; temp only under /tmp; no commits; no graphify update.",
+  "result_format": "Korean reply <=6 lines: per attribute pass/fail, snapshot equality."
+}

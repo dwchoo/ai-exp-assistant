@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw16-fix-review-02",
+  "ticket_id": "CW-16 fix-02 delta review",
+  "role": "reviewer",
+  "unit": "V-CW-16",
+  "routing": {
+    "planned_role": "reviewer",
+    "selected_role": "reviewer (wb-delta-reviewer, Sonnet high; bounded delta after full review)",
+    "reason_codes": [
+      "review_delta"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-fix-review-01.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/assignment-p27-cw16-fix-02.json",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-fix-02.md"
+    ]
+  },
+  "root_answers": [
+    "① no to-worker skill change (skill at its size limit; the cancel result detail explains after_resume).",
+    "② skipping process/cwd/file reconcile for a run already observed finished is accepted, provided run identity, approval and both OMPs paused+idle are checked and no automatic model work is started by the resume itself."
+  ],
+  "required_behavior": [
+    "Verify review-01 P2-1, P2-2, P3-1, P3-2 are closed per assignment-p27-cw16-fix-02.json and no new defect: PauseCoordinator.resume_finished correctness and races; keep_across_pause cancel notice exactly once; the prompt-hook env-names file (0600/0700, names only, no values, written only by our shell, stale-file handling, bash and dash); usage_snapshot wiring."
+  ],
+  "acceptance": [
+    "Verdict pass/block with file:line"
+  ],
+  "allowed_write_paths": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-fix-review-02.md"
+  ],
+  "rules": "Read-only. No real provider requests; never read credential contents; temp only under /tmp; no commits; no graphify update.",
+  "result_format": "Korean reply <=6 lines."
+}

@@ -1,0 +1,21 @@
+test_aggregate_accepts_genuine_copy (tests.integration.test_cw16_final_evidence_validators.FinalRecordsTests.test_aggregate_accepts_genuine_copy) ... ok
+test_aggregate_accepts_genuine_set_at_repo_root (tests.integration.test_cw16_final_evidence_validators.FinalRecordsTests.test_aggregate_accepts_genuine_set_at_repo_root) ... ok
+test_aggregate_rejects_each_mutation (tests.integration.test_cw16_final_evidence_validators.FinalRecordsTests.test_aggregate_rejects_each_mutation) ... ok
+test_expected_context_is_pinned_by_root (tests.integration.test_cw16_final_evidence_validators.FinalRecordsTests.test_expected_context_is_pinned_by_root) ... ok
+test_gate_accepts_genuine_set (tests.integration.test_cw16_final_evidence_validators.FinalRecordsTests.test_gate_accepts_genuine_set) ... ok
+test_gate_rejects_each_mutation (tests.integration.test_cw16_final_evidence_validators.FinalRecordsTests.test_gate_rejects_each_mutation) ... ok
+test_input_manifest_scope_is_complete (tests.integration.test_cw16_final_evidence_validators.FinalRecordsTests.test_input_manifest_scope_is_complete) ... ok
+test_recorded_gate_result_passed (tests.integration.test_cw16_final_evidence_validators.FinalRecordsTests.test_recorded_gate_result_passed) ... ok
+test_records_match_observed_checks (tests.integration.test_cw16_final_evidence_validators.FinalRecordsTests.test_records_match_observed_checks) ... ok
+test_aggregate_battery_catches_permissive_or_wrong_validator (tests.integration.test_cw16_final_evidence_validators.SelfCheckTests.test_aggregate_battery_catches_permissive_or_wrong_validator) ... ok
+test_aggregate_genuine_and_mutations (tests.integration.test_cw16_final_evidence_validators.SelfCheckTests.test_aggregate_genuine_and_mutations) ... ok
+test_gate_battery_catches_permissive_or_wrong_gate (tests.integration.test_cw16_final_evidence_validators.SelfCheckTests.test_gate_battery_catches_permissive_or_wrong_gate) ... ok
+test_gate_genuine_and_mutations (tests.integration.test_cw16_final_evidence_validators.SelfCheckTests.test_gate_genuine_and_mutations) ... ok
+test_load_request_rejects_malformed_and_accepts_complete (tests.integration.test_cw16_final_evidence_validators.SelfCheckTests.test_load_request_rejects_malformed_and_accepts_complete) ... ok
+test_pinned_p26_stale_issue_kinds_match_gate (tests.integration.test_cw16_final_evidence_validators.SelfCheckTests.test_pinned_p26_stale_issue_kinds_match_gate) ... ok
+test_records_from_checks_requires_unique_source (tests.integration.test_cw16_final_evidence_validators.SelfCheckTests.test_records_from_checks_requires_unique_source) ... ok
+
+----------------------------------------------------------------------
+Ran 16 tests in 1.900s
+
+OK

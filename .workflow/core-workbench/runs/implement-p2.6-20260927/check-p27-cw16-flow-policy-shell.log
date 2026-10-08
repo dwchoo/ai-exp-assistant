@@ -1,0 +1,93 @@
+== [1/2] I-FLOW/I-POLICY + CLK (live_cw16_flow_policy.py)
+test_clock_fixture_suite (tests.integration.live_cw16_flow_policy.Cw16ClockFixtureSuite.test_clock_fixture_suite) ... 
+[cw16-b2] clock suite: /home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-formal/reports/b4b-flow-policy/policy-CLK-clock-fixture-suite.json
+ok
+test_f1_free_work_with_f4_idempotence (tests.integration.live_cw16_flow_policy.Cw16FlowScenarios.test_f1_free_work_with_f4_idempotence) ... 
+[cw16-b2] flow-F1-F4: pass -> /home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-formal/reports/b4b-flow-policy/flow-F1-F4.json
+ok
+test_f2_experiment_judgments_and_missing_commit (tests.integration.live_cw16_flow_policy.Cw16FlowScenarios.test_f2_experiment_judgments_and_missing_commit) ... 
+[cw16-b2] flow-F2: pass -> /home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-formal/reports/b4b-flow-policy/flow-F2.json
+ok
+test_f3_delegated_change_local_commit_only (tests.integration.live_cw16_flow_policy.Cw16FlowScenarios.test_f3_delegated_change_local_commit_only) ... 
+[cw16-b2] flow-F3: pass -> /home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-formal/reports/b4b-flow-policy/flow-F3.json
+ok
+test_f45_worker_terminal_with_undelivered_task_and_after_cancel (tests.integration.live_cw16_flow_policy.Cw16FlowScenarios.test_f45_worker_terminal_with_undelivered_task_and_after_cancel)
+CW-19 VM observation: worker ``terminal`` gave no result for ~45 s while an unaccepted Task was open or ... 
+[cw16-b2] flow-F45: pass -> /home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-formal/reports/b4b-flow-policy/flow-F45.json
+ok
+test_f5_worker_direct_request_boundaries (tests.integration.live_cw16_flow_policy.Cw16FlowScenarios.test_f5_worker_direct_request_boundaries) ... 
+[cw16-b2] flow-F5: pass -> /home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-formal/reports/b4b-flow-policy/flow-F5.json
+ok
+test_f7_idle_then_f6_code_change_reports_end_instruction (tests.integration.live_cw16_flow_policy.Cw16FlowScenarios.test_f7_idle_then_f6_code_change_reports_end_instruction) ... 
+[cw16-b2] flow-F6-F7: pass -> /home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-formal/reports/b4b-flow-policy/flow-F6-F7.json
+ok
+test_p1_periodic_reviews_merge_and_p7_usage (tests.integration.live_cw16_flow_policy.Cw16PolicyScenarios.test_p1_periodic_reviews_merge_and_p7_usage) ... 
+[cw16-b2] policy-P1-P7: pass -> /home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-formal/reports/b4b-flow-policy/policy-P1-P7.json
+ok
+test_p2_pause_holds_automatic_work (tests.integration.live_cw16_flow_policy.Cw16PolicyScenarios.test_p2_pause_holds_automatic_work) ... 
+[cw16-b2] policy-P2: pass -> /home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-formal/reports/b4b-flow-policy/policy-P2.json
+ok
+test_p3_pause_interrupts_manager_turn (tests.integration.live_cw16_flow_policy.Cw16PolicyScenarios.test_p3_pause_interrupts_manager_turn) ... 
+[cw16-b2] policy-P3: pass -> /home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-formal/reports/b4b-flow-policy/policy-P3.json
+ok
+test_p4_retry_limit_and_revision_change (tests.integration.live_cw16_flow_policy.Cw16PolicyScenarios.test_p4_retry_limit_and_revision_change) ... 
+[cw16-b2] policy-P4: pass -> /home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-formal/reports/b4b-flow-policy/policy-P4.json
+ok
+test_p5_change_during_run_not_applied (tests.integration.live_cw16_flow_policy.Cw16PolicyScenarios.test_p5_change_during_run_not_applied) ... 
+[cw16-b2] policy-P5: pass -> /home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-formal/reports/b4b-flow-policy/policy-P5.json
+ok
+test_p6_restart_worker_stop_survivor_kill_host (tests.integration.live_cw16_flow_policy.Cw16PolicyScenarios.test_p6_restart_worker_stop_survivor_kill_host) ... 
+[cw16-b2] policy-P6: pass -> /home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-formal/reports/b4b-flow-policy/policy-P6.json
+ok
+test_p8_cancel_withdraw_keeps_observation (tests.integration.live_cw16_flow_policy.Cw16PolicyScenarios.test_p8_cancel_withdraw_keeps_observation) ... 
+[cw16-b2] policy-P8: pass -> /home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-formal/reports/b4b-flow-policy/policy-P8.json
+ok
+
+[cw16-b2] summary: /home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-formal/reports/b4b-flow-policy/flow-policy-summary.json
+
+----------------------------------------------------------------------
+Ran 14 tests in 863.177s
+
+OK
+== [2/2] I-SHELL bash+dash (live_cw16_shell.py)
+test_sh1_sh4_bash (tests.integration.live_cw16_shell.Cw16ShellScenarios.test_sh1_sh4_bash) ... 
+[cw16-b2] shell-SH1-SH4-bash: pass -> /home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-formal/reports/b4b-shell/shell-SH1-SH4-bash.json
+ok
+test_sh1_sh4_dash (tests.integration.live_cw16_shell.Cw16ShellScenarios.test_sh1_sh4_dash) ... 
+[cw16-b2] shell-SH1-SH4-dash: pass -> /home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-formal/reports/b4b-shell/shell-SH1-SH4-dash.json
+ok
+test_sh2_bash (tests.integration.live_cw16_shell.Cw16ShellScenarios.test_sh2_bash) ... 
+[cw16-b2] shell-SH2-bash: pass -> /home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-formal/reports/b4b-shell/shell-SH2-bash.json
+ok
+test_sh2_dash (tests.integration.live_cw16_shell.Cw16ShellScenarios.test_sh2_dash) ... 
+[cw16-b2] shell-SH2-dash: pass -> /home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-formal/reports/b4b-shell/shell-SH2-dash.json
+ok
+test_sh3_bash (tests.integration.live_cw16_shell.Cw16ShellScenarios.test_sh3_bash) ... 
+[cw16-b2] shell-SH3-bash: pass -> /home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-formal/reports/b4b-shell/shell-SH3-bash.json
+ok
+test_sh3_dash (tests.integration.live_cw16_shell.Cw16ShellScenarios.test_sh3_dash) ... 
+[cw16-b2] shell-SH3-dash: pass -> /home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-formal/reports/b4b-shell/shell-SH3-dash.json
+ok
+test_sh5_bash_prompt_command (tests.integration.live_cw16_shell.Cw16ShellScenarios.test_sh5_bash_prompt_command) ... 
+[cw16-b2] shell-SH5-prompt_command-bash: pass -> /home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-formal/reports/b4b-shell/shell-SH5-prompt_command-bash.json
+ok
+test_sh5_bash_trap_chld (tests.integration.live_cw16_shell.Cw16ShellScenarios.test_sh5_bash_trap_chld) ... 
+[cw16-b2] shell-SH5-trap_chld-bash: pass -> /home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-formal/reports/b4b-shell/shell-SH5-trap_chld-bash.json
+ok
+test_sh5_bash_trap_debug (tests.integration.live_cw16_shell.Cw16ShellScenarios.test_sh5_bash_trap_debug) ... 
+[cw16-b2] shell-SH5-trap_debug-bash: pass -> /home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-formal/reports/b4b-shell/shell-SH5-trap_debug-bash.json
+ok
+test_sh5_dash_ps1 (tests.integration.live_cw16_shell.Cw16ShellScenarios.test_sh5_dash_ps1) ... 
+[cw16-b2] shell-SH5-ps1-dash: pass -> /home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-formal/reports/b4b-shell/shell-SH5-ps1-dash.json
+ok
+test_sh5_dash_trap_chld (tests.integration.live_cw16_shell.Cw16ShellScenarios.test_sh5_dash_trap_chld) ... 
+[cw16-b2] shell-SH5-trap_chld-dash: pass -> /home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-formal/reports/b4b-shell/shell-SH5-trap_chld-dash.json
+ok
+
+[cw16-b2] summary: /home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-formal/reports/b4b-shell/shell-summary.json
+
+----------------------------------------------------------------------
+Ran 11 tests in 267.602s
+
+OK
+== combined rc=0

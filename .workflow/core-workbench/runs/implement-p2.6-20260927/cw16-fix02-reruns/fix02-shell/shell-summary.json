@@ -1,0 +1,38 @@
+{
+ "run_id": "fix02-shell",
+ "scenarios": {
+  "shell-SH1-SH4-bash": {
+   "result": "pass",
+   "steps": {
+    "start": "pass",
+    "SH1_prepare_parent": "pass",
+    "SH1_terminal_inherits": "pass",
+    "SH1_experiment_inherits": "pass",
+    "SH1_declared_env_exported_after_start": "pass",
+    "SH1_parent_unchanged_no_propagation": "pass",
+    "SH4_terminal_descendant_exit3": "pass",
+    "SH4_experiment_descendant_exit3": "pass",
+    "shutdown": "pass"
+   },
+   "unknowns": [],
+   "path": "/tmp/wb-cw16-fix02-reports/fix02-shell/shell-SH1-SH4-bash.json"
+  },
+  "shell-SH1-SH4-dash": {
+   "result": "pass",
+   "steps": {
+    "start": "pass",
+    "SH1_prepare_parent": "pass",
+    "SH1_terminal_inherits": "pass",
+    "SH1_experiment_inherits": "pass",
+    "SH1_declared_env_exported_after_start": "pass",
+    "SH1_parent_unchanged_no_propagation": "pass",
+    "SH4_terminal_descendant_exit3": "pass",
+    "SH4_experiment_descendant_exit3": "pass",
+    "shutdown": "pass"
+   },
+   "unknowns": [],
+   "path": "/tmp/wb-cw16-fix02-reports/fix02-shell/shell-SH1-SH4-dash.json"
+  }
+ },
+ "written_at": "2026-10-08T10:00:43+00:00"
+}

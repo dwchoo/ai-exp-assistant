@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw16-review-01",
+  "ticket_id": "CW-16 frozen C16 review (tests/integration + formal records)",
+  "role": "reviewer",
+  "unit": "V-CW-16",
+  "candidate": "f8ad6ec989ec2b9f1f72a81414bbaeeadc911997a196c0edf1eeed18442f4e3d",
+  "routing": {
+    "planned_role": "reviewer",
+    "selected_role": "reviewer (Opus high, fresh)",
+    "reason_codes": [
+      "final_gate"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-b4b-01.md"
+    ]
+  },
+  "required_behavior": [
+    "Review the frozen C16 final verification: tests/integration/** (harness, compat, flow/policy/shell, fault, VM driver, validator tests) for whether they actually observe what the 7 gate items and the 34 C-AC claim (no vacuous passes, no fixture standing in for runtime where runtime is required, correct isolation, cleanup), and the formal records check-p27-cw16-*-execution.json / -observed.json / logs (argv, exit, candidate before/after, item mapping, unknowns honesty) against requirements-p27-cw16.json, the CW-16 ticket, C-D72 and the plan. Also judge Root adjudications: C-AC-07 retry-limit report satisfied via held:retry_limit + skill instruction + delivered per-run reports; queue_full paste refusal recorded via fixture + L-CW17-CONTRACT sub-observation; regression-a intermittent first run + clean formal r2. Do not run the final gate. Read-only; you may re-run individual tests under /tmp."
+  ],
+  "acceptance": [
+    "Verdict pass/block; findings P1-P3 with file:line"
+  ],
+  "allowed_write_paths": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-review-01.md"
+  ],
+  "rules": "Read-only. No real provider requests. Never read credential stores/contents (the Workbench OMP home's agent.db symlink: metadata only) or other processes' environ; never print tokens; never edit ~/.omp, ~/.agents, ~/.claude, ~/.codex or user configs; isolate tmux/herdr; never touch the user's default tmux/herdr servers, other claude-swarm sockets, ~/wb-urux-sandbox (the user's Workbench) or processes you did not start; kill only PIDs you started; no pkill; temp only under /tmp; no commits; no graphify update; zero writes to the repo working tree (run dir and /tmp only).",
+  "result_format": "Korean reply <=10 lines."
+}

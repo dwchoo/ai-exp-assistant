@@ -1,0 +1,652 @@
+{
+ "scenario": "gap-G1-COLOR",
+ "run_id": "c18-gap",
+ "started_at": "2026-10-08T17:17:53+00:00",
+ "repo_head": "c47456a4ad2caa0b7da40fa84179da00f249f9d6",
+ "context": {
+  "host_shell": "bash"
+ },
+ "versions": {
+  "omp": "omp/18.8.0",
+  "omp_path": "/home/dwchoo/.local/bin/omp",
+  "tmux": "tmux 3.4",
+  "herdr": "herdr 0.9.3",
+  "bash": "GNU bash, version 5.2.21(1)-release (x86_64-pc-linux-gnu)",
+  "dash": "dash 0.5.12-6ubuntu5",
+  "sh": "/usr/bin/dash",
+  "python": "3.12.3",
+  "kernel": "7.0.0-30-generic",
+  "os": "Ubuntu 24.04.4 LTS"
+ },
+ "commands": [
+  {
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "start",
+    "--data-dir",
+    "/tmp/wbc16gapg1col-rrj29_x_/d",
+    "--omp",
+    "/home/dwchoo/.local/bin/omp",
+    "--omp-arg=--model",
+    "--omp-arg=wbcw16/scripted",
+    "--no-attach"
+   ],
+   "exit": 0,
+   "seconds": 3.76,
+   "stdout_tail": "tion check ...\nbackend pid 2719462 phase ready\ndata dir /tmp/wbc16gapg1col-rrj29_x_/d\n  host_shell: pid 2719467 alive=True owner=user\n  manager_omp: pid 2719470 alive=True owner=user\n  worker_omp: pid 2719471 alive=True owner=user\n  shell: bash /usr/bin/bash mode=manual_prompt\nomp isolation: ok (omp/18.8.0 evidence bridge_g3=18.2.10, isolation=18.6.1)\n  note: OMP 18.8.0 has not extracted its native addon into /tmp/wbc16gapg1col-rrj29_x_/h/.omp/natives/18.8.0 yet: the first Workbench OMP extracts it there (the same files your own omp 18.8.0 extracts; OMP has no setting to move this directory).\n",
+   "stderr_tail": ""
+  },
+  {
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "shutdown",
+    "--data-dir",
+    "/tmp/wbc16gapg1col-rrj29_x_/d",
+    "--json",
+    "--yes"
+   ],
+   "exit": 0,
+   "seconds": 0.22,
+   "stdout_tail": "no active work reported\n{\"shutdown\": {\"left_running\": [], \"lifecycle\": null, \"omp_children\": {\"alive\": [], \"observed\": []}, \"panes\": [{\"exit_status\": -1, \"pane\": \"host_shell\", \"survivors\": []}, {\"exit_status\": 143, \"pane\": \"manager_omp\", \"survivors\": []}, {\"exit_status\": 143, \"pane\": \"worker_omp\", \"survivors\": []}], \"previous_survivors\": [], \"problems\": [], \"processes\": {\"host_shell\": \"dead\", \"manager_omp\": \"dead\", \"worker_omp\": \"dead\"}, \"user_confirmed\": true, \"verified\": true}}\n",
+   "stderr_tail": ""
+  }
+ ],
+ "steps": {
+  "start": {
+   "status": "pass",
+   "seconds": 4.1,
+   "observed": {
+    "term": "xterm-256color",
+    "colorterm": "truecolor"
+   }
+  },
+  "COLOR_basic16": {
+   "status": "pass",
+   "seconds": 2.8,
+   "observed": {
+    "observed": {
+     "GQAR1": {
+      "sgr": "31",
+      "char": "G",
+      "fg": "red",
+      "bg": "default",
+      "fg_rgb": "cd0000",
+      "bg_rgb": null
+     },
+     "GQAG2": {
+      "sgr": "32",
+      "char": "G",
+      "fg": "green",
+      "bg": "default",
+      "fg_rgb": "00cd00",
+      "bg_rgb": null
+     },
+     "GQAB4": {
+      "sgr": "34",
+      "char": "G",
+      "fg": "blue",
+      "bg": "default",
+      "fg_rgb": "0000ee",
+      "bg_rgb": null
+     },
+     "GQAK9": {
+      "sgr": "91",
+      "char": "G",
+      "fg": "brightred",
+      "bg": "default",
+      "fg_rgb": "ff0000",
+      "bg_rgb": null
+     },
+     "GQAY3": {
+      "sgr": "43",
+      "char": "G",
+      "fg": "default",
+      "bg": "brown",
+      "fg_rgb": null,
+      "bg_rgb": "cdcd00"
+     }
+    }
+   }
+  },
+  "COLOR_sgr_30_37_90_97_40_47_100_107": {
+   "status": "pass",
+   "seconds": 15.1,
+   "observed": {
+    "observed": {
+     "GQFN30": {
+      "sgr": "30",
+      "char": "G",
+      "fg": "black",
+      "bg": "default",
+      "fg_rgb": "000000",
+      "bg_rgb": null
+     },
+     "GQFN31": {
+      "sgr": "31",
+      "char": "G",
+      "fg": "red",
+      "bg": "default",
+      "fg_rgb": "cd0000",
+      "bg_rgb": null
+     },
+     "GQFN32": {
+      "sgr": "32",
+      "char": "G",
+      "fg": "green",
+      "bg": "default",
+      "fg_rgb": "00cd00",
+      "bg_rgb": null
+     },
+     "GQFN33": {
+      "sgr": "33",
+      "char": "G",
+      "fg": "brown",
+      "bg": "default",
+      "fg_rgb": "cdcd00",
+      "bg_rgb": null
+     },
+     "GQFN34": {
+      "sgr": "34",
+      "char": "G",
+      "fg": "blue",
+      "bg": "default",
+      "fg_rgb": "0000ee",
+      "bg_rgb": null
+     },
+     "GQFN35": {
+      "sgr": "35",
+      "char": "G",
+      "fg": "magenta",
+      "bg": "default",
+      "fg_rgb": "cd00cd",
+      "bg_rgb": null
+     },
+     "GQFN36": {
+      "sgr": "36",
+      "char": "G",
+      "fg": "cyan",
+      "bg": "default",
+      "fg_rgb": "00cdcd",
+      "bg_rgb": null
+     },
+     "GQFN37": {
+      "sgr": "37",
+      "char": "G",
+      "fg": "white",
+      "bg": "default",
+      "fg_rgb": "e5e5e5",
+      "bg_rgb": null
+     },
+     "GQGN90": {
+      "sgr": "90",
+      "char": "G",
+      "fg": "brightblack",
+      "bg": "default",
+      "fg_rgb": "7f7f7f",
+      "bg_rgb": null
+     },
+     "GQGN91": {
+      "sgr": "91",
+      "char": "G",
+      "fg": "brightred",
+      "bg": "default",
+      "fg_rgb": "ff0000",
+      "bg_rgb": null
+     },
+     "GQGN92": {
+      "sgr": "92",
+      "char": "G",
+      "fg": "brightgreen",
+      "bg": "default",
+      "fg_rgb": "00ff00",
+      "bg_rgb": null
+     },
+     "GQGN93": {
+      "sgr": "93",
+      "char": "G",
+      "fg": "brightbrown",
+      "bg": "default",
+      "fg_rgb": "ffff00",
+      "bg_rgb": null
+     },
+     "GQGN94": {
+      "sgr": "94",
+      "char": "G",
+      "fg": "brightblue",
+      "bg": "default",
+      "fg_rgb": "5c5cff",
+      "bg_rgb": null
+     },
+     "GQGN95": {
+      "sgr": "95",
+      "char": "G",
+      "fg": "brightmagenta",
+      "bg": "default",
+      "fg_rgb": "ff00ff",
+      "bg_rgb": null
+     },
+     "GQGN96": {
+      "sgr": "96",
+      "char": "G",
+      "fg": "brightcyan",
+      "bg": "default",
+      "fg_rgb": "00ffff",
+      "bg_rgb": null
+     },
+     "GQGN97": {
+      "sgr": "97",
+      "char": "G",
+      "fg": "brightwhite",
+      "bg": "default",
+      "fg_rgb": "ffffff",
+      "bg_rgb": null
+     },
+     "GQHN40": {
+      "sgr": "40",
+      "char": "G",
+      "fg": "default",
+      "bg": "black",
+      "fg_rgb": null,
+      "bg_rgb": "000000"
+     },
+     "GQHN41": {
+      "sgr": "41",
+      "char": "G",
+      "fg": "default",
+      "bg": "red",
+      "fg_rgb": null,
+      "bg_rgb": "cd0000"
+     },
+     "GQHN42": {
+      "sgr": "42",
+      "char": "G",
+      "fg": "default",
+      "bg": "green",
+      "fg_rgb": null,
+      "bg_rgb": "00cd00"
+     },
+     "GQHN43": {
+      "sgr": "43",
+      "char": "G",
+      "fg": "default",
+      "bg": "brown",
+      "fg_rgb": null,
+      "bg_rgb": "cdcd00"
+     },
+     "GQHN44": {
+      "sgr": "44",
+      "char": "G",
+      "fg": "default",
+      "bg": "blue",
+      "fg_rgb": null,
+      "bg_rgb": "0000ee"
+     },
+     "GQHN45": {
+      "sgr": "45",
+      "char": "G",
+      "fg": "default",
+      "bg": "magenta",
+      "fg_rgb": null,
+      "bg_rgb": "cd00cd"
+     },
+     "GQHN46": {
+      "sgr": "46",
+      "char": "G",
+      "fg": "default",
+      "bg": "cyan",
+      "fg_rgb": null,
+      "bg_rgb": "00cdcd"
+     },
+     "GQHN47": {
+      "sgr": "47",
+      "char": "G",
+      "fg": "default",
+      "bg": "white",
+      "fg_rgb": null,
+      "bg_rgb": "e5e5e5"
+     },
+     "GQIN100": {
+      "sgr": "100",
+      "char": "G",
+      "fg": "default",
+      "bg": "brightblack",
+      "fg_rgb": null,
+      "bg_rgb": "7f7f7f"
+     },
+     "GQIN101": {
+      "sgr": "101",
+      "char": "G",
+      "fg": "default",
+      "bg": "brightred",
+      "fg_rgb": null,
+      "bg_rgb": "ff0000"
+     },
+     "GQIN102": {
+      "sgr": "102",
+      "char": "G",
+      "fg": "default",
+      "bg": "brightgreen",
+      "fg_rgb": null,
+      "bg_rgb": "00ff00"
+     },
+     "GQIN103": {
+      "sgr": "103",
+      "char": "G",
+      "fg": "default",
+      "bg": "brightbrown",
+      "fg_rgb": null,
+      "bg_rgb": "ffff00"
+     },
+     "GQIN104": {
+      "sgr": "104",
+      "char": "G",
+      "fg": "default",
+      "bg": "brightblue",
+      "fg_rgb": null,
+      "bg_rgb": "5c5cff"
+     },
+     "GQIN105": {
+      "sgr": "105",
+      "char": "G",
+      "fg": "default",
+      "bg": "bfightmagenta",
+      "fg_rgb": null,
+      "bg_rgb": "ff00ff"
+     },
+     "GQIN106": {
+      "sgr": "106",
+      "char": "G",
+      "fg": "default",
+      "bg": "brightcyan",
+      "fg_rgb": null,
+      "bg_rgb": "00ffff"
+     },
+     "GQIN107": {
+      "sgr": "107",
+      "char": "G",
+      "fg": "default",
+      "bg": "brightwhite",
+      "fg_rgb": null,
+      "bg_rgb": "ffffff"
+     }
+    }
+   }
+  },
+  "COLOR_256_cube": {
+   "status": "pass",
+   "seconds": 2.8,
+   "observed": {
+    "observed": {
+     "GQBC196": {
+      "sgr": "38;5;196",
+      "char": "G",
+      "fg": "ff0000",
+      "bg": "default",
+      "fg_rgb": "ff0000",
+      "bg_rgb": null
+     },
+     "GQBC046": {
+      "sgr": "38;5;46",
+      "char": "G",
+      "fg": "00ff00",
+      "bg": "default",
+      "fg_rgb": "00ff00",
+      "bg_rgb": null
+     },
+     "GQBC214": {
+      "sgr": "38;5;214",
+      "char": "G",
+      "fg": "ffaf00",
+      "bg": "default",
+      "fg_rgb": "ffaf00",
+      "bg_rgb": null
+     },
+     "GQBB021": {
+      "sgr": "48;5;21",
+      "char": "G",
+      "fg": "default",
+      "bg": "0000ff",
+      "fg_rgb": null,
+      "bg_rgb": "0000ff"
+     }
+    }
+   }
+  },
+  "COLOR_256_grey_ramp": {
+   "status": "pass",
+   "seconds": 2.8,
+   "observed": {
+    "observed": {
+     "GQCG236": {
+      "sgr": "38;5;236",
+      "char": "G",
+      "fg": "303030",
+      "bg": "default",
+      "fg_rgb": "303030",
+      "bg_rgb": null
+     },
+     "GQCG244": {
+      "sgr": "38;5;244",
+      "char": "G",
+      "fg": "808080",
+      "bg": "default",
+      "fg_rgb": "808080",
+      "bg_rgb": null
+     },
+     "GQCG252": {
+      "sgr": "38;5;252",
+      "char": "G",
+      "fg": "d0d0d0",
+      "bg": "default",
+      "fg_rgb": "d0d0d0",
+      "bg_rgb": null
+     },
+     "GQCH240": {
+      "sgr": "48;5;240",
+      "char": "G",
+      "fg": "default",
+      "bg": "585858",
+      "fg_rgb": null,
+      "bg_rgb": "585858"
+     }
+    }
+   }
+  },
+  "COLOR_256_system_indices": {
+   "status": "pass",
+   "seconds": 2.8,
+   "observed": {
+    "observed": {
+     "GQDS001": {
+      "sgr": "38;5;1",
+      "char": "G",
+      "fg": "red",
+      "bg": "default",
+      "fg_rgb": "cd0000",
+      "bg_rgb": null
+     },
+     "GQDS004": {
+      "sgr": "38;5;4",
+      "char": "G",
+      "fg": "blue",
+      "bg": "default",
+      "fg_rgb": "0000ee",
+      "bg_rgb": null
+     },
+     "GQDS008": {
+      "sgr": "38;5;8",
+      "char": "G",
+      "fg": "brightblack",
+      "bg": "default",
+      "fg_rgb": "7f7f7f",
+      "bg_rgb": null
+     },
+     "GQDS012": {
+      "sgr": "38;5;12",
+      "char": "G",
+      "fg": "brightblue",
+      "bg": "default",
+      "fg_rgb": "5c5cff",
+      "bg_rgb": null
+     }
+    }
+   }
+  },
+  "COLOR_24bit_rgb": {
+   "status": "pass",
+   "seconds": 3.0,
+   "observed": {
+    "observed": {
+     "GQET1": {
+      "sgr": "38;2;18;52;86",
+      "char": "G",
+      "fg": "005f5f",
+      "bg": "default",
+      "fg_rgb": "005f5f",
+      "bg_rgb": null
+     },
+     "GQET2": {
+      "sgr": "38;2;255;128;0",
+      "char": "G",
+      "fg": "ff8700",
+      "bg": "default",
+      "fg_rgb": "ff8700",
+      "bg_rgb": null
+     },
+     "GQET3": {
+      "sgr": "38;2;200;30;140",
+      "char": "G",
+      "fg": "d70087",
+      "bg": "default",
+      "fg_rgb": "d70087",
+      "bg_rgb": null
+     },
+     "GQEU1": {
+      "sgr": "48;2;250;100;50",
+      "char": "G",
+      "fg": "default",
+      "bg": "ff5f5f",
+      "fg_rgb": null,
+      "bg_rgb": "ff5f5f"
+     }
+    }
+   }
+  },
+  "COLOR_omp_pane_info": {
+   "status": "pass",
+   "seconds": 0.0,
+   "observed": {
+    "distinct_outer_fg_in_omp_panes": [
+     "00afd7",
+     "00afff",
+     "00ff87",
+     "121212",
+     "303030",
+     "4e4e4e",
+     "5f87af",
+     "5f87ff",
+     "5fafd7",
+     "5fafff",
+     "767676",
+     "875fff",
+     "a8a8a8",
+     "af5fd7",
+     "af5fff",
+     "d75fd7",
+     "d7af87",
+     "e4e4e4",
+     "eeeeee",
+     "ff5fd7"
+    ],
+    "count": 20,
+    "omp": "omp/18.8.0",
+    "note": "information only: OMP's own theme colours as they reach the outer terminal"
+   }
+  },
+  "shutdown": {
+   "status": "pass",
+   "seconds": 0.5,
+   "observed": {
+    "verified": true,
+    "residue": {}
+   }
+  }
+ },
+ "unknowns": [],
+ "result": "pass",
+ "identities": {
+  "backend": {
+   "pid": 2719462,
+   "start_ticks": 302494396
+  },
+  "backend_session": 2719461,
+  "panes": {
+   "host_shell": [
+    2719467,
+    302494415,
+    "aba0a993-c93c-42ac-91c6-59ccccb672b0",
+    1
+   ],
+   "manager_omp": [
+    2719470,
+    302494416,
+    "df6a3315-e86d-4636-a2dd-12c6dd5461f6",
+    1
+   ],
+   "worker_omp": [
+    2719471,
+    302494417,
+    "7a2faaad-cd5d-4af9-8b70-8be68fe1d965",
+    1
+   ]
+  },
+  "bridge": {
+   "manager": {
+    "session_id": "01a11c85-880f-7788-a37b-caca7f09f06a",
+    "generation": 1,
+    "pid": 2719470
+   },
+   "worker": {
+    "session_id": "01a11c85-883e-70b4-b8e2-1948c248ec6b",
+    "generation": 1,
+    "pid": 2719471
+   }
+  },
+  "shell_parent": {
+   "pid": 2719467,
+   "start_ticks": 302494415
+  },
+  "shell_generation": 1,
+  "supervisor": null
+ },
+ "omp_isolation": "ok",
+ "cleanup": {
+  "residue_before_fallback": {},
+  "root_removed": true,
+  "residue_after_fallback": {}
+ },
+ "provider": {
+  "requests": {},
+  "aborted": [],
+  "errors": [],
+  "rules": [
+   {
+    "name": "record",
+    "hits": 0
+   }
+  ],
+  "real_model_requests": 0,
+  "log_tail": []
+ },
+ "injected": {
+  "manager": [],
+  "worker": [],
+  "unknown": []
+ },
+ "notes": [],
+ "finished_at": "2026-10-08T17:18:27+00:00"
+}

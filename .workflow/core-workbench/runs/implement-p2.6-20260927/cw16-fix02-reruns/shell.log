@@ -1,0 +1,22 @@
+test_sh1_sh4_bash (tests.integration.live_cw16_shell.Cw16ShellScenarios.test_sh1_sh4_bash) ... 
+[cw16-b2] shell-SH1-SH4-bash: pass -> /tmp/wb-cw16-fix02-reports/fix02-shell/shell-SH1-SH4-bash.json
+ok
+test_sh1_sh4_dash (tests.integration.live_cw16_shell.Cw16ShellScenarios.test_sh1_sh4_dash) ... 
+[cw16-b2] shell-SH1-SH4-dash: pass -> /tmp/wb-cw16-fix02-reports/fix02-shell/shell-SH1-SH4-dash.json
+ok
+test_sh2_bash (tests.integration.live_cw16_shell.Cw16ShellScenarios.test_sh2_bash) ... skipped 'filtered out by WB_CW16_SCENARIOS (SH2)'
+test_sh2_dash (tests.integration.live_cw16_shell.Cw16ShellScenarios.test_sh2_dash) ... skipped 'filtered out by WB_CW16_SCENARIOS (SH2)'
+test_sh3_bash (tests.integration.live_cw16_shell.Cw16ShellScenarios.test_sh3_bash) ... skipped 'filtered out by WB_CW16_SCENARIOS (SH3)'
+test_sh3_dash (tests.integration.live_cw16_shell.Cw16ShellScenarios.test_sh3_dash) ... skipped 'filtered out by WB_CW16_SCENARIOS (SH3)'
+test_sh5_bash_prompt_command (tests.integration.live_cw16_shell.Cw16ShellScenarios.test_sh5_bash_prompt_command) ... skipped 'filtered out by WB_CW16_SCENARIOS (SH5)'
+test_sh5_bash_trap_chld (tests.integration.live_cw16_shell.Cw16ShellScenarios.test_sh5_bash_trap_chld) ... skipped 'filtered out by WB_CW16_SCENARIOS (SH5)'
+test_sh5_bash_trap_debug (tests.integration.live_cw16_shell.Cw16ShellScenarios.test_sh5_bash_trap_debug) ... skipped 'filtered out by WB_CW16_SCENARIOS (SH5)'
+test_sh5_dash_ps1 (tests.integration.live_cw16_shell.Cw16ShellScenarios.test_sh5_dash_ps1) ... skipped 'filtered out by WB_CW16_SCENARIOS (SH5)'
+test_sh5_dash_trap_chld (tests.integration.live_cw16_shell.Cw16ShellScenarios.test_sh5_dash_trap_chld) ... skipped 'filtered out by WB_CW16_SCENARIOS (SH5)'
+
+[cw16-b2] summary: /tmp/wb-cw16-fix02-reports/fix02-shell/shell-summary.json
+
+----------------------------------------------------------------------
+Ran 11 tests in 57.003s
+
+OK (skipped=9)

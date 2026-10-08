@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "unit": "V-CW-16",
+  "base_commit": "6a2ddb2",
+  "approved_bundle_digest": "b31396faad700dfbb5f9c95415ba34cac0ef7dabd517a4ef5c293ca8dc2c9cf2",
+  "inputs": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-plan-01.md",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-b1-01.md",
+    "docs/features/core-workbench/tickets/CW-16.md",
+    "docs/features/core-workbench/DECISIONS.md#C-D72"
+  ],
+  "user_authorization": "User 2026-10-08 '전부 진행해서 테스트까지 해서 완료하고 보고해'; C-D72",
+  "stage": "W (write + informal self-run). Formal runs happen later on the frozen candidate C16. Another batch writes concurrently in different files; informal host runtime self-runs may overlap — attribute timing flakes, do not chase them.",
+  "invocation": "p27-cw16-b3-01",
+  "ticket_id": "CW-16 B3: fault scenarios + VM driver + OMP broker",
+  "role": "test_designer",
+  "routing": {
+    "planned_role": "test_designer",
+    "selected_role": "test_designer (Opus high; host:reboot-vm)",
+    "reason_codes": [
+      "final_gate",
+      "fault_runtime",
+      "reboot_runtime"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-plan-01.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw19-vm-02.md"
+    ]
+  },
+  "required_behavior": [
+    "Implement plan §5.5 X1-X7 as tests/integration/live_cw16_fault.py on the B1 harness, the L-CW19-RESTART re-run wrapper (tests/recovery_boot/live_restart_independent_p27cw19.py), and fix the VM driver as tests/integration/vm_reboot_driver.py (from result-p27-cw19-vm-01-log.json driver.source; guest paths only differ) with manifest comparison. No SEL4/zsh (C-D72 (1)).",
+    "OMP 18.8.0 spawns `omp __omp_worker_daemon_broker` which outlives its OMP for a while (B1 F1). (a) In the product path, check whether Workbench full shutdown / pane close leaves brokers behind and how CW-19 survivor detection and shutdown verification treat them (must not report verified while an owned broker lives, must not kill a user's broker); report as a product finding with evidence if wrong. (b) Fix the G3 fault-integration probe cleanup (tests/gates/g3_omp) to wait bounded for its own broker to exit so the probe is deterministic on 18.8.0 (C-D72 (2) delta).",
+    "Self-run once on host (0 model requests) and the VM driver once (guest reboot only, never the host; VM ~/.local/share/wb-vm/wb-reboot start.sh/stop.sh/ssh.sh; shut it down after; keep disk files)."
+  ],
+  "allowed_write_paths": [
+    "tests/integration/** (your new files; harness additive helpers only, announced)",
+    "tests/gates/g3_omp/** (probe cleanup only)",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-b3-01.md"
+  ],
+  "prohibited_paths": [
+    "src/**",
+    "omp_bridge/**",
+    "docs/**",
+    "other .workflow files"
+  ],
+  "rules": "No real provider requests; only reboot the guest VM. Never read credential stores/contents or other processes' environ; never print tokens; never edit ~/.omp, ~/.agents, ~/.claude, ~/.codex or user configs; this session runs inside the user's tmux and herdr: strip TMUX/HERDR env from children and use only isolated sockets/dirs under /tmp; never query or touch the user's default tmux/herdr servers, other claude-swarm sockets, ~/wb-urux-sandbox (and the user's running Workbench/OMP there) or processes you did not start; kill only PIDs you started (pid+start ticks); no pkill; temp only under /tmp; no commits; no graphify update.",
+  "result_format": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-b3-01.md: scenario table, broker finding, VM run summary, formal run commands. Korean reply <=10 lines."
+}

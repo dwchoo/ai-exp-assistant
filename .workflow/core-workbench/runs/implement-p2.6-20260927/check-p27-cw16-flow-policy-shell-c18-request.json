@@ -1,0 +1,29 @@
+{
+ "root": "/home/dwchoo/ai-exp-assistant",
+ "requirements": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/requirements-p27-cw16.json",
+ "argv": [
+  "/usr/bin/env",
+  "-i",
+  "PATH=/home/dwchoo/.local/bin:/usr/bin:/bin",
+  "HOME=/home/dwchoo",
+  "LANG=C.UTF-8",
+  "PYTHONPATH=src",
+  "PYTHONDONTWRITEBYTECODE=1",
+  "WB_LIVE_CW16=1",
+  "WB_CW16_REPORT_DIR=/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-formal-c18/reports",
+  "/bin/bash",
+  "-c",
+  "rc=0; echo '== [1/2] I-FLOW/I-POLICY + CLK (live_cw16_flow_policy.py)'; WB_CW16_RUN_ID=c18-flow-policy /tmp/cw02-g1-venv/bin/python -m unittest -v tests/integration/live_cw16_flow_policy.py || rc=1; echo '== [2/2] I-SHELL bash+dash (live_cw16_shell.py)'; WB_CW16_RUN_ID=c18-shell /tmp/cw02-g1-venv/bin/python -m unittest -v tests/integration/live_cw16_shell.py || rc=1; echo \"== combined rc=$rc\"; exit $rc"
+ ],
+ "environment": {
+  "description": "Linux 7.0.0-30-generic Ubuntu 24.04.4; OMP 18.8.0 (~/.local/bin/omp); scripted local provider (0 real model requests); Bash 5.2.21; dash 0.5.12-6ubuntu5; tmux 3.4; Herdr 0.9.3; Python 3.12.3 venv /tmp/cw02-g1-venv (pyte); Node v22.23.2; env -i (TMUX*/HERDR_* stripped); frozen candidate C18 a2e3daf2 (HEAD c47456a)"
+ },
+ "log": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/check-p27-cw16-flow-policy-shell-c18.log",
+ "check_id": "p27-cw16-flow-policy-shell-c18",
+ "watch": [],
+ "exclude": [
+  ".workflow/core-workbench/runs/implement-p2.6-20260927/**",
+  "graphify-out/**"
+ ],
+ "timeout": 3600
+}

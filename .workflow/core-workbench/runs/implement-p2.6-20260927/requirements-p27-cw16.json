@@ -1,0 +1,123 @@
+{
+ "schema_version": 1,
+ "revision": "core-workbench-p2.7-CW-16",
+ "authority": "User 2026-10-08 '전부 진행해서 테스트까지 해서 완료하고 보고해'; approved bundle b31396faad700dfbb5f9c95415ba34cac0ef7dabd517a4ef5c293ca8dc2c9cf2 (amendment u, C-D72); PLAN p2.7 CW-16",
+ "acceptance_ids": [
+  "C-AC-01",
+  "C-AC-02",
+  "C-AC-03",
+  "C-AC-04",
+  "C-AC-05",
+  "C-AC-06",
+  "C-AC-07",
+  "C-AC-08",
+  "C-AC-09",
+  "C-AC-10",
+  "C-AC-11",
+  "C-AC-12",
+  "C-AC-13",
+  "C-AC-14",
+  "C-AC-15",
+  "C-AC-16",
+  "C-AC-17",
+  "C-AC-18",
+  "C-AC-19",
+  "C-AC-20",
+  "C-AC-21",
+  "C-AC-22",
+  "C-AC-23",
+  "C-AC-24",
+  "C-AC-25",
+  "C-AC-26",
+  "C-AC-27",
+  "C-AC-28",
+  "C-AC-29",
+  "C-AC-30",
+  "C-AC-31",
+  "C-AC-32",
+  "C-AC-33",
+  "C-AC-34"
+ ],
+ "gate_items": [
+  {
+   "id": "P-C-AC-19",
+   "acceptance_ids": [
+    "C-AC-19"
+   ],
+   "required_evidence_level": "runtime"
+  },
+  {
+   "id": "P-C-AC-20",
+   "acceptance_ids": [
+    "C-AC-20"
+   ],
+   "required_evidence_level": "runtime"
+  },
+  {
+   "id": "I-FLOW",
+   "acceptance_ids": [
+    "C-AC-01",
+    "C-AC-02",
+    "C-AC-03",
+    "C-AC-04",
+    "C-AC-05",
+    "C-AC-09",
+    "C-AC-11"
+   ],
+   "required_evidence_level": "runtime"
+  },
+  {
+   "id": "I-SHELL",
+   "acceptance_ids": [
+    "C-AC-03",
+    "C-AC-08",
+    "C-AC-20",
+    "C-AC-26",
+    "C-AC-32"
+   ],
+   "required_evidence_level": "runtime"
+  },
+  {
+   "id": "I-POLICY",
+   "acceptance_ids": [
+    "C-AC-07",
+    "C-AC-10",
+    "C-AC-12",
+    "C-AC-13",
+    "C-AC-21",
+    "C-AC-25",
+    "C-AC-27",
+    "C-AC-29",
+    "C-AC-30",
+    "C-AC-31",
+    "C-AC-33",
+    "C-AC-34"
+   ],
+   "required_evidence_level": "runtime"
+  },
+  {
+   "id": "I-FAULT",
+   "acceptance_ids": [
+    "C-AC-15",
+    "C-AC-16",
+    "C-AC-17",
+    "C-AC-18",
+    "C-AC-22",
+    "C-AC-23",
+    "C-AC-24",
+    "C-AC-28"
+   ],
+   "required_evidence_level": "runtime"
+  },
+  {
+   "id": "I-COMPAT",
+   "acceptance_ids": [
+    "C-AC-06",
+    "C-AC-14",
+    "C-AC-19",
+    "C-AC-20"
+   ],
+   "required_evidence_level": "runtime"
+  }
+ ]
+}

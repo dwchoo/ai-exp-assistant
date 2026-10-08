@@ -1,0 +1,476 @@
+{
+ "scenario": "policy-P4",
+ "run_id": "b4b-flow-policy",
+ "started_at": "2026-10-08T11:17:39+00:00",
+ "repo_head": "e63572356480f2431427d349d749fbd09c2ee72f",
+ "context": {
+  "host_shell": "bash"
+ },
+ "versions": {
+  "omp": "omp/18.8.0",
+  "omp_path": "/home/dwchoo/.local/bin/omp",
+  "tmux": "tmux 3.4",
+  "herdr": "herdr 0.9.3",
+  "bash": "GNU bash, version 5.2.21(1)-release (x86_64-pc-linux-gnu)",
+  "dash": "dash 0.5.12-6ubuntu5",
+  "sh": "/usr/bin/dash",
+  "python": "3.12.3",
+  "kernel": "7.0.0-30-generic",
+  "os": "Ubuntu 24.04.4 LTS"
+ },
+ "commands": [
+  {
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "start",
+    "--data-dir",
+    "/tmp/wbc16policyp4-c8t9sdni/d",
+    "--omp",
+    "/home/dwchoo/.local/bin/omp",
+    "--omp-arg=--model",
+    "--omp-arg=wbcw16/scripted",
+    "--no-attach"
+   ],
+   "exit": 0,
+   "seconds": 3.75,
+   "stdout_tail": "tion check ...\nbackend pid 2019788 phase ready\ndata dir /tmp/wbc16policyp4-c8t9sdni/d\n  host_shell: pid 2019796 alive=True owner=user\n  manager_omp: pid 2019799 alive=True owner=user\n  worker_omp: pid 2019800 alive=True owner=user\n  shell: bash /usr/bin/bash mode=manual_prompt\nomp isolation: ok (omp/18.8.0 evidence bridge_g3=18.2.10, isolation=18.6.1)\n  note: OMP 18.8.0 has not extracted its native addon into /tmp/wbc16policyp4-c8t9sdni/h/.omp/natives/18.8.0 yet: the first Workbench OMP extracts it there (the same files your own omp 18.8.0 extracts; OMP has no setting to move this directory).\n",
+   "stderr_tail": ""
+  },
+  {
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "shutdown",
+    "--data-dir",
+    "/tmp/wbc16policyp4-c8t9sdni/d",
+    "--json",
+    "--yes"
+   ],
+   "exit": 0,
+   "seconds": 3.28,
+   "stdout_tail": "rted\n{\"shutdown\": {\"left_running\": [], \"lifecycle\": null, \"omp_children\": {\"alive\": [], \"observed\": [{\"ended\": \"by_itself\", \"parent\": \"manager_omp\", \"parent_pid\": 2019799, \"pid\": 2020000, \"start_ticks\": 300333484}]}, \"panes\": [{\"exit_status\": -1, \"pane\": \"host_shell\", \"survivors\": []}, {\"exit_status\": 143, \"pane\": \"manager_omp\", \"survivors\": []}, {\"exit_status\": 143, \"pane\": \"worker_omp\", \"survivors\": []}], \"previous_survivors\": [], \"problems\": [], \"processes\": {\"host_shell\": \"dead\", \"manager_omp\": \"dead\", \"supervisor\": \"dead\", \"worker_omp\": \"dead\"}, \"user_confirmed\": true, \"verified\": true}}\n",
+   "stderr_tail": ""
+  }
+ ],
+ "steps": {
+  "start": {
+   "status": "pass",
+   "seconds": 4.1,
+   "observed": {}
+  },
+  "P4_three_reruns_then_retry_limit": {
+   "status": "pass",
+   "seconds": 12.5,
+   "observed": {
+    "rerun_results": [
+     {
+      "status": "dispatched",
+      "retry": 1,
+      "reason": null,
+      "runs_started": null,
+      "revision": 1
+     },
+     {
+      "status": "dispatched",
+      "retry": 2,
+      "reason": null,
+      "runs_started": null,
+      "revision": 2
+     },
+     {
+      "status": "dispatched",
+      "retry": 3,
+      "reason": null,
+      "runs_started": null,
+      "revision": 2
+     },
+     {
+      "status": "held",
+      "retry": null,
+      "reason": "retry_limit",
+      "runs_started": 4,
+      "revision": null
+     }
+    ],
+    "runs": 4,
+    "revisions": [
+     1,
+     1,
+     2,
+     2
+    ],
+    "task": {
+     "runs_started": 4,
+     "revision": 2,
+     "status": "finished",
+     "last_result": {
+      "judgment": "failure",
+      "outcome": "reported",
+      "report": "omp_processed",
+      "run_closed": true,
+      "run_id": "42b12cf6-3a5a-4c42-82c9-3d57cf8049c6"
+     }
+    },
+    "note": "after the limit the product holds re-runs (held:retry_limit); every earlier run's judgment reached the manager as a report"
+   }
+  },
+  "shutdown": {
+   "status": "pass",
+   "seconds": 3.6,
+   "observed": {
+    "verified": true,
+    "residue": {}
+   }
+  }
+ },
+ "unknowns": [],
+ "result": "pass",
+ "identities": {
+  "backend": {
+   "pid": 2019788,
+   "start_ticks": 300333048
+  },
+  "backend_session": 2019787,
+  "panes": {
+   "host_shell": [
+    2019796,
+    300333066,
+    "03819eb0-dbf7-4718-a920-1c0665f11558",
+    1
+   ],
+   "manager_omp": [
+    2019799,
+    300333068,
+    "d1680e98-a76d-4609-a74f-fbb8c27b1b81",
+    1
+   ],
+   "worker_omp": [
+    2019800,
+    300333068,
+    "f4064aa5-e5d6-4fa4-a4f6-6d4357bb6e16",
+    1
+   ]
+  },
+  "bridge": {
+   "manager": {
+    "session_id": "01a11b3b-bc7d-747b-8afe-0130445dd816",
+    "generation": 1,
+    "pid": 2019799
+   },
+   "worker": {
+    "session_id": "01a11b3b-bc7c-75c6-878d-b1412cf92691",
+    "generation": 1,
+    "pid": 2019800
+   }
+  },
+  "shell_parent": {
+   "pid": 2019796,
+   "start_ticks": 300333066
+  },
+  "shell_generation": 1,
+  "supervisor": null
+ },
+ "omp_isolation": "ok",
+ "cleanup": {
+  "residue_before_fallback": {},
+  "root_removed": true,
+  "residue_after_fallback": {}
+ },
+ "provider": {
+  "requests": {
+   "manager": 10,
+   "worker": 8
+  },
+  "aborted": [],
+  "errors": [],
+  "rules": [
+   {
+    "name": "record",
+    "hits": 0
+   },
+   {
+    "name": "worker-contract",
+    "hits": 8
+   },
+   {
+    "name": "exp:p4-go",
+    "hits": 1
+   },
+   {
+    "name": "",
+    "hits": 4
+   }
+  ],
+  "real_model_requests": 0,
+  "log_tail": [
+   {
+    "i": 1,
+    "at": 1791458264.6400616,
+    "role": "manager",
+    "last_role": "user",
+    "text_tail": "p4-go",
+    "injected_kind": null,
+    "tool_results": []
+   },
+   {
+    "i": 2,
+    "at": 1791458264.6692739,
+    "role": "manager",
+    "last_role": "tool",
+    "text_tail": "o not do it yourself (no commands, edits or checks for it). End your turn and wait for the worker's to_manager report.\"}",
+    "injected_kind": null,
+    "tool_results": [
+     "cw16-manager-1"
+    ]
+   },
+   {
+    "i": 3,
+    "at": 1791458264.7400954,
+    "role": "worker",
+    "last_role": "user",
+    "text_tail": null,
+    "injected_kind": "task",
+    "tool_results": []
+   },
+   {
+    "i": 4,
+    "at": 1791458265.0876024,
+    "role": "worker",
+    "last_role": "user",
+    "text_tail": null,
+    "injected_kind": "question",
+    "tool_results": []
+   },
+   {
+    "i": 5,
+    "at": 1791458265.13874,
+    "role": "manager",
+    "last_role": "user",
+    "text_tail": null,
+    "injected_kind": "report",
+    "tool_results": []
+   },
+   {
+    "i": 6,
+    "at": 1791458265.1587179,
+    "role": "manager",
+    "last_role": "tool",
+    "text_tail": "o not do it yourself (no commands, edits or checks for it). End your turn and wait for the worker's to_manager report.\"}",
+    "injected_kind": null,
+    "tool_results": [
+     "cw16-manager-2"
+    ]
+   },
+   {
+    "i": 7,
+    "at": 1791458265.2319798,
+    "role": "worker",
+    "last_role": "user",
+    "text_tail": null,
+    "injected_kind": "task",
+    "tool_results": []
+   },
+   {
+    "i": 8,
+    "at": 1791458265.5612879,
+    "role": "worker",
+    "last_role": "user",
+    "text_tail": null,
+    "injected_kind": "question",
+    "tool_results": []
+   },
+   {
+    "i": 9,
+    "at": 1791458265.6076362,
+    "role": "manager",
+    "last_role": "user",
+    "text_tail": null,
+    "injected_kind": "report",
+    "tool_results": []
+   },
+   {
+    "i": 10,
+    "at": 1791458265.6292436,
+    "role": "manager",
+    "last_role": "tool",
+    "text_tail": "o not do it yourself (no commands, edits or checks for it). End your turn and wait for the worker's to_manager report.\"}",
+    "injected_kind": null,
+    "tool_results": [
+     "cw16-manager-3"
+    ]
+   },
+   {
+    "i": 11,
+    "at": 1791458265.7151172,
+    "role": "worker",
+    "last_role": "user",
+    "text_tail": null,
+    "injected_kind": "task",
+    "tool_results": []
+   },
+   {
+    "i": 12,
+    "at": 1791458266.0518832,
+    "role": "worker",
+    "last_role": "user",
+    "text_tail": null,
+    "injected_kind": "question",
+    "tool_results": []
+   },
+   {
+    "i": 13,
+    "at": 1791458266.0991852,
+    "role": "manager",
+    "last_role": "user",
+    "text_tail": null,
+    "injected_kind": "report",
+    "tool_results": []
+   },
+   {
+    "i": 14,
+    "at": 1791458266.1220093,
+    "role": "manager",
+    "last_role": "tool",
+    "text_tail": "o not do it yourself (no commands, edits or checks for it). End your turn and wait for the worker's to_manager report.\"}",
+    "injected_kind": null,
+    "tool_results": [
+     "cw16-manager-4"
+    ]
+   },
+   {
+    "i": 15,
+    "at": 1791458266.1960697,
+    "role": "worker",
+    "last_role": "user",
+    "text_tail": null,
+    "injected_kind": "task",
+    "tool_results": []
+   },
+   {
+    "i": 16,
+    "at": 1791458266.511717,
+    "role": "worker",
+    "last_role": "user",
+    "text_tail": null,
+    "injected_kind": "question",
+    "tool_results": []
+   },
+   {
+    "i": 17,
+    "at": 1791458266.5557175,
+    "role": "manager",
+    "last_role": "user",
+    "text_tail": null,
+    "injected_kind": "report",
+    "tool_results": []
+   },
+   {
+    "i": 18,
+    "at": 1791458266.5654218,
+    "role": "manager",
+    "last_role": "tool",
+    "text_tail": "status\":\"held\",\"reason\":\"retry_limit\",\"task_id\":\"f6b3c6c3-d236-4b6b-a65d-ce4a70286f22\",\"retry_limit\":3,\"runs_started\":4}",
+    "injected_kind": null,
+    "tool_results": [
+     "cw16-manager-5"
+    ]
+   }
+  ]
+ },
+ "injected": {
+  "manager": [
+   {
+    "kind": "report",
+    "stage": null,
+    "payload_kind": null,
+    "task_id": "f6b3c6c3-d236-4b6b-a65d-ce4a70286f22",
+    "at": 1791458265.1387477
+   },
+   {
+    "kind": "report",
+    "stage": null,
+    "payload_kind": null,
+    "task_id": "f6b3c6c3-d236-4b6b-a65d-ce4a70286f22",
+    "at": 1791458265.6076484
+   },
+   {
+    "kind": "report",
+    "stage": null,
+    "payload_kind": null,
+    "task_id": "f6b3c6c3-d236-4b6b-a65d-ce4a70286f22",
+    "at": 1791458266.0991929
+   },
+   {
+    "kind": "report",
+    "stage": null,
+    "payload_kind": null,
+    "task_id": "f6b3c6c3-d236-4b6b-a65d-ce4a70286f22",
+    "at": 1791458266.5557292
+   }
+  ],
+  "worker": [
+   {
+    "kind": "task",
+    "stage": "execute",
+    "payload_kind": null,
+    "task_id": "f6b3c6c3-d236-4b6b-a65d-ce4a70286f22",
+    "at": 1791458264.7401083
+   },
+   {
+    "kind": "question",
+    "stage": "analysis",
+    "payload_kind": null,
+    "task_id": "f6b3c6c3-d236-4b6b-a65d-ce4a70286f22",
+    "at": 1791458265.087612
+   },
+   {
+    "kind": "task",
+    "stage": "execute",
+    "payload_kind": null,
+    "task_id": "f6b3c6c3-d236-4b6b-a65d-ce4a70286f22",
+    "at": 1791458265.2319937
+   },
+   {
+    "kind": "question",
+    "stage": "analysis",
+    "payload_kind": null,
+    "task_id": "f6b3c6c3-d236-4b6b-a65d-ce4a70286f22",
+    "at": 1791458265.561298
+   },
+   {
+    "kind": "task",
+    "stage": "execute",
+    "payload_kind": null,
+    "task_id": "f6b3c6c3-d236-4b6b-a65d-ce4a70286f22",
+    "at": 1791458265.715125
+   },
+   {
+    "kind": "question",
+    "stage": "analysis",
+    "payload_kind": null,
+    "task_id": "f6b3c6c3-d236-4b6b-a65d-ce4a70286f22",
+    "at": 1791458266.0518937
+   },
+   {
+    "kind": "task",
+    "stage": "execute",
+    "payload_kind": null,
+    "task_id": "f6b3c6c3-d236-4b6b-a65d-ce4a70286f22",
+    "at": 1791458266.1960785
+   },
+   {
+    "kind": "question",
+    "stage": "analysis",
+    "payload_kind": null,
+    "task_id": "f6b3c6c3-d236-4b6b-a65d-ce4a70286f22",
+    "at": 1791458266.511727
+   }
+  ],
+  "unknown": []
+ },
+ "notes": [],
+ "finished_at": "2026-10-08T11:18:00+00:00"
+}

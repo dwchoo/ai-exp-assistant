@@ -1,0 +1,262 @@
+{
+ "scenario": "shell-SH5-prompt_command-bash",
+ "run_id": "b4b-shell",
+ "started_at": "2026-10-08T11:22:33+00:00",
+ "repo_head": "e63572356480f2431427d349d749fbd09c2ee72f",
+ "context": {
+  "host_shell": "bash",
+  "shell": "bash"
+ },
+ "versions": {
+  "omp": "omp/18.8.0",
+  "omp_path": "/home/dwchoo/.local/bin/omp",
+  "tmux": "tmux 3.4",
+  "herdr": "herdr 0.9.3",
+  "bash": "GNU bash, version 5.2.21(1)-release (x86_64-pc-linux-gnu)",
+  "dash": "dash 0.5.12-6ubuntu5",
+  "sh": "/usr/bin/dash",
+  "python": "3.12.3",
+  "kernel": "7.0.0-30-generic",
+  "os": "Ubuntu 24.04.4 LTS"
+ },
+ "commands": [
+  {
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "start",
+    "--data-dir",
+    "/tmp/wbc16shellsh5-mtpse_nb/d",
+    "--omp",
+    "/home/dwchoo/.local/bin/omp",
+    "--omp-arg=--model",
+    "--omp-arg=wbcw16/scripted",
+    "--no-attach"
+   ],
+   "exit": 0,
+   "seconds": 3.64,
+   "stdout_tail": "tion check ...\nbackend pid 2032321 phase ready\ndata dir /tmp/wbc16shellsh5-mtpse_nb/d\n  host_shell: pid 2032329 alive=True owner=user\n  manager_omp: pid 2032332 alive=True owner=user\n  worker_omp: pid 2032333 alive=True owner=user\n  shell: bash /usr/bin/bash mode=manual_prompt\nomp isolation: ok (omp/18.8.0 evidence bridge_g3=18.2.10, isolation=18.6.1)\n  note: OMP 18.8.0 has not extracted its native addon into /tmp/wbc16shellsh5-mtpse_nb/h/.omp/natives/18.8.0 yet: the first Workbench OMP extracts it there (the same files your own omp 18.8.0 extracts; OMP has no setting to move this directory).\n",
+   "stderr_tail": ""
+  },
+  {
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "shutdown",
+    "--data-dir",
+    "/tmp/wbc16shellsh5-mtpse_nb/d",
+    "--json",
+    "--yes"
+   ],
+   "exit": 0,
+   "seconds": 3.37,
+   "stdout_tail": "no active work reported\n{\"shutdown\": {\"left_running\": [], \"lifecycle\": null, \"omp_children\": {\"alive\": [], \"observed\": [{\"ended\": \"by_itself\", \"parent\": \"worker_omp\", \"parent_pid\": 2032333, \"pid\": 2032550, \"start_ticks\": 300363165}]}, \"panes\": [{\"exit_status\": -1, \"pane\": \"host_shell\", \"survivors\": []}, {\"exit_status\": 143, \"pane\": \"manager_omp\", \"survivors\": []}, {\"exit_status\": 143, \"pane\": \"worker_omp\", \"survivors\": []}], \"previous_survivors\": [], \"problems\": [], \"processes\": {\"host_shell\": \"dead\", \"manager_omp\": \"dead\", \"worker_omp\": \"dead\"}, \"user_confirmed\": true, \"verified\": true}}\n",
+   "stderr_tail": ""
+  }
+ ],
+ "steps": {
+  "SH5_prompt_command": {
+   "status": "pass",
+   "seconds": 17.2,
+   "observed": {
+    "hook_named_in_reason": false,
+    "first": {
+     "status": "host_terminal_busy",
+     "reason": "host shell is not at a clean prompt (mode manual_input)"
+    },
+    "second": {
+     "status": "host_terminal_busy",
+     "reason": "host shell is not at a clean prompt (mode manual_input)"
+    },
+    "experiment": {
+     "status": "dispatched",
+     "held_reason": "host_terminal_busy",
+     "runs_started": 0
+    },
+    "held_reasons": [
+     "user_owner",
+     "parent_not_control_wait",
+     "unsubmitted_or_unconsumed_input"
+    ],
+    "dispatched": "dispatched"
+   }
+  },
+  "shutdown": {
+   "status": "pass",
+   "seconds": 3.6,
+   "observed": {
+    "verified": true,
+    "residue": {}
+   }
+  }
+ },
+ "unknowns": [],
+ "result": "pass",
+ "identities": {
+  "backend": {
+   "pid": 2032321,
+   "start_ticks": 300362448
+  },
+  "backend_session": 2032320,
+  "panes": {
+   "host_shell": [
+    2032329,
+    300362466,
+    "b94f1f01-a740-46f4-9500-e1f70370a9de",
+    1
+   ],
+   "manager_omp": [
+    2032332,
+    300362467,
+    "6229eb06-79a9-4df9-814f-393b3caa5077",
+    1
+   ],
+   "worker_omp": [
+    2032333,
+    300362468,
+    "68ee74fc-9401-4db7-81bf-56ecea13dac2",
+    1
+   ]
+  },
+  "bridge": {
+   "manager": {
+    "session_id": "01a11b40-3916-7489-9084-264a33dc767d",
+    "generation": 1,
+    "pid": 2032332
+   },
+   "worker": {
+    "session_id": "01a11b40-3918-730d-8e45-ee9481fd32e8",
+    "generation": 1,
+    "pid": 2032333
+   }
+  },
+  "shell_parent": {
+   "pid": 2032329,
+   "start_ticks": 300362466
+  },
+  "shell_generation": 1,
+  "supervisor": null
+ },
+ "omp_isolation": "ok",
+ "cleanup": {
+  "residue_before_fallback": {},
+  "root_removed": true,
+  "residue_after_fallback": {}
+ },
+ "provider": {
+  "requests": {
+   "worker": 4,
+   "manager": 2
+  },
+  "aborted": [],
+  "errors": [],
+  "rules": [
+   {
+    "name": "record",
+    "hits": 0
+   },
+   {
+    "name": "worker-contract",
+    "hits": 0
+   },
+   {
+    "name": "",
+    "hits": 0
+   },
+   {
+    "name": "term:sh5-a",
+    "hits": 1
+   },
+   {
+    "name": "",
+    "hits": 1
+   },
+   {
+    "name": "term:sh5-b",
+    "hits": 1
+   },
+   {
+    "name": "",
+    "hits": 1
+   },
+   {
+    "name": "exp:sh5-exp",
+    "hits": 1
+   }
+  ],
+  "real_model_requests": 0,
+  "log_tail": [
+   {
+    "i": 1,
+    "at": 1791458561.454759,
+    "role": "worker",
+    "last_role": "user",
+    "text_tail": "sh5-a",
+    "injected_kind": null,
+    "tool_results": []
+   },
+   {
+    "i": 2,
+    "at": 1791458561.4733417,
+    "role": "worker",
+    "last_role": "tool",
+    "text_tail": "no job, no typed line, no experiment run). Do not work around it; try again later or tell the manager with to_manager.\"}",
+    "injected_kind": null,
+    "tool_results": [
+     "cw16-worker-1"
+    ]
+   },
+   {
+    "i": 3,
+    "at": 1791458564.163509,
+    "role": "worker",
+    "last_role": "user",
+    "text_tail": "sh5-b",
+    "injected_kind": null,
+    "tool_results": []
+   },
+   {
+    "i": 4,
+    "at": 1791458564.172746,
+    "role": "worker",
+    "last_role": "tool",
+    "text_tail": "no job, no typed line, no experiment run). Do not work around it; try again later or tell the manager with to_manager.\"}",
+    "injected_kind": null,
+    "tool_results": [
+     "cw16-worker-2"
+    ]
+   },
+   {
+    "i": 5,
+    "at": 1791458564.914161,
+    "role": "manager",
+    "last_role": "user",
+    "text_tail": "sh5-exp",
+    "injected_kind": null,
+    "tool_results": []
+   },
+   {
+    "i": 6,
+    "at": 1791458564.9387515,
+    "role": "manager",
+    "last_role": "tool",
+    "text_tail": "o not do it yourself (no commands, edits or checks for it). End your turn and wait for the worker's to_manager report.\"}",
+    "injected_kind": null,
+    "tool_results": [
+     "cw16-manager-3"
+    ]
+   }
+  ]
+ },
+ "injected": {
+  "manager": [],
+  "worker": [],
+  "unknown": []
+ },
+ "notes": [
+  "prompt_command: held with reason 'host shell is not at a clean prompt (mode manual_input)', which does not name the hook"
+ ],
+ "finished_at": "2026-10-08T11:22:55+00:00"
+}

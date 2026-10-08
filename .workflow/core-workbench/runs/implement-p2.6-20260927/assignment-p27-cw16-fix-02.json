@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw16-fix-02",
+  "ticket_id": "CW-16 fix review-01 corrections",
+  "role": "worker_senior",
+  "unit": "V-CW-16",
+  "routing": {
+    "planned_role": "worker_senior",
+    "selected_role": "worker_senior (Opus high, fresh)",
+    "reason_codes": [
+      "review_block",
+      "pause_policy"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-fix-review-01.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-fix-01.md"
+    ]
+  },
+  "root_adjudication": [
+    "P2-1: a cancel during pause must truthfully notify the worker: queue the worker cancel notice with keep_across_pause (never submitted, so delivering after resume is not a replay) and make the cancel result say the worker is notified after the resume while paused (worker_notified reflects reality). Test pause->cancel->resume delivers exactly one notice.",
+    "P2-2: resuming after a run finished during pause must keep the run binding needed for pending analysis/report and for pause propagation and the shutdown stop fence; after such a resume, a new pause must reach both OMPs and the stop fence must hold. Test the full sequence.",
+    "P3-1 probe: prefer no typed probe at all — obtain the host shell's current exported environment through the managed shell's own hook/control channel (e.g. the existing prompt hook writing to a private 0600 file on request), so the user's terminal shows nothing, $? and history are untouched and keystrokes are never refused. If a typed probe must remain, it must preserve $?, never enter history, never refuse user keys silently, and never re-probe on every user command while held (probe once per user prompt change at most). Never write secret values to logs or the pane; compare only what is needed.",
+    "P3-2: attach usage_snapshot to the right class (worker_review.py ~L319) so known usage is shown; unknown stays '미확인'."
+  ],
+  "acceptance": [
+    "red->green tests; suites tests/backend, tests/recovery_boot, tests/ui, tests/terminal, tests/gates/g2_shell, tests/policy/* subdirs, tests/observation, tests/workflow with real exit codes; re-run B2 SH1 (bash, dash), P2 and the pause/cancel/resume paths of the B2 self-run command (result-p27-cw16-b2-01.md §7) — 0 model requests."
+  ],
+  "allowed_write_paths": "same as assignment-p27-cw16-fix-01.json",
+  "prohibited_paths": [
+    "tests/**/*_independent*",
+    "tests/integration/**",
+    "docs/**",
+    "other .workflow files"
+  ],
+  "rules": "No real provider requests; never read credential stores/contents or other processes' environ (our own managed shell via its own protocol is fine); never touch the user's tmux/herdr, other claude-swarm sockets, ~/wb-urux-sandbox, ~/.local/share/wb-vm or processes you did not start; kill only PIDs you started; no pkill; temp only under /tmp; no commits; no graphify update.",
+  "result_format": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-fix-02.md. Korean reply <=8 lines."
+}

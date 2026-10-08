@@ -1,0 +1,24 @@
+{
+ "root": "/home/dwchoo/ai-exp-assistant",
+ "requirements": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/requirements-p27-cw16.json",
+ "argv": [
+  "/usr/bin/env",
+  "-i",
+  "PATH=/usr/bin:/bin",
+  "LANG=C.UTF-8",
+  "/bin/bash",
+  "-c",
+  "rc=0; GH=$(mktemp -d /tmp/wb-cw16-c18-gaphome-XXXXXX); mkdir -p \"$GH/.omp/agent\"; /usr/bin/env -i HOME=$GH PATH=/home/dwchoo/.local/bin:/usr/bin:/bin LANG=C.UTF-8 TERM=xterm-256color PYTHONPATH=src PYTHONDONTWRITEBYTECODE=1 HTTP_PROXY=http://127.0.0.1:9 HTTPS_PROXY=http://127.0.0.1:9 ALL_PROXY=http://127.0.0.1:9 http_proxy=http://127.0.0.1:9 https_proxy=http://127.0.0.1:9 all_proxy=http://127.0.0.1:9 NO_PROXY=127.0.0.1 no_proxy=127.0.0.1 WB_LIVE_OMP_VERSION_RECORD=/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-formal-c18/reports/gap-omp-version.jsonl WB_LIVE_CW16=1 WB_CW16_REPORT_DIR=/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-formal-c18/reports WB_CW16_RUN_ID=c18-gap /tmp/cw02-g1-venv/bin/python -m unittest -v tests/integration/live_cw16_gap.py || rc=1; rm -rf \"$GH\"; echo \"== combined rc=$rc\"; exit $rc"
+ ],
+ "environment": {
+  "description": "Linux 7.0.0-30-generic Ubuntu 24.04.4; OMP 18.8.0 (~/.local/bin/omp, version-recorded); scripted local provider (0 real model requests); Python 3.12.3 venv /tmp/cw02-g1-venv (pyte); env -i (TMUX*/HERDR_* stripped), fake HOME under /tmp, HTTP(S)/ALL_PROXY=127.0.0.1:9; frozen candidate C18 a2e3daf2 (HEAD c47456a); command = result-p27-cw16-gap-01.md section 6-B"
+ },
+ "log": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/check-p27-cw16-gap-c18.log",
+ "check_id": "p27-cw16-gap-c18",
+ "watch": [],
+ "exclude": [
+  ".workflow/core-workbench/runs/implement-p2.6-20260927/**",
+  "graphify-out/**"
+ ],
+ "timeout": 3600
+}

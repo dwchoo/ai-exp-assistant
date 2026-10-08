@@ -1,0 +1,318 @@
+{
+ "scenario": "policy-P2",
+ "run_id": "cw16-b2-selfrun-164526",
+ "started_at": "2026-10-08T07:55:01+00:00",
+ "repo_head": "6a2ddb2b5441202c8e94d27f775c7159fb9672ae",
+ "context": {
+  "host_shell": "bash"
+ },
+ "versions": {
+  "omp": "omp/18.8.0",
+  "omp_path": "/home/dwchoo/.local/bin/omp",
+  "tmux": "tmux 3.4",
+  "herdr": "herdr 0.9.3",
+  "bash": "GNU bash, version 5.2.21(1)-release (x86_64-pc-linux-gnu)",
+  "dash": "dash 0.5.12-6ubuntu5",
+  "sh": "/usr/bin/dash",
+  "python": "3.12.3",
+  "kernel": "7.0.0-30-generic",
+  "os": "Ubuntu 24.04.4 LTS"
+ },
+ "commands": [
+  {
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "start",
+    "--data-dir",
+    "/tmp/wbc16policyp2-fglyk6lt/d",
+    "--omp",
+    "/home/dwchoo/.local/bin/omp",
+    "--omp-arg=--model",
+    "--omp-arg=wbcw16/scripted",
+    "--no-attach"
+   ],
+   "exit": 0,
+   "seconds": 3.73,
+   "stdout_tail": "tion check ...\nbackend pid 1603128 phase ready\ndata dir /tmp/wbc16policyp2-fglyk6lt/d\n  host_shell: pid 1603133 alive=True owner=user\n  manager_omp: pid 1603136 alive=True owner=user\n  worker_omp: pid 1603137 alive=True owner=user\n  shell: bash /usr/bin/bash mode=manual_prompt\nomp isolation: ok (omp/18.8.0 evidence bridge_g3=18.2.10, isolation=18.6.1)\n  note: OMP 18.8.0 has not extracted its native addon into /tmp/wbc16policyp2-fglyk6lt/h/.omp/natives/18.8.0 yet: the first Workbench OMP extracts it there (the same files your own omp 18.8.0 extracts; OMP has no setting to move this directory).\n",
+   "stderr_tail": ""
+  },
+  {
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "shutdown",
+    "--data-dir",
+    "/tmp/wbc16policyp2-fglyk6lt/d",
+    "--json",
+    "--yes"
+   ],
+   "exit": 0,
+   "seconds": 2.37,
+   "stdout_tail": "9419415f96c9\", \"survivors\": [{\"pid\": 1603136, \"role\": \"manager\", \"start_ticks\": 299117197}, {\"pid\": 1603137, \"role\": \"worker\", \"start_ticks\": 299117197}, {\"pid\": 1603133, \"role\": \"shell\", \"start_ticks\": 299117196}]}, \"panes\": [{\"exit_status\": -1, \"pane\": \"host_shell\", \"survivors\": []}, {\"exit_status\": 143, \"pane\": \"manager_omp\", \"survivors\": []}, {\"exit_status\": 143, \"pane\": \"worker_omp\", \"survivors\": []}], \"previous_survivors\": [], \"problems\": [], \"processes\": {\"host_shell\": \"dead\", \"manager_omp\": \"dead\", \"supervisor\": \"dead\", \"worker_omp\": \"dead\"}, \"user_confirmed\": true, \"verified\": true}}\n",
+   "stderr_tail": ""
+  }
+ ],
+ "steps": {
+  "start": {
+   "status": "pass",
+   "seconds": 4.1,
+   "observed": {}
+  },
+  "P2_pause_holds_sends_and_terminal": {
+   "status": "pass",
+   "seconds": 13.6,
+   "observed": {
+    "to_worker": {
+     "status": "held",
+     "reason": "paused"
+    },
+    "terminal": "paused",
+    "raw_log_growing": [
+     44,
+     77
+    ],
+    "manual_input": "user prompts to both OMP panes were accepted (manager turn ran, worker turn ran)",
+    "ui": [
+     "작업: 실험 \"P2 ticking run\" [실행 중] | 일시정지됨 | backend: ready | bridge manager=ok worker=ok | 마지막 확인 16:55:18 (0s 전) | Ctrl-] ? 도움말"
+    ]
+   }
+  },
+  "P2_run_end_shown_no_review_while_paused": {
+   "status": "pass",
+   "seconds": 77.7,
+   "observed": {
+    "end_shown_within_s": 0.4,
+    "review_exit": null,
+    "task": {
+     "status": "waiting_report",
+     "held_reason": "paused",
+     "last_result": null
+    },
+    "reviews_while_paused": 0,
+    "paused_for_s": 85.3,
+    "ui": [
+     "focus: WORKER OMP | host 입력 owner: user | shell mode: manual_prompt | worker: 작업 중 | 자동화: paused",
+     "작업: 실험 \"P2 ticking run\" [보고 대기 · paused] | 일시정지됨 | backend: ready | bridge manager=ok worker=ok | 마지막 확인 16:56:36 (0s 전) | Ctrl-] ? 도움말"
+    ]
+   }
+  },
+  "P2_resume_reconciled_no_replay": {
+   "status": "fail",
+   "seconds": 18.2,
+   "assertion": "{'defect': 'resume refused after the run ended while paused; Workbench stays paused (Task waiting_report/paused)', 'first': {'at': '2026-10-08T07:56:37+00:00', 'outcome': 'refused', 'reason': 'PausePolicyError: explicit resume and complete file/tool/process/task/approval reconciliation are required'}, 'second': {'at': '2026-10-08T07:56:43+00:00', 'outcome': 'refused', 'reason': 'PausePolicyError: explicit resume and complete file/tool/process/task/approval reconciliation are required'}, 'manager_cancel_while_paused': {'status': 'held', 'reason': 'paused'}, 'task': {'status': 'waiting_report', 'held_reason': 'paused'}, 'ui': ['작업: 실험 \"P2 ticking run\" [보고 대기 · paused] | 일시정지됨 · 재개 거부: PausePolicyError: explicit resume and complete file/tool/process/task/approval reconciliation a']}"
+  },
+  "shutdown": {
+   "status": "pass",
+   "seconds": 5.6,
+   "observed": {
+    "verified": true,
+    "residue": {}
+   }
+  }
+ },
+ "unknowns": [],
+ "result": "fail",
+ "identities": {
+  "backend": {
+   "pid": 1603128,
+   "start_ticks": 299117178
+  },
+  "backend_session": 1603127,
+  "panes": {
+   "host_shell": [
+    1603133,
+    299117196,
+    "cdc8ccbb-47ba-4f3d-b2bb-87068fb0e9d9",
+    1
+   ],
+   "manager_omp": [
+    1603136,
+    299117197,
+    "ebac7063-8b4f-4292-beae-d22b41041e63",
+    1
+   ],
+   "worker_omp": [
+    1603137,
+    299117197,
+    "35f6351e-c0c8-4014-959a-60431d83e795",
+    1
+   ]
+  },
+  "bridge": {
+   "manager": {
+    "session_id": "01a11a82-35bd-7556-843f-cceebb0a1384",
+    "generation": 1,
+    "pid": 1603136
+   },
+   "worker": {
+    "session_id": "01a11a82-3605-74b1-a055-c9e894fcfe04",
+    "generation": 1,
+    "pid": 1603137
+   }
+  },
+  "shell_parent": {
+   "pid": 1603133,
+   "start_ticks": 299117196
+  },
+  "shell_generation": 1,
+  "supervisor": null
+ },
+ "omp_isolation": "ok",
+ "cleanup": {
+  "residue_before_fallback": {},
+  "root_removed": true,
+  "residue_after_fallback": {}
+ },
+ "provider": {
+  "requests": {
+   "manager": 6,
+   "worker": 3
+  },
+  "aborted": [],
+  "errors": [],
+  "rules": [
+   {
+    "name": "record",
+    "hits": 0
+   },
+   {
+    "name": "worker-contract",
+    "hits": 1
+   },
+   {
+    "name": "exp:p2-go",
+    "hits": 1
+   },
+   {
+    "name": "",
+    "hits": 1
+   },
+   {
+    "name": "",
+    "hits": 1
+   },
+   {
+    "name": "p2-term:start",
+    "hits": 1
+   },
+   {
+    "name": "p2-term:next",
+    "hits": 1
+   },
+   {
+    "name": "",
+    "hits": 0
+   }
+  ],
+  "real_model_requests": 0,
+  "log_tail": [
+   {
+    "i": 1,
+    "at": 1791446105.926493,
+    "role": "manager",
+    "last_role": "user",
+    "text_tail": "p2-go",
+    "injected_kind": null,
+    "tool_results": []
+   },
+   {
+    "i": 2,
+    "at": 1791446105.9587672,
+    "role": "manager",
+    "last_role": "tool",
+    "text_tail": "o not do it yourself (no commands, edits or checks for it). End your turn and wait for the worker's to_manager report.\"}",
+    "injected_kind": null,
+    "tool_results": [
+     "cw16-manager-1"
+    ]
+   },
+   {
+    "i": 3,
+    "at": 1791446106.0242918,
+    "role": "worker",
+    "last_role": "user",
+    "text_tail": null,
+    "injected_kind": "task",
+    "tool_results": []
+   },
+   {
+    "i": 4,
+    "at": 1791446112.0341856,
+    "role": "manager",
+    "last_role": "user",
+    "text_tail": "p2-send",
+    "injected_kind": null,
+    "tool_results": []
+   },
+   {
+    "i": 5,
+    "at": 1791446112.0432389,
+    "role": "manager",
+    "last_role": "tool",
+    "text_tail": "{\"status\":\"held\",\"reason\":\"paused\"}",
+    "injected_kind": null,
+    "tool_results": [
+     "cw16-manager-2"
+    ]
+   },
+   {
+    "i": 6,
+    "at": 1791446112.7675047,
+    "role": "worker",
+    "last_role": "user",
+    "text_tail": "p2-term",
+    "injected_kind": null,
+    "tool_results": []
+   },
+   {
+    "i": 7,
+    "at": 1791446112.780277,
+    "role": "worker",
+    "last_role": "tool",
+    "text_tail": "othing was run: the user paused Workbench automation. A command already running continues. Wait for the user's resume.\"}",
+    "injected_kind": null,
+    "tool_results": [
+     "cw16-worker-3"
+    ]
+   },
+   {
+    "i": 8,
+    "at": 1791446214.5543876,
+    "role": "manager",
+    "last_role": "user",
+    "text_tail": "p2-cancel",
+    "injected_kind": null,
+    "tool_results": []
+   },
+   {
+    "i": 9,
+    "at": 1791446214.565799,
+    "role": "manager",
+    "last_role": "tool",
+    "text_tail": "{\"status\":\"held\",\"reason\":\"paused\"}",
+    "injected_kind": null,
+    "tool_results": [
+     "cw16-manager-4"
+    ]
+   }
+  ]
+ },
+ "injected": {
+  "manager": [],
+  "worker": [
+   {
+    "kind": "task",
+    "stage": "execute",
+    "payload_kind": null,
+    "task_id": "d7eb2a33-bdfa-4713-a098-fcf0baa74c82",
+    "at": 1791446106.0243037
+   }
+  ],
+  "unknown": []
+ },
+ "notes": [],
+ "finished_at": "2026-10-08T07:57:00+00:00"
+}

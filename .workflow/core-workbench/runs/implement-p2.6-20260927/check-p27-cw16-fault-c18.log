@@ -1,0 +1,52 @@
+== [1/2] I-FAULT host X1-X4,X6,X7 + X2R + X5 VM (live_cw16_fault.py, WB_CW16_VM=1)
+test_x1_detach_with_active_work (tests.integration.live_cw16_fault.Cw16FaultScenarios.test_x1_detach_with_active_work) ... 
+[cw16-fault] X1: {'X1.start_run': 'pass', 'X1.detach_active_review_continues': 'pass', 'X1.takeover_requested': 'pass', 'X1.detach_takeover_state_kept': 'pass', 'X1.detach_paused_pause_kept': 'pass', 'X1.resume_no_replay': 'pass', 'X1.shutdown': 'pass'}
+ok
+test_x2_backend_sigkill_restart (tests.integration.live_cw16_fault.Cw16FaultScenarios.test_x2_backend_sigkill_restart) ... 
+[cw16-fault] X2: {'X2.running_open_task': 'pass', 'X2.sigkill_backend': 'pass', 'X2.restart_reconcile': 'pass', 'X2.backend_restarted_once': 'pass', 'X2.no_replay': 'pass', 'X2.status_text': 'pass', 'X2.stop_survivor_unverified_refused': 'pass', 'X2.stop_survivor_verified_stopped': 'pass', 'X2.shutdown': 'pass'}
+ok
+test_x2r_l_cw19_restart_rerun (tests.integration.live_cw16_fault.Cw16FaultScenarios.test_x2r_l_cw19_restart_rerun) ... 
+[cw16-fault] X2R: {'X2R.l_cw19_restart': 'pass'}
+ok
+test_x3_model_fault_holds (tests.integration.live_cw16_fault.Cw16FaultScenarios.test_x3_model_fault_holds) ... 
+[cw16-fault] X3: {'X3.worker_fault_hold': 'pass', 'X3.analysis_waits_for_worker': 'pass', 'X3.worker_recovers': 'pass', 'X3.analysis_after_recovery': 'pass', 'X3.p2_2_first_tool_allowed': 'pass', 'X3.p2_1_manager_fault_report_kept': 'pass', 'X3.p2_1_delivered_once': 'pass', 'X3.shutdown': 'pass'}
+ok
+test_x4_shutdown_confirmation (tests.integration.live_cw16_fault.Cw16FaultScenarios.test_x4_shutdown_confirmation) ... 
+[cw16-fault] X4: {'X4.no_yes_refused_active_listed': 'pass', 'X4.yes_verified_nothing_left': 'pass', 'X4.owned_broker_not_alive_at_verified': 'pass', 'X4.survivor_unverified_exit1': 'pass'}
+ok
+test_x5_vm_reboot (tests.integration.live_cw16_fault.Cw16FaultScenarios.test_x5_vm_reboot) ... 
+[cw16-fault] X5: {'X5.vm_reboot': 'pass'}
+ok
+test_x6_storage_faults (tests.integration.live_cw16_fault.Cw16FaultScenarios.test_x6_storage_faults) ... 
+[cw16-fault] X6: {'X6.run_cap_64mib_run_continues': 'pass', 'X6.restart_keeps_task_spec_worktree': 'pass', 'X6.project_cap_reduced_fixture': 'pass', 'X6.start_fault_sandbox': 'pass', 'X6.raw_log_store_failure_shown': 'pass', 'X6.metadata_hold_and_pause_store_failure': 'pass', 'X6.pause_store_failure_visible_at_170': 'pass', 'X6.metadata_restored': 'pass', 'X6.shutdown': 'pass'}
+ok
+test_x7_takeover_during_delivery_restart (tests.integration.live_cw16_fault.Cw16FaultScenarios.test_x7_takeover_during_delivery_restart) ... 
+[cw16-fault] X7: {'X7.command_delivered': 'pass', 'X7.takeover_holds_new_sends': 'pass', 'X7.backend_restart': 'pass', 'X7.old_command_unknown_no_replay': 'pass', 'X7.shutdown': 'pass'}
+ok
+
+[cw16-fault] matrix: /home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-formal-c18/reports/c18-fault/fault-matrix.json
+
+----------------------------------------------------------------------
+Ran 8 tests in 1222.317s
+
+OK
+== [2/2] G3 fixed probe version record + broker wait (fake HOME, proxy blocked)
+
+[g3-version-record] {"gate": "G3 extension fault integration", "historical_pin": "omp/18.2.10", "omp": "/home/dwchoo/.local/bin/omp", "omp_version": "omp/18.8.0"}
+test_live_outage_false_ack_control_is_rejected (tests.gates.g3_omp.test_tui_extension_fault_integration.ExtensionFaultIntegrationTests.test_live_outage_false_ack_control_is_rejected) ... /usr/lib/python3.12/pty.py:95: DeprecationWarning: This process (pid=2708432) is multi-threaded, use of forkpty() may lead to deadlocks in the child.
+  pid, fd = os.forkpty()
+
+[g3-broker-wait] {"bound_seconds": 20.0, "remaining": [], "seen": 0, "waited_seconds": 0.02}
+ok
+test_opt_in_fault_before_enqueue_survives_real_reconnect_without_replay (tests.gates.g3_omp.test_tui_extension_fault_integration.ExtensionFaultIntegrationTests.test_opt_in_fault_before_enqueue_survives_real_reconnect_without_replay) ... 
+[g3-broker-wait] {"bound_seconds": 20.0, "remaining": [], "seen": 1, "waited_seconds": 3.06}
+ok
+test_outage_request_is_not_success_or_replayed_after_same_process_reconnect (tests.gates.g3_omp.test_tui_extension_fault_integration.ExtensionFaultIntegrationTests.test_outage_request_is_not_success_or_replayed_after_same_process_reconnect) ... 
+[g3-broker-wait] {"bound_seconds": 20.0, "remaining": [], "seen": 1, "waited_seconds": 2.94}
+ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 34.798s
+
+OK
+== combined rc=0

@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw16-b4a-01",
+  "ticket_id": "CW-16 B4a: G4 final evidence validator tests (W stage, before the final freeze)",
+  "role": "test_designer",
+  "unit": "V-CW-16",
+  "base_commit": "6b837ae",
+  "routing": {
+    "planned_role": "test_designer",
+    "selected_role": "test_designer (Opus high; validator negative controls)",
+    "reason_codes": [
+      "final_gate",
+      "evidence_validator"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-plan-01.md"
+    ]
+  },
+  "required_behavior": [
+    "Write tests/integration/test_cw16_final_evidence_validators.py per plan §5.7 item 3: skipped (not counted as pass) unless env WB_CW16_FINAL_REQUEST points to a JSON describing the final records (requirements path, candidate id, check observed files, gate result, aggregate expected context); when set, copy the real final records to a tmp dir and assert both the workflow gate (.agents/skills/workflow-ledger/scripts/workflow_tools.py gate) and tests/gates/harness/aggregate.py validate() accept the genuine set and reject each mutation with the exact issue kind: missing check, stale p2.6 observed (check-cw16-final-observed.json 6dc51f), unknowns, 1-byte log tamper, other candidate, fixture evidence level, acceptance mismatch; aggregate: missing/duplicate/unowned record, changed integrated input, failed/unknown, changed candidate_id, insufficient evidence level / fixture-only runtime, evidence sha change, pinned JSON with a fixture key. Use the p2.6 records in the run dir as format examples; Root fixes the expected context independently of the records (document the request JSON schema in the module docstring).",
+    "Unit-test the test itself against synthetic records in a tmp dir (a small self-check module or class that always runs) so the logic is exercised without the final records."
+  ],
+  "allowed_write_paths": [
+    "tests/integration/test_cw16_final_evidence_validators.py",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-b4a-01.md"
+  ],
+  "prohibited_paths": [
+    "src/**",
+    "omp_bridge/**",
+    "docs/**",
+    "other tests",
+    "other .workflow files"
+  ],
+  "rules": "No real provider requests; never read credential contents; temp only under /tmp; no commits; no graphify update.",
+  "result_format": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-b4a-01.md: request JSON schema, cases, self-check results. Korean reply <=6 lines."
+}

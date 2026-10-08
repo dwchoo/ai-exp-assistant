@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "feature": "core-workbench",
-  "phase": "implementing",
+  "phase": "implemented_verified",
   "revision": "r1.13",
   "approval_status": "approved_with_C-D55_amendment",
   "approval": {
@@ -425,7 +425,7 @@
   "implementation_p27": {
     "run_record": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
     "approved_bundle_sha256": "91fe05dc882d8c00ab0eb28c30e2b6cabcbfacb0f0fee3f0eaeecfaff5b7d3e8",
-    "status": "CW-19 integrated (L-CW19-RESTART, L-CW19-REBOOT passed; C-D71); C-D72 recorded; next: CW-16 B1 harness+compat -> B2/B3 -> freeze C16 -> B4 formal+real model -> review -> docs/gate",
+    "status": "Core Workbench p2.7 complete: CW-19 integrated, CW-16 done_verified on C18 (c47456a + docs); follow-ups listed in integration-p27-cw16.json; nothing pushed after 72e7d18",
     "resumed_from": ".codex/handoffs/2026-09-29-core-workbench-p27-cw17/HANDOFF.md",
     "units": {
       "V-CW-17-p2.7": {
@@ -500,6 +500,11 @@
         "status": "integrated",
         "record": ".workflow/core-workbench/runs/implement-p2.6-20260927/integration-p27-cw19.json",
         "candidate": "93fb44815693d8e78c104192371ce3f77c95785585f979c94fa88f320cfe9394"
+      },
+      "V-CW-16": {
+        "status": "done_verified",
+        "record": ".workflow/core-workbench/runs/implement-p2.6-20260927/integration-p27-cw16.json",
+        "candidate": "a2e3daf23dc98d8c98c760d62e227d4425c0b6b8265b6b3d9a696bc7a573482b"
       }
     },
     "user_review_checkpoints": {
@@ -518,6 +523,6 @@
       "workbench status creates the data dir as a side effect (P3, record for CW-16)"
     ],
     "environment_note": "OMP upgraded by user to 18.4.4 (was 18.2.10 during CW-02..CW-06 evidence) - compatibility re-check needed (CW-16 I-COMPAT) | 2026-10-07: local OMP is 18.7.0 (was 18.6.1); isolation evidence not yet regenerated on 18.7.0.",
-    "approved_bundle_digest": "b31396faad700dfbb5f9c95415ba34cac0ef7dabd517a4ef5c293ca8dc2c9cf2"
+    "approved_bundle_digest": "6a94257554222410497069c685c3cd73d39dcc9b32ff42b08007eddc526a5b94"
   }
 }

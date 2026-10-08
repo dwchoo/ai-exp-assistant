@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw16-gap-01",
+  "ticket_id": "CW-16 gap closing: run the 18.2.10-pinned live tests on 18.8.0 in a sandbox + re-observe G1-COLOR / G3-SESSION / partial items",
+  "role": "test_designer",
+  "unit": "V-CW-16",
+  "base_commit": "e635723",
+  "routing": {
+    "planned_role": "test_designer",
+    "selected_role": "test_designer (Opus high)",
+    "reason_codes": [
+      "final_gate_gap",
+      "sandbox"
+    ],
+    "evidence_refs": [
+      "docs/features/core-workbench/VERIFICATION.md (draft §6, §9, §11)",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-review-01.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-b2-01.md"
+    ]
+  },
+  "user_authorization": "User 2026-10-08 '전부 진행해서 테스트까지 해서 완료하고 보고해'; C-D72 (2) 18.8.0 basis",
+  "required_behavior": [
+    "Per C-D72 (2), convert the OMP 18.2.10 hard pins in tests/backend/live_harness.py (lines ~28, 46) and the tests that use it (test_live_start*.py, test_live_detach_independent.py, test_live_input_independent.py, test_live_contract_independent.py, test_live_paste_responsive.py, test_live_review_fixes_independent_p27c.py, and the 2 terminal skips listed in the draft VERIFICATION.md §6) to version-record, and make the harness run in a sandbox: fake HOME under /tmp, empty agent.db placeholder (never the user's credential store), the scripted local provider (tests/integration/cw16_harness.py ScriptedProvider or the existing p27w Script) with HTTP(S)/ALL_PROXY=http://127.0.0.1:9 — so 0 real model requests and no credential access. Keep every observation/assertion; edits in *_independent* files are allowed here ONLY for the pin/harness wiring lines (document each).",
+    "Re-observe on 18.8.0: G1-COLOR (pane RGB/256-color fidelity through the product UI into an outer emulator that supports truecolor, e.g. pyte or an isolated tmux capture), G3-SESSION (OMP TUI session switch such as /new while Workbench runs: bridge re-registers, generation/session handling, no replay — no model request needed), G3-TUI-CONTENTION non-empty composer hold (text left in a pane's composer -> delivery deferred, shown), G1-TEXT-TOOLS scroll (pane scroll in the product UI), L-CW17-START backend reuse on a second start while running, L-CW17-DETACH frontend SIGKILL then re-attach after >60 s, paste responsiveness, live pane queue_full. Put new scenarios under tests/integration/live_cw16_gap.py (W stage) using the B1 harness, or fix the existing tests above to run.",
+    "Self-run everything once (0 model requests) and report pass/fail per item; report product defects with repro (do not fix src).",
+    "A product fixer (shutdown/banner) edits src concurrently; attribute failures in their area."
+  ],
+  "allowed_write_paths": [
+    "tests/backend/live_harness.py",
+    "tests/backend/test_live_*.py (pin/harness wiring only)",
+    "tests/terminal/** (the 2 pinned skips: pin wiring only)",
+    "tests/integration/live_cw16_gap.py",
+    "tests/integration/cw16_harness.py (additive only)",
+    "tests/gates/g1_vt/**, tests/gates/g3_omp/** (pin -> version record only)",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-gap-01.md"
+  ],
+  "prohibited_paths": [
+    "src/**",
+    "omp_bridge/**",
+    "docs/**",
+    "other .workflow files"
+  ],
+  "rules": "No real provider requests; never read credential stores/contents or other processes' environ; never print tokens; never edit ~/.omp, ~/.agents, ~/.claude, ~/.codex or user configs; strip TMUX*/HERDR_* and isolate tmux/herdr; never touch the user's default tmux/herdr servers, other claude-swarm sockets, ~/wb-urux-sandbox, ~/.local/share/wb-vm or processes you did not start; kill only PIDs you started; no pkill; temp only under /tmp; no commits; no graphify update.",
+  "result_format": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-gap-01.md: per item pass/fail with evidence, converted tests list, formal run commands. Korean reply <=10 lines."
+}

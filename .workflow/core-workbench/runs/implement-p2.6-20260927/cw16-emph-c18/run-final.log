@@ -1,0 +1,13 @@
+test_emphasis_through_the_product_ui (__main__.EmphasisProbe.test_emphasis_through_the_product_ui) ... 
+[cw16-b2] emph-G1-COLOR: pass -> /home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-emph-c18/reports/c18-emph-final/emph-G1-COLOR.json
+ok
+
+----------------------------------------------------------------------
+Ran 1 test in 17.950s
+
+OK
+exit=0
+
+real	0m18.074s
+user	0m5.968s
+sys	0m0.292s

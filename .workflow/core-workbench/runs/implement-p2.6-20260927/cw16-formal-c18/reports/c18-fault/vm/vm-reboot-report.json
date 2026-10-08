@@ -1,0 +1,743 @@
+{
+ "scenario": "X5-vm-reboot",
+ "run_id": "c18-fault",
+ "vm_dir": "/home/dwchoo/.local/share/wb-vm/wb-reboot",
+ "guest_root": "~/cw16-reboot-c18-fault",
+ "host_repo_head": "c47456a4ad2caa0b7da40fa84179da00f249f9d6",
+ "events": [
+  {
+   "at": "2026-10-09T02:07:38+0900",
+   "what": "start.sh",
+   "argv": [
+    "~/.local/share/wb-vm/wb-reboot/start.sh"
+   ],
+   "rc": 0,
+   "seconds": 0.0,
+   "stdout_tail": "started pid 2699829\n",
+   "stderr_tail": ""
+  },
+  {
+   "at": "2026-10-09T02:07:43+0900",
+   "what": "boot_id",
+   "argv": [
+    "~/.local/share/wb-vm/wb-reboot/ssh.sh",
+    "cat /proc/sys/kernel/random/boot_id"
+   ],
+   "rc": 255,
+   "seconds": 5.0,
+   "stdout_tail": "",
+   "stderr_tail": "Connection timed out during banner exchange\r\n"
+  },
+  {
+   "at": "2026-10-09T02:07:47+0900",
+   "what": "boot_id",
+   "argv": [
+    "~/.local/share/wb-vm/wb-reboot/ssh.sh",
+    "cat /proc/sys/kernel/random/boot_id"
+   ],
+   "rc": 0,
+   "seconds": 0.7,
+   "stdout_tail": "3ada806f-8bd6-4b4a-a1e1-062233be5a22\n",
+   "stderr_tail": ""
+  },
+  {
+   "at": "2026-10-09T02:07:47+0900",
+   "what": "rsync",
+   "argv": [
+    "rsync",
+    "-a",
+    "--delete",
+    "--exclude=.git",
+    "--exclude=.workflow",
+    "--exclude=graphify-out"
+   ],
+   "rc": 0,
+   "seconds": 0.3,
+   "stdout_tail": "",
+   "stderr_tail": ""
+  },
+  {
+   "at": "2026-10-09T02:07:47+0900",
+   "what": "guest manifest",
+   "argv": [
+    "~/.local/share/wb-vm/wb-reboot/ssh.sh",
+    "python3 - ~/ai-exp-assistant src omp_bridge tests/recovery_boot"
+   ],
+   "rc": 0,
+   "seconds": 0.3,
+   "stdout_tail": "<manifest count=93 aggregate=6eeed2425de99a74c657efa1e09fcf30c5bab1bd4669169ce72067cf16fcd0b2>",
+   "stderr_tail": ""
+  },
+  {
+   "at": "2026-10-09T02:07:47+0900",
+   "what": "install driver",
+   "argv": [
+    "~/.local/share/wb-vm/wb-reboot/ssh.sh",
+    "cat > ~/cw16-vm-driver.py && sha256sum ~/cw16-vm-driver.py"
+   ],
+   "rc": 0,
+   "seconds": 0.2,
+   "stdout_tail": "46182ff76e6eeb3570cd4d068f1a0ea025f5f6912ecd8eface847dc7150bd5ac  /home/dwchoo/cw16-vm-driver.py\n",
+   "stderr_tail": ""
+  },
+  {
+   "at": "2026-10-09T02:07:48+0900",
+   "what": "guest versions",
+   "argv": [
+    "~/.local/share/wb-vm/wb-reboot/ssh.sh",
+    ". /etc/os-release; echo \"os=$PRETTY_NAME\"; echo \"kernel=$(uname -r)\"; echo \"bash=$(bash --version | head -1)\"; echo \"omp=$(~/.local/bin/omp --version 2>&1 | head -1)\"; echo \"python=$(~/wb-venv/bin/python -V 2>&1)\""
+   ],
+   "rc": 0,
+   "seconds": 0.4,
+   "stdout_tail": "os=Ubuntu 24.04.5 LTS\nkernel=6.8.0-142-generic\nbash=GNU bash, version 5.2.21(1)-release (x86_64-pc-linux-gnu)\nomp=omp/18.2.10\npython=Python 3.12.3\n",
+   "stderr_tail": ""
+  },
+  {
+   "at": "2026-10-09T02:07:54+0900",
+   "what": "guest probe (probe)",
+   "argv": [
+    "~/.local/share/wb-vm/wb-reboot/ssh.sh",
+    "cd ~ && CW19_BASE=probe CW16_VM_ROOT=$HOME/cw16-reboot-c18-fault PYTHONDONTWRITEBYTECODE=1 ~/wb-venv/bin/python ~/cw16-vm-driver.py probe"
+   ],
+   "rc": 0,
+   "seconds": 5.9,
+   "stdout_tail": "{\"t\": \"2026-10-08T17:07:52+0000\", \"phase\": \"probe\", \"step\": \"probe_start\", \"rc\": 0, \"stdout\": \"starting backend: shell bash (/usr/bin/bash), omp/18.2.10\\nwaiting for the OMP isolation check ...\\nbackend pid 1281 phase ready\\ndata dir /home/dwchoo/cw16-reboot-c18-fault/probe/home/wbdata\\n  host_shell: pid 1285 alive=True owner=user\\n  manager_omp: pid 1287 alive=True owner=user\\n  worker_omp: pid 1288 alive=True owner=user\\n  shell: bash /usr/bin/bash mode=manual_prompt\\nomp isolation: failed (omp/18.2.10 evidence isolation=18.6.1)\\nWARNING: OMP isolation check failed: manager: omp exited (closed stdout) before answering 'get_state'; worker: omp exited (closed stdout) before answering 'get_state'\\n  note: OMP 18.2.10 has not extracted its native addon into /home/dwchoo/cw16-reboot-c18-fault/probe/home/.omp/natives/18.2.10 yet: the first Workbench OMP extracts it there (the same files your own omp 18.2.10 extracts; OMP has no setting to move this directory).\\n\", \"stderr\": \"\"}\n{\"t\": \"2026-10-08T17:07:52+0000\", \"phase\": \"probe\", \"step\": \"probe_status\", \"summary\": {\"phase\": \"ready\", \"reason\": null, \"bridge\": {\"event_cursor\": {}, \"manager\": {\"generation\": 1, \"session_id\": \"01a11c7c-4ca6-70c4-9498-a0e44f6da00f\"}, \"worker\": {\"generation\": 1, \"session_id\": \"01a11c7c-4cb9-72df-9aca-bdd5608bc653\"}}}}\n{\"t\": \"2026-10-08T17:07:52+0000\", \"phase\": \"probe\", \"step\": \"probe_shutdown\", \"rc\": 0, \"stdout\": \"no active work reported\\n{\\\"shutdown\\\": {\\\"left_running\\\": [], \\\"lifecycle\\\": null, \\\"omp_children\\\": {\\\"alive\\\": [], \\\"observed\\\": []}, \\\"panes\\\": [{\\\"exit_status\\\": -1, \\\"pane\\\": \\\"host_shell\\\", \\\"survivors\\\": []}, {\\\"exit_status\\\": 143, \\\"pane\\\": \\\"manager_omp\\\", \\\"survivors\\\": []}, {\\\"exit_status\\\": 143, \\\"pane\\\": \\\"worker_omp\\\", \\\"survivors\\\": []}], \\\"previous_survivors\\\": [], \\\"problems\\\": [], \\\"processes\\\": {\\\"host_shell\\\": \\\"dead\\\", \\\"manager_omp\\\": \\\"dead\\\", \\\"worker_omp\\\": \\\"dead\\\"}, \\\"user_confirmed\\\": true, \\\"verified\\\": true}}\\n\", \"stderr\": \"\"}\n{\"t\": \"2026-10-08T17:07:53+0000\", \"phase\": \"probe\", \"step\": \"probe_leftover\", \"left\": {}}\n",
+   "stderr_tail": ""
+  },
+  {
+   "at": "2026-10-09T02:07:56+0900",
+   "what": "guest pre (a)",
+   "argv": [
+    "~/.local/share/wb-vm/wb-reboot/ssh.sh",
+    "cd ~ && CW19_BASE=a CW16_VM_ROOT=$HOME/cw16-reboot-c18-fault PYTHONDONTWRITEBYTECODE=1 ~/wb-venv/bin/python ~/cw16-vm-driver.py pre"
+   ],
+   "rc": 0,
+   "seconds": 2.5,
+   "stdout_tail": " \"work\", \"message\": \"cw19 reboot work\", \"spec\": {\"goal\": \"cw19 reboot\", \"paths\": [\"notes/\"]}}, \"result\": {\"status\": \"dispatched\", \"task_id\": \"b3033aca-d744-4256-8b46-83e7cca2bebc\", \"kind\": \"work\", \"revision\": 1, \"detail\": \"dispatched to the worker under the user's standing delegation (C-D66); it reports back with to_manager\", \"manager_rule\": \"The worker does this Task; do not do it yourself (no commands, edits or checks for it). End your turn and wait for the worker's to_manager report.\"}}\n{\"t\": \"2026-10-08T17:07:56+0000\", \"phase\": \"pre\", \"step\": \"pre_state\", \"state\": {\"boot_id\": \"3ada806f-8bd6-4b4a-a1e1-062233be5a22\", \"commit\": \"529808e0faf553ce48753705b6c87a13e417e00b\", \"task_id\": \"b3033aca-d744-4256-8b46-83e7cca2bebc\", \"runs\": 1, \"summary\": {\"phase\": \"ready\", \"boot\": {\"boot_id\": \"3ada806f-8bd6-4b4a-a1e1-062233be5a22\", \"confirmation_required\": false, \"confirmed\": null, \"confirmed_boot_id\": null, \"persisted\": true, \"reason\": null, \"recorded_boot_id\": \"3ada806f-8bd6-4b4a-a1e1-062233be5a22\"}, \"holds\": [], \"faults\": {\"metadata\": null, \"model\": null, \"raw_log\": null, \"record_error\": null}, \"automation\": {\"detail\": \"free-work run: no host run to review; pause/resume apply\", \"interruption\": {\"confirmed_at\": null, \"error\": null, \"manager_ack\": null, \"pause_id\": null, \"requested_at\": null, \"state\": \"none\", \"unknown_tool_call_ids\": [], \"worker_ack\": null}, \"paused\": false, \"persistence_error\": null, \"resume\": null, \"retry_limit\": 3, \"review\": {\"applies\": false, \"coalesced_count\": 0, \"exit\": null, \"interval_seconds\": 60, \"last_review_at\": null, \"next_due_in_seconds\": null, \"pending\": false, \"reason\": null, \"review_count\": 0, \"status\": null}, \"run\": {\"bound\": true, \"error\": null, \"kind\": \"work\", \"revision\": 1, \"run_id\": \"d90513d6-ad05-4c57-a781-a761fa9f3934\", \"task_id\": \"b3033aca-d744-4256-8b46-83e7cca2bebc\"}, \"source\": \"backend\", \"state\": \"active\", \"tick\": null, \"transition\": null}, \"startup\": {\"at\": 1791479274.4583876, \"classification\": \"fresh\", \"notes\": [], \"notice\": \n{\"t\": \"2026-10-08T17:07:56+0000\", \"phase\": \"pre\", \"step\": \"cli\", \"argv\": [\"python\", \"-m\", \"workbench\", \"status\"], \"rc\": 0, \"stdout\": \"backend pid 1430 phase ready\\ndata dir /home/dwchoo/cw16-reboot-c18-fault/a/home/wbdata\\n  host_shell: pid 1434 alive=True owner=user\\n  manager_omp: pid 1436 alive=True owner=user\\n  worker_omp: pid 1437 alive=True owner=user\\n  shell: bash /usr/bin/bash mode=manual_prompt\\n사용량: Task b3033aca-d744-4256-8b46-83e7cca2bebc run 1 (재시도 0/3) · 60s 점검 - · 모델 미확인\\nomp isolation: failed (omp/18.2.10 evidence isolation=18.6.1)\\nWARNING: OMP isolation check failed: manager: omp exited (closed stdout) before answering 'get_state'; worker: omp exited (closed stdout) before answering 'get_state'\\n  note: OMP 18.2.10 has not extracted its native addon into /home/dwchoo/cw16-reboot-c18-fault/a/home/.omp/natives/18.2.10 yet: the first Workbench OMP extracts it there (the same files your own omp 18.2.10 extracts; OMP has no setting to move this directory).\\n\", \"stderr\": \"\"}\n",
+   "stderr_tail": ""
+  },
+  {
+   "at": "2026-10-09T02:07:56+0900",
+   "what": "boot_id",
+   "argv": [
+    "~/.local/share/wb-vm/wb-reboot/ssh.sh",
+    "cat /proc/sys/kernel/random/boot_id"
+   ],
+   "rc": 0,
+   "seconds": 0.2,
+   "stdout_tail": "3ada806f-8bd6-4b4a-a1e1-062233be5a22\n",
+   "stderr_tail": ""
+  },
+  {
+   "at": "2026-10-09T02:07:57+0900",
+   "what": "guest reboot",
+   "argv": [
+    "~/.local/share/wb-vm/wb-reboot/ssh.sh",
+    "sync; sudo reboot"
+   ],
+   "rc": 0,
+   "seconds": 0.3,
+   "stdout_tail": "",
+   "stderr_tail": ""
+  },
+  {
+   "at": "2026-10-09T02:08:07+0900",
+   "what": "boot_id",
+   "argv": [
+    "~/.local/share/wb-vm/wb-reboot/ssh.sh",
+    "cat /proc/sys/kernel/random/boot_id"
+   ],
+   "rc": 255,
+   "seconds": 5.0,
+   "stdout_tail": "",
+   "stderr_tail": "Connection timed out during banner exchange\r\n"
+  },
+  {
+   "at": "2026-10-09T02:08:10+0900",
+   "what": "boot_id",
+   "argv": [
+    "~/.local/share/wb-vm/wb-reboot/ssh.sh",
+    "cat /proc/sys/kernel/random/boot_id"
+   ],
+   "rc": 0,
+   "seconds": 0.4,
+   "stdout_tail": "0e23a1ea-7467-4674-b152-f23e0db28cbd\n",
+   "stderr_tail": ""
+  },
+  {
+   "at": "2026-10-09T02:10:04+0900",
+   "what": "guest post (a)",
+   "argv": [
+    "~/.local/share/wb-vm/wb-reboot/ssh.sh",
+    "cd ~ && CW19_BASE=a CW16_VM_ROOT=$HOME/cw16-reboot-c18-fault PYTHONDONTWRITEBYTECODE=1 ~/wb-venv/bin/python ~/cw16-vm-driver.py post"
+   ],
+   "rc": 0,
+   "seconds": 113.9,
+   "stdout_tail": "\", \"pid\": 1051, \"frame\": {\"kind\": \"deliver\", \"task_id\": null, \"message_id\": null}}, {\"role\": \"worker\", \"session\": \"b038f8bb-6009-4274-bac5-afdb1689b6db\", \"pid\": 1051, \"frame\": {\"kind\": \"deliver\", \"task_id\": null, \"message_id\": null}}, {\"role\": \"worker\", \"session\": \"b038f8bb-6009-4274-bac5-afdb1689b6db\", \"pid\": 1051, \"frame\": {\"kind\": \"deliver\", \"task_id\": null, \"message_id\": null}}, {\"role\": \"worker\", \"session\": \"b038f8bb-6009-4274-bac5-afdb1689b6db\", \"pid\": 1051, \"frame\": {\"kind\": \"deliver\", \"task_id\": null, \"message_id\": null}}, {\"role\": \"worker\", \"session\": \"b038f8bb-6009-4274-bac5-afdb1689b6db\", \"pid\": 1051, \"frame\": {\"kind\": \"deliver\", \"task_id\": null, \"message_id\": null}}, {\"role\": \"worker\", \"session\": \"b038f8bb-6009-4274-bac5-afdb1689b6db\", \"pid\": 1051, \"frame\": {\"kind\": \"deliver\", \"task_id\": null, \"message_id\": nu\n{\"t\": \"2026-10-08T17:10:02+0000\", \"phase\": \"post\", \"step\": \"cli\", \"argv\": [\"python\", \"-m\", \"workbench\", \"confirm-boot\", \"--yes\"], \"rc\": 1, \"stdout\": \"\", \"stderr\": \"부팅 확인이 필요하지 않습니다 (대기 중인 확인 없음)\\n\"}\n{\"t\": \"2026-10-08T17:10:02+0000\", \"phase\": \"post\", \"step\": \"cli\", \"argv\": [\"python\", \"-m\", \"workbench\", \"status\"], \"rc\": 0, \"stdout\": \"backend pid 1044 phase ready\\ndata dir /home/dwchoo/cw16-reboot-c18-fault/a/home/wbdata\\n  host_shell: pid 1048 alive=True owner=user\\n  manager_omp: pid 1050 alive=True owner=user\\n  worker_omp: pid 1051 alive=True owner=user\\n  shell: bash /usr/bin/bash mode=manual_prompt\\n사용량: Task 0e8687b1-2f1a-4a9f-ad2e-d9ee0e05e992 run 1 (재시도 0/3) · 60s 점검 - · 모델 미확인\\nomp isolation: failed (omp/18.2.10 evidence isolation=18.6.1)\\nWARNING: OMP isolation check failed: manager: omp exited (closed stdout) before answering 'get_state'; worker: omp exited (closed stdout) before answering 'get_state'\\n  note: OMP 18.2.10 has not extracted its native addon into /home/dwchoo/cw16-reboot-c18-fault/a/home/.omp/natives/18.2.10 yet: the first Workbench OMP extracts it there (the same files your own omp 18.2.10 extracts; OMP has no setting to move this directory).\\nbackend 재시작 대조: reboot | 이전 run d90513d6-ad05-4c57-a781-a761fa9f3934 상태 interrupted_by_reboot (재실행·재전송 없음) | 보내지 못한 메시지 1건 (재전송 없음)\\n\", \"stderr\": \"\"}\n{\"t\": \"2026-10-08T17:10:02+0000\", \"phase\": \"post\", \"step\": \"cli\", \"argv\": [\"python\", \"-m\", \"workbench\", \"shutdown\", \"--yes\", \"--json\"], \"rc\": 0, \"stdout\": \"no active work reported\\n{\\\"shutdown\\\": {\\\"left_running\\\": [], \\\"lifecycle\\\": null, \\\"omp_children\\\": {\\\"alive\\\": [], \\\"observed\\\": []}, \\\"panes\\\": [{\\\"exit_status\\\": -1, \\\"pane\\\": \\\"host_shell\\\", \\\"survivors\\\": []}, {\\\"exit_status\\\": -15, \\\"pane\\\": \\\"manager_omp\\\", \\\"survivors\\\": []}, {\\\"exit_status\\\": -15, \\\"pane\\\": \\\"worker_omp\\\", \\\"survivors\\\": []}], \\\"previous_survivors\\\": [], \\\"problems\\\": [], \\\"processes\\\": {\\\"host_shell\\\": \\\"dead\\\", \\\"manager_omp\\\": \\\"dead\\\", \\\"supervisor\\\": \\\"dead\\\", \\\"worker_omp\\\": \\\"dead\\\"}, \\\"user_confirmed\\\": true, \\\"verified\\\": true}}\\n\", \"stderr\": \"\"}\n{\"t\": \"2026-10-08T17:10:04+0000\", \"phase\": \"post\", \"step\": \"leftover\", \"ours\": {}}\n",
+   "stderr_tail": ""
+  },
+  {
+   "at": "2026-10-09T02:10:12+0900",
+   "what": "guest pre2 (b)",
+   "argv": [
+    "~/.local/share/wb-vm/wb-reboot/ssh.sh",
+    "cd ~ && CW19_BASE=b CW16_VM_ROOT=$HOME/cw16-reboot-c18-fault PYTHONDONTWRITEBYTECODE=1 ~/wb-venv/bin/python ~/cw16-vm-driver.py pre2"
+   ],
+   "rc": 0,
+   "seconds": 8.2,
+   "stdout_tail": "t\": \"2026-10-08T17:10:06+0000\", \"phase\": \"pre2\", \"step\": \"pre2_summary\", \"summary\": {\"phase\": \"ready\", \"boot\": {\"boot_id\": \"0e23a1ea-7467-4674-b152-f23e0db28cbd\", \"confirmation_required\": false, \"confirmed\": null, \"confirmed_boot_id\": null, \"persisted\": true, \"reason\": null, \"recorded_boot_id\": \"0e23a1ea-7467-4674-b152-f23e0db28cbd\"}, \"holds\": [], \"faults\": {\"metadata\": null, \"model\": null, \"raw_log\": null, \"record_error\": null}, \"automation\": {\"detail\": \"free-work run: no host run to review; pause/resume apply\", \"interruption\": {\"confirmed_at\": null, \"error\": null, \"manager_ack\": null, \"pause_id\": null, \"requested_at\": null, \"state\": \"none\", \"unknown_tool_call_ids\": [], \"worker_ack\": null}, \"paused\": false, \"persistence_error\": null, \"resume\": null, \"retry_limit\": 3, \"review\": {\"applies\": false, \"coalesced_count\": 0, \"exit\": null, \"interval_seconds\": 60, \"last_review_at\": null, \"next_due_in_seconds\": null, \"pending\": false, \"reason\": null, \"review_count\": 0, \"status\": null}, \"run\": {\"bound\": true, \"error\": null, \"kind\": \"work\", \"revision\": 1, \"run_id\": \"62e14119-4801-475f-baf4-05947b89e26e\", \"task_id\": \"d8748f16-c593-4032-93ed-e9ada1590a4b\"}, \"source\": \"backend\", \"state\": \"active\", \"tick\": null, \"transition\": null}, \"startup\": {\"at\": 1791479405.4264464, \"classification\": \"fresh\", \"notes\": [], \"notice\": null, \"outbox_lost\": [], \"outbox_lost_count\": 0, \"previous\": null, \"probed\": false, \"processes\": [], \"run\": null, \"survivor_stops\": [], \"survivors\": []}, \"task\": {\"task_id\":\n{\"t\": \"2026-10-08T17:10:12+0000\", \"phase\": \"pre2\", \"step\": \"ui_screen_pre2\", \"screen\": \"focus: MANAGER OMP | host 입력 owner: user | shell mode: manual_prompt | worker: 작업 중 | 자동화: active\\n경고 OMP 격리 failed: OMP isolation check failed: manager: omp exited (closed stdout) before answering 'get_state'; worker: omp exited (closed stdout) before an\\nlq MANAGER OMP *FOCUS* alive qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqklq WORKER OMP alive qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqk\\nxfake omp manager                                                              xxfake omp worker                                                               x\\nxtool to_worker {\\\"kind\\\": \\\"work\\\", \\\"message\\\": \\\"cw19 reboot work 2\\\", \\\"spec\\\": {\\\"goaxxtool terminal {\\\"command\\\": \\\"echo cw19-baseline-1\\\"}                             x\\nxl\\\": \\\"cw19 reboot 2\\\", \\\"paths\\\": [\\\"notes/\\\"]}}                                    xxtool sent terminal                                                            x\\nxtool sent to_worker                                                           xxtool terminal {\\\"command\\\": \\\"echo cw19-baseline-2\\\"}                             x\\nx                                                                              xxtool sent terminal                                                            x\\nx                                                                              xx                                                                            \n",
+   "stderr_tail": ""
+  },
+  {
+   "at": "2026-10-09T02:10:12+0900",
+   "what": "boot_id",
+   "argv": [
+    "~/.local/share/wb-vm/wb-reboot/ssh.sh",
+    "cat /proc/sys/kernel/random/boot_id"
+   ],
+   "rc": 0,
+   "seconds": 0.2,
+   "stdout_tail": "0e23a1ea-7467-4674-b152-f23e0db28cbd\n",
+   "stderr_tail": ""
+  },
+  {
+   "at": "2026-10-09T02:10:13+0900",
+   "what": "guest reboot",
+   "argv": [
+    "~/.local/share/wb-vm/wb-reboot/ssh.sh",
+    "sync; sudo reboot"
+   ],
+   "rc": 0,
+   "seconds": 0.2,
+   "stdout_tail": "",
+   "stderr_tail": ""
+  },
+  {
+   "at": "2026-10-09T02:10:23+0900",
+   "what": "boot_id",
+   "argv": [
+    "~/.local/share/wb-vm/wb-reboot/ssh.sh",
+    "cat /proc/sys/kernel/random/boot_id"
+   ],
+   "rc": 255,
+   "seconds": 5.0,
+   "stdout_tail": "",
+   "stderr_tail": "Connection timed out during banner exchange\r\n"
+  },
+  {
+   "at": "2026-10-09T02:10:26+0900",
+   "what": "boot_id",
+   "argv": [
+    "~/.local/share/wb-vm/wb-reboot/ssh.sh",
+    "cat /proc/sys/kernel/random/boot_id"
+   ],
+   "rc": 0,
+   "seconds": 0.4,
+   "stdout_tail": "812e3a91-1dae-4e16-9185-5b83695f2a97\n",
+   "stderr_tail": ""
+  },
+  {
+   "at": "2026-10-09T02:13:14+0900",
+   "what": "guest post2 (b)",
+   "argv": [
+    "~/.local/share/wb-vm/wb-reboot/ssh.sh",
+    "cd ~ && CW19_BASE=b CW16_VM_ROOT=$HOME/cw16-reboot-c18-fault PYTHONDONTWRITEBYTECODE=1 ~/wb-venv/bin/python ~/cw16-vm-driver.py post2"
+   ],
+   "rc": 0,
+   "seconds": 168.4,
+   "stdout_tail": " · 모델 미확인 | backend: ready | bridge manager=ok worker=ok | 마지막 확인 17:13:12 (0s 전) | Ctrl-] ? 도움말\", \"lq MANAGER OMP *FOCUS* alive qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqklq WORKER OMP alive qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqk\"], \"host_shell\": [\"x$ wb-handoff                                                                                                                                                                                                                                                                                                                                                                                                  x\", \"x[worker] $ echo cw19-after-confirm-2                                                                    \n{\"t\": \"2026-10-08T17:13:12+0000\", \"phase\": \"post2\", \"step\": \"cli\", \"argv\": [\"python\", \"-m\", \"workbench\", \"status\"], \"rc\": 0, \"stdout\": \"backend pid 1047 phase ready\\ndata dir /home/dwchoo/cw16-reboot-c18-fault/b/home/wbdata\\n  host_shell: pid 1051 alive=True owner=user\\n  manager_omp: pid 1053 alive=True owner=user\\n  worker_omp: pid 1054 alive=True owner=user\\n  shell: bash /usr/bin/bash mode=manual_prompt\\n사용량: Task d8748f16-c593-4032-93ed-e9ada1590a4b run 1 (재시도 0/3) · 60s 점검 - · 모델 미확인\\nomp isolation: failed (omp/18.2.10 evidence isolation=18.6.1)\\nWARNING: OMP isolation check failed: manager: omp exited (closed stdout) before answering 'get_state'; worker: omp exited (closed stdout) before answering 'get_state'\\n  note: OMP 18.2.10 has not extracted its native addon into /home/dwchoo/cw16-reboot-c18-fault/b/home/.omp/natives/18.2.10 yet: the first Workbench OMP extracts it there (the same files your own omp 18.2.10 extracts; OMP has no setting to move this directory).\\nbackend 재시작 대조: reboot | 이전 run 62e14119-4801-475f-baf4-05947b89e26e 상태 interrupted_by_reboot (재실행·재전송 없음) | 보내지 못한 메시지 1건 (재전송 없음)\\n\", \"stderr\": \"\"}\n{\"t\": \"2026-10-08T17:13:12+0000\", \"phase\": \"post2\", \"step\": \"cli\", \"argv\": [\"python\", \"-m\", \"workbench\", \"shutdown\", \"--yes\", \"--json\"], \"rc\": 0, \"stdout\": \"no active work reported\\n{\\\"shutdown\\\": {\\\"left_running\\\": [], \\\"lifecycle\\\": null, \\\"omp_children\\\": {\\\"alive\\\": [], \\\"observed\\\": []}, \\\"panes\\\": [{\\\"exit_status\\\": -1, \\\"pane\\\": \\\"host_shell\\\", \\\"survivors\\\": []}, {\\\"exit_status\\\": -15, \\\"pane\\\": \\\"manager_omp\\\", \\\"survivors\\\": []}, {\\\"exit_status\\\": -15, \\\"pane\\\": \\\"worker_omp\\\", \\\"survivors\\\": []}], \\\"previous_survivors\\\": [], \\\"problems\\\": [], \\\"processes\\\": {\\\"host_shell\\\": \\\"dead\\\", \\\"manager_omp\\\": \\\"dead\\\", \\\"supervisor\\\": \\\"dead\\\", \\\"worker_omp\\\": \\\"dead\\\"}, \\\"user_confirmed\\\": true, \\\"verified\\\": true}}\\n\", \"stderr\": \"\"}\n{\"t\": \"2026-10-08T17:13:14+0000\", \"phase\": \"post2\", \"step\": \"leftover\", \"ours\": {}}\n",
+   "stderr_tail": ""
+  },
+  {
+   "at": "2026-10-09T02:13:18+0900",
+   "what": "guest post2_extra (b)",
+   "argv": [
+    "~/.local/share/wb-vm/wb-reboot/ssh.sh",
+    "cd ~ && CW19_BASE=b CW16_VM_ROOT=$HOME/cw16-reboot-c18-fault PYTHONDONTWRITEBYTECODE=1 ~/wb-venv/bin/python ~/cw16-vm-driver.py post2_extra"
+   ],
+   "rc": 0,
+   "seconds": 3.7,
+   "stdout_tail": "ur own omp 18.2.10 extracts; OMP has no setting to move this directory).\\n\", \"stderr\": \"\"}\n{\"t\": \"2026-10-08T17:13:16+0000\", \"phase\": \"post2_extra\", \"step\": \"ready_same_boot\", \"summary\": {\"phase\": \"ready\", \"boot\": {\"boot_id\": \"812e3a91-1dae-4e16-9185-5b83695f2a97\", \"confirmation_required\": false, \"confirmed\": null, \"confirmed_boot_id\": \"812e3a91-1dae-4e16-9185-5b83695f2a97\", \"persisted\": true, \"reason\": null, \"recorded_boot_id\": \"812e3a91-1dae-4e16-9185-5b83695f2a97\"}, \"holds\": [], \"faults\": {\"metadata\": null, \"model\": null, \"raw_log\": null, \"record_error\": null}, \"automation\": {\"detail\": \"no active run\", \"interruption\": {\"confirmed_at\": null, \"error\": null, \"manager_ack\": null, \"pause_id\": null, \"requested_at\": null, \"state\": \"none\", \"unknown_tool_call_ids\": [], \"worker_ack\": null}, \"paused\": false, \"persistence_error\": null, \"resume\": null, \"retry_limit\": 3, \"review\": {\"applies\": false, \"coalesced_count\": 0, \"exit\": null, \"interval_seconds\": 60, \"last_review_at\": null, \"next_due_in_seconds\": null, \"pending\": false, \"reason\": null, \"review_count\": 0, \"status\": null}, \"run\": null, \"source\": \"backend\", \"state\": \"idle\", \"tick\": null, \"transition\": null}, \"startup\": {\"at\": 1791479595.940363, \"classification\": \"same_boot_clean_stop\", \"notes\": [], \"notice\": null, \"outbox_lost\": [{\"handoff_id\": \"0007937f-df4f-46e6-8c1f-a3d2582c5f87\", \"kind\": \"question\", \"message_id\": \"dbd82340-e421-4df3-9f7f-190b65581f22\", \"state\": \"queued_not_sent\", \"target_role\": \"worker\"}], \"outbox_lost_count\": 1, \"previous\": {\"boot_id\": \"812e3a91-1dae-4e16-9185-5b83695f2a97\", \"phase\": \"stopped\", \"pid\n{\"t\": \"2026-10-08T17:13:16+0000\", \"phase\": \"post2_extra\", \"step\": \"terminal_after_confirm_task_closed_same_boot\", \"input_ok\": true, \"results\": [{\"status\": \"exited\", \"exit_code\": 0, \"command_id\": \"21d809ee-3757-4589-809b-216e959e920e\", \"command\": \"echo cw19-after-confirm-closed\", \"cwd\": \"/home/dwchoo/cw16-reboot-c18-fault/b/project\", \"log_path\": \"/home/dwchoo/cw16-reboot-c18-fault/b/home/wbdata/workflow/terminal/21d809ee-3757-4589-809b-216e959e920e.log\", \"duration_seconds\": 0.093, \"output_tail\": \"cw19-after-confirm-closed\\n\", \"output_tail_truncated\": false}]}\n{\"t\": \"2026-10-08T17:13:16+0000\", \"phase\": \"post2_extra\", \"step\": \"cli\", \"argv\": [\"python\", \"-m\", \"workbench\", \"shutdown\", \"--yes\", \"--json\"], \"rc\": 0, \"stdout\": \"no active work reported\\n{\\\"shutdown\\\": {\\\"left_running\\\": [], \\\"lifecycle\\\": null, \\\"omp_children\\\": {\\\"alive\\\": [], \\\"observed\\\": []}, \\\"panes\\\": [{\\\"exit_status\\\": -1, \\\"pane\\\": \\\"host_shell\\\", \\\"survivors\\\": []}, {\\\"exit_status\\\": -15, \\\"pane\\\": \\\"manager_omp\\\", \\\"survivors\\\": []}, {\\\"exit_status\\\": -15, \\\"pane\\\": \\\"worker_omp\\\", \\\"survivors\\\": []}], \\\"previous_survivors\\\": [], \\\"problems\\\": [], \\\"processes\\\": {\\\"host_shell\\\": \\\"dead\\\", \\\"manager_omp\\\": \\\"dead\\\", \\\"supervisor\\\": \\\"dead\\\", \\\"worker_omp\\\": \\\"dead\\\"}, \\\"user_confirmed\\\": true, \\\"verified\\\": true}}\\n\", \"stderr\": \"\"}\n{\"t\": \"2026-10-08T17:13:18+0000\", \"phase\": \"post2_extra\", \"step\": \"leftover\", \"ours\": {}}\n",
+   "stderr_tail": ""
+  },
+  {
+   "at": "2026-10-09T02:13:18+0900",
+   "what": "fetch guest log",
+   "argv": [
+    "~/.local/share/wb-vm/wb-reboot/ssh.sh",
+    "cat ~/cw16-reboot-c18-fault/log.jsonl"
+   ],
+   "rc": 0,
+   "seconds": 0.2,
+   "stdout_tail": "isor\\\": \\\"dead\\\", \\\"worker_omp\\\": \\\"dead\\\"}, \\\"user_confirmed\\\": true, \\\"verified\\\": true}}\\n\", \"stderr\": \"\"}\n{\"t\": \"2026-10-08T17:13:18+0000\", \"phase\": \"post2_extra\", \"step\": \"leftover\", \"ours\": {}}\n",
+   "stderr_tail": ""
+  },
+  {
+   "at": "2026-10-09T02:13:20+0900",
+   "what": "stop.sh",
+   "argv": [
+    "~/.local/share/wb-vm/wb-reboot/stop.sh"
+   ],
+   "rc": 0,
+   "seconds": 1.2,
+   "stdout_tail": "stopped\n",
+   "stderr_tail": ""
+  }
+ ],
+ "qemu_pid": 2699829,
+ "qemu_ticks": 302432862,
+ "boot_id_first": "3ada806f-8bd6-4b4a-a1e1-062233be5a22",
+ "manifest": {
+  "scope": "src/**, omp_bridge/**, tests/recovery_boot/** (no __pycache__)",
+  "host": {
+   "count": 93,
+   "aggregate": "6eeed2425de99a74c657efa1e09fcf30c5bab1bd4669169ce72067cf16fcd0b2"
+  },
+  "guest": {
+   "count": 93,
+   "aggregate": "6eeed2425de99a74c657efa1e09fcf30c5bab1bd4669169ce72067cf16fcd0b2"
+  },
+  "equal": true,
+  "differing": [],
+  "equals_cw19_vm02_aggregate": false,
+  "driver": {
+   "path": "tests/integration/vm_reboot_driver.py",
+   "sha256": "46182ff76e6eeb3570cd4d068f1a0ea025f5f6912ecd8eface847dc7150bd5ac"
+  }
+ },
+ "guest_versions": {
+  "os": "Ubuntu 24.04.5 LTS",
+  "kernel": "6.8.0-142-generic",
+  "bash": "GNU bash, version 5.2.21(1)-release (x86_64-pc-linux-gnu)",
+  "omp": "omp/18.2.10",
+  "python": "Python 3.12.3"
+ },
+ "phase_rc_probe": 0,
+ "phase_rc_pre": 0,
+ "phase_rc_post": 0,
+ "phase_rc_pre2": 0,
+ "phase_rc_post2": 0,
+ "phase_rc_post2_extra": 0,
+ "reboots": [
+  {
+   "cmd": "ssh.sh 'sync; sudo reboot'",
+   "at": "2026-10-09T02:07:56+0900",
+   "boot_before": "3ada806f-8bd6-4b4a-a1e1-062233be5a22",
+   "boot_after": "0e23a1ea-7467-4674-b152-f23e0db28cbd",
+   "back_at": "2026-10-09T02:08:10+0900",
+   "qemu_pid_same": true
+  },
+  {
+   "cmd": "ssh.sh 'sync; sudo reboot'",
+   "at": "2026-10-09T02:10:12+0900",
+   "boot_before": "0e23a1ea-7467-4674-b152-f23e0db28cbd",
+   "boot_after": "812e3a91-1dae-4e16-9185-5b83695f2a97",
+   "back_at": "2026-10-09T02:10:26+0900",
+   "qemu_pid_same": true
+  }
+ ],
+ "host_manifest_after": {
+  "aggregate": "6eeed2425de99a74c657efa1e09fcf30c5bab1bd4669169ce72067cf16fcd0b2",
+  "unchanged": true
+ },
+ "stop": {
+  "rc": 0,
+  "qemu_gone": true,
+  "disk_kept": true
+ },
+ "error": null,
+ "verdict": {
+  "result": "pass",
+  "failed": [],
+  "checks": [
+   {
+    "id": "R1-post",
+    "check": "boot_id changed across the guest reboot",
+    "ok": true,
+    "detail": {
+     "boot_id_before": "3ada806f-8bd6-4b4a-a1e1-062233be5a22",
+     "boot_id_after": "0e23a1ea-7467-4674-b152-f23e0db28cbd"
+    }
+   },
+   {
+    "id": "R2-post",
+    "check": "no process of ours survived the reboot",
+    "ok": true,
+    "detail": {}
+   },
+   {
+    "id": "R3-post",
+    "check": "records restored: classification reboot, refs ended_by_reboot not probed, run interrupted_by_reboot, outbox queued_not_sent (no resend)",
+    "ok": true,
+    "detail": {
+     "classification": "reboot",
+     "probed": false,
+     "processes": [
+      "ended_by_reboot",
+      "ended_by_reboot",
+      "ended_by_reboot",
+      "ended_by_reboot"
+     ],
+     "run": "interrupted_by_reboot",
+     "outbox_lost": [
+      "queued_not_sent"
+     ]
+    }
+   },
+   {
+    "id": "R4-post",
+    "check": "confirmation required (reboot) and boot_confirmation_required hold",
+    "ok": true,
+    "detail": {
+     "boot": {
+      "boot_id": "0e23a1ea-7467-4674-b152-f23e0db28cbd",
+      "confirmation_required": true,
+      "confirmed": false,
+      "confirmed_boot_id": null,
+      "persisted": true,
+      "reason": "reboot",
+      "recorded_boot_id": "3ada806f-8bd6-4b4a-a1e1-062233be5a22"
+     },
+     "holds": [
+      "boot_confirmation_required"
+     ]
+    }
+   },
+   {
+    "id": "R1-post2",
+    "check": "boot_id changed across the guest reboot",
+    "ok": true,
+    "detail": {
+     "boot_id_before": "0e23a1ea-7467-4674-b152-f23e0db28cbd",
+     "boot_id_after": "812e3a91-1dae-4e16-9185-5b83695f2a97"
+    }
+   },
+   {
+    "id": "R2-post2",
+    "check": "no process of ours survived the reboot",
+    "ok": true,
+    "detail": {}
+   },
+   {
+    "id": "R3-post2",
+    "check": "records restored: classification reboot, refs ended_by_reboot not probed, run interrupted_by_reboot, outbox queued_not_sent (no resend)",
+    "ok": true,
+    "detail": {
+     "classification": "reboot",
+     "probed": false,
+     "processes": [
+      "ended_by_reboot",
+      "ended_by_reboot",
+      "ended_by_reboot",
+      "ended_by_reboot",
+      "ended_by_reboot"
+     ],
+     "run": "interrupted_by_reboot",
+     "outbox_lost": [
+      "queued_not_sent"
+     ]
+    }
+   },
+   {
+    "id": "R4-post2",
+    "check": "confirmation required (reboot) and boot_confirmation_required hold",
+    "ok": true,
+    "detail": {
+     "boot": {
+      "boot_id": "812e3a91-1dae-4e16-9185-5b83695f2a97",
+      "confirmation_required": true,
+      "confirmed": false,
+      "confirmed_boot_id": null,
+      "persisted": true,
+      "reason": "reboot",
+      "recorded_boot_id": "0e23a1ea-7467-4674-b152-f23e0db28cbd"
+     },
+     "holds": [
+      "boot_confirmation_required"
+     ]
+    }
+   },
+   {
+    "id": "R3-disk",
+    "check": "records on disk before start (boot.json, backend.json, tasks.sqlite3 runs>=1)",
+    "ok": true,
+    "detail": {
+     "runs": 1,
+     "files": [
+      "backend.json",
+      "backend.lock",
+      "backend.log",
+      "boot.json",
+      "lifecycle.json",
+      "lifecycle.json.lock",
+      "omp-isolation-manager.yml",
+      "omp-isolation-worker.yml",
+      "omp-root",
+      "raw-logs",
+      "startup.json",
+      "tasks.sqlite3",
+      "workflow"
+     ]
+    }
+   },
+   {
+    "id": "R5-ui",
+    "check": "product UI shows the boot-confirmation wait before confirm",
+    "ok": true,
+    "detail": null
+   },
+   {
+    "id": "F2-fixed",
+    "check": "160 columns: the wait leads the second status line (not hidden by the isolation warning)",
+    "ok": true,
+    "detail": [
+     "focus: MANAGER OMP | host 입력 owner: user | shell mode: manual_prompt | worker: 작업 중 | 자동화: idle",
+     "재부팅 확인 대기: python -m workbench confirm-boot (그 전에는 자동 동작 보류) | 경고 OMP 격리 failed: OMP isolation check failed: manager: omp exited (closed st"
+    ]
+   },
+   {
+    "id": "R6-held",
+    "check": "before confirm: follow-up to_worker, worker terminal, new experiment held (boot_confirmation_required); cancel allowed",
+    "ok": true,
+    "detail": [
+     [
+      "to_worker",
+      "held",
+      "boot_confirmation_required"
+     ],
+     [
+      "terminal",
+      "held",
+      "boot_confirmation_required"
+     ],
+     [
+      "to_worker",
+      "cancelled",
+      null
+     ],
+     [
+      "to_worker",
+      "held",
+      "boot_confirmation_required"
+     ]
+    ]
+   },
+   {
+    "id": "R6-held-post2",
+    "check": "cycle 2: worker terminal held before confirm with the Task open",
+    "ok": true,
+    "detail": [
+     {
+      "status": "held",
+      "reason": "boot_confirmation_required",
+      "detail": "Nothing was run: Workbench holds automatic work now (reason in this result: boot confirmation, metadata storage or a model error). A command already running continues. End your turn; do not retry in a loop."
+     }
+    ]
+   },
+   {
+    "id": "R7-quiet",
+    "check": "70 s held window: no notice, no delivery, no new run",
+    "ok": true,
+    "detail": {
+     "runs_before": 1,
+     "runs_now": 1
+    }
+   },
+   {
+    "id": "R7-quiet-post2",
+    "check": "cycle 2 held window (65 s): no notice, no delivery",
+    "ok": true,
+    "detail": null
+   },
+   {
+    "id": "R8-user",
+    "check": "user direct actions allowed: host shell input ran, pause and resume accepted",
+    "ok": true,
+    "detail": {
+     "input": "CW19_USER_INPUT\n"
+    }
+   },
+   {
+    "id": "R9-confirm",
+    "check": "confirm-boot: no tty/--yes -> exit 1 with the conditions; --json -> 1; --yes -> 0",
+    "ok": true,
+    "detail": [
+     [
+      [
+       "confirm-boot"
+      ],
+      1
+     ],
+     [
+      [
+       "confirm-boot",
+       "--json"
+      ],
+      1
+     ],
+     [
+      [
+       "confirm-boot",
+       "--yes"
+      ],
+      0
+     ],
+     [
+      [
+       "confirm-boot",
+       "--yes"
+      ],
+      1
+     ]
+    ]
+   },
+   {
+    "id": "R10-after",
+    "check": "after confirm: hold lifted, UI wait gone, a new experiment is dispatched (runs +1)",
+    "ok": true,
+    "detail": {
+     "runs_before": 1,
+     "runs_now": 2
+    }
+   },
+   {
+    "id": "R11-second",
+    "check": "a second confirm-boot --yes has nothing pending (exit 1)",
+    "ok": true,
+    "detail": [
+     0,
+     1
+    ]
+   },
+   {
+    "id": "F1-fixed-closed",
+    "check": "Task cancelled before confirm: the queued backend_restarted notice is dropped, nothing delivered after confirm",
+    "ok": true,
+    "detail": {
+     "notice": "dropped_task_closed",
+     "notices_after": []
+    }
+   },
+   {
+    "id": "F1-fixed-open",
+    "check": "Task open: exactly one backend_restarted notice to the manager after confirm",
+    "ok": true,
+    "detail": {
+     "count": 1
+    }
+   },
+   {
+    "id": "R12-shutdown",
+    "check": "every shutdown --yes verified, exit 0, nothing left running",
+    "ok": true,
+    "detail": [
+     0,
+     0,
+     0,
+     0
+    ]
+   },
+   {
+    "id": "R12-residue",
+    "check": "no process of ours left after shutdown",
+    "ok": true,
+    "detail": [
+     {},
+     {},
+     {},
+     {}
+    ]
+   },
+   {
+    "id": "R13-terminal",
+    "check": "same boot after confirm (closed Task only): worker terminal runs (exited 0)",
+    "ok": true,
+    "detail": [
+     {
+      "status": "exited",
+      "exit_code": 0,
+      "command_id": "21d809ee-3757-4589-809b-216e959e920e",
+      "command": "echo cw19-after-confirm-closed",
+      "cwd": "/home/dwchoo/cw16-reboot-c18-fault/b/project",
+      "log_path": "/home/dwchoo/cw16-reboot-c18-fault/b/home/wbdata/workflow/terminal/21d809ee-3757-4589-809b-216e959e920e.log",
+      "duration_seconds": 0.093,
+      "output_tail": "cw19-after-confirm-closed\n",
+      "output_tail_truncated": false
+     }
+    ]
+   },
+   {
+    "id": "M-manifest",
+    "check": "guest copy equals the host (manifest aggregate)",
+    "ok": true,
+    "detail": {
+     "host": {
+      "count": 93,
+      "aggregate": "6eeed2425de99a74c657efa1e09fcf30c5bab1bd4669169ce72067cf16fcd0b2"
+     },
+     "guest": {
+      "count": 93,
+      "aggregate": "6eeed2425de99a74c657efa1e09fcf30c5bab1bd4669169ce72067cf16fcd0b2"
+     }
+    }
+   },
+   {
+    "id": "V-reboots",
+    "check": "two guest reboots, boot id changed each time, same QEMU process (host untouched)",
+    "ok": true,
+    "detail": [
+     {
+      "cmd": "ssh.sh 'sync; sudo reboot'",
+      "at": "2026-10-09T02:07:56+0900",
+      "boot_before": "3ada806f-8bd6-4b4a-a1e1-062233be5a22",
+      "boot_after": "0e23a1ea-7467-4674-b152-f23e0db28cbd",
+      "back_at": "2026-10-09T02:08:10+0900",
+      "qemu_pid_same": true
+     },
+     {
+      "cmd": "ssh.sh 'sync; sudo reboot'",
+      "at": "2026-10-09T02:10:12+0900",
+      "boot_before": "0e23a1ea-7467-4674-b152-f23e0db28cbd",
+      "boot_after": "812e3a91-1dae-4e16-9185-5b83695f2a97",
+      "back_at": "2026-10-09T02:10:26+0900",
+      "qemu_pid_same": true
+     }
+    ]
+   },
+   {
+    "id": "V-stopped",
+    "check": "VM stopped with stop.sh, disk files kept",
+    "ok": true,
+    "detail": {
+     "rc": 0,
+     "qemu_gone": true,
+     "disk_kept": true
+    }
+   },
+   {
+    "id": "V-no-error",
+    "check": "orchestration completed without error",
+    "ok": true,
+    "detail": null
+   }
+  ],
+  "observations": {
+   "terminal_after_confirm_with_unaccepted_task": [
+    null,
+    [
+     {
+      "status": "exited",
+      "exit_code": 0,
+      "command_id": "0259631c-9053-489b-807e-9e1e4811a274",
+      "command": "echo cw19-after-confirm-2",
+      "cwd": "/home/dwchoo/cw16-reboot-c18-fault/b/project",
+      "log_path": "/home/dwchoo/cw16-reboot-c18-fault/b/home/wbdata/workflow/terminal/0259631c-9053-489b-807e-9e1e4811a274.log",
+      "duration_seconds": 0.093,
+      "output_tail": "cw19-after-confirm-2\n",
+      "output_tail_truncated": false
+     }
+    ]
+   ]
+  }
+ }
+}

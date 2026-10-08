@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "integration": "V-CW-16 (final)",
+  "date": "2026-10-09",
+  "decisions": [
+    "C-D72",
+    "C-D73"
+  ],
+  "final_candidate": "a2e3daf23dc98d8c98c760d62e227d4425c0b6b8265b6b3d9a696bc7a573482b",
+  "final_commit": "c47456a",
+  "approved_bundle_digest": "6a94257554222410497069c685c3cd73d39dcc9b32ff42b08007eddc526a5b94",
+  "history": "C16 f8ad6ec9 (e635723) gate passed + review pass -> real-model smoke O3/O4 + gap (pinned tests, colour) -> C17 81bebe6 (review block: umask, brightbrown) -> C18 c47456a (delta review pass + Root fix for Ctrl-C during request)",
+  "formal_checks_c18": {
+    "compat-c18": "5bb0ca929ecd9cd91bc3acbe64cdc4d1bd9d0809227db057e351257d3b1e04d7",
+    "compat-c18-r2": "3c6b3f6a50c54fcafd53776d5641699ea014841412495ae4bd5b55e9b4ac234f",
+    "flow-policy-shell-c18": "b02735c5cae887a88f44d8d476f42df61b7ceeb8e218c34d11e3662c2100f758",
+    "fault-c18": "1825dae4f8be1c7bea85bcb7014ea2fc81d14c003a115695f96dca783a0f804f",
+    "gap-c18": "23a1fc62b9bf9f4f2dfefb4e57715a3ee60632d568af4be27dbae4fc57c8ba2c",
+    "regression-a-c18": "8ead7cf1b9625bf36edb99f75d1a645a27a27ff9cb92b06d50c13dde9efb9e24",
+    "regression-b-c18": "56170139115714885272e6139cc37662c54f7f72e5e5f8592c5c0d39c3aa2882"
+  },
+  "gate": {
+    "result": ".workflow/core-workbench/runs/implement-p2.6-20260927/gate-p27-cw16-c18-final-result.json",
+    "passed": true,
+    "issues": []
+  },
+  "aggregate": {
+    "expected": ".workflow/core-workbench/runs/implement-p2.6-20260927/aggregate-p27-cw16-c18-expected.json",
+    "records": ".workflow/core-workbench/runs/implement-p2.6-20260927/aggregate-p27-cw16-c18-records.json",
+    "validated_items": 7
+  },
+  "validator": {
+    "log": ".workflow/core-workbench/runs/implement-p2.6-20260927/validator-p27-cw16-c18-final.log",
+    "result": "16 tests OK, final mode"
+  },
+  "extra_runtime": {
+    "emphasis": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-emph-01.md"
+  },
+  "docs": {
+    "VERIFICATION.md": "1aac56dbe5e730c9faede394b8c4e87d006e8f2a06cac1f329999822032f8055",
+    "COMPATIBILITY.md": "6f0c43caeb0ff074c1868b0d6aeeb09a874415d5f101a66d8c750b94532b48c6",
+    "FOLLOWUP-TRUECOLOR.md": "d6e93edbe33bf82a4000ffdb5449291ebf6aed9ccfa2f3c1d12a624eb9e52c7e",
+    "audit": ".workflow/core-workbench/runs/implement-p2.6-20260927/audit-p27-cw16-c18-docs-result.json (docs only)"
+  },
+  "root_adjudications": [
+    "C-AC-07 retry-limit report: held:retry_limit detail + skill line + per-run reports",
+    "queue_full: now observed live (regression-a sandboxed live tests)",
+    "real-model smoke is confidence only (C16, 32/40; RM2 not run) — not gate evidence",
+    "compat-c18 first run Esc/slash-menu failure 3/6 cells: intermittent, formal r2 6/6; follow-up observation",
+    "test_product_pty spawn-order race: intermittent; follow-up"
+  ],
+  "verdict": "CW-16 done_verified (71-item full set: no stale/unknown; 7 owned items gate passed on C18)",
+  "carried_followups": [
+    "FOLLOWUP-TRUECOLOR.md (24-bit colour fidelity, C-D73)",
+    "Esc slash-menu intermittent in compat",
+    "test_product_pty race, connection_cap EAGAIN, concurrent_kill_and_restart intermittents",
+    "512 MiB raw-log project cap has no rotation",
+    "worker occasionally answers in another language (user: ignore)",
+    "to-worker skill at its size limit"
+  ]
+}

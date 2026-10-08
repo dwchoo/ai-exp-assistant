@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw16-docs-01",
+  "ticket_id": "CW-16 VERIFICATION.md and COMPATIBILITY.md",
+  "role": "worker",
+  "unit": "V-CW-16",
+  "candidate": "f8ad6ec989ec2b9f1f72a81414bbaeeadc911997a196c0edf1eeed18442f4e3d",
+  "candidate_commit": "e635723",
+  "routing": {
+    "planned_role": "worker",
+    "selected_role": "worker (Opus high; evidence-heavy docs incl. the 71-item set table)",
+    "reason_codes": [
+      "final_docs"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-plan-01.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-review-01.md"
+    ]
+  },
+  "required_behavior": [
+    "Replace docs/features/core-workbench/VERIFICATION.md and COMPATIBILITY.md following plan result-p27-cw16-plan-01.md §7 structure (Korean; technical identifiers verbatim; only facts from the records; never write passed for anything not run).",
+    "Inputs: requirements-p27-cw16.json; check-p27-cw16-{compat,flow-policy-shell,fault,regression-a,regression-a-r2,regression-b}-{request,execution}.json + logs (+ -observed.json for the first three); gate-p27-cw16-final-result.json (passed:true); aggregate-p27-cw16-{expected,records}.json and validator-p27-cw16-final.log (16 tests OK in final mode, all negative controls rejected); results result-p27-cw16-b1/b2/b3/b4a/b4b-01.md, result-p27-cw16-review-01.md (pass + closing conditions), integration-p27-cw19.json, result-p27-cw19-vm-02.md; snapshots p27-snapshot-cw16-C16-final.json; DECISIONS C-D72; UR-USABILITY (state.json, 2026-10-08 '좋아 현재 잘 동작해').",
+    "Review closing conditions to satisfy explicitly: (1) FinalRecordsTests final-mode run recorded (validator-p27-cw16-final.log); (2) disclose the 29-30 regression skips caused by OMP 18.2.10 pins (tests/backend/live_harness.py:28,46: L-CW17-START/DETACH, live pane queue_full test_live_contract_independent.py:289, etc.) — list them, and in the 71-item table map each affected L-CW17 / P-C-AC item to the C16 runtime re-observation that covers the same user behaviour (compat C5 detach/reattach, X-scenarios, B1/B2) or mark it 'not re-observed on C16' (never count a skip as C16 evidence); state that 'backend reuse while running' was not observed with a real OMP on C16 if that is the case; (3) approval prompt N/A evidence: Workbench OMP home does not set tools.approvalMode; OMP 18.8.0 default is `yolo` (Root checked `omp config get tools.approvalMode` in a clean temp home = yolo, 2026-10-08) and no approval prompt appeared in any live run (b1 compat note).",
+    "Root adjudications to record: C-AC-07 retry-limit report satisfied via held:retry_limit + manager skill line + delivered per-run judge reports (enumerating cause/logs/attempts/remaining in the skill is a polish item); queue_full recorded via fixture + L-CW17-CONTRACT sub-observation; regression-a first-run intermittent failures (2) + clean formal r2; review P3s listed as residual.",
+    "§8 full-set table: for all 71 PLAN gate_items give status current (C16 run) / impact-compared (input-path diff argument with reference) / historical-stale; G1/G3 18.2.10-pinned probes are historical per C-D72 (2) with the 18.8.0 re-observation link. Unverified list: GUI terminal font/RGB/IME fidelity, sudden power loss, macOS/Windows, other tmux/herdr versions; zsh-login removed from scope by C-D72 (1).",
+    "A real-model smoke (result-p27-cw16-rm-01.md) may still be running: leave a clearly marked section 10 placeholder 'pending' if it is not there yet; Root fills it.",
+    "Write ONLY the two docs. Do not touch PLAN.json, SPEC.md, BRIEF.md, DECISIONS.md (they are in the validated input manifest) or any other file."
+  ],
+  "allowed_write_paths": [
+    "docs/features/core-workbench/VERIFICATION.md",
+    "docs/features/core-workbench/COMPATIBILITY.md"
+  ],
+  "rules": "No real provider requests; never read credential contents; no commits; no graphify update.",
+  "result_format": "Korean reply <=8 lines: sections written, anything you could not confirm."
+}

@@ -1,0 +1,179 @@
+{
+ "run_id": "c18-flow-policy",
+ "scenarios": {
+  "flow-F1-F4": {
+   "result": "pass",
+   "steps": {
+    "start": "pass",
+    "F4_repeated_call_and_busy": "pass",
+    "F1_free_work": "pass",
+    "shutdown": "pass"
+   },
+   "unknowns": [],
+   "path": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-formal-c18/reports/c18-flow-policy/flow-F1-F4.json"
+  },
+  "flow-F2": {
+   "result": "pass",
+   "steps": {
+    "start": "pass",
+    "F2a_success": "pass",
+    "F2b_failure": "pass",
+    "F2c_failure": "pass",
+    "F2d_indeterminate": "pass",
+    "F2_missing_commit_nothing_runs": "pass",
+    "shutdown": "pass"
+   },
+   "unknowns": [],
+   "path": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-formal-c18/reports/c18-flow-policy/flow-F2.json"
+  },
+  "flow-F3": {
+   "result": "pass",
+   "steps": {
+    "start": "pass",
+    "F3_local_commit_in_paths": "pass",
+    "F3_no_push_no_branch": "pass",
+    "shutdown": "pass"
+   },
+   "unknowns": [],
+   "path": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-formal-c18/reports/c18-flow-policy/flow-F3.json"
+  },
+  "flow-F45": {
+   "result": "pass",
+   "steps": {
+    "start": "pass",
+    "F45_terminal_while_task_undelivered": "pass",
+    "F45_terminal_right_after_cancel": "pass",
+    "shutdown": "pass"
+   },
+   "unknowns": [],
+   "path": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-formal-c18/reports/c18-flow-policy/flow-F45.json"
+  },
+  "flow-F5": {
+   "result": "pass",
+   "steps": {
+    "start": "pass",
+    "F5_no_task_unrestricted": "pass",
+    "F5_inside_open_task_linked": "pass",
+    "F5_beyond_scope_reported_not_widened": "pass",
+    "shutdown": "pass"
+   },
+   "unknowns": [],
+   "path": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-formal-c18/reports/c18-flow-policy/flow-F5.json"
+  },
+  "flow-F6-F7": {
+   "result": "pass",
+   "steps": {
+    "start": "pass",
+    "F7_idle_before_instruction": "pass",
+    "F6a_done_requires_code_change_closes": "pass",
+    "F6b_blocked_requires_code_change_no_auto": "pass",
+    "F6_new_instruction_delivered_once": "pass",
+    "shutdown": "pass"
+   },
+   "unknowns": [],
+   "path": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-formal-c18/reports/c18-flow-policy/flow-F6-F7.json"
+  },
+  "policy-CLK-clock-fixture-suite": {
+   "result": "pass",
+   "steps": {
+    "tests/backend/test_flow_terminal_notices.py": "pass",
+    "tests/backend/test_terminal_independent_p27cd68.py": "pass",
+    "tests/backend/test_terminal_fix03_independent_p27cd68.py": "pass",
+    "tests/backend/test_cd70_followups.py": "pass",
+    "tests/backend/test_watchdog_independent_p27cd70.py": "pass",
+    "tests/backend/test_cd70_watchdog.py": "pass",
+    "tests/backend/test_cd70_fix03.py": "pass",
+    "tests/backend/test_cd70_ui_wait.py": "pass",
+    "tests/recovery_boot/test_cw19_fix01.py": "pass",
+    "tests/recovery_boot/test_survivors_holds_independent_p27cw19.py": "pass",
+    "tests/backend/test_automation_loop.py": "pass",
+    "tests/recovery_boot/test_cw19_fix02.py": "pass",
+    "tests/observation/test_worker_review.py": "pass",
+    "tests/observation/test_worker_review_independent.py": "pass",
+    "tests/policy/pause_automation/test_pause_policy.py": "pass",
+    "tests/backend/test_handoff_service.py": "pass",
+    "tests/backend/test_flow_terminal.py": "pass"
+   },
+   "unknowns": [],
+   "path": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-formal-c18/reports/c18-flow-policy/policy-CLK-clock-fixture-suite.json"
+  },
+  "policy-P1-P7": {
+   "result": "pass",
+   "steps": {
+    "start": "pass",
+    "P1_reviews_60s_merge_when_busy": "pass",
+    "P7_usage_in_review_facts_and_display": "pass",
+    "shutdown": "pass"
+   },
+   "unknowns": [],
+   "path": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-formal-c18/reports/c18-flow-policy/policy-P1-P7.json"
+  },
+  "policy-P2": {
+   "result": "pass",
+   "steps": {
+    "start": "pass",
+    "P2_pause_holds_sends_and_terminal": "pass",
+    "P2_run_end_shown_no_review_while_paused": "pass",
+    "P2_resume_reconciled_no_replay": "pass",
+    "shutdown": "pass"
+   },
+   "unknowns": [],
+   "path": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-formal-c18/reports/c18-flow-policy/policy-P2.json"
+  },
+  "policy-P3": {
+   "result": "pass",
+   "steps": {
+    "start": "pass",
+    "P3_pause_aborts_streaming_manager_turn": "pass",
+    "P3_running_manager_tool_recorded_unknown": "pass",
+    "shutdown": "pass"
+   },
+   "unknowns": [],
+   "path": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-formal-c18/reports/c18-flow-policy/policy-P3.json"
+  },
+  "policy-P4": {
+   "result": "pass",
+   "steps": {
+    "start": "pass",
+    "P4_three_reruns_then_retry_limit": "pass",
+    "shutdown": "pass"
+   },
+   "unknowns": [],
+   "path": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-formal-c18/reports/c18-flow-policy/policy-P4.json"
+  },
+  "policy-P5": {
+   "result": "pass",
+   "steps": {
+    "start": "pass",
+    "P5_change_during_run_held": "pass",
+    "shutdown": "pass"
+   },
+   "unknowns": [],
+   "path": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-formal-c18/reports/c18-flow-policy/policy-P5.json"
+  },
+  "policy-P6": {
+   "result": "pass",
+   "steps": {
+    "start": "pass",
+    "P6_restart_worker_verified": "pass",
+    "P6_stop_survivor_unknown_refused": "pass",
+    "P6_host_terminal_force_kill": "pass",
+    "shutdown": "pass"
+   },
+   "unknowns": [],
+   "path": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-formal-c18/reports/c18-flow-policy/policy-P6.json"
+  },
+  "policy-P8": {
+   "result": "pass",
+   "steps": {
+    "start": "pass",
+    "P8_cancel_running_experiment": "pass",
+    "P8_cancel_withdraws_queued_follow_up": "pass",
+    "shutdown": "pass"
+   },
+   "unknowns": [],
+   "path": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-formal-c18/reports/c18-flow-policy/policy-P8.json"
+  }
+ },
+ "written_at": "2026-10-08T16:51:48+00:00"
+}

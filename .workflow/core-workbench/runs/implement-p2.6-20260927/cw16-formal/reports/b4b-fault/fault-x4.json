@@ -1,0 +1,310 @@
+{
+ "scenario": "fault-x4",
+ "run_id": "b4b-fault",
+ "started_at": "2026-10-08T11:35:12+00:00",
+ "repo_head": "e63572356480f2431427d349d749fbd09c2ee72f",
+ "context": {
+  "scenario_id": "X4"
+ },
+ "versions": {
+  "omp": "omp/18.8.0",
+  "omp_path": "/home/dwchoo/.local/bin/omp",
+  "tmux": "tmux 3.4",
+  "herdr": "herdr 0.9.3",
+  "bash": "GNU bash, version 5.2.21(1)-release (x86_64-pc-linux-gnu)",
+  "dash": "dash 0.5.12-6ubuntu5",
+  "sh": "/usr/bin/dash",
+  "python": "3.12.3",
+  "kernel": "7.0.0-30-generic",
+  "os": "Ubuntu 24.04.4 LTS"
+ },
+ "commands": [
+  {
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "start",
+    "--data-dir",
+    "/tmp/wbc16x4v-_6okv6wo/d",
+    "--omp",
+    "/home/dwchoo/.local/bin/omp",
+    "--omp-arg=--model",
+    "--omp-arg=wbcw16/scripted",
+    "--no-attach"
+   ],
+   "exit": 0,
+   "seconds": 3.76,
+   "stdout_tail": " OMP isolation check ...\nbackend pid 2059055 phase ready\ndata dir /tmp/wbc16x4v-_6okv6wo/d\n  host_shell: pid 2059059 alive=True owner=user\n  manager_omp: pid 2059062 alive=True owner=user\n  worker_omp: pid 2059063 alive=True owner=user\n  shell: bash /usr/bin/bash mode=manual_prompt\nomp isolation: ok (omp/18.8.0 evidence bridge_g3=18.2.10, isolation=18.6.1)\n  note: OMP 18.8.0 has not extracted its native addon into /tmp/wbc16x4v-_6okv6wo/h/.omp/natives/18.8.0 yet: the first Workbench OMP extracts it there (the same files your own omp 18.8.0 extracts; OMP has no setting to move this directory).\n",
+   "stderr_tail": ""
+  },
+  {
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "shutdown",
+    "--data-dir",
+    "/tmp/wbc16x4v-_6okv6wo/d",
+    "--json"
+   ],
+   "exit": 1,
+   "seconds": 0.08,
+   "stdout_tail": "active work:\n  - {\"kind\": \"shell_request\", \"phase\": \"experiment_started\", \"request_id\": \"21861e82-265f-454c-a220-e6313310eaee\"}\n  - {\"kind\": \"automation\", \"state\": \"active\"}\n  - {\"kind\": \"task_run\", \"run_id\": \"c809f814-2c44-4421-8499-a299f7751800\", \"task_id\": \"4a1ee9eb-e3f9-4fca-aa94-f350c4e40d57\"}\n",
+   "stderr_tail": "refusing to shut down without confirmation (use --yes)\n"
+  },
+  {
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "shutdown",
+    "--data-dir",
+    "/tmp/wbc16x4v-_6okv6wo/d",
+    "--json",
+    "--yes"
+   ],
+   "exit": 0,
+   "seconds": 3.23,
+   "stdout_tail": " \"c809f814-2c44-4421-8499-a299f7751800\", \"survivors\": []}, \"omp_children\": {\"alive\": [], \"observed\": [{\"ended\": \"by_itself\", \"parent\": \"worker_omp\", \"parent_pid\": 2059063, \"pid\": 2059263, \"start_ticks\": 300438751}]}, \"panes\": [{\"exit_status\": -1, \"pane\": \"host_shell\", \"survivors\": []}, {\"exit_status\": 143, \"pane\": \"manager_omp\", \"survivors\": []}, {\"exit_status\": 143, \"pane\": \"worker_omp\", \"survivors\": []}], \"previous_survivors\": [], \"problems\": [], \"processes\": {\"host_shell\": \"dead\", \"manager_omp\": \"dead\", \"supervisor\": \"dead\", \"worker_omp\": \"dead\"}, \"user_confirmed\": true, \"verified\": true}}\n",
+   "stderr_tail": ""
+  },
+  {
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "start",
+    "--data-dir",
+    "/tmp/wbc16x4u-9d18nvmq/d",
+    "--omp",
+    "/home/dwchoo/.local/bin/omp",
+    "--omp-arg=--model",
+    "--omp-arg=wbcw16/scripted",
+    "--no-attach"
+   ],
+   "exit": 0,
+   "seconds": 3.63,
+   "stdout_tail": " OMP isolation check ...\nbackend pid 2059637 phase ready\ndata dir /tmp/wbc16x4u-9d18nvmq/d\n  host_shell: pid 2059641 alive=True owner=user\n  manager_omp: pid 2059644 alive=True owner=user\n  worker_omp: pid 2059645 alive=True owner=user\n  shell: bash /usr/bin/bash mode=manual_prompt\nomp isolation: ok (omp/18.8.0 evidence bridge_g3=18.2.10, isolation=18.6.1)\n  note: OMP 18.8.0 has not extracted its native addon into /tmp/wbc16x4u-9d18nvmq/h/.omp/natives/18.8.0 yet: the first Workbench OMP extracts it there (the same files your own omp 18.8.0 extracts; OMP has no setting to move this directory).\n",
+   "stderr_tail": ""
+  },
+  {
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "shutdown",
+    "--data-dir",
+    "/tmp/wbc16x4u-9d18nvmq/d",
+    "--yes"
+   ],
+   "exit": 1,
+   "seconds": 0.42,
+   "stdout_tail": "down\", \"pid\": 2059886, \"session\": 2059886}\nshutdown result: {\"left_running\": [{\"pid\": 2059886, \"session\": 2059886, \"start_ticks\": 300439991}], \"lifecycle\": null, \"omp_children\": {\"alive\": [], \"observed\": []}, \"panes\": [{\"exit_status\": -1, \"pane\": \"host_shell\", \"survivors\": []}, {\"exit_status\": 143, \"pane\": \"manager_omp\", \"survivors\": []}, {\"exit_status\": 143, \"pane\": \"worker_omp\", \"survivors\": []}], \"previous_survivors\": [], \"problems\": [\"left_session_processes_alive\"], \"processes\": {\"host_shell\": \"dead\", \"manager_omp\": \"dead\", \"worker_omp\": \"dead\"}, \"user_confirmed\": true, \"verified\": false}\n",
+   "stderr_tail": "종료 확인 실패: 일부 process의 종료를 확인하지 못했습니다 (left_session_processes_alive)\n"
+  }
+ ],
+ "steps": {
+  "X4.no_yes_refused_active_listed": {
+   "status": "pass",
+   "seconds": 6.3,
+   "observed": {
+    "exit": 1,
+    "stdout": "active work:\n  - {\"kind\": \"shell_request\", \"phase\": \"experiment_started\", \"request_id\": \"21861e82-265f-454c-a220-e6313310eaee\"}\n  - {\"kind\": \"automation\", \"state\": \"active\"}\n  - {\"kind\": \"task_run\", \"run_id\": \"c809f814-2c44-4421-8499-a299f7751800\", \"task_id\": \"4a1ee9eb-e3f9-4fca-aa94-f350c4e40d57\"}\n",
+    "stderr": "refusing to shut down without confirmation (use --yes)\n",
+    "still_running": true
+   }
+  },
+  "X4.yes_verified_nothing_left": {
+   "status": "pass",
+   "seconds": 3.3,
+   "observed": {
+    "exit": 0,
+    "verified": true,
+    "processes": {
+     "host_shell": "dead",
+     "manager_omp": "dead",
+     "supervisor": "dead",
+     "worker_omp": "dead"
+    },
+    "left_running": [],
+    "panes_alive_after": {
+     "host_shell": false,
+     "manager_omp": false,
+     "worker_omp": false
+    },
+    "residue": {},
+    "timeline": []
+   }
+  },
+  "X4.owned_broker_not_alive_at_verified": {
+   "status": "pass",
+   "seconds": 0.0,
+   "observed": {
+    "before_shutdown": {
+     "2059263": {
+      "ticks": 300438751,
+      "ppid": 2059063,
+      "session": 2059263,
+      "cwd": "$ROOT/p"
+     }
+    },
+    "at_verified": {},
+    "broker_pid_files_in_data_dir": {
+     "omp-root/run/daemons/global/text-predict/broker.pid": 2059263
+    },
+    "gone_after_seconds": 0.03
+   }
+  },
+  "X4.survivor_unverified_exit1": {
+   "status": "pass",
+   "seconds": 13.5,
+   "observed": {
+    "exit": 1,
+    "stderr": "종료 확인 실패: 일부 process의 종료를 확인하지 못했습니다 (left_session_processes_alive)\n",
+    "verified": false,
+    "problems": [
+     "left_session_processes_alive"
+    ],
+    "left_running": [
+     {
+      "pid": 2059886,
+      "session": 2059886,
+      "start_ticks": 300439991
+     }
+    ],
+    "active_listed": [
+     "  - {\"kind\": \"left_session\", \"note\": \"a host-shell descendant in another session; not ended by this shutdown\", \"pid\": 2059886, \"session\": 2059886}",
+     "shutdown result: {\"left_running\": [{\"pid\": 2059886, \"session\": 2059886, \"start_ticks\": 300439991}], \"lifecycle\": null, \"omp_children\": {\"alive\": [], \"observed\": []}, \"panes\": [{\"exit_status\": -1, \"pane\": \"host_shell\", \"survivors\": []}, {\"exit_status\": 143, \"pane\": \"manager_omp\", \"survivors\": []}, {\"exit_status\": 143, \"pane\": \"worker_omp\", \"survivors\": []}], \"previous_survivors\": [], \"problems\": [\"left_session_processes_alive\"], \"processes\": {\"host_shell\": \"dead\", \"manager_omp\": \"dead\", \"worker_omp\": \"dead\"}, \"user_confirmed\": true, \"verified\": false}"
+    ],
+    "observation_double_forked_daemon": {
+     "alive_after_shutdown": true,
+     "in_left_running": false,
+     "listed_as_active": false
+    }
+   }
+  }
+ },
+ "unknowns": [],
+ "result": "pass",
+ "roots": [
+  "/tmp/wbc16x4v-_6okv6wo",
+  "/tmp/wbc16x4u-9d18nvmq"
+ ],
+ "cleanup": {
+  "residue_before_fallback": {
+   "root_processes": {
+    "2059886": 300439991,
+    "2059925": 300440380
+   }
+  },
+  "root_removed": true,
+  "residue_after_fallback": {}
+ },
+ "cleanups": [
+  {
+   "residue_before_fallback": {},
+   "root_removed": true,
+   "residue_after_fallback": {}
+  },
+  {
+   "residue_before_fallback": {
+    "root_processes": {
+     "2059886": 300439991,
+     "2059925": 300440380
+    }
+   },
+   "root_removed": true,
+   "residue_after_fallback": {}
+  }
+ ],
+ "provider": {
+  "requests": {
+   "worker": 2,
+   "manager": 2
+  },
+  "injected": {
+   "manager": [],
+   "worker": [
+    {
+     "at": 1791459318.57616,
+     "kind": "task",
+     "message_id": "d1a8a834-582f-4341-936b-fe26c1d9cb6a",
+     "handoff": null,
+     "payload_kind": null,
+     "stage": "execute",
+     "contract": true
+    }
+   ],
+   "unknown": []
+  },
+  "aborted": [],
+  "errors": [],
+  "rules": [
+   {
+    "name": "tap",
+    "hits": 0
+   },
+   {
+    "name": "worker-staged",
+    "hits": 1
+   },
+   {
+    "name": "worker-review",
+    "hits": 0
+   },
+   {
+    "name": "text:x4exp",
+    "hits": 1
+   }
+  ],
+  "log_tail": [
+   {
+    "i": 1,
+    "at": 1791459317.6796713,
+    "role": "worker",
+    "last_role": "user",
+    "text_tail": "x4hello 875a0a",
+    "injected_kind": null,
+    "tool_results": []
+   },
+   {
+    "i": 2,
+    "at": 1791459318.4951787,
+    "role": "manager",
+    "last_role": "user",
+    "text_tail": "x4exp",
+    "injected_kind": null,
+    "tool_results": []
+   },
+   {
+    "i": 3,
+    "at": 1791459318.5262318,
+    "role": "manager",
+    "last_role": "tool",
+    "text_tail": "o not do it yourself (no commands, edits or checks for it). End your turn and wait for the worker's to_manager report.\"}",
+    "injected_kind": null,
+    "tool_results": [
+     "cw16-manager-1"
+    ]
+   },
+   {
+    "i": 4,
+    "at": 1791459318.5761628,
+    "role": "worker",
+    "last_role": "user",
+    "text_tail": null,
+    "injected_kind": "task",
+    "tool_results": []
+   }
+  ]
+ },
+ "notices": {
+  "manager": [],
+  "worker": [],
+  "unknown": []
+ },
+ "reviews": [],
+ "model_requests_real": 0,
+ "finished_at": "2026-10-08T11:36:00+00:00"
+}

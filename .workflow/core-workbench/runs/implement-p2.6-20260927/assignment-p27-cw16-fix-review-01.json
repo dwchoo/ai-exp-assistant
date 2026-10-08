@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw16-fix-review-01",
+  "ticket_id": "CW-16 product fix review",
+  "role": "reviewer",
+  "unit": "V-CW-16",
+  "base_commit": "6a2ddb2",
+  "routing": {
+    "planned_role": "reviewer",
+    "selected_role": "reviewer (Opus high, fresh; process lifetime + pause policy changes)",
+    "reason_codes": [
+      "process_lifetime",
+      "pause_policy"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/assignment-p27-cw16-fix-01.json",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-fix-01.md"
+    ]
+  },
+  "required_behavior": [
+    "Review `git diff 6a2ddb2 -- src omp_bridge tests` excluding tests/integration/** (B1-B3 test design, reviewed later) against the Root adjudications in assignment-p27-cw16-fix-01.json and C-D55/C-D65/C-D71/C-D72, BRIEF C-AC-21/22. Focus: (D-B2-1) the visible ` __b_env` probe typed into the user's host shell — safety (only at a clean idle prompt, never into user input/REPL, no history pollution if possible, no secrets printed to the pane or logs since it reads exported values?), correctness of env comparison, gate release; (D-B2-2) resume reconcile of a run finished during pause (no replay, no new automatic model work by the reconcile), cancel during pause semantics; (D-B2-3) usage display truthful (unknown never fixed); (F1) broker capture: only exact descendants of our OMP pinned by pidfd, bounded wait, terminate only those, verified false while alive, no cmdline matching, races with OMP exit; (F2) UI. Thread safety and locks."
+  ],
+  "acceptance": [
+    "Verdict pass/block; findings P1-P3 with file:line"
+  ],
+  "allowed_write_paths": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-fix-review-01.md"
+  ],
+  "rules": "Read-only. No real provider requests; never read credential stores/contents or other processes' environ; never touch the user's tmux/herdr, other claude-swarm sockets, ~/wb-urux-sandbox, ~/.local/share/wb-vm or processes you did not start; no commits; no graphify update.",
+  "result_format": "Korean reply <=8 lines."
+}

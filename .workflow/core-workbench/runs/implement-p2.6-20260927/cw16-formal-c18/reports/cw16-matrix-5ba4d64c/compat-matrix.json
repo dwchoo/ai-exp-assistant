@@ -1,0 +1,77 @@
+{
+ "run_id": "cw16-matrix-5ba4d64c",
+ "written_at": "2026-10-08T16:22:28+00:00",
+ "cells": {
+  "herdr/bash": {
+   "C1": "pass",
+   "C2": "pass",
+   "C3": "pass",
+   "C4": "pass",
+   "C5": "pass",
+   "C6": "pass",
+   "C7": "pass"
+  },
+  "herdr/dash": {
+   "C1": "pass",
+   "C2": "pass",
+   "C3": "pass",
+   "C4": "pass",
+   "C5": "pass",
+   "C6": "pass",
+   "C7": "pass"
+  },
+  "plain/bash": {
+   "C1": "pass",
+   "C2": "fail",
+   "C3": "pass",
+   "C4": "pass",
+   "C5": "pass",
+   "C6": "n/a",
+   "C7": "pass"
+  },
+  "plain/dash": {
+   "C1": "pass",
+   "C2": "fail",
+   "C3": "pass",
+   "C4": "pass",
+   "C5": "pass",
+   "C6": "n/a",
+   "C7": "pass"
+  },
+  "tmux/bash": {
+   "C1": "pass",
+   "C2": "pass",
+   "C3": "pass",
+   "C4": "pass",
+   "C5": "pass",
+   "C6": "pass",
+   "C7": "pass"
+  },
+  "tmux/dash": {
+   "C1": "pass",
+   "C2": "fail",
+   "C3": "pass",
+   "C4": "pass",
+   "C5": "pass",
+   "C6": "pass",
+   "C7": "pass"
+  }
+ },
+ "selection": {
+  "sel-1": "pass",
+  "sel-2": "pass",
+  "sel-3": "pass"
+ },
+ "versions": {
+  "omp": "omp/18.8.0",
+  "omp_path": "/home/dwchoo/.local/bin/omp",
+  "tmux": "tmux 3.4",
+  "herdr": "herdr 0.9.3",
+  "bash": "GNU bash, version 5.2.21(1)-release (x86_64-pc-linux-gnu)",
+  "dash": "dash 0.5.12-6ubuntu5",
+  "sh": "/usr/bin/dash",
+  "python": "3.12.3",
+  "kernel": "7.0.0-30-generic",
+  "os": "Ubuntu 24.04.4 LTS"
+ }
+}

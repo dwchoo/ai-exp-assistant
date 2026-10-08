@@ -1,0 +1,29 @@
+{
+ "root": "/home/dwchoo/ai-exp-assistant",
+ "requirements": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/requirements-p27-cw16.json",
+ "argv": [
+  "/usr/bin/env",
+  "-i",
+  "PATH=/home/dwchoo/.local/bin:/usr/bin:/bin",
+  "HOME=/home/dwchoo",
+  "LANG=C.UTF-8",
+  "PYTHONPATH=src",
+  "PYTHONDONTWRITEBYTECODE=1",
+  "WB_LIVE_CW16=1",
+  "WB_CW16_REPORT_DIR=/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-formal-c17/reports",
+  "/bin/bash",
+  "-c",
+  "rc=0; echo '== [1/2] I-FAULT host X1-X4,X6,X7 + X2R + X5 VM (live_cw16_fault.py, WB_CW16_VM=1)'; WB_CW16_VM=1 WB_CW16_RUN_ID=c17-fault /tmp/cw02-g1-venv/bin/python -m unittest -v tests/integration/live_cw16_fault.py || rc=1; echo '== [2/2] G3 fixed probe version record + broker wait (fake HOME, proxy blocked)'; mkdir -p /home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-formal-c17/reports/c17-fault; G3H=$(mktemp -d /tmp/wb-cw16-c17-g3home-XXXXXX); /usr/bin/env -i PATH=/home/dwchoo/.local/bin:/usr/bin:/bin HOME=$G3H LANG=C.UTF-8 TERM=xterm-256color PYTHONPATH=src:tests/gates/g3_omp PYTHONDONTWRITEBYTECODE=1 HTTP_PROXY=http://127.0.0.1:9 HTTPS_PROXY=http://127.0.0.1:9 ALL_PROXY=http://127.0.0.1:9 NO_PROXY=127.0.0.1 WB_G3_OMP_VERSION_RECORD=/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-formal-c17/reports/c17-fault/g3-version-record.json /tmp/cw02-g1-venv/bin/python -m unittest -v tests/gates/g3_omp/test_tui_extension_fault_integration.py || rc=1; rm -rf \"$G3H\"; echo \"== combined rc=$rc\"; exit $rc"
+ ],
+ "environment": {
+  "description": "Linux 7.0.0-30-generic Ubuntu 24.04.4; OMP 18.8.0 (~/.local/bin/omp); scripted local provider (0 real model requests); Bash 5.2.21; dash 0.5.12-6ubuntu5; tmux 3.4; Herdr 0.9.3; Python 3.12.3 venv /tmp/cw02-g1-venv (pyte); Node v22.23.2; env -i (TMUX*/HERDR_* stripped); frozen candidate C17 db39f4aa (HEAD 81bebe6); isolated QEMU VM wb-reboot (guest Ubuntu 24.04.5, guest OMP 18.2.10 probe only, fake OMP for phases; guest reboot only); C17 VM manifest aggregate d95842a4cd694292fac735f73f11d02dd70f1c75a4bb46ee8caea3ada0ae7ff2 (93 files)"
+ },
+ "log": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/check-p27-cw16-fault-c17.log",
+ "check_id": "p27-cw16-fault-c17",
+ "watch": [],
+ "exclude": [
+  ".workflow/core-workbench/runs/implement-p2.6-20260927/**",
+  "graphify-out/**"
+ ],
+ "timeout": 3600
+}

@@ -1,0 +1,17 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 2413,
+  "event": {
+    "id": "running-p27-cw16-fix-04",
+    "kind": "transition",
+    "data": {
+      "evidence": "host: SendMessage to reused agent cw16-fix3 delivered, 2026-10-08",
+      "invocation": "p27-cw16-fix-04",
+      "not_started_evidence": null,
+      "observed_effort": "unverified",
+      "observed_model": "unverified",
+      "outcome": null,
+      "state": "running"
+    }
+  }
+}

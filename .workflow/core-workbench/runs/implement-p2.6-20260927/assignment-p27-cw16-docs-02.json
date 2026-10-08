@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw16-docs-02",
+  "ticket_id": "CW-16 VERIFICATION/COMPATIBILITY update to the final candidate C18",
+  "role": "worker",
+  "unit": "V-CW-16",
+  "candidate": "a2e3daf23dc98d8c98c760d62e227d4425c0b6b8265b6b3d9a696bc7a573482b",
+  "candidate_commit": "c47456a",
+  "routing": {
+    "planned_role": "worker",
+    "selected_role": "worker (wb-worker, Sonnet high; docs from records; user 2026-10-08 prefers Sonnet)",
+    "reason_codes": [
+      "final_docs_update"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-c18-formal-01.md"
+    ]
+  },
+  "required_behavior": [
+    "Update the existing drafts docs/features/core-workbench/VERIFICATION.md and COMPATIBILITY.md (written for C16) to the FINAL candidate C18 (commit c47456a, candidate a2e3daf2…). Keep their structure; change only what the C18 records change; facts only from records; Korean.",
+    "C18 records (run dir): check-p27-cw16-{compat-c18, compat-c18-r2, flow-policy-shell-c18, fault-c18, gap-c18, regression-a-c18, regression-b-c18}-{request,execution}.json + .log, observed {compat,flow-policy-shell,fault}-c18; gate-p27-cw16-c18-final-result.json (passed:true, issues []); aggregate-p27-cw16-c18-{expected,records}.json; validator-p27-cw16-c18-final.log (16 OK, final mode); result-p27-cw16-c18-formal-01.md (compat first run exit 1: manager OMP Esc did not close the slash menu in 3/6 cells — intermittent, r2 6/6 pass; keep both); p27-snapshot-cw16-C18.json; X5 VM manifest 6eeed242…(93 files).",
+    "What changed since C16 (cite): fixes fix-03 (shutdown no traceback/C-AC-22 wait, restart line expiry, retry_limit detail, SH5 reason), fix-04/05 (colour per C-D73 incl. brightbrown, umask reverted, live_harness sandbox), gap-01 (the 18.2.10-pinned live tests now run on 18.8.0 in a sandbox; re-observed: backend reuse on second start, frontend SIGKILL re-attach >60 s, live pane queue_full, paste responsiveness, edit keys, scroll, composer hold, G3-SESSION /new); decisions C-D72, C-D73; FOLLOWUP-TRUECOLOR.md for the colour limitation; review results result-p27-cw16-c17-review-01.md (block) -> fix-05 -> result-p27-cw16-c18-review-01.md (pass) + Root fix for its P3 (Ctrl-C during the request).",
+    "Re-evaluate the §6 skip table and the §9 71-item table on C18 from the regression-a/b-c18 logs (count skips; items previously 'not re-observed' or historical-stale that gap-01/C18 runs now observe become current; G1-COLOR is judged by the C-D73 criterion in PLAN.json). Only keep items stale/partial where the C18 records truly lack them; then state the completion judgement honestly (done_verified only if no required item remains stale/unknown).",
+    "§10 real-model smoke: result-p27-cw16-rm-01.md (on C16; 32/40 requests; RM1, RM3, RM4 pass; RM2 not run; O3/O4 found and fixed in fix-03) — mark it confidence evidence on C16, not C18 gate evidence.",
+    "COMPATIBILITY: add the colour limitation (C-D73, link FOLLOWUP-TRUECOLOR.md), the intermittent Esc observation, herdr 1 MiB paste, tmux set-clipboard; versions from C18 records.",
+    "Write ONLY the two docs; do not touch PLAN.json, SPEC.md, BRIEF.md, DECISIONS.md or anything else."
+  ],
+  "allowed_write_paths": [
+    "docs/features/core-workbench/VERIFICATION.md",
+    "docs/features/core-workbench/COMPATIBILITY.md"
+  ],
+  "rules": "No real provider requests; never read credential contents; no commits; no graphify update.",
+  "result_format": "Korean reply <=8 lines: completion judgement and any item left stale/partial with reason."
+}

@@ -1,0 +1,131 @@
+{
+ "run_id": "b4b-shell",
+ "scenarios": {
+  "shell-SH1-SH4-bash": {
+   "result": "pass",
+   "steps": {
+    "start": "pass",
+    "SH1_prepare_parent": "pass",
+    "SH1_terminal_inherits": "pass",
+    "SH1_experiment_inherits": "pass",
+    "SH1_declared_env_exported_after_start": "pass",
+    "SH1_parent_unchanged_no_propagation": "pass",
+    "SH4_terminal_descendant_exit3": "pass",
+    "SH4_experiment_descendant_exit3": "pass",
+    "shutdown": "pass"
+   },
+   "unknowns": [],
+   "path": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-formal/reports/b4b-shell/shell-SH1-SH4-bash.json"
+  },
+  "shell-SH1-SH4-dash": {
+   "result": "pass",
+   "steps": {
+    "start": "pass",
+    "SH1_prepare_parent": "pass",
+    "SH1_terminal_inherits": "pass",
+    "SH1_experiment_inherits": "pass",
+    "SH1_declared_env_exported_after_start": "pass",
+    "SH1_parent_unchanged_no_propagation": "pass",
+    "SH4_terminal_descendant_exit3": "pass",
+    "SH4_experiment_descendant_exit3": "pass",
+    "shutdown": "pass"
+   },
+   "unknowns": [],
+   "path": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-formal/reports/b4b-shell/shell-SH1-SH4-dash.json"
+  },
+  "shell-SH2-bash": {
+   "result": "pass",
+   "steps": {
+    "SH2_worker_command_waiting": "pass",
+    "SH2_request_holds_new_sends": "pass",
+    "SH2_input_before_confirm_not_delivered": "pass",
+    "SH2_confirm_manual_foreground_input": "pass",
+    "SH2_wb_handoff_control_wait_no_replay": "pass",
+    "shutdown": "pass"
+   },
+   "unknowns": [],
+   "path": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-formal/reports/b4b-shell/shell-SH2-bash.json"
+  },
+  "shell-SH2-dash": {
+   "result": "pass",
+   "steps": {
+    "SH2_worker_command_waiting": "pass",
+    "SH2_request_holds_new_sends": "pass",
+    "SH2_input_before_confirm_not_delivered": "pass",
+    "SH2_confirm_manual_foreground_input": "pass",
+    "SH2_wb_handoff_control_wait_no_replay": "pass",
+    "shutdown": "pass"
+   },
+   "unknowns": [],
+   "path": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-formal/reports/b4b-shell/shell-SH2-dash.json"
+  },
+  "shell-SH3-bash": {
+   "result": "pass",
+   "steps": {
+    "SH3_unsubmitted_input_held": "pass",
+    "SH3_repl_foreground_held": "pass",
+    "SH3_background_job_held": "pass",
+    "shutdown": "pass"
+   },
+   "unknowns": [],
+   "path": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-formal/reports/b4b-shell/shell-SH3-bash.json"
+  },
+  "shell-SH3-dash": {
+   "result": "pass",
+   "steps": {
+    "SH3_unsubmitted_input_held": "pass",
+    "SH3_repl_foreground_held": "pass",
+    "SH3_background_job_held": "pass",
+    "shutdown": "pass"
+   },
+   "unknowns": [],
+   "path": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-formal/reports/b4b-shell/shell-SH3-dash.json"
+  },
+  "shell-SH5-prompt_command-bash": {
+   "result": "pass",
+   "steps": {
+    "SH5_prompt_command": "pass",
+    "shutdown": "pass"
+   },
+   "unknowns": [],
+   "path": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-formal/reports/b4b-shell/shell-SH5-prompt_command-bash.json"
+  },
+  "shell-SH5-ps1-dash": {
+   "result": "pass",
+   "steps": {
+    "SH5_ps1": "pass",
+    "shutdown": "pass"
+   },
+   "unknowns": [],
+   "path": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-formal/reports/b4b-shell/shell-SH5-ps1-dash.json"
+  },
+  "shell-SH5-trap_chld-bash": {
+   "result": "pass",
+   "steps": {
+    "SH5_trap_chld": "pass",
+    "shutdown": "pass"
+   },
+   "unknowns": [],
+   "path": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-formal/reports/b4b-shell/shell-SH5-trap_chld-bash.json"
+  },
+  "shell-SH5-trap_chld-dash": {
+   "result": "pass",
+   "steps": {
+    "SH5_trap_chld": "pass",
+    "shutdown": "pass"
+   },
+   "unknowns": [],
+   "path": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-formal/reports/b4b-shell/shell-SH5-trap_chld-dash.json"
+  },
+  "shell-SH5-trap_debug-bash": {
+   "result": "pass",
+   "steps": {
+    "SH5_trap_debug": "pass",
+    "shutdown": "pass"
+   },
+   "unknowns": [],
+   "path": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-formal/reports/b4b-shell/shell-SH5-trap_debug-bash.json"
+  }
+ },
+ "written_at": "2026-10-08T11:24:19+00:00"
+}

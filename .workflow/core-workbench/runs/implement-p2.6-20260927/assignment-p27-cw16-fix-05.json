@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw16-fix-05",
+  "ticket_id": "CW-16 C17 review corrections (-> C18)",
+  "role": "worker",
+  "unit": "V-CW-16",
+  "base_commit": "81bebe6",
+  "routing": {
+    "planned_role": "worker",
+    "selected_role": "worker (wb-worker, Sonnet high; bounded corrections; user 2026-10-08 prefers Sonnet workers)",
+    "reason_codes": [
+      "review_block_bounded"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-c17-review-01.md"
+    ]
+  },
+  "root_adjudication": [
+    "P2-1: REVERT the OMP umask 077 (panes.py OMP_UMASK use ~L440-442, launcher.py ~L486/L1060): OMP's own tools write into the user's project and must keep the user's umask. Privacy of the Workbench data dir comes from its 0700 directories (data dir, omp-root, agent). Root-approved test delta in tests/backend/test_live_start_independent.py (the private-mode check ~L166-180): keep data dir 0700 and ui.sock/bridge.sock 0600; additionally assert omp-root and omp-root/agent are 0700 and that Workbench-written files (backend.json, automation.json, journals/records/logs written by the backend — list what exists) are not group/other accessible; entries created by OMP itself under the 0700 omp-root are excluded (comment: protected by the 0700 ancestor). Update tests/backend/test_cw16_fix04.py umask cases accordingly (they should now assert the host project files keep the user's umask and the data-dir/omp-root dirs are 0700).",
+    "P2-2: add 'brightbrown': 11 to the colour name table in src/workbench/ui/terminal_g1/app.py (pyte names SGR 93/103 brightbrown) and check other pyte bright names map; add SGR 93/103 (and every 30-37/90-97/40-47/100-107) to tests (unit) and to the gap COLOR scenario in tests/integration/live_cw16_gap.py (W stage edit approved: add cases, do not weaken).",
+    "P3-1: tests/backend/live_harness.py wire_provider must not pre-create omp-root/agent with 0700 (let the product create it; place the provider file after the product's home exists, or create only the file path the product would not create, documenting why).",
+    "P3-2: `workbench shutdown` without --yes and stdin closed/not a tty: no EOFError traceback — print the active work and 'confirm with --yes' and exit 1; Ctrl-C while waiting for the result prints the '종료 확인 실패…' message (termination not confirmed) and exits 1. Tests."
+  ],
+  "acceptance": [
+    "red->green tests; all suites with real exit codes (never with SIGINT ignored): every tests/<suite> dir (`PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/<suite> -t tests/<suite> -p 'test_*.py'`, policy/gates via subdirs), node `node --test tests/bridge/*.test.ts`, and tests/integration/live_cw16_gap.py (command in result-p27-cw16-gap-01.md §6, 0 model requests)."
+  ],
+  "allowed_write_paths": [
+    "src/workbench/**",
+    "tests/backend/test_live_start_independent.py (the private-mode block only)",
+    "tests/backend/test_cw16_fix04.py",
+    "tests/backend/live_harness.py",
+    "tests/integration/live_cw16_gap.py (COLOR cases only)",
+    "tests/** new or non-independent test files",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-fix-05.md"
+  ],
+  "prohibited_paths": [
+    "other *_independent* files",
+    "docs/**",
+    "other .workflow files"
+  ],
+  "rules": "No real provider requests; never read credential stores/contents or other processes' environ; isolate tmux/herdr; never touch the user's default servers, other claude-swarm sockets, ~/wb-urux-sandbox, ~/.local/share/wb-vm or processes you did not start; kill only PIDs you started; no pkill; temp only under /tmp; no commits; no graphify update.",
+  "result_format": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-fix-05.md: checks table, per item change file:line. Korean reply <=8 lines."
+}

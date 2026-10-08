@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw16-fix-03",
+  "ticket_id": "CW-16 real-model smoke O3/O4 + review P3 quick wins (last product change before C17)",
+  "role": "worker_senior",
+  "unit": "V-CW-16",
+  "base_commit": "e635723",
+  "routing": {
+    "planned_role": "worker_senior",
+    "selected_role": "worker_senior (Opus high)",
+    "reason_codes": [
+      "shutdown_contract",
+      "ui"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-rm-01.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-review-01.md"
+    ]
+  },
+  "root_adjudication": [
+    "O4: `workbench shutdown --yes [--json]` with active model turns / a running worker command must never end in a traceback. The CLI waits for the backend's shutdown result up to the backend's real shutdown deadline (not a fixed 10 s client timeout), shows progress on stderr for the human form, and always ends with the shutdown result (verified true/false with the remaining list) or, if the backend connection is lost before a result, a clear message that termination could not be confirmed (exit 1, C-AC-22) after checking the backend pid identity is gone. Find why active turns make it slow (turn abort wait?) and keep it bounded. Test with a fake OMP that delays turn abort.",
+    "O3: the backend-restart recovery line on the status line must not stay for the whole backend lifetime: clear it once the reconciled Task is closed (or no Task was open) and any survivors list is empty or acknowledged, or after a bounded time (e.g. 2 min) — status --json keeps the record.",
+    "Review P3 quick wins that do not grow the to-worker skill (it is at its size limit): (a) held:retry_limit result detail enumerates what to report to the user (cause, log/result evidence, attempts, remaining problem) — in the backend detail text, not the skill; (b) SH5 hold reason: when a user DEBUG trap / PROMPT_COMMAND incompatibility is the cause, report that reason instead of manual_input (if the shell layer can tell; otherwise document why not).",
+    "Do not change tests/integration/** (frozen design); if an integration test asserts old text, report it."
+  ],
+  "acceptance": [
+    "red->green tests; all suites (`PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/<suite> -t tests/<suite> -p 'test_*.py'` for every dir, policy/gates via subdirs) and node; 0 model requests"
+  ],
+  "allowed_write_paths": [
+    "src/workbench/**",
+    "omp_bridge/**",
+    "tests/** (not *_independent*, not tests/integration/**)",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-fix-03.md"
+  ],
+  "prohibited_paths": [
+    "tests/**/*_independent*",
+    "tests/integration/**",
+    "docs/**",
+    "other .workflow files"
+  ],
+  "concurrency_note": "A docs writer edits docs/features/core-workbench/VERIFICATION.md and COMPATIBILITY.md concurrently; do not touch docs.",
+  "rules": "No real provider requests; never read credential stores/contents or other processes' environ; never touch the user's tmux/herdr, other claude-swarm sockets, ~/wb-urux-sandbox, ~/.local/share/wb-vm or processes you did not start; kill only PIDs you started; no pkill; temp only under /tmp; no commits; no graphify update.",
+  "result_format": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-fix-03.md. Korean reply <=8 lines."
+}

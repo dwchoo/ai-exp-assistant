@@ -1,0 +1,100 @@
+{
+ "scenario": "sel-1",
+ "run_id": "cw16-matrix-2e17e11f",
+ "started_at": "2026-10-08T11:04:47+00:00",
+ "repo_head": "e63572356480f2431427d349d749fbd09c2ee72f",
+ "context": {
+  "path": [
+   "bash",
+   "omp",
+   "sh",
+   "zsh"
+  ],
+  "SHELL": "fake zsh sentinel"
+ },
+ "versions": {
+  "omp": "omp/18.8.0",
+  "omp_path": "/home/dwchoo/.local/bin/omp",
+  "tmux": "tmux 3.4",
+  "herdr": "herdr 0.9.3",
+  "bash": "GNU bash, version 5.2.21(1)-release (x86_64-pc-linux-gnu)",
+  "dash": "dash 0.5.12-6ubuntu5",
+  "sh": "/usr/bin/dash",
+  "python": "3.12.3",
+  "kernel": "7.0.0-30-generic",
+  "os": "Ubuntu 24.04.4 LTS"
+ },
+ "commands": [
+  {
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "start",
+    "--data-dir",
+    "/tmp/wbc16sel1-erp8u6ld/d",
+    "--omp",
+    "/home/dwchoo/.local/bin/omp",
+    "--omp-arg=--model",
+    "--omp-arg=wbcw16/scripted",
+    "--no-attach"
+   ],
+   "exit": 0,
+   "seconds": 3.64,
+   "stdout_tail": "MP isolation check ...\nbackend pid 1985047 phase ready\ndata dir /tmp/wbc16sel1-erp8u6ld/d\n  host_shell: pid 1985051 alive=True owner=user\n  manager_omp: pid 1985053 alive=True owner=user\n  worker_omp: pid 1985054 alive=True owner=user\n  shell: bash /usr/bin/bash mode=manual_prompt\nomp isolation: ok (omp/18.8.0 evidence bridge_g3=18.2.10, isolation=18.6.1)\n  note: OMP 18.8.0 has not extracted its native addon into /tmp/wbc16sel1-erp8u6ld/h/.omp/natives/18.8.0 yet: the first Workbench OMP extracts it there (the same files your own omp 18.8.0 extracts; OMP has no setting to move this directory).\n",
+   "stderr_tail": ""
+  },
+  {
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "shutdown",
+    "--data-dir",
+    "/tmp/wbc16sel1-erp8u6ld/d",
+    "--json",
+    "--yes"
+   ],
+   "exit": 0,
+   "seconds": 0.36,
+   "stdout_tail": "no active work reported\n{\"shutdown\": {\"left_running\": [], \"lifecycle\": null, \"omp_children\": {\"alive\": [], \"observed\": []}, \"panes\": [{\"exit_status\": -1, \"pane\": \"host_shell\", \"survivors\": []}, {\"exit_status\": 143, \"pane\": \"manager_omp\", \"survivors\": []}, {\"exit_status\": 143, \"pane\": \"worker_omp\", \"survivors\": []}], \"previous_survivors\": [], \"problems\": [], \"processes\": {\"host_shell\": \"dead\", \"manager_omp\": \"dead\", \"worker_omp\": \"dead\"}, \"user_confirmed\": true, \"verified\": true}}\n",
+   "stderr_tail": ""
+  }
+ ],
+ "steps": {
+  "start": {
+   "status": "pass",
+   "seconds": 3.7,
+   "observed": {
+    "announced": "shell bash (/usr/bin/bash)",
+    "kind": "bash",
+    "exe": "/usr/bin/bash",
+    "pid": 1985051,
+    "shell_env_preserved": true
+   }
+  },
+  "operate": {
+   "status": "pass",
+   "seconds": 1.0,
+   "observed": {
+    "marker": "5.2.21(1)-release:1985051"
+   }
+  },
+  "shutdown": {
+   "status": "pass",
+   "seconds": 0.6,
+   "observed": {
+    "verified": true,
+    "zsh_sentinel_executed": false
+   }
+  }
+ },
+ "unknowns": [],
+ "result": "pass",
+ "cleanup": {
+  "residue_before_fallback": {},
+  "root_removed": true,
+  "residue_after_fallback": {}
+ },
+ "finished_at": "2026-10-08T11:04:53+00:00"
+}

@@ -1,0 +1,27 @@
+{
+ "root": "/home/dwchoo/ai-exp-assistant",
+ "requirements": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/requirements-p27-cw16.json",
+ "argv": [
+  "/usr/bin/env",
+  "-i",
+  "PATH=/home/dwchoo/.local/bin:/usr/bin:/bin",
+  "HOME=/home/dwchoo",
+  "LANG=C.UTF-8",
+  "PYTHONPATH=src",
+  "PYTHONDONTWRITEBYTECODE=1",
+  "/bin/bash",
+  "-c",
+  "rc=0; echo '== [1/2] non-live: test_cw16_runtime_matrix + test_cw16_harness'; /tmp/cw02-g1-venv/bin/python -m unittest -v tests/integration/test_cw16_runtime_matrix.py tests/integration/test_cw16_harness.py || rc=1; echo '== [2/2] live COMPAT 6 + SEL1-3 (test_product_path_outer_matrix)'; WB_LIVE_CW16=1 WB_CW16_REPORT_DIR=/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-formal/reports WB_CW16_RUN_ID=b4b-compat /tmp/cw02-g1-venv/bin/python -m unittest -v tests.integration.test_cw16_runtime_matrix.Cw16RuntimeMatrixTests.test_product_path_outer_matrix || rc=1; echo \"== combined rc=$rc\"; exit $rc"
+ ],
+ "environment": {
+  "description": "Linux 7.0.0-30-generic Ubuntu 24.04.4; OMP 18.8.0 (~/.local/bin/omp); scripted local provider (0 real model requests); Bash 5.2.21; dash 0.5.12-6ubuntu5; tmux 3.4 (isolated -S sockets); Herdr 0.9.3 (isolated config/runtime); Python 3.12.3 venv /tmp/cw02-g1-venv (pyte); Node v22.23.2; env -i (TMUX*/HERDR_* stripped); frozen candidate C16 f8ad6ec9 (HEAD e635723)"
+ },
+ "log": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/check-p27-cw16-compat.log",
+ "check_id": "p27-cw16-compat-01",
+ "watch": [],
+ "exclude": [
+  ".workflow/core-workbench/runs/implement-p2.6-20260927/**",
+  "graphify-out/**"
+ ],
+ "timeout": 3600
+}

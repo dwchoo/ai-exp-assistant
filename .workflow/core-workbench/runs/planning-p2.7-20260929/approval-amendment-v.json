@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "feature_id": "core-workbench",
+  "status": "approved_for_implementation",
+  "decision": "C-D73",
+  "revision": "p2.7v",
+  "recorded_at": "2026-10-08T13:43:39.495093+00:00",
+  "authority": {
+    "answer": "256색 근사 수용 (Recommended)",
+    "date": "2026-10-08",
+    "evidence": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-gap-01.md"
+  },
+  "supersedes_record": ".workflow/core-workbench/runs/planning-p2.7-20260929/approval-amendment-u.json",
+  "prior_bundle_digest": "b31396faad700dfbb5f9c95415ba34cac0ef7dabd517a4ef5c293ca8dc2c9cf2",
+  "candidate_files": {
+    "docs/features/core-workbench/BRIEF.md": "373d44845fd14d7ab702a740d66a04dd5b3fa3554630bcc84dbaaa0a87e4bb00",
+    "docs/features/core-workbench/SPEC.md": "03a052be1fc67ffac92bcadf7e2ba9d1fe813d1afed0b11179ea4bb2549c5a25",
+    "docs/features/core-workbench/PLAN.json": "742cb5e1474c6798974af9f2cf5e0ad8d4eb8401a3cd83573f7f20ece2dedbde",
+    "docs/features/core-workbench/DECISIONS.md": "3ab06a742d1ae7509c9e64aa7b595abff660d379d7b2e0a5a28d32139016d1de",
+    "docs/features/core-workbench/OPERATING-CONTRACT.md": "b5f006a86125a871f6b44d8bbf4ebc11d3e5f89ff7794e866f519f96ea8308b7",
+    "docs/features/core-workbench/DECISION-2026-09-26.md": "f82d544ad967aa7420e59982813bdda33fc66b2861a89f6f58850e256aa656e6",
+    "docs/features/core-workbench/START-IMPLEMENT.md": "77b8c10483a85e964c1c7387761b171f3aacee6d2f1d6c0a7ff7c59cb7cf56f6",
+    "docs/features/core-workbench/gates/G2.md": "60c744a07e18dfee3b2410753601925c7c9c3a4be07d3ad5442c958b5ddaf345",
+    "docs/features/core-workbench/tickets/CW-01.md": "7dae35e6d1a4d2a3475609849178bb9ea05a6f790eb4931dc0139925ba75bcb2",
+    "docs/features/core-workbench/tickets/CW-02.md": "1eeed9b1c8f7b6f44ba994deef657bdcffffe96f8ef4052172be3aab92bae863",
+    "docs/features/core-workbench/tickets/CW-03.md": "2df80b08be50dde81061d83ce296b96f20d7617f2636358d8e3d5a64791dfc37",
+    "docs/features/core-workbench/tickets/CW-04.md": "781c2e721f7d8b1cbcf2a5f0d1a9a7fe569968eed40a21fde3590d878875af0a",
+    "docs/features/core-workbench/tickets/CW-05.md": "725d1f6a72ab8b0ba0feb82413ad8f512517c2a95f374f08616e9813b2fa9354",
+    "docs/features/core-workbench/tickets/CW-06.md": "f7ce7c13ecaf4558f9c2cbfce16e8741bac4a1f8505c2a196d798f35da083468",
+    "docs/features/core-workbench/tickets/CW-07.md": "68557389e64ed872d97bc73f78639212c738c6a46ffc6efda59c18439f474d2d",
+    "docs/features/core-workbench/tickets/CW-08.md": "464e8db03c660b6165b45806bff135a3f159476ff823341af57fc9948ebb5967",
+    "docs/features/core-workbench/tickets/CW-09.md": "a4c7f18e82875f9c236884854b94eeed8796350317ee6619bbbed2b36977bff3",
+    "docs/features/core-workbench/tickets/CW-10.md": "c48c1b8f8e33c7f29bc7783690720610579fbbb5d88766116949f71240f045b0",
+    "docs/features/core-workbench/tickets/CW-11.md": "2fbce6c5eda9cfb2287b7d0d92c0fc6f7ac86dc0bc31d0390f8419c8d07cc3eb",
+    "docs/features/core-workbench/tickets/CW-12.md": "5940cafdaec0a6f0114763ca73a9036361497c89bac3652825a8d9ab6f0a0372",
+    "docs/features/core-workbench/tickets/CW-13.md": "b048e999ba81b1cf5753785523c5d8d66d9f304ef5490d90104f82f605e73fd4",
+    "docs/features/core-workbench/tickets/CW-14.md": "b7a5cf8f0bcca3c44058e0fc22cf6fc3bb1fd445d95bb2e8a0a3d1130cc8ba2f",
+    "docs/features/core-workbench/tickets/CW-15.md": "78b9e00b0e7fad0ffe3550bfcd313e12f26a44471cbee91be31f236c9afac620",
+    "docs/features/core-workbench/tickets/CW-16.md": "88f0ae9e74c528f82b8bc5919a6743e247795d2f197627f3f3cbe04fc7410128",
+    "docs/features/core-workbench/tickets/CW-17.md": "930b50bf3438da432491e3fac0b39c2eaf4631d0d1968a089cff84f4de297188",
+    "docs/features/core-workbench/tickets/CW-18.md": "315e6dd80db4de801ac7b340fb1054efa67007ef3b2415a713688aecde113bb8",
+    "docs/features/core-workbench/tickets/CW-19.md": "1fbbda9d7c48f57f93a00589e49041f4a0ba8f1d427f6866bfc8bdeef885f025",
+    "docs/adr/0002-managed-shell-control-wait.md": "198981745f6235bbc0f3a00d14bdf5949075905aefa1ebc81ce90768bdc2e37c"
+  },
+  "bundle_digest": "6a94257554222410497069c685c3cd73d39dcc9b32ff42b08007eddc526a5b94",
+  "digest_policy": "SHA-256 of candidate_files JSON with sorted keys, UTF-8, compact separators; this record excluded",
+  "changed_vs_prior": [
+    "docs/features/core-workbench/PLAN.json",
+    "docs/features/core-workbench/DECISIONS.md"
+  ],
+  "preserved": "ticket IDs, dependencies, gate item ids/levels unchanged; G1-COLOR check text revised per C-D73; VERIFICATION/COMPATIBILITY drafts are not in the bundle",
+  "validation": {
+    "record": "validate-result-amendment-v.json",
+    "new_errors_vs_amendment_u": []
+  },
+  "authorization": {
+    "implementation_authorized": true,
+    "scope": "CW-16 C17: color parse fix (D1), OMP child umask (D3) + test delta for the agent.db symlink, G1-COLOR re-check under C-D73",
+    "publication_authorized": false,
+    "commit_authorized": "user 2026-10-08"
+  }
+}

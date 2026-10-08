@@ -1,0 +1,371 @@
+{
+ "scenario": "gap-G3-SESSION",
+ "run_id": "c18-gap",
+ "started_at": "2026-10-08T17:19:41+00:00",
+ "repo_head": "c47456a4ad2caa0b7da40fa84179da00f249f9d6",
+ "context": {
+  "host_shell": "bash"
+ },
+ "versions": {
+  "omp": "omp/18.8.0",
+  "omp_path": "/home/dwchoo/.local/bin/omp",
+  "tmux": "tmux 3.4",
+  "herdr": "herdr 0.9.3",
+  "bash": "GNU bash, version 5.2.21(1)-release (x86_64-pc-linux-gnu)",
+  "dash": "dash 0.5.12-6ubuntu5",
+  "sh": "/usr/bin/dash",
+  "python": "3.12.3",
+  "kernel": "7.0.0-30-generic",
+  "os": "Ubuntu 24.04.4 LTS"
+ },
+ "commands": [
+  {
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "start",
+    "--data-dir",
+    "/tmp/wbc16gapg3ses-uqopgsh1/d",
+    "--omp",
+    "/home/dwchoo/.local/bin/omp",
+    "--omp-arg=--model",
+    "--omp-arg=wbcw16/scripted",
+    "--no-attach"
+   ],
+   "exit": 0,
+   "seconds": 3.73,
+   "stdout_tail": "tion check ...\nbackend pid 2722031 phase ready\ndata dir /tmp/wbc16gapg3ses-uqopgsh1/d\n  host_shell: pid 2722039 alive=True owner=user\n  manager_omp: pid 2722042 alive=True owner=user\n  worker_omp: pid 2722043 alive=True owner=user\n  shell: bash /usr/bin/bash mode=manual_prompt\nomp isolation: ok (omp/18.8.0 evidence bridge_g3=18.2.10, isolation=18.6.1)\n  note: OMP 18.8.0 has not extracted its native addon into /tmp/wbc16gapg3ses-uqopgsh1/h/.omp/natives/18.8.0 yet: the first Workbench OMP extracts it there (the same files your own omp 18.8.0 extracts; OMP has no setting to move this directory).\n",
+   "stderr_tail": ""
+  },
+  {
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "shutdown",
+    "--data-dir",
+    "/tmp/wbc16gapg3ses-uqopgsh1/d",
+    "--json",
+    "--yes"
+   ],
+   "exit": 0,
+   "seconds": 3.22,
+   "stdout_tail": "no active work reported\n{\"shutdown\": {\"left_running\": [], \"lifecycle\": null, \"omp_children\": {\"alive\": [], \"observed\": [{\"ended\": \"by_itself\", \"parent\": \"manager_omp\", \"parent_pid\": 2722042, \"pid\": 2722252, \"start_ticks\": 302505683}]}, \"panes\": [{\"exit_status\": -1, \"pane\": \"host_shell\", \"survivors\": []}, {\"exit_status\": 143, \"pane\": \"manager_omp\", \"survivors\": []}, {\"exit_status\": 143, \"pane\": \"worker_omp\", \"survivors\": []}], \"previous_survivors\": [], \"problems\": [], \"processes\": {\"host_shell\": \"dead\", \"manager_omp\": \"dead\", \"worker_omp\": \"dead\"}, \"user_confirmed\": true, \"verified\": true}}\n",
+   "stderr_tail": ""
+  }
+ ],
+ "steps": {
+  "start": {
+   "status": "pass",
+   "seconds": 4.1,
+   "observed": {
+    "bridge_manager": {
+     "connected": true,
+     "generation": 1,
+     "pid": 2722042,
+     "pid_matches_pane": true,
+     "session_id": "01a11c87-2ff3-7550-81b5-84eeba6191bb"
+    }
+   }
+  },
+  "SESSION_delivery_before_switch": {
+   "status": "pass",
+   "seconds": 4.6,
+   "observed": {
+    "message_id": "61656fae-df35-45a7-b3e6-71971dc368fa"
+   }
+  },
+  "SESSION_new_reregisters_same_process": {
+   "status": "pass",
+   "seconds": 2.1,
+   "observed": {
+    "before": {
+     "connected": true,
+     "generation": 1,
+     "pid": 2722042,
+     "pid_matches_pane": true,
+     "session_id": "01a11c87-2ff3-7550-81b5-84eeba6191bb"
+    },
+    "after": {
+     "connected": true,
+     "generation": 2,
+     "pid": 2722042,
+     "pid_matches_pane": true,
+     "session_id": "01a11c87-4fd3-74f7-91e9-83067de807b6"
+    },
+    "enters": 1
+   }
+  },
+  "SESSION_no_replay_one_recovery_notice": {
+   "status": "pass",
+   "seconds": 12.1,
+   "observed": {
+    "requests_delta": {
+     "manager": 1,
+     "worker": 0
+    },
+    "injected_delta": {
+     "manager": 0,
+     "worker": 0
+    },
+    "task": {
+     "task_id": "25e14498-af3e-4364-ae9c-321b7ad41b65",
+     "revision": 1,
+     "active": true,
+     "status": "running"
+    },
+    "recovery_notice": {
+     "reports_resent": 0,
+     "journal": [
+      "queued",
+      "sent"
+     ]
+    }
+   }
+  },
+  "SESSION_next_report_to_new_session_once": {
+   "status": "pass",
+   "seconds": 3.9,
+   "observed": {
+    "closed_reason": "done",
+    "envelope_session": {
+     "session_id": "01a11c87-4fd3-74f7-91e9-83067de807b6",
+     "session_generation": 2
+    }
+   }
+  },
+  "shutdown": {
+   "status": "pass",
+   "seconds": 3.5,
+   "observed": {
+    "verified": true,
+    "residue": {}
+   }
+  }
+ },
+ "unknowns": [],
+ "result": "pass",
+ "identities": {
+  "backend": {
+   "pid": 2722031,
+   "start_ticks": 302505245
+  },
+  "backend_session": 2722030,
+  "panes": {
+   "host_shell": [
+    2722039,
+    302505264,
+    "80c6289a-8c35-4d19-8e9b-c9c22ff7144e",
+    1
+   ],
+   "manager_omp": [
+    2722042,
+    302505265,
+    "963ec4e0-65b6-4e0e-b9bf-4da48d0bf392",
+    1
+   ],
+   "worker_omp": [
+    2722043,
+    302505266,
+    "62ba9f2a-23d6-433a-af64-e8f17ef1cdef",
+    1
+   ]
+  },
+  "bridge": {
+   "manager": {
+    "session_id": "01a11c87-2ff3-7550-81b5-84eeba6191bb",
+    "generation": 1,
+    "pid": 2722042
+   },
+   "worker": {
+    "session_id": "01a11c87-2fe6-70bb-b4dc-9f11055ac3cd",
+    "generation": 1,
+    "pid": 2722043
+   }
+  },
+  "shell_parent": {
+   "pid": 2722039,
+   "start_ticks": 302505264
+  },
+  "shell_generation": 1,
+  "supervisor": null
+ },
+ "omp_isolation": "ok",
+ "cleanup": {
+  "residue_before_fallback": {},
+  "root_removed": true,
+  "residue_after_fallback": {}
+ },
+ "provider": {
+  "requests": {
+   "manager": 5,
+   "worker": 5
+  },
+  "aborted": [],
+  "errors": [],
+  "rules": [
+   {
+    "name": "record",
+    "hits": 0
+   },
+   {
+    "name": "gap-s-capture",
+    "hits": 0
+   },
+   {
+    "name": "open:gap-s-open",
+    "hits": 1
+   },
+   {
+    "name": "ack:gap-s-open",
+    "hits": 0
+   },
+   {
+    "name": "gap-s-first:start",
+    "hits": 1
+   },
+   {
+    "name": "gap-s-first:next",
+    "hits": 1
+   },
+   {
+    "name": "gap-s-second:start",
+    "hits": 1
+   },
+   {
+    "name": "gap-s-second:next",
+    "hits": 1
+   }
+  ],
+  "real_model_requests": 0,
+  "log_tail": [
+   {
+    "i": 1,
+    "at": 1791479986.6806777,
+    "role": "manager",
+    "last_role": "user",
+    "text_tail": "gap-s-open",
+    "injected_kind": null,
+    "tool_results": []
+   },
+   {
+    "i": 2,
+    "at": 1791479986.7206883,
+    "role": "manager",
+    "last_role": "tool",
+    "text_tail": "o not do it yourself (no commands, edits or checks for it). End your turn and wait for the worker's to_manager report.\"}",
+    "injected_kind": null,
+    "tool_results": [
+     "cw16-manager-1"
+    ]
+   },
+   {
+    "i": 3,
+    "at": 1791479986.8887463,
+    "role": "worker",
+    "last_role": "user",
+    "text_tail": null,
+    "injected_kind": "task",
+    "tool_results": []
+   },
+   {
+    "i": 4,
+    "at": 1791479988.4856143,
+    "role": "worker",
+    "last_role": "user",
+    "text_tail": "gap-s-progress",
+    "injected_kind": null,
+    "tool_results": []
+   },
+   {
+    "i": 5,
+    "at": 1791479988.5020173,
+    "role": "worker",
+    "last_role": "tool",
+    "text_tail": " manager decides again after the resume. Do not send it again unless asked; a reply, if any, arrives as a new message.\"}",
+    "injected_kind": null,
+    "tool_results": [
+     "cw16-worker-2"
+    ]
+   },
+   {
+    "i": 6,
+    "at": 1791479988.5415409,
+    "role": "manager",
+    "last_role": "user",
+    "text_tail": null,
+    "injected_kind": "report",
+    "tool_results": []
+   },
+   {
+    "i": 7,
+    "at": 1791479992.3994877,
+    "role": "manager",
+    "last_role": "user",
+    "text_tail": "orts whose delivery is unknown are only listed (read them with workbench_status). Tell the user briefly what happened.\"}",
+    "injected_kind": null,
+    "tool_results": []
+   },
+   {
+    "i": 8,
+    "at": 1791480005.4934871,
+    "role": "worker",
+    "last_role": "user",
+    "text_tail": "gap-s-done",
+    "injected_kind": null,
+    "tool_results": []
+   },
+   {
+    "i": 9,
+    "at": 1791480005.5035758,
+    "role": "worker",
+    "last_role": "tool",
+    "text_tail": " manager decides again after the resume. Do not send it again unless asked; a reply, if any, arrives as a new message.\"}",
+    "injected_kind": null,
+    "tool_results": [
+     "cw16-worker-3"
+    ]
+   },
+   {
+    "i": 10,
+    "at": 1791480005.5360463,
+    "role": "manager",
+    "last_role": "user",
+    "text_tail": null,
+    "injected_kind": "report",
+    "tool_results": []
+   }
+  ]
+ },
+ "injected": {
+  "manager": [
+   {
+    "kind": "report",
+    "stage": null,
+    "payload_kind": "progress",
+    "task_id": "25e14498-af3e-4364-ae9c-321b7ad41b65",
+    "at": 1791479988.5415533
+   },
+   {
+    "kind": "report",
+    "stage": null,
+    "payload_kind": "done",
+    "task_id": "25e14498-af3e-4364-ae9c-321b7ad41b65",
+    "at": 1791480005.536055
+   }
+  ],
+  "worker": [
+   {
+    "kind": "task",
+    "stage": null,
+    "payload_kind": "work",
+    "task_id": "25e14498-af3e-4364-ae9c-321b7ad41b65",
+    "at": 1791479986.8887646
+   }
+  ],
+  "unknown": []
+ },
+ "notes": [],
+ "finished_at": "2026-10-08T17:20:12+00:00"
+}

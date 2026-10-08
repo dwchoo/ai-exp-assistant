@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw16-rm-01",
+  "ticket_id": "CW-16 real-model smokes RM1-RM4 on C16 (confidence, not gate evidence)",
+  "role": "test_designer",
+  "unit": "V-CW-16",
+  "candidate": "f8ad6ec989ec2b9f1f72a81414bbaeeadc911997a196c0edf1eeed18442f4e3d",
+  "candidate_commit": "e635723",
+  "routing": {
+    "planned_role": "test_designer",
+    "selected_role": "test_designer (general-purpose Sonnet high; established smoke method)",
+    "reason_codes": [
+      "live_real_model"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-plan-01.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd70-smoke-04.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cd70-smoke-03.md"
+    ]
+  },
+  "user_authorization": "User 2026-10-08 '전부 진행해서 테스트까지 해서 완료하고 보고해' (real-model runs with caps; plan estimate ~32 requests, cap 40)",
+  "setup": "As p27-cd70-smoke-04 (temp data dir + tiny git project, real product entrypoint with OMP 18.8.0 and the user's OMP auth through the Workbench OMP home symlink, ui_v1 driver tests/backend/live_cw18_independent_p27w.py Ui now with rep_screen_classes; strip TMUX*/HERDR_*). Record omp --version and start isolation per role.",
+  "scenario": [
+    "RM1 short normal flow: 'worker에게 터미널에서 `uname -a; nproc` 를 실행하게 하고 결과를 알려줘' -> to_worker with commands, worker terminal exact, done report with commands_run, manager answer. ~8 requests.",
+    "RM2 long command: 'worker에게 터미널에서 `sleep 210; echo cw16-rm2-done` 를 실행하게 하고 결과를 알려줘' -> running at 120 s, >=1 terminal_check, terminal_done once, no watchdog status_check while running, one done report. ~10 requests.",
+    "RM3 pause during a manager turn: send a manager prompt that makes a longer turn, press pause (prefix p) mid-turn -> turn abort requested/confirmed shown, no automatic work while paused, resume (reconciled) -> no replay. ~6 requests.",
+    "RM4 backend restart: with an open Task (start RM-style long command), SIGKILL the backend pid (exact pid you started), restart via the entrypoint -> same_boot_crash reconcile, one backend_restarted notice to the manager, manager's decision (continue/cancel), survivors listed. ~8 requests."
+  ],
+  "limits": [
+    "Hard cap 40 provider requests total; fail-closed counter in the UI pump loop (re-resolve session files across OMP/backend restarts; pause automation and stop typing if the counter stalls >2 s or decreases); pause at 36; wall clock 45 min. Priority if short: RM1, RM4, RM2, RM3.",
+    "Never read credential stores/contents (the Workbench OMP home's agent.db symlink: metadata only) or other processes' environ; never print tokens; never edit ~/.omp, ~/.agents, ~/.claude, ~/.codex or user configs; isolate tmux/herdr; never touch the user's default tmux/herdr servers, other claude-swarm sockets, ~/wb-urux-sandbox (the user's Workbench) or processes you did not start; kill only PIDs you started; no pkill; temp only under /tmp; no commits; no graphify update; zero writes to the repo working tree (run dir and /tmp only)."
+  ],
+  "result_format": "Write .workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-rm-01.md (+ -timeline.json): per scenario timeline, notices, tool calls, request counts, what worked / not, defects with evidence. Korean reply <=10 lines."
+}

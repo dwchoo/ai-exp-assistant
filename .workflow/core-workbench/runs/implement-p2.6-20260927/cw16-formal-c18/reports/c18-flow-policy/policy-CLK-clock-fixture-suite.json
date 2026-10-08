@@ -1,0 +1,136 @@
+{
+ "scenario": "policy-CLK-clock-fixture-suite",
+ "run_id": "c18-flow-policy",
+ "started_at": "2026-10-08T16:37:27+00:00",
+ "repo_head": "c47456a4ad2caa0b7da40fa84179da00f249f9d6",
+ "context": {
+  "evidence_level": "fixture",
+  "total_tests": 431
+ },
+ "versions": {},
+ "commands": [],
+ "steps": {
+  "tests/backend/test_flow_terminal_notices.py": {
+   "status": "pass",
+   "exit": 0,
+   "ran": 34,
+   "summary": "OK",
+   "seconds": 25.0
+  },
+  "tests/backend/test_terminal_independent_p27cd68.py": {
+   "status": "pass",
+   "exit": 0,
+   "ran": 23,
+   "summary": "OK",
+   "seconds": 21.1
+  },
+  "tests/backend/test_terminal_fix03_independent_p27cd68.py": {
+   "status": "pass",
+   "exit": 0,
+   "ran": 10,
+   "summary": "OK",
+   "seconds": 5.9
+  },
+  "tests/backend/test_cd70_followups.py": {
+   "status": "pass",
+   "exit": 0,
+   "ran": 9,
+   "summary": "OK",
+   "seconds": 3.8
+  },
+  "tests/backend/test_watchdog_independent_p27cd70.py": {
+   "status": "pass",
+   "exit": 0,
+   "ran": 30,
+   "summary": "OK",
+   "seconds": 1.5
+  },
+  "tests/backend/test_cd70_watchdog.py": {
+   "status": "pass",
+   "exit": 0,
+   "ran": 22,
+   "summary": "OK",
+   "seconds": 0.1
+  },
+  "tests/backend/test_cd70_fix03.py": {
+   "status": "pass",
+   "exit": 0,
+   "ran": 12,
+   "summary": "OK",
+   "seconds": 1.8
+  },
+  "tests/backend/test_cd70_ui_wait.py": {
+   "status": "pass",
+   "exit": 0,
+   "ran": 3,
+   "summary": "OK",
+   "seconds": 0.3
+  },
+  "tests/recovery_boot/test_cw19_fix01.py": {
+   "status": "pass",
+   "exit": 0,
+   "ran": 22,
+   "summary": "OK",
+   "seconds": 2.7
+  },
+  "tests/recovery_boot/test_survivors_holds_independent_p27cw19.py": {
+   "status": "pass",
+   "exit": 0,
+   "ran": 27,
+   "summary": "OK",
+   "seconds": 1.5
+  },
+  "tests/backend/test_automation_loop.py": {
+   "status": "pass",
+   "exit": 0,
+   "ran": 7,
+   "summary": "OK",
+   "seconds": 3.7
+  },
+  "tests/recovery_boot/test_cw19_fix02.py": {
+   "status": "pass",
+   "exit": 0,
+   "ran": 8,
+   "summary": "OK",
+   "seconds": 0.4
+  },
+  "tests/observation/test_worker_review.py": {
+   "status": "pass",
+   "exit": 0,
+   "ran": 25,
+   "summary": "OK",
+   "seconds": 0.1
+  },
+  "tests/observation/test_worker_review_independent.py": {
+   "status": "pass",
+   "exit": 0,
+   "ran": 13,
+   "summary": "OK",
+   "seconds": 0.1
+  },
+  "tests/policy/pause_automation/test_pause_policy.py": {
+   "status": "pass",
+   "exit": 0,
+   "ran": 122,
+   "summary": "OK",
+   "seconds": 27.4
+  },
+  "tests/backend/test_handoff_service.py": {
+   "status": "pass",
+   "exit": 0,
+   "ran": 25,
+   "summary": "OK",
+   "seconds": 0.9
+  },
+  "tests/backend/test_flow_terminal.py": {
+   "status": "pass",
+   "exit": 0,
+   "ran": 39,
+   "summary": "OK",
+   "seconds": 8.8
+  }
+ },
+ "unknowns": [],
+ "result": "pass",
+ "finished_at": "2026-10-08T16:39:12+00:00"
+}

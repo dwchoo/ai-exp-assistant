@@ -1,0 +1,139 @@
+{
+ "scenario": "compat-tmux-dash",
+ "run_id": "cw16-matrix-ee8643e5",
+ "started_at": "2026-10-08T15:19:50+00:00",
+ "repo_head": "81bebe68320c5eb772739f1a3ad2f7bf34aa9d72",
+ "context": {
+  "outer": "tmux",
+  "host_shell": "dash"
+ },
+ "versions": {
+  "omp": "omp/18.8.0",
+  "omp_path": "/home/dwchoo/.local/bin/omp",
+  "tmux": "tmux 3.4",
+  "herdr": "herdr 0.9.3",
+  "bash": "GNU bash, version 5.2.21(1)-release (x86_64-pc-linux-gnu)",
+  "dash": "dash 0.5.12-6ubuntu5",
+  "sh": "/usr/bin/dash",
+  "python": "3.12.3",
+  "kernel": "7.0.0-30-generic",
+  "os": "Ubuntu 24.04.4 LTS"
+ },
+ "commands": [
+  {
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "start",
+    "--data-dir",
+    "/tmp/wbc16tmda-c__h2fxj/d",
+    "--omp",
+    "/home/dwchoo/.local/bin/omp",
+    "--omp-arg=--model",
+    "--omp-arg=wbcw16/scripted",
+    "--no-attach"
+   ],
+   "exit": 0,
+   "seconds": 4.05,
+   "stdout_tail": " OMP isolation check ...\nbackend pid 2497175 phase ready\ndata dir /tmp/wbc16tmda-c__h2fxj/d\n  host_shell: pid 2497196 alive=True owner=user\n  manager_omp: pid 2497200 alive=True owner=user\n  worker_omp: pid 2497201 alive=True owner=user\n  shell: sh /usr/bin/dash mode=manual_prompt\nomp isolation: ok (omp/18.8.0 evidence bridge_g3=18.2.10, isolation=18.6.1)\n  note: OMP 18.8.0 has not extracted its native addon into /tmp/wbc16tmda-c__h2fxj/h/.omp/natives/18.8.0 yet: the first Workbench OMP extracts it there (the same files your own omp 18.8.0 extracts; OMP has no setting to move this directory).\n",
+   "stderr_tail": ""
+  },
+  {
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "shutdown",
+    "--data-dir",
+    "/tmp/wbc16tmda-c__h2fxj/d",
+    "--json",
+    "--yes"
+   ],
+   "exit": 0,
+   "seconds": 3.2,
+   "stdout_tail": "no active work reported\n{\"shutdown\": {\"left_running\": [], \"lifecycle\": null, \"omp_children\": {\"alive\": [], \"observed\": [{\"ended\": \"by_itself\", \"parent\": \"manager_omp\", \"parent_pid\": 2497200, \"pid\": 2500619, \"start_ticks\": 301787745}]}, \"panes\": [{\"exit_status\": -9, \"pane\": \"host_shell\", \"survivors\": []}, {\"exit_status\": 143, \"pane\": \"manager_omp\", \"survivors\": []}, {\"exit_status\": 143, \"pane\": \"worker_omp\", \"survivors\": []}], \"previous_survivors\": [], \"problems\": [], \"processes\": {\"host_shell\": \"dead\", \"manager_omp\": \"dead\", \"worker_omp\": \"dead\"}, \"user_confirmed\": true, \"verified\": true}}\n",
+   "stderr_tail": ""
+  }
+ ],
+ "steps": {
+  "C1": {
+   "status": "pass",
+   "seconds": 6.8,
+   "observed": {
+    "start_line": "starting backend: shell sh (/usr/bin/dash), omp/18.8.0",
+    "shell": {
+     "kind": "sh",
+     "exe": "/usr/bin/dash",
+     "pid": 2497196
+    },
+    "isolation": "ok",
+    "focus_sequence": [
+     {
+      "pane": "worker_omp",
+      "shown": true,
+      "owner": "user",
+      "epoch": 2
+     },
+     {
+      "pane": "host_shell",
+      "shown": true,
+      "owner": "user",
+      "epoch": 2
+     },
+     {
+      "pane": "manager_omp",
+      "shown": true,
+      "owner": "user",
+      "epoch": 2
+     },
+     {
+      "pane": "host_shell",
+      "shown": true,
+      "owner": "user",
+      "epoch": 2
+     }
+    ],
+    "owner": {
+     "input_owner": "user",
+     "owner_epoch": 2,
+     "parent_mode": "manual_prompt",
+     "takeover_requested": false,
+     "takeover_confirmed": false
+    },
+    "omp_version": "omp/18.8.0",
+    "header": [
+     "focus: HOST SHELL | host 입력 owner: user | shell mode: manual_prompt | worker: 대기 | 자동화: idle"
+    ]
+   }
+  }
+ },
+ "unknowns": [],
+ "result": "pass",
+ "root": "/tmp/wbc16tmda-c__h2fxj",
+ "provider": {
+  "requests": {},
+  "injected": {
+   "manager": [],
+   "worker": [],
+   "unknown": []
+  },
+  "aborted": [],
+  "errors": [],
+  "rules": [
+   {
+    "name": "text:c4copy",
+    "hits": 0
+   }
+  ],
+  "log_tail": []
+ },
+ "cleanup": {
+  "shutdown_exit": 0,
+  "residue_before_fallback": {},
+  "root_removed": true,
+  "residue_after_fallback": {}
+ },
+ "report_path": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-formal-c17/reports/cw16-matrix-ee8643e5/compat-tmux-dash.json",
+ "finished_at": "2026-10-08T15:20:10+00:00"
+}

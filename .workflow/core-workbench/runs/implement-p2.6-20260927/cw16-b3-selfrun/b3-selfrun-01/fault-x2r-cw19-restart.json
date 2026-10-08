@@ -1,0 +1,51 @@
+{
+ "scenario": "fault-x2r-cw19-restart",
+ "run_id": "b3-selfrun-01",
+ "started_at": "2026-10-08T07:36:37+00:00",
+ "repo_head": "6a2ddb2b5441202c8e94d27f775c7159fb9672ae",
+ "context": {
+  "scenario_id": "X2R",
+  "probe": "tests/recovery_boot/live_restart_independent_p27cw19.py"
+ },
+ "versions": {
+  "omp": "omp/18.8.0",
+  "omp_path": "/home/dwchoo/.local/bin/omp",
+  "tmux": "tmux 3.4",
+  "herdr": "herdr 0.9.3",
+  "bash": "GNU bash, version 5.2.21(1)-release (x86_64-pc-linux-gnu)",
+  "dash": "dash 0.5.12-6ubuntu5",
+  "sh": "/usr/bin/dash",
+  "python": "3.12.3",
+  "kernel": "7.0.0-30-generic",
+  "os": "Ubuntu 24.04.4 LTS"
+ },
+ "commands": [
+  {
+   "argv": [
+    "python",
+    "tests/recovery_boot/live_restart_independent_p27cw19.py",
+    "<report>"
+   ],
+   "exit": 0,
+   "seconds": 72.7,
+   "stdout_tail": "s the confirmation wait\n[PASS] G: user resume allowed while the boot is unconfirmed\n[PASS] G: boot hold still on after the resume\n[PASS] G: confirm-boot without --yes/tty refused, exit 1\n[PASS] G: confirm-boot shows both boot ids and the data dir\n[PASS] G: confirm-boot --yes exit 0\n[PASS] G: hold lifted after confirm-boot\n[PASS] G: a second confirm-boot has nothing pending, exit 1\n[PASS] G: confirmation durable in boot.json\n[PASS] G: final shutdown verified, exit 0\n[PASS] no request reached the local model endpoint\n[PASS] zero assistant messages in the OMP session files\nchecks: 56, failed: []\n",
+   "stderr_tail": ""
+  }
+ ],
+ "steps": {
+  "X2R.l_cw19_restart": {
+   "status": "pass",
+   "observed": {
+    "exit": 0,
+    "checks": 56,
+    "failed": [],
+    "provider_requests": [],
+    "residue_root": false,
+    "probe_report": "/tmp/wb-cw16-b3-reports/b3-selfrun-01/fault-x2r-cw19-restart-probe.json"
+   }
+  }
+ },
+ "unknowns": [],
+ "result": "pass",
+ "finished_at": "2026-10-08T07:37:50+00:00"
+}

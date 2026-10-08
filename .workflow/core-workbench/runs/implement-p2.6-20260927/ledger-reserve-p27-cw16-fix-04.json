@@ -1,0 +1,24 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 2411,
+  "event": {
+    "id": "reserve-p27-cw16-fix-04",
+    "kind": "reserve",
+    "data": {
+      "buckets": [
+        "total",
+        "role:worker_senior",
+        "unit:V-CW-16"
+      ],
+      "effort": "high",
+      "incident": "",
+      "invocation": "p27-cw16-fix-04",
+      "model": "claude-opus-5-5",
+      "purpose": "CW-16 D1/D3",
+      "role": "worker_senior",
+      "unit": "V-CW-16",
+      "workspace": "/home/dwchoo/ai-exp-assistant",
+      "writer": true
+    }
+  }
+}

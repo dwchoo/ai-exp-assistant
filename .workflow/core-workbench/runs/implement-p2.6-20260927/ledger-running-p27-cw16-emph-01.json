@@ -1,0 +1,17 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 2446,
+  "event": {
+    "id": "running-p27-cw16-emph-01",
+    "kind": "transition",
+    "data": {
+      "evidence": "host: Claude Code Agent spawn succeeded (name c18-emph, wb-test-rerun sonnet), 2026-10-09; spawned before the ledger reserve",
+      "invocation": "p27-cw16-emph-01",
+      "not_started_evidence": null,
+      "observed_effort": "unverified",
+      "observed_model": "unverified",
+      "outcome": null,
+      "state": "running"
+    }
+  }
+}

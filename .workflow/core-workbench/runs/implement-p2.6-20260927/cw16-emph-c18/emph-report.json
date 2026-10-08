@@ -1,0 +1,753 @@
+{
+ "candidate": "a2e3daf2...",
+ "term_pyte": null,
+ "pyte": {
+  "alone": {
+   "observed": {
+    "PLN": {
+     "sgr": "0",
+     "outer": {
+      "text": "GQEAPLN",
+      "uniform": true,
+      "bold": false,
+      "underline": false,
+      "reverse": false,
+      "italics": false,
+      "fg_raw": "default",
+      "bg_raw": "default",
+      "fg": null,
+      "bg": null
+     }
+    },
+    "BLD": {
+     "sgr": "1",
+     "outer": {
+      "text": "GQEABLD",
+      "uniform": true,
+      "bold": true,
+      "underline": false,
+      "reverse": false,
+      "italics": false,
+      "fg_raw": "default",
+      "bg_raw": "default",
+      "fg": null,
+      "bg": null
+     }
+    },
+    "UND": {
+     "sgr": "4",
+     "outer": {
+      "text": "GQEAUND",
+      "uniform": true,
+      "bold": false,
+      "underline": true,
+      "reverse": false,
+      "italics": false,
+      "fg_raw": "default",
+      "bg_raw": "default",
+      "fg": null,
+      "bg": null
+     }
+    },
+    "REV": {
+     "sgr": "7",
+     "outer": {
+      "text": "GQEAREV",
+      "uniform": true,
+      "bold": false,
+      "underline": false,
+      "reverse": true,
+      "italics": false,
+      "fg_raw": "default",
+      "bg_raw": "default",
+      "fg": null,
+      "bg": null
+     }
+    }
+   },
+   "verdict": {
+    "PLN": {
+     "strict": true,
+     "flags": true,
+     "colours": true,
+     "uniform": true,
+     "swapped_equivalent": false,
+     "expected": {
+      "bold": false,
+      "underline": false,
+      "reverse": false,
+      "fg": null,
+      "bg": null
+     }
+    },
+    "BLD": {
+     "strict": true,
+     "flags": true,
+     "colours": true,
+     "uniform": true,
+     "swapped_equivalent": false,
+     "expected": {
+      "bold": true,
+      "underline": false,
+      "reverse": false,
+      "fg": null,
+      "bg": null
+     }
+    },
+    "UND": {
+     "strict": true,
+     "flags": true,
+     "colours": true,
+     "uniform": true,
+     "swapped_equivalent": false,
+     "expected": {
+      "bold": false,
+      "underline": true,
+      "reverse": false,
+      "fg": null,
+      "bg": null
+     }
+    },
+    "REV": {
+     "strict": true,
+     "flags": true,
+     "colours": true,
+     "uniform": true,
+     "swapped_equivalent": false,
+     "expected": {
+      "bold": false,
+      "underline": false,
+      "reverse": true,
+      "fg": null,
+      "bg": null
+     }
+    }
+   }
+  },
+  "coloured": {
+   "observed": {
+    "B31": {
+     "sgr": "1;31",
+     "outer": {
+      "text": "GQEBB31",
+      "uniform": true,
+      "bold": true,
+      "underline": false,
+      "reverse": false,
+      "italics": false,
+      "fg_raw": "red",
+      "bg_raw": "default",
+      "fg": 1,
+      "bg": null
+     }
+    },
+    "U208": {
+     "sgr": "4;38;5;208",
+     "outer": {
+      "text": "GQEBU208",
+      "uniform": true,
+      "bold": false,
+      "underline": true,
+      "reverse": false,
+      "italics": false,
+      "fg_raw": "ff8700",
+      "bg_raw": "default",
+      "fg": 208,
+      "bg": null
+     }
+    },
+    "R44": {
+     "sgr": "7;44",
+     "outer": {
+      "text": "GQEBR44",
+      "uniform": true,
+      "bold": false,
+      "underline": false,
+      "reverse": true,
+      "italics": false,
+      "fg_raw": "default",
+      "bg_raw": "blue",
+      "fg": null,
+      "bg": 4
+     }
+    },
+    "BUR": {
+     "sgr": "1;4;7;32",
+     "outer": {
+      "text": "GQEBBUR",
+      "uniform": true,
+      "bold": true,
+      "underline": true,
+      "reverse": true,
+      "italics": false,
+      "fg_raw": "green",
+      "bg_raw": "default",
+      "fg": 2,
+      "bg": null
+     }
+    },
+    "B2C": {
+     "sgr": "1;38;5;196;48;5;21",
+     "outer": {
+      "text": "GQEBB2C",
+      "uniform": true,
+      "bold": true,
+      "underline": false,
+      "reverse": false,
+      "italics": false,
+      "fg_raw": "ff0000",
+      "bg_raw": "0000ff",
+      "fg": 9,
+      "bg": 21
+     }
+    }
+   },
+   "verdict": {
+    "B31": {
+     "strict": true,
+     "flags": true,
+     "colours": true,
+     "uniform": true,
+     "swapped_equivalent": false,
+     "expected": {
+      "bold": true,
+      "underline": false,
+      "reverse": false,
+      "fg": 1,
+      "bg": null
+     }
+    },
+    "U208": {
+     "strict": true,
+     "flags": true,
+     "colours": true,
+     "uniform": true,
+     "swapped_equivalent": false,
+     "expected": {
+      "bold": false,
+      "underline": true,
+      "reverse": false,
+      "fg": 208,
+      "bg": null
+     }
+    },
+    "R44": {
+     "strict": true,
+     "flags": true,
+     "colours": true,
+     "uniform": true,
+     "swapped_equivalent": false,
+     "expected": {
+      "bold": false,
+      "underline": false,
+      "reverse": true,
+      "fg": null,
+      "bg": 4
+     }
+    },
+    "BUR": {
+     "strict": true,
+     "flags": true,
+     "colours": true,
+     "uniform": true,
+     "swapped_equivalent": false,
+     "expected": {
+      "bold": true,
+      "underline": true,
+      "reverse": true,
+      "fg": 2,
+      "bg": null
+     }
+    },
+    "B2C": {
+     "strict": false,
+     "flags": true,
+     "colours": false,
+     "uniform": true,
+     "swapped_equivalent": false,
+     "expected": {
+      "bold": true,
+      "underline": false,
+      "reverse": false,
+      "fg": 196,
+      "bg": 21
+     }
+    }
+   }
+  },
+  "coloured2": {
+   "observed": {
+    "U9": {
+     "sgr": "4;91",
+     "outer": {
+      "text": "GQECU9",
+      "uniform": true,
+      "bold": false,
+      "underline": true,
+      "reverse": false,
+      "italics": false,
+      "fg_raw": "brightred",
+      "bg_raw": "default",
+      "fg": 9,
+      "bg": null
+     }
+    },
+    "R240": {
+     "sgr": "7;38;5;240;48;5;250",
+     "outer": {
+      "text": "GQECR240",
+      "uniform": true,
+      "bold": false,
+      "underline": false,
+      "reverse": true,
+      "italics": false,
+      "fg_raw": "585858",
+      "bg_raw": "bcbcbc",
+      "fg": 240,
+      "bg": 250
+     }
+    },
+    "BU4": {
+     "sgr": "1;4;34;47",
+     "outer": {
+      "text": "GQECBU4",
+      "uniform": true,
+      "bold": true,
+      "underline": true,
+      "reverse": false,
+      "italics": false,
+      "fg_raw": "blue",
+      "bg_raw": "white",
+      "fg": 4,
+      "bg": 7
+     }
+    }
+   },
+   "verdict": {
+    "U9": {
+     "strict": true,
+     "flags": true,
+     "colours": true,
+     "uniform": true,
+     "swapped_equivalent": false,
+     "expected": {
+      "bold": false,
+      "underline": true,
+      "reverse": false,
+      "fg": 9,
+      "bg": null
+     }
+    },
+    "R240": {
+     "strict": true,
+     "flags": true,
+     "colours": true,
+     "uniform": true,
+     "swapped_equivalent": false,
+     "expected": {
+      "bold": false,
+      "underline": false,
+      "reverse": true,
+      "fg": 240,
+      "bg": 250
+     }
+    },
+    "BU4": {
+     "strict": true,
+     "flags": true,
+     "colours": true,
+     "uniform": true,
+     "swapped_equivalent": false,
+     "expected": {
+      "bold": true,
+      "underline": true,
+      "reverse": false,
+      "fg": 4,
+      "bg": 7
+     }
+    }
+   }
+  }
+ },
+ "tmux": {
+  "term_in_pane": "python",
+  "alone": {
+   "observed": {
+    "PLN": {
+     "sgr": "0",
+     "outer": {
+      "text": "GQFAPLN",
+      "uniform": true,
+      "bold": false,
+      "underline": false,
+      "reverse": false,
+      "fg": null,
+      "bg": null
+     }
+    },
+    "BLD": {
+     "sgr": "1",
+     "outer": {
+      "text": "GQFABLD",
+      "uniform": true,
+      "bold": true,
+      "underline": false,
+      "reverse": false,
+      "fg": null,
+      "bg": null
+     }
+    },
+    "UND": {
+     "sgr": "4",
+     "outer": {
+      "text": "GQFAUND",
+      "uniform": true,
+      "bold": false,
+      "underline": true,
+      "reverse": false,
+      "fg": null,
+      "bg": null
+     }
+    },
+    "REV": {
+     "sgr": "7",
+     "outer": {
+      "text": "GQFAREV",
+      "uniform": true,
+      "bold": false,
+      "underline": false,
+      "reverse": true,
+      "fg": null,
+      "bg": null
+     }
+    }
+   },
+   "verdict": {
+    "PLN": {
+     "strict": true,
+     "flags": true,
+     "colours": true,
+     "uniform": true,
+     "swapped_equivalent": false,
+     "expected": {
+      "bold": false,
+      "underline": false,
+      "reverse": false,
+      "fg": null,
+      "bg": null
+     }
+    },
+    "BLD": {
+     "strict": true,
+     "flags": true,
+     "colours": true,
+     "uniform": true,
+     "swapped_equivalent": false,
+     "expected": {
+      "bold": true,
+      "underline": false,
+      "reverse": false,
+      "fg": null,
+      "bg": null
+     }
+    },
+    "UND": {
+     "strict": true,
+     "flags": true,
+     "colours": true,
+     "uniform": true,
+     "swapped_equivalent": false,
+     "expected": {
+      "bold": false,
+      "underline": true,
+      "reverse": false,
+      "fg": null,
+      "bg": null
+     }
+    },
+    "REV": {
+     "strict": true,
+     "flags": true,
+     "colours": true,
+     "uniform": true,
+     "swapped_equivalent": false,
+     "expected": {
+      "bold": false,
+      "underline": false,
+      "reverse": true,
+      "fg": null,
+      "bg": null
+     }
+    }
+   }
+  },
+  "coloured": {
+   "observed": {
+    "B31": {
+     "sgr": "1;31",
+     "outer": {
+      "text": "GQFBB31",
+      "uniform": true,
+      "bold": false,
+      "underline": false,
+      "reverse": false,
+      "fg": 1,
+      "bg": null
+     }
+    },
+    "U208": {
+     "sgr": "4;38;5;208",
+     "outer": {
+      "text": "GQFBU208",
+      "uniform": true,
+      "bold": false,
+      "underline": true,
+      "reverse": false,
+      "fg": 208,
+      "bg": null
+     }
+    },
+    "R44": {
+     "sgr": "7;44",
+     "outer": {
+      "text": "GQFBR44",
+      "uniform": true,
+      "bold": false,
+      "underline": false,
+      "reverse": true,
+      "fg": null,
+      "bg": 4
+     }
+    },
+    "BUR": {
+     "sgr": "1;4;7;32",
+     "outer": {
+      "text": "GQFBBUR",
+      "uniform": true,
+      "bold": true,
+      "underline": true,
+      "reverse": true,
+      "fg": 2,
+      "bg": null
+     }
+    },
+    "B2C": {
+     "sgr": "1;38;5;196;48;5;21",
+     "outer": {
+      "text": "GQFBB2C",
+      "uniform": true,
+      "bold": true,
+      "underline": false,
+      "reverse": false,
+      "fg": 196,
+      "bg": 21
+     }
+    }
+   },
+   "verdict": {
+    "B31": {
+     "strict": false,
+     "flags": false,
+     "colours": true,
+     "uniform": true,
+     "swapped_equivalent": false,
+     "expected": {
+      "bold": true,
+      "underline": false,
+      "reverse": false,
+      "fg": 1,
+      "bg": null
+     }
+    },
+    "U208": {
+     "strict": true,
+     "flags": true,
+     "colours": true,
+     "uniform": true,
+     "swapped_equivalent": false,
+     "expected": {
+      "bold": false,
+      "underline": true,
+      "reverse": false,
+      "fg": 208,
+      "bg": null
+     }
+    },
+    "R44": {
+     "strict": true,
+     "flags": true,
+     "colours": true,
+     "uniform": true,
+     "swapped_equivalent": false,
+     "expected": {
+      "bold": false,
+      "underline": false,
+      "reverse": true,
+      "fg": null,
+      "bg": 4
+     }
+    },
+    "BUR": {
+     "strict": true,
+     "flags": true,
+     "colours": true,
+     "uniform": true,
+     "swapped_equivalent": false,
+     "expected": {
+      "bold": true,
+      "underline": true,
+      "reverse": true,
+      "fg": 2,
+      "bg": null
+     }
+    },
+    "B2C": {
+     "strict": true,
+     "flags": true,
+     "colours": true,
+     "uniform": true,
+     "swapped_equivalent": false,
+     "expected": {
+      "bold": true,
+      "underline": false,
+      "reverse": false,
+      "fg": 196,
+      "bg": 21
+     }
+    }
+   }
+  },
+  "coloured2": {
+   "observed": {
+    "U9": {
+     "sgr": "4;91",
+     "outer": {
+      "text": "GQFCU9",
+      "uniform": true,
+      "bold": false,
+      "underline": true,
+      "reverse": false,
+      "fg": 9,
+      "bg": null
+     }
+    },
+    "R240": {
+     "sgr": "7;38;5;240;48;5;250",
+     "outer": {
+      "text": "GQFCR240",
+      "uniform": true,
+      "bold": false,
+      "underline": false,
+      "reverse": true,
+      "fg": 240,
+      "bg": 250
+     }
+    },
+    "BU4": {
+     "sgr": "1;4;34;47",
+     "outer": {
+      "text": "GQFCBU4",
+      "uniform": true,
+      "bold": true,
+      "underline": true,
+      "reverse": false,
+      "fg": 4,
+      "bg": 7
+     }
+    }
+   },
+   "verdict": {
+    "U9": {
+     "strict": true,
+     "flags": true,
+     "colours": true,
+     "uniform": true,
+     "swapped_equivalent": false,
+     "expected": {
+      "bold": false,
+      "underline": true,
+      "reverse": false,
+      "fg": 9,
+      "bg": null
+     }
+    },
+    "R240": {
+     "strict": true,
+     "flags": true,
+     "colours": true,
+     "uniform": true,
+     "swapped_equivalent": false,
+     "expected": {
+      "bold": false,
+      "underline": false,
+      "reverse": true,
+      "fg": 240,
+      "bg": 250
+     }
+    },
+    "BU4": {
+     "strict": true,
+     "flags": true,
+     "colours": true,
+     "uniform": true,
+     "swapped_equivalent": false,
+     "expected": {
+      "bold": true,
+      "underline": true,
+      "reverse": false,
+      "fg": 4,
+      "bg": 7
+     }
+    }
+   }
+  },
+  "raw_sample": [
+   "│\u001b[0m\"R44\" \"GQFB\"\"BUR\" \"GQFB\"\"B2C\"                                                                                                                                           \u001b[1m│"
+  ]
+ },
+ "omp": {
+  "omp": "omp/18.8.0",
+  "omp_path": "/home/dwchoo/.local/bin/omp",
+  "tmux": "tmux 3.4",
+  "herdr": "herdr 0.9.3",
+  "bash": "GNU bash, version 5.2.21(1)-release (x86_64-pc-linux-gnu)",
+  "dash": "dash 0.5.12-6ubuntu5",
+  "sh": "/usr/bin/dash",
+  "python": "3.12.3",
+  "kernel": "7.0.0-30-generic",
+  "os": "Ubuntu 24.04.4 LTS"
+ },
+ "tmux_identity": {
+  "socket": "/tmp/wbc16emphg1co-mi_8mijg/emph.sock",
+  "server_pid": 2830893,
+  "pane_pid": 2830894
+ },
+ "steps": {
+  "start": "pass",
+  "PYTE_alone": "pass",
+  "PYTE_coloured": "fail",
+  "PYTE_coloured2": "pass",
+  "TMUX_capture_pane_e": "fail",
+  "shutdown": "pass"
+ },
+ "steps_final": {
+  "start": "pass",
+  "PYTE_alone": "pass",
+  "PYTE_coloured": "fail",
+  "PYTE_coloured2": "pass",
+  "TMUX_capture_pane_e": "fail",
+  "shutdown": "pass"
+ },
+ "step_detail_fail": {
+  "PYTE_coloured": {
+   "status": "fail",
+   "seconds": 3.3,
+   "assertion": "{'mismatch': {'B2C': {'strict': False, 'flags': True, 'colours': False, 'uniform': True, 'swapped_equivalent': False, 'expected': {'bold': True, 'underline': False, 'reverse': False, 'fg': 196, 'bg': 21}}}, 'observed': {'B2C': {'sgr': '1;38;5;196;48;5;21', 'outer': {'text': 'GQEBB2C', 'uniform': True, 'bold': True, 'underline': False, 'reverse': False, 'italics': False, 'fg_raw': 'ff0000', 'bg_raw': '0000ff', 'fg': 9, 'bg': 21}}}}"
+  },
+  "TMUX_capture_pane_e": {
+   "status": "fail",
+   "seconds": 3.8,
+   "assertion": "{'mismatch': {'coloured:B31': {'strict': False, 'flags': False, 'colours': True, 'uniform': True, 'swapped_equivalent': False, 'expected': {'bold': True, 'underline': False, 'reverse': False, 'fg': 1, 'bg': None}}}}"
+  }
+ }
+}

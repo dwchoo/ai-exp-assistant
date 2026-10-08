@@ -1,0 +1,25 @@
+test_emphasis_through_the_product_ui (__main__.EmphasisProbe.test_emphasis_through_the_product_ui) ... FAIL
+
+[cw16-b2] emph-G1-COLOR: fail -> /home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-emph-c18/reports/c18-emph-r2/emph-G1-COLOR.json
+
+======================================================================
+FAIL: test_emphasis_through_the_product_ui (__main__.EmphasisProbe.test_emphasis_through_the_product_ui)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-emph-c18/probe_emph.py", line 315, in test_emphasis_through_the_product_ui
+    fr.assert_steps(self, rig)
+  File "/home/dwchoo/ai-exp-assistant/tests/integration/cw16_flow_rig.py", line 288, in assert_steps
+    test.assertEqual(rig.runner.failures(), {}, json.dumps(rig.report.data["steps"], ensure_ascii=False,
+AssertionError: {'TMUX_capture_pane_e': 'fail'} != {}
+- {'TMUX_capture_pane_e': 'fail'}
++ {} : {"start": {"status": "pass", "seconds": 4.1, "observed": {"term": "xterm-256color"}}, "PYTE_alone": {"status": "pass", "seconds": 2.6, "observed": {"verdict": {"PLN": true, "BLD": true, "UND": true, "REV": true}}}, "PYTE_coloured": {"status": "pass", "seconds": 3.3, "observed": {"verdict": {"B31": true, "U208": true, "R44": true, "BUR": true, "B2C": true}}}, "PYTE_coloured2": {"status": "pass", "seconds": 2.6, "observed": {"verdict": {"U9": true, "R240": true, "BU4": true}}}, "TMUX_capture_pane_e": {"status": "fail", "seconds": 3.8, "assertion": "{'mismatch': {'coloured:B31': {'strict': False, 'flags': False, 'colours': True, 'uniform': True, 'swapped_equivalent': False, 'expected': {'bold': True, 'underline': False, 'reverse': False, 'fg': 1, 'bg': None}}}}"}, "shutdown": {"status": "pass", "seconds": 0.5, "observed": {"verified": true, "residue": {}}}}
+
+----------------------------------------------------------------------
+Ran 1 test in 17.051s
+
+FAILED (failures=1)
+exit=1
+
+real	0m17.175s
+user	0m6.056s
+sys	0m0.325s

@@ -1,0 +1,24 @@
+{
+ "root": "/home/dwchoo/ai-exp-assistant",
+ "requirements": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/requirements-p27-cw16.json",
+ "argv": [
+  "/usr/bin/env",
+  "-i",
+  "PATH=/usr/bin:/bin",
+  "LANG=C.UTF-8",
+  "/bin/bash",
+  "-c",
+  "rc=0; RH=$(mktemp -d /tmp/wb-cw16-b4b-reghome-XXXXXX); mkdir -p \"$RH/.omp/agent\"; E=\"/usr/bin/env -i PATH=/tmp/cw02-g1-venv/bin:/home/dwchoo/.local/bin:/usr/bin:/bin HOME=$RH LANG=C.UTF-8 PYTHONPATH=src PYTHONDONTWRITEBYTECODE=1 HTTP_PROXY=http://127.0.0.1:9 HTTPS_PROXY=http://127.0.0.1:9 ALL_PROXY=http://127.0.0.1:9 NO_PROXY=127.0.0.1,localhost\"; for s in terminal recovery_boot integration lifecycle observation storage tasks workflow contracts bridge gates/g1_vt gates/g2_shell gates/g3_omp gates/g4_evidence gates/g4_lifetime policy/pause_automation policy/recovery_manager; do echo \"== suite tests/$s start $(date -Is)\"; if $E python -m unittest discover -s tests/$s -p 'test_*.py' -v; then echo \"== suite tests/$s rc=0 $(date -Is)\"; else echo \"== suite tests/$s rc=FAIL $(date -Is)\"; rc=1; fi; done; echo \"== node --test tests/bridge/*.test.ts start $(date -Is)\"; if $E node --test tests/bridge/*.test.ts; then echo '== node bridge rc=0'; else echo '== node bridge rc=FAIL'; rc=1; fi; echo \"== tests/gates/harness/run-contracts.sh start $(date -Is)\"; if $E sh tests/gates/harness/run-contracts.sh; then echo '== run-contracts rc=0'; else echo '== run-contracts rc=FAIL'; rc=1; fi; rm -rf \"$RH\"; echo \"== combined rc=$rc\"; exit $rc"
+ ],
+ "environment": {
+  "description": "Linux 7.0.0-30-generic Ubuntu 24.04.4; OMP 18.8.0 (~/.local/bin/omp, version-recorded); Bash 5.2.21; dash 0.5.12-6ubuntu5; tmux 3.4; Herdr 0.9.3; Python 3.12.3 venv /tmp/cw02-g1-venv (pyte); Node v22.23.2; env -i (TMUX*/HERDR_* stripped), fake HOME under /tmp, HTTP(S)/ALL_PROXY=127.0.0.1:9 (no provider reachable); frozen candidate C16 f8ad6ec9 (HEAD e635723)"
+ },
+ "log": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/check-p27-cw16-regression-b.log",
+ "check_id": "p27-cw16-regression-b-01",
+ "watch": [],
+ "exclude": [
+  ".workflow/core-workbench/runs/implement-p2.6-20260927/**",
+  "graphify-out/**"
+ ],
+ "timeout": 3600
+}

@@ -1,0 +1,686 @@
+{
+ "scenario": "fault-x6",
+ "run_id": "b4b-fault",
+ "started_at": "2026-10-08T11:41:42+00:00",
+ "repo_head": "e63572356480f2431427d349d749fbd09c2ee72f",
+ "context": {
+  "scenario_id": "X6"
+ },
+ "versions": {
+  "omp": "omp/18.8.0",
+  "omp_path": "/home/dwchoo/.local/bin/omp",
+  "tmux": "tmux 3.4",
+  "herdr": "herdr 0.9.3",
+  "bash": "GNU bash, version 5.2.21(1)-release (x86_64-pc-linux-gnu)",
+  "dash": "dash 0.5.12-6ubuntu5",
+  "sh": "/usr/bin/dash",
+  "python": "3.12.3",
+  "kernel": "7.0.0-30-generic",
+  "os": "Ubuntu 24.04.4 LTS"
+ },
+ "commands": [
+  {
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "start",
+    "--data-dir",
+    "/tmp/wbc16x6c-v3fl2d0e/d",
+    "--omp",
+    "/home/dwchoo/.local/bin/omp",
+    "--omp-arg=--model",
+    "--omp-arg=wbcw16/scripted",
+    "--no-attach"
+   ],
+   "exit": 0,
+   "seconds": 3.76,
+   "stdout_tail": " OMP isolation check ...\nbackend pid 2063829 phase ready\ndata dir /tmp/wbc16x6c-v3fl2d0e/d\n  host_shell: pid 2063836 alive=True owner=user\n  manager_omp: pid 2063839 alive=True owner=user\n  worker_omp: pid 2063840 alive=True owner=user\n  shell: bash /usr/bin/bash mode=manual_prompt\nomp isolation: ok (omp/18.8.0 evidence bridge_g3=18.2.10, isolation=18.6.1)\n  note: OMP 18.8.0 has not extracted its native addon into /tmp/wbc16x6c-v3fl2d0e/h/.omp/natives/18.8.0 yet: the first Workbench OMP extracts it there (the same files your own omp 18.8.0 extracts; OMP has no setting to move this directory).\n",
+   "stderr_tail": ""
+  },
+  {
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "status",
+    "--data-dir",
+    "/tmp/wbc16x6c-v3fl2d0e/d"
+   ],
+   "exit": 0,
+   "seconds": 0.07,
+   "stdout_tail": "r=user\n  manager_omp: pid 2063839 alive=True owner=user\n  worker_omp: pid 2063840 alive=True owner=user\n  shell: bash /usr/bin/bash mode=manual_prompt\n사용량: Task 6506b0fc-ca96-449d-bf6c-de69f4c996c9 run 1 (재시도 0/3) · 60s 점검 - · 모델 미확인\nomp isolation: ok (omp/18.8.0 evidence bridge_g3=18.2.10, isolation=18.6.1)\n  note: OMP 18.8.0 has not extracted its native addon into /tmp/wbc16x6c-v3fl2d0e/h/.omp/natives/18.8.0 yet: the first Workbench OMP extracts it there (the same files your own omp 18.8.0 extracts; OMP has no setting to move this directory).\nraw log: raw log run 64 MiB 한도 도달, 저장 중지 — 실행 계속\n",
+   "stderr_tail": ""
+  },
+  {
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "shutdown",
+    "--data-dir",
+    "/tmp/wbc16x6c-v3fl2d0e/d",
+    "--json",
+    "--yes"
+   ],
+   "exit": 0,
+   "seconds": 3.24,
+   "stdout_tail": "rted\n{\"shutdown\": {\"left_running\": [], \"lifecycle\": null, \"omp_children\": {\"alive\": [], \"observed\": [{\"ended\": \"by_itself\", \"parent\": \"manager_omp\", \"parent_pid\": 2063839, \"pid\": 2064035, \"start_ticks\": 300477741}]}, \"panes\": [{\"exit_status\": -1, \"pane\": \"host_shell\", \"survivors\": []}, {\"exit_status\": 143, \"pane\": \"manager_omp\", \"survivors\": []}, {\"exit_status\": 143, \"pane\": \"worker_omp\", \"survivors\": []}], \"previous_survivors\": [], \"problems\": [], \"processes\": {\"host_shell\": \"dead\", \"manager_omp\": \"dead\", \"supervisor\": \"dead\", \"worker_omp\": \"dead\"}, \"user_confirmed\": true, \"verified\": true}}\n",
+   "stderr_tail": ""
+  },
+  {
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "start",
+    "--data-dir",
+    "/tmp/wbc16x6c-v3fl2d0e/d",
+    "--omp",
+    "/home/dwchoo/.local/bin/omp",
+    "--omp-arg=--model",
+    "--omp-arg=wbcw16/scripted",
+    "--no-attach"
+   ],
+   "exit": 0,
+   "seconds": 2.28,
+   "stdout_tail": "starting backend: shell bash (/usr/bin/bash), omp/18.8.0\nwaiting for the OMP isolation check ...\nbackend pid 2064460 phase ready\ndata dir /tmp/wbc16x6c-v3fl2d0e/d\n  host_shell: pid 2064464 alive=True owner=user\n  manager_omp: pid 2064467 alive=True owner=user\n  worker_omp: pid 2064468 alive=True owner=user\n  shell: bash /usr/bin/bash mode=manual_prompt\n사용량: Task 6506b0fc-ca96-449d-bf6c-de69f4c996c9 run 1 (재시도 0/3) · 60s 점검 - · 모델 미확인\nomp isolation: ok (omp/18.8.0 evidence bridge_g3=18.2.10, isolation=18.6.1)\n",
+   "stderr_tail": ""
+  },
+  {
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "shutdown",
+    "--data-dir",
+    "/tmp/wbc16x6c-v3fl2d0e/d",
+    "--json",
+    "--yes"
+   ],
+   "exit": 0,
+   "seconds": 0.4,
+   "stdout_tail": "no active work reported\n{\"shutdown\": {\"left_running\": [], \"lifecycle\": null, \"omp_children\": {\"alive\": [], \"observed\": []}, \"panes\": [{\"exit_status\": -1, \"pane\": \"host_shell\", \"survivors\": []}, {\"exit_status\": 143, \"pane\": \"manager_omp\", \"survivors\": []}, {\"exit_status\": 143, \"pane\": \"worker_omp\", \"survivors\": []}], \"previous_survivors\": [], \"problems\": [], \"processes\": {\"host_shell\": \"dead\", \"manager_omp\": \"dead\", \"worker_omp\": \"dead\"}, \"user_confirmed\": true, \"verified\": true}}\n",
+   "stderr_tail": ""
+  },
+  {
+   "argv": [
+    "/tmp/cw02-g1-venv/bin/python",
+    "-m",
+    "unittest",
+    "discover",
+    "-v",
+    "-s",
+    "tests/recovery_boot",
+    "-t",
+    "tests/recovery_boot",
+    "-p",
+    "test_faults_independent_p27cw19.py",
+    "-k",
+    "RawLogCaps"
+   ],
+   "exit": 0,
+   "seconds": 0,
+   "stdout_tail": "",
+   "stderr_tail": "t) ... ok\ntest_run_cap_64_mib_drain_never_raises (test_faults_independent_p27cw19.RawLogCaps.test_run_cap_64_mib_drain_never_raises) ... ok\ntest_store_failure_records_missing_bytes_and_continues (test_faults_independent_p27cw19.RawLogCaps.test_store_failure_records_missing_bytes_and_continues) ... ok\n\n----------------------------------------------------------------------\nRan 5 tests in 0.098s\n\nOK\n"
+  },
+  {
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "start",
+    "--data-dir",
+    "/tmp/wbc16x6f-7x3kowy_/d",
+    "--omp",
+    "/home/dwchoo/.local/bin/omp",
+    "--omp-arg=--model",
+    "--omp-arg=wbcw16/scripted",
+    "--no-attach"
+   ],
+   "exit": 0,
+   "seconds": 3.84,
+   "stdout_tail": " OMP isolation check ...\nbackend pid 2064664 phase ready\ndata dir /tmp/wbc16x6f-7x3kowy_/d\n  host_shell: pid 2064668 alive=True owner=user\n  manager_omp: pid 2064674 alive=True owner=user\n  worker_omp: pid 2064675 alive=True owner=user\n  shell: bash /usr/bin/bash mode=manual_prompt\nomp isolation: ok (omp/18.8.0 evidence bridge_g3=18.2.10, isolation=18.6.1)\n  note: OMP 18.8.0 has not extracted its native addon into /tmp/wbc16x6f-7x3kowy_/h/.omp/natives/18.8.0 yet: the first Workbench OMP extracts it there (the same files your own omp 18.8.0 extracts; OMP has no setting to move this directory).\n",
+   "stderr_tail": ""
+  },
+  {
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "shutdown",
+    "--data-dir",
+    "/tmp/wbc16x6f-7x3kowy_/d",
+    "--json",
+    "--yes"
+   ],
+   "exit": 0,
+   "seconds": 3.26,
+   "stdout_tail": "orted\n{\"shutdown\": {\"left_running\": [], \"lifecycle\": null, \"omp_children\": {\"alive\": [], \"observed\": [{\"ended\": \"by_itself\", \"parent\": \"manager_omp\", \"parent_pid\": 2064674, \"pid\": 2064875, \"start_ticks\": 300479051}]}, \"panes\": [{\"exit_status\": 0, \"pane\": \"host_shell\", \"survivors\": []}, {\"exit_status\": 143, \"pane\": \"manager_omp\", \"survivors\": []}, {\"exit_status\": 143, \"pane\": \"worker_omp\", \"survivors\": []}], \"previous_survivors\": [], \"problems\": [], \"processes\": {\"host_shell\": \"dead\", \"manager_omp\": \"dead\", \"supervisor\": \"dead\", \"worker_omp\": \"dead\"}, \"user_confirmed\": true, \"verified\": true}}\n",
+   "stderr_tail": ""
+  }
+ ],
+ "steps": {
+  "X6.run_cap_64mib_run_continues": {
+   "status": "pass",
+   "seconds": 6.6,
+   "observed": {
+    "raw_log_status": {
+     "cap_source": "run",
+     "dropped_bytes": 7029169,
+     "missing_bytes": 7029169,
+     "observed_bytes": 74138033,
+     "run_id": "7d7f8ca2-2189-4cd3-892f-77e2668a5dfc",
+     "storage_error": null,
+     "stored_bytes": 67108864,
+     "text": "raw log run 64 MiB 한도 도달, 저장 중지 — 실행 계속",
+     "truncated": true
+    },
+    "stored_file_bytes": 67108864,
+    "task": {
+     "status": "finished",
+     "last_result": {
+      "judged": {
+       "exit_confirmed": true,
+       "exit_status": 0,
+       "host_evidence": {
+        "judgment": "indeterminate",
+        "reasons": [
+         "raw_log_incomplete"
+        ]
+       },
+       "raw_log_collected": true,
+       "result_collected": true
+      },
+      "judgment": "indeterminate",
+      "not_judged": [
+       "worker_analysis"
+      ],
+      "outcome": "judgment_unavailable",
+      "reason": "worker_judgment_conflicts_with_evidence",
+      "reasons": [
+       "worker_analysis_unavailable"
+      ],
+      "report": "not_sent",
+      "run_closed": true,
+      "run_id": "7d7f8ca2-2189-4cd3-892f-77e2668a5dfc"
+     },
+     "summary": "cw16 X6 70 MiB"
+    },
+    "status_text": [
+     "raw log: raw log run 64 MiB 한도 도달, 저장 중지 — 실행 계속"
+    ]
+   }
+  },
+  "X6.restart_keeps_task_spec_worktree": {
+   "status": "pass",
+   "seconds": 6.1,
+   "observed": {
+    "task_before": {
+     "task_id": "6506b0fc-ca96-449d-bf6c-de69f4c996c9",
+     "summary": "cw16 X6 70 MiB",
+     "status": "finished"
+    },
+    "task_after": {
+     "task_id": "6506b0fc-ca96-449d-bf6c-de69f4c996c9",
+     "summary": "cw16 X6 70 MiB",
+     "status": "finished"
+    },
+    "worktree_outcome_files": [
+     "workflow/worktrees/6506b0fc-ca96-449d-bf6c-de69f4c996c9-r1-ca6decd5/outcome.txt"
+    ],
+    "raw_log_after_restart": 67108864,
+    "run_record": true,
+    "startup": "same_boot_clean_stop"
+   }
+  },
+  "X6.project_cap_reduced_fixture": {
+   "status": "pass",
+   "seconds": 0.2,
+   "observed": {
+    "exit": 0,
+    "tests": [
+     [
+      "test_backend_defaults_are_64_and_512_mib",
+      "ok"
+     ],
+     [
+      "test_backend_raw_log_view_texts",
+      "ok"
+     ],
+     [
+      "test_project_cap_is_reported_as_project",
+      "ok"
+     ],
+     [
+      "test_run_cap_64_mib_drain_never_raises",
+      "ok"
+     ],
+     [
+      "test_store_failure_records_missing_bytes_and_continues",
+      "ok"
+     ]
+    ],
+    "evidence_level": "fixture (reduced project limit; the 512 MiB project cap has no runtime knob, by design)"
+   }
+  },
+  "X6.start_fault_sandbox": {
+   "status": "pass",
+   "seconds": 4.2,
+   "observed": {
+    "phase": "ready"
+   }
+  },
+  "X6.raw_log_store_failure_shown": {
+   "status": "pass",
+   "seconds": 5.1,
+   "observed": {
+    "raw_log": {
+     "cap_source": null,
+     "dropped_bytes": 11,
+     "missing_bytes": 11,
+     "observed_bytes": 11,
+     "run_id": "43fe9551-36ad-4d07-944f-3abb81cf327e",
+     "storage_error": "PermissionError:13",
+     "stored_bytes": 0,
+     "text": "raw log 저장 장애(PermissionError:13): 누락 11 bytes — 실행 계속",
+     "truncated": true
+    },
+    "task": {
+     "status": "finished",
+     "last_result": {
+      "judged": {
+       "exit_confirmed": true,
+       "exit_status": 0,
+       "host_evidence": {
+        "judgment": "indeterminate",
+        "reasons": [
+         "insufficient_raw_log"
+        ]
+       },
+       "raw_log_collected": true,
+       "result_collected": true
+      },
+      "judgment": "indeterminate",
+      "not_judged": [
+       "worker_analysis"
+      ],
+      "outcome": "judgment_unavailable",
+      "reason": "worker_judgment_conflicts_with_evidence",
+      "reasons": [
+       "worker_analysis_unavailable"
+      ],
+      "report": "not_sent",
+      "run_closed": true,
+      "run_id": "43fe9551-36ad-4d07-944f-3abb81cf327e"
+     }
+    },
+    "raw_dir_mode_during": "0500"
+   }
+  },
+  "X6.metadata_hold_and_pause_store_failure": {
+   "status": "pass",
+   "seconds": 6.0,
+   "observed": {
+    "holds": [
+     {
+      "reason": "metadata_unavailable",
+      "since": 1791459725.3329792,
+      "detail": "backend_record: PermissionError"
+     }
+    ],
+    "faults_metadata": {
+     "state": "failed",
+     "sources": {
+      "backend_record": "backend_record: PermissionError"
+     },
+     "since": 1791459725.3329792
+    },
+    "record_error": "PermissionError: Permission denied",
+    "ui_shown": true,
+    "ui_lines": [
+     "일시정지 저장 오류(재시작 시 유지 안 될 수 있음) | metadata 저장 장애: 새 자동 작업 보류 (실행·관측 계속) · raw log 저장 장애(PermissionError:13): 누락 21 bytes — 실행 계",
+     "x  └─ kind=\"work\", message=\"x6 while metadata is unavailable\", spec={2 keys}        xx └ • status: \"held\"                                                       "
+    ],
+    "new_work_results": [
+     {
+      "status": "held",
+      "reason": "metadata_unavailable"
+     },
+     {
+      "status": "held",
+      "reason": "metadata_unavailable",
+      "detail": "Nothing was run: Workbench holds automatic work now (reason in this result: boot confirmation, metadata storage or a model error). A command already running continues. End your turn; do not retry in a loop."
+     }
+    ],
+    "pause": {
+     "paused": true,
+     "persistence_error": "pause_not_stored",
+     "detail": "paused by the user; collection continues, new automatic work is held (the pause is not stored durably; retried)",
+     "metadata_sources": [
+      "automation_pause",
+      "backend_record"
+     ]
+    },
+    "pause_store_ui": true,
+    "status_lines_170": [
+     "focus: WORKER OMP | host 입력 owner: user | shell mode: manual_foreground | worker: 대기 | 자동화: paused",
+     "일시정지 저장 오류(재시작 시 유지 안 될 수 있음) | metadata 저장 장애: 새 자동 작업 보류 (실행·관측 계속) · raw log 저장 장애(PermissionError:13): 누락 21 bytes — 실행 계",
+     "lq MANAGER OMP alive qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqklq WORKER OMP *FOCUS* alive qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqk"
+    ],
+    "pause_store_ui_at_400_cols": true,
+    "status_lines_400": [
+     "focus: WORKER OMP | host 입력 owner: user | shell mode: manual_foreground | worker: 대기 | 자동화: paused",
+     "일시정지 저장 오류(재시작 시 유지 안 될 수 있음) | metadata 저장 장애: 새 자동 작업 보류 (실행·관측 계속) · raw log 저장 장애(PermissionError:13): 누락 21 bytes — 실행 계속 | 작업: 실험 \"cw16 X6 raw log store fault\" [보고 완료 · judgment_unavailable:worker_judgment_conflicts_with_evidence] | 사용량: 재시도 0/3 · 모델 미확인 | 일시정지됨 | backend: degraded | bridge manager=ok worker=ok | 마지막 확",
+     "lq MANAGER OMP alive qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqklq WORKER OMP *FOCUS* alive qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqk"
+    ],
+    "hold_still_latched": true,
+    "backend_phase": "degraded",
+    "bridges_connected": {
+     "manager": true,
+     "worker": true
+    }
+   }
+  },
+  "X6.pause_store_failure_visible_at_170": {
+   "status": "pass",
+   "seconds": 0.0,
+   "observed": {
+    "pause_store_ui": true,
+    "status_lines_170": [
+     "focus: WORKER OMP | host 입력 owner: user | shell mode: manual_foreground | worker: 대기 | 자동화: paused",
+     "일시정지 저장 오류(재시작 시 유지 안 될 수 있음) | metadata 저장 장애: 새 자동 작업 보류 (실행·관측 계속) · raw log 저장 장애(PermissionError:13): 누락 21 bytes — 실행 계",
+     "lq MANAGER OMP alive qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqklq WORKER OMP *FOCUS* alive qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqk"
+    ],
+    "pause_store_ui_at_400_cols": true,
+    "status_lines_400": [
+     "focus: WORKER OMP | host 입력 owner: user | shell mode: manual_foreground | worker: 대기 | 자동화: paused",
+     "일시정지 저장 오류(재시작 시 유지 안 될 수 있음) | metadata 저장 장애: 새 자동 작업 보류 (실행·관측 계속) · raw log 저장 장애(PermissionError:13): 누락 21 bytes — 실행 계속 | 작업: 실험 \"cw16 X6 raw log store fault\" [보고 완료 · judgment_unavailable:worker_judgment_conflicts_with_evidence] | 사용량: 재시도 0/3 · 모델 미확인 | 일시정지됨 | backend: degraded | bridge manager=ok worker=ok | 마지막 확",
+     "lq MANAGER OMP alive qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqklq WORKER OMP *FOCUS* alive qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqk"
+    ]
+   }
+  },
+  "X6.metadata_restored": {
+   "status": "pass",
+   "seconds": 4.9,
+   "observed": {
+    "holds": [],
+    "paused": true,
+    "automation_json_paused": true
+   }
+  },
+  "X6.shutdown": {
+   "status": "pass",
+   "seconds": 3.3,
+   "observed": {
+    "verified": true
+   }
+  }
+ },
+ "unknowns": [],
+ "result": "pass",
+ "roots": [
+  "/tmp/wbc16x6c-v3fl2d0e",
+  "/tmp/wbc16x6f-7x3kowy_"
+ ],
+ "cleanup": {
+  "residue_before_fallback": {},
+  "root_removed": true,
+  "residue_after_fallback": {}
+ },
+ "cleanups": [
+  {
+   "residue_before_fallback": {},
+   "root_removed": true,
+   "residue_after_fallback": {}
+  },
+  {
+   "residue_before_fallback": {},
+   "root_removed": true,
+   "residue_after_fallback": {}
+  }
+ ],
+ "provider": {
+  "requests": {
+   "manager": 8,
+   "worker": 6
+  },
+  "injected": {
+   "manager": [
+    {
+     "at": 1791459709.122769,
+     "kind": "report",
+     "message_id": "cac39d84-8ea8-42b4-843a-5efab6bc1fa0",
+     "handoff": "workbench_notice",
+     "payload_kind": null,
+     "stage": null,
+     "contract": false
+    },
+    {
+     "at": 1791459724.8531492,
+     "kind": "report",
+     "message_id": "8ccdbeaf-cf42-446d-a071-2350fc034911",
+     "handoff": "workbench_notice",
+     "payload_kind": null,
+     "stage": null,
+     "contract": false
+    }
+   ],
+   "worker": [
+    {
+     "at": 1791459707.4734657,
+     "kind": "task",
+     "message_id": "68aa7a53-6817-4e9f-ae1e-50b0c0810014",
+     "handoff": null,
+     "payload_kind": null,
+     "stage": "execute",
+     "contract": true
+    },
+    {
+     "at": 1791459709.0629075,
+     "kind": "question",
+     "message_id": "5b9b8b74-714a-43ab-a554-9570839c382a",
+     "handoff": null,
+     "payload_kind": null,
+     "stage": "analysis",
+     "contract": true
+    },
+    {
+     "at": 1791459720.4903297,
+     "kind": "task",
+     "message_id": "1aa00a94-bf4b-47c4-ae22-a5238ff372c6",
+     "handoff": null,
+     "payload_kind": null,
+     "stage": "execute",
+     "contract": true
+    },
+    {
+     "at": 1791459724.7959898,
+     "kind": "question",
+     "message_id": "01777745-8816-461f-a4ef-c147e1685598",
+     "handoff": null,
+     "payload_kind": null,
+     "stage": "analysis",
+     "contract": true
+    }
+   ],
+   "unknown": []
+  },
+  "aborted": [],
+  "errors": [],
+  "rules": [
+   {
+    "name": "tap",
+    "hits": 0
+   },
+   {
+    "name": "worker-staged",
+    "hits": 4
+   },
+   {
+    "name": "worker-review",
+    "hits": 0
+   },
+   {
+    "name": "text:x6flood",
+    "hits": 1
+   },
+   {
+    "name": "text:x6held",
+    "hits": 1
+   },
+   {
+    "name": "text:x6term",
+    "hits": 1
+   },
+   {
+    "name": "text:x6raw",
+    "hits": 1
+   }
+  ],
+  "log_tail": [
+   {
+    "i": 1,
+    "at": 1791459707.3829756,
+    "role": "manager",
+    "last_role": "user",
+    "text_tail": "x6flood",
+    "injected_kind": null,
+    "tool_results": []
+   },
+   {
+    "i": 2,
+    "at": 1791459707.4154732,
+    "role": "manager",
+    "last_role": "tool",
+    "text_tail": "o not do it yourself (no commands, edits or checks for it). End your turn and wait for the worker's to_manager report.\"}",
+    "injected_kind": null,
+    "tool_results": [
+     "cw16-manager-1"
+    ]
+   },
+   {
+    "i": 3,
+    "at": 1791459707.4734674,
+    "role": "worker",
+    "last_role": "user",
+    "text_tail": null,
+    "injected_kind": "task",
+    "tool_results": []
+   },
+   {
+    "i": 4,
+    "at": 1791459709.0629098,
+    "role": "worker",
+    "last_role": "user",
+    "text_tail": null,
+    "injected_kind": "question",
+    "tool_results": []
+   },
+   {
+    "i": 5,
+    "at": 1791459709.1227715,
+    "role": "manager",
+    "last_role": "user",
+    "text_tail": null,
+    "injected_kind": "report",
+    "tool_results": []
+   },
+   {
+    "i": 6,
+    "at": 1791459720.3971882,
+    "role": "manager",
+    "last_role": "user",
+    "text_tail": "x6raw",
+    "injected_kind": null,
+    "tool_results": []
+   },
+   {
+    "i": 7,
+    "at": 1791459720.4285824,
+    "role": "manager",
+    "last_role": "tool",
+    "text_tail": "o not do it yourself (no commands, edits or checks for it). End your turn and wait for the worker's to_manager report.\"}",
+    "injected_kind": null,
+    "tool_results": [
+     "cw16-manager-2"
+    ]
+   },
+   {
+    "i": 8,
+    "at": 1791459720.490333,
+    "role": "worker",
+    "last_role": "user",
+    "text_tail": null,
+    "injected_kind": "task",
+    "tool_results": []
+   },
+   {
+    "i": 9,
+    "at": 1791459724.7959912,
+    "role": "worker",
+    "last_role": "user",
+    "text_tail": null,
+    "injected_kind": "question",
+    "tool_results": []
+   },
+   {
+    "i": 10,
+    "at": 1791459724.8531506,
+    "role": "manager",
+    "last_role": "user",
+    "text_tail": null,
+    "injected_kind": "report",
+    "tool_results": []
+   },
+   {
+    "i": 11,
+    "at": 1791459726.4531844,
+    "role": "manager",
+    "last_role": "user",
+    "text_tail": "x6held",
+    "injected_kind": null,
+    "tool_results": []
+   },
+   {
+    "i": 12,
+    "at": 1791459726.4614081,
+    "role": "manager",
+    "last_role": "tool",
+    "text_tail": "{\"status\":\"held\",\"reason\":\"metadata_unavailable\"}",
+    "injected_kind": null,
+    "tool_results": [
+     "cw16-manager-3"
+    ]
+   },
+   {
+    "i": 13,
+    "at": 1791459727.432061,
+    "role": "worker",
+    "last_role": "user",
+    "text_tail": "x6term",
+    "injected_kind": null,
+    "tool_results": []
+   },
+   {
+    "i": 14,
+    "at": 1791459727.4428127,
+    "role": "worker",
+    "last_role": "tool",
+    "text_tail": "ation, metadata storage or a model error). A command already running continues. End your turn; do not retry in a loop.\"}",
+    "injected_kind": null,
+    "tool_results": [
+     "cw16-worker-4"
+    ]
+   }
+  ]
+ },
+ "notices": {
+  "manager": [],
+  "worker": [],
+  "unknown": []
+ },
+ "reviews": [],
+ "model_requests_real": 0,
+ "finished_at": "2026-10-08T11:42:19+00:00"
+}

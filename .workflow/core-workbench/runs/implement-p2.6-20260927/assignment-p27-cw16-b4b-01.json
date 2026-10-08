@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw16-b4b-01",
+  "ticket_id": "CW-16 B4b: formal checks on frozen C16 (R stage)",
+  "role": "test_designer",
+  "unit": "V-CW-16",
+  "candidate": "f8ad6ec989ec2b9f1f72a81414bbaeeadc911997a196c0edf1eeed18442f4e3d",
+  "candidate_commit": "e635723",
+  "candidate_snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-cw16-C16-final.json",
+  "approved_bundle_digest": "b31396faad700dfbb5f9c95415ba34cac0ef7dabd517a4ef5c293ca8dc2c9cf2",
+  "requirements": ".workflow/core-workbench/runs/implement-p2.6-20260927/requirements-p27-cw16.json",
+  "routing": {
+    "planned_role": "test_designer",
+    "selected_role": "test_designer (Opus high; formal runs + observed item judgement)",
+    "reason_codes": [
+      "final_gate"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-plan-01.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-b1-01.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-b2-01.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-b3-01.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-b4a-01.md"
+    ]
+  },
+  "user_authorization": "User 2026-10-08 '전부 진행해서 테스트까지 해서 완료하고 보고해'",
+  "required_behavior": [
+    "R stage: ZERO writes to the repo working tree (only into this run dir and /tmp). Verify `git status --short -- src omp_bridge tests docs pyproject.toml` is empty before and after, and that a fresh snapshot equals the C16 candidate (workflow_tools.py snapshot with exclude ['.workflow/core-workbench/runs/implement-p2.6-20260927/**','graphify-out/**'], checkpoint false) before and after each check.",
+    "Run the formal checks SERIALLY through `python .agents/skills/workflow-ledger/scripts/workflow_tools.py check --input <req> --output <run dir>/check-p27-cw16-<id>-execution.json` (request format as in check-cw16-final-request.json: root, requirements=requirements-p27-cw16.json, argv, environment description with real versions, log in run dir, check_id, watch [], exclude as above, timeout <= 3600): (1) compat: B1 §6 commands (non-live + live compat 6 + SEL1-3); (2) flow-policy-shell: B2 §7 commands; (3) fault: B3 §5 host commands including X2R, and the VM driver X5 (guest reboot only; manifest must equal C16 aggregate; shut the VM down after); (4) regression: every tests/<suite> dir (policy and gates via their subdirs) + node --test tests/bridge/*.test.ts + run-contracts.sh if it exists. Strip TMUX*/HERDR_* (env -i as the batch results show). Known intermittent tests (list in result-p27-cw16-plan-01.md §6 + test_product_mux_independent_p27n drag test): if one fails, re-run it once alone and record both outcomes; never edit tests.",
+    "Write per-check observed drafts check-p27-cw16-<id>-observed.json mapping results to the 7 gate items of requirements-p27-cw16.json (format as check-cw16-final-observed.json; observed_evidence_level runtime only where a real runtime scenario ran; unknowns listed honestly; items not observed by a check are omitted, never guessed). Do not run the final gate — Root does.",
+    "0 real model requests in B4b (scripted provider). Real-model smokes are a separate later call."
+  ],
+  "allowed_write_paths": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/check-p27-cw16-*",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/cw16-formal/**",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-b4b-01.md"
+  ],
+  "prohibited_paths": [
+    "everything in the repo outside the run dir (R stage)"
+  ],
+  "rules": "No real provider requests. Never read credential stores/contents or other processes' environ; never print tokens; never edit ~/.omp, ~/.agents, ~/.claude, ~/.codex or user configs; isolate tmux/herdr (own sockets/dirs under /tmp), never touch the user's default servers, other claude-swarm sockets, ~/wb-urux-sandbox or processes you did not start; reboot only the guest VM; kill only PIDs you started; no pkill; temp only under /tmp; no commits; no graphify update.",
+  "result_format": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-b4b-01.md: per check id, argv, exit, duration, log sha256, candidate before/after, item observations, unknowns, intermittent re-runs. Korean reply <=10 lines."
+}

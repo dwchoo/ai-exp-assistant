@@ -1,0 +1,396 @@
+{
+ "scenario": "flow-F1-F4",
+ "run_id": "b4b-flow-policy",
+ "started_at": "2026-10-08T11:07:14+00:00",
+ "repo_head": "e63572356480f2431427d349d749fbd09c2ee72f",
+ "context": {
+  "host_shell": "bash"
+ },
+ "versions": {
+  "omp": "omp/18.8.0",
+  "omp_path": "/home/dwchoo/.local/bin/omp",
+  "tmux": "tmux 3.4",
+  "herdr": "herdr 0.9.3",
+  "bash": "GNU bash, version 5.2.21(1)-release (x86_64-pc-linux-gnu)",
+  "dash": "dash 0.5.12-6ubuntu5",
+  "sh": "/usr/bin/dash",
+  "python": "3.12.3",
+  "kernel": "7.0.0-30-generic",
+  "os": "Ubuntu 24.04.4 LTS"
+ },
+ "commands": [
+  {
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "start",
+    "--data-dir",
+    "/tmp/wbc16flowf1f4-hcxizrsf/d",
+    "--omp",
+    "/home/dwchoo/.local/bin/omp",
+    "--omp-arg=--model",
+    "--omp-arg=wbcw16/scripted",
+    "--no-attach"
+   ],
+   "exit": 0,
+   "seconds": 3.75,
+   "stdout_tail": "tion check ...\nbackend pid 2005103 phase ready\ndata dir /tmp/wbc16flowf1f4-hcxizrsf/d\n  host_shell: pid 2005107 alive=True owner=user\n  manager_omp: pid 2005110 alive=True owner=user\n  worker_omp: pid 2005112 alive=True owner=user\n  shell: bash /usr/bin/bash mode=manual_prompt\nomp isolation: ok (omp/18.8.0 evidence bridge_g3=18.2.10, isolation=18.6.1)\n  note: OMP 18.8.0 has not extracted its native addon into /tmp/wbc16flowf1f4-hcxizrsf/h/.omp/natives/18.8.0 yet: the first Workbench OMP extracts it there (the same files your own omp 18.8.0 extracts; OMP has no setting to move this directory).\n",
+   "stderr_tail": ""
+  },
+  {
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "shutdown",
+    "--data-dir",
+    "/tmp/wbc16flowf1f4-hcxizrsf/d",
+    "--json",
+    "--yes"
+   ],
+   "exit": 0,
+   "seconds": 3.29,
+   "stdout_tail": "rted\n{\"shutdown\": {\"left_running\": [], \"lifecycle\": null, \"omp_children\": {\"alive\": [], \"observed\": [{\"ended\": \"by_itself\", \"parent\": \"manager_omp\", \"parent_pid\": 2005110, \"pid\": 2005310, \"start_ticks\": 300270943}]}, \"panes\": [{\"exit_status\": -1, \"pane\": \"host_shell\", \"survivors\": []}, {\"exit_status\": 143, \"pane\": \"manager_omp\", \"survivors\": []}, {\"exit_status\": 143, \"pane\": \"worker_omp\", \"survivors\": []}], \"previous_survivors\": [], \"problems\": [], \"processes\": {\"host_shell\": \"dead\", \"manager_omp\": \"dead\", \"supervisor\": \"dead\", \"worker_omp\": \"dead\"}, \"user_confirmed\": true, \"verified\": true}}\n",
+   "stderr_tail": ""
+  }
+ ],
+ "steps": {
+  "start": {
+   "status": "pass",
+   "seconds": 4.1,
+   "observed": {
+    "isolation": "ok"
+   }
+  },
+  "F4_repeated_call_and_busy": {
+   "status": "pass",
+   "seconds": 0.9,
+   "observed": {
+    "dispatched": {
+     "status": "dispatched",
+     "task_id": "b2e57264-7de6-4fe0-9c4c-360e6e0ffefb",
+     "kind": "work",
+     "revision": 1,
+     "detail": "dispatched to the worker under the user's standing delegation (C-D66); it reports back with to_manager",
+     "manager_rule": "The worker does this Task; do not do it yourself (no commands, edits or checks for it). End your turn and wait for the worker's to_manager report."
+    },
+    "repeated_call": "OMP renamed the repeated call id to cw16-manager-1_dup1: worker_busy, no second Task",
+    "repeated_call_result": "worker_busy",
+    "busy": "worker_busy",
+    "busy_task": {
+     "task_id": "b2e57264-7de6-4fe0-9c4c-360e6e0ffefb",
+     "kind": "work",
+     "summary": "run the two F1 commands and report",
+     "status": "running",
+     "since": "2026-10-08T11:07:19Z",
+     "run_id": "7decde80-b1bd-433b-9c80-b708359acc97",
+     "held_reason": null
+    },
+    "ui": [
+     "focus: MANAGER OMP | host 입력 owner: user | shell mode: manual_prompt | worker: 작업 중 | 자동화: active",
+     "작업: 작업 \"run the two F1 commands and report\" [실행 중] | 사용량: 재시도 0/3 · 모델 미확인 | backend: ready | bridge manager=ok worker=ok | 마지막 확인 20:07:19 (0s 전)"
+    ],
+    "worker": {
+     "state": "busy",
+     "task_id": "b2e57264-7de6-4fe0-9c4c-360e6e0ffefb"
+    },
+    "journal_records_for_call": [
+     "request",
+     "result"
+    ]
+   }
+  },
+  "F1_free_work": {
+   "status": "pass",
+   "seconds": 0.7,
+   "observed": {
+    "terminal": [
+     {
+      "status": "exited",
+      "exit_code": 0,
+      "command": "echo F1_ONE_$((40+2))",
+      "log_path": "/tmp/wbc16flowf1f4-hcxizrsf/d/workflow/terminal/2d92382b-bcf8-403b-81a0-afaa3827a445.log"
+     },
+     {
+      "status": "not_in_task_commands",
+      "exit_code": null,
+      "command": null,
+      "log_path": null
+     },
+     {
+      "status": "exited",
+      "exit_code": 0,
+      "command": "printf 'F1_TWO\\n' > f1-two.txt",
+      "log_path": "/tmp/wbc16flowf1f4-hcxizrsf/d/workflow/terminal/c25146b2-cae3-4633-82b1-92fd9116490f.log"
+     }
+    ],
+    "report": {
+     "kind": "done",
+     "commands_run": [
+      {
+       "command": "echo F1_ONE_$((40+2))",
+       "duration_seconds": 0.092,
+       "exit_code": 0,
+       "log_path": "/tmp/wbc16flowf1f4-hcxizrsf/d/workflow/terminal/2d92382b-bcf8-403b-81a0-afaa3827a445.log",
+       "signal": null,
+       "status": "exited"
+      },
+      {
+       "command": "printf 'F1_TWO\\n' > f1-two.txt",
+       "duration_seconds": 0.091,
+       "exit_code": 0,
+       "log_path": "/tmp/wbc16flowf1f4-hcxizrsf/d/workflow/terminal/c25146b2-cae3-4633-82b1-92fd9116490f.log",
+       "signal": null,
+       "status": "exited"
+      }
+     ],
+     "message": "F1: both commands ran"
+    },
+    "task": {
+     "active": false,
+     "cancel_requested": false,
+     "closed_reason": "done",
+     "held_reason": null,
+     "kind": "work",
+     "last_result": {
+      "outcome": "done",
+      "run_id": "7decde80-b1bd-433b-9c80-b708359acc97"
+     },
+     "retry_limit": 3,
+     "revision": 1,
+     "run_id": null,
+     "runs_started": 1,
+     "since": "2026-10-08T11:07:20Z",
+     "status": "closed",
+     "summary": "run the two F1 commands and report",
+     "task_id": "b2e57264-7de6-4fe0-9c4c-360e6e0ffefb"
+    },
+    "ui_host": [
+     "x[worker] $ echo F1_ONE_$((40+2))                                                                                                                               ",
+     "xF1_ONE_42                                                                                                                                                      ",
+     "x[worker] $ printf 'F1_TWO\\n' > f1-two.txt                                                                                                                      "
+    ]
+   }
+  },
+  "shutdown": {
+   "status": "pass",
+   "seconds": 3.6,
+   "observed": {
+    "verified": true,
+    "residue": {}
+   }
+  }
+ },
+ "unknowns": [],
+ "result": "pass",
+ "identities": {
+  "backend": {
+   "pid": 2005103,
+   "start_ticks": 300270507
+  },
+  "backend_session": 2005102,
+  "panes": {
+   "host_shell": [
+    2005107,
+    300270525,
+    "ae9118b1-75fc-4cf2-9ffb-4d56f5c28c77",
+    1
+   ],
+   "manager_omp": [
+    2005110,
+    300270526,
+    "5d29c0d6-5f3b-46d4-ad14-be1a3dc6ce5c",
+    1
+   ],
+   "worker_omp": [
+    2005112,
+    300270527,
+    "b2ebf2ee-2a80-4c69-b679-b35ef3ed4fa6",
+    1
+   ]
+  },
+  "bridge": {
+   "manager": {
+    "session_id": "01a11b32-3161-7342-8ae7-836ce6e8d708",
+    "generation": 1,
+    "pid": 2005110
+   },
+   "worker": {
+    "session_id": "01a11b32-3144-7111-b91d-8dd8b92518c8",
+    "generation": 1,
+    "pid": 2005112
+   }
+  },
+  "shell_parent": {
+   "pid": 2005107,
+   "start_ticks": 300270525
+  },
+  "shell_generation": 1,
+  "supervisor": null
+ },
+ "omp_isolation": "ok",
+ "cleanup": {
+  "residue_before_fallback": {},
+  "root_removed": true,
+  "residue_after_fallback": {}
+ },
+ "provider": {
+  "requests": {
+   "manager": 5,
+   "worker": 5
+  },
+  "aborted": [],
+  "errors": [],
+  "rules": [
+   {
+    "name": "record",
+    "hits": 0
+   },
+   {
+    "name": "f1-manager",
+    "hits": 4
+   },
+   {
+    "name": "f1-worker:start",
+    "hits": 1
+   },
+   {
+    "name": "f1-worker:next",
+    "hits": 4
+   }
+  ],
+  "real_model_requests": 0,
+  "log_tail": [
+   {
+    "i": 1,
+    "at": 1791457639.2477272,
+    "role": "manager",
+    "last_role": "user",
+    "text_tail": "f1-go",
+    "injected_kind": null,
+    "tool_results": []
+   },
+   {
+    "i": 2,
+    "at": 1791457639.2845132,
+    "role": "manager",
+    "last_role": "tool",
+    "text_tail": "o not do it yourself (no commands, edits or checks for it). End your turn and wait for the worker's to_manager report.\"}",
+    "injected_kind": null,
+    "tool_results": [
+     "cw16-manager-1"
+    ]
+   },
+   {
+    "i": 3,
+    "at": 1791457639.3183055,
+    "role": "manager",
+    "last_role": "tool",
+    "text_tail": "r its to_manager report (done/blocked), send a follow-up with this task_id, or cancel it with {task_id, cancel: true}.\"}",
+    "injected_kind": null,
+    "tool_results": [
+     "cw16-manager-1_dup1"
+    ]
+   },
+   {
+    "i": 4,
+    "at": 1791457639.3300588,
+    "role": "manager",
+    "last_role": "tool",
+    "text_tail": "r its to_manager report (done/blocked), send a follow-up with this task_id, or cancel it with {task_id, cancel: true}.\"}",
+    "injected_kind": null,
+    "tool_results": [
+     "cw16-manager-2"
+    ]
+   },
+   {
+    "i": 5,
+    "at": 1791457639.4298635,
+    "role": "worker",
+    "last_role": "user",
+    "text_tail": null,
+    "injected_kind": "task",
+    "tool_results": []
+   },
+   {
+    "i": 6,
+    "at": 1791457639.8566873,
+    "role": "worker",
+    "last_role": "tool",
+    "text_tail": "82b-bcf8-403b-81a0-afaa3827a445.log\",\"duration_seconds\":0.092,\"output_tail\":\"F1_ONE_42\\n\",\"output_tail_truncated\":false}",
+    "injected_kind": null,
+    "tool_results": [
+     "cw16-worker-3"
+    ]
+   },
+   {
+    "i": 7,
+    "at": 1791457639.8679225,
+    "role": "worker",
+    "last_role": "tool",
+    "text_tail": "2))\\n2. printf 'F1_TWO\\\\n' > f1-two.txt\",\"allowed_commands\":[\"echo F1_ONE_$((40+2))\",\"printf 'F1_TWO\\\\n' > f1-two.txt\"]}",
+    "injected_kind": null,
+    "tool_results": [
+     "cw16-worker-4"
+    ]
+   },
+   {
+    "i": 8,
+    "at": 1791457640.0322344,
+    "role": "worker",
+    "last_role": "tool",
+    "text_tail": "minal/c25146b2-cae3-4633-82b1-92fd9116490f.log\",\"duration_seconds\":0.091,\"output_tail\":\"\",\"output_tail_truncated\":false}",
+    "injected_kind": null,
+    "tool_results": [
+     "cw16-worker-5"
+    ]
+   },
+   {
+    "i": 9,
+    "at": 1791457640.0412807,
+    "role": "worker",
+    "last_role": "tool",
+    "text_tail": " manager decides again after the resume. Do not send it again unless asked; a reply, if any, arrives as a new message.\"}",
+    "injected_kind": null,
+    "tool_results": [
+     "cw16-worker-6"
+    ]
+   },
+   {
+    "i": 10,
+    "at": 1791457640.077059,
+    "role": "manager",
+    "last_role": "user",
+    "text_tail": null,
+    "injected_kind": "report",
+    "tool_results": []
+   }
+  ]
+ },
+ "injected": {
+  "manager": [
+   {
+    "kind": "report",
+    "stage": null,
+    "payload_kind": "done",
+    "task_id": "b2e57264-7de6-4fe0-9c4c-360e6e0ffefb",
+    "at": 1791457640.0770695
+   }
+  ],
+  "worker": [
+   {
+    "kind": "task",
+    "stage": null,
+    "payload_kind": "work",
+    "task_id": "b2e57264-7de6-4fe0-9c4c-360e6e0ffefb",
+    "at": 1791457639.429872
+   }
+  ],
+  "unknown": []
+ },
+ "notes": [
+  "F4: exact-toolCallId idempotence (a frame re-sent with the same id) is not reachable through OMP 18.8.0, which renames a repeated model call id; it is covered by the fixture suite (tests/backend/test_handoff_service.py, test_flow_terminal.py) in policy-CLK."
+ ],
+ "finished_at": "2026-10-08T11:07:24+00:00"
+}

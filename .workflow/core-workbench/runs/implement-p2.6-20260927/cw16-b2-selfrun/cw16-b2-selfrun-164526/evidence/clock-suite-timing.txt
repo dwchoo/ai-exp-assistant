@@ -1,0 +1,15 @@
+tests/backend/test_flow_terminal_notices.py 0s :: Ran 1 test in 0.000s  FAILED (errors=1) 
+tests/backend/test_terminal_independent_p27cd68.py 21s :: Ran 23 tests in 20.935s  OK 
+tests/backend/test_terminal_fix03_independent_p27cd68.py 6s :: Ran 10 tests in 5.676s  OK 
+tests/backend/test_cd70_followups.py 0s :: Ran 1 test in 0.000s  FAILED (errors=1) 
+tests/backend/test_watchdog_independent_p27cd70.py 2s :: Ran 30 tests in 1.440s  OK 
+tests/backend/test_cd70_watchdog.py 0s :: Ran 22 tests in 0.034s  OK 
+tests/backend/test_cd70_fix03.py 0s :: Ran 1 test in 0.000s  FAILED (errors=1) 
+tests/backend/test_cd70_ui_wait.py 0s :: Ran 1 test in 0.000s  FAILED (errors=1) 
+tests/recovery_boot/test_cw19_fix01.py 0s :: Ran 1 test in 0.000s  FAILED (errors=1) 
+tests/recovery_boot/test_survivors_holds_independent_p27cw19.py 1s :: Ran 27 tests in 1.365s  OK 
+tests/backend/test_automation_loop.py 4s :: Ran 7 tests in 3.049s  OK 
+tests/recovery_boot/test_cw19_fix02.py 0s :: Ran 1 test in 0.000s  FAILED (errors=1) 
+tests/observation/test_worker_review.py 0s :: Ran 25 tests in 0.039s  OK 
+tests/observation/test_worker_review_independent.py 0s :: Ran 13 tests in 0.038s  OK 
+tests/policy/pause_automation/test_pause_policy.py 22s :: Ran 122 tests in 21.899s  OK 

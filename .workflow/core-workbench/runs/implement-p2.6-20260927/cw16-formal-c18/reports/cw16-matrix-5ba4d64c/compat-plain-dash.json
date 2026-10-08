@@ -1,0 +1,354 @@
+{
+ "scenario": "compat-plain-dash",
+ "run_id": "cw16-matrix-5ba4d64c",
+ "started_at": "2026-10-08T16:16:03+00:00",
+ "repo_head": "c47456a4ad2caa0b7da40fa84179da00f249f9d6",
+ "context": {
+  "outer": "plain",
+  "host_shell": "dash"
+ },
+ "versions": {
+  "omp": "omp/18.8.0",
+  "omp_path": "/home/dwchoo/.local/bin/omp",
+  "tmux": "tmux 3.4",
+  "herdr": "herdr 0.9.3",
+  "bash": "GNU bash, version 5.2.21(1)-release (x86_64-pc-linux-gnu)",
+  "dash": "dash 0.5.12-6ubuntu5",
+  "sh": "/usr/bin/dash",
+  "python": "3.12.3",
+  "kernel": "7.0.0-30-generic",
+  "os": "Ubuntu 24.04.4 LTS"
+ },
+ "commands": [
+  {
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "start",
+    "--data-dir",
+    "/tmp/wbc16plda-333i0dwa/d",
+    "--omp",
+    "/home/dwchoo/.local/bin/omp",
+    "--omp-arg=--model",
+    "--omp-arg=wbcw16/scripted",
+    "--no-attach"
+   ],
+   "exit": 0,
+   "seconds": 3.64,
+   "stdout_tail": " OMP isolation check ...\nbackend pid 2597356 phase ready\ndata dir /tmp/wbc16plda-333i0dwa/d\n  host_shell: pid 2597364 alive=True owner=user\n  manager_omp: pid 2597368 alive=True owner=user\n  worker_omp: pid 2597369 alive=True owner=user\n  shell: sh /usr/bin/dash mode=manual_prompt\nomp isolation: ok (omp/18.8.0 evidence bridge_g3=18.2.10, isolation=18.6.1)\n  note: OMP 18.8.0 has not extracted its native addon into /tmp/wbc16plda-333i0dwa/h/.omp/natives/18.8.0 yet: the first Workbench OMP extracts it there (the same files your own omp 18.8.0 extracts; OMP has no setting to move this directory).\n",
+   "stderr_tail": ""
+  },
+  {
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "shutdown",
+    "--data-dir",
+    "/tmp/wbc16plda-333i0dwa/d",
+    "--json",
+    "--yes"
+   ],
+   "exit": 0,
+   "seconds": 3.2,
+   "stdout_tail": "no active work reported\n{\"shutdown\": {\"left_running\": [], \"lifecycle\": null, \"omp_children\": {\"alive\": [], \"observed\": [{\"ended\": \"by_itself\", \"parent\": \"manager_omp\", \"parent_pid\": 2597368, \"pid\": 2597680, \"start_ticks\": 302124860}]}, \"panes\": [{\"exit_status\": -9, \"pane\": \"host_shell\", \"survivors\": []}, {\"exit_status\": 143, \"pane\": \"manager_omp\", \"survivors\": []}, {\"exit_status\": 143, \"pane\": \"worker_omp\", \"survivors\": []}], \"previous_survivors\": [], \"problems\": [], \"processes\": {\"host_shell\": \"dead\", \"manager_omp\": \"dead\", \"worker_omp\": \"dead\"}, \"user_confirmed\": true, \"verified\": true}}\n",
+   "stderr_tail": ""
+  }
+ ],
+ "steps": {
+  "C1": {
+   "status": "pass",
+   "seconds": 6.1,
+   "observed": {
+    "start_line": "starting backend: shell sh (/usr/bin/dash), omp/18.8.0",
+    "shell": {
+     "kind": "sh",
+     "exe": "/usr/bin/dash",
+     "pid": 2597364
+    },
+    "isolation": "ok",
+    "focus_sequence": [
+     {
+      "pane": "worker_omp",
+      "shown": true,
+      "owner": "user",
+      "epoch": 2
+     },
+     {
+      "pane": "host_shell",
+      "shown": true,
+      "owner": "user",
+      "epoch": 2
+     },
+     {
+      "pane": "manager_omp",
+      "shown": true,
+      "owner": "user",
+      "epoch": 2
+     },
+     {
+      "pane": "host_shell",
+      "shown": true,
+      "owner": "user",
+      "epoch": 2
+     }
+    ],
+    "owner": {
+     "input_owner": "user",
+     "owner_epoch": 2,
+     "parent_mode": "manual_prompt",
+     "takeover_requested": false,
+     "takeover_confirmed": false
+    },
+    "omp_version": "omp/18.8.0",
+    "header": [
+     "focus: HOST SHELL | host 입력 owner: user | shell mode: manual_prompt | worker: 대기 | 자동화: idle"
+    ]
+   }
+  },
+  "C2": {
+   "status": "fail",
+   "seconds": 16.8,
+   "assertion": "('manager_omp', 'esc_closed_menu', {'typed_visible': True, 'alt_enter_newline': True, 'ctrl_c_cleared': True, 'slash_menu': True, 'esc_closed_menu': False, 'hangul_composer': True, 'alive': True})"
+  },
+  "C3": {
+   "status": "pass",
+   "seconds": 5.1,
+   "observed": {
+    "initial": {
+     "outer": [
+      40,
+      170
+     ],
+     "product": [
+      40,
+      170
+     ],
+     "want": {
+      "manager_omp": [
+       17,
+       83
+      ],
+      "worker_omp": [
+       17,
+       83
+      ],
+      "host_shell": [
+       16,
+       168
+      ]
+     },
+     "omp": {
+      "manager_omp": [
+       17,
+       83
+      ],
+      "worker_omp": [
+       17,
+       83
+      ]
+     },
+     "shell": "16 168"
+    },
+    "small": {
+     "outer": [
+      34,
+      150
+     ],
+     "product": [
+      34,
+      150
+     ],
+     "want": {
+      "manager_omp": [
+       14,
+       73
+      ],
+      "worker_omp": [
+       14,
+       73
+      ],
+      "host_shell": [
+       13,
+       148
+      ]
+     },
+     "omp": {
+      "manager_omp": [
+       14,
+       73
+      ],
+      "worker_omp": [
+       14,
+       73
+      ]
+     },
+     "shell": "13 148"
+    },
+    "back": {
+     "outer": [
+      40,
+      170
+     ],
+     "product": [
+      40,
+      170
+     ],
+     "want": {
+      "manager_omp": [
+       17,
+       83
+      ],
+      "worker_omp": [
+       17,
+       83
+      ],
+      "host_shell": [
+       16,
+       168
+      ]
+     },
+     "omp": {
+      "manager_omp": [
+       17,
+       83
+      ],
+      "worker_omp": [
+       17,
+       83
+      ]
+     },
+     "shell": "16 168"
+    }
+   }
+  },
+  "C4": {
+   "status": "pass",
+   "seconds": 8.3,
+   "observed": {
+    "reply_visible": true,
+    "default_outer_config": {
+     "copy_picker": true,
+     "product_notice": true,
+     "notice_lines": [
+      "[MANAGER OMP] 복사됨: 48자"
+     ],
+     "outer_received_osc52": true,
+     "osc52_writes_seen": 1
+    },
+    "outer_received_osc52": true,
+    "manager_requests": 1,
+    "host_osc52_forwarded": false,
+    "passthrough_text_drawn": false
+   }
+  },
+  "C5": {
+   "status": "pass",
+   "seconds": 69.9,
+   "observed": {
+    "detach_seconds": 65.7,
+    "ui_exit": 0,
+    "ui_processes_before": 1,
+    "ui_processes_while_detached": 0,
+    "loop_lines_at_detach": 3,
+    "loop_lines_after": 68,
+    "identities_same": true,
+    "owner_before": {
+     "input_owner": "user",
+     "owner_epoch": 2,
+     "parent_mode": "manual_foreground",
+     "takeover_requested": false,
+     "takeover_confirmed": false
+    },
+    "owner_after": {
+     "input_owner": "user",
+     "owner_epoch": 2,
+     "parent_mode": "manual_foreground",
+     "takeover_requested": false,
+     "takeover_confirmed": false
+    },
+    "focus_after": "host_shell",
+    "task_same": true,
+    "provider_requests_before": {
+     "manager": 1
+    },
+    "provider_requests_after": {
+     "manager": 1
+    },
+    "reattach_shown": true,
+    "loop_output_visible_after_reattach": true,
+    "loop_numbers_seen_max": 68,
+    "prompt_back_after_ctrl_c": true,
+    "count_file": "once\n"
+   }
+  },
+  "C6": {
+   "status": "n/a",
+   "seconds": 0.0,
+   "reason": "plain PTY: the product UI is the outermost client; no outer persistence layer (UI detach/reattach is C5)"
+  },
+  "C7": {
+   "status": "pass",
+   "seconds": 3.5,
+   "observed": {
+    "shutdown_exit": 0,
+    "verified": true,
+    "ui_clients_exited": true,
+    "outer_teardown": {},
+    "residue": {},
+    "shutdown_keys": [
+     "left_running",
+     "lifecycle",
+     "omp_children",
+     "panes",
+     "previous_survivors",
+     "problems",
+     "processes",
+     "user_confirmed",
+     "verified"
+    ]
+   }
+  }
+ },
+ "unknowns": [],
+ "result": "fail",
+ "root": "/tmp/wbc16plda-333i0dwa",
+ "outer_facts": {},
+ "provider": {
+  "requests": {
+   "manager": 1
+  },
+  "injected": {
+   "manager": [],
+   "worker": [],
+   "unknown": []
+  },
+  "aborted": [],
+  "errors": [],
+  "rules": [
+   {
+    "name": "text:c4copy",
+    "hits": 1
+   }
+  ],
+  "log_tail": [
+   {
+    "i": 1,
+    "at": 1791476192.4070332,
+    "role": "manager",
+    "last_role": "user",
+    "text_tail": "c4copy",
+    "injected_kind": null,
+    "tool_results": []
+   }
+  ]
+ },
+ "cleanup": {
+  "residue_before_fallback": {},
+  "root_removed": true,
+  "residue_after_fallback": {}
+ },
+ "report_path": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-formal-c18/reports/cw16-matrix-5ba4d64c/compat-plain-dash.json",
+ "finished_at": "2026-10-08T16:17:53+00:00"
+}

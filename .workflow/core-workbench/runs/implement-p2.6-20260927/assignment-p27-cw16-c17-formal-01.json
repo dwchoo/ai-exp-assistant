@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw16-c17-formal-01",
+  "ticket_id": "CW-16 formal checks on frozen C17 (R stage)",
+  "role": "test_designer",
+  "unit": "V-CW-16",
+  "candidate": "db39f4aabd7034dd280110ac93a6b5d0577440dd30981cd17f9883404259767d",
+  "candidate_commit": "81bebe6",
+  "candidate_snapshot": ".workflow/core-workbench/runs/implement-p2.6-20260927/p27-snapshot-cw16-C17.json",
+  "approved_bundle_digest": "6a94257554222410497069c685c3cd73d39dcc9b32ff42b08007eddc526a5b94",
+  "requirements": ".workflow/core-workbench/runs/implement-p2.6-20260927/requirements-p27-cw16.json",
+  "routing": {
+    "planned_role": "test_designer",
+    "selected_role": "test_designer (general-purpose Sonnet high; repeat of the established C16 formal procedure; user 2026-10-08 prefers Sonnet)",
+    "reason_codes": [
+      "final_gate_rerun"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-b4b-01.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-gap-01.md"
+    ]
+  },
+  "user_authorization": "User 2026-10-08 '전부 진행해서 테스트까지 해서 완료하고 보고해'",
+  "required_behavior": [
+    "Repeat exactly the C16 formal procedure of result-p27-cw16-b4b-01.md on C17 (same request format, same argv per check, check ids suffixed -c17: compat-c17, flow-policy-shell-c17, fault-c17 (incl. X5 VM, manifest must equal the C17 aggregate), regression-a-c17, regression-b-c17) PLUS a new check gap-c17 running tests/integration/live_cw16_gap.py with the command in result-p27-cw16-gap-01.md §6. R stage: zero repo writes; snapshot before/after each check must equal C17; do not touch docs/** (drafts are part of C17).",
+    "Write observed drafts check-p27-cw16-<id>-c17-observed.json for compat, flow-policy-shell, fault mapping the 7 items as before (runtime only where runtime ran, unknowns honest). gap-c17 and regressions get execution records only.",
+    "Signals: never launch suites with SIGINT ignored (no nohup/&; check `grep SigIgn /proc/self/status` in the runner shell) — the previous re-run lost a run to that.",
+    "Known intermittent tests (plan §6 list + connection_cap BlockingIOError, concurrent_kill_and_restart, p27s KillScope, test_product_pty RestartExitedOmp, mux drag): if a regression check fails only on these, re-run that test alone once and record; if a regression check exits 1, re-run the whole check once formally as -r2 and keep both."
+  ],
+  "allowed_write_paths": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/check-p27-cw16-*-c17*",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/cw16-formal-c17/**",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-c17-formal-01.md"
+  ],
+  "prohibited_paths": [
+    "everything in the repo outside the run dir (R stage)"
+  ],
+  "rules": "No real provider requests. Never read credential stores/contents or other processes' environ; never print tokens; never edit ~/.omp, ~/.agents, ~/.claude, ~/.codex or user configs; isolate tmux/herdr (own sockets/dirs under /tmp), never touch the user's default servers, other claude-swarm sockets, ~/wb-urux-sandbox or processes you did not start; reboot only the guest VM; kill only PIDs you started; no pkill; temp only under /tmp; no commits; no graphify update.",
+  "result_format": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-c17-formal-01.md: per check id, argv, exit, duration, log sha256, candidate before/after, item observations, unknowns, re-runs. Korean reply <=10 lines."
+}

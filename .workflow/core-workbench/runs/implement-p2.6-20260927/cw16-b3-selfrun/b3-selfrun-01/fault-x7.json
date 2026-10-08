@@ -1,0 +1,417 @@
+{
+ "scenario": "fault-x7",
+ "run_id": "b3-selfrun-01",
+ "started_at": "2026-10-08T07:42:09+00:00",
+ "repo_head": "6a2ddb2b5441202c8e94d27f775c7159fb9672ae",
+ "context": {
+  "scenario_id": "X7"
+ },
+ "versions": {
+  "omp": "omp/18.8.0",
+  "omp_path": "/home/dwchoo/.local/bin/omp",
+  "tmux": "tmux 3.4",
+  "herdr": "herdr 0.9.3",
+  "bash": "GNU bash, version 5.2.21(1)-release (x86_64-pc-linux-gnu)",
+  "dash": "dash 0.5.12-6ubuntu5",
+  "sh": "/usr/bin/dash",
+  "python": "3.12.3",
+  "kernel": "7.0.0-30-generic",
+  "os": "Ubuntu 24.04.4 LTS"
+ },
+ "commands": [
+  {
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "start",
+    "--data-dir",
+    "/tmp/wbc16x7t-24wydlso/d",
+    "--omp",
+    "/home/dwchoo/.local/bin/omp",
+    "--omp-arg=--model",
+    "--omp-arg=wbcw16/scripted",
+    "--no-attach"
+   ],
+   "exit": 0,
+   "seconds": 5.29,
+   "stdout_tail": " OMP isolation check ...\nbackend pid 1567914 phase ready\ndata dir /tmp/wbc16x7t-24wydlso/d\n  host_shell: pid 1567950 alive=True owner=user\n  manager_omp: pid 1567953 alive=True owner=user\n  worker_omp: pid 1567954 alive=True owner=user\n  shell: bash /usr/bin/bash mode=manual_prompt\nomp isolation: ok (omp/18.8.0 evidence bridge_g3=18.2.10, isolation=18.6.1)\n  note: OMP 18.8.0 has not extracted its native addon into /tmp/wbc16x7t-24wydlso/h/.omp/natives/18.8.0 yet: the first Workbench OMP extracts it there (the same files your own omp 18.8.0 extracts; OMP has no setting to move this directory).\n",
+   "stderr_tail": ""
+  },
+  {
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "start",
+    "--data-dir",
+    "/tmp/wbc16x7t-24wydlso/d",
+    "--omp",
+    "/home/dwchoo/.local/bin/omp",
+    "--omp-arg=--model",
+    "--omp-arg=wbcw16/scripted",
+    "--no-attach"
+   ],
+   "exit": 0,
+   "seconds": 3.87,
+   "stdout_tail": "starting backend: shell bash (/usr/bin/bash), omp/18.8.0\nwaiting for the OMP isolation check ...\nbackend pid 1572558 phase ready\ndata dir /tmp/wbc16x7t-24wydlso/d\n  host_shell: pid 1572576 alive=True owner=user\n  manager_omp: pid 1572579 alive=True owner=user\n  worker_omp: pid 1572580 alive=True owner=user\n  shell: bash /usr/bin/bash mode=manual_prompt\nomp isolation: ok (omp/18.8.0 evidence bridge_g3=18.2.10, isolation=18.6.1)\n",
+   "stderr_tail": ""
+  },
+  {
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "shutdown",
+    "--data-dir",
+    "/tmp/wbc16x7t-24wydlso/d",
+    "--json",
+    "--yes"
+   ],
+   "exit": 1,
+   "seconds": 0.38,
+   "stdout_tail": "ost_shell\", \"survivors\": []}, {\"exit_status\": 143, \"pane\": \"manager_omp\", \"survivors\": []}, {\"exit_status\": 143, \"pane\": \"worker_omp\", \"survivors\": []}], \"previous_survivors\": [{\"comm\": \"python\", \"name\": \"session_member\", \"pid\": 1568634, \"survivor_id\": \"s1\"}, {\"comm\": \"bash\", \"name\": \"session_member\", \"pid\": 1568645, \"survivor_id\": \"s2\"}, {\"comm\": \"sleep\", \"name\": \"session_member\", \"pid\": 1568646, \"survivor_id\": \"s3\"}], \"problems\": [\"previous_backend_survivors_alive\"], \"processes\": {\"host_shell\": \"dead\", \"manager_omp\": \"dead\", \"worker_omp\": \"dead\"}, \"user_confirmed\": true, \"verified\": false}}\n",
+   "stderr_tail": ""
+  }
+ ],
+ "steps": {
+  "X7.command_delivered": {
+   "status": "pass",
+   "seconds": 7.0,
+   "observed": {
+    "shell": {
+     "request_id": "f229b9a4-b20c-4536-a894-035823e7aa05",
+     "phase": "experiment_started",
+     "input_owner": "manager",
+     "owner_epoch": 3
+    },
+    "operated_by": "worker",
+    "task": {
+     "task_id": "0ba47737-61c7-4d3f-b63c-8026d786d592",
+     "kind": "work",
+     "status": "running"
+    }
+   }
+  },
+  "X7.takeover_holds_new_sends": {
+   "status": "pass",
+   "seconds": 123.9,
+   "observed": {
+    "requested": {
+     "takeover_requested": true,
+     "input_owner": "user",
+     "owner_epoch": 4,
+     "held_reasons": [
+      "takeover_requested",
+      "user_owner",
+      "outstanding_request"
+     ],
+     "phase": "experiment_started",
+     "request_id": "f229b9a4-b20c-4536-a894-035823e7aa05"
+    },
+    "first_terminal_result": {
+     "status": "running",
+     "reason": null,
+     "exit_code": null,
+     "command_id": "f229b9a4-b20c-4536-a894-035823e7aa05"
+    },
+    "second_send_result": {
+     "status": "terminal_command_running",
+     "reason": "terminal_command_running",
+     "detail": "One command at a time: do not start another until Workbench notifies you that it ended.",
+     "command_id": "f229b9a4-b20c-4536-a894-035823e7aa05",
+     "command": "echo X7ONCE >> /tmp/wbc16x7t-24wydlso/t/x7-count.txt; sleep 400; echo X7END",
+     "log_path": "/tmp/wbc16x7t-24wydlso/d/workflow/terminal/f229b9a4-b20c-4536-a894-035823e7aa05.log"
+    },
+    "second_ran": false,
+    "confirm": {
+     "takeover_confirmed": true,
+     "parent_mode": "control_wait",
+     "phase": "experiment_started",
+     "input_owner": "user"
+    },
+    "confirm_ui": [
+     "인수 확인됨: host 입력 owner 변경"
+    ],
+    "count_lines": 1
+   }
+  },
+  "X7.backend_restart": {
+   "status": "pass",
+   "seconds": 6.1,
+   "observed": {
+    "kill": {
+     "pid": 1567914,
+     "start_ticks": 299039998,
+     "signalled": true,
+     "gone": true
+    },
+    "classification": "same_boot_crash",
+    "survivors": [
+     {
+      "survivor_id": "s1",
+      "name": "session_member",
+      "comm": "python",
+      "stoppable": false,
+      "state": "alive"
+     },
+     {
+      "survivor_id": "s2",
+      "name": "session_member",
+      "comm": "bash",
+      "stoppable": false,
+      "state": "alive"
+     },
+     {
+      "survivor_id": "s3",
+      "name": "session_member",
+      "comm": "sleep",
+      "stoppable": false,
+      "state": "alive"
+     }
+    ],
+    "outbox_lost": [],
+    "task": {
+     "task_id": "0ba47737-61c7-4d3f-b63c-8026d786d592",
+     "status": "running",
+     "held_reason": "backend_restarted"
+    }
+   }
+  },
+  "X7.old_command_unknown_no_replay": {
+   "status": "pass",
+   "seconds": 16.8,
+   "observed": {
+    "commands_run": [
+     {
+      "status": "unknown",
+      "exit_code": null,
+      "command_id": null
+     }
+    ],
+    "notes": [
+     "Runs from before a backend restart were rebuilt from the terminal journal; a command that was still running at the restart shows status unknown."
+    ],
+    "journal_terminal_started": 1,
+    "count_lines_after_restart": 1,
+    "second_ran": false
+   }
+  },
+  "X7.shutdown": {
+   "status": "pass",
+   "seconds": 0.4,
+   "observed": {
+    "exit": 1,
+    "verified": false,
+    "problems": [
+     "previous_backend_survivors_alive"
+    ]
+   }
+  }
+ },
+ "unknowns": [],
+ "result": "pass",
+ "roots": [
+  "/tmp/wbc16x7t-24wydlso"
+ ],
+ "cleanup": {
+  "residue_before_fallback": {
+   "session_members": {
+    "1568634": 299040656,
+    "1568645": 299040661,
+    "1568646": 299040662
+   },
+   "root_processes": {
+    "1568634": 299040656,
+    "1568645": 299040661,
+    "1568646": 299040662
+   }
+  },
+  "root_removed": true,
+  "residue_after_fallback": {}
+ },
+ "cleanups": [
+  {
+   "residue_before_fallback": {
+    "session_members": {
+     "1568634": 299040656,
+     "1568645": 299040661,
+     "1568646": 299040662
+    },
+    "root_processes": {
+     "1568634": 299040656,
+     "1568645": 299040661,
+     "1568646": 299040662
+    }
+   },
+   "root_removed": true,
+   "residue_after_fallback": {}
+  }
+ ],
+ "provider": {
+  "requests": {
+   "manager": 5,
+   "worker": 4
+  },
+  "injected": {
+   "manager": [],
+   "worker": [
+    {
+     "at": 1791445336.1974897,
+     "kind": "task",
+     "message_id": "8a844cbe-b330-48b6-b816-3b1efaae5221",
+     "handoff": "to_worker",
+     "payload_kind": "work",
+     "stage": null,
+     "contract": false
+    }
+   ],
+   "unknown": []
+  },
+  "aborted": [],
+  "errors": [],
+  "rules": [
+   {
+    "name": "tap",
+    "hits": 0
+   },
+   {
+    "name": "worker-staged",
+    "hits": 0
+   },
+   {
+    "name": "worker-review",
+    "hits": 0
+   },
+   {
+    "name": "text:x7work",
+    "hits": 1
+   },
+   {
+    "name": "x7-first",
+    "hits": 1
+   },
+   {
+    "name": "text:x7second",
+    "hits": 1
+   },
+   {
+    "name": "text:x7status",
+    "hits": 1
+   }
+  ],
+  "log_tail": [
+   {
+    "i": 1,
+    "at": 1791445336.0308418,
+    "role": "manager",
+    "last_role": "user",
+    "text_tail": "x7work",
+    "injected_kind": null,
+    "tool_results": []
+   },
+   {
+    "i": 2,
+    "at": 1791445336.064953,
+    "role": "manager",
+    "last_role": "tool",
+    "text_tail": "o not do it yourself (no commands, edits or checks for it). End your turn and wait for the worker's to_manager report.\"}",
+    "injected_kind": null,
+    "tool_results": [
+     "cw16-manager-1"
+    ]
+   },
+   {
+    "i": 3,
+    "at": 1791445336.197493,
+    "role": "worker",
+    "last_role": "user",
+    "text_tail": null,
+    "injected_kind": "task",
+    "tool_results": []
+   },
+   {
+    "i": 4,
+    "at": 1791445456.2448242,
+    "role": "worker",
+    "last_role": "tool",
+    "text_tail": "you a check every 60 s while it runs and a completion notice when it exits. The user can stop it in the host terminal.\"}",
+    "injected_kind": null,
+    "tool_results": [
+     "cw16-worker-2"
+    ]
+   },
+   {
+    "i": 5,
+    "at": 1791445456.9077618,
+    "role": "worker",
+    "last_role": "user",
+    "text_tail": "x7second",
+    "injected_kind": null,
+    "tool_results": []
+   },
+   {
+    "i": 6,
+    "at": 1791445456.9177525,
+    "role": "worker",
+    "last_role": "tool",
+    "text_tail": "sleep 400; echo X7END\",\"log_path\":\"/tmp/wbc16x7t-24wydlso/d/workflow/terminal/f229b9a4-b20c-4536-a894-035823e7aa05.log\"}",
+    "injected_kind": null,
+    "tool_results": [
+     "cw16-worker-3"
+    ]
+   },
+   {
+    "i": 7,
+    "at": 1791445466.2341702,
+    "role": "manager",
+    "last_role": "user",
+    "text_tail": "run an experiment, or cancel). Tell the user briefly what happened.\",\"notice_id\":\"eded42e5-7706-4a59-b1c0-6ab7450a40d5\"}",
+    "injected_kind": null,
+    "tool_results": []
+   },
+   {
+    "i": 8,
+    "at": 1791445467.7377305,
+    "role": "manager",
+    "last_role": "user",
+    "text_tail": "x7status",
+    "injected_kind": null,
+    "tool_results": []
+   },
+   {
+    "i": 9,
+    "at": 1791445467.7513635,
+    "role": "manager",
+    "last_role": "tool",
+    "text_tail": "k_id\":\"0ba47737-61c7-4d3f-b63c-8026d786d592\",\"checks_sent\":0,\"max_checks\":2,\"stalled_notified\":false,\"idle_since\":null}}",
+    "injected_kind": null,
+    "tool_results": [
+     "cw16-manager-4"
+    ]
+   }
+  ]
+ },
+ "notices": {
+  "manager": [
+   {
+    "at": 1791445466.2341952,
+    "type": "backend_restarted",
+    "notice_id": "eded42e5-7706-4a59-b1c0-6ab7450a40d5",
+    "task_id": "0ba47737-61c7-4d3f-b63c-8026d786d592",
+    "classification": "same_boot_crash",
+    "task_status": "running",
+    "survivors": [
+     "s1",
+     "s2",
+     "s3"
+    ]
+   }
+  ],
+  "worker": [],
+  "unknown": []
+ },
+ "reviews": [],
+ "model_requests_real": 0,
+ "finished_at": "2026-10-08T07:45:08+00:00"
+}

@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw16-rerun-01",
+  "ticket_id": "CW-16 regression + gap run after fix-03/fix-04 (pre-C17)",
+  "role": "test_designer",
+  "unit": "V-CW-16",
+  "routing": {
+    "planned_role": "test_designer",
+    "selected_role": "test_designer (wb-test-rerun, Sonnet high; regression run with defined checks; user 2026-10-08 prefers Sonnet)",
+    "reason_codes": [
+      "regression_rerun"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-fix-03.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-fix-04.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-gap-01.md"
+    ]
+  },
+  "required_behavior": [
+    "On the current working tree (uncommitted fix-03 + fix-04 + gap-01 test changes), run serially with real exit codes: every tests/<suite> dir via `PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/<suite> -t tests/<suite> -p 'test_*.py'` (policy and gates via their subdirs), `node --test tests/bridge/*.test.ts`, the new tests/backend/test_cw16_fix04.py, and the gap scenarios tests/integration/live_cw16_gap.py with the command in result-p27-cw16-gap-01.md §6 (0 model requests). Strip TMUX*/HERDR_* (env -i as shown there).",
+    "A failure: re-run it once alone; report both. Do not edit any file except: fill the SUITES_AND_GAP section of result-p27-cw16-fix-04.md and write result-p27-cw16-rerun-01.md."
+  ],
+  "allowed_write_paths": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-fix-04.md (SUITES_AND_GAP section only)",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-rerun-01.md"
+  ],
+  "rules": "No real provider requests; never read credential stores/contents or other processes' environ; isolate tmux/herdr; never touch the user's default servers, other claude-swarm sockets, ~/wb-urux-sandbox, ~/.local/share/wb-vm or processes you did not start; kill only PIDs you started; no pkill; temp only under /tmp; no repo edits; no commits; no graphify update.",
+  "result_format": "Korean reply <=8 lines: per suite exit/counts, gap per item, failures with single re-run results."
+}

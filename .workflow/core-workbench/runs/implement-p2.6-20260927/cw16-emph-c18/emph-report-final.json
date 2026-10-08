@@ -1,0 +1,856 @@
+{
+ "candidate": "a2e3daf2...",
+ "term_pyte": "xterm-256color",
+ "pyte": {
+  "alone": {
+   "observed": {
+    "PLN": {
+     "sgr": "0",
+     "outer": {
+      "text": "GQEAPLN",
+      "uniform": true,
+      "bold": false,
+      "underline": false,
+      "reverse": false,
+      "italics": false,
+      "fg_raw": "default",
+      "bg_raw": "default",
+      "fg": null,
+      "bg": null
+     },
+     "raw_bytes_before_marker": "| worker: ëê¸° | ìëí: idle\u001b[27;2H\u001b(B\u001b[0mGQEAPLN"
+    },
+    "BLD": {
+     "sgr": "1",
+     "outer": {
+      "text": "GQEABLD",
+      "uniform": true,
+      "bold": true,
+      "underline": false,
+      "reverse": false,
+      "italics": false,
+      "fg_raw": "default",
+      "bg_raw": "default",
+      "fg": null,
+      "bg": null
+     },
+     "raw_bytes_before_marker": "| ìëí: idle\u001b[27;2H\u001b(B\u001b[0mGQEAPLN \u001b(B\u001b[0;1mGQEABLD"
+    },
+    "UND": {
+     "sgr": "4",
+     "outer": {
+      "text": "GQEAUND",
+      "uniform": true,
+      "bold": false,
+      "underline": true,
+      "reverse": false,
+      "italics": false,
+      "fg_raw": "default",
+      "bg_raw": "default",
+      "fg": null,
+      "bg": null
+     },
+     "raw_bytes_before_marker": "\u001b(B\u001b[0mGQEAPLN \u001b(B\u001b[0;1mGQEABLD\u001b(B\u001b[0m \u001b(B\u001b[0;4mGQEAUND"
+    },
+    "REV": {
+     "sgr": "7",
+     "outer": {
+      "text": "GQEAREV",
+      "uniform": true,
+      "bold": false,
+      "underline": false,
+      "reverse": true,
+      "italics": false,
+      "fg_raw": "default",
+      "bg_raw": "default",
+      "fg": null,
+      "bg": null
+     },
+     "raw_bytes_before_marker": "GQEABLD\u001b(B\u001b[0m \u001b(B\u001b[0;4mGQEAUND\u001b(B\u001b[0m \u001b(B\u001b[0;7mGQEAREV"
+    }
+   },
+   "verdict": {
+    "PLN": {
+     "strict": true,
+     "flags": true,
+     "colours": true,
+     "uniform": true,
+     "swapped_equivalent": false,
+     "expected": {
+      "bold": false,
+      "underline": false,
+      "reverse": false,
+      "fg": null,
+      "bg": null
+     }
+    },
+    "BLD": {
+     "strict": true,
+     "flags": true,
+     "colours": true,
+     "uniform": true,
+     "swapped_equivalent": false,
+     "expected": {
+      "bold": true,
+      "underline": false,
+      "reverse": false,
+      "fg": null,
+      "bg": null
+     }
+    },
+    "UND": {
+     "strict": true,
+     "flags": true,
+     "colours": true,
+     "uniform": true,
+     "swapped_equivalent": false,
+     "expected": {
+      "bold": false,
+      "underline": true,
+      "reverse": false,
+      "fg": null,
+      "bg": null
+     }
+    },
+    "REV": {
+     "strict": true,
+     "flags": true,
+     "colours": true,
+     "uniform": true,
+     "swapped_equivalent": false,
+     "expected": {
+      "bold": false,
+      "underline": false,
+      "reverse": true,
+      "fg": null,
+      "bg": null
+     }
+    }
+   }
+  },
+  "coloured": {
+   "observed": {
+    "B31": {
+     "sgr": "1;31",
+     "outer": {
+      "text": "GQEBB31",
+      "uniform": true,
+      "bold": true,
+      "underline": false,
+      "reverse": false,
+      "italics": false,
+      "fg_raw": "red",
+      "bg_raw": "default",
+      "fg": "cd0000",
+      "bg": null
+     },
+     "raw_bytes_before_marker": "t | worker: ëê¸° | ìëí: idle\u001b[30;2H\u001b[31mGQEBB31"
+    },
+    "U208": {
+     "sgr": "4;38;5;208",
+     "outer": {
+      "text": "GQEBU208",
+      "uniform": true,
+      "bold": false,
+      "underline": true,
+      "reverse": false,
+      "italics": false,
+      "fg_raw": "ff8700",
+      "bg_raw": "default",
+      "fg": "ff8700",
+      "bg": null
+     },
+     "raw_bytes_before_marker": "e\u001b[30;2H\u001b[31mGQEBB31\u001b(B\u001b[0m \u001b(B\u001b[0;4m\u001b[38;5;208mGQEBU208"
+    },
+    "R44": {
+     "sgr": "7;44",
+     "outer": {
+      "text": "GQEBR44",
+      "uniform": true,
+      "bold": false,
+      "underline": false,
+      "reverse": true,
+      "italics": false,
+      "fg_raw": "default",
+      "bg_raw": "blue",
+      "fg": null,
+      "bg": "0000ee"
+     },
+     "raw_bytes_before_marker": "B\u001b[0;4m\u001b[38;5;208mGQEBU208\u001b(B\u001b[0m \u001b(B\u001b[0;7m\u001b[44mGQEBR44"
+    },
+    "BUR": {
+     "sgr": "1;4;7;32",
+     "outer": {
+      "text": "GQEBBUR",
+      "uniform": true,
+      "bold": true,
+      "underline": true,
+      "reverse": true,
+      "italics": false,
+      "fg_raw": "green",
+      "bg_raw": "default",
+      "fg": "00cd00",
+      "bg": null
+     },
+     "raw_bytes_before_marker": " \u001b(B\u001b[0;7m\u001b[44mGQEBR44\u001b(B\u001b[0m \u001b(B\u001b[0;1;4;7m\u001b[32mGQEBBUR"
+    },
+    "B2C": {
+     "sgr": "1;38;5;196;48;5;21",
+     "outer": {
+      "text": "GQEBB2C",
+      "uniform": true,
+      "bold": true,
+      "underline": false,
+      "reverse": false,
+      "italics": false,
+      "fg_raw": "ff0000",
+      "bg_raw": "0000ff",
+      "fg": "ff0000",
+      "bg": "0000ff"
+     },
+     "raw_bytes_before_marker": "32mGQEBBUR\u001b(B\u001b[0m \u001b(B\u001b[0;1m\u001b[38;5;196m\u001b[48;5;21mGQEBB2C"
+    }
+   },
+   "verdict": {
+    "B31": {
+     "strict": true,
+     "flags": true,
+     "colours": true,
+     "uniform": true,
+     "swapped_equivalent": false,
+     "expected": {
+      "bold": true,
+      "underline": false,
+      "reverse": false,
+      "fg": 1,
+      "bg": null
+     }
+    },
+    "U208": {
+     "strict": true,
+     "flags": true,
+     "colours": true,
+     "uniform": true,
+     "swapped_equivalent": false,
+     "expected": {
+      "bold": false,
+      "underline": true,
+      "reverse": false,
+      "fg": 208,
+      "bg": null
+     }
+    },
+    "R44": {
+     "strict": true,
+     "flags": true,
+     "colours": true,
+     "uniform": true,
+     "swapped_equivalent": false,
+     "expected": {
+      "bold": false,
+      "underline": false,
+      "reverse": true,
+      "fg": null,
+      "bg": 4
+     }
+    },
+    "BUR": {
+     "strict": true,
+     "flags": true,
+     "colours": true,
+     "uniform": true,
+     "swapped_equivalent": false,
+     "expected": {
+      "bold": true,
+      "underline": true,
+      "reverse": true,
+      "fg": 2,
+      "bg": null
+     }
+    },
+    "B2C": {
+     "strict": true,
+     "flags": true,
+     "colours": true,
+     "uniform": true,
+     "swapped_equivalent": false,
+     "expected": {
+      "bold": true,
+      "underline": false,
+      "reverse": false,
+      "fg": 196,
+      "bg": 21
+     }
+    }
+   }
+  },
+  "coloured2": {
+   "observed": {
+    "U9": {
+     "sgr": "4;91",
+     "outer": {
+      "text": "GQECU9",
+      "uniform": true,
+      "bold": false,
+      "underline": true,
+      "reverse": false,
+      "italics": false,
+      "fg_raw": "brightred",
+      "bg_raw": "default",
+      "fg": "ff0000",
+      "bg": null
+     },
+     "raw_bytes_before_marker": "QEC\u001b(B\u001b[m\"\"B\u001b(B\u001b[mU4\"\u001b(B\u001b[m\u001b[32;2H\u001b(B\u001b[0;4m\u001b[91mGQECU9"
+    },
+    "R240": {
+     "sgr": "7;38;5;240;48;5;250",
+     "outer": {
+      "text": "GQECR240",
+      "uniform": true,
+      "bold": false,
+      "underline": false,
+      "reverse": true,
+      "italics": false,
+      "fg_raw": "585858",
+      "bg_raw": "bcbcbc",
+      "fg": "585858",
+      "bg": "bcbcbc"
+     },
+     "raw_bytes_before_marker": "91mGQECU9\u001b(B\u001b[0m \u001b(B\u001b[0;7m\u001b[38;5;240m\u001b[48;5;250mGQECR240"
+    },
+    "BU4": {
+     "sgr": "1;4;34;47",
+     "outer": {
+      "text": "GQECBU4",
+      "uniform": true,
+      "bold": true,
+      "underline": true,
+      "reverse": false,
+      "italics": false,
+      "fg_raw": "blue",
+      "bg_raw": "white",
+      "fg": "0000ee",
+      "bg": "e5e5e5"
+     },
+     "raw_bytes_before_marker": "\u001b[48;5;250mGQECR240\u001b(B\u001b[0m \u001b(B\u001b[0;1;4m\u001b[34m\u001b[47mGQECBU4"
+    }
+   },
+   "verdict": {
+    "U9": {
+     "strict": true,
+     "flags": true,
+     "colours": true,
+     "uniform": true,
+     "swapped_equivalent": false,
+     "expected": {
+      "bold": false,
+      "underline": true,
+      "reverse": false,
+      "fg": 9,
+      "bg": null
+     }
+    },
+    "R240": {
+     "strict": true,
+     "flags": true,
+     "colours": true,
+     "uniform": true,
+     "swapped_equivalent": false,
+     "expected": {
+      "bold": false,
+      "underline": false,
+      "reverse": true,
+      "fg": 240,
+      "bg": 250
+     }
+    },
+    "BU4": {
+     "strict": true,
+     "flags": true,
+     "colours": true,
+     "uniform": true,
+     "swapped_equivalent": false,
+     "expected": {
+      "bold": true,
+      "underline": true,
+      "reverse": false,
+      "fg": 4,
+      "bg": 7
+     }
+    }
+   }
+  }
+ },
+ "tmux": {
+  "term_in_pane": "python",
+  "alone": {
+   "observed": {
+    "PLN": {
+     "sgr": "0",
+     "outer": {
+      "text": "GQFAPLN",
+      "uniform": true,
+      "bold": false,
+      "underline": false,
+      "reverse": false,
+      "fg": null,
+      "bg": null,
+      "sgr_carried_in_from_previous_line": {
+       "bold": true,
+       "underline": false,
+       "reverse": false,
+       "fg": null,
+       "bg": null
+      },
+      "raw": "│\u001b[0mGQFAPLN \u001b[1mGQFABLD\u001b[0m \u001b[4"
+     }
+    },
+    "BLD": {
+     "sgr": "1",
+     "outer": {
+      "text": "GQFABLD",
+      "uniform": true,
+      "bold": true,
+      "underline": false,
+      "reverse": false,
+      "fg": null,
+      "bg": null,
+      "sgr_carried_in_from_previous_line": {
+       "bold": true,
+       "underline": false,
+       "reverse": false,
+       "fg": null,
+       "bg": null
+      },
+      "raw": "│\u001b[0mGQFAPLN \u001b[1mGQFABLD\u001b[0m \u001b[4mGQFAUND\u001b[0m"
+     }
+    },
+    "UND": {
+     "sgr": "4",
+     "outer": {
+      "text": "GQFAUND",
+      "uniform": true,
+      "bold": false,
+      "underline": true,
+      "reverse": false,
+      "fg": null,
+      "bg": null,
+      "sgr_carried_in_from_previous_line": {
+       "bold": true,
+       "underline": false,
+       "reverse": false,
+       "fg": null,
+       "bg": null
+      },
+      "raw": "│\u001b[0mGQFAPLN \u001b[1mGQFABLD\u001b[0m \u001b[4mGQFAUND\u001b[0m \u001b[7mGQFAREV\u001b[0m"
+     }
+    },
+    "REV": {
+     "sgr": "7",
+     "outer": {
+      "text": "GQFAREV",
+      "uniform": true,
+      "bold": false,
+      "underline": false,
+      "reverse": true,
+      "fg": null,
+      "bg": null,
+      "sgr_carried_in_from_previous_line": {
+       "bold": true,
+       "underline": false,
+       "reverse": false,
+       "fg": null,
+       "bg": null
+      },
+      "raw": "│\u001b[0mGQFAPLN \u001b[1mGQFABLD\u001b[0m \u001b[4mGQFAUND\u001b[0m \u001b[7mGQFAREV\u001b[0m                "
+     }
+    }
+   },
+   "verdict": {
+    "PLN": {
+     "strict": true,
+     "flags": true,
+     "colours": true,
+     "uniform": true,
+     "swapped_equivalent": false,
+     "expected": {
+      "bold": false,
+      "underline": false,
+      "reverse": false,
+      "fg": null,
+      "bg": null
+     }
+    },
+    "BLD": {
+     "strict": true,
+     "flags": true,
+     "colours": true,
+     "uniform": true,
+     "swapped_equivalent": false,
+     "expected": {
+      "bold": true,
+      "underline": false,
+      "reverse": false,
+      "fg": null,
+      "bg": null
+     }
+    },
+    "UND": {
+     "strict": true,
+     "flags": true,
+     "colours": true,
+     "uniform": true,
+     "swapped_equivalent": false,
+     "expected": {
+      "bold": false,
+      "underline": true,
+      "reverse": false,
+      "fg": null,
+      "bg": null
+     }
+    },
+    "REV": {
+     "strict": true,
+     "flags": true,
+     "colours": true,
+     "uniform": true,
+     "swapped_equivalent": false,
+     "expected": {
+      "bold": false,
+      "underline": false,
+      "reverse": true,
+      "fg": null,
+      "bg": null
+     }
+    }
+   }
+  },
+  "coloured": {
+   "observed": {
+    "B31": {
+     "sgr": "1;31",
+     "outer": {
+      "text": "GQFBB31",
+      "uniform": true,
+      "bold": true,
+      "underline": false,
+      "reverse": false,
+      "fg": 1,
+      "bg": null,
+      "sgr_carried_in_from_previous_line": {
+       "bold": true,
+       "underline": false,
+       "reverse": false,
+       "fg": null,
+       "bg": null
+      },
+      "raw": "│\u001b[31mGQFBB31\u001b[0m \u001b[4m\u001b[38;5;208m"
+     }
+    },
+    "U208": {
+     "sgr": "4;38;5;208",
+     "outer": {
+      "text": "GQFBU208",
+      "uniform": true,
+      "bold": false,
+      "underline": true,
+      "reverse": false,
+      "fg": 208,
+      "bg": null,
+      "sgr_carried_in_from_previous_line": {
+       "bold": true,
+       "underline": false,
+       "reverse": false,
+       "fg": null,
+       "bg": null
+      },
+      "raw": "│\u001b[31mGQFBB31\u001b[0m \u001b[4m\u001b[38;5;208mGQFBU208\u001b[0m \u001b[7m\u001b[44mGQFBR4"
+     }
+    },
+    "R44": {
+     "sgr": "7;44",
+     "outer": {
+      "text": "GQFBR44",
+      "uniform": true,
+      "bold": false,
+      "underline": false,
+      "reverse": true,
+      "fg": null,
+      "bg": 4,
+      "sgr_carried_in_from_previous_line": {
+       "bold": true,
+       "underline": false,
+       "reverse": false,
+       "fg": null,
+       "bg": null
+      },
+      "raw": "│\u001b[31mGQFBB31\u001b[0m \u001b[4m\u001b[38;5;208mGQFBU208\u001b[0m \u001b[7m\u001b[44mGQFBR44\u001b[0m \u001b[1;4;7m\u001b[32mGQ"
+     }
+    },
+    "BUR": {
+     "sgr": "1;4;7;32",
+     "outer": {
+      "text": "GQFBBUR",
+      "uniform": true,
+      "bold": true,
+      "underline": true,
+      "reverse": true,
+      "fg": 2,
+      "bg": null,
+      "sgr_carried_in_from_previous_line": {
+       "bold": true,
+       "underline": false,
+       "reverse": false,
+       "fg": null,
+       "bg": null
+      },
+      "raw": "│\u001b[31mGQFBB31\u001b[0m \u001b[4m\u001b[38;5;208mGQFBU208\u001b[0m \u001b[7m\u001b[44mGQFBR44\u001b[0m \u001b[1;4;7m\u001b[32mGQFBBUR\u001b[0m \u001b[1m\u001b[38;5;196m"
+     }
+    },
+    "B2C": {
+     "sgr": "1;38;5;196;48;5;21",
+     "outer": {
+      "text": "GQFBB2C",
+      "uniform": true,
+      "bold": true,
+      "underline": false,
+      "reverse": false,
+      "fg": 196,
+      "bg": 21,
+      "sgr_carried_in_from_previous_line": {
+       "bold": true,
+       "underline": false,
+       "reverse": false,
+       "fg": null,
+       "bg": null
+      },
+      "raw": "│\u001b[31mGQFBB31\u001b[0m \u001b[4m\u001b[38;5;208mGQFBU208\u001b[0m \u001b[7m\u001b[44mGQFBR44\u001b[0m \u001b[1;4;7m\u001b[32mGQFBBUR\u001b[0m \u001b[1m\u001b[38;5;196m\u001b[48;5;21mGQFBB2C\u001b[0m                "
+     }
+    }
+   },
+   "verdict": {
+    "B31": {
+     "strict": true,
+     "flags": true,
+     "colours": true,
+     "uniform": true,
+     "swapped_equivalent": false,
+     "expected": {
+      "bold": true,
+      "underline": false,
+      "reverse": false,
+      "fg": 1,
+      "bg": null
+     }
+    },
+    "U208": {
+     "strict": true,
+     "flags": true,
+     "colours": true,
+     "uniform": true,
+     "swapped_equivalent": false,
+     "expected": {
+      "bold": false,
+      "underline": true,
+      "reverse": false,
+      "fg": 208,
+      "bg": null
+     }
+    },
+    "R44": {
+     "strict": true,
+     "flags": true,
+     "colours": true,
+     "uniform": true,
+     "swapped_equivalent": false,
+     "expected": {
+      "bold": false,
+      "underline": false,
+      "reverse": true,
+      "fg": null,
+      "bg": 4
+     }
+    },
+    "BUR": {
+     "strict": true,
+     "flags": true,
+     "colours": true,
+     "uniform": true,
+     "swapped_equivalent": false,
+     "expected": {
+      "bold": true,
+      "underline": true,
+      "reverse": true,
+      "fg": 2,
+      "bg": null
+     }
+    },
+    "B2C": {
+     "strict": true,
+     "flags": true,
+     "colours": true,
+     "uniform": true,
+     "swapped_equivalent": false,
+     "expected": {
+      "bold": true,
+      "underline": false,
+      "reverse": false,
+      "fg": 196,
+      "bg": 21
+     }
+    }
+   }
+  },
+  "coloured2": {
+   "observed": {
+    "U9": {
+     "sgr": "4;91",
+     "outer": {
+      "text": "GQFCU9",
+      "uniform": true,
+      "bold": false,
+      "underline": true,
+      "reverse": false,
+      "fg": 9,
+      "bg": null,
+      "sgr_carried_in_from_previous_line": {
+       "bold": true,
+       "underline": false,
+       "reverse": false,
+       "fg": null,
+       "bg": null
+      },
+      "raw": "│\u001b[0;4m\u001b[91mGQFCU9\u001b[0m \u001b[7m\u001b[38;5;240m"
+     }
+    },
+    "R240": {
+     "sgr": "7;38;5;240;48;5;250",
+     "outer": {
+      "text": "GQFCR240",
+      "uniform": true,
+      "bold": false,
+      "underline": false,
+      "reverse": true,
+      "fg": 240,
+      "bg": 250,
+      "sgr_carried_in_from_previous_line": {
+       "bold": true,
+       "underline": false,
+       "reverse": false,
+       "fg": null,
+       "bg": null
+      },
+      "raw": "│\u001b[0;4m\u001b[91mGQFCU9\u001b[0m \u001b[7m\u001b[38;5;240m\u001b[48;5;250mGQFCR240\u001b[0m \u001b[1;4m\u001b[34m\u001b[47"
+     }
+    },
+    "BU4": {
+     "sgr": "1;4;34;47",
+     "outer": {
+      "text": "GQFCBU4",
+      "uniform": true,
+      "bold": true,
+      "underline": true,
+      "reverse": false,
+      "fg": 4,
+      "bg": 7,
+      "sgr_carried_in_from_previous_line": {
+       "bold": true,
+       "underline": false,
+       "reverse": false,
+       "fg": null,
+       "bg": null
+      },
+      "raw": "│\u001b[0;4m\u001b[91mGQFCU9\u001b[0m \u001b[7m\u001b[38;5;240m\u001b[48;5;250mGQFCR240\u001b[0m \u001b[1;4m\u001b[34m\u001b[47mGQFCBU4\u001b[0m                "
+     }
+    }
+   },
+   "verdict": {
+    "U9": {
+     "strict": true,
+     "flags": true,
+     "colours": true,
+     "uniform": true,
+     "swapped_equivalent": false,
+     "expected": {
+      "bold": false,
+      "underline": true,
+      "reverse": false,
+      "fg": 9,
+      "bg": null
+     }
+    },
+    "R240": {
+     "strict": true,
+     "flags": true,
+     "colours": true,
+     "uniform": true,
+     "swapped_equivalent": false,
+     "expected": {
+      "bold": false,
+      "underline": false,
+      "reverse": true,
+      "fg": 240,
+      "bg": 250
+     }
+    },
+    "BU4": {
+     "strict": true,
+     "flags": true,
+     "colours": true,
+     "uniform": true,
+     "swapped_equivalent": false,
+     "expected": {
+      "bold": true,
+      "underline": true,
+      "reverse": false,
+      "fg": 4,
+      "bg": 7
+     }
+    }
+   }
+  },
+  "raw_sample": [
+   "│\u001b[31mGQFBB31\u001b[0m \u001b[4m\u001b[38;5;208mGQFBU208\u001b[0m \u001b[7m\u001b[44mGQFBR44\u001b[0m \u001b[1;4;7m\u001b[32mGQFBBUR\u001b[0m \u001b[1m\u001b[38;5;196m\u001b[48;5;21mGQFBB2C\u001b[0m                                                                                                                                \u001b[1m"
+  ],
+  "control_without_workbench": {
+   "rc": 0,
+   "raw": [
+    "\u001b[1m\u001b[31mGQCTL1\u001b[0m \u001b[1;4m\u001b[32mGQCTL2\u001b[0m \u001b[1mGQCTL3"
+   ]
+  }
+ },
+ "omp": {
+  "omp": "omp/18.8.0",
+  "omp_path": "/home/dwchoo/.local/bin/omp",
+  "tmux": "tmux 3.4",
+  "herdr": "herdr 0.9.3",
+  "bash": "GNU bash, version 5.2.21(1)-release (x86_64-pc-linux-gnu)",
+  "dash": "dash 0.5.12-6ubuntu5",
+  "sh": "/usr/bin/dash",
+  "python": "3.12.3",
+  "kernel": "7.0.0-30-generic",
+  "os": "Ubuntu 24.04.4 LTS"
+ },
+ "tmux_identity": {
+  "socket": "/tmp/wbc16emphg1co-tzleqf65/emph.sock",
+  "server_pid": 2834417,
+  "pane_pid": 2834418
+ },
+ "steps": {
+  "start": "pass",
+  "PYTE_alone": "pass",
+  "PYTE_coloured": "pass",
+  "PYTE_coloured2": "pass",
+  "TMUX_capture_pane_e": "pass",
+  "shutdown": "pass"
+ },
+ "steps_final": {
+  "start": "pass",
+  "PYTE_alone": "pass",
+  "PYTE_coloured": "pass",
+  "PYTE_coloured2": "pass",
+  "TMUX_capture_pane_e": "pass",
+  "shutdown": "pass"
+ },
+ "step_detail_fail": {}
+}

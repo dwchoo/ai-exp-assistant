@@ -1,0 +1,317 @@
+{
+ "scenario": "policy-P6",
+ "run_id": "c18-flow-policy",
+ "started_at": "2026-10-08T16:50:31+00:00",
+ "repo_head": "c47456a4ad2caa0b7da40fa84179da00f249f9d6",
+ "context": {
+  "host_shell": "bash"
+ },
+ "versions": {
+  "omp": "omp/18.8.0",
+  "omp_path": "/home/dwchoo/.local/bin/omp",
+  "tmux": "tmux 3.4",
+  "herdr": "herdr 0.9.3",
+  "bash": "GNU bash, version 5.2.21(1)-release (x86_64-pc-linux-gnu)",
+  "dash": "dash 0.5.12-6ubuntu5",
+  "sh": "/usr/bin/dash",
+  "python": "3.12.3",
+  "kernel": "7.0.0-30-generic",
+  "os": "Ubuntu 24.04.4 LTS"
+ },
+ "commands": [
+  {
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "start",
+    "--data-dir",
+    "/tmp/wbc16policyp6-a5u3co0q/d",
+    "--omp",
+    "/home/dwchoo/.local/bin/omp",
+    "--omp-arg=--model",
+    "--omp-arg=wbcw16/scripted",
+    "--no-attach"
+   ],
+   "exit": 0,
+   "seconds": 3.64,
+   "stdout_tail": "tion check ...\nbackend pid 2662390 phase ready\ndata dir /tmp/wbc16policyp6-a5u3co0q/d\n  host_shell: pid 2662395 alive=True owner=user\n  manager_omp: pid 2662398 alive=True owner=user\n  worker_omp: pid 2662399 alive=True owner=user\n  shell: bash /usr/bin/bash mode=manual_prompt\nomp isolation: ok (omp/18.8.0 evidence bridge_g3=18.2.10, isolation=18.6.1)\n  note: OMP 18.8.0 has not extracted its native addon into /tmp/wbc16policyp6-a5u3co0q/h/.omp/natives/18.8.0 yet: the first Workbench OMP extracts it there (the same files your own omp 18.8.0 extracts; OMP has no setting to move this directory).\n",
+   "stderr_tail": ""
+  },
+  {
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "shutdown",
+    "--data-dir",
+    "/tmp/wbc16policyp6-a5u3co0q/d",
+    "--json",
+    "--yes"
+   ],
+   "exit": 0,
+   "seconds": 5.17,
+   "stdout_tail": " \"survivors\": [{\"pid\": 2662398, \"role\": \"manager\", \"start_ticks\": 302330184}]}, \"omp_children\": {\"alive\": [], \"observed\": [{\"ended\": \"by_itself\", \"parent\": \"manager_omp\", \"parent_pid\": 2662398, \"pid\": 2662607, \"start_ticks\": 302330594}]}, \"panes\": [{\"exit_status\": -1, \"pane\": \"host_shell\", \"survivors\": []}, {\"exit_status\": 143, \"pane\": \"manager_omp\", \"survivors\": []}, {\"exit_status\": 143, \"pane\": \"worker_omp\", \"survivors\": []}], \"previous_survivors\": [], \"problems\": [], \"processes\": {\"host_shell\": \"dead\", \"manager_omp\": \"dead\", \"worker_omp\": \"dead\"}, \"user_confirmed\": true, \"verified\": true}}\n",
+   "stderr_tail": ""
+  }
+ ],
+ "steps": {
+  "start": {
+   "status": "pass",
+   "seconds": 4.0,
+   "observed": {}
+  },
+  "P6_restart_worker_verified": {
+   "status": "pass",
+   "seconds": 32.9,
+   "observed": {
+    "result": {
+     "status": "restarted",
+     "reason": "cw16 p6: verify the forced restart",
+     "worker": {
+      "pane_generation": 2,
+      "pid": 2662853,
+      "registered": true,
+      "session_id": "01a11c6c-8967-70e0-a82e-546e1fcc6469",
+      "generation": 1
+     },
+     "previous": {
+      "process": {
+       "pid": 2662399,
+       "start_ticks": 302330185
+      },
+      "session_id": "ac2917b8-8ebc-48ea-b9a9-ed771a9afef5",
+      "generation": 1,
+      "exit_status": 143,
+      "survivors": []
+     }
+    },
+    "old_worker_dead": true,
+    "new_worker": {
+     "pid": 2662853,
+     "start_ticks": 302330710
+    },
+    "task_kept": "running",
+    "worker_restarted_notice_to_manager": false
+   }
+  },
+  "P6_stop_survivor_unknown_refused": {
+   "status": "pass",
+   "seconds": 0.8,
+   "observed": {
+    "result": {
+     "status": "refused",
+     "reason": "unknown_survivor",
+     "detail": "No survivor with this survivor_id; read workbench_status.",
+     "survivor": null
+    }
+   }
+  },
+  "P6_host_terminal_force_kill": {
+   "status": "pass",
+   "seconds": 2.8,
+   "observed": {
+    "killed": {
+     "pid": 2662395,
+     "start_ticks": 302330183
+    },
+    "new_shell": {
+     "pid": 2663538,
+     "start_ticks": 302334081
+    },
+    "generation": [
+     1,
+     2
+    ],
+    "ui": []
+   }
+  },
+  "shutdown": {
+   "status": "pass",
+   "seconds": 5.5,
+   "observed": {
+    "verified": true,
+    "residue": {}
+   }
+  }
+ },
+ "unknowns": [],
+ "result": "pass",
+ "identities": {
+  "backend": {
+   "pid": 2662390,
+   "start_ticks": 302330164
+  },
+  "backend_session": 2662389,
+  "panes": {
+   "host_shell": [
+    2662395,
+    302330183,
+    "6d1476e0-7c29-4be7-851e-57f5836e687c",
+    1
+   ],
+   "manager_omp": [
+    2662398,
+    302330184,
+    "91e4d7de-ef38-4266-8f99-1e2575c70512",
+    1
+   ],
+   "worker_omp": [
+    2662399,
+    302330185,
+    "ac2917b8-8ebc-48ea-b9a9-ed771a9afef5",
+    1
+   ]
+  },
+  "bridge": {
+   "manager": {
+    "session_id": "01a11c6c-78c0-7253-9466-de335b3ec0e0",
+    "generation": 1,
+    "pid": 2662398
+   },
+   "worker": {
+    "session_id": "01a11c6c-78b6-777a-8781-8def0e4846c0",
+    "generation": 1,
+    "pid": 2662399
+   }
+  },
+  "shell_parent": {
+   "pid": 2662395,
+   "start_ticks": 302330183
+  },
+  "shell_generation": 1,
+  "supervisor": null
+ },
+ "omp_isolation": "ok",
+ "cleanup": {
+  "residue_before_fallback": {},
+  "root_removed": true,
+  "residue_after_fallback": {}
+ },
+ "provider": {
+  "requests": {
+   "manager": 7,
+   "worker": 1
+  },
+  "aborted": [],
+  "errors": [],
+  "rules": [
+   {
+    "name": "record",
+    "hits": 0
+   },
+   {
+    "name": "",
+    "hits": 1
+   },
+   {
+    "name": "",
+    "hits": 1
+   },
+   {
+    "name": "",
+    "hits": 1
+   },
+   {
+    "name": "",
+    "hits": 1
+   }
+  ],
+  "real_model_requests": 0,
+  "log_tail": [
+   {
+    "i": 1,
+    "at": 1791478235.777214,
+    "role": "manager",
+    "last_role": "user",
+    "text_tail": "p6-task",
+    "injected_kind": null,
+    "tool_results": []
+   },
+   {
+    "i": 2,
+    "at": 1791478235.8039672,
+    "role": "manager",
+    "last_role": "tool",
+    "text_tail": "o not do it yourself (no commands, edits or checks for it). End your turn and wait for the worker's to_manager report.\"}",
+    "injected_kind": null,
+    "tool_results": [
+     "cw16-manager-1"
+    ]
+   },
+   {
+    "i": 3,
+    "at": 1791478235.9339485,
+    "role": "worker",
+    "last_role": "user",
+    "text_tail": null,
+    "injected_kind": "task",
+    "tool_results": []
+   },
+   {
+    "i": 4,
+    "at": 1791478236.7082813,
+    "role": "manager",
+    "last_role": "user",
+    "text_tail": "p6-restart",
+    "injected_kind": null,
+    "tool_results": []
+   },
+   {
+    "i": 5,
+    "at": 1791478237.949941,
+    "role": "manager",
+    "last_role": "tool",
+    "text_tail": "-up to_worker on the same task_id (Workbench re-sends the full Task and the commands already run), or cancel the Task.\"}",
+    "injected_kind": null,
+    "tool_results": [
+     "cw16-manager-2"
+    ]
+   },
+   {
+    "i": 6,
+    "at": 1791478238.5886745,
+    "role": "manager",
+    "last_role": "user",
+    "text_tail": "start, just end your turn. Use the workbench-recovery skill (workbench_status first if unsure). Tell the user briefly.\"}",
+    "injected_kind": null,
+    "tool_results": []
+   },
+   {
+    "i": 7,
+    "at": 1791478268.630097,
+    "role": "manager",
+    "last_role": "user",
+    "text_tail": "p6-survivor",
+    "injected_kind": null,
+    "tool_results": []
+   },
+   {
+    "i": 8,
+    "at": 1791478268.6395679,
+    "role": "manager",
+    "last_role": "tool",
+    "text_tail": "fused\",\"reason\":\"unknown_survivor\",\"detail\":\"No survivor with this survivor_id; read workbench_status.\",\"survivor\":null}",
+    "injected_kind": null,
+    "tool_results": [
+     "cw16-manager-3"
+    ]
+   }
+  ]
+ },
+ "injected": {
+  "manager": [],
+  "worker": [
+   {
+    "kind": "task",
+    "stage": null,
+    "payload_kind": "work",
+    "task_id": "a9b4e2b8-388c-4f0c-a9b1-4490e2af2426",
+    "at": 1791478235.9339614
+   }
+  ],
+  "unknown": []
+ },
+ "notes": [],
+ "finished_at": "2026-10-08T16:51:17+00:00"
+}

@@ -1,0 +1,51 @@
+{
+ "run_id": "fix02-policy",
+ "scenarios": {
+  "flow-F45": {
+   "result": "pass",
+   "steps": {
+    "start": "pass",
+    "F45_terminal_while_task_undelivered": "pass",
+    "F45_terminal_right_after_cancel": "pass",
+    "shutdown": "pass"
+   },
+   "unknowns": [],
+   "path": "/tmp/wb-cw16-fix02-reports/fix02-policy/flow-F45.json"
+  },
+  "policy-P2": {
+   "result": "pass",
+   "steps": {
+    "start": "pass",
+    "P2_pause_holds_sends_and_terminal": "pass",
+    "P2_run_end_shown_no_review_while_paused": "pass",
+    "P2_resume_reconciled_no_replay": "pass",
+    "shutdown": "pass"
+   },
+   "unknowns": [],
+   "path": "/tmp/wb-cw16-fix02-reports/fix02-policy/policy-P2.json"
+  },
+  "policy-P3": {
+   "result": "pass",
+   "steps": {
+    "start": "pass",
+    "P3_pause_aborts_streaming_manager_turn": "pass",
+    "P3_running_manager_tool_recorded_unknown": "pass",
+    "shutdown": "pass"
+   },
+   "unknowns": [],
+   "path": "/tmp/wb-cw16-fix02-reports/fix02-policy/policy-P3.json"
+  },
+  "policy-P8": {
+   "result": "pass",
+   "steps": {
+    "start": "pass",
+    "P8_cancel_running_experiment": "pass",
+    "P8_cancel_withdraws_queued_follow_up": "pass",
+    "shutdown": "pass"
+   },
+   "unknowns": [],
+   "path": "/tmp/wb-cw16-fix02-reports/fix02-policy/policy-P8.json"
+  }
+ },
+ "written_at": "2026-10-08T10:02:55+00:00"
+}

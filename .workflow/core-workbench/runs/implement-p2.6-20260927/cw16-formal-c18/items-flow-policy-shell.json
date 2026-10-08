@@ -1,0 +1,53 @@
+[
+ {
+  "id": "I-FLOW",
+  "acceptance_ids": [
+   "C-AC-01",
+   "C-AC-02",
+   "C-AC-03",
+   "C-AC-04",
+   "C-AC-05",
+   "C-AC-09",
+   "C-AC-11"
+  ],
+  "result": "passed",
+  "observed_evidence_level": "runtime",
+  "evidence": "C18 production entrypoint + product UI with actual OMP 18.8.0 manager/worker and scripted local provider (0 real model requests), host Bash: F1 manager pane input -> to_worker(work, 2 commands) -> worker terminal exited 0 with output tail and log_path, out-of-list command refused (not_in_task_commands, not run), done report with commands_run -> Task closed/done; F4 repeated call (OMP renames to _dup1) -> worker_busy, no second Task; F2 experiment in a prepared worktree with execute->analysis order, worker 1st judgment and manager report for criteria_met / nonzero_exit / exit_zero_criteria_failed / indeterminate(missing result file), missing commit -> WorktreePreparationError reported, nothing executed; F3 worker write + local commit only, bare remote refs unchanged, no push/branch; F5 (C-D72 (3)) no-Task small request unrestricted, inside open Task linked to it, beyond scope -> refused command + scope_expansion_manager_confirmation to manager, no new Task; F6 done/blocked + requires_code_change ends the instruction, 0 auto deliveries during the idle window until a new manager follow-up (exactly 1); F7 idle >=60 s before any manager instruction (0 model requests, 0 runs); F45 worker terminal answers immediately (from 0.16 s) with an undelivered Task / right after cancel. All shutdowns verified, residue {}. Reports cw16-formal-c18/reports/c18-flow-policy/flow-*.json.",
+  "unknowns": []
+ },
+ {
+  "id": "I-POLICY",
+  "acceptance_ids": [
+   "C-AC-07",
+   "C-AC-10",
+   "C-AC-12",
+   "C-AC-13",
+   "C-AC-21",
+   "C-AC-25",
+   "C-AC-27",
+   "C-AC-29",
+   "C-AC-30",
+   "C-AC-31",
+   "C-AC-33",
+   "C-AC-34"
+  ],
+  "result": "passed",
+  "observed_evidence_level": "runtime",
+  "evidence": "Same runtime (C18, actual OMP 18.8.0, scripted provider): P1 200 s silent run - first 60 s review at 60.7 s, busy worker -> delayed/worker_busy_or_unknown pending, merged review (coalesced), hang classification unknown (silence alone not hang), success; P7 usage in review facts (unknown, not invented) and in status snapshot + Workbench status line ('사용량: 재시도 0/3 · 점검 N · 모델 미확인'); P2 pause -> to_worker held/paused, terminal paused, raw log keeps growing, manual prompts to both OMPs run, 0 reviews while paused, run end shown as waiting_report/paused, resume 'run_finished_while_paused ... reconciled without replay' with 0 replays; P3 pause during a streaming manager turn -> interruption confirmed, provider stream abort recorded, unknown tool call ids recorded, resume with 0 re-run of the aborted turn; P4 failed run + 3 reruns (spec change -> revision 2 applied to the next run) then 4th request held/retry_limit (runs_started 4); P5 spec change while running -> worker_busy, running revision kept; P6 restart_worker ends only the Workbench worker (exit 143 confirmed) with new pid, stop_survivor of unknown id refused, host shell kill confirmed then new shell generation; P8 cancel keeps the command running to its end, then closed/cancelled with run linkage kept. CLK: clock fixture suite 17 modules OK (121st periodic review and 13th wake are fixture-level as the SPEC allows). Reports policy-*.json. Note for Root (B2 O5): at the retry limit the product returns held/retry_limit to the manager; no separate automatic summary report beyond the per-run judgment reports.",
+  "unknowns": []
+ },
+ {
+  "id": "I-SHELL",
+  "acceptance_ids": [
+   "C-AC-03",
+   "C-AC-08",
+   "C-AC-20",
+   "C-AC-26",
+   "C-AC-32"
+  ],
+  "result": "passed",
+  "observed_evidence_level": "runtime",
+  "evidence": "C18 product persistent host shell under the final UI/backend composition, both Bash 5.2.21 and dash 0.5.12, actual OMP 18.8.0 + scripted provider: SH1 user cd/export/PATH in the parent shell inherited by worker terminal and by the experiment (declared environment incl. a variable exported after start is accepted), WORKBENCH_* absent in children, child cd/export not propagated, parent $$/cwd/generation unchanged; SH2 takeover request while a worker command waits on foreground -> new sends held (host_terminal_busy), input before confirm refused and not delivered, confirm -> manual input reaches the current foreground, delivered command shown with its real result (exited 0), wb-handoff -> control_wait with 0 replay; SH3 unsubmitted input / python3 REPL / background job -> automatic input held with reasons, job untouched, experiment starts after the job ends; SH4 sh -c 'sleep 5 & exit 3' -> exit 3 confirmed after descendants end; SH5 trap CHLD -> unsupported_hook_or_trap hold, PROMPT_COMMAND (bash) / PS1 (dash) override -> held (reason shows manual_input, B2 O1), trap DEBUG treated as compatible and runs. All shutdowns verified, residue {}. Reports cw16-formal-c18/reports/c18-shell/shell-*.json.",
+  "unknowns": []
+ }
+]

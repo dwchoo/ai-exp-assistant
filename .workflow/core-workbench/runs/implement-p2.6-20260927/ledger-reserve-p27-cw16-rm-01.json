@@ -1,0 +1,24 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 2391,
+  "event": {
+    "id": "reserve-p27-cw16-rm-01",
+    "kind": "reserve",
+    "data": {
+      "buckets": [
+        "total",
+        "role:test_designer",
+        "unit:V-CW-16"
+      ],
+      "effort": "high",
+      "incident": "",
+      "invocation": "p27-cw16-rm-01",
+      "model": "claude-sonnet-5-5",
+      "purpose": "CW-16 real-model smokes",
+      "role": "test_designer",
+      "unit": "V-CW-16",
+      "workspace": "/home/dwchoo/ai-exp-assistant",
+      "writer": true
+    }
+  }
+}

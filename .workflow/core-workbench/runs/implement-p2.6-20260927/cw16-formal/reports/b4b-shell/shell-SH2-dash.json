@@ -1,0 +1,359 @@
+{
+ "scenario": "shell-SH2-dash",
+ "run_id": "b4b-shell",
+ "started_at": "2026-10-08T11:21:16+00:00",
+ "repo_head": "e63572356480f2431427d349d749fbd09c2ee72f",
+ "context": {
+  "host_shell": "dash",
+  "shell": "dash"
+ },
+ "versions": {
+  "omp": "omp/18.8.0",
+  "omp_path": "/home/dwchoo/.local/bin/omp",
+  "tmux": "tmux 3.4",
+  "herdr": "herdr 0.9.3",
+  "bash": "GNU bash, version 5.2.21(1)-release (x86_64-pc-linux-gnu)",
+  "dash": "dash 0.5.12-6ubuntu5",
+  "sh": "/usr/bin/dash",
+  "python": "3.12.3",
+  "kernel": "7.0.0-30-generic",
+  "os": "Ubuntu 24.04.4 LTS"
+ },
+ "commands": [
+  {
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "start",
+    "--data-dir",
+    "/tmp/wbc16shellsh2-10xahtck/d",
+    "--omp",
+    "/home/dwchoo/.local/bin/omp",
+    "--omp-arg=--model",
+    "--omp-arg=wbcw16/scripted",
+    "--no-attach"
+   ],
+   "exit": 0,
+   "seconds": 3.75,
+   "stdout_tail": "lation check ...\nbackend pid 2029114 phase ready\ndata dir /tmp/wbc16shellsh2-10xahtck/d\n  host_shell: pid 2029121 alive=True owner=user\n  manager_omp: pid 2029125 alive=True owner=user\n  worker_omp: pid 2029126 alive=True owner=user\n  shell: sh /usr/bin/dash mode=manual_prompt\nomp isolation: ok (omp/18.8.0 evidence bridge_g3=18.2.10, isolation=18.6.1)\n  note: OMP 18.8.0 has not extracted its native addon into /tmp/wbc16shellsh2-10xahtck/h/.omp/natives/18.8.0 yet: the first Workbench OMP extracts it there (the same files your own omp 18.8.0 extracts; OMP has no setting to move this directory).\n",
+   "stderr_tail": ""
+  },
+  {
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "shutdown",
+    "--data-dir",
+    "/tmp/wbc16shellsh2-10xahtck/d",
+    "--json",
+    "--yes"
+   ],
+   "exit": 0,
+   "seconds": 4.38,
+   "stdout_tail": "orted\n{\"shutdown\": {\"left_running\": [], \"lifecycle\": null, \"omp_children\": {\"alive\": [], \"observed\": [{\"ended\": \"by_itself\", \"parent\": \"worker_omp\", \"parent_pid\": 2029126, \"pid\": 2029330, \"start_ticks\": 300355166}]}, \"panes\": [{\"exit_status\": -9, \"pane\": \"host_shell\", \"survivors\": []}, {\"exit_status\": 143, \"pane\": \"manager_omp\", \"survivors\": []}, {\"exit_status\": 143, \"pane\": \"worker_omp\", \"survivors\": []}], \"previous_survivors\": [], \"problems\": [], \"processes\": {\"host_shell\": \"dead\", \"manager_omp\": \"dead\", \"supervisor\": \"dead\", \"worker_omp\": \"dead\"}, \"user_confirmed\": true, \"verified\": true}}\n",
+   "stderr_tail": ""
+  }
+ ],
+ "steps": {
+  "SH2_worker_command_waiting": {
+   "status": "pass",
+   "seconds": 4.9,
+   "observed": {
+    "shell": {
+     "input_owner": "manager",
+     "parent_mode": "control_wait",
+     "phase": "experiment_started"
+    },
+    "operated_by": "worker"
+   }
+  },
+  "SH2_request_holds_new_sends": {
+   "status": "pass",
+   "seconds": 7.2,
+   "observed": {
+    "takeover_requested": true,
+    "held_task": {
+     "status": "dispatched",
+     "held_reason": "host_terminal_busy:worker_terminal_command",
+     "runs_started": 0
+    },
+    "cancel": "cancelled",
+    "owner": "user"
+   }
+  },
+  "SH2_input_before_confirm_not_delivered": {
+   "status": "pass",
+   "seconds": 3.0,
+   "observed": {
+    "delivered": false,
+    "ui": [
+     "focus: HOST SHELL | host 입력 owner: user | shell mode: control_wait | worker: 대기 | 자동화: idle",
+     "lq HOST SHELL *FOCUS* alive owner=user qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq",
+     "입력 거부 [HOST SHELL]: input_target_unknown: managed request in flight; confirm takeover of its foreground target (mode control_wait) (보류: takeover_requested, user"
+    ]
+   }
+  },
+  "SH2_confirm_manual_foreground_input": {
+   "status": "pass",
+   "seconds": 1.6,
+   "observed": {
+    "foreground_got": "SH2_GOT:hello",
+    "delivered_command_result": {
+     "status": "exited",
+     "exit_code": 0,
+     "reason": null,
+     "detail": null
+    },
+    "shell": {
+     "input_owner": "user",
+     "parent_mode": "control_wait",
+     "takeover_confirmed": true
+    }
+   }
+  },
+  "SH2_wb_handoff_control_wait_no_replay": {
+   "status": "pass",
+   "seconds": 9.6,
+   "observed": {
+    "control_wait": {
+     "input_owner": "user",
+     "parent_mode": "control_wait"
+    },
+    "replayed": 0,
+    "cancelled_experiment_ran": false,
+    "terminal_in_control_wait": {
+     "status": "host_terminal_busy",
+     "reason": "host shell is not at a clean prompt (mode control_wait)"
+    },
+    "after_retakeover_terminal": "exited"
+   }
+  },
+  "shutdown": {
+   "status": "pass",
+   "seconds": 4.7,
+   "observed": {
+    "verified": true,
+    "residue": {}
+   }
+  }
+ },
+ "unknowns": [],
+ "result": "pass",
+ "identities": {
+  "backend": {
+   "pid": 2029114,
+   "start_ticks": 300354730
+  },
+  "backend_session": 2029113,
+  "panes": {
+   "host_shell": [
+    2029121,
+    300354749,
+    "a6872899-7403-42af-a0f5-9a7fc311573c",
+    1
+   ],
+   "manager_omp": [
+    2029125,
+    300354750,
+    "6d3470a3-e45d-43b0-bded-1bce8542588d",
+    1
+   ],
+   "worker_omp": [
+    2029126,
+    300354751,
+    "1126f18f-6b8c-4382-ad45-e607e61b4527",
+    1
+   ]
+  },
+  "bridge": {
+   "manager": {
+    "session_id": "01a11b3f-0b5e-7681-8147-3028e0f198b3",
+    "generation": 1,
+    "pid": 2029125
+   },
+   "worker": {
+    "session_id": "01a11b3f-0bab-7262-b197-d8abd80a1e62",
+    "generation": 1,
+    "pid": 2029126
+   }
+  },
+  "shell_parent": {
+   "pid": 2029121,
+   "start_ticks": 300354749
+  },
+  "shell_generation": 1,
+  "supervisor": null
+ },
+ "omp_isolation": "ok",
+ "cleanup": {
+  "residue_before_fallback": {},
+  "root_removed": true,
+  "residue_after_fallback": {}
+ },
+ "provider": {
+  "requests": {
+   "worker": 6,
+   "manager": 4
+  },
+  "aborted": [],
+  "errors": [],
+  "rules": [
+   {
+    "name": "record",
+    "hits": 0
+   },
+   {
+    "name": "worker-contract",
+    "hits": 0
+   },
+   {
+    "name": "",
+    "hits": 0
+   },
+   {
+    "name": "",
+    "hits": 1
+   },
+   {
+    "name": "",
+    "hits": 1
+   },
+   {
+    "name": "exp:sh2-exp",
+    "hits": 1
+   },
+   {
+    "name": "mgr:sh2-cancel",
+    "hits": 1
+   },
+   {
+    "name": "term:sh2-in-wait",
+    "hits": 1
+   },
+   {
+    "name": "",
+    "hits": 1
+   },
+   {
+    "name": "term:sh2-after",
+    "hits": 1
+   },
+   {
+    "name": "",
+    "hits": 1
+   }
+  ],
+  "real_model_requests": 0,
+  "log_tail": [
+   {
+    "i": 1,
+    "at": 1791458481.4695635,
+    "role": "worker",
+    "last_role": "user",
+    "text_tail": "sh2-go",
+    "injected_kind": null,
+    "tool_results": []
+   },
+   {
+    "i": 2,
+    "at": 1791458482.9504747,
+    "role": "manager",
+    "last_role": "user",
+    "text_tail": "sh2-exp",
+    "injected_kind": null,
+    "tool_results": []
+   },
+   {
+    "i": 3,
+    "at": 1791458482.984762,
+    "role": "manager",
+    "last_role": "tool",
+    "text_tail": "o not do it yourself (no commands, edits or checks for it). End your turn and wait for the worker's to_manager report.\"}",
+    "injected_kind": null,
+    "tool_results": [
+     "cw16-manager-2"
+    ]
+   },
+   {
+    "i": 4,
+    "at": 1791458488.7673779,
+    "role": "manager",
+    "last_role": "user",
+    "text_tail": "sh2-cancel",
+    "injected_kind": null,
+    "tool_results": []
+   },
+   {
+    "i": 5,
+    "at": 1791458488.7803512,
+    "role": "manager",
+    "last_role": "tool",
+    "text_tail": "2\",\"at\":\"2026-10-08T11:21:28Z\",\"kind\":\"task_cancelled\",\"task_id\":\"7ec3ea05-38d1-40c9-adde-dccca111bd5d\",\"run_id\":null}]}",
+    "injected_kind": null,
+    "tool_results": [
+     "cw16-manager-3"
+    ]
+   },
+   {
+    "i": 6,
+    "at": 1791458493.1793861,
+    "role": "worker",
+    "last_role": "tool",
+    "text_tail": "e66f-a55b-44b6-893b-7591ac020814.log\",\"duration_seconds\":11.634,\"output_tail\":\"hello\\n$ \",\"output_tail_truncated\":false}",
+    "injected_kind": null,
+    "tool_results": [
+     "cw16-worker-1"
+    ]
+   },
+   {
+    "i": 7,
+    "at": 1791458501.0958805,
+    "role": "worker",
+    "last_role": "user",
+    "text_tail": "sh2-in-wait",
+    "injected_kind": null,
+    "tool_results": []
+   },
+   {
+    "i": 8,
+    "at": 1791458501.1058545,
+    "role": "worker",
+    "last_role": "tool",
+    "text_tail": "no job, no typed line, no experiment run). Do not work around it; try again later or tell the manager with to_manager.\"}",
+    "injected_kind": null,
+    "tool_results": [
+     "cw16-worker-4"
+    ]
+   },
+   {
+    "i": 9,
+    "at": 1791458502.9295757,
+    "role": "worker",
+    "last_role": "user",
+    "text_tail": "sh2-after",
+    "injected_kind": null,
+    "tool_results": []
+   },
+   {
+    "i": 10,
+    "at": 1791458503.0877545,
+    "role": "worker",
+    "last_role": "tool",
+    "text_tail": "798-153d-42f7-9642-3b28ac5dbe7f.log\",\"duration_seconds\":0.092,\"output_tail\":\"SH2_AFTER\\n\",\"output_tail_truncated\":false}",
+    "injected_kind": null,
+    "tool_results": [
+     "cw16-worker-5"
+    ]
+   }
+  ]
+ },
+ "injected": {
+  "manager": [],
+  "worker": [],
+  "unknown": []
+ },
+ "notes": [],
+ "finished_at": "2026-10-08T11:21:48+00:00"
+}

@@ -1,0 +1,260 @@
+{
+ "scenario": "shell-SH5-trap_chld-dash",
+ "run_id": "c18-shell",
+ "started_at": "2026-10-08T16:55:47+00:00",
+ "repo_head": "c47456a4ad2caa0b7da40fa84179da00f249f9d6",
+ "context": {
+  "host_shell": "dash",
+  "shell": "dash"
+ },
+ "versions": {
+  "omp": "omp/18.8.0",
+  "omp_path": "/home/dwchoo/.local/bin/omp",
+  "tmux": "tmux 3.4",
+  "herdr": "herdr 0.9.3",
+  "bash": "GNU bash, version 5.2.21(1)-release (x86_64-pc-linux-gnu)",
+  "dash": "dash 0.5.12-6ubuntu5",
+  "sh": "/usr/bin/dash",
+  "python": "3.12.3",
+  "kernel": "7.0.0-30-generic",
+  "os": "Ubuntu 24.04.4 LTS"
+ },
+ "commands": [
+  {
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "start",
+    "--data-dir",
+    "/tmp/wbc16shellsh5-1a6ohass/d",
+    "--omp",
+    "/home/dwchoo/.local/bin/omp",
+    "--omp-arg=--model",
+    "--omp-arg=wbcw16/scripted",
+    "--no-attach"
+   ],
+   "exit": 0,
+   "seconds": 3.76,
+   "stdout_tail": "lation check ...\nbackend pid 2674877 phase ready\ndata dir /tmp/wbc16shellsh5-1a6ohass/d\n  host_shell: pid 2674881 alive=True owner=user\n  manager_omp: pid 2674885 alive=True owner=user\n  worker_omp: pid 2674886 alive=True owner=user\n  shell: sh /usr/bin/dash mode=manual_prompt\nomp isolation: ok (omp/18.8.0 evidence bridge_g3=18.2.10, isolation=18.6.1)\n  note: OMP 18.8.0 has not extracted its native addon into /tmp/wbc16shellsh5-1a6ohass/h/.omp/natives/18.8.0 yet: the first Workbench OMP extracts it there (the same files your own omp 18.8.0 extracts; OMP has no setting to move this directory).\n",
+   "stderr_tail": ""
+  },
+  {
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "shutdown",
+    "--data-dir",
+    "/tmp/wbc16shellsh5-1a6ohass/d",
+    "--json",
+    "--yes"
+   ],
+   "exit": 0,
+   "seconds": 3.19,
+   "stdout_tail": "no active work reported\n{\"shutdown\": {\"left_running\": [], \"lifecycle\": null, \"omp_children\": {\"alive\": [], \"observed\": [{\"ended\": \"by_itself\", \"parent\": \"worker_omp\", \"parent_pid\": 2674886, \"pid\": 2675136, \"start_ticks\": 302362529}]}, \"panes\": [{\"exit_status\": -9, \"pane\": \"host_shell\", \"survivors\": []}, {\"exit_status\": 143, \"pane\": \"manager_omp\", \"survivors\": []}, {\"exit_status\": 143, \"pane\": \"worker_omp\", \"survivors\": []}], \"previous_survivors\": [], \"problems\": [], \"processes\": {\"host_shell\": \"dead\", \"manager_omp\": \"dead\", \"worker_omp\": \"dead\"}, \"user_confirmed\": true, \"verified\": true}}\n",
+   "stderr_tail": ""
+  }
+ ],
+ "steps": {
+  "SH5_trap_chld": {
+   "status": "pass",
+   "seconds": 20.1,
+   "observed": {
+    "hook_named_in_reason": true,
+    "first": {
+     "status": "start_failed",
+     "reason": "UnsafeShellState: no clean direct same-parent handoff"
+    },
+    "second": {
+     "status": "host_terminal_busy",
+     "reason": "host shell hook is unsupported"
+    },
+    "experiment": {
+     "status": "dispatched",
+     "held_reason": "host_terminal_busy",
+     "runs_started": 0
+    },
+    "held_reasons": [
+     "user_owner",
+     "parent_not_control_wait",
+     "unsupported_hook_or_trap"
+    ],
+    "dispatched": "dispatched"
+   }
+  },
+  "shutdown": {
+   "status": "pass",
+   "seconds": 3.5,
+   "observed": {
+    "verified": true,
+    "residue": {}
+   }
+  }
+ },
+ "unknowns": [],
+ "result": "pass",
+ "identities": {
+  "backend": {
+   "pid": 2674877,
+   "start_ticks": 302361813
+  },
+  "backend_session": 2674876,
+  "panes": {
+   "host_shell": [
+    2674881,
+    302361832,
+    "2005839f-ae25-41d0-ac36-c8286f4d1555",
+    1
+   ],
+   "manager_omp": [
+    2674885,
+    302361833,
+    "5a1c7338-d77f-4b05-9af3-8eb3089d58a1",
+    1
+   ],
+   "worker_omp": [
+    2674886,
+    302361833,
+    "44184557-ad85-4367-8c67-7464e78dcec4",
+    1
+   ]
+  },
+  "bridge": {
+   "manager": {
+    "session_id": "01a11c71-4d1d-71ed-883d-210e30cce226",
+    "generation": 1,
+    "pid": 2674885
+   },
+   "worker": {
+    "session_id": "01a11c71-4d09-75cd-afcc-1881baaeeaf3",
+    "generation": 1,
+    "pid": 2674886
+   }
+  },
+  "shell_parent": {
+   "pid": 2674881,
+   "start_ticks": 302361832
+  },
+  "shell_generation": 1,
+  "supervisor": null
+ },
+ "omp_isolation": "ok",
+ "cleanup": {
+  "residue_before_fallback": {},
+  "root_removed": true,
+  "residue_after_fallback": {}
+ },
+ "provider": {
+  "requests": {
+   "worker": 4,
+   "manager": 2
+  },
+  "aborted": [],
+  "errors": [],
+  "rules": [
+   {
+    "name": "record",
+    "hits": 0
+   },
+   {
+    "name": "worker-contract",
+    "hits": 0
+   },
+   {
+    "name": "",
+    "hits": 0
+   },
+   {
+    "name": "term:sh5-a",
+    "hits": 1
+   },
+   {
+    "name": "",
+    "hits": 1
+   },
+   {
+    "name": "term:sh5-b",
+    "hits": 1
+   },
+   {
+    "name": "",
+    "hits": 1
+   },
+   {
+    "name": "exp:sh5-exp",
+    "hits": 1
+   }
+  ],
+  "real_model_requests": 0,
+  "log_tail": [
+   {
+    "i": 1,
+    "at": 1791478555.1002476,
+    "role": "worker",
+    "last_role": "user",
+    "text_tail": "sh5-a",
+    "injected_kind": null,
+    "tool_results": []
+   },
+   {
+    "i": 2,
+    "at": 1791478558.1933117,
+    "role": "worker",
+    "last_role": "tool",
+    "text_tail": "t started; the host terminal is the user's again.\",\"host_terminal\":{\"input_owner\":\"user\",\"parent_mode\":\"manual_prompt\"}}",
+    "injected_kind": null,
+    "tool_results": [
+     "cw16-worker-1"
+    ]
+   },
+   {
+    "i": 3,
+    "at": 1791478560.6963716,
+    "role": "worker",
+    "last_role": "user",
+    "text_tail": "sh5-b",
+    "injected_kind": null,
+    "tool_results": []
+   },
+   {
+    "i": 4,
+    "at": 1791478560.7053087,
+    "role": "worker",
+    "last_role": "tool",
+    "text_tail": "no job, no typed line, no experiment run). Do not work around it; try again later or tell the manager with to_manager.\"}",
+    "injected_kind": null,
+    "tool_results": [
+     "cw16-worker-2"
+    ]
+   },
+   {
+    "i": 5,
+    "at": 1791478561.4958494,
+    "role": "manager",
+    "last_role": "user",
+    "text_tail": "sh5-exp",
+    "injected_kind": null,
+    "tool_results": []
+   },
+   {
+    "i": 6,
+    "at": 1791478561.5240917,
+    "role": "manager",
+    "last_role": "tool",
+    "text_tail": "o not do it yourself (no commands, edits or checks for it). End your turn and wait for the worker's to_manager report.\"}",
+    "injected_kind": null,
+    "tool_results": [
+     "cw16-manager-3"
+    ]
+   }
+  ]
+ },
+ "injected": {
+  "manager": [],
+  "worker": [],
+  "unknown": []
+ },
+ "notes": [],
+ "finished_at": "2026-10-08T16:56:11+00:00"
+}

@@ -1,0 +1,99 @@
+{
+ "scenario": "sel-2",
+ "run_id": "cw16-matrix-66dca4ae",
+ "started_at": "2026-10-08T06:38:29+00:00",
+ "repo_head": "6a2ddb2b5441202c8e94d27f775c7159fb9672ae",
+ "context": {
+  "path": [
+   "omp",
+   "sh",
+   "zsh"
+  ],
+  "SHELL": "fake zsh sentinel"
+ },
+ "versions": {
+  "omp": "omp/18.8.0",
+  "omp_path": "/home/dwchoo/.local/bin/omp",
+  "tmux": "tmux 3.4",
+  "herdr": "herdr 0.9.3",
+  "bash": "GNU bash, version 5.2.21(1)-release (x86_64-pc-linux-gnu)",
+  "dash": "dash 0.5.12-6ubuntu5",
+  "sh": "/usr/bin/dash",
+  "python": "3.12.3",
+  "kernel": "7.0.0-30-generic",
+  "os": "Ubuntu 24.04.4 LTS"
+ },
+ "commands": [
+  {
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "start",
+    "--data-dir",
+    "/tmp/wbc16sel2-p108g3v0/d",
+    "--omp",
+    "/home/dwchoo/.local/bin/omp",
+    "--omp-arg=--model",
+    "--omp-arg=wbcw16/scripted",
+    "--no-attach"
+   ],
+   "exit": 0,
+   "seconds": 3.71,
+   "stdout_tail": " OMP isolation check ...\nbackend pid 1423835 phase ready\ndata dir /tmp/wbc16sel2-p108g3v0/d\n  host_shell: pid 1423839 alive=True owner=user\n  manager_omp: pid 1423841 alive=True owner=user\n  worker_omp: pid 1423843 alive=True owner=user\n  shell: sh /usr/bin/dash mode=manual_prompt\nomp isolation: ok (omp/18.8.0 evidence bridge_g3=18.2.10, isolation=18.6.1)\n  note: OMP 18.8.0 has not extracted its native addon into /tmp/wbc16sel2-p108g3v0/h/.omp/natives/18.8.0 yet: the first Workbench OMP extracts it there (the same files your own omp 18.8.0 extracts; OMP has no setting to move this directory).\n",
+   "stderr_tail": ""
+  },
+  {
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "shutdown",
+    "--data-dir",
+    "/tmp/wbc16sel2-p108g3v0/d",
+    "--json",
+    "--yes"
+   ],
+   "exit": 0,
+   "seconds": 1.3,
+   "stdout_tail": "no active work reported\n{\"shutdown\": {\"left_running\": [], \"lifecycle\": null, \"panes\": [{\"exit_status\": -9, \"pane\": \"host_shell\", \"survivors\": []}, {\"exit_status\": 143, \"pane\": \"manager_omp\", \"survivors\": []}, {\"exit_status\": 143, \"pane\": \"worker_omp\", \"survivors\": []}], \"previous_survivors\": [], \"problems\": [], \"processes\": {\"host_shell\": \"dead\", \"manager_omp\": \"dead\", \"worker_omp\": \"dead\"}, \"user_confirmed\": true, \"verified\": true}}\n",
+   "stderr_tail": ""
+  }
+ ],
+ "steps": {
+  "start": {
+   "status": "pass",
+   "seconds": 3.8,
+   "observed": {
+    "announced": "shell sh (/usr/bin/dash)",
+    "kind": "sh",
+    "exe": "/usr/bin/dash",
+    "pid": 1423839,
+    "shell_env_preserved": true
+   }
+  },
+  "operate": {
+   "status": "pass",
+   "seconds": 1.0,
+   "observed": {
+    "marker": "1423839:none"
+   }
+  },
+  "shutdown": {
+   "status": "pass",
+   "seconds": 1.6,
+   "observed": {
+    "verified": true,
+    "zsh_sentinel_executed": false
+   }
+  }
+ },
+ "unknowns": [],
+ "result": "pass",
+ "cleanup": {
+  "residue_before_fallback": {},
+  "root_removed": true,
+  "residue_after_fallback": {}
+ },
+ "finished_at": "2026-10-08T06:38:36+00:00"
+}

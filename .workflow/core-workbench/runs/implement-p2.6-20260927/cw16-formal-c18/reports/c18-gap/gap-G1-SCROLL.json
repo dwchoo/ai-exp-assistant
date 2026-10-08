@@ -1,0 +1,183 @@
+{
+ "scenario": "gap-G1-SCROLL",
+ "run_id": "c18-gap",
+ "started_at": "2026-10-08T17:19:17+00:00",
+ "repo_head": "c47456a4ad2caa0b7da40fa84179da00f249f9d6",
+ "context": {
+  "host_shell": "bash"
+ },
+ "versions": {
+  "omp": "omp/18.8.0",
+  "omp_path": "/home/dwchoo/.local/bin/omp",
+  "tmux": "tmux 3.4",
+  "herdr": "herdr 0.9.3",
+  "bash": "GNU bash, version 5.2.21(1)-release (x86_64-pc-linux-gnu)",
+  "dash": "dash 0.5.12-6ubuntu5",
+  "sh": "/usr/bin/dash",
+  "python": "3.12.3",
+  "kernel": "7.0.0-30-generic",
+  "os": "Ubuntu 24.04.4 LTS"
+ },
+ "commands": [
+  {
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "start",
+    "--data-dir",
+    "/tmp/wbc16gapg1scr-mmkoz_ac/d",
+    "--omp",
+    "/home/dwchoo/.local/bin/omp",
+    "--omp-arg=--model",
+    "--omp-arg=wbcw16/scripted",
+    "--no-attach"
+   ],
+   "exit": 0,
+   "seconds": 3.77,
+   "stdout_tail": "tion check ...\nbackend pid 2721566 phase ready\ndata dir /tmp/wbc16gapg1scr-mmkoz_ac/d\n  host_shell: pid 2721570 alive=True owner=user\n  manager_omp: pid 2721573 alive=True owner=user\n  worker_omp: pid 2721574 alive=True owner=user\n  shell: bash /usr/bin/bash mode=manual_prompt\nomp isolation: ok (omp/18.8.0 evidence bridge_g3=18.2.10, isolation=18.6.1)\n  note: OMP 18.8.0 has not extracted its native addon into /tmp/wbc16gapg1scr-mmkoz_ac/h/.omp/natives/18.8.0 yet: the first Workbench OMP extracts it there (the same files your own omp 18.8.0 extracts; OMP has no setting to move this directory).\n",
+   "stderr_tail": ""
+  },
+  {
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "shutdown",
+    "--data-dir",
+    "/tmp/wbc16gapg1scr-mmkoz_ac/d",
+    "--json",
+    "--yes"
+   ],
+   "exit": 0,
+   "seconds": 0.22,
+   "stdout_tail": "no active work reported\n{\"shutdown\": {\"left_running\": [], \"lifecycle\": null, \"omp_children\": {\"alive\": [], \"observed\": []}, \"panes\": [{\"exit_status\": -1, \"pane\": \"host_shell\", \"survivors\": []}, {\"exit_status\": 143, \"pane\": \"manager_omp\", \"survivors\": []}, {\"exit_status\": 143, \"pane\": \"worker_omp\", \"survivors\": []}], \"previous_survivors\": [], \"problems\": [], \"processes\": {\"host_shell\": \"dead\", \"manager_omp\": \"dead\", \"worker_omp\": \"dead\"}, \"user_confirmed\": true, \"verified\": true}}\n",
+   "stderr_tail": ""
+  }
+ ],
+ "steps": {
+  "start": {
+   "status": "pass",
+   "seconds": 4.2,
+   "observed": {}
+  },
+  "SCROLL_mode_history_kept_live_exit": {
+   "status": "pass",
+   "seconds": 13.2,
+   "observed": {
+    "title_in_mode": "lq HOST SHELL [SCROLL live 끝/391] *FOCUS* alive owner=user qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqk",
+    "top_view": [
+     "x$ seq -f 'GQS%04g' 1 400                                                                                                                                                x",
+     "xGQS0001                                                                                                                                                                 x",
+     "xGQS0002                                                                                                                                                                 x"
+    ],
+    "kept_while_output_arrived": true,
+    "live_after_G": true,
+    "keys_not_forwarded": true
+   }
+  },
+  "SCROLL_shift_pgup_direct_and_live_on_input": {
+   "status": "pass",
+   "seconds": 1.9,
+   "observed": {
+    "title_scrolled": "lq HOST SHELL [SCROLL live보다 15줄 위/395] *FOCUS* alive owner=user qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqk",
+    "back_to_live_on_input": true
+   }
+  },
+  "SCROLL_mouse_wheel": {
+   "status": "pass",
+   "seconds": 2.7,
+   "observed": {
+    "title_after_wheel": "lq HOST SHELL [SCROLL live보다 12줄 위/397] *FOCUS* alive owner=user qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqk"
+   }
+  },
+  "SCROLL_omp_pane_mode": {
+   "status": "pass",
+   "seconds": 1.6,
+   "observed": {
+    "manager_title_in_mode": "lq MANAGER OMP [SCROLL live 끝/0] *FOCUS* alive qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqklq WORKER OMP alive qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqk"
+   }
+  },
+  "shutdown": {
+   "status": "pass",
+   "seconds": 0.5,
+   "observed": {
+    "verified": true,
+    "residue": {}
+   }
+  }
+ },
+ "unknowns": [],
+ "result": "pass",
+ "identities": {
+  "backend": {
+   "pid": 2721566,
+   "start_ticks": 302502821
+  },
+  "backend_session": 2721565,
+  "panes": {
+   "host_shell": [
+    2721570,
+    302502841,
+    "b8985d4f-32a9-48a7-b549-2d36e22ead7e",
+    1
+   ],
+   "manager_omp": [
+    2721573,
+    302502842,
+    "e1bada47-0ee1-4777-b597-5a88c62c0310",
+    1
+   ],
+   "worker_omp": [
+    2721574,
+    302502843,
+    "0d0d5d6e-34c1-424f-bc42-ba044678d80d",
+    1
+   ]
+  },
+  "bridge": {
+   "manager": {
+    "session_id": "01a11c86-d183-712e-a5e8-57ca7887d7a3",
+    "generation": 1,
+    "pid": 2721573
+   },
+   "worker": {
+    "session_id": "01a11c86-d15f-7151-b846-d00c5281ac0e",
+    "generation": 1,
+    "pid": 2721574
+   }
+  },
+  "shell_parent": {
+   "pid": 2721570,
+   "start_ticks": 302502841
+  },
+  "shell_generation": 1,
+  "supervisor": null
+ },
+ "omp_isolation": "ok",
+ "cleanup": {
+  "residue_before_fallback": {},
+  "root_removed": true,
+  "residue_after_fallback": {}
+ },
+ "provider": {
+  "requests": {},
+  "aborted": [],
+  "errors": [],
+  "rules": [
+   {
+    "name": "record",
+    "hits": 0
+   }
+  ],
+  "real_model_requests": 0,
+  "log_tail": []
+ },
+ "injected": {
+  "manager": [],
+  "worker": [],
+  "unknown": []
+ },
+ "notes": [],
+ "finished_at": "2026-10-08T17:19:41+00:00"
+}

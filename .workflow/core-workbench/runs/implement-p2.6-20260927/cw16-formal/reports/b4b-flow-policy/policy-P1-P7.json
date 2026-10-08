@@ -1,0 +1,349 @@
+{
+ "scenario": "policy-P1-P7",
+ "run_id": "b4b-flow-policy",
+ "started_at": "2026-10-08T11:11:55+00:00",
+ "repo_head": "e63572356480f2431427d349d749fbd09c2ee72f",
+ "context": {
+  "host_shell": "bash"
+ },
+ "versions": {
+  "omp": "omp/18.8.0",
+  "omp_path": "/home/dwchoo/.local/bin/omp",
+  "tmux": "tmux 3.4",
+  "herdr": "herdr 0.9.3",
+  "bash": "GNU bash, version 5.2.21(1)-release (x86_64-pc-linux-gnu)",
+  "dash": "dash 0.5.12-6ubuntu5",
+  "sh": "/usr/bin/dash",
+  "python": "3.12.3",
+  "kernel": "7.0.0-30-generic",
+  "os": "Ubuntu 24.04.4 LTS"
+ },
+ "commands": [
+  {
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "start",
+    "--data-dir",
+    "/tmp/wbc16policyp1-cz45gzmq/d",
+    "--omp",
+    "/home/dwchoo/.local/bin/omp",
+    "--omp-arg=--model",
+    "--omp-arg=wbcw16/scripted",
+    "--no-attach"
+   ],
+   "exit": 0,
+   "seconds": 3.53,
+   "stdout_tail": "tion check ...\nbackend pid 2013483 phase ready\ndata dir /tmp/wbc16policyp1-cz45gzmq/d\n  host_shell: pid 2013504 alive=True owner=user\n  manager_omp: pid 2013507 alive=True owner=user\n  worker_omp: pid 2013508 alive=True owner=user\n  shell: bash /usr/bin/bash mode=manual_prompt\nomp isolation: ok (omp/18.8.0 evidence bridge_g3=18.2.10, isolation=18.6.1)\n  note: OMP 18.8.0 has not extracted its native addon into /tmp/wbc16policyp1-cz45gzmq/h/.omp/natives/18.8.0 yet: the first Workbench OMP extracts it there (the same files your own omp 18.8.0 extracts; OMP has no setting to move this directory).\n",
+   "stderr_tail": ""
+  },
+  {
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "shutdown",
+    "--data-dir",
+    "/tmp/wbc16policyp1-cz45gzmq/d",
+    "--json",
+    "--yes"
+   ],
+   "exit": 0,
+   "seconds": 3.4,
+   "stdout_tail": "rted\n{\"shutdown\": {\"left_running\": [], \"lifecycle\": null, \"omp_children\": {\"alive\": [], \"observed\": [{\"ended\": \"by_itself\", \"parent\": \"manager_omp\", \"parent_pid\": 2013507, \"pid\": 2013703, \"start_ticks\": 300299011}]}, \"panes\": [{\"exit_status\": -1, \"pane\": \"host_shell\", \"survivors\": []}, {\"exit_status\": 143, \"pane\": \"manager_omp\", \"survivors\": []}, {\"exit_status\": 143, \"pane\": \"worker_omp\", \"survivors\": []}], \"previous_survivors\": [], \"problems\": [], \"processes\": {\"host_shell\": \"dead\", \"manager_omp\": \"dead\", \"supervisor\": \"dead\", \"worker_omp\": \"dead\"}, \"user_confirmed\": true, \"verified\": true}}\n",
+   "stderr_tail": ""
+  }
+ ],
+ "steps": {
+  "start": {
+   "status": "pass",
+   "seconds": 3.9,
+   "observed": {}
+  },
+  "P1_reviews_60s_merge_when_busy": {
+   "status": "pass",
+   "seconds": 200.9,
+   "observed": {
+    "first_review_after_s": 60.7,
+    "merged_review_coalesced": 1,
+    "delayed_states_seen": [
+     {
+      "status": "delayed",
+      "reason": "worker_busy_or_unknown",
+      "pending": true,
+      "coalesced_count": 0,
+      "review_count": 1
+     },
+     {
+      "status": "delayed",
+      "reason": "worker_busy_or_unknown",
+      "pending": true,
+      "coalesced_count": 0,
+      "review_count": 1
+     },
+     {
+      "status": "delayed",
+      "reason": "worker_busy_or_unknown",
+      "pending": true,
+      "coalesced_count": 0,
+      "review_count": 1
+     }
+    ],
+    "review_timeline_s": [
+     [
+      60.7,
+      0
+     ],
+     [
+      186.3,
+      1
+     ]
+    ],
+    "hang_classification": "unknown",
+    "judgment": "success",
+    "active_run": {
+     "bound": true,
+     "error": null,
+     "kind": "experiment",
+     "revision": 1,
+     "run_id": "19384e2b-a076-4964-bdf3-f2bf9f458d2a",
+     "task_id": "0e69e909-a3a1-43f7-8b76-79c3647b207e"
+    }
+   }
+  },
+  "P7_usage_in_review_facts_and_display": {
+   "status": "pass",
+   "seconds": 0.1,
+   "observed": {
+    "review_facts_usage": {
+     "tokens_estimated": "unknown",
+     "tokens_observed": "unknown",
+     "tokens_unknown": "unknown",
+     "unknown_samples": 61
+    },
+    "status_has_usage": true,
+    "ui_has_usage": true,
+    "workbench_status_lines": [
+     "focus: WORKER OMP | host 입력 owner: manager | shell mode: control_wait | worker: 작업 중 | 자동화: active",
+     "작업: 실험 \"P1 silent run\" [실행 중] | 사용량: 재시도 0/3 · 점검 2 · 모델 미확인 | 60s 대조 40s 후 | backend: ready | bridge manager=ok worker=ok | 마지막 확인 20:15:20 ("
+    ],
+    "omp_pane_lines_mentioning_usage": [
+     "x   • kind: \"experiment\"                                                            xx _count\":1,\"usage\":{\"tokens_estimated\":\"unknown\",\"tokens_observed\":\"unknow"
+    ]
+   }
+  },
+  "shutdown": {
+   "status": "pass",
+   "seconds": 3.7,
+   "observed": {
+    "verified": true,
+    "residue": {}
+   }
+  }
+ },
+ "unknowns": [],
+ "result": "pass",
+ "identities": {
+  "backend": {
+   "pid": 2013483,
+   "start_ticks": 300298597
+  },
+  "backend_session": 2013482,
+  "panes": {
+   "host_shell": [
+    2013504,
+    300298615,
+    "c8b44ce4-65e5-4fac-8823-52b2db74b99e",
+    1
+   ],
+   "manager_omp": [
+    2013507,
+    300298617,
+    "91b93038-5bbe-45c2-8926-322499b41e16",
+    1
+   ],
+   "worker_omp": [
+    2013508,
+    300298617,
+    "e9342443-3174-4e43-a082-5e1ee86deb36",
+    1
+   ]
+  },
+  "bridge": {
+   "manager": {
+    "session_id": "01a11b36-7ac2-768e-a7ae-ab57d91c4c66",
+    "generation": 1,
+    "pid": 2013507
+   },
+   "worker": {
+    "session_id": "01a11b36-7aa0-7079-a1ca-f377cc2536bf",
+    "generation": 1,
+    "pid": 2013508
+   }
+  },
+  "shell_parent": {
+   "pid": 2013504,
+   "start_ticks": 300298615
+  },
+  "shell_generation": 1,
+  "supervisor": null
+ },
+ "omp_isolation": "ok",
+ "cleanup": {
+  "residue_before_fallback": {},
+  "root_removed": true,
+  "residue_after_fallback": {}
+ },
+ "provider": {
+  "requests": {
+   "manager": 3,
+   "worker": 5
+  },
+  "aborted": [],
+  "errors": [],
+  "rules": [
+   {
+    "name": "record",
+    "hits": 0
+   },
+   {
+    "name": "worker-contract",
+    "hits": 2
+   },
+   {
+    "name": "exp:p1-go",
+    "hits": 1
+   },
+   {
+    "name": "",
+    "hits": 1
+   },
+   {
+    "name": "",
+    "hits": 2
+   }
+  ],
+  "real_model_requests": 0,
+  "log_tail": [
+   {
+    "i": 1,
+    "at": 1791457919.915176,
+    "role": "manager",
+    "last_role": "user",
+    "text_tail": "p1-go",
+    "injected_kind": null,
+    "tool_results": []
+   },
+   {
+    "i": 2,
+    "at": 1791457919.9546843,
+    "role": "manager",
+    "last_role": "tool",
+    "text_tail": "o not do it yourself (no commands, edits or checks for it). End your turn and wait for the worker's to_manager report.\"}",
+    "injected_kind": null,
+    "tool_results": [
+     "cw16-manager-1"
+    ]
+   },
+   {
+    "i": 3,
+    "at": 1791457920.0204544,
+    "role": "worker",
+    "last_role": "user",
+    "text_tail": null,
+    "injected_kind": "task",
+    "tool_results": []
+   },
+   {
+    "i": 4,
+    "at": 1791457981.2360141,
+    "role": "worker",
+    "last_role": "user",
+    "text_tail": null,
+    "injected_kind": "question",
+    "tool_results": []
+   },
+   {
+    "i": 5,
+    "at": 1791458016.00895,
+    "role": "worker",
+    "last_role": "user",
+    "text_tail": "p1-busy",
+    "injected_kind": null,
+    "tool_results": []
+   },
+   {
+    "i": 6,
+    "at": 1791458106.807867,
+    "role": "worker",
+    "last_role": "user",
+    "text_tail": null,
+    "injected_kind": "question",
+    "tool_results": []
+   },
+   {
+    "i": 7,
+    "at": 1791458120.3386655,
+    "role": "worker",
+    "last_role": "user",
+    "text_tail": null,
+    "injected_kind": "question",
+    "tool_results": []
+   },
+   {
+    "i": 8,
+    "at": 1791458120.3958192,
+    "role": "manager",
+    "last_role": "user",
+    "text_tail": null,
+    "injected_kind": "report",
+    "tool_results": []
+   }
+  ]
+ },
+ "injected": {
+  "manager": [
+   {
+    "kind": "report",
+    "stage": null,
+    "payload_kind": null,
+    "task_id": "0e69e909-a3a1-43f7-8b76-79c3647b207e",
+    "at": 1791458120.3958297
+   }
+  ],
+  "worker": [
+   {
+    "kind": "task",
+    "stage": "execute",
+    "payload_kind": null,
+    "task_id": "0e69e909-a3a1-43f7-8b76-79c3647b207e",
+    "at": 1791457920.0204678
+   },
+   {
+    "kind": "question",
+    "stage": "periodic_review",
+    "payload_kind": null,
+    "task_id": "0e69e909-a3a1-43f7-8b76-79c3647b207e",
+    "at": 1791457981.2360203
+   },
+   {
+    "kind": "question",
+    "stage": "periodic_review",
+    "payload_kind": null,
+    "task_id": "0e69e909-a3a1-43f7-8b76-79c3647b207e",
+    "at": 1791458106.807875
+   },
+   {
+    "kind": "question",
+    "stage": "analysis",
+    "payload_kind": null,
+    "task_id": "0e69e909-a3a1-43f7-8b76-79c3647b207e",
+    "at": 1791458120.3386729
+   }
+  ],
+  "unknown": []
+ },
+ "notes": [],
+ "finished_at": "2026-10-08T11:15:24+00:00"
+}

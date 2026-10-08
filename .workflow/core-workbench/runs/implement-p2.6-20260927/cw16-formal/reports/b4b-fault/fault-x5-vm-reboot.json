@@ -1,0 +1,73 @@
+{
+ "scenario": "fault-x5-vm-reboot",
+ "run_id": "b4b-fault",
+ "started_at": "2026-10-08T11:36:00+00:00",
+ "repo_head": "e63572356480f2431427d349d749fbd09c2ee72f",
+ "context": {
+  "scenario_id": "X5"
+ },
+ "versions": {},
+ "commands": [
+  {
+   "argv": [
+    "python",
+    "tests/integration/vm_reboot_driver.py",
+    "host",
+    "<dir>"
+   ],
+   "exit": 0,
+   "seconds": 341.49,
+   "stdout_tail": "{\"result\": \"pass\", \"failed\": [], \"report\": \"/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-formal/reports/b4b-fault/vm/vm-reboot-report.json\"}\n",
+   "stderr_tail": ""
+  }
+ ],
+ "steps": {
+  "X5.vm_reboot": {
+   "status": "pass",
+   "observed": {
+    "failed": [],
+    "checks": 28,
+    "manifest": {
+     "scope": "src/**, omp_bridge/**, tests/recovery_boot/** (no __pycache__)",
+     "host": {
+      "count": 91,
+      "aggregate": "514dd5c6b357d2f0ddf9b76d23fb76e5ea457801ba7b067c01f69e53860f9166"
+     },
+     "guest": {
+      "count": 91,
+      "aggregate": "514dd5c6b357d2f0ddf9b76d23fb76e5ea457801ba7b067c01f69e53860f9166"
+     },
+     "equal": true,
+     "differing": [],
+     "equals_cw19_vm02_aggregate": false,
+     "driver": {
+      "path": "tests/integration/vm_reboot_driver.py",
+      "sha256": "46182ff76e6eeb3570cd4d068f1a0ea025f5f6912ecd8eface847dc7150bd5ac"
+     }
+    },
+    "reboots": [
+     {
+      "cmd": "ssh.sh 'sync; sudo reboot'",
+      "at": "2026-10-08T20:36:19+0900",
+      "boot_before": "4fe4e402-48a5-471c-b562-fa57b377e289",
+      "boot_after": "44645188-18bb-48f0-8ef0-809221027f72",
+      "back_at": "2026-10-08T20:36:33+0900",
+      "qemu_pid_same": true
+     },
+     {
+      "cmd": "ssh.sh 'sync; sudo reboot'",
+      "at": "2026-10-08T20:38:34+0900",
+      "boot_before": "44645188-18bb-48f0-8ef0-809221027f72",
+      "boot_after": "45510fb0-3c02-40ba-a2f1-df3454bfdf59",
+      "back_at": "2026-10-08T20:38:48+0900",
+      "qemu_pid_same": true
+     }
+    ],
+    "report": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-formal/reports/b4b-fault/vm/vm-reboot-report.json"
+   }
+  }
+ },
+ "unknowns": [],
+ "result": "pass",
+ "finished_at": "2026-10-08T11:41:42+00:00"
+}

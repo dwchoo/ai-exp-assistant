@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw16-fix-01",
+  "ticket_id": "CW-16 product defects from B2/B3 self-runs",
+  "role": "worker_senior",
+  "unit": "V-CW-16",
+  "base_commit": "6a2ddb2",
+  "approved_bundle_digest": "b31396faad700dfbb5f9c95415ba34cac0ef7dabd517a4ef5c293ca8dc2c9cf2",
+  "routing": {
+    "planned_role": "worker_senior",
+    "selected_role": "worker_senior (Opus high)",
+    "reason_codes": [
+      "final_gate_defects",
+      "process_lifetime",
+      "pause_policy"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-b2-01.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-b3-01.md"
+    ]
+  },
+  "user_authorization": "User 2026-10-08 '전부 진행해서 테스트까지 해서 완료하고 보고해'",
+  "root_adjudication": [
+    "D-B2-1: experiment environment admission must use the host shell's CURRENT exported environment (the user prepares the environment directly, C-D55), not the environment captured at backend start (service.py ~L404). Obtain it from the live managed shell at dispatch/start time (existing shell protocol or a safe probe) without reading other processes' environ outside our own shell's identity; a variable exported after start must satisfy the check. A held experiment must not block the worker `terminal` for unrelated commands unless the host shell is actually busy (explain the current coupling and fix it if it is the cause).",
+    "D-B2-2: a run that finishes while automation is paused must not make resume impossible: resume reconciliation records the observed finish (no replay, no new model work started by the reconcile itself) and resumes; while paused the user/manager must still be able to cancel a Task (cancel is allowed under holds per C-D71 (3) and C-D65 cancel semantics) — make cancel during pause work and test the deadlock path.",
+    "D-B2-3 (C-AC-21): show usage in `status --json` and the UI status/task line: current run/retry usage (retries used/limit, review count, peer wakes as already counted) and model usage when known; unknown is shown as unknown ('미확인'), never as a fixed value. Keep it short on the status line.",
+    "B3 F1: full shutdown / OMP pane close must account for OMP 18.8.0's `omp __omp_worker_daemon_broker` children spawned by Workbench's own OMP processes: capture exact identities (pid + start ticks, our OMP as ancestor) before the OMP exits, wait bounded (they exit on their own ~1-3 s), and include them in verification; if still alive after the bound, terminate only those exact identities (they are ours) and verify; never match by cmdline and never touch a user's broker. verified must be false while an owned broker lives (C-AC-22).",
+    "B3 F2: the pause-store failure ('저장 오류') indicator must be visible at 170 columns (priority on the status line like the reboot wait text).",
+    "Fixture: tests/recovery_boot/fake_omp.py reader thread dies on a string envelope (`.get` on str) — fix the fixture (it is not an independent test)."
+  ],
+  "acceptance": [
+    "red->green tests for each; all suites with real exit codes for every tests/<suite> dir (`PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/<suite> -t tests/<suite> -p 'test_*.py'`) and node `node --test tests/bridge/*.test.ts`; then re-run the failing self-run steps: B2 steps (see result-p27-cw16-b2-01.md §7 formal command, run only the failing scenarios if supported) and B3 X4/X6 (result-p27-cw16-b3-01.md), 0 model requests."
+  ],
+  "allowed_write_paths": [
+    "src/workbench/**",
+    "omp_bridge/**",
+    "tests/** (not *_independent*; not tests/integration/** except reading)",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-fix-01.md"
+  ],
+  "prohibited_paths": [
+    "tests/**/*_independent*",
+    "tests/integration/** (frozen test design for C16; report needed changes instead)",
+    "docs/**",
+    "other .workflow files"
+  ],
+  "rules": "No real provider requests; never read credential stores/contents or other processes' environ (our own managed shell's exported variables via its own protocol are fine); never edit ~/.omp, ~/.agents, ~/.claude, ~/.codex or user configs; this session runs inside the user's tmux/herdr — isolate; never touch the user's default tmux/herdr servers, other claude-swarm sockets, ~/wb-urux-sandbox (user's Workbench and its OMP brokers), ~/.local/share/wb-vm or processes you did not start; kill only PIDs you started; no pkill; temp only under /tmp; no commits; no graphify update.",
+  "result_format": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-fix-01.md: checks table first, per item fix with file:line, self-run re-run results. Korean reply <=10 lines."
+}

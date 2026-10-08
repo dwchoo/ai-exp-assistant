@@ -1,0 +1,121 @@
+{
+ "invocation": "p27-cw16-rm-01",
+ "omp": "omp/18.8.0",
+ "candidate_commit": "e635723",
+ "requests": {
+  "cap": 40,
+  "pause_at": 36,
+  "total": 32,
+  "run1": {
+   "total": 12,
+   "RM1": {
+    "manager": 4,
+    "worker": 4
+   },
+   "aborted_RM2_attempt": {
+    "manager": 2,
+    "worker": 2,
+    "aborted": 1
+   }
+  },
+  "run2": {
+   "total": 20,
+   "RM4": {
+    "manager": 11,
+    "worker": 8
+   },
+   "RM3": {
+    "manager": 1
+   }
+  },
+  "errors": 0,
+  "aborted": 1,
+  "counter_stale": 0
+ },
+ "clock_note": "times UTC from session/journal records; KST = UTC+9",
+ "RM1": {
+  "input": "12:40:45.912",
+  "to_worker": "12:40:53.564",
+  "task_at_worker": "12:40:53.697",
+  "terminal": "12:40:59.179",
+  "terminal_exit0": "12:40:59.316",
+  "to_manager_done": "12:41:01.938",
+  "report_to_manager": "12:41:01.983",
+  "final_answer": "12:41:07.793",
+  "task_to_terminal_s": 5.5,
+  "task_to_done_s": 8.2,
+  "input_to_final_s": 21.9,
+  "calls": {
+   "manager": {
+    "read": 1,
+    "to_worker": 1
+   },
+   "worker": {
+    "read": 1,
+    "terminal": 1,
+    "to_manager": 1
+   }
+  },
+  "notices": 0
+ },
+ "RM2": {
+  "executed": false,
+  "reason": "request budget (RM4 used 19; remaining under pause 36 insufficient)"
+ },
+ "RM3": {
+  "typed": "12:45:11.6",
+  "pause_confirmed": "~12:45:15",
+  "interruption_state": "not_needed",
+  "requests_during_pause": 0,
+  "resume": "12:45:47 outcome=resumed",
+  "manager_answer": "12:46:17.9",
+  "new_requests_after_resume": 1,
+  "replay": false,
+  "abort_shown": false,
+  "note": "no automation run bound; manual manager turn not interrupted by design (automation.py L1118)"
+ },
+ "RM4": {
+  "input": "12:43:01.9",
+  "to_worker": "12:43:11.4",
+  "terminal_start": "12:43:15.97",
+  "backend_sigkill": "12:43:28.2",
+  "worker_terminal_result": "outcome_unknown/session_shutdown",
+  "restart_start": "12:43:36-38",
+  "backend_restarted_notice_sent": "12:43:37.6",
+  "notice_count": 1,
+  "classification": "same_boot_crash",
+  "survivors": [
+   "python",
+   "bash",
+   "sleep"
+  ],
+  "survivors_stoppable": false,
+  "manager_decision": [
+   "workbench_status",
+   "to_worker follow-up (no re-run)",
+   "workbench_status",
+   "cancel"
+  ],
+  "worker_terminal_calls": 1,
+  "final_answer": "12:44:29.6",
+  "calls": {
+   "manager": {
+    "read": 3,
+    "workbench_status": 2,
+    "to_worker": 3
+   },
+   "worker": {
+    "read": 3,
+    "terminal": 1,
+    "to_manager": 2
+   }
+  }
+ },
+ "observations": [
+  "O1 recovery cost 19 requests",
+  "O2 worker done after cancel rejected no_active_task",
+  "O3 restart banner persists after task closed",
+  "O4 shutdown --yes with active turns: exit 1 TimeoutError (10 s client timeout), processes gone, verified JSON not received",
+  "O5 old attach UI exits in 4 s; worker terminal call resolves outcome_unknown"
+ ]
+}

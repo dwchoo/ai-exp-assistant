@@ -1,0 +1,30 @@
+test_clock_fixture_suite (tests.integration.live_cw16_flow_policy.Cw16ClockFixtureSuite.test_clock_fixture_suite) ... skipped 'filtered out by WB_CW16_SCENARIOS (CLK)'
+test_f1_free_work_with_f4_idempotence (tests.integration.live_cw16_flow_policy.Cw16FlowScenarios.test_f1_free_work_with_f4_idempotence) ... skipped 'filtered out by WB_CW16_SCENARIOS (F1)'
+test_f2_experiment_judgments_and_missing_commit (tests.integration.live_cw16_flow_policy.Cw16FlowScenarios.test_f2_experiment_judgments_and_missing_commit) ... skipped 'filtered out by WB_CW16_SCENARIOS (F2)'
+test_f3_delegated_change_local_commit_only (tests.integration.live_cw16_flow_policy.Cw16FlowScenarios.test_f3_delegated_change_local_commit_only) ... skipped 'filtered out by WB_CW16_SCENARIOS (F3)'
+test_f45_worker_terminal_with_undelivered_task_and_after_cancel (tests.integration.live_cw16_flow_policy.Cw16FlowScenarios.test_f45_worker_terminal_with_undelivered_task_and_after_cancel)
+CW-19 VM observation: worker ``terminal`` gave no result for ~45 s while an unaccepted Task was open or ... 
+[cw16-b2] flow-F45: pass -> /tmp/wb-cw16-fix02-reports/fix02-policy/flow-F45.json
+ok
+test_f5_worker_direct_request_boundaries (tests.integration.live_cw16_flow_policy.Cw16FlowScenarios.test_f5_worker_direct_request_boundaries) ... skipped 'filtered out by WB_CW16_SCENARIOS (F5)'
+test_f7_idle_then_f6_code_change_reports_end_instruction (tests.integration.live_cw16_flow_policy.Cw16FlowScenarios.test_f7_idle_then_f6_code_change_reports_end_instruction) ... skipped 'filtered out by WB_CW16_SCENARIOS (F7)'
+test_p1_periodic_reviews_merge_and_p7_usage (tests.integration.live_cw16_flow_policy.Cw16PolicyScenarios.test_p1_periodic_reviews_merge_and_p7_usage) ... skipped 'filtered out by WB_CW16_SCENARIOS (P1)'
+test_p2_pause_holds_automatic_work (tests.integration.live_cw16_flow_policy.Cw16PolicyScenarios.test_p2_pause_holds_automatic_work) ... 
+[cw16-b2] policy-P2: pass -> /tmp/wb-cw16-fix02-reports/fix02-policy/policy-P2.json
+ok
+test_p3_pause_interrupts_manager_turn (tests.integration.live_cw16_flow_policy.Cw16PolicyScenarios.test_p3_pause_interrupts_manager_turn) ... 
+[cw16-b2] policy-P3: pass -> /tmp/wb-cw16-fix02-reports/fix02-policy/policy-P3.json
+ok
+test_p4_retry_limit_and_revision_change (tests.integration.live_cw16_flow_policy.Cw16PolicyScenarios.test_p4_retry_limit_and_revision_change) ... skipped 'filtered out by WB_CW16_SCENARIOS (P4)'
+test_p5_change_during_run_not_applied (tests.integration.live_cw16_flow_policy.Cw16PolicyScenarios.test_p5_change_during_run_not_applied) ... skipped 'filtered out by WB_CW16_SCENARIOS (P5)'
+test_p6_restart_worker_stop_survivor_kill_host (tests.integration.live_cw16_flow_policy.Cw16PolicyScenarios.test_p6_restart_worker_stop_survivor_kill_host) ... skipped 'filtered out by WB_CW16_SCENARIOS (P6)'
+test_p8_cancel_withdraw_keeps_observation (tests.integration.live_cw16_flow_policy.Cw16PolicyScenarios.test_p8_cancel_withdraw_keeps_observation) ... 
+[cw16-b2] policy-P8: pass -> /tmp/wb-cw16-fix02-reports/fix02-policy/policy-P8.json
+ok
+
+[cw16-b2] summary: /tmp/wb-cw16-fix02-reports/fix02-policy/flow-policy-summary.json
+
+----------------------------------------------------------------------
+Ran 14 tests in 188.806s
+
+OK (skipped=10)

@@ -1,0 +1,91 @@
+{
+ "run_id": "b3-selfrun-01",
+ "written_at": "2026-10-08T07:45:08+00:00",
+ "scenarios": {
+  "X1": {
+   "result": "pass",
+   "steps": {
+    "X1.start_run": "pass",
+    "X1.detach_active_review_continues": "pass",
+    "X1.takeover_requested": "pass",
+    "X1.detach_takeover_state_kept": "pass",
+    "X1.detach_paused_pause_kept": "pass",
+    "X1.resume_no_replay": "pass",
+    "X1.shutdown": "pass"
+   },
+   "unknowns": []
+  },
+  "X2": {
+   "result": "pass",
+   "steps": {
+    "X2.running_open_task": "pass",
+    "X2.sigkill_backend": "pass",
+    "X2.restart_reconcile": "pass",
+    "X2.backend_restarted_once": "pass",
+    "X2.no_replay": "pass",
+    "X2.status_text": "pass",
+    "X2.stop_survivor_unverified_refused": "pass",
+    "X2.stop_survivor_verified_stopped": "pass",
+    "X2.shutdown": "pass"
+   },
+   "unknowns": []
+  },
+  "X2R": {
+   "result": "pass",
+   "steps": {
+    "X2R.l_cw19_restart": "pass"
+   },
+   "unknowns": []
+  },
+  "X3": {
+   "result": "pass",
+   "steps": {
+    "X3.worker_fault_hold": "pass",
+    "X3.analysis_waits_for_worker": "pass",
+    "X3.worker_recovers": "pass",
+    "X3.analysis_after_recovery": "pass",
+    "X3.p2_2_first_tool_allowed": "pass",
+    "X3.p2_1_manager_fault_report_kept": "pass",
+    "X3.p2_1_delivered_once": "pass",
+    "X3.shutdown": "pass"
+   },
+   "unknowns": []
+  },
+  "X4": {
+   "result": "fail",
+   "steps": {
+    "X4.no_yes_refused_active_listed": "pass",
+    "X4.yes_verified_nothing_left": "pass",
+    "X4.owned_broker_not_alive_at_verified": "fail",
+    "X4.survivor_unverified_exit1": "pass"
+   },
+   "unknowns": []
+  },
+  "X6": {
+   "result": "fail",
+   "steps": {
+    "X6.run_cap_64mib_run_continues": "pass",
+    "X6.restart_keeps_task_spec_worktree": "pass",
+    "X6.project_cap_reduced_fixture": "pass",
+    "X6.start_fault_sandbox": "pass",
+    "X6.raw_log_store_failure_shown": "pass",
+    "X6.metadata_hold_and_pause_store_failure": "pass",
+    "X6.pause_store_failure_visible_at_170": "fail",
+    "X6.metadata_restored": "pass",
+    "X6.shutdown": "pass"
+   },
+   "unknowns": []
+  },
+  "X7": {
+   "result": "pass",
+   "steps": {
+    "X7.command_delivered": "pass",
+    "X7.takeover_holds_new_sends": "pass",
+    "X7.backend_restart": "pass",
+    "X7.old_command_unknown_no_replay": "pass",
+    "X7.shutdown": "pass"
+   },
+   "unknowns": []
+  }
+ }
+}

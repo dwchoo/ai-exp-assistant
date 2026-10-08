@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw16-c17-review-01",
+  "ticket_id": "CW-16 C17 delta review (fix-03, fix-04, gap tests)",
+  "role": "reviewer",
+  "unit": "V-CW-16",
+  "candidate": "db39f4aabd7034dd280110ac93a6b5d0577440dd30981cd17f9883404259767d",
+  "base_commit": "e635723",
+  "routing": {
+    "planned_role": "reviewer",
+    "selected_role": "reviewer (Opus high, fresh; final candidate delta)",
+    "reason_codes": [
+      "final_gate",
+      "shutdown_contract"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-fix-03.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-fix-04.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-gap-01.md",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-rerun-01.md"
+    ]
+  },
+  "required_behavior": [
+    "Review `git diff e635723 81bebe6 -- src omp_bridge tests` against assignments p27-cw16-fix-03/-fix-04/-gap-01 and C-D71/C-D72/C-D73, C-AC-22: shutdown answer flush + shared SIGTERM grace + CLI deadline wait (no traceback, truthful unverified), restart status line expiry, retry_limit detail, SH5 reason, colour mapping (C-D73 criterion; no misparse), umask 077 for OMP children (no effect on the user's host shell), sandboxed live_harness (no credential access: empty placeholder agent.db, proxies blocked, version record) and edits to independent tests (pin/harness wiring and the symlink delta only; no weakened assertions), gap scenarios validity. Read-only; you may run tests under /tmp. A formal run executes concurrently on the host — avoid heavy parallel load."
+  ],
+  "acceptance": [
+    "Verdict pass/block with findings P1-P3 file:line"
+  ],
+  "allowed_write_paths": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-c17-review-01.md"
+  ],
+  "rules": "Read-only. No real provider requests; never read credential stores/contents or other processes' environ; never touch the user's tmux/herdr, other claude-swarm sockets, ~/wb-urux-sandbox, ~/.local/share/wb-vm or processes you did not start; no commits; no graphify update.",
+  "result_format": "Korean reply <=8 lines."
+}

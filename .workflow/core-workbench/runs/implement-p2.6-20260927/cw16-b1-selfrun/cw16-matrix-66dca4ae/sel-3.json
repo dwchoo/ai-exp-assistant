@@ -1,0 +1,67 @@
+{
+ "scenario": "sel-3",
+ "run_id": "cw16-matrix-66dca4ae",
+ "started_at": "2026-10-08T06:38:36+00:00",
+ "repo_head": "6a2ddb2b5441202c8e94d27f775c7159fb9672ae",
+ "context": {
+  "path": [
+   "omp",
+   "zsh"
+  ],
+  "SHELL": "fake zsh sentinel"
+ },
+ "versions": {
+  "omp": "omp/18.8.0",
+  "omp_path": "/home/dwchoo/.local/bin/omp",
+  "tmux": "tmux 3.4",
+  "herdr": "herdr 0.9.3",
+  "bash": "GNU bash, version 5.2.21(1)-release (x86_64-pc-linux-gnu)",
+  "dash": "dash 0.5.12-6ubuntu5",
+  "sh": "/usr/bin/dash",
+  "python": "3.12.3",
+  "kernel": "7.0.0-30-generic",
+  "os": "Ubuntu 24.04.4 LTS"
+ },
+ "commands": [
+  {
+   "argv": [
+    "python",
+    "-m",
+    "workbench",
+    "status",
+    "--data-dir",
+    "/tmp/wbc16sel3-wdxxctrz/d",
+    "--json"
+   ],
+   "exit": 3,
+   "seconds": 0.06,
+   "stdout_tail": "{\"running\": false, \"data_dir\": \"/tmp/wbc16sel3-wdxxctrz/d\"}\n",
+   "stderr_tail": ""
+  }
+ ],
+ "steps": {
+  "start_refused": {
+   "status": "pass",
+   "seconds": 0.1,
+   "observed": {
+    "exit": 2,
+    "guidance": [
+     "OMP Workbench needs Bash or a POSIX sh on PATH for its persistent host shell.",
+     "No backend was started."
+    ],
+    "data_dir_unchanged": true,
+    "backends": [],
+    "status_exit": 3,
+    "zsh_sentinel_executed": false
+   }
+  }
+ },
+ "unknowns": [],
+ "result": "pass",
+ "cleanup": {
+  "residue_before_fallback": {},
+  "root_removed": true,
+  "residue_after_fallback": {}
+ },
+ "finished_at": "2026-10-08T06:38:36+00:00"
+}

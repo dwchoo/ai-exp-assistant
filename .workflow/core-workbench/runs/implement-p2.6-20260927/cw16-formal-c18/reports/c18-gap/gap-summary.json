@@ -1,0 +1,60 @@
+{
+ "run_id": "c18-gap",
+ "scenarios": {
+  "gap-G1-COLOR": {
+   "result": "pass",
+   "steps": {
+    "start": "pass",
+    "COLOR_basic16": "pass",
+    "COLOR_sgr_30_37_90_97_40_47_100_107": "pass",
+    "COLOR_256_cube": "pass",
+    "COLOR_256_grey_ramp": "pass",
+    "COLOR_256_system_indices": "pass",
+    "COLOR_24bit_rgb": "pass",
+    "COLOR_omp_pane_info": "pass",
+    "shutdown": "pass"
+   },
+   "unknowns": [],
+   "path": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-formal-c18/reports/c18-gap/gap-G1-COLOR.json"
+  },
+  "gap-G1-SCROLL": {
+   "result": "pass",
+   "steps": {
+    "start": "pass",
+    "SCROLL_mode_history_kept_live_exit": "pass",
+    "SCROLL_shift_pgup_direct_and_live_on_input": "pass",
+    "SCROLL_mouse_wheel": "pass",
+    "SCROLL_omp_pane_mode": "pass",
+    "shutdown": "pass"
+   },
+   "unknowns": [],
+   "path": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-formal-c18/reports/c18-gap/gap-G1-SCROLL.json"
+  },
+  "gap-G3-COMPOSER": {
+   "result": "pass",
+   "steps": {
+    "start": "pass",
+    "COMPOSER_draft_in_manager": "pass",
+    "COMPOSER_report_deferred_and_shown": "pass",
+    "COMPOSER_cleared_then_delivered_once": "pass",
+    "shutdown": "pass"
+   },
+   "unknowns": [],
+   "path": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-formal-c18/reports/c18-gap/gap-G3-COMPOSER.json"
+  },
+  "gap-G3-SESSION": {
+   "result": "pass",
+   "steps": {
+    "start": "pass",
+    "SESSION_delivery_before_switch": "pass",
+    "SESSION_new_reregisters_same_process": "pass",
+    "SESSION_no_replay_one_recovery_notice": "pass",
+    "SESSION_next_report_to_new_session_once": "pass",
+    "shutdown": "pass"
+   },
+   "unknowns": [],
+   "path": "/home/dwchoo/ai-exp-assistant/.workflow/core-workbench/runs/implement-p2.6-20260927/cw16-formal-c18/reports/c18-gap/gap-G3-SESSION.json"
+  }
+ },
+ "written_at": "2026-10-08T17:20:12+00:00"
+}

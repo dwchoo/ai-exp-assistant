@@ -1,0 +1,33 @@
+== [1/2] non-live: test_cw16_runtime_matrix + test_cw16_harness
+test_actual_bash_and_dash_canonical_matrix (tests.integration.test_cw16_runtime_matrix.Cw16RuntimeMatrixTests.test_actual_bash_and_dash_canonical_matrix) ... ok
+test_output_capture_has_a_hard_file_and_memory_bound (tests.integration.test_cw16_runtime_matrix.Cw16RuntimeMatrixTests.test_output_capture_has_a_hard_file_and_memory_bound) ... ok
+test_product_path_outer_matrix (tests.integration.test_cw16_runtime_matrix.Cw16RuntimeMatrixTests.test_product_path_outer_matrix) ... skipped 'product-path outer matrix (~25 min, scripted provider): set WB_LIVE_CW16=1'
+test_runtime_versions_are_recorded_not_pinned (tests.integration.test_cw16_runtime_matrix.Cw16RuntimeMatrixTests.test_runtime_versions_are_recorded_not_pinned) ... 
+[cw16-versions] {"bash": "GNU bash, version 5.2.21(1)-release (x86_64-pc-linux-gnu)", "dash": "dash 0.5.12-6ubuntu5", "herdr": "herdr 0.9.3", "kernel": "7.0.0-30-generic", "omp": "omp/18.8.0", "omp_path": "/home/dwchoo/.local/bin/omp", "os": "Ubuntu 24.04.4 LTS", "python": "3.12.3", "sh": "/usr/bin/dash", "tmux": "tmux 3.4"}
+ok
+test_shell_selection_ignores_login_shell_and_fails_with_guidance (tests.integration.test_cw16_runtime_matrix.Cw16RuntimeMatrixTests.test_shell_selection_ignores_login_shell_and_fails_with_guidance) ... ok
+test_timeout_is_bounded_when_pipe_holder_drops_owner_token (tests.integration.test_cw16_runtime_matrix.Cw16RuntimeMatrixTests.test_timeout_is_bounded_when_pipe_holder_drops_owner_token) ... ok
+test_timeout_kills_detached_owned_descendants (tests.integration.test_cw16_runtime_matrix.Cw16RuntimeMatrixTests.test_timeout_kills_detached_owned_descendants) ... ok
+test_clean_env_never_inherits_outer_context (tests.integration.test_cw16_harness.HelperTests.test_clean_env_never_inherits_outer_context) ... ok
+test_kill_exact_refuses_a_wrong_start_time (tests.integration.test_cw16_harness.HelperTests.test_kill_exact_refuses_a_wrong_start_time) ... ok
+test_shutdown_result (tests.integration.test_cw16_harness.HelperTests.test_shutdown_result) ... ok
+test_step_runner_statuses_and_prerequisites (tests.integration.test_cw16_harness.HelperTests.test_step_runner_statuses_and_prerequisites) ... ok
+test_http_error_turn (tests.integration.test_cw16_harness.ScriptedProviderTests.test_http_error_turn) ... ok
+test_models_yml_names_the_local_port_only (tests.integration.test_cw16_harness.ScriptedProviderTests.test_models_yml_names_the_local_port_only) ... ok
+test_rules_roles_counts_and_default (tests.integration.test_cw16_harness.ScriptedProviderTests.test_rules_roles_counts_and_default) ... ok
+test_script_errors_answer_instead_of_hanging (tests.integration.test_cw16_harness.ScriptedProviderTests.test_script_errors_answer_instead_of_hanging) ... ok
+test_streamed_turn_and_client_abort_is_recorded (tests.integration.test_cw16_harness.ScriptedProviderTests.test_streamed_turn_and_client_abort_is_recorded) ... ok
+test_tool_calls_and_tool_results_and_injected_messages (tests.integration.test_cw16_harness.ScriptedProviderTests.test_tool_calls_and_tool_results_and_injected_messages) ... ok
+
+----------------------------------------------------------------------
+Ran 17 tests in 9.409s
+
+OK (skipped=1)
+== [2/2] live COMPAT 6 + SEL1-3 (test_product_path_outer_matrix)
+test_product_path_outer_matrix (tests.integration.test_cw16_runtime_matrix.Cw16RuntimeMatrixTests.test_product_path_outer_matrix) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 792.718s
+
+OK
+== combined rc=0

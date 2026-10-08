@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw16-b1-01",
+  "ticket_id": "CW-16 B1: common harness + outer compat matrix + shell selection",
+  "role": "test_designer",
+  "unit": "V-CW-16",
+  "base_commit": "6a2ddb2",
+  "approved_bundle_digest": "b31396faad700dfbb5f9c95415ba34cac0ef7dabd517a4ef5c293ca8dc2c9cf2",
+  "routing": {
+    "planned_role": "test_designer",
+    "selected_role": "test_designer (Opus high; harness others reuse)",
+    "reason_codes": [
+      "final_gate",
+      "compat_runtime"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-plan-01.md",
+      "docs/features/core-workbench/tickets/CW-16.md"
+    ]
+  },
+  "user_authorization": "User 2026-10-08 '전부 진행해서 테스트까지 해서 완료하고 보고해'; C-D72 answers",
+  "required_behavior": [
+    "Implement plan result-p27-cw16-plan-01.md §5.1 (tests/integration/cw16_harness.py: sandbox, ScriptedProvider with delays/errors/counters/injected-message log, entrypoint helpers, UI driver from tests/backend/live_cw18_independent_p27w.py Ui with rep_screen_classes, owned-pid cleanup, residue checks, per-scenario JSON reports to /tmp) and §5.2 (outer adapters: plain PTY, isolated tmux, isolated herdr 0.9.3; scenarios C1-C7 for each outer × host {bash, dash}) as tests/integration/live_cw16_compat.py, plus §5.3 SEL1-SEL3 bundled (bash first with fake zsh sentinel not executed, no bash -> /usr/bin/dash, neither -> guidance + exit != 0 + nothing started). Per C-D72 (1) there is no zsh-login check (SEL4 dropped).",
+    "Per C-D72 (2): replace the existing tests/integration/test_cw16_runtime_matrix.py outer matrix (OMP 18.2.10 / herdr 0.9.1 pins) with the product-path version-record approach (record OMP/tmux/herdr/bash/dash versions; never pin); keep the canonical matrix; mark the old probe historical in a comment. Also convert the pinned OMP 18.2.10 G1/G3 live probe tests (tests/gates/g3_omp test_tui_extension_fault_integration setUpClass and any tests/integration pins) to record the version actually run (no pin), keeping what they observe.",
+    "Run each outer × shell once yourself (informal W-stage self-run; formal runs come later on the frozen candidate). Record results to /tmp and summarise. Expected ~20 min, 0 model requests.",
+    "Do not change product code; product defects -> failing repro + report."
+  ],
+  "allowed_write_paths": [
+    "tests/integration/**",
+    "tests/gates/g3_omp/** (version pin -> version record only)",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-b1-01.md"
+  ],
+  "prohibited_paths": [
+    "src/**",
+    "omp_bridge/**",
+    "docs/**",
+    "other .workflow files"
+  ],
+  "rules": "No real provider requests in B1 (scripted local provider only; HTTP(S)/ALL_PROXY=http://127.0.0.1:9). Never read credential stores/contents or other processes' environ; never print tokens; never edit ~/.omp, ~/.agents, ~/.claude, ~/.codex or user configs; this session itself runs inside the user's tmux and herdr: strip TMUX/HERDR env from every child, use only your own isolated tmux socket (-S under /tmp, -f /dev/null) and an isolated herdr config/runtime/session dir under /tmp; never query or touch the user's default tmux/herdr servers or other claude-swarm sockets; never touch ~/wb-urux-sandbox, ~/.local/share/wb-vm or processes you did not start; kill only PIDs you started (pid+start ticks); no pkill; temp only under /tmp; no commits; no graphify update.",
+  "result_format": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw16-b1-01.md: harness API (for B2/B3), matrix results per outer×shell×C1-C7 (pass/N/A/not run + reason), SEL results, defects, versions. Korean reply <=10 lines."
+}
