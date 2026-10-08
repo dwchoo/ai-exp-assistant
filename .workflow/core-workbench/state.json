@@ -425,7 +425,7 @@
   "implementation_p27": {
     "run_record": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
     "approved_bundle_sha256": "91fe05dc882d8c00ab0eb28c30e2b6cabcbfacb0f0fee3f0eaeecfaff5b7d3e8",
-    "status": "C-D70 integrated and verified (real-model smokes incl. normal-flow regression); host pane shrink overprint fixed (smoke overprint was an emulator artefact); next: UR-USABILITY retry by the user, CW-19, CW-16 (polish lists in integration-p27-cd68/cd70/overprint.json)",
+    "status": "UR-USABILITY done (user 2026-10-08); main=72e7d18 pushed; now: CW-19 (design -> implement -> test -> VM reboot -> review), then CW-16 and polish, per user 2026-10-08 '전부 진행해서 테스트까지 해서 완료하고 보고해'",
     "resumed_from": ".codex/handoffs/2026-09-29-core-workbench-p27-cw17/HANDOFF.md",
     "units": {
       "V-CW-17-p2.7": {
@@ -499,7 +499,13 @@
     },
     "user_review_checkpoints": {
       "UR-UX": "closed 2026-10-03 (user: 'UI 적인 것은 괜찮은거 같아'); C-D64",
-      "UR-USABILITY": "ready for the user (CW-18 integrated and real-model smoke passed)"
+      "UR-USABILITY": {
+        "checkpoint": "UR-USABILITY (C-D57)",
+        "status": "done",
+        "date": "2026-10-08",
+        "user_quote": "좋아 현재 잘 동작해. 이제 이걸 푸쉬해줘.",
+        "note": "user retried the sandbox after C-D68..C-D70 and the host-pane shrink fix; branch pushed and fast-forward merged to main 72e7d18 on user request"
+      }
     },
     "note": "state is an operational index; verify against ledger and run records",
     "next_after_ur_ux": "apply UR-UX feedback as CW-06 delta (if any) -> CW-18 -> UR-USABILITY -> CW-19 -> CW-16",

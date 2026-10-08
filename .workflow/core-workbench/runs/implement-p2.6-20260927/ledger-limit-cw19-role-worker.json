@@ -1,0 +1,23 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 2294,
+  "event": {
+    "id": "limit-cw19-role-worker",
+    "kind": "limit",
+    "data": {
+      "authority": "Approved PLAN p2.7s (bundle 25936cde...), C-D55 budget delegation, workflow-contract section 8; user 2026-10-08 '전부 진행해서 테스트까지 해서 완료하고 보고해' (CW-19, CW-16, polish)",
+      "bucket": "role:worker",
+      "decision_owner": "Root",
+      "expected_previous": {
+        "authority": "C-D70 (approved PLAN p2.7s, bundle 25936cde...), C-D55 budget delegation, workflow-contract section 8; user 2026-10-07 '좋아' to pre-UR polish + regression smoke",
+        "reason": "C-D70 pre-UR UI polish (wb-worker) + reserve",
+        "value": 59
+      },
+      "origin": "operating",
+      "reason": "polish (bounded) + docs",
+      "remaining_work_estimate": 6,
+      "scope_basis": null,
+      "value": 63
+    }
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw19-01",
+  "ticket_id": "CW-19 U1-U3 implementation",
+  "role": "worker_senior",
+  "unit": "V-CW-19",
+  "approved_bundle_digest": "cd3e3c9d143ef4d00f806288bccba15ecbc5d76bf7d8c6f1547672cbd31e812c",
+  "base": "72e7d18 + integrated polish-01 (committed before dispatch)",
+  "routing": {
+    "planned_role": "worker_senior",
+    "selected_role": "worker_senior (Opus high)",
+    "reason_codes": [
+      "process_lifetime",
+      "recovery_contract",
+      "concurrency"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw19-design-01.md",
+      "docs/features/core-workbench/DECISIONS.md#C-D71"
+    ]
+  },
+  "user_authorization": "User 2026-10-08 '전부 진행해서 테스트까지 해서 완료하고 보고해'; C-D71 answers",
+  "required_behavior": [
+    "Implement the design in result-p27-cw19-design-01.md section 3 units U1, U2, U3 in order (each with its own red->green tests before the next), adjusted by C-D71 (docs/features/core-workbench/DECISIONS.md#C-D71) — the user decisions override the design's defaults where they differ:",
+    "C-D71 (1) survivors: previous-incarnation processes (same boot, pid + start_ticks identity) are never auto-killed; list them in status / UI recovery line / shutdown list and in the manager's backend-restart notice and workbench_status; add a manager-only bridge tool (e.g. `stop_survivor {survivor_id, reason}`) that re-verifies identity (same boot, pid, start_ticks, owner) right before signalling (TERM, grace, KILL of that exact process / its own session as existing pane close does), records reason/requester/time/outcome, and refuses unknown or changed identities; unknown-identity entries are display-only. Update the manager recovery skill and tool descriptions briefly.",
+    "C-D71 (2) same-boot restart + open Task -> one 'backend_restarted' notice to the new manager session after reconcile (with survivors and the reconcile summary); never while paused, before confirm_boot, or under metadata/model hold (deferred until allowed, sent once).",
+    "C-D71 (3) boot marker changed -> AdmissionHold boot_confirmation_required: hold every Workbench-originated automatic action (to_worker dispatch of experiment and free-work Tasks, worker terminal tool, watchdog/recovery notices, 60 s review, new experiments); allow user direct pane input, pane restart (C-D62/63), takeover, pause/resume, cancel, status. CLI `confirm-boot` shows environment/execution conditions and confirms (durable); UI only shows the waiting state (C-D58).",
+    "C-D71 (4) model error hold per role lifts passively when that role's next assistant turn ends without error; no probe requests. C-D71 (5) project 512 MiB raw log cap applies to experiment run raw logs via RawLogStore; worker terminal logs keep 64 MiB/command only.",
+    "Also: durable pause across backend crash (R4), _write_record fail-soft with metadata failure display (R3), previous backend.json read before overwrite and reconcile against /proc identity with boot_id compared first (pid reuse), never-submitted outbox messages lost in a crash listed as 'queued, not sent' when the journal shows them (R9), full shutdown via CLI shows active work and asks confirmation; failure to verify termination is never shown as success (C-AC-22).",
+    "Write scope: the PLAN CW-19 scope plus the backend files named in the design (service.py, cli.py, automation.py, flow*.py, workflow/run.py, omp_bridge/g3/bridge.ts, omp_bridge/skills/workbench-recovery, ui/product/model.py, contracts/ui_v1.py, app/recovery*.py, backend/boot*.py, policy/recovery_manager/port_sqlite.py) and their tests.",
+    "Tests: unit + one real-process test that starts the backend via the product entrypoint with a fake OMP command / scripted provider, SIGKILLs the backend, restarts it and checks reconcile, survivors listing, no replay, pause kept, notice once; plus a boot-marker-change test (injectable boot_id source) checking the hold and confirm-boot. All suites green with real exit codes (`PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/<suite> -t tests/<suite> -p 'test_*.py'` for backend, bridge, terminal, ui, workflow, gates/g2_shell, contracts, recovery_boot if created; node `node --test tests/bridge/*.test.ts`)."
+  ],
+  "allowed_write_paths": [
+    "src/workbench/app/**",
+    "src/workbench/backend/**",
+    "src/workbench/policy/recovery_manager/**",
+    "src/workbench/workflow/run.py",
+    "src/workbench/contracts/ui_v1.py",
+    "src/workbench/ui/product/**",
+    "src/workbench/ipc/bridge_g3/mailbox.py",
+    "omp_bridge/g3/bridge.ts",
+    "omp_bridge/skills/**",
+    "tests/** (not *_independent*)",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw19-01.md"
+  ],
+  "prohibited_paths": [
+    "tests/**/*_independent*",
+    "docs/**",
+    "other .workflow files"
+  ],
+  "rules": "No real provider requests (a local scripted provider/fake OMP is fine); never read credential stores/contents or other processes' environ; never edit ~/.omp, ~/.agents, ~/.claude, ~/.codex or user configs; never touch the user's tmux (default socket), other claude-swarm sockets, ~/wb-urux-sandbox, ~/.local/share/wb-vm or processes you did not start; kill only PIDs you started; no pkill; temp only under /tmp; no commits; no graphify update.",
+  "result_format": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw19-01.md: checks table first (real exit codes), per unit status with file:line, decisions taken where the design/C-D71 left room, independent tests needing updates, open questions. Korean reply <=12 lines."
+}

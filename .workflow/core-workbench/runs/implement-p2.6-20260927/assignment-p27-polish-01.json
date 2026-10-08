@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-polish-01",
+  "ticket_id": "Carried polish (product): BridgeTimeout unknown noise, empty log on abort, DECSC on shrink, dead waiter after worker disconnect, reports_resent skew",
+  "role": "worker_senior",
+  "unit": "V-polish-final",
+  "base_commit": "72e7d18",
+  "routing": {
+    "planned_role": "worker_senior",
+    "selected_role": "worker_senior (Opus high; delivery/terminal timing)",
+    "reason_codes": [
+      "delivery_contract",
+      "concurrency"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/integration-p27-cd68.json",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/integration-p27-cd70.json",
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/integration-p27-overprint.json"
+    ]
+  },
+  "user_authorization": "User 2026-10-08 '전부 진행해서 테스트까지 해서 완료하고 보고해'",
+  "required_behavior": [
+    "(1) BridgeTimeout: outbox deliveries are recorded unknown/BridgeTimeout although the target OMP did process them (smokes cd70-01/02/03/04; first Task delivery). Find why (deliver timeout vs the target's turn length, receipt window, on_submitted) in flow.py / ipc/bridge_g3/mailbox.py / bridge.ts receipts; make the recorded outcome truthful (e.g. submitted + receipt window ended = 'submitted, outcome pending' not unknown, or a longer/receipt-driven wait) WITHOUT changing the no-replay rule or the C-D70 report_delivery_unknown semantics (never-submitted only). Keep the 10 s tool budget.",
+    "(2) An aborted terminal run before submit leaves an empty 0600 .log: do not create it before typing, or remove it on that path (flow_terminal.py).",
+    "(3) vt_g1/screen.py _resize_screen: shift a DECSC-saved cursor y by the dropped rows (clamped) on shrink.",
+    "(4) Dead waiter after a worker disconnect delays terminal_check up to the handler timeout (flow_terminal.py): release/notice promptly on peer gone.",
+    "(5) reports_resent count skew when the manager session changes twice in a narrow window (flow.py _unbound_for ~L937-952): count per delivering session correctly.",
+    "Tests red->green for each; suites tests/backend, tests/bridge (py+node), tests/terminal, tests/ui, tests/workflow, tests/gates/g2_shell, tests/contracts with real exit codes (`PYTHONPATH=src /tmp/cw02-g1-venv/bin/python -m unittest discover -s tests/<suite> -t tests/<suite> -p 'test_*.py'`, node `node --test tests/bridge/*.test.ts`)."
+  ],
+  "concurrency_note": "A read-only design investigation for CW-19 runs at the same time; no other writer. Do not touch src/workbench/app/**, policy/recovery_manager/**, backend/boot*.",
+  "allowed_write_paths": [
+    "src/workbench/backend/flow*.py",
+    "src/workbench/ipc/bridge_g3/mailbox.py",
+    "omp_bridge/g3/bridge.ts",
+    "src/workbench/terminal/vt_g1/screen.py",
+    "tests/backend/test_*.py (not *_independent*)",
+    "tests/bridge/** (not *_independent*)",
+    "tests/terminal/test_*.py (not *_independent*)",
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-polish-01.md"
+  ],
+  "prohibited_paths": [
+    "tests/**/*_independent*",
+    "docs/**",
+    "other .workflow files"
+  ],
+  "rules": "No real provider requests; never read credential stores/contents or other processes' environ; never edit ~/.omp, ~/.agents, ~/.claude, ~/.codex or user configs; never touch the user's tmux (default socket), other claude-swarm sockets, ~/wb-urux-sandbox or processes you did not start; kill only PIDs you started; no pkill; temp only under /tmp; no commits; no graphify update.",
+  "result_format": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-polish-01.md: checks table, per item cause + fix file:line. Korean reply <=8 lines."
+}

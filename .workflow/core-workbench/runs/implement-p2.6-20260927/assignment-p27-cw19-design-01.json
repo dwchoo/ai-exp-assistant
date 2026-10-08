@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-cw19-design-01",
+  "ticket_id": "CW-19 design investigation",
+  "role": "code_explorer",
+  "unit": "V-CW-19-design",
+  "base_commit": "72e7d18",
+  "routing": {
+    "planned_role": "code_explorer",
+    "selected_role": "code_explorer (Opus high, read-only design pass; process lifetime/recovery)",
+    "reason_codes": [
+      "process_lifetime",
+      "recovery_contract"
+    ],
+    "evidence_refs": [
+      "docs/features/core-workbench/tickets/CW-19.md",
+      "docs/features/core-workbench/PLAN.json#CW-19"
+    ]
+  },
+  "user_authorization": "User 2026-10-08 '전부 진행해서 테스트까지 해서 완료하고 보고해'",
+  "required_behavior": [
+    "Read docs/features/core-workbench/tickets/CW-19.md, PLAN.json (CW-19 entry, gate items L-CW19-RESTART / L-CW19-REBOOT, dependency_artifacts), SPEC.md sections for production composition / I-FAULT / C-AC-16,17,22,23,24,28, DECISIONS C-D55, C-D56, C-D58, C-D62, C-D63, C-D70 (5) (backend restart is CW-19). Map what already exists in code: src/workbench/backend/service.py (read_boot_id, boot dict, confirm_boot, shutdown_request/confirm, resume/reconcile, _respawn, restart history, data-dir records), src/workbench/app/lifecycle.py, production.py, policy/recovery_manager/**, workflow LifecycleJournal / LifecycleCoordinator.reconcile / RecoveryCoordinator / RecoveryPort, cli.py (start/attach/shutdown/confirm-boot commands), panes.py (process identity), flow*.py durable journals (outbox, tasks, terminal runs), storage layer, raw log limits (CW-14), model error/metadata failure signals.",
+    "Produce a gap analysis per ticket bullet (boot marker, restart reconcile with /proc identity, RecoveryPort SQLite production impl replacing test doubles, termination callbacks normal_stop/drain/force wired to real workflow runs, full shutdown with running-work display and confirmation, fault display for model error / metadata store failure / raw log limit) with file:line, what is missing, and risks (orphaned host shell / OMP processes after backend SIGKILL: are panes in their own sessions? do they die with the backend? what does a restarted backend do with surviving processes? the Task/outbox/terminal journals after restart; no replay).",
+    "Propose an implementation plan split into 2-4 sequential work units with exact behaviours, write scopes (PLAN write scope plus any backend files needed — list them), tests (unit + real-process restart test with SIGKILL of the backend started via the product entrypoint), and a VM reboot procedure (VM at ~/.local/share/wb-vm/wb-reboot with start.sh/stop.sh/ssh.sh; guest repo is an rsync copy at ~/ai-exp-assistant excluding .workflow and graphify-out; guest OMP 18.2.10; verify without real model requests if possible). Flag any decision that needs the user (do not decide product behaviour that the ticket/SPEC leaves open; propose a default with reason)."
+  ],
+  "allowed_write_paths": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw19-design-01.md"
+  ],
+  "rules": "No real provider requests; never read credential stores/contents or other processes' environ; never edit ~/.omp, ~/.agents, ~/.claude, ~/.codex or user configs; never touch the user's tmux (default socket), other claude-swarm sockets, ~/wb-urux-sandbox or processes you did not start; kill only PIDs you started; no pkill; temp only under /tmp; no commits; no graphify update.",
+  "result_format": ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-cw19-design-01.md (English or Korean; precise, file:line). Reply in Korean <=12 lines."
+}

@@ -1,0 +1,24 @@
+{
+  "path": ".workflow/core-workbench/runs/implement-p2.6-20260927/ledger.json",
+  "expected_revision": 2295,
+  "event": {
+    "id": "limit-cw19-unit-V-CW-19-design",
+    "kind": "limit",
+    "data": {
+      "authority": "Approved PLAN p2.7s (bundle 25936cde...), C-D55 budget delegation, workflow-contract section 8; user 2026-10-08 '전부 진행해서 테스트까지 해서 완료하고 보고해' (CW-19, CW-16, polish)",
+      "bucket": "unit:V-CW-19-design",
+      "decision_owner": "Root",
+      "expected_previous": null,
+      "origin": "operating",
+      "reason": "New unit: CW-19 design investigation",
+      "remaining_work_estimate": 2,
+      "scope_basis": {
+        "evidence_refs": [
+          "new unit (CW-19/CW-16 start)"
+        ],
+        "status": "known-empty"
+      },
+      "value": 2
+    }
+  }
+}

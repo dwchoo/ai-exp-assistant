@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "invocation": "p27-polish-review-01",
+  "ticket_id": "Carried polish (product) delta review",
+  "role": "reviewer",
+  "unit": "V-polish-final",
+  "base_commit": "72e7d18",
+  "routing": {
+    "planned_role": "reviewer",
+    "selected_role": "reviewer (wb-delta-reviewer, Sonnet high)",
+    "reason_codes": [
+      "review_delta"
+    ],
+    "evidence_refs": [
+      ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-polish-01.md"
+    ]
+  },
+  "required_behavior": [
+    "Review `git diff 72e7d18 -- src omp_bridge tests` (excluding docs/.workflow) against assignment-p27-polish-01.json and result-p27-polish-01.md. Key risks: (1) receipt window end recorded as delivered/receipt_window_ended — must only apply to submitted (API-accepted) messages; never-submitted must stay deferred/unknown per C-D70; no replay; UI/notices consistent; (3) DECSC shift clamp; (4) peer_gone waiter release does not drop terminal output or double-notify; (5) per-session reports_resent count. Run the new tests."
+  ],
+  "acceptance": [
+    "Verdict pass/block with P1-P3 file:line"
+  ],
+  "allowed_write_paths": [
+    ".workflow/core-workbench/runs/implement-p2.6-20260927/result-p27-polish-review-01.md"
+  ],
+  "rules": "Read-only. No real provider requests; never read credential contents; temp only under /tmp; no commits; no graphify update.",
+  "result_format": "Korean reply <=6 lines."
+}
