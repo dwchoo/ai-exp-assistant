@@ -13,9 +13,11 @@ import fcntl
 import os
 from pathlib import Path
 import pty
+import re
 import select
 import shlex
 import signal
+import stat
 import struct
 import termios
 import threading
@@ -40,6 +42,42 @@ SESSION_PIN_LIMIT = 256
 # C-D63 force-kill: SIGHUP/SIGTERM grace before SIGKILL of the host shell session.
 SHELL_KILL_GRACE = 1.0
 DEFAULT_SIZE = (30, 100)
+ENV_PROBE_SECONDS = 0.5  # CW-16 D-B2-1: re-reading a names file the next prompt is rewriting
+# CW-16 B3 F1: detached children of a Workbench OMP (e.g. OMP 18.8.0's daemon broker, which calls setsid and
+# outlives its parent for ~1-3 s): rescanned while the OMP lives, waited for after it ends, then ended.
+DETACHED_SCAN_SECONDS = 2.0
+DETACHED_WAIT_SECONDS = 5.0
+DETACHED_TERM_GRACE = 2.0
+_ENV_NAME = re.compile(r"[A-Za-z_][A-Za-z0-9_]*")
+_ENV_NAMES_MAX = 1 << 20
+
+
+def _read_env_names(path: Path) -> set[str] | None:
+    """The names the prompt hook wrote (``WBENV1 L``: one per line, ``WBENV1 Z``: NUL-ended), or None when the
+    file is missing, too large or not complete (no end marker yet)."""
+    try:
+        fd = os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_CLOEXEC)
+    except OSError:
+        return None
+    try:
+        info = os.fstat(fd)
+        if not stat.S_ISREG(info.st_mode) or info.st_uid != os.getuid() or info.st_size > _ENV_NAMES_MAX:
+            return None
+        data = os.read(fd, _ENV_NAMES_MAX + 1)
+    except OSError:
+        return None
+    finally:
+        os.close(fd)
+    end = b"\x01END\n"
+    if not data.endswith(end):
+        return None
+    if data.startswith(b"WBENV1 L\n"):
+        items = data[len(b"WBENV1 L\n"):-len(end)].split(b"\n")
+    elif data.startswith(b"WBENV1 Z\n"):
+        items = data[len(b"WBENV1 Z\n"):-len(end)].split(b"\0")
+    else:
+        return None
+    return {item.decode("ascii") for item in items if _ENV_NAME.fullmatch(item.decode("ascii", "replace"))}
 
 
 def process_ref(role: str, pid: int) -> ProcessRef | None:
@@ -238,6 +276,95 @@ class _OwnedSession:
         return killed
 
 
+def _pin_child(pid: int, parent: int, session: int) -> tuple[int, bytes] | None:
+    """(pidfd, start) for a live direct child of ``parent`` outside ``session``; identity re-read after opening."""
+    before = _stat(pid)
+    try:
+        if not _live(before) or int(before[1]) != parent or int(before[3]) == session:
+            return None
+        fd = os.pidfd_open(pid)
+    except (OSError, ValueError, IndexError):
+        return None
+    after = _stat(pid)
+    if (not _live(after) or after[19] != before[19] or int(after[1]) != parent
+            or _pidfd_exited(fd)):
+        os.close(fd)
+        return None
+    return fd, before[19]
+
+
+class DetachedChildren:
+    """CW-16 B3 F1 (C-AC-22): processes a Workbench OMP started in their own session, by exact identity.
+
+    Each entry is a pidfd opened while the process was provably a direct
+    child of the live OMP this backend started (never a name or command line
+    match, so a user's own OMP broker is never a candidate). ``finish`` waits
+    a bounded time for them to end by themselves, then signals only these
+    pidfds (TERM, then KILL) and reports what is still alive.
+    """
+
+    def __init__(self) -> None:
+        self._entries: dict[tuple[int, int], dict[str, Any]] = {}
+        self._lock = threading.Lock()
+
+    def add(self, entries: Sequence[dict[str, Any]]) -> None:
+        with self._lock:
+            for entry in entries:
+                key = (entry["pid"], int(entry["start_ticks"]))
+                if key in self._entries:
+                    os.close(entry.pop("fd"))
+                else:
+                    self._entries[key] = entry
+            for key in [k for k, e in self._entries.items() if e.get("ended") is None and _pidfd_exited(e["fd"])]:
+                os.close(self._entries.pop(key)["fd"])  # ended by itself before the shutdown: nothing to show
+
+    def alive(self) -> list[dict[str, Any]]:
+        with self._lock:
+            return [self._view(e) for e in self._entries.values() if not _pidfd_exited(e["fd"])]
+
+    @staticmethod
+    def _view(entry: Mapping[str, Any]) -> dict[str, Any]:
+        return {name: entry.get(name) for name in ("pid", "start_ticks", "parent", "parent_pid", "ended")}
+
+    def finish(self, wait: float = DETACHED_WAIT_SECONDS, grace: float = DETACHED_TERM_GRACE) -> dict[str, Any]:
+        with self._lock:
+            entries = list(self._entries.values())
+            self._entries.clear()
+
+        def pending() -> list[dict[str, Any]]:
+            for entry in entries:
+                if entry.get("ended") is None and _pidfd_exited(entry["fd"]):
+                    entry["ended"] = entry.get("signalled") or "by_itself"
+            return [entry for entry in entries if entry.get("ended") is None]
+
+        deadline = time.monotonic() + max(wait, 0.0)
+        while pending() and time.monotonic() < deadline:
+            time.sleep(0.05)
+        for signum, label, settle in ((signal.SIGTERM, "terminated", grace), (signal.SIGKILL, "killed", 1.0)):
+            left = pending()
+            if not left:
+                break
+            for entry in left:
+                try:
+                    signal.pidfd_send_signal(entry["fd"], signum)
+                    entry["signalled"] = label
+                except ProcessLookupError:
+                    pass
+                except OSError as exc:
+                    entry["why_not"] = _signal_failure(exc)
+            deadline = time.monotonic() + settle
+            while pending() and time.monotonic() < deadline:
+                time.sleep(0.02)
+        alive = pending()
+        for entry in alive:
+            entry["ended"] = None
+        result = {"observed": [self._view(e) for e in entries],
+                  "alive": [dict(self._view(e), why_not=e.get("why_not", "did_not_exit")) for e in alive]}
+        for entry in entries:
+            os.close(entry["fd"])
+        return result
+
+
 class Pane:
     """Common sequence/replay/queue bookkeeping."""
 
@@ -327,6 +454,9 @@ class OmpPane(_OwnedSession, Pane):
         os.set_blocking(master, False)
         # The unreaped child is ours; its start ticks prove session ownership later.
         self.ref = process_ref(f"{role}_omp", pid)
+        # CW-16 B3 F1: (pid, start ticks) -> pidfd of this OMP's direct children in another session.
+        self._detached: dict[tuple[int, bytes], int] = {}
+        self._detached_scan_at = 0.0
 
     def fds(self) -> list[int]:
         # After EOF/EIO a PTY master stays readable; stop selecting on it.
@@ -364,8 +494,56 @@ class OmpPane(_OwnedSession, Pane):
             chunks.append(self._chunk(data))
         elif data == b"":
             self._eof = True
+        if time.monotonic() >= getattr(self, "_detached_scan_at", 0.0):
+            self._detached_scan_at = time.monotonic() + DETACHED_SCAN_SECONDS
+            self._scan_detached()
         self.poll()
         return chunks
+
+    def scan_detached(self) -> None:
+        """Pin detached children now (the backend calls it before anything at a full shutdown signals an OMP)."""
+        self._scan_detached()
+
+    def _scan_detached(self) -> None:
+        """CW-16 B3 F1: pin this OMP's direct children that left its session (e.g. its daemon broker).
+
+        Only while the OMP is the unexited child this backend started (its pid
+        cannot name another process then); a child is pinned by pidfd with its
+        parent re-read after opening. They are reparented when the OMP ends, so
+        this runs before ``close`` signals the OMP and every few seconds.
+        """
+        if not hasattr(self, "_detached"):  # an instance built without __init__ (tests)
+            self._detached = {}
+        for key in [key for key, fd in self._detached.items() if _pidfd_exited(fd)]:
+            os.close(self._detached.pop(key))
+        if self._leader_exited() or not self._leader_proven():
+            return
+        try:
+            names = os.listdir("/proc")
+        except OSError:
+            return
+        known = {pid for pid, _ in self._detached}
+        for name in names:
+            if len(self._detached) >= SESSION_PIN_LIMIT:
+                break
+            if not name.isdecimal() or int(name) in known or int(name) == self.pid:
+                continue
+            pinned = _pin_child(int(name), self.pid, self.pid)
+            if pinned is None:
+                continue
+            if self._leader_exited() or not self._leader_proven():
+                os.close(pinned[0])  # the parent ended meanwhile: its pid proves nothing any more
+                return
+            self._detached[(int(name), pinned[1])] = pinned[0]
+
+    def take_detached(self) -> list[dict[str, Any]]:
+        """Hand the pinned detached children (pidfds included) to the backend's ``DetachedChildren``."""
+        taken: list[dict[str, Any]] = []
+        for (pid, start), fd in getattr(self, "_detached", {}).items():
+            taken.append({"pid": pid, "start_ticks": int(start), "fd": fd, "parent": f"{self.role}_omp",
+                          "parent_pid": self.pid, "ended": None})
+        getattr(self, "_detached", {}).clear()
+        return taken
 
     def _flush(self) -> None:
         if not self._pending or self.master_fd < 0:
@@ -426,7 +604,9 @@ class OmpPane(_OwnedSession, Pane):
         """TERM the proven OMP group, then KILL every proven member left in its session.
 
         Never raises for a member that cannot be signalled: it is reported in ``survivors``.
+        Its detached children (CW-16 B3 F1) are pinned first; ``take_detached`` hands them to the backend.
         """
+        self._scan_detached()
         if not self._leader_exited() and self._leader_proven():
             # Unreaped child of this backend: its group number is still ours.
             try:
@@ -782,6 +962,39 @@ class ShellPane(_OwnedSession, Pane):
             except (IndexError, ValueError):
                 continue
         return members if self._leader_proven() else None
+
+    def exported_names(self, names: Sequence[str], *, timeout: float = ENV_PROBE_SECONDS) -> set[str] | None:
+        """CW-16 D-B2-1 (C-D55): which of ``names`` the shell exports NOW (the user may export after start).
+
+        fix-02 (P3-1): nothing is typed. The managed shell's own prompt hook writes the names (never values) it
+        exports at every prompt to a private file in its 0700 init directory before it emits READY
+        (``managed_controller_source``), so at a user-owned idle prompt the file is the environment of that
+        prompt; nothing else can change it before the next prompt. The user's terminal, ``$?``, history and
+        keystrokes are untouched. A partial file (the next prompt is being drawn) is read again within
+        ``timeout``. None when it cannot be observed now (the shell is not at its idle prompt, no complete file).
+        """
+        wanted = tuple(sorted(set(names)))
+        if not wanted:
+            return set()
+        if any(not _ENV_NAME.fullmatch(name) for name in wanted):
+            return None  # not a shell variable name: never reported as exported
+        path = getattr(self.shell._transport, "env_names_path", None)
+        if path is None:
+            return None
+        deadline = time.monotonic() + max(timeout, 0.0)
+        while True:
+            with self.io_lock:
+                if self._released or self._exited:
+                    return None
+                events = self.shell._transport.events
+                at_prompt = (self.state.get("parent_mode") == "manual_prompt" and bool(events)
+                             and events[-1] == "READY")
+                present = _read_env_names(path) if at_prompt else None
+            if present is not None:
+                return present & set(wanted)
+            if not at_prompt or time.monotonic() >= deadline:
+                return None
+            time.sleep(0.02)
 
     def cwd(self) -> str | None:
         """The shell's current directory from /proc (never typed); None when unprovable."""

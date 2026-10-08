@@ -104,6 +104,11 @@ removed before any release; a client sending ``approval_decide`` gets
   e.g. ``host_terminal_busy``. ``since`` is when ``status`` last changed.
 - ``worker``: ``{state, task_id}``; ``state`` is one of :data:`WORKER_STATES`
   (``busy`` while a Task is active, then ``task_id`` names it).
+- ``usage`` (CW-16, C-AC-21; additive): ``{task_id, runs_started,
+  retries_used, retry_limit, review_count, model: {tokens_observed,
+  tokens_estimated}, model_known}``. Counts are null without a Task / bound
+  run; a model token value is an integer only when a source reported it,
+  else ``"unknown"`` (never a fixed number).
 
 Backend restart and reboot (CW-19, C-D71; additive)
 --------------------------------------------------

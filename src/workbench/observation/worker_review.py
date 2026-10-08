@@ -804,6 +804,13 @@ class WorkerReviewScheduler:
         self._usage = UsageLedger()
         self._last_hang_report: Mapping[str, Any] | None = None
 
+    def usage_snapshot(self) -> dict[str, int | str]:
+        """C-AC-21: the bound run's model usage so far (missing observations stay ``unknown``, never zero).
+
+        Read from any thread: a run change swaps in a new ledger, so the ledger read here is one run's."""
+        ledger = self._usage
+        return ledger.snapshot().as_dict()
+
     def activate_run_source(self, run: ActiveRunRef, source: object) -> ExitSourceToken | None:
         return self.admission.activate_run_source(run, source)
 

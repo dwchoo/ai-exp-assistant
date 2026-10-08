@@ -35,12 +35,20 @@ class _Transport(ManagedLifecycleProbe):
         self.handoff_episode = 0
         super().__init__(choice, environment=environment)
 
+    @property
+    def env_names_path(self) -> Path:
+        """CW-16 fix-02: where the prompt hook writes the exported names (never values) at each prompt."""
+        return Path(self._init_dir.name) / "env-names"
+
     def _control_init_source(self):
         # Private control paths are non-exported shell locals, not user env.
         root = Path(self._init_dir.name)
-        setup = ("unset BOUNDARY_TRAPS BOUNDARY_TRAPS_AFTER BOUNDARY_PREPARED\n"
+        # The hook's ``>|`` keeps an existing file's mode: create it 0600 so the user's umask never widens it.
+        os.close(os.open(self.env_names_path, os.O_WRONLY | os.O_CREAT | os.O_NOFOLLOW | os.O_CLOEXEC, 0o600))
+        setup = ("unset BOUNDARY_TRAPS BOUNDARY_TRAPS_AFTER BOUNDARY_PREPARED BOUNDARY_ENV_NAMES\n"
                  f"BOUNDARY_TRAPS={shlex.quote(str(root / 'before'))}\n"
                  f"BOUNDARY_TRAPS_AFTER={shlex.quote(str(root / 'after'))}\n"
+                 f"BOUNDARY_ENV_NAMES={shlex.quote(str(self.env_names_path))}\n"
                  "BOUNDARY_PREPARED=persistent\n")
         if self.choice.kind == "sh":
             setup += ("unset ENV\n" if self._user_env_value is None

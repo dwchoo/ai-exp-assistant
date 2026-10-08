@@ -435,7 +435,29 @@ def managed_controller_source(shell: str, *, handoff_checks: bool = False) -> st
     __b_emit JOBS_END:HANDOFF
     __b_emit "CONTROL_READY:$$"
     __b_loop'''
-    return f'''__b_emit() {{ printf '%s\\n' "$1" >&9; }}
+    # CW-16 D-B2-1 / fix-02 (P3-1): the exported environment is observed without typing anything. When the init
+    # sets ``BOUNDARY_ENV_NAMES`` (a path in the private 0700 init directory), the prompt hook writes the names
+    # (never values) the shell exports at this prompt to that file before it emits READY: bash lists them with the
+    # builtin ``compgen -e`` (no fork); sh asks a child (``env -0 | cut``), which sees exactly the exported
+    # environment (values only cross that pipe). The terminal shows nothing, ``$?`` and history are untouched
+    # (the hook already runs at every prompt) and no keystroke is held for it. A trailing marker lets a reader
+    # refuse a partial write; ``>|`` still writes under the user's ``set -C``.
+    env_bin = shutil.which("env", path="/usr/bin:/bin")
+    cut_bin = shutil.which("cut", path="/usr/bin:/bin")
+    if bash:
+        env_names = "{ printf 'WBENV1 L\\n' && compgen -e && printf '\\001END\\n'; }"
+    elif env_bin and cut_bin:
+        env_names = (f"{{ printf 'WBENV1 Z\\n' && {shlex.quote(env_bin)} -0 | {shlex.quote(cut_bin)} -z -d= -f1 "
+                     "&& printf '\\001END\\n'; }")
+    else:
+        env_names = ":"  # no names file: the environment stays unverified (never guessed)
+    emit = f'''__b_emit() {{
+    if [ "$1" = READY ] && [ -n "${{BOUNDARY_ENV_NAMES-}}" ]; then
+        {env_names} 2>/dev/null >|"$BOUNDARY_ENV_NAMES"
+    fi
+    printf '%s\\n' "$1" >&9
+}}'''
+    return f'''{emit}
 {prompt}
 __b_hook_compatible() {{
     {{ {prompt_check}; }} || return 1

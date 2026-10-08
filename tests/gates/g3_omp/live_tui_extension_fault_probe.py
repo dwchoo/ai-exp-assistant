@@ -224,6 +224,44 @@ def _malformed_frame(
                             "internal_handler_replay_unknown")
 
 
+# OMP >= 18.8 starts a detached ``omp __omp_worker_daemon_broker`` (own session, parent re-set to init, cwd =
+# the OMP's cwd) after the first model turn. ``_stop_omps`` signals only the OMP process groups, so the broker
+# outlives them and exits by itself once it sees no live client (OMP_DAEMON_IDLE_GRACE_MS, default 3000 ms).
+# C-D72 (2) delta: wait, bounded, for the brokers of THIS probe (identified by cwd inside this probe's own temp
+# root and the broker argv) to exit before the residue is measured. Nothing is signalled: a broker that does
+# not exit within the bound stays in ``cwd_processes_remaining`` and the clean-up assertion fails as before.
+BROKER_ARG = b"__omp_worker_daemon_broker"
+BROKER_WAIT_SECONDS = 20.0
+
+
+def _own_brokers(cwds: list[Path]) -> dict[int, str]:
+    found: dict[int, str] = {}
+    wanted = {str(cwd.resolve()) for cwd in cwds}
+    for entry in Path("/proc").iterdir():
+        if not entry.name.isdigit():
+            continue
+        try:
+            if BROKER_ARG not in (entry / "cmdline").read_bytes():
+                continue
+            cwd = os.readlink(entry / "cwd")
+        except OSError:
+            continue
+        if cwd in wanted:
+            found[int(entry.name)] = cwd
+    return found
+
+
+def _wait_own_brokers(cwds: list[Path], timeout: float = BROKER_WAIT_SECONDS) -> dict[str, object]:
+    started = time.monotonic()
+    seen = _own_brokers(cwds)
+    remaining = dict(seen)
+    while remaining and time.monotonic() - started < timeout:
+        time.sleep(0.1)
+        remaining = _own_brokers(cwds)
+    return {"seen": len(seen), "remaining": sorted(remaining), "waited_seconds": round(time.monotonic() - started, 2),
+            "bound_seconds": timeout}
+
+
 def run(omp: str, *, malformed_frame: bool = False, outage_delivery: bool = False,
         handler_fault: bool = False) -> dict[str, object]:
     result: dict[str, object] = {
@@ -477,6 +515,9 @@ def run(omp: str, *, malformed_frame: bool = False, outage_delivery: bool = Fals
             _stop_omps(children)
             result["omp_children_remaining"] = sum(
                 Path(f"/proc/{child['pid']}").exists() for child in children
+            )
+            result["omp_broker_wait"] = _wait_own_brokers(
+                [root / f"cwd-{role}" for role in ROLES if (root / f"cwd-{role}").exists()]
             )
             result["cwd_processes_remaining"] = {
                 role: cwd_processes(root / f"cwd-{role}") for role in ROLES

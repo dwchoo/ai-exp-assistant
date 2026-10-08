@@ -1,4 +1,12 @@
-"""CW-16의 재실행 가능한 Linux shell 및 outer-terminal runtime matrix."""
+"""CW-16의 재실행 가능한 Linux shell 및 outer-terminal runtime matrix.
+
+C-D72 (2): versions are recorded, never pinned. The outer matrix now runs through the product path
+(``tests/integration/live_cw16_compat.py``: ``python -m workbench start``/``attach`` in plain PTY, isolated tmux
+and isolated Herdr x host Bash/dash, scripted local provider). Historical: the p2.6 outer matrix ran the
+G1 feasibility probes ``tests/gates/g1_vt/live_outer_compat_probe.py`` / ``live_outer_tmux_probe.py``, which
+refuse anything but OMP 18.2.10 and Herdr 0.9.1 and drive ``terminal_g1`` (not the product UI); those probes
+and their p2.6 evidence (candidate 6dc51f) stay as historical records only and are no longer run here.
+"""
 
 from __future__ import annotations
 
@@ -26,7 +34,9 @@ _OUTPUT_LIMIT = 8 * 1024 * 1024
 
 
 def _environment() -> dict[str, str]:
-    environment = os.environ.copy()
+    # The session running this may live inside the user's tmux/Herdr: never hand their context to a probe.
+    environment = {key: value for key, value in os.environ.items()
+                   if not key.startswith(("TMUX", "HERDR_", "WORKBENCH_"))}
     environment.update({"PYTHONDONTWRITEBYTECODE": "1", "PYTHONPATH": "src"})
     return environment
 
@@ -59,17 +69,24 @@ def _descendants(root_pid: int) -> dict[int, int]:
 
 
 def _owned_processes(owner_token: str) -> dict[int, int]:
+    """Processes carrying ``owner_token``: in their cmdline (any process), or in their environ for this test
+    process's own descendants only -- the environ of a process this test did not start is never read."""
     marker = owner_token.encode()
     owned: dict[int, int] = {}
+    mine = _descendants(os.getpid())
     for entry in Path("/proc").iterdir():
         if not entry.name.isdigit():
             continue
         pid = int(entry.name)
+        if pid == os.getpid():
+            continue
         identity = _process_identity(pid)
         if identity is None:
             continue
         try:
-            evidence = entry.joinpath("cmdline").read_bytes() + entry.joinpath("environ").read_bytes()
+            evidence = entry.joinpath("cmdline").read_bytes()
+            if pid in mine and mine[pid] == identity[1]:
+                evidence += entry.joinpath("environ").read_bytes()
         except (FileNotFoundError, PermissionError, ProcessLookupError):
             continue
         if marker in evidence:
@@ -142,7 +159,12 @@ def _same_owned_root(root: Path, identity: tuple[int, int]) -> bool:
     )
 
 
-def _run_bounded(argv: list[str], timeout: float) -> subprocess.CompletedProcess[str]:
+def _run_bounded(
+    argv: list[str], timeout: float, *, limit_child_files: bool = True
+) -> subprocess.CompletedProcess[str]:
+    # limit_child_files=False: RLIMIT_FSIZE is inherited by every descendant; the live product matrix must
+    # not run under it (OMP 18.8.0 extracts its native addon, > 8 MiB, on first start -> degraded). The
+    # captured output is still checked against _OUTPUT_LIMIT afterwards.
     owner_token = "cw16-owner-" + uuid.uuid4().hex
     sandbox, sandbox_identity = _short_owned_root()
     environment = _environment()
@@ -158,7 +180,7 @@ def _run_bounded(argv: list[str], timeout: float) -> subprocess.CompletedProcess
             stdout=stdout_file,
             stderr=stderr_file,
             start_new_session=True,
-            preexec_fn=_limit_child_files,
+            preexec_fn=_limit_child_files if limit_child_files else None,
         )
     except BaseException:
         stdout_file.close()
@@ -239,33 +261,47 @@ class Cw16RuntimeMatrixTests(unittest.TestCase):
         self.assertEqual(completed.returncode, 0, completed.stdout + completed.stderr)
         self.assertIn("Ran 3 tests", completed.stderr)
 
-    def test_plain_tmux_and_herdr_outer_matrix(self) -> None:
-        cases = (
-            ("plain", "tests/gates/g1_vt/live_outer_compat_probe.py", (), "passed"),
-            ("tmux", "tests/gates/g1_vt/live_outer_tmux_probe.py", (), "observed"),
-            ("herdr", "tests/gates/g1_vt/live_outer_compat_probe.py", ("--herdr",), "passed"),
-        )
-        for name, script, arguments, expected in cases:
-            with self.subTest(outer=name):
-                completed = _run_bounded(
-                    [sys.executable, script, *arguments],
-                    timeout=120,
-                )
-                self.assertEqual(completed.returncode, 0, completed.stdout + completed.stderr)
-                result = json.loads(completed.stdout.splitlines()[-1])
-                self.assertEqual(result["result"], expected)
-                if name == "tmux":
-                    self.assertTrue(result["tmux_client_cleaned"])
-                    self.assertTrue(result["processes_cleaned"])
-                    self.assertTrue(result["tmux_socket_removed"])
-                else:
-                    self.assertTrue(result["outer_cleaned"])
-                    self.assertTrue(result["children_cleaned"])
-                    self.assertTrue(result["local_alternate_restored"])
-                if name == "herdr":
-                    self.assertTrue(result["non_nested_attach"])
-                    self.assertTrue(result["default_state_unchanged"])
-                    self.assertTrue(result["session_deleted"])
+    def test_runtime_versions_are_recorded_not_pinned(self) -> None:
+        # C-D72 (2): record what actually runs (OMP / tmux / Herdr / Bash / dash); no version is required.
+        sys.path.insert(0, str(ROOT / "tests" / "integration"))
+        import cw16_harness
+
+        versions = cw16_harness.tool_versions()
+        print(f"\n[cw16-versions] {json.dumps(versions, sort_keys=True)}", file=sys.stderr)
+        target = os.environ.get("WB_CW16_VERSION_RECORD")
+        if target:
+            Path(target).write_text(json.dumps(versions, indent=1, sort_keys=True) + "\n")
+        self.assertTrue(versions["omp"].startswith("omp/"), versions)
+        self.assertTrue(versions["tmux"].startswith("tmux "), versions)
+        self.assertTrue(versions["herdr"].startswith("herdr "), versions)
+        self.assertIn("GNU bash, version 5.", versions["bash"])
+        self.assertTrue(versions["dash"].startswith("dash "), versions)
+
+    @unittest.skipUnless(
+        os.environ.get("WB_LIVE_CW16") == "1",
+        "product-path outer matrix (~25 min, scripted provider): set WB_LIVE_CW16=1",
+    )
+    def test_product_path_outer_matrix(self) -> None:
+        # Replaces the historical G1-probe outer matrix (OMP 18.2.10 / Herdr 0.9.1 pins, terminal_g1).
+        run_id = "cw16-matrix-" + uuid.uuid4().hex[:8]
+        report_dir = Path(os.environ.get("WB_CW16_REPORT_DIR") or "/tmp/wb-cw16-reports")
+        with mock.patch.dict(os.environ, {"WB_CW16_RUN_ID": run_id, "WB_CW16_REPORT_DIR": str(report_dir)}):
+            completed = _run_bounded(
+                [sys.executable, "-m", "unittest", "-v", "tests/integration/live_cw16_compat.py"],
+                timeout=3000,
+                limit_child_files=False,
+            )
+        self.assertEqual(completed.returncode, 0, completed.stdout[-4000:] + completed.stderr[-8000:])
+        matrix = json.loads((report_dir / run_id / "compat-matrix.json").read_text())
+        expected_cells = {f"{outer}/{shell}" for outer in ("plain", "tmux", "herdr") for shell in ("bash", "dash")}
+        self.assertEqual(set(matrix["cells"]), expected_cells, matrix)
+        for cell, steps in matrix["cells"].items():
+            for step, status in steps.items():
+                allowed = ("pass", "n/a") if (cell.startswith("plain/") and step == "C6") else ("pass",)
+                self.assertIn(status, allowed, (cell, step, matrix["cells"][cell]))
+        self.assertEqual(matrix["selection"], {"sel-1": "pass", "sel-2": "pass", "sel-3": "pass"})
+        for tool in ("omp", "tmux", "herdr", "bash", "dash"):
+            self.assertNotIn(matrix["versions"][tool], ("missing", ""), tool)
 
     def test_timeout_kills_detached_owned_descendants(self) -> None:
         marker = "cw16-timeout-" + uuid.uuid4().hex

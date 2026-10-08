@@ -1092,9 +1092,13 @@ class HandoffService:
         if findings:
             return (rejected("environment_value", fields=findings),
                     {"redacted": "environment_value", "fields": findings})
-        if self._is_paused():
+        cancel = request.tool == "to_worker" and isinstance(request.args, Mapping) and request.args.get("cancel") is True
+        if self._is_paused() and not cancel:
+            # CW-16 D-B2-2 (C-D71 (3), C-D65): a cancel is the user's/manager's decision and goes while paused; it
+            # starts no model work. fix-02 (P2-1): the worker's cancel notice is kept through the pause (never
+            # submitted, so its delivery after the resume is no replay) and the result says it goes after the resume.
             return held("paused"), request.args
-        if request.tool == "to_worker" and not (isinstance(request.args, Mapping) and request.args.get("cancel") is True):
+        if request.tool == "to_worker" and not cancel:
             # CW-19 (C-D71 (3)/(4)): no instruction reaches the worker before confirm-boot, during a metadata
             # fault or while the worker's model is held; a cancel is the user's/manager's decision and still goes.
             # Reasons (to-worker skill): boot_confirmation_required, metadata_unavailable, model_hold:worker,

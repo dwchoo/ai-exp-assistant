@@ -1230,6 +1230,23 @@ class PauseCoordinator:
         requested = datetime.strptime(self._requested_at, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc) if self._requested_at else None
         if checked_at > now or requested is None or checked_at < requested:
             raise PausePolicyError("resume evidence is stale or not post-pause")
+        return self._peers_reconciled(current)
+
+    def _validate_finished_resume(self, run: object, _evidence: object) -> tuple[dict[str, Any], dict[str, Any]]:
+        """CW-16 fix-02 (P2-2): the paused run's host command ended (exit confirmed, checked by the caller).
+
+        Its process and cwd can no longer match the paused run, so only the parts that still apply are
+        reconciled: the same current, uncancelled Task/revision/run/approval and both OMPs paused, idle and
+        without in-flight tools in the bound sessions. Nothing of the run is replayed."""
+        current = self._persisted_binding(run)
+        if self._repository_cancelled(
+                run.repository, current.task_id, current.revision, current.run_id):
+            raise PausePolicyError("a cancelled persisted run cannot be resumed")
+        if self._binding is None or not self._same_scope(self._binding, current):
+            raise PausePolicyError("current Task/revision/run/approval differs from paused scope")
+        return self._peers_reconciled(current)
+
+    def _peers_reconciled(self, current: PauseBinding) -> tuple[dict[str, Any], dict[str, Any]]:
         manager = _role_state(self._bridge, ActorRole.MANAGER, min(self._request_timeout, 2.0))
         worker = _role_state(self._bridge, ActorRole.WORKER, min(self._request_timeout, 2.0))
         for role, state, session_id, generation in (
@@ -1882,6 +1899,16 @@ class PauseCoordinator:
         with self._transition("resume"):
             return self._resume(run, evidence, resume_token)
 
+    def resume_finished(self, run: object) -> PauseStatus:
+        """CW-16 fix-02 (P2-2): the user's reconciled resume of a bound run whose host command ended while
+        paused (the caller observed the confirmed exit). The pause is lifted through the same transition as
+        ``resume`` (both OMPs, journal ``resumed``/``finished_while_paused``), so the run stays bound and a later
+        pause starts a new pause of both OMPs."""
+        resume_token = self._authority_fence.token()
+        with self._transition("resume"):
+            return self._resume(run, None, resume_token, validate=self._validate_finished_resume,
+                                resumed_status="finished_while_paused")
+
     def resume_observed(self, run: object, *, user_resume: bool) -> PauseStatus:
         """Production entry point: derive reconciliation from a live WorkflowRun."""
         if not hasattr(run, "worktree") or not hasattr(run, "shell"):
@@ -1948,13 +1975,14 @@ class PauseCoordinator:
         return self.status()
 
     def _resume(self, run: object, evidence: object,
-                resume_token: object) -> PauseStatus:
+                resume_token: object, *, validate: Callable[[object, object], Any] | None = None,
+                resumed_status: str = "reconciled") -> PauseStatus:
         self._refresh_base_state()
         self._sync_repository_cancellation()
         with self._lock:
             if self._pause_override is not True or self._cancelled:
                 raise PausePolicyError("only an uncancelled paused run can be resumed")
-        self._validate_resume(run, evidence)
+        (validate or self._validate_resume)(run, evidence)
         with self._lock:
             binding, pause_id = self._binding, self._pause_id
             if (binding is None or pause_id is None or self._run is not run
@@ -1996,7 +2024,7 @@ class PauseCoordinator:
                                  or self._cancelled or self._cancel_fence_pending
                                  or self._persistence_error is not None)
         if not authority_changed:
-            self._record("resumed", status="reconciled")
+            self._record("resumed", status=resumed_status)
         with self._lock:
             authority_changed = (authority_changed or not self._transition_current(run, binding, pause_id)
                                  or self._cancelled or self._cancel_fence_pending)

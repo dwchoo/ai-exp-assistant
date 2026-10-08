@@ -108,6 +108,8 @@ from workbench.workflow.worker_port import WorkerResponseRejected
 
 FLOW_LEDGER_NAME = "tasks-flow.jsonl"  # under DataLayout.workflow
 WORKER_TERMINAL_HELD = "host_terminal_busy:worker_terminal_command"
+# A pending experiment start that waits only for the host shell (or was not checked yet) keeps the terminal off it.
+_HOST_START_REASONS = (None, "host_terminal_busy", WORKER_TERMINAL_HELD)
 RETRY_LIMIT = 3  # CW-13: re-runs of one experiment Task
 SUMMARY_MAX = 1024
 NOTICE_LIMIT = 16
@@ -166,6 +168,11 @@ MANAGER_RULE = ("The worker does this Task; do not do it yourself (no commands, 
 CANCEL_WAIT_DETAIL = ("The experiment's host command is still running; Workbench never kills it. The Task "
                       "closes as cancelled when the command exits (the user can stop it in the host shell); "
                       "no judgment is made.")
+CANCEL_NOTICE_AFTER_RESUME_DETAIL = ("Workbench is paused: the worker is told of the cancel after the resume "
+                                     "(the notice was not sent yet and is delivered once).")
+CANCEL_NOTICE_AFTER_HOLD_DETAIL = ("Automatic delivery to the worker is held: the worker is told of the cancel once "
+                                   "the hold lifts (the notice was not sent yet and is delivered once).")
+CANCEL_NOTICE_FAILED_DETAIL = "The Task is cancelled, but the cancel notice could not be queued for the worker."
 
 
 def _under(path: str, root: Path | str) -> bool:
@@ -338,7 +345,9 @@ class ExperimentPorts:
     host_shell: Callable[[], Any]  # -> HostShellPort | None
     make_workflow: Callable[[Any], Any]  # (repository on the runner thread) -> TaskWorkflow
     automation: Callable[[], Mapping[str, Any]]  # AutomationState port
-    environment_names: Callable[[], set[str]]  # names in the host shell's start-up environment
+    # Names exported in the host shell now: ``(names=[...]) -> set | None`` (None: not observable now); a callable
+    # without ``names`` is a fixed set (tests).
+    environment_names: Callable[..., set[str] | None]
     worktrees_root: Path
     artifacts_root: Path
 
@@ -540,8 +549,10 @@ class TaskFlow:
         with self._lock:
             if self._following is not None:
                 return "an experiment run uses the host terminal"
+            # CW-16 D-B2-1: a start held for a reason other than the host shell itself (environment, worker,
+            # pause, holds) does not keep the terminal from an idle host shell; the gate still serializes them.
             if any(task.kind == "experiment" and task.status != "closed" and task.pending_start
-                   for task in self.tasks.values()):
+                   and task.held_reason in _HOST_START_REASONS for task in self.tasks.values()):
                 return "an experiment run is starting"
             if self._home_cwd is not None:
                 return "the host shell directory is being restored after an experiment run"
@@ -983,11 +994,30 @@ class TaskFlow:
             self._wake.notify_all()
             return HandoffDecision({"status": "cancel_requested", "task_id": task_id, "detail": CANCEL_WAIT_DETAIL})
         task.cancel_requested = record
-        notified = self._finish_cancel(task, task.run_id)
-        return HandoffDecision({"status": "cancelled", "task_id": task_id, "worker_notified": notified})
+        notice = self._finish_cancel(task, task.run_id)
+        result: dict[str, Any] = {"status": "cancelled", "task_id": task_id, "worker_notified": notice == "queued"}
+        if notice not in ("queued", "not_needed"):
+            # CW-16 fix-02 (P2-1): the notice waits (never submitted, so no replay) and goes once the pause/hold
+            # ends; the result says so instead of claiming the worker was told now.
+            result["worker_notice"] = notice
+            result["detail"] = (CANCEL_NOTICE_AFTER_RESUME_DETAIL if notice == "after_resume"
+                                else CANCEL_NOTICE_AFTER_HOLD_DETAIL if notice.startswith("after_hold")
+                                else CANCEL_NOTICE_FAILED_DETAIL)
+        return HandoffDecision(result)
 
-    def _finish_cancel(self, task: FlowTask, run_id: str | None) -> bool:
-        """Cancel the current run (if any), close the Task and tell the worker; under the flow lock."""
+    def _cancel_notice_state(self) -> str:
+        """Where a cancel notice queued now stands: ``queued`` (the lane delivers it now), ``after_resume`` (paused)
+        or ``after_hold:<reason>`` (a CW-19 hold of the worker)."""
+        if self._paused_now():
+            return "after_resume"
+        hold = self._held_now(ActorRole.WORKER)
+        return "queued" if hold is None else f"after_hold:{hold}"
+
+    def _finish_cancel(self, task: FlowTask, run_id: str | None) -> str:
+        """Cancel the current run (if any), close the Task and tell the worker; under the flow lock.
+
+        Returns the worker notice state: ``not_needed`` (the worker never got the Task), ``queued``,
+        ``after_resume``/``after_hold:<reason>`` (kept until the pause/hold ends) or ``not_queued:<status>``."""
         record = task.cancel_requested or {}
         cancelled_run = None
         if run_id is not None:
@@ -1004,17 +1034,20 @@ class TaskFlow:
         never_sent = (MessageKind.TASK.value in withdrawn
                       or self._task_message_state.get(task.task_id) in ("queued", "not_sent"))
         self._notice(kind="task_cancelled", task_id=task.task_id, run_id=run_id)
-        notified = False
+        notice = "not_needed"
         if cancelled_run is not None and not never_sent:
             payload = {"handoff": "to_worker", "kind": task.kind, "task_id": task.task_id, "cancel": True,
                        "message": record.get("message") or "cancelled by the manager"}
+            # CW-16 fix-02 (P2-1): the notice was never submitted, so keeping it through a pause or a CW-19 hold
+            # and delivering it after the resume is not a replay (R3); dropping it would leave the worker unaware.
             queued = self._handoffs.enqueue(OutboundMessage(
                 task.task_id, revision or cancelled_run["revision"], run_id, ActorRole.MANAGER, ActorRole.WORKER,
-                MessageKind.QUESTION, payload), origin=f"cancel:{task.task_id}")
-            notified = queued.get("status") == "queued"
+                MessageKind.QUESTION, payload), origin=f"cancel:{task.task_id}", keep_across_pause=True)
+            status = queued.get("status")
+            notice = self._cancel_notice_state() if status == "queued" else f"not_queued:{status}"
         if run_id is not None:
             threading.Thread(target=self._notify_lifecycle, args=("run_ended", run_id), daemon=True).start()
-        return notified
+        return notice
 
     def _end_inactive(self, task: FlowTask, reason: str) -> None:
         """A finished experiment or blocked free-work Task ends when a new Task arrives."""
@@ -1372,18 +1405,25 @@ class TaskFlow:
             return hold
         if port is None:
             return "host_terminal_unavailable"
-        names = set((task.spec or {}).get("execution", {}).get("environment") or [])
-        try:
-            missing = sorted(names - set(self._experiment.environment_names()))
-        except Exception:
-            missing = sorted(names)
-        if missing:
-            return "environment_missing:" + ",".join(missing)
         if self._omp_idle(ActorRole.WORKER) is not True:
             return "worker_busy"
         busy = port.busy()
         if busy is not None:
             return "host_terminal_busy"
+        # CW-16 D-B2-1 (C-D55): the names are checked last, against the host shell's CURRENT exported environment
+        # (the user prepares it in the terminal after start); the live check needs the idle shell checked above.
+        names = set((task.spec or {}).get("execution", {}).get("environment") or [])
+        if names:
+            source = self._experiment.environment_names
+            try:
+                present = source(names=sorted(names)) if accepts_keyword(source, "names") else source()
+            except Exception:
+                present = None
+            if present is None:
+                return "environment_unverified"
+            missing = sorted(names - set(present))
+            if missing:
+                return "environment_missing:" + ",".join(missing)
         return None
 
     def _run_experiment(self, task_id: str, job: Mapping[str, Any]) -> None:
@@ -1402,14 +1442,13 @@ class TaskFlow:
             self._set_held(task_id, WORKER_TERMINAL_HELD if owner == "terminal" else "host_terminal_busy")
             self._wait(self._poll_interval)
             return
-        port = None
+        port, blocker = None, None
         try:
             port = ports.host_shell()
             blocker = self._experiment_blocker(task, port)  # the idle-only rule (nothing is held yet)
             if blocker is not None:
                 self._set_held(task_id, blocker)
-                self._wait(self._poll_interval)
-                return
+                return  # CW-16 D-B2-1: the wait below is outside the gate (a held start never blocks the terminal)
             self._execute(task, job, port, ports)
         finally:
             self._host_gate.release("experiment")
@@ -1421,6 +1460,8 @@ class TaskFlow:
                 except Exception:
                     pass
                 port.detach()
+        if blocker is not None:
+            self._wait(self._poll_interval)
 
     def _typing_hold(self, task: FlowTask, port: Any, ports: ExperimentPorts, refused: list[str]) -> Callable:
         """R5: called by the workflow just before its first keystroke into the host shell.

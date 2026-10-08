@@ -236,6 +236,7 @@ class _Bound:
     ended: bool = False
     pause_bound: bool = False  # PauseCoordinator.bind_run succeeded for this run
     policy_paused: bool = False  # PauseCoordinator.pause ran for this run (resume must reconcile)
+    host_finished: bool = False  # CW-16 fix-02: its host command ended while paused and was reconciled (no review)
 
 
 def _signal_exact(ref: ProcessRef, signums: tuple[int, ...]) -> bool:
@@ -766,8 +767,8 @@ class AutomationController:
     def _review_run(self) -> ActiveRunRef | None:
         with self._lock:
             bound = self._bound
-        if bound is None or bound.kind != "experiment" or bound.ended:
-            return None  # free work has no host run to review (module docstring)
+        if bound is None or bound.kind != "experiment" or bound.ended or bound.host_finished:
+            return None  # free work has no host run to review (module docstring); a finished one neither
         return bound.active
 
     def _worker_state(self, _run: ActiveRunRef) -> object:
@@ -806,8 +807,8 @@ class AutomationController:
     def _dispatch_review(self, request: ReviewRequest) -> dict[str, Any]:
         with self._lock:
             bound = self._bound
-        if (bound is None or bound.ended or bound.active is None or self.paused() or self._held() is not None
-                or bound.active.identity != request.run.identity):
+        if (bound is None or bound.ended or bound.host_finished or bound.active is None or self.paused()
+                or self._held() is not None or bound.active.identity != request.run.identity):
             return {"status": "held"}
         mailbox = TaskMailbox(self.repository, self.bridge)  # type: ignore[arg-type]
         message = mailbox.create_message(
@@ -939,8 +940,18 @@ class AutomationController:
                 return False, ", ".join(answers)
         return True, ", ".join(answers)
 
+    @staticmethod
+    def _bound_run_finished(bound: _Bound) -> dict[str, Any] | None:
+        """CW-16 D-B2-2: the bound experiment's host command exited (confirmed) while paused, else None."""
+        record = getattr(bound.workflow_run, "_record", None) if bound.kind == "experiment" else None
+        if not isinstance(record, dict) or record.get("shell_state") != "exited" \
+                or record.get("exit_confirmed") is not True:
+            return None
+        return {"exit_status": record.get("exit_status")}
+
     def _resume(self, bound: _Bound | None) -> None:
         outcome, reason, unbound = "resumed", None, False
+        finished = None if bound is None or not bound.policy_paused else self._bound_run_finished(bound)
         if bound is not None and bound.policy_paused and not self._bound_run_current(bound):
             # F3: the run bound at pause time closed while paused: reconcile to idle (no run).
             lifted, answers = self._resume_peers_after_close()
@@ -950,6 +961,32 @@ class AutomationController:
                     bound.ended = True
             else:
                 outcome, reason = "refused", f"run_closed_while_paused: OMP pause not lifted ({answers})"
+        elif bound is not None and finished is not None:
+            # CW-16 D-B2-2: the run's host command ended while paused. Its process, cwd and output can no longer
+            # match the paused run, so the live-run reconciliation cannot pass; the coordinator reconciles what
+            # still applies (same current run and approval, both OMPs paused and idle) and lifts the pause of both
+            # OMPs. Nothing is replayed and no model request starts from here.
+            # fix-02 (P2-2): the run stays bound until ``run_ended`` (its report is accepted or it closes), as in
+            # the ordinary flow: its pending analysis/report can be paused again and the shutdown stop fence still
+            # covers it. Only its host part is over (no review; ``host_finished``).
+            try:
+                status = self.pause_policy.resume_finished(bound.view)
+            except Exception as exc:
+                outcome, reason, status = "refused", (f"run_finished_while_paused: {type(exc).__name__}: "
+                                                      f"{str(exc)[:200]}"), None
+            else:
+                if status.paused:
+                    outcome, reason = "refused", ("run_finished_while_paused: "
+                                                  + (status.persistence_error or "reconciliation_failed"))
+                else:
+                    reason = (f"run_finished_while_paused: exit {finished['exit_status']} observed, reconciled "
+                              "without replay (manager=resumed, worker=resumed)")
+                    with self._lock:
+                        bound.host_finished = True
+                    self._record_finished_resume(bound, finished)
+            with self._lock:
+                if status is not None:
+                    self._pause_status = status
         elif bound is not None and bound.policy_paused:
             try:
                 status = self.pause_policy.resume_observed(bound.view, user_resume=True)
@@ -980,6 +1017,32 @@ class AutomationController:
             except Exception:
                 pass
         self._log(f"automation: resume {outcome}" + (f" ({reason})" if reason else ""))
+
+    def _record_finished_resume(self, bound: _Bound, finished: Mapping[str, Any]) -> None:
+        """The observed finish next to the run's pause journal (best effort; the resume itself is stored)."""
+        record_dir = getattr(bound.view, "record_dir", None)
+        if record_dir is None:
+            return
+        entry = {"event": "resumed_after_finish", "run_id": bound.run_id, "task_id": bound.task_id,
+                 "exit_status": finished.get("exit_status"), "replayed": False, "at": _iso(self._wall())}
+        try:
+            fd = os.open(Path(record_dir) / "resume-reconcile.jsonl", os.O_WRONLY | os.O_CREAT | os.O_APPEND, 0o600)
+            try:
+                os.write(fd, (json.dumps(entry, sort_keys=True) + "\n").encode())
+                os.fsync(fd)
+            finally:
+                os.close(fd)
+        except OSError as exc:
+            self._log(f"automation: finished-run resume not recorded ({type(exc).__name__})")
+
+    def usage(self) -> dict[str, Any]:
+        """C-AC-21 (CW-16 D-B2-3): model token usage the reviews observed; ``unknown`` until a source reports it."""
+        try:
+            snapshot = self.review.usage_snapshot()
+        except Exception:
+            snapshot = {}
+        return {"tokens_observed": snapshot.get("tokens_observed", "unknown"),
+                "tokens_estimated": snapshot.get("tokens_estimated", "unknown")}
 
     def wait_idle(self, timeout: float = 10.0) -> bool:
         """Tests and shutdown: wait for queued pause/resume transitions."""

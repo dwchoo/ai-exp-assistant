@@ -1973,12 +1973,16 @@ class ProductModel:
         line2 = (f"backend: {self.state.get('phase', 'unknown')} | bridge manager={peer('manager')} "
                  f"worker={peer('worker')} | 마지막 확인 {seen} | Ctrl-] ? 도움말")
         extra = " | ".join(part for part in (self.recovery_text(include_boot=False), self.task_text(),
-                                             self.automation_text()) if part)
+                                             self.usage_text(), self.automation_text(include_store_error=False))
+                           if part)
         if extra:
             line2 = f"{extra} | {line2}"
         warning = self.isolation_warning()
         if warning:
             line2 = f"{warning} | {line2}"
+        store_error = self.store_error_text()
+        if store_error:  # CW-16 B3 F2: a pause/resume that was not stored stays visible at 170 columns
+            line2 = f"{store_error} | {line2}"
         boot_wait = self.boot_wait_text()
         if boot_wait:  # VM F2: the safety wait comes first, so a narrow terminal still shows it
             line2 = f"{boot_wait} | {line2}"
@@ -2025,6 +2029,35 @@ class ProductModel:
             summary = _clip(summary, max(SUMMARY_MIN_COLS, min(SUMMARY_MAX_COLS, self.cols // 3)))
             head += f' "{summary}"'
         return head + tail
+
+    def usage_text(self) -> str:
+        """C-AC-21 (CW-16 D-B2-3), short: ``사용량: 재시도 1/3 · 점검 2 · 모델 미확인`` while there is a Task.
+
+        A model token count is shown only when the snapshot has an integer; otherwise ``미확인``.
+        """
+        usage = self.state.get("usage")
+        if not isinstance(usage, dict) or not isinstance(self.state.get("task"), dict):
+            return ""
+
+        def count(value: object) -> int | None:
+            return value if type(value) is int and value >= 0 else None
+
+        parts = []
+        retries, limit = count(usage.get("retries_used")), count(usage.get("retry_limit"))
+        if retries is not None:
+            parts.append(f"재시도 {retries}/{limit if limit is not None else '?'}")
+        reviews = count(usage.get("review_count"))
+        if reviews is not None:
+            parts.append(f"점검 {reviews}")
+        model = usage.get("model") if isinstance(usage.get("model"), dict) else {}
+        observed, estimated = count(model.get("tokens_observed")), count(model.get("tokens_estimated"))
+        if observed is not None:
+            parts.append(f"모델 {observed} tok")
+        elif estimated is not None:
+            parts.append(f"모델 ~{estimated} tok(추정)")
+        else:
+            parts.append("모델 미확인")
+        return "사용량: " + " · ".join(parts)
 
     def boot_wait_text(self) -> str:
         """CW-19: the boot confirmation wait (its text names why), else empty."""
@@ -2101,7 +2134,15 @@ class ProductModel:
                 parts.append(f"worker 재시작됨 (manager 요청{': ' + reason if reason else ''})")
         return " · ".join(parts)
 
-    def automation_text(self) -> str:
+    def store_error_text(self) -> str:
+        """The automation pause/resume state that could not be stored (snapshot ``automation.persistence_error``)."""
+        automation = self._automation()
+        if not automation.get("persistence_error"):
+            return ""
+        paused = automation.get("state") in ("paused", "pausing") or automation.get("paused") is True
+        return "일시정지 저장 오류(재시작 시 유지 안 될 수 있음)" if paused else "자동화 상태 저장 오류"
+
+    def automation_text(self, *, include_store_error: bool = True) -> str:
         """Review timer / held reason / interruption / refused resume of the snapshot ``automation``."""
         automation = self._automation()
         state = automation.get("state")
@@ -2141,7 +2182,7 @@ class ProductModel:
             resume = automation.get("resume")
             if isinstance(resume, dict) and resume.get("outcome") == "refused":
                 parts.append(f"재개 거부: {_plain(resume.get('reason')) or '?'}")
-        if automation.get("persistence_error"):
+        if include_store_error and automation.get("persistence_error"):
             parts.append("저장 오류")
         return " · ".join(parts)
 

@@ -150,6 +150,16 @@ def _print_summary(snapshot: dict, stream=sys.stdout) -> None:
     if shell:
         print(f"  shell: {shell.get('kind')} {shell.get('executable')} mode={shell.get('parent_mode')}",
               file=stream)
+    usage = snapshot.get("usage")
+    if isinstance(usage, dict) and usage.get("task_id"):  # C-AC-21 (CW-16 D-B2-3)
+        model = usage.get("model") or {}
+        tokens = next((f"{value} tok" + (" (추정)" if key == "tokens_estimated" else "")
+                       for key in ("tokens_observed", "tokens_estimated")
+                       if type(value := model.get(key)) is int), "미확인")
+        print(f"사용량: Task {usage.get('task_id')} run {usage.get('runs_started')} "
+              f"(재시도 {usage.get('retries_used')}/{usage.get('retry_limit')}) · 60s 점검 "
+              f"{usage.get('review_count') if usage.get('review_count') is not None else '-'} · 모델 {tokens}",
+              file=stream)
     isolation = snapshot.get("omp_isolation")
     if isolation:
         drift = isolation.get("version_drift") or {}

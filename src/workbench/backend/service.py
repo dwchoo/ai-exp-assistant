@@ -33,7 +33,7 @@ import sys
 import threading
 import time
 import traceback
-from typing import Any
+from typing import Any, Mapping, Sequence
 from uuid import uuid4
 
 from workbench.app.lifecycle import LifecycleJournal
@@ -62,7 +62,9 @@ from workbench.backend.launcher import (
 )
 from workbench.backend.omp_home import (
     OmpHome, home_environment, natives_status, prepare_omp_home, verify_omp_home)
-from workbench.backend.panes import HostShellPort, OmpPane, Pane, ShellPane, process_ref, ref_dict
+from workbench.backend.panes import (
+    DetachedChildren, HostShellPort, OmpPane, Pane, ShellPane, process_ref, ref_dict,
+)
 from workbench.backend.paths import (
     BackendLocked, DataLayout, InstanceLock, ensure_private_dir, unlink_stale_socket, write_private_json,
 )
@@ -194,6 +196,8 @@ class Backend:
         self._launch: dict[PaneId, dict[str, Any]] = {}
         self._restart_lock = threading.Lock()
         self.restarts: list[dict[str, Any]] = []
+        # CW-16 B3 F1: detached children of Workbench OMPs (e.g. the OMP daemon broker), by pidfd
+        self.omp_children = DetachedChildren()
         # C-D63: the host shell's start-up environment and cwd, and its kill/restart serialisation.
         self._shell_env: dict[str, str] | None = None
         self._shell_cwd: str | None = None
@@ -401,7 +405,7 @@ class Backend:
             handoffs=self.handoffs, omp_idle=self._omp_idle, paused=self._automation_paused,
             experiment=ExperimentPorts(
                 host_shell=self._host_shell_port, make_workflow=self._make_workflow,
-                automation=self._automation_port, environment_names=lambda: set(self._shell_env or {}),
+                automation=self._automation_port, environment_names=self._shell_exported_names,
                 worktrees_root=ensure_private_dir(layout.workflow / "worktrees"),
                 artifacts_root=ensure_private_dir(layout.workflow / "runs")),
             project_dir=self.project_dir, lifecycle=self.automation_loop, host_gate=host_gate,
@@ -621,6 +625,14 @@ class Backend:
 
     def _close(self) -> dict[str, Any]:
         self.hold.set(SHUTDOWN_HOLD)  # CW-19: nothing automatic starts from here
+        # CW-16 B3 F1: pin each OMP's detached children (its daemon broker) while the OMP still lives: the bound
+        # run's stop fence below may end the OMPs, and their children are reparented the moment they exit.
+        for pane in list(self.panes.values()):
+            if isinstance(pane, OmpPane):
+                try:
+                    pane.scan_detached()
+                except Exception as exc:
+                    _log(f"detached-child scan of {pane.pane_id.value} failed: {type(exc).__name__}: {exc}")
         self._isolation_cancel.set()
         left = self._left_session_processes()  # setsid'd descendants of the host shell: shown, never signalled
         if self.watchdog is not None:
@@ -642,11 +654,17 @@ class Backend:
         if self.ui is not None:
             self.ui.stop_accepting()
         closed: list[dict[str, Any]] = []
+        registry = getattr(self, "omp_children", None) or DetachedChildren()  # tests may build a bare Backend
         for pane in self.panes.values():
             try:
                 closed.append(pane.close())
             except Exception as exc:  # keep closing the rest; report the failure
                 closed.append({"pane": pane.pane_id.value, "error": repr(exc)})
+            if isinstance(pane, OmpPane):
+                registry.add(pane.take_detached())
+        # CW-16 B3 F1 (C-AC-22): the OMPs' own detached children (their daemon broker ends ~1-3 s after its
+        # OMP) are waited for, then only those exact processes are ended; one still alive is never verified.
+        children = registry.finish()
         if self.bridge is not None:
             self.bridge.set_tool_handler(None)
             self.bridge.close()
@@ -663,11 +681,12 @@ class Backend:
         previous = self.survivors.alive()
         problems = ([f"{name}_{state}" for name, state in evidence.items() if state != "dead"]
                     + (["left_session_processes_alive"] if left_running else [])
-                    + (["previous_backend_survivors_alive"] if previous else []))
+                    + (["previous_backend_survivors_alive"] if previous else [])
+                    + (["omp_detached_children_alive"] if children["alive"] else []))
         result = {"panes": closed, "processes": evidence,
                   "verified": all(state == "dead" for state in evidence.values()) and not left_running
-                  and not previous,
-                  "left_running": left_running,
+                  and not previous and not children["alive"],
+                  "left_running": left_running, "omp_children": children,
                   "previous_survivors": [{name: item.get(name) for name in ("survivor_id", "name", "pid", "comm")}
                                          for item in previous],
                   "problems": problems, "user_confirmed": self._shutdown_confirmed,
@@ -753,9 +772,10 @@ class Backend:
                 "focus": self.focus.value,
                 "panes": {pane_id.value: self._pane_info(pane, host=pane_id is PaneId.HOST_SHELL)
                           for pane_id, pane in self.panes.items()},
-                "bridge": self.bridge_state(), "automation": self._automation_view(),
-                "task": self.flow.task_view() if self.flow else None,
+                "bridge": self.bridge_state(), "automation": (automation := self._automation_view()),
+                "task": (task := self.flow.task_view() if self.flow else None),
                 "worker": self.flow.worker_view() if self.flow else {"state": "idle", "task_id": None},
+                "usage": self._usage_view(task, automation),
                 "omp_isolation": self.omp_isolation,
                 "recovery": self._recovery_view(),
                 "boot": dict(self.boot), "shutdown": {"pending": self._shutdown_token is not None},
@@ -1075,6 +1095,7 @@ class Backend:
             # A member that cannot be signalled (EPERM) is reported, never a restart failure.
             # C-D70 (3): a live worker OMP asked to end by restart_worker is KILLed here with its session.
             previous["survivors"] = old.close(grace=close_grace)["survivors"]
+            self.omp_children.add(old.take_detached())  # CW-16 B3 F1: accounted for at the full shutdown
             previous["exit_status"] = old.returncode
             new = OmpPane(pane_id, role, launch["command"], launch["env"], cwd=self.project_dir,
                           size=old.size, generation=old.generation + 1)
@@ -1197,6 +1218,26 @@ class Backend:
         if self.automation_loop is not None:
             return self.automation_loop.paused()
         return self.automation.get("state") == "paused"
+
+    def _usage_view(self, task: Mapping[str, Any] | None, automation: Mapping[str, Any]) -> dict[str, Any]:
+        """C-AC-21 (CW-16 D-B2-3): what the current Task's runs and reviews used, and model usage when known.
+
+        Run/retry counts come from the Task, the review count from the bound run's 60 s reviews; model tokens
+        are ``unknown`` unless a source reported them (never shown as a fixed value).
+        """
+        task = task if isinstance(task, Mapping) else {}
+        runs, limit = task.get("runs_started"), task.get("retry_limit")
+        runs = runs if type(runs) is int else None
+        review = automation.get("review") if isinstance(automation.get("review"), Mapping) else {}
+        reviews = review.get("review_count") if review.get("applies") is True else None
+        model = {"tokens_observed": "unknown", "tokens_estimated": "unknown"}
+        if self.automation_loop is not None:
+            model.update(self.automation_loop.usage())
+        return {"task_id": task.get("task_id"), "runs_started": runs,
+                "retries_used": None if runs is None else max(0, runs - 1),
+                "retry_limit": limit if type(limit) is int else None,
+                "review_count": reviews if type(reviews) is int else None, "model": model,
+                "model_known": any(type(value) is int for value in model.values())}
 
     def _automation_view(self) -> dict[str, Any]:
         """The ui_v1 ``automation`` state: the controller's (U3) once bound, else the backend's own."""
@@ -1659,6 +1700,13 @@ class Backend:
             return self.bridge.probe(role, timeout=1.0).get("idle") is True
         except (MailboxError, OSError, TimeoutError):
             return None
+
+    def _shell_exported_names(self, names: Sequence[str]) -> set[str] | None:
+        """CW-16 D-B2-1 (C-D55): the names the live host shell exports now (not the start-up environment)."""
+        shell = self.shell
+        if shell is None or shell.exited():
+            return None
+        return shell.exported_names(names)
 
     def _host_shell_port(self) -> HostShellPort | None:
         shell = self.shell

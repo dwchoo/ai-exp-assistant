@@ -5,12 +5,15 @@ deliveries, which it always defers: nothing is ever submitted) to $FAKE_FRAMES. 
 - ``model-error`` / ``model-ok`` / ``model-aborted``: a ``model_turn_result`` event like the bridge extension
   sends (no text; aborted sends nothing);
 - ``tool <name> <json args>``: one bridge ``tool_request`` (as a model's tool call would);
+- ``broker <seconds>``: start a child in its own session that lives on that long after this OMP ends (<0: until
+  killed), like OMP 18.8.0's daemon broker; its pid goes to $FAKE_BROKERS;
 - ``survive``: ignore SIGHUP and keep running after the PTY hangs up (an OMP that outlives a backend crash).
 """
 import json
 import os
 import signal
 import socket
+import subprocess
 import sys
 import threading
 import time
@@ -64,6 +67,13 @@ def serve():
                   "reason": "fake_omp_not_accepting"})
             if os.environ.get("FAKE_FRAMES"):
                 envelope = frame.get("envelope") or {}
+                if isinstance(envelope, str):  # the backend sends the envelope as a JSON string
+                    try:
+                        envelope = json.loads(envelope)
+                    except ValueError:
+                        envelope = {}
+                if not isinstance(envelope, dict):
+                    envelope = {}
                 with open(os.environ["FAKE_FRAMES"], "a") as stream:
                     stream.write(json.dumps({"role": role, "session": session, "pid": os.getpid(), "frame": {
                         "kind": "deliver", "task_id": envelope.get("task_id"),
@@ -89,6 +99,19 @@ def commands():
             signal.signal(signal.SIGHUP, signal.SIG_IGN)
             survive = True
             print("surviving a hangup", flush=True)
+            continue
+        if command.startswith("broker "):  # CW-16 B3 F1: a daemon broker like OMP 18.8.0's (own session)
+            linger = float(command.split(" ", 1)[1])  # seconds it lives on after this OMP ends (<0: until killed)
+            code = ("import os, sys, time\nparent = int(sys.argv[1])\nlinger = float(sys.argv[2])\n"
+                    "while os.getppid() == parent:\n    time.sleep(0.05)\n"
+                    "time.sleep(linger) if linger >= 0 else time.sleep(3600)\n")
+            child = subprocess.Popen([sys.executable, "-c", code, str(os.getpid()), str(linger)],
+                                     start_new_session=True, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                                     stderr=subprocess.DEVNULL)
+            if os.environ.get("FAKE_BROKERS"):
+                with open(os.environ["FAKE_BROKERS"], "a") as stream:
+                    stream.write(json.dumps({"role": role, "pid": child.pid}) + "\n")
+            print("broker started", child.pid, flush=True)
             continue
         if command.startswith("tool "):
             _, name, args = command.split(" ", 2)

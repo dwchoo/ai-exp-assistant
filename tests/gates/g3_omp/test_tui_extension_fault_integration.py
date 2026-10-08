@@ -7,25 +7,48 @@ import os
 from pathlib import Path
 import shutil
 import socket
+import sys
 import time
 import unittest
 from unittest.mock import patch
 from uuid import uuid4
 
+import live_omp_probe
 import live_tui_extension_fault_probe as probe
 
 
 class ExtensionFaultIntegrationTests(unittest.TestCase):
+    # C-D72 (2): this gate was first observed on a pinned OMP 18.2.10 (historical record). It now
+    # records the OMP version it actually ran instead of refusing other versions; what it observes
+    # is unchanged. The record goes to stderr and, when WB_G3_OMP_VERSION_RECORD names a file, to
+    # that JSON file.
     @classmethod
     def setUpClass(cls) -> None:
         cls.omp = shutil.which("omp")
         if cls.omp is None:
             raise RuntimeError("Actual OMP is required for the G3 integration gate")
-        if probe._omp_version(cls.omp) != probe.OMP_VERSION:
-            raise RuntimeError("Unexpected OMP version")
+        cls.omp_version = probe._omp_version(cls.omp)
+        if not cls.omp_version.startswith("omp/"):
+            raise RuntimeError(f"OMP version could not be determined: {cls.omp_version!r}")
+        # The bridge reports WORKBENCH_G3_EXPECTED_OMP_VERSION; make it the version actually run.
+        cls._version_patch = patch.object(live_omp_probe, "OMP_VERSION", cls.omp_version)
+        cls._version_patch.start()
+        record = {"gate": "G3 extension fault integration", "omp": cls.omp, "omp_version": cls.omp_version,
+                  "historical_pin": "omp/18.2.10"}
+        print(f"\n[g3-version-record] {json.dumps(record, sort_keys=True)}", file=sys.stderr)
+        target = os.environ.get("WB_G3_OMP_VERSION_RECORD")
+        if target:
+            Path(target).write_text(json.dumps(record, sort_keys=True) + "\n")
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        cls._version_patch.stop()
 
     def assert_clean(self, result: dict[str, object]) -> None:
+        # C-D72 (2) delta: the probe waits (bounded, no signal) for its own OMP daemon broker before measuring.
+        print(f"\n[g3-broker-wait] {json.dumps(result.get('omp_broker_wait'), sort_keys=True)}", file=sys.stderr)
         self.assertEqual(result["omp_children_remaining"], 0, result)
+        self.assertEqual((result.get("omp_broker_wait") or {}).get("remaining"), [], result)
         self.assertTrue(all(not pids for pids in result["cwd_processes_remaining"].values()), result)
         for pid in result["pids"].values():
             self.assertFalse(Path(f"/proc/{pid}").exists())
