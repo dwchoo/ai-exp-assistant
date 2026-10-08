@@ -31,7 +31,7 @@ OMP = find_omp()
 DETACHED_SECONDS = 63
 
 
-@unittest.skipUnless(OMP, "real OMP 18.2.10 is required for L-CW17-DETACH")
+@unittest.skipUnless(OMP, "real OMP is required for L-CW17-DETACH (version recorded, not pinned: C-D72 (2))")
 class IndependentLiveDetachTests(unittest.TestCase):
     def test_sigkill_attached_frontend_then_over_60s_detached_reattach_keeps_user_owned_identities(self):
         live = LiveBackend(OMP, path="/usr/bin:/bin")

@@ -731,6 +731,8 @@ class RetryTests(FlowFixture):
         self.assertEqual(self.runs[2]["revision"], 2, "the same spec reruns on its revision")
         limited = self.to_worker({"kind": "experiment", "message": "one more", "task_id": task_id, "run": True})
         self.assertEqual((limited["status"], limited["reason"]), ("held", "retry_limit"))
+        for needle in ("cause", "evidence", "log", "attempts", "remains", "do not run it again"):
+            self.assertIn(needle, limited["detail"], "C-AC-07: what to report to the user (CW-16 P3-1)")
         proceeds = [d for revision in (1, 2) for d in self.decisions(task_id, revision) if d["kind"] == "proceed"]
         self.assertEqual([d["retry_count_used"] for d in proceeds], [0, 1, 2, 3])
         self.assertTrue(all((d["details"]["actor"], d["details"]["authority"]) == STANDING for d in proceeds))

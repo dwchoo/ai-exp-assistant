@@ -85,6 +85,13 @@ EXIT_LOCKED = 75
 READY_TIMEOUT = 90.0
 STATE_INTERVAL = 0.25
 SHUTDOWN_TOKEN_TTL = 120.0
+# C-AC-22 (CW-16 O4): the confirm answer is sent before the close starts; the CLI then waits for the result up to
+# this bound, the sum (rounded up) of the bounded waits in ``_close`` (thread joins: watchdog 7, run fence 2,
+# automation 3x10, TaskFlow 10, terminal 5 each, isolation 15, handoff lanes 25 each; panes: OMPs together 3 + 2 + 2,
+# detached children 5 + 2; UI flush 2). A normal close takes a few seconds; the bound only matters for a hang.
+SHUTDOWN_RESULT_DEADLINE = 150.0
+SHUTDOWN_ANSWER_FLUSH = 1.0  # how long the close waits to send queued answers (the confirm) before it starts
+OMP_TERM_GRACE = 3.0  # both OMPs get SIGTERM together and share this grace (an OMP aborting a turn may need it all)
 OMP_ROLES = (("manager", PaneId.MANAGER_OMP), ("worker", PaneId.WORKER_OMP))
 ISOLATION_JOIN_TIMEOUT = 15.0
 RESTART_HISTORY = 20
@@ -625,6 +632,9 @@ class Backend:
 
     def _close(self) -> dict[str, Any]:
         self.hold.set(SHUTDOWN_HOLD)  # CW-19: nothing automatic starts from here
+        if self.ui is not None:
+            # CW-16 O4 (C-AC-22): the confirm's answer was only queued; send it now, not after the whole close.
+            self.ui.flush(SHUTDOWN_ANSWER_FLUSH)
         # CW-16 B3 F1: pin each OMP's detached children (its daemon broker) while the OMP still lives: the bound
         # run's stop fence below may end the OMPs, and their children are reparented the moment they exit.
         for pane in list(self.panes.values()):
@@ -655,9 +665,24 @@ class Backend:
             self.ui.stop_accepting()
         closed: list[dict[str, Any]] = []
         registry = getattr(self, "omp_children", None) or DetachedChildren()  # tests may build a bare Backend
+        # CW-16 O4: an OMP in a model turn may take seconds to abort it on SIGTERM; both OMPs get the signal at
+        # once and share one grace, so the close is not one grace per OMP (each is KILLed after it as before).
+        term_deadline = time.monotonic() + OMP_TERM_GRACE
+        signalled: dict[PaneId, bool] = {}
+        for pane in self.panes.values():
+            if isinstance(pane, OmpPane):
+                try:
+                    pane.scan_detached()  # B3 F1: pin its detached children again right before the signal
+                    signalled[pane.pane_id] = pane.terminate()
+                except Exception as exc:  # close() below signals it itself
+                    _log(f"SIGTERM to {pane.pane_id.value} failed: {type(exc).__name__}: {exc}")
         for pane in self.panes.values():
             try:
-                closed.append(pane.close())
+                if isinstance(pane, OmpPane):
+                    closed.append(pane.close(max(0.0, term_deadline - time.monotonic()),
+                                             signalled=signalled.get(pane.pane_id, False)))
+                else:
+                    closed.append(pane.close())
             except Exception as exc:  # keep closing the rest; report the failure
                 closed.append({"pane": pane.pane_id.value, "error": repr(exc)})
             if isinstance(pane, OmpPane):
@@ -1024,7 +1049,8 @@ class Backend:
             raise Held(Reason.SHUTDOWN_TOKEN_MISMATCH, "shutdown token is stale or unknown; request again")
         self._shutdown_confirmed = True
         _log("shutdown confirmed by UI")
-        return {"shutting_down": True}
+        # The result follows in the CLOSING frame; the client waits for it up to this bound (CW-16 O4).
+        return {"shutting_down": True, "result_deadline": SHUTDOWN_RESULT_DEADLINE}
 
     def confirm_boot(self, boot_id: str) -> dict[str, Any]:
         """C-AC-23 / C-D58: the CLI ``confirm-boot``; durable first, then the hold is lifted."""

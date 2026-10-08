@@ -141,3 +141,7 @@
 <a id="C-D72"></a>
 
 - C-D72: 2026-10-08 CW-16(최종 통합 검증) 착수 전 사용자 결정. 근거: 계획 result-p27-cw16-plan-01.md §9. 사용자 인용: "그냥 bash, sh만 지원으로 하자. 이거 둘중 하나는 무조건 있을거 아니야." 선택지 답변: OMP 버전 "18.8.0 기준 + 영향 대조 (Recommended)", worker 직접 요청 "범위 넘으면 manager 보고 (Recommended)", 승인 창 "해당 없음(근거 첨부) (Recommended)". (1) 지원 shell은 Bash(우선)와 sh(fallback)뿐이다. 사용자의 기본/login shell이 zsh 등 다른 shell이어도 Workbench는 Bash 또는 sh로 host terminal을 띄우며, zsh 전용 안내·실제 zsh login 검증은 C-AC-20 범위에서 뺀다. Bash와 sh가 모두 없을 때의 안내는 기존 구현대로 유지한다. (2) 최종 검증 OMP 버전은 설치된 18.8.0이다. OMP 18.2.10에 고정된 G1·G3 live probe 근거는 이전 기록(historical)으로 두고, 같은 사용자 동작을 18.8.0 최종 후보에서 다시 관측했는지 영향 대조표로 연결한다. 고정 probe는 실행한 OMP 버전을 기록하는 방식으로 바꾼다(CW-16 test delta). (3) 사용자가 worker에게 직접 요청할 때: 열린 Task 범위 안이면 그 Task로 수행하고, Task가 없는 작은 요청은 제한 없이 수행하며(C-D69 (6)(b)), 열린 Task 범위를 넘는 요청은 worker가 스스로 범위를 넓히지 않고 manager에게 보고한다(C-D69 (2)). (4) 원본 OMP 승인 창은 제품 구성(worker `--tools` 허용 목록, manager 기본)에서 나타나지 않으면 근거를 붙여 "해당 없음"으로 기록한다.
+
+<a id="C-D73"></a>
+
+- C-D73: 2026-10-08 CW-16 gap 검증(result-p27-cw16-gap-01.md) 뒤 색상 fidelity에 대한 사용자 결정. 선택지 답변: "256색 근사 수용 (Recommended)". 제품 UI는 curses color pair로 pane을 그리며 OMP의 24-bit RGB 색을 256색(6×6×6 cube·grey ramp·system 16색)으로 근사한다. 이 근사를 제품 동작으로 확정하고 COMPATIBILITY에 한계로 적는다. G1-COLOR 점검 기준은 "원본 RGB와 같음"이 아니라 다음으로 바꾼다: 같은 rows/columns·TERM/COLORTERM에서 OMP의 index 색(0–255)은 같은 index로, 24-bit RGB는 가장 가까운 256색으로 그려지고, 강조(bold/underline/reverse)와 색 구분이 유지되며, 색 해석 오류(예: hex 색을 10진 index로 오인)가 없다. 실물 GUI terminal의 표시 fidelity는 계속 미검증 목록에 둔다.

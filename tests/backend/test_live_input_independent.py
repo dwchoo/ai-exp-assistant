@@ -43,7 +43,7 @@ def tearDownModule():  # noqa: N802 - unittest hook
             json.dump(ROWS, stream, indent=1, ensure_ascii=False)
 
 
-@unittest.skipUnless(OMP, "real OMP 18.2.10 is required")
+@unittest.skipUnless(OMP, "real OMP is required (version recorded, not pinned: C-D72 (2))")
 class IndependentHostShellInputTests(unittest.TestCase):
     def open(self, scenario: str):
         live = LiveBackend(OMP, path="/usr/bin:/bin")

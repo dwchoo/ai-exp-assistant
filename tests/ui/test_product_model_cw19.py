@@ -8,7 +8,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 
 from support import FakeSender, snapshot  # noqa: E402
-from workbench.ui.product.model import BOOT_WAIT_TEXT, STARTUP_SHOWN_SECONDS, ProductModel  # noqa: E402
+from workbench.ui.product.model import (  # noqa: E402
+    BOOT_WAIT_TEXT, STARTUP_SETTLED_SECONDS, STARTUP_SHOWN_SECONDS, ProductModel)
 
 NOW = 5000.0
 
@@ -48,6 +49,30 @@ class Cw19StatusTests(unittest.TestCase):
         self.assertIn("이전 backend의 process 1개 남음", model.status_lines()[1])
         startup["survivors"] = []
         model.apply_snapshot({**snapshot(), "startup": startup})
+        self.assertNotIn("재시작", model.status_lines()[1])
+
+    def test_restart_line_clears_once_settled_or_after_a_bounded_time(self):
+        """CW-16 O3: not for the whole backend lifetime; status --json keeps the record."""
+        self.assertLessEqual(STARTUP_SHOWN_SECONDS, 180)
+        startup = {"classification": "same_boot_crash", "at": NOW - 5, "outbox_lost_count": 1,
+                   "run": {"state": "outcome_unknown"}, "survivors": []}
+        held = {"task_id": "t1", "kind": "work", "status": "held", "held_reason": "backend_restarted"}
+        model, clock = model_with(startup=startup, task=held)
+        self.assertIn("backend 비정상 종료 뒤 재시작", model.status_lines()[1])
+        clock[0] = NOW + 60  # the reconciled Task is still open: still shown
+        model.apply_snapshot({**snapshot(), "startup": startup, "task": held})
+        self.assertIn("backend 비정상 종료 뒤 재시작", model.status_lines()[1])
+        model.apply_snapshot({**snapshot(), "startup": startup, "task": {**held, "status": "closed"}})
+        self.assertNotIn("재시작", model.status_lines()[1], "the Task is closed and nothing survived")
+        clock[0] = NOW + STARTUP_SHOWN_SECONDS + 1  # still open, but past the bound
+        model.apply_snapshot({**snapshot(), "startup": startup, "task": held})
+        self.assertNotIn("재시작", model.status_lines()[1])
+        # No Task was open and nothing survived: shown only briefly.
+        clock[0] = NOW
+        model.apply_snapshot({**snapshot(), "startup": startup, "task": None})
+        self.assertIn("재시작", model.status_lines()[1])
+        clock[0] = NOW + STARTUP_SETTLED_SECONDS + 1
+        model.apply_snapshot({**snapshot(), "startup": startup, "task": None})
         self.assertNotIn("재시작", model.status_lines()[1])
 
     def test_fault_holds_say_that_execution_continues(self):

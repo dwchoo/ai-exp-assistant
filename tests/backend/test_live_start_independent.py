@@ -44,7 +44,7 @@ def foreign_sleeper() -> tuple[subprocess.Popen, int]:
     return process, ticks(process.pid)
 
 
-@unittest.skipUnless(OMP, "real OMP 18.2.10 is required for L-CW17-START")
+@unittest.skipUnless(OMP, "real OMP is required for L-CW17-START (version recorded, not pinned: C-D72 (2))")
 class IndependentLiveStartTests(unittest.TestCase):
     def live(self, **kwargs) -> LiveBackend:
         live = LiveBackend(OMP, **kwargs)
@@ -129,7 +129,7 @@ class IndependentLiveStartTests(unittest.TestCase):
         self.assertFalse(sentinel.exists(), "the zsh login shell was executed")
 
     def test_no_bash_no_sh_on_plain_pty_prints_requirements_exits_nonzero_and_starts_nothing(self):
-        live = self.live()
+        live = self.live(seed_provider=False)  # gap-01 wiring: the data dir must stay untouched before start
         sentinel = live.root / "zsh-ran"
         bindir = self.bindir(live, omp=OMP)
         zsh = fake_zsh(bindir, sentinel)
@@ -173,13 +173,15 @@ class IndependentLiveStartTests(unittest.TestCase):
             for name in dirs + files:
                 path = Path(root) / name
                 info = os.lstat(path)
+                if stat.S_ISLNK(info.st_mode):
+                    continue  # p27-cw16-fix-04 (Root-approved delta): C-D64 agent.db symlink, lstat mode is always 0777
                 if stat.S_IMODE(info.st_mode) & 0o077:
                     exposed.append((str(path.relative_to(live.data)), oct(stat.S_IMODE(info.st_mode))))
         self.assertEqual(exposed, [], "data-dir entries readable by group/other")
         self.assert_shutdown_clean(live)
 
     def test_symlinked_data_dir_is_refused_before_anything_starts(self):
-        live = self.live()
+        live = self.live(seed_provider=False)  # gap-01 wiring: nothing may be written through the symlink
         target = live.root / "elsewhere"
         target.mkdir(mode=0o700)
         live.data.symlink_to(target)

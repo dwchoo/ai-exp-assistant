@@ -68,7 +68,7 @@ def init_dir_of(pid: int, kind: str) -> Path:
     raise AssertionError("dash ENV init file not found")
 
 
-@unittest.skipUnless(OMP, "real OMP 18.2.10 is required")
+@unittest.skipUnless(OMP, "real OMP is required (version recorded, not pinned: C-D72 (2))")
 class BackendManualInputTests(unittest.TestCase):
     def open(self, kind: str):
         live = LiveBackend(OMP, path="/usr/bin:/bin")

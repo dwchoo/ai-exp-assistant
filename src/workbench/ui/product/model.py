@@ -135,7 +135,10 @@ BOOT_UNKNOWN_TEXT = "boot 확인 대기: python -m workbench confirm-boot (boot 
 BOOT_RECONCILE_FAILED_TEXT = "재시작 대조 실패 확인 대기: python -m workbench confirm-boot (그 전에는 자동 동작 보류)"
 STARTUP_TEXT = {"same_boot_crash": "backend 비정상 종료 뒤 재시작", "same_boot_unverified_stop": "종료 미확인 뒤 재시작",
                 "same_boot_clean_stop": "backend 재시작", "reboot": "재부팅 뒤 시작", "boot_unknown": "boot 불명 뒤 시작"}
-STARTUP_SHOWN_SECONDS = 600
+# CW-16 O3: the restart line is shown at most this long, and only this long once nothing is left to decide (no open
+# Task, no previous-backend process alive); `status --json` keeps the record. Live survivors stay listed.
+STARTUP_SHOWN_SECONDS = 120
+STARTUP_SETTLED_SECONDS = 15
 # host-shell held reasons that mean user jobs (or a state left unknown by them) keep the handoff / automation held
 JOB_HELD_REASONS = ("manual_jobs", "unknown_or_manual_residue")
 # held reasons in a refusal notice, in plain Korean (unknown codes are shown as they are)
@@ -2082,10 +2085,12 @@ class ProductModel:
             survivors = [item for item in startup.get("survivors") or () if isinstance(item, dict)
                          and item.get("state") in ("alive", "stop_unconfirmed")]
             at = startup.get("at")
-            recent = isinstance(at, (int, float)) and not isinstance(at, bool) \
-                and self.clock() - at <= STARTUP_SHOWN_SECONDS
+            age = self.clock() - at if isinstance(at, (int, float)) and not isinstance(at, bool) else None
+            task = self.state.get("task")
+            task_open = isinstance(task, dict) and task.get("status") not in (None, "closed")
+            settled = not task_open and not survivors
             label = STARTUP_TEXT.get(_plain(startup.get("classification")))
-            if label and (recent or survivors):
+            if label and age is not None and age <= (STARTUP_SETTLED_SECONDS if settled else STARTUP_SHOWN_SECONDS):
                 run = startup.get("run") if isinstance(startup.get("run"), dict) else {}
                 state = _plain(run.get("state"))
                 note = {"interrupted_by_reboot": " · 이전 run 중단됨(결과 불명)",

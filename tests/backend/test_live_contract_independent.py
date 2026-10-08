@@ -107,7 +107,7 @@ def core_identity(snapshot: dict) -> dict:
             "alive": {k: p["alive"] for k, p in snapshot["panes"].items()}}
 
 
-@unittest.skipUnless(OMP, "real OMP 18.2.10 is required")
+@unittest.skipUnless(OMP, "real OMP is required (version recorded, not pinned: C-D72 (2))")
 class IndependentLiveContractTests(unittest.TestCase):
     def open(self) -> tuple[LiveBackend, dict]:
         live = LiveBackend(OMP, path="/usr/bin:/bin")

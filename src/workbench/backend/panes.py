@@ -46,6 +46,7 @@ ENV_PROBE_SECONDS = 0.5  # CW-16 D-B2-1: re-reading a names file the next prompt
 # CW-16 B3 F1: detached children of a Workbench OMP (e.g. OMP 18.8.0's daemon broker, which calls setsid and
 # outlives its parent for ~1-3 s): rescanned while the OMP lives, waited for after it ends, then ended.
 DETACHED_SCAN_SECONDS = 2.0
+OMP_UMASK = 0o077  # CW-16 D3: every OMP process Workbench starts creates owner-only files (not the host shell)
 DETACHED_WAIT_SECONDS = 5.0
 DETACHED_TERM_GRACE = 2.0
 _ENV_NAME = re.compile(r"[A-Za-z_][A-Za-z0-9_]*")
@@ -436,6 +437,9 @@ class OmpPane(_OwnedSession, Pane):
                 if cwd is not None:
                     os.chdir(cwd)
                 _set_winsize(0, rows, cols)
+                # CW-16 D3: what OMP creates in the Workbench OMP home (data dir) is private to the user. Only this
+                # OMP child gets the mask; the host shell keeps the user's umask.
+                os.umask(OMP_UMASK)
                 # Python ignores SIGPIPE/SIGXFSZ; OMP starts with defaults.
                 signal.signal(signal.SIGPIPE, signal.SIG_DFL)
                 signal.signal(signal.SIGXFSZ, signal.SIG_DFL)
@@ -600,22 +604,27 @@ class OmpPane(_OwnedSession, Pane):
             return False
         return True
 
-    def close(self, grace: float = 3.0) -> dict[str, Any]:
+    def close(self, grace: float = 3.0, *, signalled: bool = False) -> dict[str, Any]:
         """TERM the proven OMP group, then KILL every proven member left in its session.
 
-        Never raises for a member that cannot be signalled: it is reported in ``survivors``.
-        Its detached children (CW-16 B3 F1) are pinned first; ``take_detached`` hands them to the backend.
+        ``signalled``: ``terminate`` already sent the SIGTERM (the backend's shutdown signals both OMPs together,
+        CW-16 O4); it is not sent twice. Never raises for a member that cannot be signalled: it is reported in
+        ``survivors``. Its detached children (CW-16 B3 F1) are pinned first; ``take_detached`` hands them to the
+        backend.
         """
         self._scan_detached()
         if not self._leader_exited() and self._leader_proven():
             # Unreaped child of this backend: its group number is still ours.
-            try:
-                os.killpg(self.pid, signal.SIGTERM)
+            if signalled:
                 terminated = True
-            except ProcessLookupError:
-                terminated = True
-            except OSError:
-                terminated = False  # EPERM: no group member took it; the pinned KILL below decides
+            else:
+                try:
+                    os.killpg(self.pid, signal.SIGTERM)
+                    terminated = True
+                except ProcessLookupError:
+                    terminated = True
+                except OSError:
+                    terminated = False  # EPERM: no group member took it; the pinned KILL below decides
             deadline = time.monotonic() + (grace if terminated else 0.0)
             while not self._leader_exited() and time.monotonic() < deadline:
                 self._drain_quietly(0.05)
@@ -637,6 +646,12 @@ class OmpPane(_OwnedSession, Pane):
                 os.read(self.master_fd, READ_CHUNK_BYTES)
         except OSError:
             time.sleep(timeout)
+
+
+# CW-16 SH5 (review P3-5): the hold reason when no prompt marker followed an entered line (see _prompt_marker_missing)
+PROMPT_HOOK_SUSPECT = ("host shell reported no prompt after the last entered line and runs no program (mode "
+                       "manual_input): a user PROMPT_COMMAND (bash) or PS1 (sh) change may have replaced Workbench's "
+                       "prompt hook, or a shell builtin or multi-line command is still running or waiting for input")
 
 
 class ShellPane(_OwnedSession, Pane):
@@ -890,6 +905,16 @@ class ShellPane(_OwnedSession, Pane):
             return self.shell_state()
 
     # -- CW-18 approved runs (C-D65): idle-only start through HostShellPort --------
+    def _prompt_marker_missing(self, state: dict[str, Any]) -> bool:
+        """CW-16 SH5: an entered line got no prompt marker back while the shell itself is the PTY foreground and
+        runs no process. A user PROMPT_COMMAND (bash) or PS1 (sh) that replaced Workbench's prompt hook looks like
+        this; a builtin still running or reading, or a multi-line command, looks the same from outside, so the
+        reason names both (nothing is typed into the shell to find out). Caller holds ``io_lock``."""
+        boundary = self.shell._transport.boundary
+        if not boundary.submitted_lines or boundary.pending_line or state.get("foreground_group") != self.pid:
+            return False
+        return self._session_members() == []
+
     def automation_busy(self, own_hold: str | None = None) -> str | None:
         """None when the shell is user-owned at a clean prompt with no jobs, else why not.
 
@@ -918,6 +943,8 @@ class ShellPane(_OwnedSession, Pane):
         if self._pending:
             return "user input is queued for the host shell"
         if state["parent_mode"] != "manual_prompt":
+            if state["parent_mode"] == "manual_input" and self._prompt_marker_missing(state):
+                return PROMPT_HOOK_SUSPECT
             return f"host shell is not at a clean prompt (mode {state['parent_mode']})"
         busy = {"manual_jobs": "the host shell has jobs",
                 "unsubmitted_or_unconsumed_input": "a line is being typed in the host shell",

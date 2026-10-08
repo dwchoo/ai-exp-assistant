@@ -2422,7 +2422,7 @@
         "CW-02"
       ],
       "required_evidence_level": "runtime",
-      "check": "동일 rows/columns·version·theme·TERM/COLORTERM·font에서 OMP의 RGB 텍스트 색상·구분 가능한 강조를 원본과 대조. pyte truecolor 파싱이나 정적 RGB 축소 확인만으로 curses 출력 fidelity를 통과시키지 않음. 수정 시 cursor·SGR·redraw 회귀까지 확인.",
+      "check": "C-D73: 같은 rows/columns·TERM/COLORTERM에서 OMP index 색(0-255)은 같은 index로, 24-bit RGB는 가장 가까운 256색으로 제품 UI(curses)에 그려지고 bold/underline/reverse 강조와 색 구분이 유지되며 색 해석 오류(hex를 10진 index로 오인 등)가 없음을 제품 경로 outer 화면에서 대조. pyte 파싱만으로 통과시키지 않음. 실물 GUI terminal 표시 fidelity는 미검증으로 기록. (이전 기준: 동일 rows/columns·version·theme·TERM/COLORTERM·font에서 OMP의 RGB 텍스트 색상·구분 가능한 강조를 원본과 대조. pyte truecolor 파싱이나 정적 RGB 축소 확인만으로 curses 출력 fidelity를 통과시키지 않음. 수정 시 cursor·SGR·redraw 회귀까지 확인.)",
       "kind": "feasibility",
       "evidence_status": "pending_current_candidate",
       "final_checks": []

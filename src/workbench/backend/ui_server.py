@@ -390,6 +390,21 @@ class UiServer:
             self.listener = None
             self._unlink()
 
+    def flush(self, timeout: float) -> None:
+        """Send what is already queued (e.g. the shutdown confirm's answer) without reading new requests."""
+        deadline = time.monotonic() + timeout
+        while True:
+            pending = [c for c in self.connections if c.outbound]
+            remaining = deadline - time.monotonic()
+            if not pending or remaining <= 0:
+                return
+            try:
+                writable = select.select([], pending, [], min(remaining, 0.05))[1]
+            except InterruptedError:
+                continue
+            for connection in writable:
+                self._write(connection)
+
     def close(self, final: dict[str, Any] | None = None, *, flush_timeout: float = 2.0) -> None:
         self.stop_accepting()
         header = {"v": ui_v1.VERSION, "type": ServerType.CLOSING.value, "reason": Reason.BACKEND_SHUTDOWN.value}

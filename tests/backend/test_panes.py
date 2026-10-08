@@ -290,6 +290,40 @@ class ShellPaneTests(unittest.TestCase):
                     pane.close()
                 self.assertEqual(LinuxProcessProbe().observe(ref).state, "dead")
 
+    def test_a_replaced_prompt_hook_is_named_in_the_hold_reason(self):
+        """CW-16 SH5 (review P3-5): no prompt marker after an entered line while the shell runs nothing."""
+        cases = ((ShellChoice("bash", "/usr/bin/bash"), b"PROMPT_COMMAND='echo hi'\r"),
+                 (ShellChoice("sh", "/usr/bin/dash"), b"PS1='% '\r"))
+        for choice, change in cases:
+            with self.subTest(choice.kind), tempfile.TemporaryDirectory(prefix="cw16-sh5-") as directory:
+                pane = ShellPane(choice, {"PATH": "/usr/bin:/bin", "HOME": directory, "LANG": "C.UTF-8"})
+                try:
+                    pump_until(pane, lambda _: pane.state["parent_mode"] == "manual_prompt")
+                    with pane.io_lock:
+                        self.assertIsNone(pane.automation_busy())
+                    self.assertIsNone(pane.admit(b"sleep 30\r"))
+                    pump_until(pane, lambda _: pane.state["parent_mode"] == "manual_foreground")
+                    with pane.io_lock:
+                        self.assertNotIn("PROMPT_COMMAND", pane.automation_busy())  # a program runs
+                    self.assertIsNone(pane.admit(b"\x03"))
+                    pump_until(pane, lambda _: pane.state["parent_mode"] == "manual_prompt")
+                    self.assertIsNone(pane.admit(b"echo partial"))  # typed, not entered: not the hook
+                    pump_until(pane, lambda _: pane.state["parent_mode"] == "manual_input")
+                    with pane.io_lock:
+                        reason = pane.automation_busy()
+                    self.assertIn("manual_input", reason)
+                    self.assertNotIn("PROMPT_COMMAND", reason)
+                    self.assertIsNone(pane.admit(b"\x03"))
+                    pump_until(pane, lambda _: pane.state["parent_mode"] == "manual_prompt")
+                    self.assertIsNone(pane.admit(change))
+                    self.assertIsNone(pane.admit(b"true\r"))
+                    with pane.io_lock:
+                        pump_until(pane, lambda _: "PROMPT_COMMAND (bash) or PS1 (sh)" in (pane.automation_busy() or ""))
+                        reason = pane.automation_busy()
+                    self.assertIn("manual_input", reason)
+                finally:
+                    pane.close()
+
 
 if __name__ == "__main__":
     unittest.main()

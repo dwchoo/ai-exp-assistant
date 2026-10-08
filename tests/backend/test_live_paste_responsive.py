@@ -16,7 +16,7 @@ from workbench.contracts.v1 import PaneId
 OMP = find_omp()
 
 
-@unittest.skipUnless(OMP, "real OMP 18.2.10 is required")
+@unittest.skipUnless(OMP, "real OMP is required (version recorded, not pinned: C-D72 (2))")
 class LivePasteResponsivenessTests(unittest.TestCase):
     def test_2mib_raw_paste_keeps_snapshot_latency_under_one_second(self):
         live = LiveBackend(OMP, path="/usr/bin:/bin")

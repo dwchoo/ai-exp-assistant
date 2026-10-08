@@ -106,7 +106,7 @@ class LiveCase(unittest.TestCase):
             client.displays.clear()
 
 
-@unittest.skipUnless(OMP, "real OMP 18.2.10 is required")
+@unittest.skipUnless(OMP, "real OMP is required (version recorded, not pinned: C-D72 (2))")
 class LivePasteResponsivenessTests(LiveCase):
     def omp_echo_latency(self, client: UiClient, pane: PaneId) -> float:
         """Time from one key admitted to the OMP pane until that pane's next display chunk."""
@@ -240,7 +240,7 @@ class LivePasteResponsivenessTests(LiveCase):
         client.detach()
 
 
-@unittest.skipUnless(OMP, "real OMP 18.2.10 is required")
+@unittest.skipUnless(OMP, "real OMP is required (version recorded, not pinned: C-D72 (2))")
 class LiveSignalDispositionAndShutdownTests(LiveCase):
     def test_omp_host_shell_and_user_children_default_pipe_xfsz_then_clean_shutdown(self):
         probe_dir = Path(tempfile.mkdtemp(prefix="p27c-omp-"))

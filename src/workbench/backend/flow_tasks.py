@@ -111,6 +111,12 @@ WORKER_TERMINAL_HELD = "host_terminal_busy:worker_terminal_command"
 # A pending experiment start that waits only for the host shell (or was not checked yet) keeps the terminal off it.
 _HOST_START_REASONS = (None, "host_terminal_busy", WORKER_TERMINAL_HELD)
 RETRY_LIMIT = 3  # CW-13: re-runs of one experiment Task
+# C-AC-07 (CW-16 review P3-1): what the manager reports to the user once the re-runs are used (the tool result
+# carries it, so the to-worker skill does not grow).
+RETRY_LIMIT_DETAIL = ("the re-runs of this experiment are used up; do not run it again. Report to the user: "
+                      "(1) the cause of the failures as far as known, (2) the evidence: each run's result "
+                      "and its log or result file paths, (3) the attempts made (runs started, what changed "
+                      "between them), (4) the problem that remains. Then wait for the user's decision.")
 SUMMARY_MAX = 1024
 NOTICE_LIMIT = 16
 HOLD_REASON = "Workbench is starting the manager's experiment run"
@@ -774,8 +780,9 @@ class TaskFlow:
         if task.busy():
             return self._worker_busy(task)
         if task.runs_started > RETRY_LIMIT:
-            return HandoffDecision(held("retry_limit") | {"task_id": task.task_id, "retry_limit": RETRY_LIMIT,
-                                                          "runs_started": task.runs_started})
+            return HandoffDecision(held("retry_limit") | {
+                "task_id": task.task_id, "retry_limit": RETRY_LIMIT, "runs_started": task.runs_started,
+                "detail": RETRY_LIMIT_DETAIL})
         base = dict(spec) if spec is not None else dict(task.spec)
         if base == task.spec:
             revision = task.revision  # the same delegated spec runs again on its revision

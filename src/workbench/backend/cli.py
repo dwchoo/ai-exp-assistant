@@ -383,15 +383,49 @@ def cmd_confirm_boot(args: argparse.Namespace) -> int:
     return 0
 
 
+SHUTDOWN_RESULT_WAIT = 150.0  # used when an older backend does not send its own bound (``result_deadline``)
+SHUTDOWN_PROGRESS_EVERY = 5.0  # seconds between the human form's progress lines (stderr)
+BACKEND_GONE_WAIT = 10.0  # after a lost connection: how long to watch the backend's exact pid end
+
+
+def _backend_state(ref: object, wait: float) -> str:
+    """``ended``, ``alive`` or ``unknown`` for the backend's exact pid and start ticks (never signalled)."""
+    if not isinstance(ref, Mapping) or type(ref.get("pid")) is not int or type(ref.get("start_ticks")) is not int:
+        return "unknown"
+    from workbench.app.recovery import observe
+    deadline = time.monotonic() + wait
+    while True:
+        state = observe(ref["pid"], ref["start_ticks"])
+        if state != "alive" or time.monotonic() >= deadline:
+            return state
+        time.sleep(0.1)
+
+
 def cmd_shutdown(args: argparse.Namespace) -> int:
+    """C-AC-22: show the active work, confirm, then wait for the backend's own result; a result that is not
+    verified, or none at all, is never shown as success, and no failure ends in a traceback (CW-16 O4)."""
     layout = _layout(args)
     try:
         client = UiClient(layout.ui_socket, name="workbench-cli", timeout=10)
     except NotRunning:
         print(f"no backend is running for {layout.root}", file=sys.stderr)
         return EXIT_NOT_RUNNING
+    except (OSError, ClientError) as exc:
+        print(f"backend did not answer: {type(exc).__name__}: {exc}", file=sys.stderr)
+        return EXIT_FAILURE
+    result: dict | None = None
+    lost: str | None = None
+    backend_ref: object = None
     with client:
-        pending = client.request(ClientType.SHUTDOWN_REQUEST)
+        try:
+            pending = client.request(ClientType.SHUTDOWN_REQUEST)
+        except (OSError, TimeoutError, ClientError) as exc:
+            print(f"shutdown request failed (nothing was stopped): {type(exc).__name__}: {exc}", file=sys.stderr)
+            return EXIT_FAILURE
+        if not pending.get("ok", True) or "token" not in pending:
+            print(f"shutdown request refused: {pending.get('reason')}: {pending.get('detail')}", file=sys.stderr)
+            return EXIT_FAILURE
+        backend_ref = (pending.get("processes") or {}).get("backend")
         active = pending.get("active", [])
         print("active work:" if active else "no active work reported")
         for item in active:
@@ -403,23 +437,62 @@ def cmd_shutdown(args: argparse.Namespace) -> int:
             if input("stop the backend, both OMP sessions and the host shell? [y/N] ").strip().lower() != "y":
                 print("cancelled")
                 return EXIT_FAILURE
-        confirmed = client.request(ClientType.SHUTDOWN_CONFIRM, token=pending["token"])
+        wait = SHUTDOWN_RESULT_WAIT
+        try:
+            confirmed = client.request(ClientType.SHUTDOWN_CONFIRM, token=pending["token"])
+        except TimeoutError:  # an older backend answers only when its close ends: keep waiting for the result
+            confirmed = {"ok": True}
+        except (OSError, ClientError) as exc:
+            confirmed = {"ok": True}
+            lost = f"{type(exc).__name__}: {exc}"
         if not confirmed.get("ok"):
             print(f"shutdown refused: {confirmed.get('reason')}: {confirmed.get('detail')}", file=sys.stderr)
             return EXIT_FAILURE
-        deadline = time.monotonic() + 30
-        while client.closing is None and time.monotonic() < deadline:
-            if not client.pump(0.2):
+        bound = confirmed.get("result_deadline")
+        if type(bound) in (int, float) and bound > 0:
+            wait = float(bound)
+        started = time.monotonic()
+        deadline, next_progress = started + wait, started + SHUTDOWN_PROGRESS_EVERY
+        if not args.json and client.closing is None and lost is None:
+            print(f"종료 중: 진행 중인 OMP turn 중단과 process 정리를 기다립니다 (최대 {wait:.0f}초)", file=sys.stderr)
+        while client.closing is None and lost is None:
+            now = time.monotonic()
+            if now >= deadline:
+                lost = f"no result within {wait:.0f} s"
                 break
+            if not args.json and now >= next_progress:
+                print(f"종료 중… {now - started:.0f}초 경과", file=sys.stderr)
+                next_progress = now + SHUTDOWN_PROGRESS_EVERY
+            try:
+                if not client.pump(min(0.2, deadline - now)):
+                    lost = "the backend closed the connection before its result"
+            except (OSError, ClientError) as exc:
+                lost = f"{type(exc).__name__}: {exc}"
         result = (client.closing or {}).get("result")
+    if not isinstance(result, dict):
+        result = None
+    if result is None:
+        # C-AC-22: no result is never a success; say whether the backend itself is gone (exact pid identity).
+        backend = _backend_state(backend_ref, BACKEND_GONE_WAIT)
+        cause = lost or "the backend sent no result"
+        backend_text = {"ended": "backend process는 종료됨", "alive": "backend process가 아직 실행 중",
+                        "unknown": "backend process 상태 불명"}[backend]
+        if args.json:
+            print(json.dumps({"shutdown": None, "unconfirmed": {"cause": cause, "backend": backend}},
+                             sort_keys=True))
+        else:
+            print("shutdown result: null")
+        print(f"종료 확인 실패: 종료 결과를 받지 못해 OMP·host shell 등의 종료를 확인할 수 없습니다 "
+              f"({backend_text}; {cause}). 'status'로 확인하세요", file=sys.stderr)
+        return EXIT_FAILURE
     if args.json:
         print(json.dumps({"shutdown": result}, sort_keys=True))
     else:
         print(f"shutdown result: {json.dumps(result, sort_keys=True)}")
-        if not (result and result.get("verified")):  # C-AC-22: never shown as success
+        if not result.get("verified"):  # C-AC-22: never shown as success
             print("종료 확인 실패: 일부 process의 종료를 확인하지 못했습니다 "
-                  f"({', '.join((result or {}).get('problems') or ['result unknown'])})", file=sys.stderr)
-    return 0 if result and result.get("verified") else EXIT_FAILURE
+                  f"({', '.join(result.get('problems') or ['result unknown'])})", file=sys.stderr)
+    return 0 if result.get("verified") else EXIT_FAILURE
 
 
 def cmd_backend(args: argparse.Namespace) -> int:

@@ -43,6 +43,35 @@ def _outer_size(fd: int) -> tuple[int, int]:
     return max(1, rows), max(1, columns)
 
 
+# xterm's 256-colour palette as pyte writes it (pyte.graphics.FG_BG_256): the 16 system colours, the 6x6x6 cube
+# levels and the 24-step grey ramp.
+_SYSTEM16 = ((0x00, 0x00, 0x00), (0xCD, 0x00, 0x00), (0x00, 0xCD, 0x00), (0xCD, 0xCD, 0x00), (0x00, 0x00, 0xEE),
+             (0xCD, 0x00, 0xCD), (0x00, 0xCD, 0xCD), (0xE5, 0xE5, 0xE5), (0x7F, 0x7F, 0x7F), (0xFF, 0x00, 0x00),
+             (0x00, 0xFF, 0x00), (0xFF, 0xFF, 0x00), (0x5C, 0x5C, 0xFF), (0xFF, 0x00, 0xFF), (0x00, 0xFF, 0xFF),
+             (0xFF, 0xFF, 0xFF))
+_CUBE_LEVELS = (0, 95, 135, 175, 215, 255)
+_GREY_LEVELS = tuple(8 + 10 * step for step in range(24))
+
+
+def _rgb_index(rgb: tuple[int, int, int]) -> int:
+    """C-D73: a 24-bit RGB as the nearest colour of the 256-colour palette (cube or grey ramp, the nearer; a tie
+    keeps the cube). A system colour (0-15) is chosen only for its exact xterm value, so an index colour the pane
+    screen turned into its RGB is drawn with its own index; seven system colours share their RGB with a cube colour
+    (e.g. 9 and 196 are both ff0000) and are drawn as that cube colour (the same RGB)."""
+
+    def distance(other: tuple[int, ...]) -> int:
+        return sum((a - b) ** 2 for a, b in zip(rgb, other))
+
+    steps = tuple(min(range(6), key=lambda level: abs(_CUBE_LEVELS[level] - component)) for component in rgb)
+    cube_index = 16 + 36 * steps[0] + 6 * steps[1] + steps[2]
+    cube_distance = distance(tuple(_CUBE_LEVELS[step] for step in steps))
+    grey_step = min(range(24), key=lambda step: distance((_GREY_LEVELS[step],) * 3))
+    grey_distance = distance((_GREY_LEVELS[grey_step],) * 3)
+    if cube_distance and rgb in _SYSTEM16:
+        return _SYSTEM16.index(rgb)
+    return cube_index if cube_distance <= grey_distance else 232 + grey_step
+
+
 def _color_index(value: str, colors: int) -> int:
     named = {
         "black": 0,
@@ -65,12 +94,11 @@ def _color_index(value: str, colors: int) -> int:
     lowered = value.lower()
     if lowered in named:
         index = named[lowered]
+    elif len(lowered) == 6 and all(char in "0123456789abcdef" for char in lowered):
+        # CW-16 D1: a pyte colour of six hex digits is an RGB even when every digit is decimal ("303030").
+        index = _rgb_index(tuple(int(lowered[offset : offset + 2], 16) for offset in (0, 2, 4)))
     elif lowered.isdigit():
         index = int(lowered)
-    elif len(lowered) == 6 and all(char in "0123456789abcdef" for char in lowered):
-        rgb = tuple(int(lowered[offset : offset + 2], 16) for offset in (0, 2, 4))
-        cube = tuple(min(5, round(component / 255 * 5)) for component in rgb)
-        index = 16 + 36 * cube[0] + 6 * cube[1] + cube[2]
     else:
         return -1
     if colors < 16:

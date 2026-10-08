@@ -48,7 +48,7 @@ def identity(snapshot):
     }
 
 
-@unittest.skipUnless(OMP, "real OMP 18.2.10 is required for L-CW17-DETACH")
+@unittest.skipUnless(OMP, "real OMP is required for L-CW17-DETACH (version recorded, not pinned: C-D72 (2))")
 class LiveDetachTests(unittest.TestCase):
     def test_detach_over_60s_then_reattach_same_identities_no_new_run(self):
         live = LiveBackend(OMP, path="/usr/bin:/bin")

@@ -1,9 +1,22 @@
-"""Runtime harness for CW-17: real entrypoint, real OMP 18.2.10, owned temp resources.
+"""Runtime harness for CW-17: real entrypoint, the installed OMP, owned temp resources.
 
 Each harness owns one temp root (data dir, profile, project cwd), one local
 counting provider, and only the processes it can prove it started: the
 backend recorded in ``backend.json`` and the members of the sessions it owns.
 Cleanup uses pidfd_open plus a start-time recheck and pidfd_send_signal.
+
+C-D72 (2) / p27-cw16-gap-01: the tests were written against OMP 18.2.10
+(``HISTORICAL_OMP_VERSION``); the version is now recorded, not required
+(stderr, and ``$WB_LIVE_OMP_VERSION_RECORD`` as JSON lines when set). Every run
+is sandboxed: the child environment is built from scratch (no ``TMUX*``,
+``HERDR_*``, ``WORKBENCH_*``, ``PI_*``, display or agent sockets), HOME is a
+fake home inside the owned root whose ``~/.omp/agent/agent.db`` is an EMPTY
+placeholder (the user's credential store is never reachable), XDG dirs and
+TMPDIR live in the root, and ``HTTP(S)_PROXY``/``ALL_PROXY`` point at a closed
+local port. The counting provider is wired into the Workbench OMP home
+(``<data>/omp-root/agent/models.yml``) so ``--model cw17-probe/scripted``
+resolves to it and ``provider.requests`` counts every model request: zero real
+model requests by construction (no credential, proxies closed).
 """
 from __future__ import annotations
 
@@ -22,28 +35,96 @@ import termios
 import threading
 import time
 import fcntl
+import pwd
 
 REPO = Path(__file__).resolve().parents[2]
 SRC = REPO / "src"
-OMP_VERSION = "omp/18.2.10"
+HISTORICAL_OMP_VERSION = "omp/18.2.10"  # C-D72 (2): what the tests were written against; recorded, not required
+BLOCKED_PROXY = "http://127.0.0.1:9"
+PROXY_KEYS = ("HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY", "http_proxy", "https_proxy", "all_proxy")
 ZSH_DEFAULT = "/usr/bin/zsh"
 SETSID = shutil.which("setsid", path="/usr/bin:/bin") or "/usr/bin/setsid"
 TEST_OMP_ARGS = ("--no-session", "--no-pty", "--no-skills", "--no-rules", "--no-title", "--no-extensions",
                  "--no-tools", "--model", "cw17-probe/scripted")
 
 sys.path.insert(0, str(SRC))
+from workbench.backend.omp_home import AGENT_DIR_NAME, omp_root  # noqa: E402
 from workbench.runtime.process_evidence import LinuxProcessProbe  # noqa: E402
+
+_FOUND: dict[str, str | None] = {}
+
+
+def _user_name_and_home() -> tuple[str, str]:
+    try:
+        entry = pwd.getpwuid(os.getuid())
+        return entry.pw_name, entry.pw_dir  # not $HOME: the runner may itself have a fake HOME
+    except KeyError:
+        return "user", os.path.expanduser("~")
+
+
+def sandbox_env(root: Path, **extra: str) -> dict[str, str]:
+    """A from-scratch child environment confined to ``root`` (fake HOME with an empty agent.db, proxies closed)."""
+    user, _ = _user_name_and_home()
+    home = root / "h"
+    (home / ".omp" / "agent").mkdir(parents=True, exist_ok=True)
+    store = home / ".omp" / "agent" / "agent.db"
+    if not store.exists():
+        store.write_bytes(b"")  # EMPTY placeholder: no credential exists in this home
+    (root / "t").mkdir(exist_ok=True)
+    (root / "r").mkdir(mode=0o700, exist_ok=True)
+    env = {"PATH": "/usr/bin:/bin", "HOME": str(home), "USER": user, "LOGNAME": user, "LANG": "C.UTF-8",
+           "TERM": "xterm-256color", "TMPDIR": str(root / "t"), "XDG_RUNTIME_DIR": str(root / "r"),
+           "XDG_CONFIG_HOME": str(home / ".config"), "XDG_DATA_HOME": str(home / ".local/share"),
+           "XDG_STATE_HOME": str(home / ".local/state"), "XDG_CACHE_HOME": str(home / ".cache"),
+           "NO_PROXY": "127.0.0.1", "no_proxy": "127.0.0.1", **{key: BLOCKED_PROXY for key in PROXY_KEYS}}
+    env.update(extra)
+    return env
+
+
+def assert_sandboxed(env: dict[str, str], root: Path) -> None:
+    """Fail closed when a child environment could reach the user's home, servers or network."""
+    leaked = sorted(k for k in env if k.startswith(("TMUX", "HERDR_", "WORKBENCH_"))
+                    or k in ("DISPLAY", "WAYLAND_DISPLAY", "SSH_AUTH_SOCK", "DBUS_SESSION_BUS_ADDRESS"))
+    if leaked:
+        raise AssertionError(f"outer context leaked into a child env: {leaked}")
+    if not Path(env.get("HOME", "/")).resolve().is_relative_to(root.resolve()):
+        raise AssertionError(f"child HOME is not inside the owned root: {env.get('HOME')}")
+    if any(env.get(key) != BLOCKED_PROXY for key in PROXY_KEYS):
+        raise AssertionError("a proxy variable is not blocked")
+
+
+def _record_version(candidate: str, version: str) -> None:
+    line = {"omp": candidate, "version": version, "historical": HISTORICAL_OMP_VERSION,
+            "pinned": False, "at": time.strftime("%Y-%m-%dT%H:%M:%S%z")}
+    print(f"[live_harness] OMP version recorded (not pinned, C-D72 (2)): {json.dumps(line)}", file=sys.stderr)
+    target = os.environ.get("WB_LIVE_OMP_VERSION_RECORD")
+    if target:
+        with open(target, "a", encoding="utf-8") as handle:
+            handle.write(json.dumps(line) + "\n")
 
 
 def find_omp() -> str | None:
-    candidate = shutil.which("omp") or os.path.expanduser("~/.local/bin/omp")
-    if not os.access(candidate, os.X_OK):
-        return None
-    try:
-        result = subprocess.run([candidate, "--version"], capture_output=True, text=True, timeout=15)
-    except (OSError, subprocess.TimeoutExpired):
-        return None
-    return candidate if result.stdout.strip() == OMP_VERSION else None
+    """The installed OMP (any ``omp/*`` version; C-D72 (2): recorded, not pinned). Probed in a sandbox."""
+    if "omp" in _FOUND:
+        return _FOUND["omp"]
+    _, user_home = _user_name_and_home()
+    candidate = os.environ.get("WB_LIVE_OMP") or shutil.which("omp") or os.path.join(user_home, ".local/bin/omp")
+    found = None
+    if os.access(candidate, os.X_OK):
+        probe_root = Path(tempfile.mkdtemp(prefix="cw17-ver-", dir="/tmp"))
+        try:
+            result = subprocess.run([candidate, "--version"], capture_output=True, text=True, timeout=30,
+                                    env=sandbox_env(probe_root), cwd=probe_root, stdin=subprocess.DEVNULL)
+            version = result.stdout.strip()
+            if version.startswith("omp/"):
+                found = candidate
+                _record_version(candidate, version)
+        except (OSError, subprocess.TimeoutExpired):
+            pass
+        finally:
+            shutil.rmtree(probe_root, ignore_errors=True)
+    _FOUND["omp"] = found
+    return found
 
 
 class _CountingHandler(BaseHTTPRequestHandler):
@@ -167,8 +248,9 @@ class PtyRun:
 
 
 class LiveBackend:
-    def __init__(self, omp: str, *, path: str | None = None):
+    def __init__(self, omp: str, *, path: str | None = None, seed_provider: bool = True):
         self.omp = omp
+        self.seed_provider = seed_provider  # False: the test needs the data dir untouched before start
         self.root = Path(tempfile.mkdtemp(prefix="cw17-", dir="/tmp"))
         self.data = self.root / "d"
         self.project = self.root / "project"
@@ -186,11 +268,13 @@ class LiveBackend:
             "    api: openai-completions\n    auth: none\n    models:\n"
             "      - id: scripted\n        name: CW17 fixture\n        contextWindow: 32768\n        maxTokens: 1024\n")
         (self.root / "config.yml").write_text("startup:\n  setupWizard: false\n")
-        env = {k: v for k, v in os.environ.items()
-               if not k.startswith(("HERDR_", "WORKBENCH_", "TMUX", "PI_", "PYTHON"))}
-        env.update({"PATH": path or "/usr/bin:/bin", "SHELL": ZSH_DEFAULT, "PI_CODING_AGENT_DIR": str(self.profile),
-                    "PYTHONPATH": str(SRC), "PYTHONDONTWRITEBYTECODE": "1", "HOME": env.get("HOME", str(self.root)),
-                    "LANG": "C.UTF-8"})
+        # p27-cw16-gap-01: built from scratch in a sandbox (fake HOME, empty agent.db, proxies closed) instead of
+        # copying os.environ with the user's real HOME. No PI_CODING_AGENT_DIR: the product (C-D64) withholds it
+        # from its OMPs and would resolve the "user" auth store from it; here that store is the fake home's empty
+        # placeholder, which the product links into its OMP home (as in cw16_harness.Sandbox).
+        env = sandbox_env(self.root, PATH=path or "/usr/bin:/bin", SHELL=ZSH_DEFAULT,
+                          PYTHONPATH=str(SRC), PYTHONDONTWRITEBYTECODE="1")
+        assert_sandboxed(env, self.root)
         self.env = env
         self.clients: list[PtyRun] = []
         self.known: dict[str, tuple[int, int]] = {}
@@ -200,7 +284,26 @@ class LiveBackend:
     def argv(self, *args: str) -> list[str]:
         return [sys.executable, "-m", "workbench", *args]
 
+    def wire_provider(self) -> None:
+        """Put the counting provider into the Workbench OMP home the product gives its OMPs (C-D64).
+
+        The product replaces ``PI_CODING_AGENT_DIR`` with ``<data>/omp-root/agent``, so the profile's
+        ``models.yml`` is not seen there; without this the scripted model would not resolve and
+        ``provider.requests`` could not count anything. Never writes through a symlinked data dir."""
+        if not self.seed_provider or self.data.is_symlink():
+            return
+        if not self.data.exists():
+            self.data.mkdir(mode=0o700)
+        agent = omp_root(self.data) / AGENT_DIR_NAME
+        agent.mkdir(parents=True, exist_ok=True, mode=0o700)
+        for directory in (omp_root(self.data), agent):
+            os.chmod(directory, 0o700)
+        target = agent / "models.yml"
+        target.write_bytes((self.profile / "models.yml").read_bytes())
+        os.chmod(target, 0o600)
+
     def start_args(self, *extra: str) -> list[str]:
+        self.wire_provider()
         omp_args = [f"--omp-arg={item}" for item in (*TEST_OMP_ARGS, "--config", str(self.root / "config.yml"))]
         return ["start", "--data-dir", str(self.data), "--omp", self.omp, *omp_args, *extra]
 

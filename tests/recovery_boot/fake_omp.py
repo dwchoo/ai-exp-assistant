@@ -7,7 +7,9 @@ deliveries, which it always defers: nothing is ever submitted) to $FAKE_FRAMES. 
 - ``tool <name> <json args>``: one bridge ``tool_request`` (as a model's tool call would);
 - ``broker <seconds>``: start a child in its own session that lives on that long after this OMP ends (<0: until
   killed), like OMP 18.8.0's daemon broker; its pid goes to $FAKE_BROKERS;
-- ``survive``: ignore SIGHUP and keep running after the PTY hangs up (an OMP that outlives a backend crash).
+- ``survive``: ignore SIGHUP and keep running after the PTY hangs up (an OMP that outlives a backend crash);
+- ``slow-term <seconds>``: on SIGTERM record the time (to $FAKE_TERMS) and exit only after that long, like an OMP
+  aborting a model turn in flight (CW-16 O4).
 """
 import json
 import os
@@ -99,6 +101,19 @@ def commands():
             signal.signal(signal.SIGHUP, signal.SIG_IGN)
             survive = True
             print("surviving a hangup", flush=True)
+            continue
+        if command.startswith("slow-term "):
+            delay = float(command.split(" ", 1)[1])
+
+            def on_term(*_):
+                if os.environ.get("FAKE_TERMS"):
+                    with open(os.environ["FAKE_TERMS"], "a") as stream:
+                        stream.write(json.dumps({"role": role, "pid": os.getpid(), "at": time.time()}) + "\n")
+                time.sleep(delay)
+                os._exit(143)
+
+            signal.signal(signal.SIGTERM, on_term)
+            print("slow term", delay, flush=True)
             continue
         if command.startswith("broker "):  # CW-16 B3 F1: a daemon broker like OMP 18.8.0's (own session)
             linger = float(command.split(" ", 1)[1])  # seconds it lives on after this OMP ends (<0: until killed)

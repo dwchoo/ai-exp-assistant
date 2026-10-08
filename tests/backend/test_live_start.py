@@ -28,7 +28,7 @@ def wait_status(live, predicate, timeout=15):
     raise AssertionError(f"status predicate timeout: {snapshot}")
 
 
-@unittest.skipUnless(OMP, "real OMP 18.2.10 is required for L-CW17-START")
+@unittest.skipUnless(OMP, "real OMP is required for L-CW17-START (version recorded, not pinned: C-D72 (2))")
 class LiveStartTests(unittest.TestCase):
     def live(self, **kwargs) -> LiveBackend:
         live = LiveBackend(OMP, **kwargs)
@@ -131,7 +131,7 @@ class LiveStartTests(unittest.TestCase):
         self.assert_clean_shutdown(live)
 
     def test_path_without_bash_or_sh_prints_requirements_and_starts_nothing(self):
-        live = self.live()
+        live = self.live(seed_provider=False)  # gap-01 wiring: the data dir must stay untouched before start
         live.env["PATH"] = self.bindir(live, omp=OMP)
         result = live.cli(*live.start_args("--no-attach"), timeout=60)
         self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
