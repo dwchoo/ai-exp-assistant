@@ -86,8 +86,10 @@ def _color_index(value: str, colors: int) -> int:
         "brightred": 9,
         "brightgreen": 10,
         "brightyellow": 11,
+        "brightbrown": 11,  # pyte names SGR 93/103 "brightbrown"
         "brightblue": 12,
         "brightmagenta": 13,
+        "bfightmagenta": 13,  # pyte's BG_AIXTERM[105] spells it this way (typo in pyte.graphics)
         "brightcyan": 14,
         "brightwhite": 15,
     }

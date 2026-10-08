@@ -422,6 +422,9 @@ def cmd_shutdown(args: argparse.Namespace) -> int:
         except (OSError, TimeoutError, ClientError) as exc:
             print(f"shutdown request failed (nothing was stopped): {type(exc).__name__}: {exc}", file=sys.stderr)
             return EXIT_FAILURE
+        except KeyboardInterrupt:  # C18 review P3: Ctrl-C before the confirmation stops nothing
+            print("\ncancelled (nothing was stopped)", file=sys.stderr)
+            return EXIT_FAILURE
         if not pending.get("ok", True) or "token" not in pending:
             print(f"shutdown request refused: {pending.get('reason')}: {pending.get('detail')}", file=sys.stderr)
             return EXIT_FAILURE
@@ -431,43 +434,60 @@ def cmd_shutdown(args: argparse.Namespace) -> int:
         for item in active:
             print(f"  - {json.dumps(item, sort_keys=True)}")
         if not args.yes:
-            if not sys.stdin.isatty():
-                print("refusing to shut down without confirmation (use --yes)", file=sys.stderr)
+            # fix-05 (C17 P3-2): no input() on a closed or non-tty stdin (no EOFError/AttributeError traceback).
+            stdin = sys.stdin
+            interactive = False
+            try:
+                interactive = stdin is not None and stdin.isatty()
+            except (OSError, ValueError):
+                pass
+            if not interactive:
+                print("refusing to shut down without confirmation: confirm with --yes (nothing was stopped). "
+                      "종료하려면 --yes를 붙여 다시 실행하세요", file=sys.stderr)
                 return EXIT_FAILURE
-            if input("stop the backend, both OMP sessions and the host shell? [y/N] ").strip().lower() != "y":
+            try:
+                answer = input("stop the backend, both OMP sessions and the host shell? [y/N] ")
+            except (EOFError, KeyboardInterrupt):
+                print("\ncancelled (nothing was stopped; use --yes to confirm)", file=sys.stderr)
+                return EXIT_FAILURE
+            if answer.strip().lower() != "y":
                 print("cancelled")
                 return EXIT_FAILURE
         wait = SHUTDOWN_RESULT_WAIT
         try:
-            confirmed = client.request(ClientType.SHUTDOWN_CONFIRM, token=pending["token"])
-        except TimeoutError:  # an older backend answers only when its close ends: keep waiting for the result
-            confirmed = {"ok": True}
-        except (OSError, ClientError) as exc:
-            confirmed = {"ok": True}
-            lost = f"{type(exc).__name__}: {exc}"
-        if not confirmed.get("ok"):
-            print(f"shutdown refused: {confirmed.get('reason')}: {confirmed.get('detail')}", file=sys.stderr)
-            return EXIT_FAILURE
-        bound = confirmed.get("result_deadline")
-        if type(bound) in (int, float) and bound > 0:
-            wait = float(bound)
-        started = time.monotonic()
-        deadline, next_progress = started + wait, started + SHUTDOWN_PROGRESS_EVERY
-        if not args.json and client.closing is None and lost is None:
-            print(f"종료 중: 진행 중인 OMP turn 중단과 process 정리를 기다립니다 (최대 {wait:.0f}초)", file=sys.stderr)
-        while client.closing is None and lost is None:
-            now = time.monotonic()
-            if now >= deadline:
-                lost = f"no result within {wait:.0f} s"
-                break
-            if not args.json and now >= next_progress:
-                print(f"종료 중… {now - started:.0f}초 경과", file=sys.stderr)
-                next_progress = now + SHUTDOWN_PROGRESS_EVERY
             try:
-                if not client.pump(min(0.2, deadline - now)):
-                    lost = "the backend closed the connection before its result"
+                confirmed = client.request(ClientType.SHUTDOWN_CONFIRM, token=pending["token"])
+            except TimeoutError:  # an older backend answers only when its close ends: keep waiting for the result
+                confirmed = {"ok": True}
             except (OSError, ClientError) as exc:
+                confirmed = {"ok": True}
                 lost = f"{type(exc).__name__}: {exc}"
+            if not confirmed.get("ok"):
+                print(f"shutdown refused: {confirmed.get('reason')}: {confirmed.get('detail')}", file=sys.stderr)
+                return EXIT_FAILURE
+            bound = confirmed.get("result_deadline")
+            if type(bound) in (int, float) and bound > 0:
+                wait = float(bound)
+            started = time.monotonic()
+            deadline, next_progress = started + wait, started + SHUTDOWN_PROGRESS_EVERY
+            if not args.json and client.closing is None and lost is None:
+                print(f"종료 중: 진행 중인 OMP turn 중단과 process 정리를 기다립니다 (최대 {wait:.0f}초)",
+                      file=sys.stderr)
+            while client.closing is None and lost is None:
+                now = time.monotonic()
+                if now >= deadline:
+                    lost = f"no result within {wait:.0f} s"
+                    break
+                if not args.json and now >= next_progress:
+                    print(f"종료 중… {now - started:.0f}초 경과", file=sys.stderr)
+                    next_progress = now + SHUTDOWN_PROGRESS_EVERY
+                try:
+                    if not client.pump(min(0.2, deadline - now)):
+                        lost = "the backend closed the connection before its result"
+                except (OSError, ClientError) as exc:
+                    lost = f"{type(exc).__name__}: {exc}"
+        except KeyboardInterrupt:  # fix-05 (C17 P3-2): the wait ended by the user; the stop was requested, not confirmed
+            lost = "interrupted (Ctrl-C) while waiting for the result"
         result = (client.closing or {}).get("result")
     if not isinstance(result, dict):
         result = None

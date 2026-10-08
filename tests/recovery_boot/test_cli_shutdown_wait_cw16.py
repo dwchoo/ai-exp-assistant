@@ -80,9 +80,9 @@ class ShutdownWait(unittest.TestCase):
         self.root = Path(tempfile.mkdtemp(prefix="cw16-o4-cli-", dir="/tmp"))
         self.addCleanup(shutil.rmtree, self.root, True)
 
-    def run_cli(self, client, *, json_form=False, **patches):
+    def run_cli(self, client, *, json_form=False, yes=True, **patches):
         out, err = io.StringIO(), io.StringIO()
-        args = argparse.Namespace(data_dir=str(self.root), yes=True, json=json_form)
+        args = argparse.Namespace(data_dir=str(self.root), yes=yes, json=json_form)
         with contextlib.ExitStack() as stack:
             stack.enter_context(mock.patch.object(cli, "_layout", lambda _a, **_k: Layout(self.root)))
             stack.enter_context(mock.patch.object(cli, "UiClient", lambda *a, **k: client))
@@ -152,6 +152,64 @@ class ShutdownWait(unittest.TestCase):
         client = Client({ClientType.SHUTDOWN_REQUEST: TimeoutError("no frame from backend"),
                          ClientType.SHUTDOWN_CONFIRM: {"ok": True}})
         code, _out, err = self.run_cli(client)
+        self.assertEqual(code, 1)
+        self.assertEqual(client.sent, [ClientType.SHUTDOWN_REQUEST])
+        self.assertIn("nothing was stopped", err)
+
+    def test_ctrl_c_during_the_request_stops_nothing_without_a_traceback(self):
+        # C18 review P3: Ctrl-C before the confirmation is a cancel, never a traceback or a confirm
+        client = Client({ClientType.SHUTDOWN_REQUEST: KeyboardInterrupt(),
+                         ClientType.SHUTDOWN_CONFIRM: {"ok": True}})
+        code, _out, err = self.run_cli(client)
+        self.assertEqual(code, 1)
+        self.assertEqual(client.sent, [ClientType.SHUTDOWN_REQUEST])
+        self.assertIn("nothing was stopped", err)
+
+    # -- fix-05 (C17 P3-2): no traceback without --yes on a closed stdin, or on Ctrl-C ----------------------
+    def test_no_yes_on_a_closed_or_non_tty_stdin_prints_the_work_and_asks_for_yes(self):
+        class Tty(io.StringIO):
+            def isatty(self):
+                return True
+
+        class BrokenTty(Tty):
+            def readline(self, *_a):
+                return ""  # input() raises EOFError (Ctrl-D / a tty closed under us)
+
+        for label, stdin in (("none", None), ("not a tty", io.StringIO("")), ("eof on a tty", BrokenTty())):
+            with self.subTest(stdin=label), mock.patch.object(sys, "stdin", stdin):
+                client = Client(self.answers())
+                code, out, err = self.run_cli(client, yes=False)
+                self.assertEqual(code, 1, err)
+                self.assertIn("task_run", out)  # the active work is shown
+                self.assertIn("--yes", err)
+                self.assertEqual(client.sent, [ClientType.SHUTDOWN_REQUEST], "nothing was confirmed")
+                self.assertNotIn("Traceback", err)
+
+    def test_ctrl_c_while_waiting_reports_unconfirmed_termination(self):
+        class Interrupted(Client):
+            def pump(self, timeout):
+                raise KeyboardInterrupt
+
+        for json_form in (False, True):
+            with self.subTest(json=json_form):
+                client = Interrupted(self.answers(), closing_after=None)
+                code, out, err = self.run_cli(client, json_form=json_form, BACKEND_GONE_WAIT=0.2)
+                self.assertEqual(code, 1)
+                self.assertIn("종료 확인 실패", err)
+                self.assertIn("Ctrl-C", err)
+                if json_form:
+                    self.assertIsNone(json.loads(out.splitlines()[-1])["shutdown"])
+                else:
+                    self.assertIn("shutdown result: null", out)
+
+    def test_ctrl_c_at_the_prompt_cancels_without_confirming(self):
+        class Tty(io.StringIO):
+            def isatty(self):
+                return True
+
+        client = Client(self.answers())
+        with mock.patch.object(sys, "stdin", Tty()), mock.patch("builtins.input", side_effect=KeyboardInterrupt):
+            code, _out, err = self.run_cli(client, yes=False)
         self.assertEqual(code, 1)
         self.assertEqual(client.sent, [ClientType.SHUTDOWN_REQUEST])
         self.assertIn("nothing was stopped", err)

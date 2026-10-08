@@ -294,10 +294,15 @@ class LiveBackend:
             return
         if not self.data.exists():
             self.data.mkdir(mode=0o700)
+        # fix-05 (C17 P3-1): the file has to be in place before the product starts its OMPs, so these two
+        # directories exist before the product creates them. They are made deliberately wide (0755): the product
+        # must tighten them to 0700 (``ensure_private_dir``) before OMP writes anything, and a regression in that
+        # shows up as a wide mode in the tests that check modes. A test that must observe the product's own
+        # creation uses ``seed_provider=False`` instead (nothing exists before ``start``).
         agent = omp_root(self.data) / AGENT_DIR_NAME
-        agent.mkdir(parents=True, exist_ok=True, mode=0o700)
+        agent.mkdir(parents=True, exist_ok=True, mode=0o755)
         for directory in (omp_root(self.data), agent):
-            os.chmod(directory, 0o700)
+            os.chmod(directory, 0o755)
         target = agent / "models.yml"
         target.write_bytes((self.profile / "models.yml").read_bytes())
         os.chmod(target, 0o600)

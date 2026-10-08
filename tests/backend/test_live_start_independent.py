@@ -150,7 +150,8 @@ class IndependentLiveStartTests(unittest.TestCase):
 
     # -- single instance, stale state -------------------------------------
     def test_concurrent_starts_yield_one_backend_and_private_modes(self):
-        live = self.live()
+        # p27-cw16-fix-05 (P3-1): seed_provider=False -> omp-root and agent are created by the product itself.
+        live = self.live(seed_provider=False)
         live.data.mkdir(mode=0o755)
         os.chmod(live.data, 0o755)
         procs = [subprocess.Popen(live.argv(*live.start_args("--no-attach")), env=live.env, cwd=live.project,
@@ -168,8 +169,15 @@ class IndependentLiveStartTests(unittest.TestCase):
             info = os.lstat(live.data / name)
             self.assertTrue(stat.S_ISSOCK(info.st_mode), name)
             self.assertEqual(stat.S_IMODE(info.st_mode), 0o600, name)
+        # p27-cw16-fix-05 (Root-approved delta, P2-1): OMP keeps the user's umask, so privacy of what OMP writes comes
+        # from the 0700 ancestors; the product creates omp-root and omp-root/agent as 0700.
+        omp_root_dir = live.data / "omp-root"
+        for directory in (omp_root_dir, omp_root_dir / "agent"):
+            self.assertEqual(stat.S_IMODE(os.lstat(directory).st_mode), 0o700, str(directory))
         exposed = []
         for root, dirs, files in os.walk(live.data):
+            if Path(root) == omp_root_dir:
+                dirs[:] = []  # entries OMP itself creates under the 0700 omp-root: protected by that ancestor
             for name in dirs + files:
                 path = Path(root) / name
                 info = os.lstat(path)
@@ -177,7 +185,7 @@ class IndependentLiveStartTests(unittest.TestCase):
                     continue  # p27-cw16-fix-04 (Root-approved delta): C-D64 agent.db symlink, lstat mode is always 0777
                 if stat.S_IMODE(info.st_mode) & 0o077:
                     exposed.append((str(path.relative_to(live.data)), oct(stat.S_IMODE(info.st_mode))))
-        self.assertEqual(exposed, [], "data-dir entries readable by group/other")
+        self.assertEqual(exposed, [], "Workbench-written data-dir entries readable by group/other")
         self.assert_shutdown_clean(live)
 
     def test_symlinked_data_dir_is_refused_before_anything_starts(self):

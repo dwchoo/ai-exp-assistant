@@ -71,6 +71,8 @@ def nearest_256(rgb_hex: str) -> str:
 def as_rgb(value: str) -> str | None:
     """A pyte cell colour as 6-digit RGB hex in the xterm palette (None for 'default' / unknown)."""
     value = (value or "").lower()
+    if value == "bfightmagenta":  # pyte.graphics.BG_AIXTERM[105] is misspelled upstream; it is bright magenta
+        value = "brightmagenta"
     if re.fullmatch(r"[0-9a-f]{6}", value):
         return value
     palette = _palette()
@@ -251,6 +253,16 @@ class Cw16GapScenarios(unittest.TestCase):
             return compare(seen, {"GQAR1": ("fg", palette[1]), "GQAG2": ("fg", palette[2]), "GQAB4": ("fg", palette[4]),
                                   "GQAK9": ("fg", palette[9]), "GQAY3": ("bg", palette[3])})
 
+        def sgr_ranges():
+            """fix-05 (C17 P2-2): every SGR 30-37 / 90-97 (fg) and 40-47 / 100-107 (bg), e.g. 93/103 (pyte 'brightbrown')."""
+            groups = [("F", 30, 0, "fg"), ("G", 90, 8, "fg"), ("H", 40, 0, "bg"), ("I", 100, 8, "bg")]
+            observed, expected = {}, {}
+            for tag, first, base, attr in groups:
+                cases = [(f"N{first + n}", str(first + n)) for n in range(8)]
+                observed.update(emit(cases, tag))
+                expected.update({f"GQ{tag}N{first + n}": (attr, palette[base + n]) for n in range(8)})
+            return compare(observed, expected)
+
         def cube256():
             cases = [("C196", "38;5;196"), ("C046", "38;5;46"), ("C214", "38;5;214"), ("B021", "48;5;21")]
             seen = emit(cases, "B")
@@ -289,6 +301,7 @@ class Cw16GapScenarios(unittest.TestCase):
                     "note": "information only: OMP's own theme colours as they reach the outer terminal"}
 
         rig.step("COLOR_basic16", basic16, ("start",))
+        rig.step("COLOR_sgr_30_37_90_97_40_47_100_107", sgr_ranges, ("start",))
         rig.step("COLOR_256_cube", cube256, ("start",))
         rig.step("COLOR_256_grey_ramp", grey256, ("start",))
         rig.step("COLOR_256_system_indices", system256, ("start",))

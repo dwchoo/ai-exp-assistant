@@ -1,15 +1,19 @@
-"""p27-cw16-fix-04: D1 pane colours (C-D73 256-colour approximation, no hex misread as a decimal index) and D3
-(every OMP process Workbench starts runs with umask 077; the host shell keeps the user's umask). No OMP, no model."""
+"""p27-cw16-fix-04/05: D1 pane colours (C-D73 256-colour approximation, no hex misread as a decimal index; every
+SGR 30-37/90-97/40-47/100-107 keeps its index) and D3 (fix-05: OMP processes and the host shell all keep the user's
+umask; the private data comes from the 0700 data dir / omp-root / agent). No OMP, no model."""
 from __future__ import annotations
 
 import os
 from pathlib import Path
+import stat
 import sys
 import tempfile
 import time
 import unittest
 
-from workbench.backend import launcher
+import pyte
+
+from workbench.backend import launcher, omp_home
 from workbench.backend.panes import OmpPane, ShellPane
 from workbench.contracts.v1 import PaneId
 from workbench.terminal.shell_g2.prototype import ShellChoice
@@ -57,6 +61,24 @@ class ColorIndex(unittest.TestCase):
         self.assertEqual(_color_index("brightred", 256), 9)
         self.assertEqual(_color_index("nonsense", 256), -1)
 
+    def test_every_sgr_30_37_90_97_40_47_100_107_keeps_its_index(self):
+        # fix-05 (C17 P2-2): pyte names SGR 93/103 "brightbrown" (and spells SGR 105 "bfightmagenta").
+        for first, base, attribute in ((30, 0, "fg"), (90, 8, "fg"), (40, 0, "bg"), (100, 8, "bg")):
+            for step in range(8):
+                sgr = first + step
+                with self.subTest(sgr=sgr):
+                    screen = pyte.Screen(4, 1)
+                    pyte.Stream(screen).feed(f"\x1b[{sgr}mX")
+                    name = getattr(screen.buffer[0][0], attribute)
+                    self.assertNotEqual(name, "default")
+                    self.assertEqual(_color_index(name, 256), base + step, name)
+                    self.assertEqual(_color_index(name, 16), base + step, name)
+
+    def test_pyte_bright_yellow_names_93_and_103(self):
+        self.assertEqual(_color_index("brightbrown", 256), 11)
+        self.assertEqual(_color_index("brightyellow", 256), 11)
+        self.assertEqual(_color_index("bfightmagenta", 256), 13)
+
 
 def wait_file(path: Path, timeout: float = 5.0) -> str:
     deadline = time.monotonic() + timeout
@@ -68,30 +90,53 @@ def wait_file(path: Path, timeout: float = 5.0) -> str:
 
 
 class OmpUmask(unittest.TestCase):
+    """fix-05 (C17 P2-1): OMP's own tools write into the user's project, so OMP keeps the user's umask."""
+
     def setUp(self):
         self.directory = Path(tempfile.mkdtemp(prefix="cw16-fix04-", dir="/tmp"))
         self.addCleanup(lambda: __import__("shutil").rmtree(self.directory, True))
         self.previous = os.umask(0o002)  # a permissive user umask, as in the gap run
         self.addCleanup(os.umask, self.previous)
 
-    def test_omp_pane_child_runs_with_umask_077(self):
+    def test_omp_pane_child_keeps_the_user_umask(self):
         out = self.directory / "umask"
         pane = OmpPane(PaneId.WORKER_OMP, "worker", ["/bin/sh", "-c", f"umask > {out}; exec sleep 30"],
                        {"PATH": "/usr/bin:/bin"})
         try:
-            self.assertEqual(wait_file(out), "0077")
+            self.assertEqual(wait_file(out), "0002")
         finally:
             pane.close(grace=0.5)
 
-    def test_omp_helper_processes_run_with_umask_077(self):
+    def test_omp_project_files_keep_the_user_umask(self):
+        out = self.directory / "project-file"
+        pane = OmpPane(PaneId.WORKER_OMP, "worker", ["/bin/sh", "-c", f"touch {out}; mkdir {out}-dir; exec sleep 30"],
+                       {"PATH": "/usr/bin:/bin"})
+        try:
+            deadline = time.monotonic() + 5
+            while not Path(f"{out}-dir").exists() and time.monotonic() < deadline:
+                time.sleep(0.02)
+            self.assertEqual(stat.S_IMODE(os.stat(out).st_mode), 0o664)
+            self.assertEqual(stat.S_IMODE(os.stat(f"{out}-dir").st_mode), 0o775)
+        finally:
+            pane.close(grace=0.5)
+
+    def test_omp_helper_processes_keep_the_user_umask(self):
         outputs = launcher._bounded_outputs([["/bin/sh", "-c", "umask"]], cwd=self.directory,
                                             environment={"PATH": "/usr/bin:/bin"}, deadline=time.monotonic() + 5)
-        self.assertEqual(outputs[0][1].strip(), b"0077")
+        self.assertEqual(outputs[0][1].strip(), b"0002")
         out = self.directory / "iso-umask"
         launcher.check_isolation(["/bin/sh", "-c", f"umask > {out}", "x"], cwd=self.directory,
                                  environment={"PATH": "/usr/bin:/bin"}, role="worker", allowed_skills=(),
                                  timeout=5)
-        self.assertEqual(wait_file(out), "0077")
+        self.assertEqual(wait_file(out), "0002")
+
+    def test_workbench_omp_home_is_private_through_its_directories_not_the_umask(self):
+        # The privacy of what OMP writes into its Workbench home comes from the 0700 directories.
+        data = self.directory / "data"
+        home = omp_home.prepare_omp_home(data, {"HOME": str(self.directory), "PATH": "/usr/bin:/bin"},
+                                         skills_dir=self.directory, provider_ids=launcher.ISOLATION_PROVIDER_IDS)
+        for directory in (omp_home.omp_root(data), home.agent_dir):
+            self.assertEqual(stat.S_IMODE(os.stat(directory).st_mode), 0o700, directory)
 
     def test_host_shell_keeps_the_user_umask(self):
         out = self.directory / "shell-umask"

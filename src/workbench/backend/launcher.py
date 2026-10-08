@@ -59,7 +59,6 @@ import threading
 import time
 from typing import Any, Mapping, Sequence
 
-from workbench.backend.panes import OMP_UMASK
 from workbench.backend.paths import write_private_json
 from workbench.backend.omp_home import (
     classify_open_paths, home_env_leaks, home_environment, observe_open_paths, withheld_user_values,
@@ -483,7 +482,7 @@ def _bounded_outputs(argvs: Sequence[Sequence[str]], *, cwd: Path | str, environ
         try:
             process = subprocess.Popen(list(argv), cwd=cwd, env=dict(environment), stdin=subprocess.DEVNULL,
                                        stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
-                                       start_new_session=True, close_fds=True, umask=OMP_UMASK)
+                                       start_new_session=True, close_fds=True)
         except OSError as exc:
             job["error"] = f"spawn failed: {exc}"
             continue
@@ -1057,7 +1056,7 @@ def check_isolation(command: Sequence[str], *, cwd: Path | str, environment: Map
         try:
             process = subprocess.Popen(argv, cwd=cwd, env=without_user_values(environment), stdin=subprocess.PIPE,
                                        stdout=subprocess.PIPE, stderr=stderr, start_new_session=True,
-                                       close_fds=True, umask=OMP_UMASK)
+                                       close_fds=True)
         except OSError as exc:
             result.update(error=f"spawn failed: {exc}", duration=round(time.monotonic() - started, 3))
             return result

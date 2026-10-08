@@ -46,7 +46,6 @@ ENV_PROBE_SECONDS = 0.5  # CW-16 D-B2-1: re-reading a names file the next prompt
 # CW-16 B3 F1: detached children of a Workbench OMP (e.g. OMP 18.8.0's daemon broker, which calls setsid and
 # outlives its parent for ~1-3 s): rescanned while the OMP lives, waited for after it ends, then ended.
 DETACHED_SCAN_SECONDS = 2.0
-OMP_UMASK = 0o077  # CW-16 D3: every OMP process Workbench starts creates owner-only files (not the host shell)
 DETACHED_WAIT_SECONDS = 5.0
 DETACHED_TERM_GRACE = 2.0
 _ENV_NAME = re.compile(r"[A-Za-z_][A-Za-z0-9_]*")
@@ -437,9 +436,6 @@ class OmpPane(_OwnedSession, Pane):
                 if cwd is not None:
                     os.chdir(cwd)
                 _set_winsize(0, rows, cols)
-                # CW-16 D3: what OMP creates in the Workbench OMP home (data dir) is private to the user. Only this
-                # OMP child gets the mask; the host shell keeps the user's umask.
-                os.umask(OMP_UMASK)
                 # Python ignores SIGPIPE/SIGXFSZ; OMP starts with defaults.
                 signal.signal(signal.SIGPIPE, signal.SIG_DFL)
                 signal.signal(signal.SIGXFSZ, signal.SIG_DFL)
