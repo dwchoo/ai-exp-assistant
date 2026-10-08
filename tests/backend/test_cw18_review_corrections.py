@@ -504,8 +504,11 @@ class RealMailboxTests(unittest.TestCase):
         nxt = self.handle("to_worker", {"kind": "work", "message": "do B", "spec": {"goal": "B", "paths": ["src/"]}})
         self.assertEqual(nxt["status"], "dispatched", nxt)
         self.assertEqual(self.flow.tasks[task_a].closed_reason, "done")
-        # The manager's turn outlasts the 1 s receipt window: the receipt is unknown, the Task stays done.
-        self.assertTrue(wait_until(lambda: any(e["state"] == "unknown" for e in self.service.outbox_snapshot()), 5))
+        # The manager's turn outlasts the 1 s receipt window: the report was accepted, its turn's outcome is
+        # pending (p27-polish-01: delivered / receipt_window_ended, not unknown), the Task stays done.
+        self.assertTrue(wait_until(lambda: any(e["state"] == "delivered" and e["reason"] == "receipt_window_ended"
+                                               for e in self.service.outbox_snapshot()), 5))
+        self.assertFalse(any(e["state"] == "unknown" for e in self.service.outbox_snapshot()))
         self.assertEqual(self.flow.worker_view(), {"state": "busy", "task_id": nxt["task_id"]})
         with TaskRepository(self.db) as repository:
             self.assertIsNone(repository.get_current_run(task_a))

@@ -315,6 +315,18 @@ def _run_entry(command: str, log_path: str, script_path: str | None, result: Map
     return entry
 
 
+def _drop_unrun_files(command: "_Command", *, keep_script: bool = False) -> None:
+    """A command that never started: remove its (empty) 0600 log and, unless kept, its unused script file."""
+    paths = [command.log_path] + ([] if keep_script or command.script_path is None else [command.script_path])
+    for path in paths:
+        try:
+            if path is command.log_path and path.stat().st_size:
+                continue  # not empty: never removed
+            path.unlink()
+        except OSError:
+            pass
+
+
 @dataclass(eq=False)
 class _Command:
     command_id: str
@@ -332,6 +344,7 @@ class _Command:
     log_truncated: bool = False
     log_error: str | None = None
     handoff_typed: bool = False  # Workbench typed wb-handoff for this command (C-D69 (5)(a))
+    submitting: bool = False  # the submit to the host shell was attempted (the shell may have the command)
     script_path: Path | None = None  # C-D69 (6)(c): the command runs from this script file (too long for one request)
     echo: bytes = b""  # the command line the child prints first, still to be skipped (as the PTY shows it)
     # C-D68 (8) notices; ``since`` is guarded by ``lock``, the rest by the service lock.
@@ -474,6 +487,8 @@ class TerminalService:
         self._notifier: threading.Thread | None = None
         self._calls: dict[tuple, _Command] = {}  # terminal call key -> the command it waited for
         self._abandoned: dict[tuple, None] = {}  # keys of calls the bridge stopped waiting for
+        self._wakeups: dict[tuple, threading.Event] = {}  # waiting call key -> its wake-up (end, peer gone, close)
+        self._gone: dict[tuple, None] = {}  # keys of calls whose worker session's connection ended (p27-polish-01)
         self._noticing: list[_Command] = []  # commands whose completion notice is pending
 
     # -- the journal ----------------------------------------------------------------
@@ -494,6 +509,9 @@ class TerminalService:
     def close(self, timeout: float = 5.0) -> None:
         self._stop.set()
         self._wake.set()
+        with self._lock:
+            for wakeup in self._wakeups.values():
+                wakeup.set()
         for thread in list(self._threads) + ([self._notifier] if self._notifier is not None else []):
             thread.join(timeout)
 
@@ -647,22 +665,34 @@ class TerminalService:
                 "output_tail": text, "output_tail_truncated": truncated or dropped, "detail": RUNNING_DETAIL}
 
     def _await(self, command: _Command, deadline: float, key: tuple) -> dict[str, Any]:
+        wakeup = threading.Event()
         with self._lock:
             command.waiters.add(key)
+            self._wakeups[key] = wakeup
             self._calls[key] = command
             while len(self._calls) > CALLS_KEPT:
                 del self._calls[next(iter(self._calls))]
         final = False
         try:
-            while not command.done.wait(max(min(deadline - time.monotonic(), 1.0), 0)):
-                if time.monotonic() >= deadline or self._stop.is_set():
+            # p27-polish-01: woken at once by the command's end, the end of this call's worker session (no one can
+            # get its result) or close; not only at its deadline. A call the bridge answered itself
+            # (terminal_wait_abandoned) still waits: the backend answers it as before.
+            while not command.done.is_set():
+                remaining = deadline - time.monotonic()
+                if remaining <= 0 or self._stop.is_set() or self._gone_now(key):
                     break
+                wakeup.wait(min(remaining, 1.0))
+                wakeup.clear()
         finally:
             with self._lock:
                 command.waiters.discard(key)
+                if self._wakeups.get(key) is wakeup:
+                    del self._wakeups[key]
                 final = command.done.is_set() and command.result is not None
                 if final:
                     command.consumed.add(key)
+                elif key in self._abandoned:
+                    pass  # its result reaches nobody: the check, its window and the unseen output stay as they are
                 else:  # the call saw the output so far: the next check counts from now
                     command.check_base = self._clock()
                     command.take_since()
@@ -721,7 +751,15 @@ class TerminalService:
             self._journal({"type": "terminal_peer_gone", "session_id": session_id, "generation": generation,
                            "calls": len(keys)})
         for key in keys:
+            with self._lock:
+                self._gone[key] = None
+                while len(self._gone) > CALLS_KEPT:
+                    del self._gone[next(iter(self._gone))]
             self._mark_abandoned(key, "terminal_wait_abandoned")
+            with self._lock:
+                wakeup = self._wakeups.get(key)
+                if wakeup is not None:
+                    wakeup.set()  # its waiting call stops now (p27-polish-01)
 
     def host_operator(self) -> str | None:
         """``worker`` while the worker's terminal command holds the host shell (smoke-01 P2), else None."""
@@ -742,6 +780,10 @@ class TerminalService:
     def _abandoned_now(self, key: tuple) -> bool:
         with self._lock:
             return key in self._abandoned
+
+    def _gone_now(self, key: tuple) -> bool:
+        with self._lock:
+            return key in self._gone
 
     # -- C-D68 (8): checks and the completion notice ------------------------------------------
     def _waiting_now(self) -> bool:
@@ -984,12 +1026,7 @@ class TerminalService:
                 requested = self._give_back(port, after_failure=True)
                 returned = self._returned_state(port, retake=command.handoff_typed and not requested)
                 port.release_hold(HOLD_REASON)
-                for path in (command.log_path, command.script_path):
-                    try:
-                        if path is not None:
-                            path.unlink()  # nothing ran: no empty log (review-02 P3 (2)) or unused script is left
-                    except OSError:
-                        pass
+                _drop_unrun_files(command)  # nothing ran: no empty log (review-02 P3 (2)) or unused script is left
                 self._journal({"type": "terminal_aborted", "key": key_dict, "stage": "before_submit",
                                "command_id": command.command_id, "returned_to_user": _is_returned(returned)})
                 return {"status": "aborted", "reason": "call_abandoned", "command_id": command.command_id,
@@ -1001,6 +1038,9 @@ class TerminalService:
                 # wait that comes late (wb-handoff typed, claim failed) is still given back, under the hold
                 returned = self._returned_state(port, retake=command.handoff_typed and not requested)
                 port.release_hold(HOLD_REASON)
+                # p27-polish-01: no output is ever collected for it, so its log stays empty and unreferenced; a
+                # script the shell may already have been handed (the submit itself failed) stays
+                _drop_unrun_files(command, keep_script=command.submitting)
                 self._journal({"type": "terminal_start_failed", "command_id": command.command_id,
                                "key": key_dict, "reason": error, "cwd": command.cwd or None,
                                "returned_to_user": _is_returned(returned), "host_terminal": returned})
@@ -1199,6 +1239,7 @@ class TerminalService:
         else:
             command.echo = f"[worker] $ {command.command}\n".encode().replace(b"\n", b"\r\n")
             argv = [executable, "-c", ECHO_SCRIPT, executable, command.command]
+        command.submitting = True  # from here the shell may have received the command
         port.submit(control, argv,
                     dict(self._automation()))
 
@@ -1238,6 +1279,10 @@ class TerminalService:
         command.result = result
         command.done.set()
         with self._lock:
+            for key in command.waiters:
+                wakeup = self._wakeups.get(key)
+                if wakeup is not None:
+                    wakeup.set()
             self._drop_check(command, "superseded")  # the completion notice replaces it
             self._refresh_notice(command)
 

@@ -47,8 +47,10 @@ through ``record``. Its contract:
   to pending, nothing submitted) and ``submitted`` (CW-18 R1: the target OMP
   accepted it into its session; ``TaskMailbox.deliver(on_submitted=...)``),
   before the terminal state that comes when the target's turn ended (or the
-  receipt window ran out: ``unknown`` after a submission changes nothing that
-  was decided at ``submitted``).
+  receipt window ran out: ``delivered`` with reason ``receipt_window_ended``
+  after a submission whose turn is still running (p27-polish-01), ``unknown``
+  when the submission or the target's session is in doubt; neither changes
+  what was decided at ``submitted``).
 - ``withdraw(task_id)`` (CW-18 R2) drops every message of a Task that was not
   submitted yet (pending, deferred or never created); a message the lane holds
   at that moment is dropped at its next step and never retried.
@@ -92,6 +94,9 @@ from workbench.terminal.shell_g2.lifecycle import RUN_REQUEST_MAX, encode_run, n
 
 HANDOFF_JOURNAL_NAME = "handoffs.jsonl"  # under DataLayout.workflow
 REQUEUE_LIMIT = 5  # C-D70 (5): new manager sessions a never-submitted worker report follows
+# p27-polish-01 (smokes cd70-01..04): the target OMP accepted the message but its turn outlasted the receipt
+# window (``deliver_timeout``): delivered, the turn's outcome pending (not ``unknown``; never resent either way)
+RECEIPT_WINDOW_ENDED = "receipt_window_ended"
 # p27-cd68-fix-03 (smoke-01 M2): "not yet processed" was read as "send it again".
 QUEUED_DETAIL = ("Accepted by Workbench; it is delivered to the other OMP once, in order. Do not send it again; "
                  "a reply, if any, arrives as a new message.")
@@ -781,8 +786,9 @@ class HandoffService:
         # and in-flight ones already counted whose re-queue is still to come
         self._requeued_uncounted: set[str] = set()
         self._requeue_expected: set[str] = set()
-        # p27-cd70-fix-03: reports queued while no manager OMP was connected, not yet counted by a manager_recovery
-        self._unbound_uncounted: set[str] = set()
+        # p27-cd70-fix-03: reports queued while no manager OMP was connected -> the manager session whose
+        # manager_recovery counted it last (None: not counted yet); kept until it ends (p27-polish-01: per session)
+        self._unbound_counted: dict[str, tuple[str, int] | None] = {}
 
     # -- wiring for U2/U3 -------------------------------------------------------
     def configure(self, *, policy: HandoffPolicy | None = None,
@@ -948,18 +954,32 @@ class HandoffService:
     def _unbound_for(self, current: tuple[str, int]) -> set[str]:
         """Under the outbox lock: the reports queued while no manager was connected that go to the ``current``
         session (p27-cd70-fix-03): not created yet, or created for it and not ended unknown (those are listed as
-        unknown instead). Each is counted by one manager_recovery only."""
+        unknown instead). Each is counted once per manager session it may reach (p27-polish-01, review-03
+        P3-1): one counted by a session that went away before it was created is counted again by the session
+        it is created for; one created for (or ended at) another session is no longer followed."""
         found: set[str] = set()
+        live: set[str] = set()
         for entry in self._outbox:
-            if entry.handoff_id not in self._unbound_uncounted:
+            handoff_id = entry.handoff_id
+            if handoff_id not in self._unbound_counted:
                 continue
-            self._unbound_uncounted.discard(entry.handoff_id)
+            live.add(handoff_id)
             if entry.withdrawn or entry.state in ("withdrawn", "rejected", "held_paused", "unknown"):
+                del self._unbound_counted[handoff_id]
                 continue
             message = entry.message
-            if message is None or (message.session_id, message.session_generation) == current:
-                found.add(entry.handoff_id)
-        self._unbound_uncounted.clear()  # entries no longer in the outbox
+            bound = None if message is None else (message.session_id, message.session_generation)
+            if bound is not None and bound != current:
+                if entry.submitted or entry.state not in ("pending", "delivering"):
+                    del self._unbound_counted[handoff_id]  # it reached (or ended at) another session
+                continue  # created for an older session: the session-change requeue path counts it
+            if self._unbound_counted[handoff_id] != current:
+                self._unbound_counted[handoff_id] = current
+                found.add(handoff_id)
+            if bound is not None and (entry.submitted or entry.state not in ("pending", "delivering")):
+                del self._unbound_counted[handoff_id]  # it reached this session: nothing left to count
+        for handoff_id in set(self._unbound_counted) - live:
+            del self._unbound_counted[handoff_id]  # entries no longer in the outbox
         return found
 
     def _count_lane_requeue(self, entry: _OutboxEntry) -> None:
@@ -1100,7 +1120,7 @@ class HandoffService:
         with self._outbox_cv:
             self._outbox.append(entry)
             if unbound:
-                self._unbound_uncounted.add(entry.handoff_id)
+                self._unbound_counted[entry.handoff_id] = None
             self._outbox_cv.notify_all()
         if unbound:
             return {"status": "queued", "handoff_id": entry.handoff_id, "waiting_for": WAITING_FOR_MANAGER,
@@ -1225,6 +1245,11 @@ class HandoffService:
                 receipt = mailbox.deliver(entry.message, timeout=self._deliver_timeout)
             status, reason = receipt.status, (receipt.details or {}).get("reason")
             blockers = (receipt.details or {}).get("blockers")
+            if (status is MailboxStatus.UNKNOWN and entry.submitted and reason == "BridgeTimeout"
+                    and (receipt.details or {}).get("stage") == "omp_processing_observation"):
+                # p27-polish-01: accepted into the target's session; only the end of its (long) turn was not seen
+                # within the receipt window. Delivered, outcome pending: no notice, no resend (as before).
+                status, reason = MailboxStatus.API_RETURNED, RECEIPT_WINDOW_ENDED
         except BridgeDisconnected:
             status, reason, blockers = MailboxStatus.DEFERRED, "target_not_connected", None  # before any submission
         except Exception as exc:
@@ -1322,7 +1347,7 @@ class HandoffService:
 
 
 __all__ = [
-    "REQUEUE_LIMIT", "QUEUED_WAITING_DETAIL", "WAITING_FOR_MANAGER", "ANALYSIS_LEVELS", "ANALYSIS_RULES", "DEFAULT_ANALYSIS", "HANDOFF_JOURNAL_NAME", "ActiveTask", "HandoffDecision", "HandoffJournal", "HandoffPolicy", "HandoffRequest", "HandoffService",
+    "RECEIPT_WINDOW_ENDED", "REQUEUE_LIMIT", "QUEUED_WAITING_DETAIL", "WAITING_FOR_MANAGER", "ANALYSIS_LEVELS", "ANALYSIS_RULES", "DEFAULT_ANALYSIS", "HANDOFF_JOURNAL_NAME", "ActiveTask", "HandoffDecision", "HandoffJournal", "HandoffPolicy", "HandoffRequest", "HandoffService",
     "OutboundMessage", "OutboxListener", "PlaceholderPolicy", "TOOL_ROLES", "accepts_keyword",
     "environment_value_findings", "held", "rejected",
     "sensitive_environment_values", "validate_arguments",

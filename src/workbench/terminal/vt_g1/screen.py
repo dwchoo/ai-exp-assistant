@@ -186,6 +186,10 @@ class TerminalScreen(pyte.HistoryScreen):
                 for y in range(lines):
                     self.buffer[y] = self.buffer[y + drop]
                 self.cursor.y -= drop
+                # p27-polish-01 (review P3-2): a DECSC-saved cursor moves with its line too (clamped), so ESC 8
+                # after the shrink lands where it was saved, not ``drop`` rows lower
+                for savepoint in self.savepoints:
+                    savepoint.cursor.y = min(max(savepoint.cursor.y - drop, 0), lines - 1)
             for y in range(lines, self.lines):
                 self.buffer.pop(y, None)
             self.lines = lines  # pyte's own resize then has no rows left to drop from the top
